@@ -1,51 +1,37 @@
-number_of_people = 0
 number_of_book = 100
-many_user = [{'이름' : '김시습', '나이' : 20}, {'이름' : '허균', '나이' : 26},{'이름' : '남영로', '나이' : 25},{'이름' : '임제', '나이' : 25},{'이름' : '박지원', '나이' : 25}]
 name = ['김시습', '허균', '남영로', '임제', '박지원']
 age = [20, 16, 52, 36, 60]
 address = ['서울', '강릉', '조선', '나주', '한성부']
 
-
-def increase_user():
-    pass
-
-
+# 1. 책의 수를 줄이는 함수
 def decrease_book(count):
     global number_of_book
     number_of_book -= count
     return number_of_book
 
+# 2. 유저 정보를 딕셔너리로 만드는 함수
 def create_user(name, age, address):
-    user={}
-    user['name']= name
-    user['age']= age
-    user['address']= address
-    return user
-pack = list(map(create_user, name,age,address))
+    return {'name': name, 'age': age, 'address': address}
 
+# 3. map을 사용하여 유저 목록(pack) 생성
+pack = list(map(create_user, name, age, address))
 
+# 4. 모든 유저에게 환영 인사 (첫 번째 루프)
 for user in pack:
-    user_number = user['name'] #여기서 for는 그냥 user라는 딕셔너리의 안의 수 만큼 반복할것이기에 놔두고 새로운 변수값으로 user['name']을 주게 되면 그 수만큼
-    #key의 수만큼 각 name 호출하게됨 
-    print(f'{user_number}님 환영합니다 !') #그래서 print당시에는 user_number로 제대로 불러옴 
+    print(f"{user['name']}님 환영합니다 !")
 
+# 5. 책 대여 시스템 함수
+def rental_book(user):
+    target_name = user['name']
+    target_age = user['age']
+    
+    # 나이를 10으로 나눈 몫만큼 대여
+    book_count = target_age // 10 
+    decrease_book(book_count)
+    
+    print(f'남은 책의 수 : {number_of_book}')
+    print(f'{target_name}님이 {book_count}권의 책을 대여하였습니다.')
 
-
-def rental_book(info):
-    for name, age in info.items():
-        book_count= age//10 
-        decrease_book(book_count)
-        print(f'{name}님이 {book_count}권의 책을 대여하였습니다.')
-
-
-
-user_info = []
-for new_users in many_user:
-
-    name = new_users['이름']
-    age = new_users['나이']
-    new_dict = {name : age}
-    user_info.append(new_dict)
-
-for info in user_info:
+# 6. 각 유저별로 대여 진행 (두 번째 루프)
+for info in pack:
     rental_book(info)
