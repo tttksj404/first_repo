@@ -2,7 +2,7 @@ import requests
 
 # 1. API 호출 설정
 url = "http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json"
-api_key = "***REMOVED_FINLIFE_API_KEY***"
+api_key = ""
 
 params = {
     'auth': api_key,
