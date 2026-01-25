@@ -4,7 +4,18 @@
 ############## 주의 ##############
 # 입력을 받기위한 input 함수는 절대 사용하지 않습니다.
 def under_60(scores):
-    pass
+    unpassed = []
+    count_number = 0
+    m = len(scores)
+    for ind in range(m):
+        if scores[ind] < 60:
+            unpassed.append(scores[ind]) #이건 그 값을 넣는 용도고
+            count_number +=1 #실제로 몇개가 들어갔는지는 변수값 초기화로 넣어주면됨 
+        else:
+            pass
+    return count_number
+
+
     # 여기에 코드를 작성하여 함수를 완성합니다.
 
 
