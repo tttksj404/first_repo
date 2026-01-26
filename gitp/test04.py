@@ -15,14 +15,15 @@ False를 반환하는 is_id_valid 함수를 완성하시오.
 # 입력을 받기위한 input 함수는 절대 사용하지 않습니다.
 def is_id_valid(user_data):
     id_key = []
-    id_long = len(user_data)
-    for ind in range(id_long):
-        real_ind =str(user_data[ind])
-        id_key.append(real_ind)
-    if id_key[id_long] >= 0 and id_key[id_long] <= 9:
-    
-        return True
-    else:
+    key = user_data['id']
+    id_long = len(key) #'jungssafy5'의 길이 
+    for key_number in key:
+        id_key.append(key_number) #id_key에는 "j","u","n,"g.... 이렇게 담김 
+    answer = id_key[int(id_long)-1]
+    if answer.isdecimal() is True:
+        if int(answer) >=0 and int(answer)<=9:
+            return True
+    else: 
         return False
     # 여기에 코드를 작성하여 함수를 완성합니다.
 
