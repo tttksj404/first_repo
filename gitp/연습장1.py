@@ -1,13 +1,14 @@
 def is_id_valid(user_data):
     # 1. 딕셔너리에서 'id' 값 추출
-    user_id = user_data.get('id', '')
+    user_id = user_data.get('id', '') # key를 직접 불러오지 않고, get을 쓰는이유 똑같지만 키가 없을때 None이 나오고 eroor없다는 점 
+    # user_id의 ' '에 id의 value 값 들어감 
     
     # 2. 아이디가 비어있을 경우에 대한 예외 처리
     if not user_id:
         return False
     
     # 3. 마지막 글자([-1])가 숫자인지(isdecimal) 확인하여 결과(True/False)를 즉시 반환
-    return user_id[-1].isdecimal()
+    return user_id[-1].isdecimal() #isdecimal은 int로 변환가능하면 true , 아니면 false 
 
 #####################################################
 # 테스트 코드 (수정 금지 영역)
