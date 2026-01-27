@@ -1,8 +1,10 @@
-# 김싸피는 시험점수를 관리하는 코드를 작성하려고 한다.
-#❖ 전체 점수 중 60점 미만인 과목의 개수를 계산하여 반환하는 under_60 함수를 완성하시오.
-
+'''
+김싸피는 시험점수를 관리하는 코드를 작성하려고 한다.
+❖ 전체 점수 중 60점 미만인 과목의 개수를 계산하여 반환하는 under_60 함수를 완성하시오.
+'''
 ############## 주의 ##############
 # 입력을 받기위한 input 함수는 절대 사용하지 않습니다.
+'''
 def under_60(scores):
     unpassed = []
     count_number = 0
@@ -13,6 +15,14 @@ def under_60(scores):
             count_number +=1 #실제로 몇개가 들어갔는지는 변수값 초기화로 넣어주면됨 
         else:
             pass
+    return count_number
+'''
+def under_60(scores):
+    total_length = len(scores)
+    count_number = 0
+    for ind in range(total_length):
+        if scores[ind] < 60:
+            count_number +=1
     return count_number
 
 
