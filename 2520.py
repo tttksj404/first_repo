@@ -17,9 +17,14 @@
 
 
 test_case = input()
-print()
+
+T = int(test_case.strip())
+
 for _ in range(int(test_case)):
-    pancake_ingrediant = list(map(int, input().split()))
+    line = input().split()
+    while not line: 
+        line = input().split()
+    pancake_ingrediant = list(map(int, line))
     topping = list(map(int, input().split())) #len 쓰려면 반드시 list
 
     min_ingrediant = 0
