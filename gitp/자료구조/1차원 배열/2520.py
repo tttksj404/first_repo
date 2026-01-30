@@ -15,7 +15,7 @@
 #만약 최대 팬케이크 반죽이 더 작으면 최대 팬케이크 반죽이 최대개수
 
 
-
+import math
 test_case = input()
 
 T = int(test_case.strip())
@@ -24,6 +24,7 @@ for _ in range(int(test_case)):
     line = input().split()
     while not line: 
         line = input().split()
+
     pancake_ingrediant = list(map(int, line))
     topping = list(map(int, input().split())) #len 쓰려면 반드시 list
 
@@ -40,7 +41,8 @@ for _ in range(int(test_case)):
         elif ind == 4:
             pancake_ingrediant[ind]/=9
     min_ingrediant += min(pancake_ingrediant)
-    pancake_base += 16*min_ingrediant
+    pancake_base += math.floor(16*(min_ingrediant))  #내림차순 계산 들어가야함 총 팬케이크 반죽은 정수여야만 하므로 내림 
+
 
     for ind in range(len(topping)):
         if ind ==0:
@@ -53,11 +55,13 @@ for _ in range(int(test_case)):
             topping[3]//=10
     sum_toping = sum(topping)
     answer = 0
-    if sum_toping > pancake_base:
-        answer += pancake_base
+    if sum_toping > int(pancake_base): #부동소수점 오류 때문에 이미 내림했떠라도 int넣어서 해결해줘야함 
+        answer += int(pancake_base)
     else:
-        answer += sum_toping
+        answer += int(sum_toping)
     print(answer)
+    pancake_ingrediant.clear() #어짜피 루프 시작시 변수 재할당 되므로 필요x 
+    
 
         
 
