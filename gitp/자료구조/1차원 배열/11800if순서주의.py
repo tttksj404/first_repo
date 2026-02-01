@@ -77,8 +77,21 @@ for n in range(T):
     if a == 6 and b ==5:
         answer = "Sheesh Beesh" #예외의 예외는 마지막에 처리해야됨 
         #if로 순서중요하기에 생각하기
-    
-    
+    '''
+    try : 예외가 발생할 수 있는 코드 작성
+    except : 예외가 발생했을 때 실행할 코드 작성
+    else : 예외가 발생하지 않았을 때 실행할 코드 작성
+    finally : 예외 발생 여부와 상관없이 항상 실행할 코드 작성
+
+    EAFP = easier to ask for forgiveness than permission
+    예외처리를 중심으로 코드를 작성하는 접근 방식 (try-except)-일단 실행 후 예외처리
+
+    LBYL = look before you leap
+    값 검사를 중심으로 코드를 작성하는 접근 방식(if-else)- 실행하기 전에 조건검사 
+
+
+
+    '''
     n+=1
     print(f'Case {n}: {answer}')
     n-=1
