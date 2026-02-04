@@ -89,7 +89,7 @@ if T_input:
         for _ in range(N):
             board.append(list(map(int, input().split())))
         
-        max_flies = -1
+        max_flies = -1 #최대값 -1로 안정화 
         best_y, best_x = 0, 0
         
         # 2. 십자가 방향 정의 (중앙, 상, 하, 좌, 우)

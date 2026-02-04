@@ -26,7 +26,7 @@ def down(firstx, firsty): #x,y는 스타트 좌표
 
 
 
-
+'''
 for t in range(1,11):
     a = int(input())
     locations = [list(map(int, input().split())) for _ in range(100)]
@@ -56,6 +56,53 @@ for t in range(1,11):
     print(f'#{t} {current_x}')
     
     
+
+'''
+#이거 이렇게는 못푼다. 애초에 전 범위를 훑는게 아닌 이동이 목적이기 때문 
+'''
+
+T = int(input())
+for w in range(1,T+1):
+    ladder = [list(map(int,input().split())) for _ in range(100)]
+    #상,좌,우
+    dr = [-1,0,0] #행
+    dc = [0,-1,1] #열
+
+    #현재 좌표
+    r,c = 99,0
+    best_r, best_c = 0,0
+    #2즉 끝점이 있는 좌표값 구하기
+    for a in range(100):
+        if ladder[r][a] == 2:
+            c = a
+        break
+
+    #계속 올라가기 만약 좌우가 없다면 
+    for a in range(r,-1,-1):
+        for b in range(c,-1,-1):
+    #탐색범위
+            for i in range(3):
+                nr = r+dr[i]
+                nc = c+dc[i]
+            #만약 좌가 있다면 좌로
+            #만약 우가 있다면 우로 이동하기 
+            #아니면 위로
+            while EOFError:
+                if ladder[nr][nc] ==1:
+                    best_r = nr
+                    best_c = nc
+            
+    print(f'#{w} {best_c}')
+
+'''  
+
+    
+
+
+
+
+
+
     
 
                 
