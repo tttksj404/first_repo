@@ -21,12 +21,13 @@ for _ in range(10):
     found = False #아직 회문을 찾지 못했다는 기본 값 
     # 4. 가장 긴 길이(100)부터 1까지 역순으로 조사
     for length in range(100, 0, -1): #한줄에서 잘라낼 수 있는 회문의 길이 자체를 역순탐색해서 max 필요없음
+        #length는 회문의 길이로 A단 한 글자도 회문이 될 수 있으므로 회문 자체의 최소길이는 1 최대는 한줄 전체가 될 수 있다.,
         if found:
             break
             
         for i in range(100): #행
             # 한 줄에서 길이 length만큼 잘라낼 수 있는 시작점(j)의 범위
-            for j in range(100 - length + 1): 
+            for j in range(100 - length + 1):  #열의 길이중 회문의 길이를 제외한 범위로 봐야함 그래야 아래의 이유
                 '''
                 100cm 책상에서 90cm의 자를 옆으로 밀면서 검사하면 
                 j가 시작점이고 끝점이 j+length인데 그래서 오른쪽 끝점인 j+length는 책상 끝인 100cm를 넘지 못한다
