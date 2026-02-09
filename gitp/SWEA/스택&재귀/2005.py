@@ -9,3 +9,18 @@ n만큼 아래 메커니즘의 반복출력
 작성해주면됨 
 그걸 마지막 인덱스(len-1)까지만 반복해줘서 내용 채워주면된다.
 '''
+
+T = int(input())
+for w in range(1,T+1):
+    n = int(input()) #n만큼 반복출력 줄의개수 
+    stack = []
+    now_list = []
+
+
+    #출력값의 시작과 끝값은 항상1 
+    for a in range(1,n+1):
+        if a ==1:
+            now_list=[1]
+            
+
+
