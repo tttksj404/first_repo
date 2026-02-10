@@ -12,7 +12,7 @@ for i in range(2,N+1):
     pd[i]=dp[i-1]%2
 print(pd[N])
 '''
-
+'''
 N = int(input())
 
 
@@ -26,10 +26,10 @@ else:
         N//=2
     
     print("".join(ans[::-1]))
-
-
-
 '''
+
+
+
 import sys
 # 입력 숫자가 커도 재귀 깊이가 깊지 않아서 (약 47단계) 
 # setrecursionlimit을 따로 건드릴 필요도 없습니다.
@@ -45,7 +45,12 @@ def convert_to_binary(n):
     
     # 출력 단계: 호출이 다 끝나고 "돌아오는 길"에 나머지를 출력
     # 이렇게 하면 자연스럽게 역순(이진수 순서)으로 출력됩니다.
-    print(n % 2, end='')
+    print(n % 2, end='') #프린트 함수는 줄바꿈 문자가 프린트 끝나고 기본값으로 추가되는데 여기서 줄바꿈 대신 그냥 빈 문자열 공백하나로 두라는 뜻
+    #end=' ' 없이 입력시 
+    #1
+    #0
+    #1 로 출력
+    #그러나 end=' '넣어서 101로 출력됨 
 
 N = int(input())
 
@@ -53,7 +58,7 @@ if N == 0:
     print(0)
 else:
     convert_to_binary(N)
-    print() # 줄바꿈
+    print() # 줄바꿈  이거 안붙여주면 101root@user: ~$같은 시스템 메시지와 겹쳐나오게되므로 반드시 해줄 필요가 있다 
 
-'''
+
 
