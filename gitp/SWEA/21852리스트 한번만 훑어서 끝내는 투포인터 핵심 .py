@@ -45,7 +45,7 @@ for w in range(1,T+1):
     N, K = map(int, input().split())
     sample = list(map(int, input().split())) #N이 sample의 길이
     passcode = list(map(int, input().split())) #K가 passcode의 길이
-    s_idx =0 #sample의 손가락은 계속 전진하고, 내가 찾아야할 passcode숫자와 일치할 때만 passcode 손가락을 옆으로 한칸
+    #sample의 손가락은 계속 전진하고, 내가 찾아야할 passcode숫자와 일치할 때만 passcode 손가락을 옆으로 한칸
     # 그래서 idx를 2개 사용한거 = 투 포인터 
     #리스트 슬라이싱은 매번 리스트 훑어야 해서 시간초과 
     #리스트를 한번만 훑어서 끝낸다는게 핵심이여서 투포인터를 사용한 것 
