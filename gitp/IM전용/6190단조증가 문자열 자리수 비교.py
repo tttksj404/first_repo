@@ -41,6 +41,32 @@ for tc in range(1,T+1):
         print(f'#{tc} {ans}')
     
 
+'''
+T = int(input())
+for tc in range(1, T + 1):
+    N = int(input())
+    # 1. 내림차순 정렬 (큰 것부터 곱해보기 위해)
+    num_list = sorted(list(map(int, input().split())), reverse=True)
+    
+    max_val = -1
+    
+    for i in range(N - 1):
+        for j in range(i + 1, N):
+            product = num_list[i] * num_list[j]
+            
+            # 2. 가지치기: 현재 곱이 이미 찾은 최댓값보다 작으면 더 볼 필요 없음!
+            if product <= max_val:
+                break
+            
+            # 3. 단조 증가 판정 (문자열 비교 활용)
+            s_prod = str(product)
+            if all(s_prod[k] <= s_prod[k+1] for k in range(len(s_prod) - 1)):
+                max_val = product
+                
+    print(f'#{tc} {max_val}')
+
+
+    '''
     
                 
             
