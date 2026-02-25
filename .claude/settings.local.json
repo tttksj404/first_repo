@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c/Users/SSAFY/Desktop/first_repo && python reorganize.py 2>&1)",
+      "Bash(python:*)",
+      "mcp__ide__executeCode",
+      "Bash(cmd:*)"
+    ]
+  }
+}
