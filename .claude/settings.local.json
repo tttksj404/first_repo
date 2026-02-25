@@ -15,7 +15,7 @@
         "@notionhq/notion-mcp-server"
       ],
       "env": {
-        "NOTION_TOKEN": ""
+        "NOTION_TOKEN": "채워넣어"
       }
     }
   }
