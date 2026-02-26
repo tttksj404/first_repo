@@ -12,7 +12,7 @@
       "command": "notion-mcp-server.cmd",
       "args": [],
       "env": {
-        "NOTION_TOKEN":  ""
+        "NOTION_TOKEN":  "REDACTED_NOTION_TOKEN"
       }
     }
   }
