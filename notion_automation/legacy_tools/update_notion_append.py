@@ -6,7 +6,7 @@ import sys
 # Ensure UTF-8 output
 sys.stdout.reconfigure(encoding='utf-8')
 
-TOKEN = "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"
+TOKEN = "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"
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json",

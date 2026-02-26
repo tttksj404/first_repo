@@ -12,7 +12,7 @@
       "command": "notion-mcp-server.cmd",
       "args": [],
       "env": {
-        "NOTION_TOKEN":  ""
+        "NOTION_TOKEN":  "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"
       }
     }
   }
