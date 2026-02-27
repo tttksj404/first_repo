@@ -1,7 +1,26 @@
 import requests
 import json
 
-NOTION_TOKEN = "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"
+
+import os
+
+def _get_notion_token():
+    # Try multiple paths to find notion_key.txt
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    paths = [
+        os.path.join(current_dir, 'notion_key.txt'),
+        os.path.join(current_dir, '..', 'core', 'notion_key.txt'),
+        os.path.join(current_dir, 'core', 'notion_key.txt'),
+        os.path.join(os.getcwd(), 'notion_automation', 'core', 'notion_key.txt')
+    ]
+    for p in paths:
+        if os.path.exists(p):
+            with open(p, 'r', encoding='utf-8') as f:
+                token = f.read().strip()
+                if token: return token
+    return os.getenv("NOTION_TOKEN", "YOUR_NOTION_TOKEN_HERE")
+
+NOTION_TOKEN = _get_notion_token()
 HEADERS = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
     "Content-Type": "application/json",
