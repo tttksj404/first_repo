@@ -1,0 +1,8 @@
+# Notion API Keys
+notion_automation/core/notion_key.txt
+notion_automation/core/notion_auth.py
+**/__pycache__/
+*.DS_Store
+.vscode/
+.claude/
+.gemini/
