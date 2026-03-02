@@ -1,8 +1,35 @@
-# Notion API Keys
-notion_automation/core/notion_key.txt
-notion_automation/core/notion_auth.py
+# Environments & Secrets
+.env
+.env.*
+*.key
+*.token
+notion_key.txt
+notion_auth.py
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
 **/__pycache__/
-*.DS_Store
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# IDEs
 .vscode/
+.idea/
 .claude/
 .gemini/
+
+# Project Specific
+notion_automation/**/notion_key.txt
+notion_automation/**/notion_auth.py
