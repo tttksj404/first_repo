@@ -1,4 +1,8 @@
 {
+  "model": {
+    "name": "gemini-2.5-flash-lite"
+  },
+  "maxAttempts": 1,
   "permissions": {
     "allow": [
       "Bash(cd /c/Users/SSAFY/Desktop/first_repo && python reorganize.py 2>&1)",

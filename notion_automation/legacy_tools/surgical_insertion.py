@@ -1,8 +1,15 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from notion_automation.core.notion_env import get_notion_token
 import requests
 import json
-
-TOKEN = "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"
+TOKEN = get_notion_token()
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json",
@@ -20,39 +27,42 @@ def insert_blocks(page_id, blocks, after_id):
 if __name__ == "__main__":
     page_id = "2f0eacc8-175a-805c-85b2-dca59899d3d8"
     
-    # 1. 제목(Index 0) 바로 뒤에 목차와 인트로 삽입
+    # 1. ?쒕ぉ(Index 0) 諛붾줈 ?ㅼ뿉 紐⑹감? ?명듃濡??쎌엯
     # after_id: 2f0eacc8-175a-8083-b095-c14951296b30 (Heading 1 ID)
     intro_blocks = [
         {"object": "block", "type": "table_of_contents", "table_of_contents": {}},
         {"object": "block", "type": "callout", "callout": {
-            "rich_text": [{"text": {"content": "💡 이 페이지는 사용자님이 정리하신 정석 코드들을 기반으로, 제가 공부하며 깨달은 팁들을 중간중간 덧붙여 만든 종합 학습장입니다. 기존 내용은 그대로 보존되어 있으니 안심하고 학습하세요!"}}],
-            "icon": {"emoji": "🎓"}
+            "rich_text": [{"text": {"content": "?뮕 ???섏씠吏???ъ슜?먮떂???뺣━?섏떊 ?뺤꽍 肄붾뱶?ㅼ쓣 湲곕컲?쇰줈, ?쒓? 怨듬??섎ŉ 源⑤떖? ?곷뱾??以묎컙以묎컙 ?㏓텤??留뚮뱺 醫낇빀 ?숈뒿?μ엯?덈떎. 湲곗〈 ?댁슜? 洹몃?濡?蹂댁〈?섏뼱 ?덉쑝???덉떖?섍퀬 ?숈뒿?섏꽭??"}}],
+            "icon": {"emoji": "?럳"}
         }},
         {"object": "block", "type": "divider", "divider": {}}
     ]
     print("Inserting Table of Contents and Intro...")
     insert_blocks(page_id, intro_blocks, "2f0eacc8-175a-8083-b095-c14951296b30")
 
-    # 2. DFS 섹션(Index 10) 앞에 브릿지 삽입
+    # 2. DFS ?뱀뀡(Index 10) ?욎뿉 釉뚮┸吏 ?쎌엯
     # after_id: 2f0eacc8-175a-806c-9250-fbfecc99d3cd (Divider before DFS)
     dfs_bridge = [
         {"object": "block", "type": "callout", "callout": {
-            "rich_text": [{"text": {"content": "🔍 여기서부터는 DFS의 영역입니다. 스택이나 재귀를 사용하여 깊게 들어가는 탐색의 정수를 느껴보세요."}}],
-            "icon": {"emoji": "⛏️"}
+            "rich_text": [{"text": {"content": "?뵇 ?ш린?쒕??곕뒗 DFS???곸뿭?낅땲?? ?ㅽ깮?대굹 ?ш?瑜??ъ슜?섏뿬 源딄쾶 ?ㅼ뼱媛???먯깋???뺤닔瑜??먭뺨蹂댁꽭??"}}],
+            "icon": {"emoji": "?륅툘"}
         }}
     ]
     print("Inserting DFS Bridge...")
     insert_blocks(page_id, dfs_bridge, "2f0eacc8-175a-806c-9250-fbfecc99d3cd")
 
-    # 3. BFS 섹션(Index 81) 앞에 브릿지 삽입
+    # 3. BFS ?뱀뀡(Index 81) ?욎뿉 釉뚮┸吏 ?쎌엯
     # after_id: 2f0eacc8-175a-80e2-b982-c4bb476856ff (Divider before BFS)
     bfs_bridge = [
         {"object": "block", "type": "callout", "callout": {
-            "rich_text": [{"text": {"content": "🌊 이제 BFS로 넘어갑니다. 큐(Queue)를 사용하여 물결처럼 퍼져나가는 최단 거리 탐색을 시작합니다."}}],
-            "icon": {"emoji": "🌊"}
+            "rich_text": [{"text": {"content": "?뙄 ?댁젣 BFS濡??섏뼱媛묐땲?? ??Queue)瑜??ъ슜?섏뿬 臾쇨껐泥섎읆 ?쇱졇?섍???理쒕떒 嫄곕━ ?먯깋???쒖옉?⑸땲??"}}],
+            "icon": {"emoji": "?뙄"}
         }}
     ]
     print("Inserting BFS Bridge...")
     insert_blocks(page_id, bfs_bridge, "2f0eacc8-175a-80e2-b982-c4bb476856ff")
 
     print("Surgical Insertion Complete!")
+
+
+
