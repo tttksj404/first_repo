@@ -1,7 +1,14 @@
+﻿import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from notion_automation.core.notion_env import get_notion_token
 import requests
 import json
-
-TOKEN = "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"
+TOKEN = get_notion_token()
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json",
@@ -18,7 +25,10 @@ def search_pages(query):
     return response.json()
 
 if __name__ == "__main__":
-    results = search_pages("알고리즘")
+    results = search_pages("?뚭퀬由ъ쬁")
     for page in results.get("results", []):
         title = page.get("properties", {}).get("title", {}).get("title", [{}])[0].get("plain_text", "Untitled")
         print(f"Page Title: {title}, ID: {page['id']}")
+
+
+

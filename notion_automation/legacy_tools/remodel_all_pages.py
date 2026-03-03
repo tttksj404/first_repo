@@ -1,52 +1,91 @@
-# -*- coding: utf-8 -*-
-import requests
-import json
+﻿# -*- coding: utf-8 -*-
+import sys
 import time
+from pathlib import Path
 
-TOKEN = "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"
+import requests
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from notion_automation.core.notion_env import get_notion_token
+
+TOKEN = get_notion_token()
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json",
-    "Notion-Version": "2022-06-28"
+    "Notion-Version": "2022-06-28",
 }
+
 
 def get_child_pages(parent_id):
     url = f"https://api.notion.com/v1/blocks/{parent_id}/children"
-    res = requests.get(url, headers=HEADERS).json()
-    return [b['id'] for b in res.get('results', []) if b['type'] == 'child_page']
+    response = requests.get(url, headers=HEADERS, timeout=20)
+    response.raise_for_status()
+    data = response.json()
+    return [b["id"] for b in data.get("results", []) if b.get("type") == "child_page"]
 
-def insert_elements(page_id, title):
-    # Get current blocks
+
+def insert_elements(page_id):
     url = f"https://api.notion.com/v1/blocks/{page_id}/children"
-    blocks_res = requests.get(url, headers=HEADERS).json().get('results', [])
-    if not blocks_res: return
+    response = requests.get(url, headers=HEADERS, timeout=20)
+    response.raise_for_status()
+    blocks = response.json().get("results", [])
+    if not blocks:
+        return
 
-    first_id = blocks_res[0]['id']
-    
-    # 1. Insert ToC and Intro at TOP
+    first_id = blocks[0]["id"]
+
     top_blocks = [
         {"object": "block", "type": "table_of_contents", "table_of_contents": {}},
-        {"object": "block", "type": "callout", "callout": {
-            "rich_text": [{"text": {"content": "💡 학생의 가이드: 기존 내용을 정독한 뒤, 제가 공부하며 덧붙인 하단 요약본을 함께 보시면 학습 효과가 두 배가 됩니다!"}}],
-            "icon": {"emoji": "🎓"}
-        }},
-        {"object": "block", "type": "divider", "divider": {}}
+        {
+            "object": "block",
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"text": {"content": "Review top-to-bottom, then use summary at the end."}}],
+                "icon": {"emoji": "📘"},
+            },
+        },
+        {"object": "block", "type": "divider", "divider": {}},
     ]
-    requests.patch(url, json={"children": top_blocks, "after": first_id}, headers=HEADERS)
+    top_res = requests.patch(url, json={"children": top_blocks, "after": first_id}, headers=HEADERS, timeout=20)
+    top_res.raise_for_status()
 
-    # 2. Append Summary at BOTTOM
     bottom_blocks = [
         {"object": "block", "type": "divider", "divider": {}},
-        {"object": "block", "type": "heading_2", "heading_2": {"rich_text": [{"text": {"content": "📚 한눈에 보는 요약 및 실전 팁"}}]}},
-        {"object": "block", "type": "quote", "quote": {"rich_text": [{"text": {"content": "기존의 상세 코드들을 충분히 익히셨다면, 아래의 핵심 포인트들을 머릿속에 정리해보세요.\n\n- 로직 설계: 주석으로 흐름 먼저 잡기\n- 예외 처리: 경계값 확인\n- 최적화: 상황에 맞는 자료구조 선택"}}]}}
+        {
+            "object": "block",
+            "type": "heading_2",
+            "heading_2": {"rich_text": [{"text": {"content": "Summary and practical tips"}}]},
+        },
+        {
+            "object": "block",
+            "type": "quote",
+            "quote": {
+                "rich_text": [
+                    {
+                        "text": {
+                            "content": (
+                                "- Design logic first with comments.\n"
+                                "- Check edge cases early.\n"
+                                "- Pick the data structure that matches constraints."
+                            )
+                        }
+                    }
+                ]
+            },
+        },
     ]
-    requests.patch(url, json={"children": bottom_blocks}, headers=HEADERS)
+    bottom_res = requests.patch(url, json={"children": bottom_blocks}, headers=HEADERS, timeout=20)
+    bottom_res.raise_for_status()
     print(f"Refined: {page_id}")
+
 
 if __name__ == "__main__":
     parent_id = "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
     children = get_child_pages(parent_id)
     for child in children:
-        insert_elements(child, "")
+        insert_elements(child)
         time.sleep(1)
-    print("All pages refined successfully without any deletion!")
+    print("All pages refined successfully without any deletion.")
