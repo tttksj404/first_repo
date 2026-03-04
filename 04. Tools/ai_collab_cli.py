@@ -12,7 +12,7 @@ DEFAULT_GEMINI_CMD = "gemini.cmd"
 DEFAULT_CLAUDE_CMD = "claude"
 DEFAULT_CODEX_CMD = "codex"
 
-ALL_PROVIDERS = ("gemini", "claude", "codex")
+ALL_PROVIDERS = ("gemini", "codex")
 
 DEFAULT_GEMINI_MODELS = [
     "gemini-3.1-pro-preview",
@@ -23,10 +23,7 @@ DEFAULT_GEMINI_MODELS = [
     "gemini-2.0-flash",
 ]
 
-DEFAULT_CLAUDE_MODELS = [
-    "sonnet",
-    "opus",
-]
+DEFAULT_CLAUDE_MODELS = []
 
 
 class CliCallError(RuntimeError):
@@ -424,7 +421,7 @@ def main() -> int:
 
     try:
         require_command(args.gemini_cmd)
-        require_command(args.claude_cmd)
+        # require_command(args.claude_cmd)
         require_command(args.codex_cmd)
         cli_env = build_cli_env()
         if cli_env.get("NOTION_TOKEN"):
