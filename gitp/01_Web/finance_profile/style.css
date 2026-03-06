@@ -1,0 +1,182 @@
+:root {
+  --bg: #f3f7ff;
+  --card-bg: #ffffff;
+  --line: #d8e1ef;
+  --text: #1a2a40;
+  --muted: #5f6f86;
+  --primary: #0a6ff2;
+  --primary-hover: #085dcb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+  background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+  color: var(--text);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+nav {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.nav-link.active {
+  color: #ffffff;
+  background: var(--primary);
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+}
+
+.section-desc {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 220px 1.2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.avatar {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  display: block;
+  border: 2px solid var(--line);
+}
+
+.field-label,
+legend {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+textarea,
+input,
+select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(10, 111, 242, 0.14);
+}
+
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px 0 0;
+  padding: 10px;
+}
+
+fieldset label {
+  display: block;
+  margin-top: 6px;
+}
+
+input[readonly] {
+  background: #f2f5fa;
+  color: #5f6f86;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  gap: 14px 16px;
+}
+
+.actions {
+  margin-top: 16px;
+}
+
+.btn-primary {
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #ffffff;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bio-section {
+    order: 2;
+  }
+
+  .invest-section {
+    order: 3;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
