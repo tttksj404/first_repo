@@ -92,3 +92,83 @@ for tc in range(1,T+1):
     eaten_set = set()
     dfs(si,sj,0,eaten_set)
     print(f'#{tc} {len(eaten_set)}')
+
+
+
+    '''
+
+
+dy = [-1, 1, 0, 0]
+dx = [0, 0, -1, 1]
+
+def dfs(cur, n):
+    # [탈출 조건] 포가 3번 넘었으면(n=3) 더 이상 갈 필요 없으니 종료!
+    if n == 3:
+        return
+
+    # 4방향(상하좌우) 하나씩 검사해보자
+    for i in range(4):
+        jumped = False  # 아직 '다리'(넘을 기물)를 발견 못 했다는 뜻이야
+        
+        # 현재 위치에서 해당 방향으로 장기판 끝까지 쭉~ 훑어봐 (j는 거리)
+        for j in range(1, N + 1):
+            ny = cur[0] + dy[i] * j
+            nx = cur[1] + dx[i] * j
+            
+            # 장기판 범위 안에 있을 때만 따져야겠지?
+            if 0 <= ny < N and 0 <= nx < N:
+                
+                # 1. 아직 다리를 안 넘었을 때
+                if not jumped:
+                    # 기물(1)을 만났다! 드디어 넘을 '다리'를 찾았어!
+                    if matrix[ny][nx] == 1:
+                        jumped = True # 이제부터는 '넘은 상태'야
+                        continue      # 다리 바로 위에는 못 앉으니까 다음 칸으로 PASS
+                
+                # 2. 이미 다리를 하나 넘었을 때 (여기서부터 착지 가능)
+                if jumped:
+                    # Case A: 다리를 넘었는데 또 기물(1)을 만났다? -> "이놈 잡았다!"
+                    if matrix[ny][nx] == 1:
+                        # 이 기물 위치는 포가 잡을 수 있는 곳이야. 체크!
+                        checked[ny][nx] = True
+                        
+                        # [백트래킹 시작]
+                        matrix[ny][nx] = 0  # 기물을 잡았으니까 잠시 빈칸(0)으로 치워둬
+                        dfs((ny, nx), n + 1) # 잡은 그 자리에서 다음 점프(n+1) 시작!
+                        matrix[ny][nx] = 1  # 탐색 끝나고 돌아오면 다시 기물을 원래대로(1) 복구!
+                        
+                        # 기물을 하나 잡으면 그 뒤는 못 넘어가니까 이 방향은 여기서 끝!
+                        break
+                    
+                    # Case B: 다리를 넘었는데 빈 공간(0)이다? -> "잠시 쉬어가기"
+                    else:
+                        # 빈 곳에 착지해서 다음 이동(n+1)을 준비해
+                        dfs((ny, nx), n + 1)
+
+# --- 메인 실행부 ---
+T = int(input())
+for t in range(T):
+    N = int(input())
+    matrix = [list(map(int, input().split())) for i in range(N)]
+    
+    # 1. 일단 우리 '포'(값=2)가 어디 있는지부터 찾자
+    for i in range(N):
+        for j in range(N):
+            if matrix[i][j] == 2:
+                cur = (i, j)
+    
+    # 잡을 수 있는 기물 위치를 기록할 판 (중복 체크용)
+    checked = [[False] * N for i in range(N)]
+    cnt = 0
+    
+    # 2. DFS 탐색 시작! (시작점, 이동횟수 0)
+    dfs(cur, 0)
+    
+    # 3. 전체 판을 돌면서 포가 잡을 수 있다고 표시(True)된 곳만 세어보자
+    for i in checked:
+        for j in i:
+            if j == True:
+                cnt += 1
+                
+    print(f'#{t+1} {cnt}')
+    '''
