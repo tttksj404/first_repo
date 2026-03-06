@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포트폴리오 수정 | 금융 상품 비교 서비스</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>금융 상품 비교 서비스</h1>
+    <nav>
+      <a class="nav-link" href="./index.html">기본 정보 수정</a>
+      <a class="nav-link active" href="./portfolio.html">포트폴리오 수정</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="card">
+      <h2>포트폴리오 수정</h2>
+      <p class="section-desc">회원의 금융 포트폴리오 정보를 수정합니다.</p>
+
+      <form class="form-grid portfolio-grid">
+        <label>회원 번호
+          <input type="text" value="1000234" readonly>
+        </label>
+        <label>ID
+          <input type="text" value="ssafy_user15" readonly>
+        </label>
+        <label>대출 성향
+          <select>
+            <option>보수적</option>
+            <option selected>중립적</option>
+            <option>공격적</option>
+          </select>
+        </label>
+        <label>목표 대출액(만원)
+          <input type="number" min="0" step="100" placeholder="예: 3000">
+        </label>
+      </form>
+
+      <div class="actions">
+        <button type="button" class="btn-primary">포트폴리오 저장</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
