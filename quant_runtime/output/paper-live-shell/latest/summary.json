@@ -1,0 +1,18 @@
+{
+  "account_snapshot": {},
+  "cycle_count": 1,
+  "decision_count": 1,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "modes": [
+    "futures"
+  ],
+  "open_orders_snapshot": {},
+  "symbols": [
+    "BTCUSDT"
+  ],
+  "tested_order_count": 0,
+  "tested_orders": []
+}
