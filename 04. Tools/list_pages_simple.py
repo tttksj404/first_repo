@@ -84,7 +84,6 @@ if __name__ == "__main__":
     if pages:
         with open("notion_pages_list.json", "w", encoding="utf-8") as f:
             json.dump(pages, f, ensure_ascii=False, indent=2)
-        # Print only the relevant one for algorithm
+        # Print all results
         for p in pages:
-            if "삼성 A형" in p['title'] or "Algorithm" in p['title']:
-                print(f"Target found: {p['title']} ({p['id']})")
+            print(f"Page found: {p['title']} ({p['id']})")
