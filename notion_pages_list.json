@@ -1,0 +1,772 @@
+[
+  {
+    "id": "31eeacc8-175a-8122-bc26-ca316b8f2c44",
+    "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-81f0-97a1-e84a739c4b26",
+    "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-8183-b982-f39616d86dce",
+    "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "303eacc8-175a-80a3-9154-f7a7acee7c80",
+    "title": "코테 대비",
+    "type": "page"
+  },
+  {
+    "id": "2f0eacc8-175a-8072-8e4b-e298edcb69c5",
+    "title": "재귀&백트래킹(여기서부터 응용 1~3문제)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-814f-b848-c84b74984e09",
+    "title": "📍 [Backtracking] 1759 - 암호 만들기",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-8150-8859-e5dd986c528c",
+    "title": "📍 [BFS] 2178 - 미로 탐색 (최단 경로)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-815b-bb0a-c5033af89e88",
+    "title": "📍 [Parametric Search] 2805 - 나무 자르기",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81ac-a2b6-df47a5723749",
+    "title": "📍 [BFS] 3184 - 양과 늑대 (영역 탐색)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81fc-a724-eb76f3b3d399",
+    "title": "📍 [Dijkstra] 1753 - 최단 경로",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-816b-8379-facefbe8206e",
+    "title": "📍 [Topological Sort] 14567 - 위상 정렬 (선수 과목)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81ea-8b47-c81bd0d10912",
+    "title": "📍 [Samsung A] 코딩 던전 (DFS & 예산 관리)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-819d-b98f-d208aa13c899",
+    "title": "📍 [Samsung A] 사과 먹기 (시뮬레이션 & 방향 전환)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81de-96b2-dc42b14ff10a",
+    "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81db-acda-fa02ac631576",
+    "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81e9-a302-dec0633ff5ea",
+    "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-813c-ba9b-c0ff8e8d5d98",
+    "title": "📍 [Samsung A] DFS & 백트래킹 극한의 정복 (IM Master Style)",
+    "type": "page"
+  },
+  {
+    "id": "2f0eacc8-175a-805c-85b2-dca59899d3d8",
+    "title": "DFS/BFS",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-817f-9ad8-fe6917b25c99",
+    "title": "📍 [Samsung A] 테트로미노 (DFS + 특수 모양)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8124-a142-c90eadfa6db3",
+    "title": "📍 [Samsung A] 원판 돌리기 (배열 회전 & 평균)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-818c-9734-d93929cfbf83",
+    "title": "📍 [Samsung A] 미세먼지 안녕! (확산 & 회전)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-8120-93ec-f01ece5a531c",
+    "title": "📍 [Samsung A] 학교 필수 과목 (위상 정렬)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81e5-a57e-d33266fd300c",
+    "title": "📍 [Samsung A] 아기 상어 (우선순위 BFS 탐색)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81d1-b45c-ff132d0b1f56",
+    "title": "📍 [Samsung A] 연산자 끼워넣기 (백트래킹)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8139-973e-e2e28a926f49",
+    "title": "📍 [Samsung A] 경사로 (인덱스 조건 체크)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8172-a54f-fef8428fb6e4",
+    "title": "📍 [Samsung A] 이차원 배열과 연산 (커스텀 정렬)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-812a-bed2-fbacb1f93d1c",
+    "title": "📍 [Samsung A] 상어 초등학교 (우선순위 탐색)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-819e-a0b8-e6c64fc18bd1",
+    "title": "📍 [Samsung A] 마법사 상어와 파이어볼 (격자 제어)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8120-b249-efef529db6f8",
+    "title": "📍 [Samsung A] 치킨 배달 (조합 & 최솟값)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8134-8838-f7c295125f8a",
+    "title": "📍 [Samsung A] 나무 재테크 (3차원 배열 관리)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81cd-abb4-cd3ada7df20e",
+    "title": "📍 [Samsung A] 낚시왕 (2D 이동 시뮬레이션)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-817a-b91e-fc823a0ab988",
+    "title": "📍 [Samsung A] 인구 이동 (영역 탐색 & 갱신)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8108-9c3a-f2fa6658f3b0",
+    "title": "📍 [Samsung A] 구슬 탈출 2 (조건부 BFS)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8102-92f6-de849db9395d",
+    "title": "📍 [Samsung A] 스타트와 링크 (백트래킹 & 조합)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-8180-bb7b-f0b83282fa25",
+    "title": "📍 [Samsung A] 몬스터 헌터 (비트마스크 백트래킹)",
+    "type": "page"
+  },
+  {
+    "id": "319eacc8-175a-81c5-8bd2-ea179bf83820",
+    "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열 탐색)",
+    "type": "page"
+  },
+  {
+    "id": "319eacc8-175a-81e0-9669-f9661759d4f0",
+    "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+    "type": "page"
+  },
+  {
+    "id": "319eacc8-175a-8168-98f3-e63ceafa8736",
+    "title": "📍 [BFS] 2178 - 미로 탐색 (최단 거리의 정석)",
+    "type": "page"
+  },
+  {
+    "id": "319eacc8-175a-81ac-aecf-dbc7aacebc69",
+    "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81e5-9b4a-f71b9243c136",
+    "title": "2178 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-816f-9ad0-dcc1f05df53e",
+    "title": "Ungrouped 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-819b-aae7-ec4e5eaf9263",
+    "title": "A형 준비 전체 정리 (Codex+Claude+Gemini 검증, 2026-03-03)",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81b0-989e-d779f91c6fc5",
+    "title": "CONCEPT_Fibonacci_DP - DP, 누적합/투포인터",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81b3-ac03-e73d137c307b",
+    "title": "Step5_DP_AdvancedGraph 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8150-b7cb-f763eabbd2cc",
+    "title": "9251 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81ea-9aaf-daf148d64ddd",
+    "title": "2623 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8153-acb1-e07c598d8457",
+    "title": "2579 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81df-8f2a-eede4d0ab41a",
+    "title": "2252 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-818f-8c6d-d80339c914b3",
+    "title": "1932 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81f6-8805-dc1ce5614acd",
+    "title": "1916 - 다익스트라/최단거리, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8134-bc87-fb16a756ac51",
+    "title": "1912 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8137-bc72-e0d546f76c49",
+    "title": "1766 - 다익스트라/최단거리, 위상정렬",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-815c-8ac0-eb628f938b75",
+    "title": "1753 - 다익스트라/최단거리, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-818f-99b2-f24830be0b06",
+    "title": "1647 - 그래프 BFS, 그리디",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8175-befe-c85672189e43",
+    "title": "1516 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8180-a735-f45edef905fa",
+    "title": "1504 - 다익스트라/최단거리, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8121-89eb-d4c7b3dd01b2",
+    "title": "1463 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-815c-aec0-f9ded8b06151",
+    "title": "14567 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8126-abe6-da1a6c08872c",
+    "title": "14002 - DP, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81fb-8b54-f7f90e498849",
+    "title": "12865 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81ed-b829-c51f077bd07b",
+    "title": "12738 - 이분탐색/파라메트릭 서치, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8112-ba78-de8c0a191992",
+    "title": "1238 - 다익스트라/최단거리, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81dd-82dc-cab2025726d9",
+    "title": "12015 - 이분탐색/파라메트릭 서치, 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-816a-8152-d2a0f160924a",
+    "title": "11727 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8139-a53e-c645630bfb3e",
+    "title": "11722 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-817e-86f9-ca7fd5d1821c",
+    "title": "11055 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8144-91bb-d499febda1a0",
+    "title": "11053 - DP",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-812f-a3b1-e9ec4f178798",
+    "title": "1005 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-811f-a6b1-f35546ddceb4",
+    "title": "6236 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8129-a114-c74c4d8f911a",
+    "title": "Step4_BinarySearch_Greedy 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8180-b181-e081d5124650",
+    "title": "3079 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-810e-8c88-f2208dfbdcb5",
+    "title": "2805 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8168-a02e-d27de940bb28",
+    "title": "2559 - 누적합/투포인터",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8122-af69-d366db3cc8cf",
+    "title": "2512 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81d4-be13-c3e5b0875fa1",
+    "title": "2470 - 이분탐색/파라메트릭 서치, 그리디",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-810a-9cea-ebe9032d3bbd",
+    "title": "2467 - 이분탐색/파라메트릭 서치, 그리디",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8171-86e5-c95693ac3032",
+    "title": "2110 - 이분탐색/파라메트릭 서치, 그리디",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81d9-bb1f-d7b1d109cb87",
+    "title": "1654 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-817c-90d3-d614d58d5d5f",
+    "title": "1477 - 이분탐색/파라메트릭 서치, 그리디",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81a8-adaf-e7ddb88c2201",
+    "title": "13397 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8137-94f1-e5b1ddfb0054",
+    "title": "1300 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8186-94db-de8cf276c4c9",
+    "title": "11659 - 누적합/투포인터",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8170-8697-e62c9f1d24b5",
+    "title": "5639 - 이분탐색/파라메트릭 서치, 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81d8-a077-dd9def363cf6",
+    "title": "Step3_Graph_Traversal 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81d1-ba07-e1b131de46f7",
+    "title": "3184 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81e1-a5a6-d99d9b522e8e",
+    "title": "2636 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-814a-8ec5-e558ed62fa61",
+    "title": "21736 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8112-bdef-e9ef3e3e2bed",
+    "title": "1991 - 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8101-baa0-c5e477fa6804",
+    "title": "1967 - 그래프 BFS, 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8157-ad18-c433ca32e9c1",
+    "title": "1926 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-817c-a043-c272c6b976ea",
+    "title": "18352 - 다익스트라/최단거리, 위상정렬",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8120-ae90-eaec3494d335",
+    "title": "11725 - 위상정렬, 이분탐색/파라메트릭 서치",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81f5-9dba-cf7fa48dee2a",
+    "title": "7568 - 그래프 BFS",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8177-af49-ebcc4f2487b0",
+    "title": "Step2_BruteForce_Backtracking 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8192-bcb9-eaca27473245",
+    "title": "6603 - 그래프 BFS, 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8152-ab22-c55673a80e7b",
+    "title": "2231 - 기본 구현/자료구조",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8135-8150-e45ae825336b",
+    "title": "1759 - 그래프 BFS, 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-813e-ad96-d8cb6d6828d2",
+    "title": "14889 - 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-817f-8ae5-c275d6611039",
+    "title": "14888 - 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-816a-bbac-cd7693840506",
+    "title": "1182 - 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81d7-8438-fffd5c2946ee",
+    "title": "10974 - 그래프 BFS, 그래프 DFS/백트래킹",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8171-bfd0-dfeb14dfb329",
+    "title": "2577 - 기본 구현/자료구조",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81a3-bd79-f510656ff6d5",
+    "title": "Step1_Basic_DataStructure 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81e8-848d-cd61049f7b40",
+    "title": "1920 - 기본 구현/자료구조",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-81db-be0d-c4f54300d672",
+    "title": "1715 - 다익스트라/최단거리, 힙/우선순위큐",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-813d-bc44-ec4906ecfd93",
+    "title": "11286 - 다익스트라/최단거리, 힙/우선순위큐",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-815b-90e1-e8a634d36782",
+    "title": "11279 - 다익스트라/최단거리, 힙/우선순위큐",
+    "type": "page"
+  },
+  {
+    "id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524",
+    "title": "알고리즘 스터디 ",
+    "type": "page"
+  },
+  {
+    "id": "2f7eacc8-175a-8037-b6f8-dc9907e07ae0",
+    "title": "2월",
+    "type": "page"
+  },
+  {
+    "id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5",
+    "title": "스터디 로드맵 ",
+    "type": "page"
+  },
+  {
+    "id": "316eacc8-175a-81fd-82f7-fa89b180ecc8",
+    "title": "📍 [BFS] 9205 - 맥주 마시며 걸어가기 (거리 기반 점프)",
+    "type": "page"
+  },
+  {
+    "id": "316eacc8-175a-81c5-b2c0-c50710b7755b",
+    "title": "📍 [BFS] 2667 - 단지번호붙이기 (연결 요소 정렬)",
+    "type": "page"
+  },
+  {
+    "id": "316eacc8-175a-815d-972a-e945b06eb5e5",
+    "title": "📍 [BFS] 1926 - 그림 (영역 탐색)",
+    "type": "page"
+  },
+  {
+    "id": "316eacc8-175a-8140-8712-e0e2ae4f8a24",
+    "title": "🔥 [LEET 140+] 3월 기출 해부 데일리 루틴 (2026-03-01)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-817c-8fa6-c89fd1e36a66",
+    "title": "🏆 [2026] LEET 140+ 합격 사수: SSAFY 병행 마스터 워크스페이스",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-8100-b638-fdfe053da235",
+    "title": "⏰ [섹션 2] 데일리 루틴 & 체크리스트",
+    "type": "database"
+  },
+  {
+    "id": "314eacc8-175a-8101-8889-ebd834aa2a46",
+    "title": "🔍 [섹션 3] 논리 피드백 연구소",
+    "type": "database"
+  },
+  {
+    "id": "314eacc8-175a-819d-985b-ee4f4d006c90",
+    "title": "📘 [완전판] LEET 추리논증 기본 정리 및 전략 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-818a-92da-cd2d38cc4f4c",
+    "title": "📕 [완전판] LEET 언어이해 기출 출제원리 및 오답 거름망",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-8176-9445-d770e721d284",
+    "title": "[LEET] 💤 23:00 수면 및 회복 (7시간 사수)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-8187-a318-e78f24c7ea37",
+    "title": "[LEET] 🔥 20:15 Night 집중 학습 (기출분석)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-81ec-bf0a-d21c317b1225",
+    "title": "[LEET] 🍴 13:10 Lunch 틈새 (추리 퀴즈)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-8180-a36a-da26378dee0f",
+    "title": "[SSAFY] 🏢 09:00 교육 및 알고리즘 집중",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-81da-a5e3-e15c721de930",
+    "title": "[LEET] 🌅 08:30 Morning 예열 (언어 1지문)",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-80a8-b8e0-f8c467ae8ab3",
+    "title": "제목 없음",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-81a0-842a-cd10e53374e4",
+    "title": "2025학년도 추리 15번",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-8193-9f05-cf0f5a097b85",
+    "title": "📍 [Samsung A] 주사위 윷놀이 (백트래킹 & 상태)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81f8-b518-fbfea3edcac5",
+    "title": "📍 [Samsung A] 스타트 택시 (복합 BFS)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81a1-b46f-d1de909db499",
+    "title": "📍 [Samsung A] 새로운 게임 2 (말 쌓기 관리)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81cc-b101-fbd9f48aa4e8",
+    "title": "📍 [Samsung A] 뱀 (덱 관리 & 시뮬레이션)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81d1-8add-c2ee0f78236d",
+    "title": "📍 [Samsung A] 연구소 (조합 + 확산 BFS)",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81fd-93d5-d90dbc0b7285",
+    "title": "📚 AI 활용 가이드: 똑똑하게 명령하고 200% 활용하기",
+    "type": "page"
+  },
+  {
+    "id": "30ceacc8-175a-804d-9888-cf3288329719",
+    "title": "다익스트라(Dijkstra)",
+    "type": "page"
+  },
+  {
+    "id": "302eacc8-175a-8072-aad8-db2ca96b67e4",
+    "title": "DP 탐색(최종값 저장탐색)",
+    "type": "page"
+  },
+  {
+    "id": "2feeacc8-175a-80ee-9739-cb395ef4cc64",
+    "title": "투포인터,그리디",
+    "type": "page"
+  },
+  {
+    "id": "2faeacc8-175a-8009-9587-edcfe01dbb4e",
+    "title": "이진 탐색",
+    "type": "page"
+  },
+  {
+    "id": "2e7eacc8-175a-8049-8859-c2d0efe9cbe4",
+    "title": "해시",
+    "type": "page"
+  },
+  {
+    "id": "2f3eacc8-175a-8022-970c-c9c4ed4f1c43",
+    "title": "시뮬레이션",
+    "type": "page"
+  },
+  {
+    "id": "2e7eacc8-175a-803b-af45-d17145aba517",
+    "title": "배열 & 문자열 ",
+    "type": "page"
+  },
+  {
+    "id": "2eaeacc8-175a-80fa-98b4-e0a61bda22cb",
+    "title": "스택&큐",
+    "type": "page"
+  },
+  {
+    "id": "2fceacc8-175a-8097-8a09-dec951049ee0",
+    "title": "격자탐색 마스터",
+    "type": "page"
+  },
+  {
+    "id": "310eacc8-175a-806b-a9cb-ddfec721be71",
+    "title": "반복문 혹은 원형에서의 반복",
+    "type": "page"
+  },
+  {
+    "id": "2ebeacc8-175a-803e-8ffc-d832509624c1",
+    "title": "파이썬 문법",
+    "type": "page"
+  },
+  {
+    "id": "30beacc8-175a-8059-9fc3-d262112c0fc4",
+    "title": "IM정리",
+    "type": "page"
+  },
+  {
+    "id": "2fceacc8-175a-80bf-bfc1-eb2daffafad5",
+    "title": "인덱스 사용법/ 인덱스[0] 과 [-1]을 이용해 최대 최소값 이용  ",
+    "type": "page"
+  },
+  {
+    "id": "2fbeacc8-175a-8057-8677-e1da08202692",
+    "title": "따로 알아둬야하는 입력 출력 방법들",
+    "type": "page"
+  },
+  {
+    "id": "2ffeacc8-175a-80dd-b167-d583f11597a3",
+    "title": "회문분석",
+    "type": "page"
+  },
+  {
+    "id": "2fdeacc8-175a-8054-81f4-ecb052b4d0fe",
+    "title": "차분배열, 누적합",
+    "type": "page"
+  },
+  {
+    "id": "2fceacc8-175a-8049-a889-f4dfad72a7de",
+    "title": "2차원 배열의 응용",
+    "type": "page"
+  },
+  {
+    "id": "8938fced-ff81-4868-9e97-96e01212b875",
+    "title": "데이터 분석 ",
+    "type": "page"
+  },
+  {
+    "id": "2f7eacc8-175a-80e4-87f7-f4b955153e66",
+    "title": "26~30일",
+    "type": "page"
+  },
+  {
+    "id": "2f0eacc8-175a-8054-932b-c1824f53c326",
+    "title": "1월",
+    "type": "page"
+  },
+  {
+    "id": "2f0eacc8-175a-8055-b8a3-dc0050747538",
+    "title": "ssafy 교육(python)",
+    "type": "page"
+  },
+  {
+    "id": "2f0eacc8-175a-803d-98eb-c965d8d9e1d3",
+    "title": "19~23일",
+    "type": "page"
+  }
+]
