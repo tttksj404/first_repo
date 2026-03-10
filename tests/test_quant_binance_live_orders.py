@@ -116,6 +116,41 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(result.market, "futures")
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
 
+    def test_live_order_adapter_uses_quote_order_qty_for_spot_market_buy(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        decision = DecisionIntent(
+            decision_id="d2",
+            decision_hash="hash-2",
+            snapshot_id="s2",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 10, 0, 30, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=66.0,
+            gross_expected_edge_bps=30.0,
+            net_expected_edge_bps=18.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=2400.0,
+            stop_distance_bps=80.0,
+        )
+        adapter = DecisionLiveOrderAdapter(FakeLiveOrderClient(), self.settings)  # type: ignore[arg-type]
+        built = adapter.build_order_params(decision=decision, reference_price=50000.0)
+        assert built is not None
+        market, params = built
+        self.assertEqual(market, "spot")
+        self.assertEqual(params["side"], "BUY")
+        self.assertEqual(params["quoteOrderQty"], "2400.00")
+        self.assertNotIn("quantity", params)
+
     def test_session_prevents_duplicate_live_order_hash(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
         store = MarketStateStore()
