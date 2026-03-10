@@ -1,5 +1,5 @@
 {
-  "config_version": "2026-03-08.v1",
+  "config_version": "2026-03-10.v1",
   "snapshot_schema_version": "1.0.0",
   "universe": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
   "klines": ["1m", "5m", "15m", "1h", "4h"],
@@ -70,6 +70,22 @@
     "futures_block_penalty": 0.65,
     "spot_block_penalty": 0.85
   },
+  "futures_exposure": {
+    "soft_liquidity_floor": 0.7,
+    "soft_volatility_penalty_max": 0.45,
+    "soft_overheat_penalty_max": 0.35,
+    "reduced_size_multiplier": 1.0,
+    "min_entry_net_edge_bps": 8.0,
+    "reduced_entry_net_edge_bps": 10.0,
+    "strong_score_buffer": 4.0,
+    "strong_trend_strength_min": 0.82,
+    "strong_volume_confirmation_min": 0.74,
+    "strong_liquidity_min": 0.8,
+    "strong_volatility_penalty_max": 0.32,
+    "strong_overheat_penalty_max": 0.24,
+    "strong_edge_to_cost_multiple_min": 2.0,
+    "strong_size_multiplier": 1.0
+  },
   "cash_reserve": {
     "when_futures_enabled": 0.15,
     "when_futures_disabled": 0.3
@@ -127,12 +143,17 @@
     "conservative": {},
     "balanced": {
       "mode_thresholds": {
+        "futures_score_min": 73,
+        "futures_trend_strength_min": 0.66,
+        "futures_liquidity_min": 0.68,
+        "futures_volatility_penalty_max": 0.47,
+        "futures_overheat_penalty_max": 0.38,
         "spot_score_min": 50,
         "spot_liquidity_min": 0.55,
         "spot_volatility_penalty_max": 0.68
       },
       "cost_gate": {
-        "edge_to_cost_multiple_min": 1.2
+        "edge_to_cost_multiple_min": 1.1
       },
       "spot_support": {
         "support_alignment_min": 0.2,
@@ -144,41 +165,80 @@
       },
       "macro_gates": {
         "spot_block_penalty": 0.92
+      },
+      "futures_exposure": {
+        "soft_liquidity_floor": 0.62,
+        "soft_volatility_penalty_max": 0.55,
+        "soft_overheat_penalty_max": 0.5,
+        "reduced_size_multiplier": 0.65,
+        "min_entry_net_edge_bps": 8.0,
+        "reduced_entry_net_edge_bps": 10.0,
+        "strong_size_multiplier": 1.2
       }
     },
     "active": {
       "mode_thresholds": {
-        "spot_score_min": 42,
-        "spot_liquidity_min": 0.45,
-        "spot_volatility_penalty_max": 0.8
+        "futures_score_min": 60,
+        "spot_score_min": 48,
+        "futures_trend_strength_min": 0.62,
+        "spot_trend_strength_min": 0.45,
+        "futures_liquidity_min": 0.58,
+        "spot_liquidity_min": 0.5,
+        "futures_volatility_penalty_max": 0.58,
+        "spot_volatility_penalty_max": 0.72,
+        "futures_overheat_penalty_max": 0.48
       },
       "cost_gate": {
-        "edge_to_cost_multiple_min": 0.9
+        "edge_to_cost_multiple_min": 1.05
+      },
+      "risk": {
+        "per_trade_equity_risk": 0.0042,
+        "max_symbol_notional_fraction": 0.24,
+        "max_total_notional_fraction": 0.6,
+        "max_futures_leverage": 3.0,
+        "target_futures_leverage": 2.0
       },
       "mode_behavior": {
         "spot_require_positive_trend": false,
         "spot_allow_bottoming_reversal": true
       },
       "spot_support": {
-        "support_alignment_min": 0.0,
-        "resistance_penalty_max": 0.9,
-        "sentiment_support_min": 0.0,
-        "liquidity_relaxation": 0.12,
-        "breakout_resistance_override_min": 0.78,
-        "bottoming_support_override_min": 0.12
+        "support_alignment_min": 0.12,
+        "resistance_penalty_max": 0.82,
+        "sentiment_support_min": 0.05,
+        "liquidity_relaxation": 0.1,
+        "breakout_resistance_override_min": 0.82,
+        "bottoming_support_override_min": 0.16
       },
       "macro_gates": {
-        "spot_block_penalty": 0.98
+        "futures_block_penalty": 0.72,
+        "spot_block_penalty": 0.95
       },
       "cash_reserve": {
-        "when_futures_enabled": 0.1,
-        "when_futures_disabled": 0.2
+        "when_futures_enabled": 0.12,
+        "when_futures_disabled": 0.25
       },
       "altcoin_overlays": {
-        "breadth_floor": 0.3,
-        "liquidity_floor": 0.3,
-        "smart_money_floor": 0.25,
-        "rotation_block_penalty": 0.9
+        "breadth_floor": 0.32,
+        "liquidity_floor": 0.32,
+        "smart_money_floor": 0.28,
+        "rotation_block_penalty": 0.88
+      },
+      "futures_exposure": {
+        "soft_liquidity_floor": 0.56,
+        "soft_volatility_penalty_max": 0.62,
+        "soft_overheat_penalty_max": 0.5,
+        "reduced_size_multiplier": 0.5,
+        "min_entry_net_edge_bps": 8.0,
+        "reduced_entry_net_edge_bps": 11.0,
+        "strong_score_buffer": 3.0,
+        "strong_trend_strength_min": 0.8,
+        "strong_volume_confirmation_min": 0.72,
+        "strong_liquidity_min": 0.76,
+        "strong_volatility_penalty_max": 0.3,
+        "strong_overheat_penalty_max": 0.22,
+        "strong_edge_to_cost_multiple_min": 2.0,
+        "strong_size_multiplier": 1.35
       },
       "symbol_eligibility": {
         "observe_only_liquidity_max": 0.28,
