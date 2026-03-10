@@ -28,3 +28,9 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Added repository-level instructions to append relevant work summaries and initialized this tracking file with a stable format.
 - Competency mapping: Logical data structuring, technical communication
 - Skill sharpened next: Keep translating concrete tasks into capability language without overstating relevance.
+
+### 2026-03-10 - Quant futures profile refinement
+- Summary: Refined a live crypto strategy profile to increase qualified futures entries while preserving hard structural risk blocks and evidence-based exposure control.
+- What was done: Mapped current gating and sizing logic against crawled strategy notes, introduced a config-backed futures exposure layer for reduced-size soft entries and stronger-setup scaling, validated with targeted unit and replay/config tests, and documented the behavioral evidence.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Tighten the link between regime evidence, exposure budgeting, and live execution-state accounting.

@@ -31,31 +31,113 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertEqual(settings.mode_thresholds.spot_score_min, 55)
         self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 1.5)
 
-    def test_balanced_profile_relaxes_spot_constraints(self) -> None:
+    def test_balanced_profile_relaxes_spot_and_futures_constraints(self) -> None:
         os.environ["STRATEGY_PROFILE"] = "balanced"
         settings = Settings.load(CONFIG_PATH)
         self.assertEqual(settings.strategy_profile, "balanced")
+        self.assertEqual(settings.mode_thresholds.futures_score_min, 73)
+        self.assertEqual(settings.mode_thresholds.futures_trend_strength_min, 0.66)
+        self.assertEqual(settings.mode_thresholds.futures_liquidity_min, 0.68)
+        self.assertEqual(settings.mode_thresholds.futures_volatility_penalty_max, 0.47)
+        self.assertEqual(settings.mode_thresholds.futures_overheat_penalty_max, 0.38)
         self.assertEqual(settings.mode_thresholds.spot_score_min, 50)
-        self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 1.2)
+        self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 1.1)
         self.assertEqual(settings.spot_support.support_alignment_min, 0.2)
+        self.assertEqual(settings.futures_exposure.soft_liquidity_floor, 0.62)
+        self.assertEqual(settings.futures_exposure.reduced_size_multiplier, 0.65)
+        self.assertEqual(settings.futures_exposure.strong_size_multiplier, 1.2)
 
     def test_active_profile_is_more_permissive(self) -> None:
         os.environ["STRATEGY_PROFILE"] = "active"
         settings = Settings.load(CONFIG_PATH)
         self.assertEqual(settings.strategy_profile, "active")
-        self.assertEqual(settings.mode_thresholds.spot_score_min, 42)
-        self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 0.9)
+        self.assertEqual(settings.mode_thresholds.futures_score_min, 60)
+        self.assertEqual(settings.mode_thresholds.spot_score_min, 48)
+        self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 1.05)
+        self.assertEqual(settings.risk.target_futures_leverage, 2.0)
+        self.assertEqual(settings.risk.max_futures_leverage, 3.0)
         self.assertFalse(settings.mode_behavior.spot_require_positive_trend)
-        self.assertEqual(settings.cash_reserve.when_futures_enabled, 0.1)
-        self.assertEqual(settings.spot_support.support_alignment_min, 0.0)
-        self.assertEqual(settings.spot_support.resistance_penalty_max, 0.9)
-        self.assertEqual(settings.spot_support.sentiment_support_min, 0.0)
-        self.assertEqual(settings.spot_support.liquidity_relaxation, 0.12)
-        self.assertEqual(settings.spot_support.breakout_resistance_override_min, 0.78)
-        self.assertEqual(settings.spot_support.bottoming_support_override_min, 0.12)
-        self.assertEqual(settings.macro_gates.spot_block_penalty, 0.98)
+        self.assertEqual(settings.cash_reserve.when_futures_enabled, 0.12)
+        self.assertEqual(settings.spot_support.support_alignment_min, 0.12)
+        self.assertEqual(settings.spot_support.resistance_penalty_max, 0.82)
+        self.assertEqual(settings.spot_support.sentiment_support_min, 0.05)
+        self.assertEqual(settings.spot_support.liquidity_relaxation, 0.1)
+        self.assertEqual(settings.spot_support.breakout_resistance_override_min, 0.82)
+        self.assertEqual(settings.spot_support.bottoming_support_override_min, 0.16)
+        self.assertEqual(settings.macro_gates.futures_block_penalty, 0.72)
+        self.assertEqual(settings.macro_gates.spot_block_penalty, 0.95)
         self.assertTrue(settings.mode_behavior.spot_allow_bottoming_reversal)
         self.assertEqual(settings.symbol_eligibility.observe_only_liquidity_max, 0.28)
+
+    def test_balanced_profile_routes_mildly_heated_futures_setup_to_spot(self) -> None:
+        conservative_settings = Settings.load(CONFIG_PATH)
+        os.environ["STRATEGY_PROFILE"] = "balanced"
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.78,
+            ret_rank_4h=0.76,
+            breakout_norm=0.78,
+            ema_stack_score=0.95,
+            vol_z_5m_norm=0.68,
+            vol_z_1h_norm=0.69,
+            taker_imbalance_norm=0.66,
+            spread_bps_norm=0.22,
+            probe_slippage_bps_norm=0.25,
+            depth_10bps_norm=0.8,
+            book_stability_norm=0.88,
+            realized_vol_1h_norm=1.3,
+            realized_vol_4h_norm=1.2,
+            vol_shock_norm=0.34,
+            funding_abs_percentile=0.22,
+            oi_surge_percentile=0.18,
+            basis_stretch_percentile=0.2,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.76,
+            volume_confirmation=0.76,
+            liquidity_score=0.66,
+            volatility_penalty=0.48,
+            overheat_penalty=0.39,
+            support_alignment=0.48,
+            resistance_penalty=0.18,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.62,
+            gross_expected_edge_bps=20.0,
+            estimated_round_trip_cost_bps=17.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-balanced-futures",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 10, 0, 0, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.5,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+        conservative_decision = evaluate_snapshot(
+            snapshot,
+            conservative_settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=conservative_settings.cash_reserve.when_futures_enabled,
+        )
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+        self.assertNotEqual(conservative_decision.final_mode, "futures")
+        self.assertEqual(decision.final_mode, "spot")
+        self.assertEqual(decision.side, "long")
+        self.assertIn("EDGE_TOO_THIN", decision.rejection_reasons)
 
     def test_active_profile_thresholds_affect_spot_decision(self) -> None:
         os.environ["STRATEGY_PROFILE"] = "active"
@@ -85,7 +167,7 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
             liquidity_score=0.7,
             volatility_penalty=0.25,
             overheat_penalty=0.14,
-            support_alignment=0.05,
+            support_alignment=0.12,
             resistance_penalty=0.8,
             macro_risk_penalty=0.9,
             sentiment_support_score=0.05,
@@ -141,11 +223,11 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
             trend_direction=-1,
             trend_strength=0.58,
             volume_confirmation=0.74,
-            liquidity_score=0.34,
+            liquidity_score=0.41,
             volatility_penalty=0.25,
             overheat_penalty=0.14,
             support_alignment=0.2,
-            resistance_penalty=0.88,
+            resistance_penalty=0.8,
             macro_risk_penalty=0.2,
             sentiment_regime="bottoming",
             sentiment_support_score=0.6,
@@ -175,6 +257,66 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
             cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
         )
         self.assertEqual(decision.final_mode, "spot")
+
+    def test_active_profile_routes_near_threshold_futures_setup_to_spot_when_edge_is_thin(self) -> None:
+        os.environ["STRATEGY_PROFILE"] = "active"
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.78,
+            ret_rank_4h=0.76,
+            breakout_norm=0.78,
+            ema_stack_score=0.95,
+            vol_z_5m_norm=0.68,
+            vol_z_1h_norm=0.69,
+            taker_imbalance_norm=0.66,
+            spread_bps_norm=0.22,
+            probe_slippage_bps_norm=0.25,
+            depth_10bps_norm=0.8,
+            book_stability_norm=0.88,
+            realized_vol_1h_norm=0.32,
+            realized_vol_4h_norm=0.31,
+            vol_shock_norm=0.34,
+            funding_abs_percentile=0.22,
+            oi_surge_percentile=0.18,
+            basis_stretch_percentile=0.2,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.68,
+            volume_confirmation=0.72,
+            liquidity_score=0.66,
+            volatility_penalty=0.48,
+            overheat_penalty=0.39,
+            support_alignment=0.48,
+            resistance_penalty=0.18,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.62,
+            gross_expected_edge_bps=20.0,
+            estimated_round_trip_cost_bps=17.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-active-futures",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.5,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+        self.assertEqual(decision.final_mode, "spot")
+        self.assertIn("EDGE_TOO_THIN", decision.rejection_reasons)
 
 
 if __name__ == "__main__":

@@ -65,6 +65,11 @@ def make_primitive() -> PrimitiveInputs:
 class FakeLiveOrderClient:
     def __init__(self) -> None:
         self.calls = 0
+        self.leverage_calls: list[tuple[str, int]] = []
+
+    def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
+        self.leverage_calls.append((symbol, leverage))
+        return {"symbol": symbol, "leverage": leverage}
 
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
@@ -102,12 +107,14 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
             order_intent_notional_usd=2000.0,
             stop_distance_bps=45.0,
         )
-        adapter = DecisionLiveOrderAdapter(FakeLiveOrderClient())  # type: ignore[arg-type]
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
         result = adapter.execute_decision(decision=decision, reference_price=50000.0)
         self.assertIsNotNone(result)
         assert result is not None
         self.assertTrue(result.accepted)
         self.assertEqual(result.market, "futures")
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
 
     def test_session_prevents_duplicate_live_order_hash(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
