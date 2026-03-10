@@ -1,0 +1,219 @@
+{
+  "Backtracking": [
+    {
+      "id": "31beacc8-175a-814f-b848-c84b74984e09",
+      "title": "📍 [Backtracking] 1759 - 암호 만들기",
+      "type": "page"
+    }
+  ],
+  "BFS": [
+    {
+      "id": "31beacc8-175a-8150-8859-e5dd986c528c",
+      "title": "📍 [BFS] 2178 - 미로 탐색 (최단 경로)",
+      "type": "page"
+    },
+    {
+      "id": "31beacc8-175a-81ac-a2b6-df47a5723749",
+      "title": "📍 [BFS] 3184 - 양과 늑대 (영역 탐색)",
+      "type": "page"
+    },
+    {
+      "id": "319eacc8-175a-8168-98f3-e63ceafa8736",
+      "title": "📍 [BFS] 2178 - 미로 탐색 (최단 거리의 정석)",
+      "type": "page"
+    },
+    {
+      "id": "316eacc8-175a-81fd-82f7-fa89b180ecc8",
+      "title": "📍 [BFS] 9205 - 맥주 마시며 걸어가기 (거리 기반 점프)",
+      "type": "page"
+    },
+    {
+      "id": "316eacc8-175a-81c5-b2c0-c50710b7755b",
+      "title": "📍 [BFS] 2667 - 단지번호붙이기 (연결 요소 정렬)",
+      "type": "page"
+    },
+    {
+      "id": "316eacc8-175a-815d-972a-e945b06eb5e5",
+      "title": "📍 [BFS] 1926 - 그림 (영역 탐색)",
+      "type": "page"
+    }
+  ],
+  "Parametric Search": [
+    {
+      "id": "31beacc8-175a-815b-bb0a-c5033af89e88",
+      "title": "📍 [Parametric Search] 2805 - 나무 자르기",
+      "type": "page"
+    }
+  ],
+  "Dijkstra": [
+    {
+      "id": "31beacc8-175a-81fc-a724-eb76f3b3d399",
+      "title": "📍 [Dijkstra] 1753 - 최단 경로",
+      "type": "page"
+    }
+  ],
+  "Topological Sort": [
+    {
+      "id": "31beacc8-175a-816b-8379-facefbe8206e",
+      "title": "📍 [Topological Sort] 14567 - 위상 정렬 (선수 과목)",
+      "type": "page"
+    }
+  ],
+  "Samsung A": [
+    {
+      "id": "31beacc8-175a-81ea-8b47-c81bd0d10912",
+      "title": "📍 [Samsung A] 코딩 던전 (DFS & 예산 관리)",
+      "type": "page"
+    },
+    {
+      "id": "31beacc8-175a-819d-b98f-d208aa13c899",
+      "title": "📍 [Samsung A] 사과 먹기 (시뮬레이션 & 방향 전환)",
+      "type": "page"
+    },
+    {
+      "id": "31beacc8-175a-81de-96b2-dc42b14ff10a",
+      "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열)",
+      "type": "page"
+    },
+    {
+      "id": "31beacc8-175a-81db-acda-fa02ac631576",
+      "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+      "type": "page"
+    },
+    {
+      "id": "31beacc8-175a-81e9-a302-dec0633ff5ea",
+      "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+      "type": "page"
+    },
+    {
+      "id": "31beacc8-175a-813c-ba9b-c0ff8e8d5d98",
+      "title": "📍 [Samsung A] DFS & 백트래킹 극한의 정복 (IM Master Style)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-817f-9ad8-fe6917b25c99",
+      "title": "📍 [Samsung A] 테트로미노 (DFS + 특수 모양)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8124-a142-c90eadfa6db3",
+      "title": "📍 [Samsung A] 원판 돌리기 (배열 회전 & 평균)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-818c-9734-d93929cfbf83",
+      "title": "📍 [Samsung A] 미세먼지 안녕! (확산 & 회전)",
+      "type": "page"
+    },
+    {
+      "id": "314eacc8-175a-8120-93ec-f01ece5a531c",
+      "title": "📍 [Samsung A] 학교 필수 과목 (위상 정렬)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81e5-a57e-d33266fd300c",
+      "title": "📍 [Samsung A] 아기 상어 (우선순위 BFS 탐색)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81d1-b45c-ff132d0b1f56",
+      "title": "📍 [Samsung A] 연산자 끼워넣기 (백트래킹)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8139-973e-e2e28a926f49",
+      "title": "📍 [Samsung A] 경사로 (인덱스 조건 체크)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8172-a54f-fef8428fb6e4",
+      "title": "📍 [Samsung A] 이차원 배열과 연산 (커스텀 정렬)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-812a-bed2-fbacb1f93d1c",
+      "title": "📍 [Samsung A] 상어 초등학교 (우선순위 탐색)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-819e-a0b8-e6c64fc18bd1",
+      "title": "📍 [Samsung A] 마법사 상어와 파이어볼 (격자 제어)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8120-b249-efef529db6f8",
+      "title": "📍 [Samsung A] 치킨 배달 (조합 & 최솟값)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8134-8838-f7c295125f8a",
+      "title": "📍 [Samsung A] 나무 재테크 (3차원 배열 관리)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81cd-abb4-cd3ada7df20e",
+      "title": "📍 [Samsung A] 낚시왕 (2D 이동 시뮬레이션)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-817a-b91e-fc823a0ab988",
+      "title": "📍 [Samsung A] 인구 이동 (영역 탐색 & 갱신)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8108-9c3a-f2fa6658f3b0",
+      "title": "📍 [Samsung A] 구슬 탈출 2 (조건부 BFS)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8102-92f6-de849db9395d",
+      "title": "📍 [Samsung A] 스타트와 링크 (백트래킹 & 조합)",
+      "type": "page"
+    },
+    {
+      "id": "314eacc8-175a-8180-bb7b-f0b83282fa25",
+      "title": "📍 [Samsung A] 몬스터 헌터 (비트마스크 백트래킹)",
+      "type": "page"
+    },
+    {
+      "id": "319eacc8-175a-81c5-8bd2-ea179bf83820",
+      "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열 탐색)",
+      "type": "page"
+    },
+    {
+      "id": "319eacc8-175a-81e0-9669-f9661759d4f0",
+      "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+      "type": "page"
+    },
+    {
+      "id": "319eacc8-175a-81ac-aecf-dbc7aacebc69",
+      "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-8193-9f05-cf0f5a097b85",
+      "title": "📍 [Samsung A] 주사위 윷놀이 (백트래킹 & 상태)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81f8-b518-fbfea3edcac5",
+      "title": "📍 [Samsung A] 스타트 택시 (복합 BFS)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81a1-b46f-d1de909db499",
+      "title": "📍 [Samsung A] 새로운 게임 2 (말 쌓기 관리)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81cc-b101-fbd9f48aa4e8",
+      "title": "📍 [Samsung A] 뱀 (덱 관리 & 시뮬레이션)",
+      "type": "page"
+    },
+    {
+      "id": "313eacc8-175a-81d1-8add-c2ee0f78236d",
+      "title": "📍 [Samsung A] 연구소 (조합 + 확산 BFS)",
+      "type": "page"
+    }
+  ]
+}
