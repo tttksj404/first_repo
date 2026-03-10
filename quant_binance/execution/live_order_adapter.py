@@ -66,13 +66,17 @@ class DecisionLiveOrderAdapter:
             return None
         quantity = quantity_from_notional(decision.order_intent_notional_usd, reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
+        side = "BUY" if decision.side == "long" else "SELL"
         params = {
             "symbol": decision.symbol,
-            "side": "BUY" if decision.side == "long" else "SELL",
+            "side": side,
             "type": "MARKET",
-            "quantity": f"{quantity:.8f}",
             "newOrderRespType": "RESULT",
         }
+        if market == "spot" and side == "BUY":
+            params["quoteOrderQty"] = f"{decision.order_intent_notional_usd:.2f}"
+        else:
+            params["quantity"] = f"{quantity:.8f}"
         if market == "futures":
             params["reduceOnly"] = "false"
         return market, params
@@ -91,7 +95,7 @@ class DecisionLiveOrderAdapter:
             leverage = self._target_futures_leverage(decision)
             self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
         response = self.client.place_order(market=market, order_params=order_params)
-        quantity = float(order_params["quantity"])
+        quantity = float(order_params.get("quantity", 0.0))
         accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
         return LiveOrderResult(
             symbol=decision.symbol,
