@@ -213,8 +213,8 @@ class LivePaperSession:
 
     def _cash_reserve_fraction(self) -> float:
         if self.capital_report.get("can_trade_futures_any", False):
-            return 0.15
-        return 0.30
+            return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
+        return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
     def _record_decision(
         self,
