@@ -266,61 +266,90 @@ class LivePaperSession:
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
-                live_result = self.live_order_executor.execute_decision(
-                    decision=executable_decision,
-                    reference_price=state.last_trade_price,
-                )
-                if live_result is not None:
-                    self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                try:
+                    live_result = self.live_order_executor.execute_decision(
+                        decision=executable_decision,
+                        reference_price=state.last_trade_price,
+                    )
+                except Exception as exc:
                     payload = {
                         "timestamp": timestamp,
-                        "symbol": live_result.symbol,
-                        "market": live_result.market,
-                        "side": live_result.side,
-                        "quantity": live_result.quantity,
-                        "accepted": live_result.accepted,
+                        "symbol": executable_decision.symbol,
+                        "market": executable_decision.final_mode,
+                        "stage": "live_order",
+                        "error": repr(exc),
                     }
-                    self.live_orders.append(payload)
                     if self.verbose:
-                        print(
-                            f"[LIVE_ORDER] {live_result.symbol} market={live_result.market} side={live_result.side} qty={live_result.quantity} accepted={live_result.accepted}",
-                            flush=True,
-                        )
+                        print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
                     if self.log_store is not None:
-                        self.log_store.append("live_orders", payload)
+                        self.log_store.append("order_errors", payload)
+                else:
+                    if live_result is not None:
+                        self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                        payload = {
+                            "timestamp": timestamp,
+                            "symbol": live_result.symbol,
+                            "market": live_result.market,
+                            "side": live_result.side,
+                            "quantity": live_result.quantity,
+                            "accepted": live_result.accepted,
+                        }
+                        self.live_orders.append(payload)
+                        if self.verbose:
+                            print(
+                                f"[LIVE_ORDER] {live_result.symbol} market={live_result.market} side={live_result.side} qty={live_result.quantity} accepted={live_result.accepted}",
+                                flush=True,
+                            )
+                        if self.log_store is not None:
+                            self.log_store.append("live_orders", payload)
         if self.order_tester is not None and state is not None and self._market_capital_allowed(decision):
             test_decision = self._cap_live_order_decision(decision)
-            test_result = self.order_tester.test_decision(
-                decision=test_decision,
-                reference_price=state.last_trade_price,
-            )
-            if test_result is not None:
-                self.tested_orders.append(
-                    {
-                        "symbol": test_result.symbol,
-                        "market": test_result.market,
-                        "side": test_result.side,
-                        "quantity": test_result.quantity,
-                        "accepted": test_result.accepted,
+            if test_decision.final_mode in {"spot", "futures"} and test_decision.order_intent_notional_usd > 0:
+                try:
+                    test_result = self.order_tester.test_decision(
+                        decision=test_decision,
+                        reference_price=state.last_trade_price,
+                    )
+                except Exception as exc:
+                    payload = {
+                        "timestamp": timestamp,
+                        "symbol": test_decision.symbol,
+                        "market": test_decision.final_mode,
+                        "stage": "test_order",
+                        "error": repr(exc),
                     }
-                )
-                if self.verbose:
-                    print(
-                        f"[TEST_ORDER] {test_result.symbol} market={test_result.market} side={test_result.side} qty={test_result.quantity} accepted={test_result.accepted}",
-                        flush=True,
-                    )
-                if self.log_store is not None:
-                    self.log_store.append(
-                        "tested_orders",
-                        {
-                            "timestamp": timestamp,
-                            "symbol": test_result.symbol,
-                            "market": test_result.market,
-                            "side": test_result.side,
-                            "quantity": test_result.quantity,
-                            "accepted": test_result.accepted,
-                        },
-                    )
+                    if self.verbose:
+                        print(f"[TEST_ORDER_ERROR] {test_decision.symbol} {exc}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("order_errors", payload)
+                else:
+                    if test_result is not None:
+                        self.tested_orders.append(
+                            {
+                                "symbol": test_result.symbol,
+                                "market": test_result.market,
+                                "side": test_result.side,
+                                "quantity": test_result.quantity,
+                                "accepted": test_result.accepted,
+                            }
+                        )
+                        if self.verbose:
+                            print(
+                                f"[TEST_ORDER] {test_result.symbol} market={test_result.market} side={test_result.side} qty={test_result.quantity} accepted={test_result.accepted}",
+                                flush=True,
+                            )
+                        if self.log_store is not None:
+                            self.log_store.append(
+                                "tested_orders",
+                                {
+                                    "timestamp": timestamp,
+                                    "symbol": test_result.symbol,
+                                    "market": test_result.market,
+                                    "side": test_result.side,
+                                    "quantity": test_result.quantity,
+                                    "accepted": test_result.accepted,
+                                },
+                            )
 
 
 @dataclass(frozen=True)
