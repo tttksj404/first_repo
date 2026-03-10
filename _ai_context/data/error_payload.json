@@ -1,0 +1,322 @@
+{
+  "children": [
+    {
+      "object": "block",
+      "type": "code",
+      "code": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "\"\"\"\n📍 [BOJ] 14889 스타트와 링크\n> [학습 우선순위: Step 2 - 백트래킹/팀나누기]\n> N명의 사람을 N/2명씩 두 팀으로 나눌 때, 두 팀의 능력치 차이의 최솟값을 구하라.\n\n🔍 상세 분석:\n- N명 중에서 N/2명을 뽑는 '조합' 문제입니다.\n- 내가 '스타트 팀'으로 선택되면(`visited[i] = True`), 선택되지 않은 나머지 사람들은 자동으로 '링크 팀'이 됩니다.\n- N이 최대 20이므로, 최대 20C10 = 184,756가지 경우의 수를 전부 따져볼 수 있습니다.\n\n🏗️ 구현 체크리스트:\n1. `visited` 배열로 팀원 선택 여부를 체크한다.\n2. DFS 함수에서 현재까지 뽑은 인원수(`count`)와 다음 선택할 시작점(`idx`)을 관리한다.\n3. N/2명을 다 뽑으면, 각 팀의 점수를 계산한다.\n   - 팀 점수 = 같은 팀원 i, j 쌍에 대해 `S[i][j] + S[j][i]`를 모두 더한 값.\n4. 두 팀의 점수 차이의 최댓값을 갱신한다.\n\n💡 학생 가이드:\n- \"점수 계산할 때 왜 이중 for문을 쓰나요?\" \n  -> 같은 팀 안에 (A, B, C)가 있다면, (A,B), (B,A), (A,C), (C,A), (B,C), (C,B) 모든 경우의 능력치를 더해줘야 하기 때문입니다.\n\"\"\"\n\nimport sys\ninput = sys.stdin.readline\n\nN = int(input())\n# 능력치 시너지 행렬 S\nS = [list(map(int, input().split())) for _ in range(N)]\n\n# 방문 장부: True면 스타트 팀, False면 링크 팀\nvisited = [False] * N\nmin_diff = float('inf') # 정답 (최소 차이)\n\ndef calculate():\n    \"\"\"현재 팀 구성에 따른 점수 차이 계산 함수\"\"\"\n    start_score = 0\n    link_score = 0\n    \n    # 0번부터 N-1번까지 모든 쌍(i, j)을 조사\n    for i in range(N):\n        for j in range(i + 1, N):\n            # i와 j가 둘 다 스타트 팀(True)이라면\n            if visited[i] and visited[j]:\n                start_score += S[i][j] + S[j][i]\n            # i와 j가 둘 다 링크 팀(False)이라면\n            elif not visited[i] and not visited[j]:\n                link_score += S[i][j] + S[j][i]\n                \n    return abs(start_score - link_score)\n\ndef dfs(count, idx):\n    \"\"\"\n    count: 현재 스타트 팀에 합류한 사람 수\n    idx: 이번에 합류시킬 후보 사람 번호\n    \"\"\"\n    global min_diff\n    \n    # [기저 조건] 한 팀에 N/2명이 다 찼을 때\n    if count == N // 2:\n        diff = calculate()\n        min_diff = min(min_diff, diff)\n        return\n\n    # [유도 파트] 사람 i를 팀에 넣거나 안 넣거나\n    for i in range(idx, N):\n        if not visited[i]:\n            # 1. i를 스타트 팀에 넣는다\n            visited[i] = True\n            # 2. 다음 사람을 뽑으러 간다 (중복 방지 위해 i+1 전달)\n            dfs(count + 1, i + 1)\n            # 3. 중요!! 다음 경우의 수를 위해 i를 다시 팀에서 뺀다 (백트래킹)\n            visited[i] = False\n            \n            # [최적화] 차이가 0이면 더 볼 필요 없음\n            if min_diff == 0:\n                return\n\n# 0명을 뽑은 상태에서 0번 사람부터 탐색 시작\ndfs(0, 0)\nprint(min_diff)\n",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "language": "python"
+      }
+    },
+    {
+      "object": "block",
+      "type": "divider",
+      "divider": {}
+    },
+    {
+      "object": "block",
+      "type": "heading_2",
+      "heading_2": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "🏗️ 실전 예제 2 - [BOJ 14888 연산자 끼워넣기]",
+              "link": null
+            },
+            "annotations": {
+              "bold": true,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "color": "default",
+        "is_toggleable": false
+      }
+    },
+    {
+      "object": "block",
+      "type": "quote",
+      "quote": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "숫자 순서는 고정, 연산자의 순열을 구하는 문제입니다. 남은 연산자 개수를 인자로 넘기는 테크닉을 배울 수 있습니다.",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "color": "default"
+      }
+    },
+    {
+      "object": "block",
+      "type": "code",
+      "code": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "\"\"\"\n📍 [BOJ] 14888 연산자 끼워넣기\n> [학습 우선순위: Step 2 - 백트래킹/수식]\n> N개의 숫자 사이에 더하기, 빼기, 곱하기, 나누기를 넣어 만들 수 있는 최대/최소값을 구하라.\n\n🔍 상세 분석:\n- 숫자의 순서는 정해져 있고, 연산자만 어떤 순서로 쓸지 정하면 됩니다.\n- 연산자들의 개수가 각각 정해져 있으므로, 남은 연산자 개수를 하나씩 줄여가며 DFS를 돌립니다.\n- 삼성 A형에서 정말 좋아하는 전형적인 백트래킹 유형입니다.\n\n🏗️ 구현 체크리스트:\n1. DFS 함수 인자: (현재까지 사용한 숫자 개수, 현재까지의 계산 결과, 남은 +, -, *, / 개수).\n2. 기저 조건: 숫자를 N개 다 썼을 때, 최댓값과 최솟값을 갱신한다.\n3. 유도 파트: 연산자가 1개라도 남아있다면, 그 연산자를 쓰고 개수를 하나 줄여 재귀 호출한다.\n4. 음수 나눗셈 주의: `int(a / b)`를 사용하면 파이썬에서도 C++ 스타일의 정수 나눗셈이 가능합니다.\n\n💡 학생 가이드:\n- \"나눗셈 계산법이 왜 다른가요?\" \n  -> 파이썬의 `//`는 내림 연산(Floor)입니다. `-5 // 2 = -3`이 되죠. 하지만 문제 조건(C++14 기준)은 0을 향해 자르므로 `-5 / 2 = -2.5`에서 정수 부분인 `-2`를 취해야 합니다. 그래서 `int(a / b)`가 정답입니다!\n\"\"\"\n\nimport sys\ninput = sys.stdin.readline\n\n# N: 숫자의 개수\nN = int(input())\n# nums: 숫자 리스트\nnums = list(map(int, input().split()))\n# 연산자 개수 (더하기, 빼기, 곱하기, 나누기 순)\nadd, sub, mul, div = map(int, input().split())\n\n# 최댓값과 최솟값 초기화 (최대 10억, 최소 -10억 범위)\nmax_val = -float('inf')\nmin_val = float('inf')\n\ndef dfs(idx, current_res, a, s, m, d):\n    \"\"\"\n    idx: 이번에 연산할 숫자의 위치\n    current_res: 지금까지 계산된 결과값\n    a, s, m, d: 각각 남은 더하기, 빼기, 곱하기, 나누기 개수\n    \"\"\"\n    global max_val, min_val\n    \n    # [기저 조건] 모든 숫자를 다 계산했을 때\n    if idx == N:\n        max_val = max(max_val, current_res)\n        min_val = min(min_val, current_res)\n        return\n\n    # [유도 파트] 연산자가 남아있다면 사용하고 다음 숫자로 넘어간다\n    if a > 0: # 더하기가 남았으면\n        dfs(idx + 1, current_res + nums[idx], a - 1, s, m, d)\n    if s > 0: # 빼기가 남았으면\n        dfs(idx + 1, current_res - nums[idx], a, s - 1, m, d)\n    if m > 0: # 곱하기가 남았으면\n        dfs(idx + 1, current_res * nums[idx], a, s, m - 1, d)\n    if d > 0: # 나누기가 남았으면\n        # 파이썬 정수 나눗셈 주의: int(a / b) 사용\n        dfs(idx + 1, int(current_res / nums[idx]), a, s, m, d - 1)\n\n# 첫 번째 숫자를 시작 결과값으로 넣고, 1번 인덱스 숫자부터 연산 시작\ndfs(1, nums[0], add, sub, mul, div)\n\nprint(max_val)\nprint(min_val)\n",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "language": "python"
+      }
+    },
+    {
+      "object": "block",
+      "type": "divider",
+      "divider": {}
+    },
+    {
+      "object": "block",
+      "type": "heading_2",
+      "heading_2": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "🏗️ 구현 체크리스트",
+              "link": null
+            },
+            "annotations": {
+              "bold": true,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "color": "default",
+        "is_toggleable": false
+      }
+    },
+    {
+      "object": "block",
+      "type": "to_do",
+      "to_do": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "기저 조건(Base Case)이 정확한가? (depth == N)",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "checked": false,
+        "color": "default"
+      }
+    },
+    {
+      "object": "block",
+      "type": "to_do",
+      "to_do": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "유도 파트가 모든 후보를 포함하는가? (for i in range...)",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "checked": false,
+        "color": "default"
+      }
+    },
+    {
+      "object": "block",
+      "type": "to_do",
+      "to_do": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "Visited 배열이나 Index 관리가 적절한가?",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "checked": false,
+        "color": "default"
+      }
+    },
+    {
+      "object": "block",
+      "type": "to_do",
+      "to_do": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "재귀 호출 직후 상태 복구(Pop, visited=False)를 했는가?",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "checked": false,
+        "color": "default"
+      }
+    },
+    {
+      "object": "block",
+      "type": "divider",
+      "divider": {}
+    },
+    {
+      "object": "block",
+      "type": "heading_2",
+      "heading_2": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "💡 학생 가이드: 백지코딩을 위한 멘탈 모델",
+              "link": null
+            },
+            "annotations": {
+              "bold": true,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "color": "default",
+        "is_toggleable": false
+      }
+    },
+    {
+      "object": "block",
+      "type": "callout",
+      "callout": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "재귀가 꼬인다면? print('  ' * depth, f'depth: {depth}') 처럼 depth만큼 공백을 주어 출력해 보세요. 함수가 어떻게 들어갔다 나오는지 계단식으로 보일 겁니다.",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "color": "default",
+        "icon": {
+          "type": "emoji",
+          "emoji": "🧪"
+        }
+      }
+    },
+    {
+      "object": "block",
+      "type": "callout",
+      "callout": {
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "시간 초과가 난다면? 기저 조건에 도달하기 전이라도 '이미 정답의 가능성이 없는 경우(예: 현재 합 > 최소 합)' 바로 return 하는 '가지치기'를 추가하세요.",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            }
+          }
+        ],
+        "color": "default",
+        "icon": {
+          "type": "emoji",
+          "emoji": "✂️"
+        }
+      }
+    }
+  ]
+}
