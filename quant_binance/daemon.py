@@ -125,7 +125,7 @@ def run_live_paper_daemon(
         remaining_portfolio_capacity_usd=5000.0,
         rest_client=rest_client,
         order_tester=DecisionOrderTestAdapter(rest_client),
-        live_order_executor=DecisionLiveOrderAdapter(rest_client) if execute_live_orders else None,
+        live_order_executor=DecisionLiveOrderAdapter(rest_client, settings) if execute_live_orders else None,
         learner=learner,
         learner_output_path=run_paths.root / "edge_table.json",
         log_store=log_store,
