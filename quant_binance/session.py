@@ -220,6 +220,12 @@ class LivePaperSession:
         if not self.capital_report:
             return decision
         reserve_fraction = self._cash_reserve_fraction()
+        requirements_key = "spot_requirements" if decision.final_mode == "spot" else "futures_requirements"
+        min_notional = 0.0
+        for item in self.capital_report.get(requirements_key, []):
+            if item.get("symbol") == decision.symbol:
+                min_notional = float(item.get("min_notional_usd", 0.0))
+                break
         if decision.final_mode == "spot":
             available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
             max_notional = max(0.0, available * (1.0 - reserve_fraction))
@@ -229,8 +235,9 @@ class LivePaperSession:
             max_notional = max(0.0, available * leverage * (1.0 - reserve_fraction))
         else:
             return decision
-        if max_notional <= 0.0:
-            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("INSUFFICIENT_EXECUTION_BALANCE",)))))
+        rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
+        if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
+            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (rejection_code,)))))
         if decision.order_intent_notional_usd <= max_notional:
             return decision
         floored_notional = round(max_notional, 6)
@@ -282,8 +289,9 @@ class LivePaperSession:
                     if self.log_store is not None:
                         self.log_store.append("live_orders", payload)
         if self.order_tester is not None and state is not None and self._market_capital_allowed(decision):
+            test_decision = self._cap_live_order_decision(decision)
             test_result = self.order_tester.test_decision(
-                decision=decision,
+                decision=test_decision,
                 reference_price=state.last_trade_price,
             )
             if test_result is not None:
