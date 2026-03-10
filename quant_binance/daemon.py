@@ -132,6 +132,7 @@ def run_live_paper_daemon(
         verbose=True,
         observe_only_symbols=sorted(observe_only_symbols),
     )
+    session.sync_account()
     bootstrap_time = _next_decision_boundary(
         next(iter(store._states.values())).last_update_time,
         settings.decision_engine.decision_interval_minutes,
