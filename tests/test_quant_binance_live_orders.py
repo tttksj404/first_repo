@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
+from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.data.market_store import MarketStateStore
@@ -14,6 +15,7 @@ from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInp
 from quant_binance.service import PaperTradingService
 from quant_binance.session import LivePaperSession
 from quant_binance.settings import Settings
+from quant_binance.observability.log_store import JsonlLogStore
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +76,17 @@ class FakeLiveOrderClient:
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
         return {"status": "FILLED", "market": market, "orderId": self.calls}
+
+
+class RaisingLiveOrderClient(FakeLiveOrderClient):
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        raise RuntimeError("simulated live order failure")
+
+
+class RaisingTestOrderClient:
+    def test_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        raise RuntimeError("simulated test order failure")
 
 
 class QuantBinanceLiveOrdersTests(unittest.TestCase):
@@ -150,6 +163,60 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(params["side"], "BUY")
         self.assertEqual(params["quoteOrderQty"], "2400.00")
         self.assertNotIn("quantity", params)
+
+    def test_session_survives_live_order_exception(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = RaisingLiveOrderClient()
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client),  # type: ignore[arg-type]
+            order_tester=DecisionOrderTestAdapter(RaisingTestOrderClient()),  # type: ignore[arg-type]
+            log_store=JsonlLogStore(ROOT / ".tmp-test-logs"),
+        )
+        payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971200000,
+                    "T": 1772971500000,
+                    "o": "49900",
+                    "h": "50100",
+                    "l": "49850",
+                    "c": "50050",
+                    "v": "12",
+                    "q": "600000",
+                    "x": True,
+                },
+            },
+        }
+        decision = session.process_payload(payload, now=now)
+        self.assertIsNotNone(decision)
+        self.assertEqual(len(session.decisions), 1)
+        self.assertEqual(len(session.live_orders), 0)
+        self.assertEqual(len(session.tested_orders), 0)
 
     def test_session_prevents_duplicate_live_order_hash(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
