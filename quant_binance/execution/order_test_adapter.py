@@ -37,12 +37,16 @@ class DecisionOrderTestAdapter:
             return None
         quantity = quantity_from_notional(decision.order_intent_notional_usd, reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
+        side = "BUY" if decision.side == "long" else "SELL"
         order_params = {
             "symbol": decision.symbol,
-            "side": "BUY" if decision.side == "long" else "SELL",
+            "side": side,
             "type": "MARKET",
-            "quantity": f"{quantity:.8f}",
         }
+        if market == "spot" and side == "BUY":
+            order_params["quoteOrderQty"] = f"{decision.order_intent_notional_usd:.2f}"
+        else:
+            order_params["quantity"] = f"{quantity:.8f}"
         if market == "futures":
             order_params["reduceOnly"] = "false"
         return market, order_params
@@ -58,7 +62,7 @@ class DecisionOrderTestAdapter:
             return None
         market, order_params = built
         response = self.client.test_order(market=market, order_params=order_params)
-        quantity = float(order_params["quantity"])
+        quantity = float(order_params.get("quantity", 0.0))
         accepted = response.get("status", "ok") not in {"error", "rejected"}
         return OrderTestResult(
             symbol=decision.symbol,
