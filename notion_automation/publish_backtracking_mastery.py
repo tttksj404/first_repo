@@ -1,258 +1,179 @@
-import requests
-import os
 import json
+import requests
 import time
-from pathlib import Path
+from notion_automation.core.notion_env import get_notion_token
 
-# --- 인증 및 설정 ---
-def get_token():
-    paths = [Path(".env.notion"), Path("notion_automation/.env.notion")]
-    for p in paths:
-        if p.exists():
-            for line in p.read_text(encoding="utf-8").splitlines():
-                if "NOTION_TOKEN" in line:
-                    return line.split("=", 1)[1].strip().strip('"').strip("'")
-    return os.getenv("NOTION_TOKEN")
+NOTION_TOKEN = get_notion_token()
+NOTION_VERSION = "2022-06-28"
+PARENT_PAGE_ID = "2f0eacc8175a80728e4be298edcb69c5"
 
-TOKEN = get_token()
-HEADERS = {
-    "Authorization": f"Bearer {TOKEN}",
+headers = {
+    "Authorization": f"Bearer {NOTION_TOKEN}",
     "Content-Type": "application/json",
-    "Notion-Version": "2022-06-28"
+    "Notion-Version": NOTION_VERSION
 }
-PARENT_PAGE_ID = "303eacc8-175a-80a3-9154-f7a7acee7c80" # 코테 대비 페이지 ID
 
-def api_request(method, path, payload=None):
-    url = f"https://api.notion.com/v1{path}"
-    for attempt in range(1, 6):
-        try:
-            response = requests.request(method, url, headers=HEADERS, json=payload, timeout=30)
-            if response.status_code == 429:
-                wait_time = 2**attempt
-                print(f"Rate limited. Waiting {wait_time}s...")
-                time.sleep(wait_time)
-                continue
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            if attempt == 5: raise e
-            time.sleep(2)
-
-def create_page(title, parent_id):
+def create_page(parent_id, title):
+    url = "https://api.notion.com/v1/pages"
     payload = {
         "parent": {"page_id": parent_id},
         "properties": {
-            "title": {"title": [{"text": {"content": title}}]}
-        },
-        "icon": {"type": "emoji", "emoji": "👑"}
+            "title": [{"text": {"content": title}}]
+        }
     }
-    return api_request("POST", "/pages", payload)
+    response = requests.post(url, headers=headers, json=payload)
+    if response.status_code == 200:
+        return response.json()["id"]
+    else:
+        print(f"Error creating page: {response.text}")
+        return None
 
-def append_blocks(block_id, blocks):
-    # 5~10개 단위로 쪼개어 보내는 Chunking 적용
-    for i in range(0, len(blocks), 5):
-        chunk = blocks[i:i+5]
-        api_request("PATCH", f"/blocks/{block_id}/children", {"children": chunk})
+def append_blocks(page_id, blocks):
+    url = f"https://api.notion.com/v1/blocks/{page_id}/children"
+    for i in range(0, len(blocks), 10):
+        chunk = blocks[i:i+10]
+        for attempt in range(5):
+            resp = requests.patch(url, headers=headers, json={"children": chunk})
+            if resp.status_code == 200: break
+            time.sleep(2 ** attempt)
         time.sleep(0.5)
 
-def rich_text_list(content, bold=False, color=None):
-    # 2000자 제한을 위한 2중 청킹 프로토콜
-    res = []
-    chunk_size = 1900
-    for i in range(0, len(content), chunk_size):
-        text_part = content[i:i+chunk_size]
-        item = {"type": "text", "text": {"content": text_part}}
-        if bold or color:
-            item["annotations"] = {}
-            if bold: item["annotations"]["bold"] = True
-            if color: item["annotations"]["color"] = color
-        res.append(item)
-    return res
+def rich_text(text):
+    return [{"type": "text", "text": {"content": text[i:i+1900]}} for i in range(0, len(text), 1900)]
 
-def text_block(content, bold=False, color=None):
-    return {
-        "object": "block",
-        "type": "paragraph",
-        "paragraph": {"rich_text": rich_text_list(content, bold, color)}
-    }
+def heading(text, level=1):
+    return {"object": "block", "type": f"heading_{level}", f"heading_{level}": {"rich_text": [{"type": "text", "text": {"content": text}}]}}
 
-def heading_block(content, level=2):
-    t = f"heading_{level}"
-    return {
-        "object": "block",
-        "type": t,
-        t: {"rich_text": rich_text_list(content, bold=True)}
-    }
+def paragraph(text):
+    return {"object": "block", "type": "paragraph", "paragraph": {"rich_text": rich_text(text)}}
 
-def callout_block(content, emoji="💡", color="default"):
-    return {
-        "object": "block",
-        "type": "callout",
-        "callout": {
-            "icon": {"type": "emoji", "emoji": emoji},
-            "rich_text": rich_text_list(content),
-            "color": color
-        }
-    }
+def callout(text, emoji="💡", color="default"):
+    return {"object": "block", "type": "callout", "callout": {"rich_text": rich_text(text), "icon": {"emoji": emoji}, "color": color}}
 
-def quote_block(content):
-    return {
-        "object": "block",
-        "type": "quote",
-        "quote": {"rich_text": rich_text_list(content)}
-    }
+def code(text, lang="python"):
+    return {"object": "block", "type": "code", "code": {"rich_text": rich_text(text), "language": lang}}
 
-def bullet_block(content, bold=False):
-    return {
-        "object": "block",
-        "type": "bulleted_list_item",
-        "bulleted_list_item": {"rich_text": rich_text_list(content, bold)}
-    }
+def bullet(text):
+    return {"object": "block", "type": "bulleted_list_item", "bulleted_list_item": {"rich_text": rich_text(text)}}
 
-def code_block(code, language="python"):
-    return {
-        "object": "block",
-        "type": "code",
-        "code": {
-            "language": language,
-            "rich_text": rich_text_list(code)
-        }
-    }
+def divider(): return {"object": "block", "type": "divider", "divider": {}}
 
-def divider_block():
-    return {"object": "block", "type": "divider", "divider": {}}
+def main():
+    title = "📕 [마스터북] 백트래킹 3대 천왕 (순열, 조합, 부분집합) - IM 마스터 가이드"
+    page_id = create_page(PARENT_PAGE_ID, title)
+    if not page_id: return
 
-def todo_block(content):
-    return {
-        "object": "block",
-        "type": "to_do",
-        "to_do": {"rich_text": rich_text_list(content)}
-    }
+    # Intro
+    intro = [
+        callout("백트래킹은 모든 경우의 수를 '체계적으로' 탐색하는 기술입니다. 삼성 A형의 핵심이며, 순열/조합/부분집합의 템플릿만 완벽히 외우면 80%는 해결됩니다.", emoji="🚀", color="blue_background"),
+        {"object": "block", "type": "table_of_contents", "table_of_contents": {}},
+        divider()
+    ]
+    append_blocks(page_id, intro)
 
-def publish():
-    title = "[A형 합격] 재귀, 브루트포스, 백트래킹 백지코딩 끝판왕 정복"
-    print(f"🚀 '{title}' 페이지 생성 중...")
-    
-    page = create_page(title, PARENT_PAGE_ID)
-    page_id = page['id']
-    
-    blocks = []
-    
-    # 상단 요약 및 상황 설정
-    blocks.append(callout_block("이 가이드는 단순 암기가 아닌, '재귀적 사고의 시각화'와 '백트래킹의 복구 메커니즘'을 완벽히 이해하도록 설계되었습니다. 삼성 A형의 80%는 여기서 나옵니다.", emoji="🔥", color="yellow_background"))
-    blocks.append(quote_block("순열, 조합, 부분집합... 매번 헷갈린다면? 백트래킹의 '원상복구' 원리만 알면 모든 구현이 가능합니다. 이 가이드는 '머릿속의 로직을 코드로 옮기는 법'을 알려드립니다."))
-    blocks.append(divider_block())
-
-    # Section 1
-    blocks.append(heading_block("🔍 1. 재귀(Recursion) - 백트래킹의 심장", level=2))
-    blocks.append(text_block("재귀는 '함수가 자기 자신을 호출하는 것'입니다. 마치 마트료시카 인형처럼 큰 문제를 해결하기 위해 똑같은 형태의 작은 문제로 들어가는 과정이죠.", bold=True))
-    blocks.append(text_block("📍 재귀의 2대 필수 조건 (절대 원칙)", bold=True))
-    blocks.append(bullet_block("기저 조건 (Base Case): '언제 멈출 것인가?' (탈출구). 이게 없으면 RecursionError가 발생합니다."))
-    blocks.append(bullet_block("유도 파트 (Inductive Step): '어떻게 다음 단계로 나아갈 것인가?' (진입로). 문제를 작게 만들어 다시 자신을 호출합니다."))
-    blocks.append(callout_block("시각화 팁: 재귀는 '지하실로 내려가는 계단'과 같습니다. 바닥(기저 조건)을 찍어야 다시 1층으로 올라올 수 있습니다.", emoji="🪜"))
-    blocks.append(divider_block())
-
-    # Section 2
-    blocks.append(heading_block("🔍 2. 브루트포스(Brute Force) - 무식하게 다 해보기", level=2))
-    blocks.append(text_block("삼성 A형은 입력값 N이 보통 10~15 정도로 작습니다. 이는 '모든 경우의 수를 다 뒤져봐라'라는 강력한 힌트입니다."))
-    blocks.append(bullet_block("N! (순열) 이나 2^N (부분집합) 정도의 복잡도는 N=10 수준에서 충분히 통과 가능합니다."))
-    blocks.append(bullet_block("Greedy나 DP가 먼저 떠오르지 않는다면, 일단 '재귀'로 모든 경우를 다 해보는 것부터 시작하세요."))
-    blocks.append(divider_block())
-
-    # Section 3
-    blocks.append(heading_block("🔍 3. 백트래킹(Backtracking) - 똑똑하게 다 해보기", level=2))
-    blocks.append(text_block("백트래킹은 모든 경로를 가보되, '이 길은 아니네?' 싶을 때 즉시 되돌아오는 기술입니다.", bold=True))
-    blocks.append(text_block("📍 핵심 메커니즘: '선택' -> '탐색' -> '복구'", bold=True))
-    blocks.append(bullet_block("가지치기 (Pruning): 유망하지 않은 경로는 중간에 return 하여 시간을 단축합니다. 예: 합이 이미 최솟값을 넘었을 때."))
-    blocks.append(bullet_block("상태 복구 (Restoration): [가장 중요] 재귀가 끝난 뒤에는 나의 선택(방문 체크 등)을 반드시 '취소'해야 다른 갈림길에서 영향을 받지 않습니다."))
-    blocks.append(divider_block())
-
-    # Section 4: Pruning
-    blocks.append(heading_block("🔍 4. 가지치기(Pruning) - A형 합격의 당락을 가르는 기술", level=2))
-    blocks.append(quote_block("단순히 다 해보는 것만으로는 시간 초과(TLE)를 피할 수 없을 때가 있습니다. 이때 '미리 싹을 자르는' 것이 필요합니다."))
-    blocks.append(bullet_block("최소값 갱신 중일 때: 현재까지의 합(sum)이 이미 이전에 구한 최소값(ans)보다 크다면? 더 가볼 필요 없이 즉시 return!"))
-    blocks.append(bullet_block("특정 조건 위배: 문제에서 요구하는 조건(예: 특정 좌표 방문 불가)을 어기는 순간 즉시 return!"))
-    blocks.append(divider_block())
-
-    # 3대 패턴
-    blocks.append(heading_block("🏗️ 백트래킹 3대 패턴 (순열, 조합, 부분집합)", level=2))
-    
-    blocks.append(text_block("1️⃣ 순열 (Permutation) - '순서가 다르면 다른 것'", bold=True, color="blue"))
-    blocks.append(text_block("예: (A, B) ≠ (B, A). 핵심은 visited 배열로 사용 여부 체크 + 항상 0번부터 탐색."))
-    blocks.append(code_block("""# [순열 템플릿]
-def perm(depth):
-    if depth == R: # R개를 다 뽑았다면?
-        print(path) # 정답 처리
-        return
-
-    for i in range(N): # 항상 0부터 끝까지 검사
-        if not visited[i]: # 아직 안 썼다면?
-            visited[i] = True  # [선택]
-            path.append(data[i])
-            perm(depth + 1)    # [탐색]
-            path.pop()         # [복구]
-            visited[i] = False # [복구]"""))
-
-    blocks.append(text_block("2️⃣ 조합 (Combination) - '순서가 달라도 같은 것'", bold=True, color="green"))
-    blocks.append(text_block("예: (A, B) = (B, A). 핵심은 start 인덱스를 인자로 넘겨 '나보다 뒤에 있는 애들만 봐라'고 지시."))
-    blocks.append(code_block("""# [조합 템플릿]
-def comb(depth, start):
-    if depth == R:
+    # 1. Permutation
+    perm = [
+        heading("1. 순열 (Permutations)", 1),
+        callout("순서가 중요하다! (1, 2)와 (2, 1)은 서로 다른 경우로 취급합니다.", emoji="🔢"),
+        heading("🔍 핵심 접근법", 2),
+        paragraph("- **핵심 아이템**: `visited` (또는 `used`) 배열.\n- **동작 원리**: 0번 인덱스부터 끝까지 매번 훑지만, 이미 뽑은 녀석(`visited[i] == True`)은 건너뜁니다."),
+        heading("💻 표준 템플릿", 2),
+        code("""def dfs(depth):
+    if depth == M: # M개를 다 뽑았다면?
         print(path)
         return
 
-    for i in range(start, N): # start부터 끝까지 검사 (이전 선택 제외)
-        path.append(data[i])
-        comb(depth + 1, i + 1) # 다음은 i+1부터 봐라!
-        path.pop() # [복구]"""))
+    for i in range(N):
+        if not visited[i]: # 아직 안 썼다면
+            visited[i] = True
+            path.append(nums[i]) # 선택!
+            
+            dfs(depth + 1) # 다음 칸으로
+            
+            path.pop() # 백트래킹 (선택 취소)
+            visited[i] = False"""),
+        heading("📍 관련 문제 리스트", 2),
+        bullet("`10974.py` (모든 순열) - 가장 기본적인 N! 탐색"),
+        bullet("`14888.py` (연산자 끼워넣기) - 연산자들의 순열을 만드는 문제"),
+        bullet("`A형실전_15649_N과M1_순열.py` - 백트래킹의 기초"),
+        bullet("`worksplit.py` (일 분배) - 누구에게 어떤 일을 맡길지 순열 결정"),
+        bullet("`electrocart.py` (전자카트) - 경로의 순서를 결정하는 TSP 유형"),
+        bullet("`maxcontestmoney.py` (최대 상금) - 숫자판 교환(순열 기반 교환)"),
+        divider()
+    ]
+    append_blocks(page_id, perm)
 
-    blocks.append(text_block("3️⃣ 부분집합 (Power Set) - '넣을까? 말까?'", bold=True, color="orange"))
-    blocks.append(text_block("모든 요소에 대해 '포함/미포함'의 2가지 선택지를 가집니다. (2^N)"))
-    blocks.append(code_block("""# [부분집합 템플릿]
-def subset(depth):
-    if depth == N:
-        # selected에 True인 애들만 모으면 하나의 부분집합 완성
+    # 2. Combination
+    comb = [
+        heading("2. 조합 (Combinations)", 1),
+        callout("순서는 상관없다! (1, 2)와 (2, 1)은 같은 팀입니다. 대표 뽑기 유형.", emoji="🤝"),
+        heading("🔍 핵심 접근법", 2),
+        paragraph("- **핵심 아이템**: `start` 인자.\n- **동작 원리**: `for` 루프를 `start`부터 시작하여, 이전에 뽑은 인덱스보다 뒤에 있는 것만 고려합니다. (자동으로 오름차순 형성)"),
+        heading("💻 표준 템플릿", 2),
+        code("""def dfs(depth, start):
+    if depth == M:
+        print(path)
         return
 
-    selected[depth] = True  # 현재 원소 포함
-    subset(depth + 1)
-    
-    selected[depth] = False # 현재 원소 미포함
-    subset(depth + 1)"""))
-    blocks.append(divider_block())
+    for i in range(start, N):
+        path.append(nums[i]) # 선택!
+        
+        # 다음 재귀는 현재 인덱스(i)의 '다음(i+1)'부터 탐색!
+        dfs(depth + 1, i + 1) 
+        
+        path.pop() # 백트래킹"""),
+        heading("📍 관련 문제 리스트", 2),
+        bullet("`1759.py` (암호 만들기) - 자음/모음 조건이 붙은 조합"),
+        bullet("`6603.py` (로또) - 6개의 숫자를 고르는 전형적인 조합"),
+        bullet("`14889.py` (스타트와 링크) - 팀을 N/2명씩 나누는 조합"),
+        bullet("`minsum.py` (최소합) - 경로 선택에서의 조합적 접근"),
+        bullet("`A형필수_순열조합_중복제거백트래킹.py` - 기본 개념 총정리"),
+        divider()
+    ]
+    append_blocks(page_id, comb)
 
-    # 실전 예시 1
-    blocks.append(heading_block("🏗️ 실전 예제 1 - [BOJ 14889 스타트와 링크]", level=2))
-    blocks.append(quote_block("N명 중 N/2명을 뽑는 '조합'과 팀 점수 계산 '시뮬레이션'이 결합된 최고의 연습 문제입니다."))
-    
-    code_14889 = Path("gitp/A형준비/Step2_BruteForce_Backtracking/14889.py").read_text(encoding="utf-8")
-    blocks.append(code_block(code_14889))
-    
-    blocks.append(divider_block())
+    # 3. Subset
+    subset = [
+        heading("3. 부분집합 (Subsets)", 1),
+        callout("각 원소에게 묻는다: '너 들어올래? 말래?' (Yes or No)", emoji="🧺"),
+        heading("🔍 핵심 접근법", 2),
+        paragraph("- **핵심 아이템**: `Binary Choice` (포함/미포함).\n- **동작 원리**: `for`문 없이, 현재 인덱스 원소를 '넣는 재귀'와 '안 넣는 재귀'를 각각 호출합니다."),
+        heading("💻 표준 템플릿", 2),
+        code("""def dfs(idx, current_sum):
+    if idx == N: # 끝까지 다 물어봤다면?
+        if current_sum == S: # 조건 확인
+            print(path)
+        return
 
-    # 실전 예시 2
-    blocks.append(heading_block("🏗️ 실전 예제 2 - [BOJ 14888 연산자 끼워넣기]", level=2))
-    blocks.append(quote_block("숫자 순서는 고정, 연산자의 순열을 구하는 문제입니다. 남은 연산자 개수를 인자로 넘기는 테크닉을 배울 수 있습니다."))
-    
-    code_14888 = Path("gitp/A형준비/Step2_BruteForce_Backtracking/14888.py").read_text(encoding="utf-8")
-    blocks.append(code_block(code_14888))
+    # 1. 현재 원소(nums[idx])를 포함하는 경우
+    path.append(nums[idx])
+    dfs(idx + 1, current_sum + nums[idx])
+    path.pop() # 백트래킹
 
-    blocks.append(divider_block())
+    # 2. 현재 원소를 포함하지 않는 경우
+    dfs(idx + 1, current_sum)"""),
+        heading("📍 관련 문제 리스트", 2),
+        bullet("`1182.py` (부분수열의 합) - 부분집합 합의 정석"),
+        bullet("`highestsheelves.py` (장훈이의 높은 선반) - 모든 부분집합 합 중 최소 초과값 찾기"),
+        divider()
+    ]
+    append_blocks(page_id, subset)
 
-    # 체크리스트 및 가이드
-    blocks.append(heading_block("🏗️ 구현 체크리스트", level=2))
-    blocks.append(todo_block("기저 조건(Base Case)이 정확한가? (depth == N)"))
-    blocks.append(todo_block("유도 파트가 모든 후보를 포함하는가? (for i in range...)"))
-    blocks.append(todo_block("Visited 배열이나 Index 관리가 적절한가?"))
-    blocks.append(todo_block("재귀 호출 직후 상태 복구(Pop, visited=False)를 했는가?"))
-    
-    blocks.append(divider_block())
-    blocks.append(heading_block("💡 학생 가이드: 백지코딩을 위한 멘탈 모델", level=2))
-    blocks.append(callout_block("재귀가 꼬인다면? print('  ' * depth, f'depth: {depth}') 처럼 depth만큼 공백을 주어 출력해 보세요. 함수가 어떻게 들어갔다 나오는지 계단식으로 보일 겁니다.", emoji="🧪"))
-    blocks.append(callout_block("시간 초과가 난다면? 기저 조건에 도달하기 전이라도 '이미 정답의 가능성이 없는 경우(예: 현재 합 > 최소 합)' 바로 return 하는 '가지치기'를 추가하세요.", emoji="✂️"))
-    
-    append_blocks(page_id, blocks)
-    print(f"✅ '{title}' 업로드 완료!")
+    # Final Tips
+    tips = [
+        heading("💡 IM Master의 실전 팁", 1),
+        callout("중복을 허용하는가? (중복순열/중복조합)", emoji="⚠️", color="yellow_background"),
+        bullet("**중복순열**: `visited` 체크를 안 하면 됩니다."),
+        bullet("**중복조합**: `dfs` 호출 시 `i+1`이 아니라 현재 인덱스 `i`를 그대로 넘기면 됩니다."),
+        callout("시간 복잡도 계산법", emoji="⏳", color="gray_background"),
+        bullet("순열: N! (N=10 정도가 한계)"),
+        bullet("조합: NCr (N=20~30 정도가 한계)"),
+        bullet("부분집합: 2^N (N=20 정도가 한계)"),
+        paragraph("\n**가장 중요한 것**: 재귀 호출이 끝난 뒤 반드시 `path.pop()`이나 `visited[i] = False`로 원상 복구하세요. 이것이 백트래킹의 알파이자 오메가입니다.")
+    ]
+    append_blocks(page_id, tips)
+
+    print(f"Master Book Created! https://www.notion.so/{page_id.replace('-', '')}")
 
 if __name__ == "__main__":
-    publish()
+    main()
