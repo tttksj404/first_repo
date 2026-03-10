@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
@@ -216,6 +216,26 @@ class LivePaperSession:
             return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
         return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
+    def _cap_live_order_decision(self, decision: DecisionIntent) -> DecisionIntent:
+        if not self.capital_report:
+            return decision
+        reserve_fraction = self._cash_reserve_fraction()
+        if decision.final_mode == "spot":
+            available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
+            max_notional = max(0.0, available * (1.0 - reserve_fraction))
+        elif decision.final_mode == "futures":
+            available = float(self.capital_report.get("futures_available_balance_usd", 0.0))
+            leverage = self.runtime.paper_service.settings.risk.target_futures_leverage
+            max_notional = max(0.0, available * leverage * (1.0 - reserve_fraction))
+        else:
+            return decision
+        if max_notional <= 0.0:
+            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("INSUFFICIENT_EXECUTION_BALANCE",)))))
+        if decision.order_intent_notional_usd <= max_notional:
+            return decision
+        floored_notional = round(max_notional, 6)
+        return replace(decision, order_intent_notional_usd=floored_notional)
+
     def _record_decision(
         self,
         *,
@@ -235,15 +255,16 @@ class LivePaperSession:
         if self.log_store is not None:
             self.log_store.append("decisions", decision.as_dict())
         if self.live_order_executor is not None and state is not None and self._market_capital_allowed(decision):
-            fingerprint = self._execution_fingerprint(decision)
-            last_fingerprint = self.last_executed_fingerprint_by_symbol.get(decision.symbol)
-            if last_fingerprint != fingerprint:
+            executable_decision = self._cap_live_order_decision(decision)
+            fingerprint = self._execution_fingerprint(executable_decision)
+            last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
+            if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
                 live_result = self.live_order_executor.execute_decision(
-                    decision=decision,
+                    decision=executable_decision,
                     reference_price=state.last_trade_price,
                 )
                 if live_result is not None:
-                    self.last_executed_fingerprint_by_symbol[decision.symbol] = fingerprint
+                    self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
                     payload = {
                         "timestamp": timestamp,
                         "symbol": live_result.symbol,
