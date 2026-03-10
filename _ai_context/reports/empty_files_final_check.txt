@@ -1,0 +1,147 @@
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/General_Knowledge/303 Immersive Media.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/General_Knowledge/302 Ai.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/General_Knowledge/301 Legal Tech.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2021 논형법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2009 예비 공중.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2014 문31.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2013 문11.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2020 선의지.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2023 근대화.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2013 문1.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2009 문4.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2020 문12.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2010 문24.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2018 DNA 컴퓨팅.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2019 극우 민족주의.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2020 랑데부.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams/2024 예송논쟁.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/Past_Exams.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/gpts/gpt.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/인물, 정서, 상황, 상징.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/습학.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/글의 흐름.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/313 외국계취업.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/213 운동.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/다도.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/이상치.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/212 시력.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/형가.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/121 총 학점수.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/+,-의 질감.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2022 문29.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/f-검정.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/금강경.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/311 그리스 로마 신화.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2024 문8.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/분석 기획 및 관리를 수행하는 조직.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/이것이 ~이유다.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/아미타 부처.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/베르그송.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/312 논어.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/자객열전.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/의사결정나무.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/필요조건.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/문항을 통한 역추론.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/Untitled.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/다시풀기.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/전진선택법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/현교.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/다중선형회귀분석.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/언어이해 2011.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/은닉층.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/지문을 통한 추론.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/법학 논증.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/221 게임.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/데이터 마이닝.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/법언어추리.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2023 중력파.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/316 열하일기.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/ROC Curve.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/언어이해 유형별 풀이법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/과학기술.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/모르는 단어.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/예양.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/k-평균 군집.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/이상값.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/110 Law School 입시.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/사이비 특칭.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/k-means 군집분석.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/주성분분석.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/다름 아니다.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/사회추리.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/범주화.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/모집단.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/전제.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/반대.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/공통<->차이.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/황룡사 9층 목탑.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/C등급.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/152 추리논증 문제점.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/B등급.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/양화논리.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/화엄경.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/232 가고싶은 여행지.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/상위범주<->하위범주.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/314 재무행정론.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/상관분석.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/상위범주->하위범주.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/키케로.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/오류논증.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/비모수적 방법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/123 자격증.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/회귀분석.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/유클리드 거리행렬.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/반비례.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/지수평활법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/추리논증 오답노트.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/도구 단어들.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/나이브 베이즈 정리.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/추리논증 유형 파일링.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/체비셰프 거리.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/대당 사각형.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/수리추리.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/문단 순서.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/비트겐슈타인.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/조말.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/일리아스.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/한신노관열전.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/전칭긍정.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/일반->구체.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/규범.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/p->s.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2025 언어이해 보복기.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/만.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/주관<->객관.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/후진제거법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/효.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/인문.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/114 POST LEET.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/군집화.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/염세주의.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2025 언어이해 보복기 1.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/관습법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/231 가본 여행지.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2024 문30.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/원리의 순서.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/122 인턴쉽.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/사회.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2018 DNA 컴퓨팅.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/비지도 학습.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/계통추출법.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/고쳐야 할 점.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/추상<->구체.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/한비자.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/왕사.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/과제 중심적인 접근 방식.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/시계열분석.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/구분중심비판.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/상사성.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/섭정.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/모순.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/개인<->다수.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/조사의 질감.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/언어이해 풀이 시간.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/결정계수.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/00. inbox/2025학년도 추리 15번.md
+/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/각/서랍 세우기.md
