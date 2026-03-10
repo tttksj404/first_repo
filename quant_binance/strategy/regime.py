@@ -12,6 +12,9 @@ from quant_binance.settings import Settings
 from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gate
 
 
+FUTURES_SOFT_RISK_REASONS = {"SCORE_TOO_LOW", "LIQUIDITY_TOO_WEAK", "VOL_TOO_HIGH", "FUTURES_OVERHEAT", "EDGE_BELOW_COST", "SENTIMENT_CAUTION"}
+
+
 def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
     if features.predictability_score >= settings.mode_thresholds.futures_score_min:
         return "futures"
@@ -42,10 +45,42 @@ def observe_only_reasons(features: FeatureVector, settings: Settings, symbol: st
     return tuple(reasons)
 
 
-def _futures_passes(features: FeatureVector, settings: Settings, symbol: str) -> tuple[bool, list[str]]:
+def _edge_to_cost_multiple(features: FeatureVector) -> float:
+    if features.estimated_round_trip_cost_bps <= 0:
+        return float("inf")
+    return features.gross_expected_edge_bps / features.estimated_round_trip_cost_bps
+
+
+def _is_objectively_strong_futures_setup(
+    features: FeatureVector,
+    settings: Settings,
+) -> bool:
+    thresholds = settings.mode_thresholds
+    exposure = settings.futures_exposure
+    return (
+        features.predictability_score >= thresholds.futures_score_min + exposure.strong_score_buffer
+        and features.trend_strength >= exposure.strong_trend_strength_min
+        and features.volume_confirmation >= exposure.strong_volume_confirmation_min
+        and features.liquidity_score >= exposure.strong_liquidity_min
+        and features.volatility_penalty <= exposure.strong_volatility_penalty_max
+        and features.overheat_penalty <= exposure.strong_overheat_penalty_max
+        and features.macro_risk_penalty < settings.macro_gates.futures_block_penalty
+        and features.sentiment_regime != "caution"
+        and _edge_to_cost_multiple(features) >= exposure.strong_edge_to_cost_multiple_min
+    )
+
+
+def _futures_entry_plan(
+    features: FeatureVector,
+    settings: Settings,
+    symbol: str,
+) -> tuple[bool, list[str], float]:
     thresholds = settings.mode_thresholds
     macro_gates = settings.macro_gates
+    exposure = settings.futures_exposure
     reasons: list[str] = []
+    size_multiplier = 1.0
+    reduced_size = False
     if features.predictability_score < thresholds.futures_score_min:
         reasons.append("SCORE_TOO_LOW")
     if abs(features.trend_direction) != 1:
@@ -53,11 +88,23 @@ def _futures_passes(features: FeatureVector, settings: Settings, symbol: str) ->
     if features.trend_strength < thresholds.futures_trend_strength_min:
         reasons.append("SCORE_TOO_LOW")
     if features.liquidity_score < thresholds.futures_liquidity_min:
-        reasons.append("LIQUIDITY_TOO_WEAK")
+        if features.liquidity_score < exposure.soft_liquidity_floor:
+            reasons.append("LIQUIDITY_TOO_WEAK")
+        else:
+            reduced_size = True
+            size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
     if features.volatility_penalty > thresholds.futures_volatility_penalty_max:
-        reasons.append("VOL_TOO_HIGH")
+        if features.volatility_penalty > exposure.soft_volatility_penalty_max:
+            reasons.append("VOL_TOO_HIGH")
+        else:
+            reduced_size = True
+            size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
     if features.overheat_penalty > thresholds.futures_overheat_penalty_max:
-        reasons.append("FUTURES_OVERHEAT")
+        if features.overheat_penalty > exposure.soft_overheat_penalty_max:
+            reasons.append("FUTURES_OVERHEAT")
+        else:
+            reduced_size = True
+            size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
     if features.macro_risk_penalty >= macro_gates.futures_block_penalty:
         reasons.append("MACRO_RISK_HIGH")
     if features.sentiment_regime == "caution":
@@ -73,7 +120,15 @@ def _futures_passes(features: FeatureVector, settings: Settings, symbol: str) ->
             reasons.append("ALT_ROTATION_HEADWIND")
     if not passes_cost_gate(features, settings):
         reasons.append("EDGE_BELOW_COST")
-    return not reasons, reasons
+    if features.net_expected_edge_bps < exposure.min_entry_net_edge_bps:
+        reasons.append("EDGE_TOO_THIN")
+    if reasons:
+        return False, reasons, 0.0
+    if reduced_size and features.net_expected_edge_bps < exposure.reduced_entry_net_edge_bps:
+        return False, ["EDGE_TOO_THIN"], 0.0
+    if not reduced_size and _is_objectively_strong_futures_setup(features, settings):
+        size_multiplier = max(size_multiplier, exposure.strong_size_multiplier)
+    return True, reasons, size_multiplier
 
 
 def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tuple[bool, list[str]]:
@@ -208,7 +263,11 @@ def evaluate_snapshot(
             rejection_reasons=cash_reasons,
         )
 
-    futures_ok, futures_reasons = _futures_passes(futures_features, settings, snapshot.symbol)
+    futures_ok, futures_reasons, futures_size_multiplier = _futures_entry_plan(
+        futures_features,
+        settings,
+        snapshot.symbol,
+    )
     if futures_ok:
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
@@ -216,6 +275,7 @@ def evaluate_snapshot(
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
+            size_multiplier=futures_size_multiplier,
         )
         if equity_usd > 0 and (equity_usd - notional) / equity_usd < cash_reserve_fraction:
             futures_ok = False
