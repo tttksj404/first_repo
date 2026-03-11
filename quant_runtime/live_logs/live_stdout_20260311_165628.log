@@ -1,0 +1,18 @@
+[PROFILE_SWITCHER] enabled calm=alpha_max fast=scalp_ultra active=alpha_max
+[DECISION] 2026-03-11T08:00:00+00:00 BTCUSDT mode=spot side=long score=56.27
+[DECISION] 2026-03-11T08:00:00+00:00 ETHUSDT mode=spot side=long score=53.97
+[DECISION] 2026-03-11T08:00:00+00:00 SOLUSDT mode=spot side=long score=56.27
+[DECISION] 2026-03-11T08:00:00+00:00 DOGEUSDT mode=spot side=long score=53.47
+[DECISION] 2026-03-11T08:00:00+00:00 ADAUSDT mode=spot side=long score=48.97
+[DECISION] 2026-03-11T08:00:00+00:00 XRPUSDT mode=futures side=long score=59.71
+[LIVE_ORDER_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40762 msg=The order amount exceeds the balance
+[TEST_ORDER] XRPUSDT market=futures side=buy qty=152.18509433 accepted=True
+[DECISION] 2026-03-11T08:00:00+00:00 TRXUSDT mode=cash side=flat score=39.38
+[DECISION] 2026-03-11T08:00:00+00:00 LINKUSDT mode=spot side=long score=50.93
+[DECISION] 2026-03-11T08:00:00+00:00 WLDUSDT mode=cash side=flat score=46.86
+[CONNECT] websocket attempt=1
+[SYNC] 2026-03-11T08:15:01.507573+00:00 account/open-order snapshot refreshed
+[PROFILE_SWITCH] from=alpha_max to=scalp_ultra reason=FAST_SIGNAL vol_penalty=0.7829 abs_ret_1h=0.0076
+[DECISION] 2026-03-11T08:15:00+00:00 XRPUSDT mode=futures side=long score=62.63
+[LIVE_ORDER_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/account/set-leverage: code=40893 msg=Unable to update the leverage factor of this position, there is not enough margin!
+[TEST_ORDER] XRPUSDT market=futures side=buy qty=71.12282107 accepted=True

@@ -1,0 +1,14 @@
+[DECISION] 2026-03-11T06:40:00+00:00 BTCUSDT mode=spot side=long score=68.22
+[DECISION] 2026-03-11T06:40:00+00:00 ETHUSDT mode=futures side=long score=62.66
+[LIVE_ORDER] ETHUSDT market=futures side=buy qty=0.01104165 accepted=True
+[DECISION] 2026-03-11T06:40:00+00:00 SOLUSDT mode=futures side=long score=66.76
+[DECISION] 2026-03-11T06:40:00+00:00 DOGEUSDT mode=spot side=long score=60.21
+[DECISION] 2026-03-11T06:40:00+00:00 ADAUSDT mode=cash side=flat score=58.28
+[DECISION] 2026-03-11T06:40:00+00:00 XRPUSDT mode=futures side=long score=66.05
+[DECISION] 2026-03-11T06:40:00+00:00 TRXUSDT mode=cash side=flat score=50.12
+[DECISION] 2026-03-11T06:40:00+00:00 LINKUSDT mode=spot side=long score=61.06
+[DECISION] 2026-03-11T06:40:00+00:00 WLDUSDT mode=cash side=flat score=54.31
+[CONNECT] websocket attempt=1
+[SYNC] 2026-03-11T06:55:00.780728+00:00 account/open-order snapshot refreshed
+[SYNC] 2026-03-11T07:05:01.562136+00:00 account/open-order snapshot refreshed
+[SYNC] 2026-03-11T07:10:01.550648+00:00 account/open-order snapshot refreshed

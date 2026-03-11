@@ -1,0 +1,4 @@
+[DECISION] 2026-03-11T06:00:00+00:00 BTCUSDT mode=spot side=long score=55.61
+[DECISION] 2026-03-11T06:00:00+00:00 ETHUSDT mode=spot side=long score=53.30
+[DECISION] 2026-03-11T06:00:00+00:00 SOLUSDT mode=spot side=long score=52.61
+[CONNECT] websocket attempt=1
