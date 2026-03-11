@@ -139,6 +139,58 @@ class QuantBinanceLiveTests(unittest.TestCase):
         self.assertEqual(decision.symbol, "BTCUSDT")
         self.assertIn(decision.final_mode, {"futures", "spot", "cash"})
 
+    def test_live_runtime_triggers_on_real_binance_closed_5m_kline_timestamp(self) -> None:
+        _, runtime = self._make_runtime()
+        decision = runtime.on_payload(
+            {
+                "stream": "btcusdt@kline_5m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "5m",
+                        "t": 1770000000000,
+                        "T": 1770000299999,
+                        "o": "49900",
+                        "h": "50100",
+                        "l": "49850",
+                        "c": "50050",
+                        "v": "12",
+                        "q": "600000",
+                        "x": True,
+                    },
+                },
+            },
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        self.assertIsNotNone(decision)
+
+    def test_live_runtime_ignores_closed_non_decision_interval_kline(self) -> None:
+        _, runtime = self._make_runtime()
+        decision = runtime.on_payload(
+            {
+                "stream": "btcusdt@kline_1h",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "1h",
+                        "t": 1770000000000,
+                        "T": 1770003599999,
+                        "o": "49900",
+                        "h": "50100",
+                        "l": "49850",
+                        "c": "50050",
+                        "v": "12",
+                        "q": "600000",
+                        "x": True,
+                    },
+                },
+            },
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        self.assertIsNone(decision)
+
     def test_live_runtime_skips_ineligible_symbols(self) -> None:
         _, runtime = self._make_runtime()
         runtime.eligible_symbols = {"ETHUSDT"}
