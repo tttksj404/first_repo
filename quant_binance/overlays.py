@@ -18,6 +18,12 @@ class MacroInputs:
     fed_balance_sheet_30d_pct: float
     mmf_30d_pct: float
     labor_stress_score: float
+    us10y_change_30d_bps: float = 0.0
+    dxy_change_30d_pct: float = 0.0
+    fed_liquidity_score: float = 0.5
+    policy_easing_score: float = 0.5
+    event_risk_score: float = 0.0
+    btc_safe_haven_score: float = 0.5
 
 
 @dataclass(frozen=True)
@@ -112,20 +118,31 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
         risk += 0.20
     if macro_inputs.labor_stress_score >= 0.7:
         risk += 0.15
+    risk += 0.35 * clamp(macro_inputs.event_risk_score, 0.0, 1.0)
     if macro_inputs.tga_drain_score >= 0.6:
         support += 0.20
     if macro_inputs.fed_balance_sheet_30d_pct > 0:
         support += 0.20
     if macro_inputs.mmf_30d_pct < 0:
         support += 0.10
+    if macro_inputs.us10y_change_30d_bps <= -25.0:
+        support += 0.15
+    if macro_inputs.dxy_change_30d_pct <= -1.5:
+        support += 0.15
+    support += 0.20 * clamp(macro_inputs.fed_liquidity_score, 0.0, 1.0)
+    support += 0.15 * clamp(macro_inputs.policy_easing_score, 0.0, 1.0)
+    support += 0.10 * clamp(macro_inputs.btc_safe_haven_score, 0.0, 1.0)
 
     penalty = clamp(risk - support, 0.0, 1.0)
+    support_score = clamp(support, 0.0, 1.0)
     regime = "high_risk" if penalty >= 0.65 else "supportive" if penalty <= 0.25 else "neutral"
     return FeatureVector(
         **{
             **features.as_dict(),
             "macro_regime": regime,
             "macro_risk_penalty": round(penalty, 6),
+            "macro_liquidity_support_score": round(support_score, 6),
+            "macro_event_risk_score": round(clamp(macro_inputs.event_risk_score, 0.0, 1.0), 6),
         }
     )
 

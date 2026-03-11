@@ -46,6 +46,11 @@ print("live_order_count:", summary.get("live_order_count"))
 print("tested_order_count:", summary.get("tested_order_count"))
 print("symbols:", summary.get("symbols"))
 print("modes:", summary.get("modes"))
+print("observe_only_symbols:", summary.get("observe_only_symbols"))
+print("realized_pnl_usd_estimate:", summary.get("realized_pnl_usd_estimate"))
+print("unrealized_pnl_usd_estimate:", summary.get("unrealized_pnl_usd_estimate"))
+print("exit_reason_counts:", summary.get("exit_reason_counts"))
+print("symbol_performance:", summary.get("symbol_performance"))
 print("kill_switch:", summary.get("kill_switch"))
 print("updated_at:", state.get("updated_at"))
 print("heartbeat_count:", state.get("heartbeat_count"))
@@ -57,4 +62,8 @@ if capital:
     print("futures_available_balance_usd:", capital.get("futures_available_balance_usd"))
     print("can_trade_spot_any:", capital.get("can_trade_spot_any"))
     print("can_trade_futures_any:", capital.get("can_trade_futures_any"))
+spot_positions = summary.get("open_spot_positions") or []
+futures_positions = summary.get("open_futures_positions") or []
+print("open_spot_positions:", spot_positions)
+print("open_futures_positions:", futures_positions)
 PY

@@ -1,0 +1,32 @@
+[
+  {
+    "profile": "conservative",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  },
+  {
+    "profile": "balanced",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  },
+  {
+    "profile": "active",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  }
+]

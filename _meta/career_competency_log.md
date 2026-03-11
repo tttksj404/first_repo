@@ -58,3 +58,9 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Traced the current short-activation bottlenecks across regime gating, fallback futures scoring, sizing, leverage selection, live-order execution, and session-level capital capping; added a bearish caution override for structurally strong shorts, replaced long-only futures flow bias with directional flow alignment, made futures sizing and cash-reserve checks leverage-aware, raised only the active profile leverage targets, and verified the path with focused bearish/leverage unit tests.
 - Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
 - Skill sharpened next: Add direct session-cap tests so leverage selection and executable notional caps stay aligned as the live risk model evolves.
+
+### 2026-03-11 - Binance-to-Bitget exchange migration scaffold
+- Summary: Started the exchange migration of the quant runtime from Binance to Bitget with a Bitget-first env and REST execution layer while keeping the highest-risk websocket/live-daemon gap explicit.
+- What was done: Mapped Binance-specific integration points, added generic exchange/env resolution, implemented Bitget REST signing and request builders, rewired runtime/scripts to default to Bitget, converted order-test flow into Bitget payload preview without live credentials, and verified the migration slice with focused adapter/runtime tests.
+- Competency mapping: Data pipeline/system integration development, logical data structuring, generative AI architecture understanding, technical communication
+- Skill sharpened next: Finish exchange-normalized public websocket ingestion so the live daemon can move off Binance safely.

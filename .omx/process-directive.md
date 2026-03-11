@@ -14,3 +14,6 @@ Additional instruction:
 
 - Treat this as the default workflow for all future user commands unless the user explicitly overrides it.
 - Prefer doing the full cycle in one turn: analysis, validation, execution, application, and reporting.
+- If disk space becomes constrained or file growth threatens runtime stability, prioritize log/file housekeeping work above other optimizations.
+- When storage pressure blocks edits or tests, first reclaim space by pruning generated artifacts, oversized logs, and stale runtime outputs, then continue the requested work.
+- Treat automatic file cleanup and retention control for runtime outputs as a standing high-priority maintenance concern in this workspace.
