@@ -1,0 +1,1 @@
+{"error": "RuntimeError('Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40762 msg=The order amount exceeds the balance')", "market": "futures", "stage": "live_order", "symbol": "BTCUSDT", "timestamp": "2026-03-11T08:25:00+00:00"}

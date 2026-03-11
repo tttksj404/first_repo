@@ -1,0 +1,16 @@
+[DECISION] 2026-03-11T06:25:00+00:00 BTCUSDT mode=futures side=long score=66.16
+[LIVE_ORDER_ERROR] BTCUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40774 msg=The order type for unilateral position must also be the unilateral position type.
+[TEST_ORDER] BTCUSDT market=futures side=buy qty=0.00245545 accepted=True
+[DECISION] 2026-03-11T06:25:00+00:00 ETHUSDT mode=futures side=long score=62.54
+[LIVE_ORDER_ERROR] ETHUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40774 msg=The order type for unilateral position must also be the unilateral position type.
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.08489166 accepted=True
+[DECISION] 2026-03-11T06:25:00+00:00 SOLUSDT mode=spot side=long score=59.12
+[DECISION] 2026-03-11T06:25:00+00:00 DOGEUSDT mode=spot side=long score=56.59
+[DECISION] 2026-03-11T06:25:00+00:00 ADAUSDT mode=cash side=flat score=56.55
+[DECISION] 2026-03-11T06:25:00+00:00 XRPUSDT mode=futures side=long score=65.98
+[LIVE_ORDER_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40774 msg=The order type for unilateral position must also be the unilateral position type.
+[TEST_ORDER] XRPUSDT market=futures side=buy qty=124.25471424 accepted=True
+[DECISION] 2026-03-11T06:25:00+00:00 TRXUSDT mode=cash side=flat score=51.97
+[DECISION] 2026-03-11T06:25:00+00:00 LINKUSDT mode=spot side=long score=58.41
+[DECISION] 2026-03-11T06:25:00+00:00 WLDUSDT mode=cash side=flat score=55.63
+[CONNECT] websocket attempt=1

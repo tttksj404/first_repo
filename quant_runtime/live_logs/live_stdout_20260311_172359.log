@@ -1,0 +1,16 @@
+[PROFILE_SWITCHER] enabled calm=alpha_max fast=scalp_ultra active=alpha_max
+[DECISION] 2026-03-11T08:25:00+00:00 BTCUSDT mode=futures side=long score=58.54
+[LIVE_ORDER_ERROR] BTCUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=45111 msg=less than the minimum order quantity
+[TEST_ORDER] BTCUSDT market=futures side=buy qty=0.00301474 accepted=True
+[DECISION] 2026-03-11T08:25:00+00:00 ETHUSDT mode=futures side=long score=59.99
+[LIVE_ORDER] ETHUSDT market=futures side=buy qty=0.01475109 accepted=True
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.00833683 accepted=True
+[DECISION] 2026-03-11T08:25:00+00:00 SOLUSDT mode=futures side=long score=61.53
+[LIVE_ORDER] SOLUSDT market=futures side=buy qty=0.15240975 accepted=True
+[DECISION] 2026-03-11T08:25:00+00:00 DOGEUSDT mode=futures side=long score=59.21
+[DECISION] 2026-03-11T08:25:00+00:00 ADAUSDT mode=spot side=long score=56.38
+[DECISION] 2026-03-11T08:25:00+00:00 XRPUSDT mode=spot side=long score=55.40
+[DECISION] 2026-03-11T08:25:00+00:00 TRXUSDT mode=cash side=flat score=45.75
+[DECISION] 2026-03-11T08:25:00+00:00 LINKUSDT mode=spot side=long score=60.08
+[DECISION] 2026-03-11T08:25:00+00:00 WLDUSDT mode=cash side=flat score=57.08
+[CONNECT] websocket attempt=1

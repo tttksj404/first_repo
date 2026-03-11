@@ -1,0 +1,91 @@
+{
+  "observation_count": 8,
+  "symbols": {
+    "ADAUSDT": [
+      {
+        "bucket": 4,
+        "median_bps": 25.015386,
+        "mode": "spot",
+        "observations": [
+          25.015386
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "BTCUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 37.647337,
+        "mode": "spot",
+        "observations": [
+          37.647337
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "DOGEUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 30.162643,
+        "mode": "spot",
+        "observations": [
+          30.162643
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 29.781188,
+        "mode": "spot",
+        "observations": [
+          29.781188
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "LINKUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 31.900351,
+        "mode": "spot",
+        "observations": [
+          31.900351
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 37.865694,
+        "mode": "spot",
+        "observations": [
+          37.865694
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "XRPUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 11.461364,
+        "mode": "futures",
+        "observations": [
+          11.461364
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 6,
+        "median_bps": 11.613361,
+        "mode": "futures",
+        "observations": [
+          11.613361
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}

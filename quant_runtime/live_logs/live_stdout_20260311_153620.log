@@ -1,0 +1,14 @@
+[DECISION] 2026-03-11T06:40:00+00:00 BTCUSDT mode=spot side=long score=67.24
+[DECISION] 2026-03-11T06:40:00+00:00 ETHUSDT mode=futures side=long score=63.19
+[LIVE_ORDER_ERROR] ETHUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40762 msg=The order amount exceeds the balance
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.08458183 accepted=True
+[DECISION] 2026-03-11T06:40:00+00:00 SOLUSDT mode=spot side=long score=63.69
+[DECISION] 2026-03-11T06:40:00+00:00 DOGEUSDT mode=spot side=long score=59.04
+[DECISION] 2026-03-11T06:40:00+00:00 ADAUSDT mode=spot side=long score=58.93
+[DECISION] 2026-03-11T06:40:00+00:00 XRPUSDT mode=futures side=long score=66.22
+[LIVE_ORDER_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40762 msg=The order amount exceeds the balance
+[TEST_ORDER] XRPUSDT market=futures side=buy qty=123.7831881 accepted=True
+[DECISION] 2026-03-11T06:40:00+00:00 TRXUSDT mode=cash side=flat score=49.85
+[DECISION] 2026-03-11T06:40:00+00:00 LINKUSDT mode=spot side=long score=61.26
+[DECISION] 2026-03-11T06:40:00+00:00 WLDUSDT mode=cash side=flat score=57.65
+[CONNECT] websocket attempt=1

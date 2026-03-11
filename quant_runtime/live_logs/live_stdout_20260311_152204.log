@@ -1,0 +1,14 @@
+[DECISION] 2026-03-11T06:25:00+00:00 BTCUSDT mode=futures side=long score=65.15
+[LIVE_ORDER_ERROR] BTCUSDT HTTP Error 400: Bad Request
+[TEST_ORDER] BTCUSDT market=futures side=buy qty=0.0024559 accepted=True
+[DECISION] 2026-03-11T06:25:00+00:00 ETHUSDT mode=spot side=long score=59.56
+[DECISION] 2026-03-11T06:25:00+00:00 SOLUSDT mode=spot side=long score=58.67
+[DECISION] 2026-03-11T06:25:00+00:00 DOGEUSDT mode=spot side=long score=56.22
+[DECISION] 2026-03-11T06:25:00+00:00 ADAUSDT mode=cash side=flat score=56.48
+[DECISION] 2026-03-11T06:25:00+00:00 XRPUSDT mode=futures side=long score=63.56
+[LIVE_ORDER_ERROR] XRPUSDT HTTP Error 400: Bad Request
+[TEST_ORDER] XRPUSDT market=futures side=buy qty=124.27274046 accepted=True
+[DECISION] 2026-03-11T06:25:00+00:00 TRXUSDT mode=cash side=flat score=51.47
+[DECISION] 2026-03-11T06:25:00+00:00 LINKUSDT mode=spot side=long score=57.20
+[DECISION] 2026-03-11T06:25:00+00:00 WLDUSDT mode=cash side=flat score=54.00
+[CONNECT] websocket attempt=1
