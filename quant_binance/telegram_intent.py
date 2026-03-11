@@ -21,6 +21,9 @@ LOCAL_COMMAND_ALIASES = {
     "stop": {"/stop", "stop", "중지", "정지", "멈춰", "그만", "꺼", "종료"},
     "smoke": {"/smoke", "smoke", "스모크", "점검", "체크", "전체 점검", "스모크 돌려"},
     "extract": {"/extract", "extract", "추출", "크롤링", "본문 추출", "사이트 크롤링", "자료 긁어와"},
+    "strategy-report": {"/strategyreport", "전략 보고", "전략 제안 보고", "전략 보고서", "보고서 보내", "전략 승격 보고"},
+    "strategy-approve": {"/approve", "승인", "오케이", "ok", "전략 승인", "적용해"},
+    "strategy-reject": {"/reject", "거절", "보류", "전략 거절", "적용하지마"},
 }
 
 CODEX_TASK_ALIASES = {
@@ -129,6 +132,9 @@ def help_message_ko() -> str:
         "- /stop 또는 '멈춰'\n"
         "- /smoke 또는 '스모크 점검해'\n"
         "- /extract 또는 '사이트 크롤링해'\n"
+        "- /strategyreport 또는 '전략 보고서'\n"
+        "- /approve 또는 '전략 승인'\n"
+        "- /reject 또는 '전략 거절'\n"
         "- /codex status-check\n"
         "- /codex capital-report\n"
         "- /codex latest-run-review\n"
