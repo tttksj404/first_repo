@@ -19,6 +19,14 @@ BITGET_DEFAULT_PRODUCT_TYPE = "USDT-FUTURES"
 BITGET_DEFAULT_MARGIN_COIN = "USDT"
 
 
+def _bitget_futures_side(*, side: str, reduce_only: bool | None) -> str:
+    normalized = side.strip().upper()
+    if normalized not in {"BUY", "SELL"}:
+        raise ValueError(f"unsupported Bitget futures side '{side}'")
+    # This runtime uses Bitget unilateral mode: open/close is expressed via reduceOnly.
+    return normalized.lower()
+
+
 _SPOT_KLINE_GRANULARITY = {
     "1m": "1min",
     "3m": "3min",
@@ -228,7 +236,7 @@ class BitgetRestClient:
             "productType": self.contract_config.product_type,
             "marginCoin": self.contract_config.margin_coin,
             "marginMode": "crossed",
-            "side": side.lower(),
+            "side": _bitget_futures_side(side=side, reduce_only=reduce_only),
             "orderType": order_type.lower(),
             "size": f"{quantity:.8f}",
         }
