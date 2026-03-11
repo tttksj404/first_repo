@@ -261,8 +261,8 @@
         "per_trade_equity_risk": 0.0042,
         "max_symbol_notional_fraction": 0.24,
         "max_total_notional_fraction": 0.6,
-        "max_futures_leverage": 3.0,
-        "target_futures_leverage": 2.0
+        "max_futures_leverage": 10.0,
+        "target_futures_leverage": 5.0
       },
       "mode_behavior": {
         "spot_require_positive_trend": false,

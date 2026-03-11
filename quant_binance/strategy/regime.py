@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from quant_binance.models import DecisionIntent, FeatureVector, MarketSnapshot
 from quant_binance.observability.decision_log import hash_decision_payload
-from quant_binance.risk.sizing import position_notional_and_stop_bps
+from quant_binance.risk.sizing import position_notional_and_stop_bps, select_futures_leverage
 from quant_binance.overlays import is_alt_symbol
 from quant_binance.settings import Settings
 from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gate
@@ -170,6 +170,17 @@ def _futures_entry_plan(
             size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
     if features.macro_risk_penalty >= macro_gates.futures_block_penalty:
         reasons.append("MACRO_RISK_HIGH")
+    bearish_caution_override = (
+        features.trend_direction < 0
+        and features.predictability_score >= futures_score_min + 2.0
+        and features.trend_strength >= thresholds.futures_trend_strength_min + 0.04
+        and features.volume_confirmation >= 0.58
+        and features.liquidity_score >= max(futures_liquidity_min, exposure.soft_liquidity_floor)
+        and features.net_expected_edge_bps >= max(exposure.reduced_entry_net_edge_bps, exposure.min_entry_net_edge_bps)
+        and _edge_to_cost_multiple(features) >= max(settings.cost_gate.edge_to_cost_multiple_min, 1.15)
+        and features.volatility_penalty <= exposure.soft_volatility_penalty_max
+        and features.overheat_penalty <= exposure.soft_overheat_penalty_max
+    )
     priority_caution_override = (
         priority_symbol
         and exposure.priority_allow_caution
@@ -181,6 +192,7 @@ def _futures_entry_plan(
     if features.sentiment_regime == "caution" and not (
         (supportive_macro and exposure.macro_allow_caution and features.volume_confirmation >= 0.62)
         or priority_caution_override
+        or bearish_caution_override
     ):
         if soft_entry_allowed:
             reduced_size = True
@@ -379,6 +391,17 @@ def evaluate_snapshot(
         snapshot.symbol,
     )
     if futures_ok:
+        planned_leverage = select_futures_leverage(
+            predictability_score=futures_features.predictability_score,
+            trend_strength=futures_features.trend_strength,
+            volume_confirmation=futures_features.volume_confirmation,
+            liquidity_score=futures_features.liquidity_score,
+            volatility_penalty=futures_features.volatility_penalty,
+            overheat_penalty=futures_features.overheat_penalty,
+            net_expected_edge_bps=futures_features.net_expected_edge_bps,
+            estimated_round_trip_cost_bps=futures_features.estimated_round_trip_cost_bps,
+            settings=settings,
+        )
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
             atr_14_1h_bps=snapshot.feature_values.realized_vol_1h_norm * 100.0,
@@ -386,8 +409,10 @@ def evaluate_snapshot(
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
             size_multiplier=futures_size_multiplier,
+            leverage_multiplier=planned_leverage,
         )
-        if equity_usd > 0 and (equity_usd - notional) / equity_usd < cash_reserve_fraction:
+        required_margin_usd = notional / max(float(planned_leverage), 1.0)
+        if equity_usd > 0 and (equity_usd - required_margin_usd) / equity_usd < cash_reserve_fraction:
             futures_ok = False
             futures_reasons.append("CASH_RESERVE_BLOCK")
         payload = {
