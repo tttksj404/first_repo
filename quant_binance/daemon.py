@@ -9,6 +9,7 @@ from quant_binance.data.combined_ws import CombinedWebSocketClient
 from quant_binance.data.futures_stream import build_futures_streams
 from quant_binance.data.rest_seed import seed_market_store_from_rest
 from quant_binance.data.spot_stream import build_spot_streams
+from quant_binance.data.bitget_ws import BitgetWebSocketClient
 from quant_binance.exchange import resolve_exchange_id
 from quant_binance.data.binance_ws import BinanceWebSocketClient
 from quant_binance.execution.client_factory import build_exchange_rest_client
@@ -43,6 +44,55 @@ def _next_decision_boundary(timestamp, interval_minutes: int):
     return floored
 
 
+def _build_live_ws_client(
+    *,
+    exchange_id: str,
+    symbols: tuple[str, ...],
+    allow_insecure_ssl: bool,
+) -> CombinedWebSocketClient:
+    if exchange_id == "bitget":
+        return CombinedWebSocketClient(
+            [
+                BitgetWebSocketClient(
+                    market="spot",
+                    symbols=symbols,
+                    intervals=("5m", "1h", "4h"),
+                    allow_insecure_ssl=allow_insecure_ssl,
+                    label="spot",
+                ),
+                BitgetWebSocketClient(
+                    market="futures",
+                    symbols=symbols,
+                    intervals=("5m",),
+                    allow_insecure_ssl=allow_insecure_ssl,
+                    label="futures",
+                ),
+            ]
+        )
+    spot_streams = []
+    futures_streams = []
+    for symbol in symbols:
+        spot_streams.extend(build_spot_streams(symbol, ("5m", "1h", "4h")))
+        futures_streams.extend(build_futures_streams(symbol, ("5m",)))
+        futures_streams.append(f"{symbol.lower()}@openInterest")
+    return CombinedWebSocketClient(
+        [
+            BinanceWebSocketClient(
+                market="spot",
+                streams=spot_streams,
+                allow_insecure_ssl=allow_insecure_ssl,
+                label="spot",
+            ),
+            BinanceWebSocketClient(
+                market="futures",
+                streams=futures_streams,
+                allow_insecure_ssl=allow_insecure_ssl,
+                label="futures",
+            ),
+        ]
+    )
+
+
 def run_live_paper_daemon(
     *,
     config_path: str | Path,
@@ -53,10 +103,6 @@ def run_live_paper_daemon(
     exchange: str | None = None,
 ) -> dict[str, object]:
     exchange_id = resolve_exchange_id(exchange)
-    if exchange_id == "bitget":
-        raise RuntimeError(
-            "Bitget live daemon wiring is intentionally blocked in this first pass because public websocket market-data translation is still Binance-shaped. Replay, paper-live, and Bitget order-preview paths are ready."
-        )
     settings = Settings.load(config_path)
     initialize_workspace(output_base_dir)
     if settings.housekeeping.enabled:
@@ -70,24 +116,31 @@ def run_live_paper_daemon(
     rest_client = build_exchange_rest_client(
         exchange=exchange_id,
         allow_insecure_ssl=allow_insecure_ssl,
+        allow_missing_credentials=exchange_id == "bitget" and not execute_live_orders,
     )
-    rest_client.build_capital_report = lambda: build_capital_adequacy_report(  # type: ignore[attr-defined]
-        spot_available_balance_usd=float(
-            next(
-                (
-                    item.get("free", 0.0)
-                    for item in rest_client.get_account(market="spot").get("balances", [])
-                    if item.get("asset") == "USDT"
-                ),
-                0.0,
-            )
-        ),
-        futures_available_balance_usd=float(
-            rest_client.get_account(market="futures").get("availableBalance", 0.0)
-        ),
-        settings=settings,
-        rest_client=rest_client,
-    )
+    supports_private_reads = bool(getattr(rest_client, "supports_private_reads", True))
+    if execute_live_orders and not supports_private_reads:
+        raise RuntimeError(
+            "Bitget live order daemon requires BITGET_API_KEY, BITGET_API_SECRET, and BITGET_API_PASSPHRASE"
+        )
+    if supports_private_reads:
+        rest_client.build_capital_report = lambda: build_capital_adequacy_report(  # type: ignore[attr-defined]
+            spot_available_balance_usd=float(
+                next(
+                    (
+                        item.get("free", 0.0)
+                        for item in rest_client.get_account(market="spot").get("balances", [])
+                        if item.get("asset") == "USDT"
+                    ),
+                    0.0,
+                )
+            ),
+            futures_available_balance_usd=float(
+                rest_client.get_account(market="futures").get("availableBalance", 0.0)
+            ),
+            settings=settings,
+            rest_client=rest_client,
+        )
     store = seed_market_store_from_rest(
         client=rest_client,
         symbols=settings.universe,
@@ -138,7 +191,7 @@ def run_live_paper_daemon(
         runtime=runtime,
         equity_usd=10000.0,
         remaining_portfolio_capacity_usd=5000.0,
-        rest_client=rest_client,
+        rest_client=rest_client if supports_private_reads else None,
         order_tester=DecisionOrderTestAdapter(rest_client),
         live_order_executor=DecisionLiveOrderAdapter(rest_client, settings) if execute_live_orders else None,
         learner=learner,
@@ -147,7 +200,8 @@ def run_live_paper_daemon(
         verbose=True,
         observe_only_symbols=sorted(observe_only_symbols),
     )
-    session.sync_account()
+    if supports_private_reads:
+        session.sync_account()
     bootstrap_time = _next_decision_boundary(
         next(iter(store._states.values())).last_update_time,
         settings.decision_engine.decision_interval_minutes,
@@ -166,28 +220,11 @@ def run_live_paper_daemon(
             history=history,
             decision_time=bootstrap_time,
         )
-    spot_streams = []
-    futures_streams = []
-    for symbol in settings.universe:
-        spot_streams.extend(build_spot_streams(symbol, ("5m", "1h", "4h")))
-        futures_streams.extend(build_futures_streams(symbol, ("5m",)))
-        futures_streams.append(f"{symbol.lower()}@openInterest")
     shell = LivePaperShell(
-        ws_client_factory=lambda: CombinedWebSocketClient(
-            [
-                BinanceWebSocketClient(
-                    market="spot",
-                    streams=spot_streams,
-                    allow_insecure_ssl=allow_insecure_ssl,
-                    label="spot",
-                ),
-                BinanceWebSocketClient(
-                    market="futures",
-                    streams=futures_streams,
-                    allow_insecure_ssl=allow_insecure_ssl,
-                    label="futures",
-                ),
-            ]
+        ws_client_factory=lambda: _build_live_ws_client(
+            exchange_id=exchange_id,
+            symbols=settings.universe,
+            allow_insecure_ssl=allow_insecure_ssl,
         ),
         session=session,
         backoff_policy=BackoffPolicy(max_attempts=max_retries),
