@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -94,6 +95,17 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.settings = Settings.load(CONFIG_PATH)
 
+    def _load_settings_for_profile(self, profile: str) -> Settings:
+        previous = os.environ.get("STRATEGY_PROFILE")
+        os.environ["STRATEGY_PROFILE"] = profile
+        try:
+            return Settings.load(CONFIG_PATH)
+        finally:
+            if previous is None:
+                os.environ.pop("STRATEGY_PROFILE", None)
+            else:
+                os.environ["STRATEGY_PROFILE"] = previous
+
     def test_live_order_adapter_executes_market_order(self) -> None:
         from quant_binance.models import DecisionIntent
 
@@ -128,6 +140,78 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertTrue(result.accepted)
         self.assertEqual(result.market, "futures")
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
+
+    def test_live_order_adapter_uses_active_profile_max_leverage_for_strong_futures_short(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("active")
+        decision = DecisionIntent(
+            decision_id="d-strong-short",
+            decision_hash="hash-strong-short",
+            snapshot_id="s-strong-short",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 11, 0, 30, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.86,
+            volume_confirmation=0.8,
+            liquidity_score=0.84,
+            volatility_penalty=0.24,
+            overheat_penalty=0.16,
+            predictability_score=87.0,
+            gross_expected_edge_bps=40.0,
+            net_expected_edge_bps=28.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=140.0,
+            stop_distance_bps=45.0,
+        )
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        result = adapter.execute_decision(decision=decision, reference_price=50000.0)
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result.market, "futures")
+        self.assertEqual(result.side, "SELL")
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 10)])
+
+    def test_live_order_adapter_uses_soft_active_leverage_for_borderline_futures_setup(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("active")
+        decision = DecisionIntent(
+            decision_id="d-soft-short",
+            decision_hash="hash-soft-short",
+            snapshot_id="s-soft-short",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 11, 0, 35, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.64,
+            volume_confirmation=0.61,
+            liquidity_score=0.66,
+            volatility_penalty=0.66,
+            overheat_penalty=0.3,
+            predictability_score=67.0,
+            gross_expected_edge_bps=33.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=60.0,
+            stop_distance_bps=55.0,
+        )
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        adapter.execute_decision(decision=decision, reference_price=50000.0)
+
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 4)])
 
     def test_live_order_adapter_uses_quote_order_qty_for_spot_market_buy(self) -> None:
         from quant_binance.models import DecisionIntent

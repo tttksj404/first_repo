@@ -6,6 +6,12 @@ from quant_binance.models import FeatureVector
 from quant_binance.settings import Settings
 
 
+def _directional_flow_alignment(features: FeatureVector) -> float:
+    if features.trend_direction == 0:
+        return 0.0
+    return max(features.trend_direction * (features.taker_imbalance_norm - 0.5), 0.0) * 2.0
+
+
 def compute_predictability_score(features: FeatureVector, settings: Settings) -> float:
     weights = settings.weights
     score = 100.0 * (
@@ -85,14 +91,17 @@ def estimate_live_fallback_edge_bps(
         + 10.0 * features.overheat_penalty
         + 4.0 * features.resistance_penalty
         + 8.0 * features.macro_risk_penalty
+        + 5.0 * features.macro_event_risk_score
         + 10.0 * features.alt_rotation_penalty
     )
 
     if mode == "futures":
+        directional_flow_alignment = _directional_flow_alignment(features)
         raw = (
             quality_base
             + 2.0 * features.breakout_norm
-            + 2.0 * max(features.taker_imbalance_norm - 0.5, 0.0) * 10.0
+            + 10.0 * directional_flow_alignment
+            + 8.0 * max(features.macro_liquidity_support_score - 0.5, 0.0)
             - risk_penalty
         )
     else:
@@ -100,6 +109,7 @@ def estimate_live_fallback_edge_bps(
             6.0 * features.support_alignment
             + 4.0 * max(features.sentiment_support_score - 0.5, 0.0) * 2.0
             + 3.0 * max(1.0 - features.overheat_penalty, 0.0)
+            + 4.0 * max(features.macro_liquidity_support_score - 0.5, 0.0)
         )
         raw = (
             quality_base
