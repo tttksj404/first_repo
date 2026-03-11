@@ -8,7 +8,7 @@ It favors:
 
 - simple local commands
 - JSON artifacts on disk
-- Binance `order/test` before any real order path
+- Bitget-first exchange defaults with explicit credential/env checks
 - paper-live and replay verification before longer runs
 
 ## Workspace Layout
@@ -48,20 +48,22 @@ Do not skip directly to a live order path.
 
 ## Commands
 
-Before any Binance `order/test` run, set credentials in either your shell or the repository root `.env`.
+Before any private exchange run, set credentials in either your shell or the repository root `.env`.
 
 Example:
 
 ```env
-BINANCE_API_KEY=your_key
-BINANCE_API_SECRET=your_secret
+EXCHANGE=bitget
+BITGET_API_KEY=your_key
+BITGET_API_SECRET=your_secret
+BITGET_API_PASSPHRASE=your_passphrase
 UNIVERSE_SYMBOLS=BTCUSDT,ETHUSDT,SOLUSDT
 MACRO_INPUTS_PATH=quant_binance/examples/macro_inputs.sample.json
 ALTCOIN_INPUTS_PATH=quant_binance/examples/altcoin_inputs.sample.json
 ```
 
 If `UNIVERSE_SYMBOLS` is set, it overrides the default `universe` in config.
-Use this to mirror the symbols you enabled in Binance symbol whitelist.
+Use this to mirror the symbols you enabled on the target exchange.
 If `MACRO_INPUTS_PATH` or `MACRO_INPUTS_JSON` is set, macro regime inputs are loaded and applied before regime selection.
 If `ALTCOIN_INPUTS_PATH` or `ALTCOIN_INPUTS_JSON` is set, altcoin intelligence inputs are loaded for non-BTC/ETH symbols and affect edge estimation and regime gating.
 
@@ -99,15 +101,17 @@ python3 -m quant_binance.runtime \
   --max-retries 3
 ```
 
-Binance `order/test` validation:
+Exchange order validation / preview:
 
 ```bash
-BINANCE_API_KEY=... BINANCE_API_SECRET=... \
+EXCHANGE=bitget \
 python3 -m quant_binance.runtime \
   --mode paper-live-test-order \
   --fixture tests/paper_live_fixture.json \
   --output quant_runtime/output/paper-live-test-order/latest/summary.json
 ```
+
+On Bitget, `paper-live-test-order` is a local request-preview step because Bitget does not expose a Binance-style `order/test` endpoint.
 
 Single-user shortcut scripts:
 
@@ -128,11 +132,11 @@ sh scripts/quant_extract_naver_article.sh 'https://naver.me/IxKJQmc9' quant_runt
 sh scripts/quant_extract_naver_openclaw.sh 'https://naver.me/IxKJQmc9' quant_runtime/artifacts/openclaw_naver_strategy.md
 ```
 
-`quant_smoke_all.sh` runs the recommended local smoke path and includes `paper-live-test-order` only when Binance API env vars are present.
+`quant_smoke_all.sh` runs the recommended local smoke path. For Bitget it always includes the order-preview step; for Binance it still requires live API env vars before running `paper-live-test-order`.
 
 `quant_run_forever.sh` starts the long-running live paper daemon mode for single-user local operation.
 
-`quant_run_live_orders.sh` starts the long-running daemon with actual live order submission enabled.
+`quant_run_live_orders.sh` starts the long-running daemon with actual live order submission enabled. In this first Bitget migration pass, the live daemon intentionally refuses Bitget because websocket market-data translation is still pending.
 
 `quant_status.sh` prints the latest saved state so you can tell whether the loop is still alive.
 
@@ -162,6 +166,6 @@ If `kill_switch.armed = true`, stop and inspect the latest state/report before c
 ## Practical Notes
 
 - Keep API keys `trade only` and disable withdrawals.
-- Use `order/test` and small paper loops first.
+- Use Bitget order preview or Binance `order/test`, plus small paper loops, before any live path.
 - Treat output folders as disposable run logs, not as a database.
 - If you change config thresholds, keep the previous output directories for comparison.

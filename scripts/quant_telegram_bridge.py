@@ -64,6 +64,42 @@ def send_message(chat_id: int, text: str) -> None:
 def run_local_command(action: str) -> str:
     if action == 'help':
         return help_message_ko()
+    if action == 'strategy-report':
+        proc = subprocess.run(
+            ['sh', 'scripts/quant_strategy_promotion.sh', 'report', 'quant_runtime'],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            timeout=600,
+        )
+        output = (proc.stdout or '') + ('\n' + proc.stderr if proc.stderr else '')
+        return output.strip() or f'command finished with exit={proc.returncode}'
+    if action == 'strategy-approve':
+        proc = subprocess.run(
+            ['sh', 'scripts/quant_strategy_promotion.sh', 'approve', 'quant_runtime'],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            timeout=900,
+        )
+        output = (proc.stdout or '') + ('\n' + proc.stderr if proc.stderr else '')
+        return output.strip() or f'command finished with exit={proc.returncode}'
+    if action == 'strategy-reject':
+        proc = subprocess.run(
+            ['sh', 'scripts/quant_strategy_promotion.sh', 'reject', 'quant_runtime'],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            timeout=600,
+        )
+        output = (proc.stdout or '') + ('\n' + proc.stderr if proc.stderr else '')
+        return output.strip() or f'command finished with exit={proc.returncode}'
     proc = subprocess.run(
         ['sh', 'scripts/quant_remote_command.sh', action],
         cwd=ROOT,

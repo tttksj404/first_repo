@@ -1,0 +1,31 @@
+{
+  "account_snapshot": {},
+  "capital_report": {},
+  "closed_trades": [],
+  "cycle_count": 1,
+  "decision_count": 1,
+  "exit_reason_counts": {},
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "live_order_count": 0,
+  "live_orders": [],
+  "modes": [
+    "futures"
+  ],
+  "observe_only_symbols": [],
+  "open_futures_positions": [],
+  "open_orders_snapshot": {},
+  "open_spot_positions": [],
+  "realized_pnl_usd_estimate": 0.0,
+  "symbol_performance": [],
+  "symbols": [
+    "BTCUSDT"
+  ],
+  "tested_order_count": 0,
+  "tested_orders": [],
+  "unrealized_futures_pnl_usd_estimate": 0,
+  "unrealized_pnl_usd_estimate": 0,
+  "unrealized_spot_pnl_usd_estimate": 0
+}

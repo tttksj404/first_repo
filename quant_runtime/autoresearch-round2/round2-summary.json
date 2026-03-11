@@ -1,0 +1,42 @@
+[
+  {
+    "profile": "active",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  },
+  {
+    "profile": "autoresearch-futures-active",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  },
+  {
+    "profile": "autoresearch-bearish-short-bias",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  },
+  {
+    "profile": "autoresearch-leverage-strong",
+    "replay_decisions": 2,
+    "replay_orders": 1,
+    "replay_modes": {},
+    "paper_decisions": 1,
+    "paper_tested_orders": 0,
+    "paper_modes": {},
+    "paper_rejections": {}
+  }
+]

@@ -1,0 +1,302 @@
+{
+  "capital_report": {
+    "can_trade_any": true,
+    "can_trade_futures_any": true,
+    "can_trade_spot_any": false,
+    "futures_available_balance_usd": 33.852403,
+    "futures_requirements": [
+      {
+        "buffered_min_equity_usd": 520.833333,
+        "market": "futures",
+        "min_equity_usd": 416.666667,
+        "min_notional_usd": 100.0,
+        "symbol": "BTCUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 104.166667,
+        "market": "futures",
+        "min_equity_usd": 83.333333,
+        "min_notional_usd": 20.0,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "SOLUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ADAUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "DOGEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "TRXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 104.166667,
+        "market": "futures",
+        "min_equity_usd": 83.333333,
+        "min_notional_usd": 20.0,
+        "symbol": "BCHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ANKRUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "FLOWUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "KAVAUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "AGLDUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ACHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "STEEMUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "WLDUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ACTUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ACXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "VIRTUALUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "SIGNUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "futures",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "AWEUSDT"
+      }
+    ],
+    "minimum_full_universe_balance_usd": 520.833333,
+    "minimum_operational_balance_usd": 5.208333,
+    "note": "5% \uc218\uc775 \ubcf4\uc7a5\uc740 \ubd88\uac00\ud558\uba70, \uc544\ub798 \uae08\uc561\uc740 \ud604\uc7ac \uc124\uc815\uacfc \ucd5c\uc18c \uc8fc\ubb38 \uc870\uac74 \uae30\uc900\uc758 \uc6b4\uc601 \uac00\ub2a5 \uc790\uae08 \ucd94\uc815\uce58\uc785\ub2c8\ub2e4.",
+    "pending_symbols": [],
+    "recommended_balance_usd": 833.333333,
+    "spot_available_balance_usd": 4.8172368,
+    "spot_requirements": [
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "BTCUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "SOLUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ADAUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 5.208333,
+        "market": "spot",
+        "min_equity_usd": 4.166667,
+        "min_notional_usd": 1.0,
+        "symbol": "DOGEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "TRXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "BCHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ANKRUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "FLOWUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "KAVAUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "AGLDUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ADXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ACHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "STEEMUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "WLDUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 5.208333,
+        "market": "spot",
+        "min_equity_usd": 4.166667,
+        "min_notional_usd": 1.0,
+        "symbol": "ACTUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "ACXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "VIRTUALUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "SIGNUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 26.041667,
+        "market": "spot",
+        "min_equity_usd": 20.833333,
+        "min_notional_usd": 5.0,
+        "symbol": "AWEUSDT"
+      }
+    ]
+  },
+  "decision_count": 13,
+  "heartbeat_count": 1242785,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_timestamp": "2026-03-11T00:20:00+00:00",
+  "last_event_timestamp": "2026-03-11T00:25:52.315009+00:00",
+  "live_order_count": 0,
+  "tested_order_count": 0,
+  "updated_at": "2026-03-11T00:25:56.441416+00:00"
+}

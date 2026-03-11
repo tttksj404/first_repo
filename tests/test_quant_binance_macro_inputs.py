@@ -31,6 +31,8 @@ class QuantBinanceMacroInputsTests(unittest.TestCase):
         assert macro is not None
         self.assertAlmostEqual(macro.truflation_yoy, 1.8)
         self.assertAlmostEqual(macro.tga_drain_score, 0.7)
+        self.assertAlmostEqual(macro.dxy_change_30d_pct, -1.8)
+        self.assertAlmostEqual(macro.fed_liquidity_score, 0.66)
 
 
 if __name__ == "__main__":
