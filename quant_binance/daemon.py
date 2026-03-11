@@ -53,6 +53,13 @@ def run_live_paper_daemon(
 ) -> dict[str, object]:
     settings = Settings.load(config_path)
     initialize_workspace(output_base_dir)
+    if settings.housekeeping.enabled:
+        from quant_binance.housekeeping import prune_old_run_directories
+
+        prune_old_run_directories(
+            mode_root=Path(output_base_dir) / "output" / "paper-live-shell",
+            keep_recent_runs=settings.housekeeping.keep_recent_runs,
+        )
     run_paths = prepare_run_paths(base_dir=Path(output_base_dir) / "output", mode="paper-live-shell")
     credentials = load_binance_credentials_from_env()
     rest_client = BinanceRestClient(
@@ -118,7 +125,10 @@ def run_live_paper_daemon(
         decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
         eligible_symbols=eligible_symbols,
     )
-    log_store = JsonlLogStore(run_paths.root / "logs")
+    log_store = JsonlLogStore(
+        run_paths.root / "logs",
+        max_bytes_per_stream=settings.housekeeping.max_log_bytes_per_stream if settings.housekeeping.enabled else None,
+    )
     session = LivePaperSession(
         runtime=runtime,
         equity_usd=10000.0,
