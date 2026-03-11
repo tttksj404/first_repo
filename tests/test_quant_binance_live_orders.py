@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import os
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
+from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.data.market_store import MarketStateStore
@@ -14,6 +16,7 @@ from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInp
 from quant_binance.service import PaperTradingService
 from quant_binance.session import LivePaperSession
 from quant_binance.settings import Settings
+from quant_binance.observability.log_store import JsonlLogStore
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,16 +68,43 @@ def make_primitive() -> PrimitiveInputs:
 class FakeLiveOrderClient:
     def __init__(self) -> None:
         self.calls = 0
+        self.leverage_calls: list[tuple[str, int]] = []
+
+    def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
+        self.leverage_calls.append((symbol, leverage))
+        return {"symbol": symbol, "leverage": leverage}
 
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
         return {"status": "FILLED", "market": market, "orderId": self.calls}
 
 
+class RaisingLiveOrderClient(FakeLiveOrderClient):
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        raise RuntimeError("simulated live order failure")
+
+
+class RaisingTestOrderClient:
+    def test_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        raise RuntimeError("simulated test order failure")
+
+
 class QuantBinanceLiveOrdersTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.settings = Settings.load(CONFIG_PATH)
+
+    def _load_settings_for_profile(self, profile: str) -> Settings:
+        previous = os.environ.get("STRATEGY_PROFILE")
+        os.environ["STRATEGY_PROFILE"] = profile
+        try:
+            return Settings.load(CONFIG_PATH)
+        finally:
+            if previous is None:
+                os.environ.pop("STRATEGY_PROFILE", None)
+            else:
+                os.environ["STRATEGY_PROFILE"] = previous
 
     def test_live_order_adapter_executes_market_order(self) -> None:
         from quant_binance.models import DecisionIntent
@@ -102,12 +132,175 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
             order_intent_notional_usd=2000.0,
             stop_distance_bps=45.0,
         )
-        adapter = DecisionLiveOrderAdapter(FakeLiveOrderClient())  # type: ignore[arg-type]
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
         result = adapter.execute_decision(decision=decision, reference_price=50000.0)
         self.assertIsNotNone(result)
         assert result is not None
         self.assertTrue(result.accepted)
         self.assertEqual(result.market, "futures")
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
+
+    def test_live_order_adapter_uses_active_profile_max_leverage_for_strong_futures_short(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("active")
+        decision = DecisionIntent(
+            decision_id="d-strong-short",
+            decision_hash="hash-strong-short",
+            snapshot_id="s-strong-short",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 11, 0, 30, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.86,
+            volume_confirmation=0.8,
+            liquidity_score=0.84,
+            volatility_penalty=0.24,
+            overheat_penalty=0.16,
+            predictability_score=87.0,
+            gross_expected_edge_bps=40.0,
+            net_expected_edge_bps=28.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=140.0,
+            stop_distance_bps=45.0,
+        )
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        result = adapter.execute_decision(decision=decision, reference_price=50000.0)
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result.market, "futures")
+        self.assertEqual(result.side, "SELL")
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 10)])
+
+    def test_live_order_adapter_uses_soft_active_leverage_for_borderline_futures_setup(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("active")
+        decision = DecisionIntent(
+            decision_id="d-soft-short",
+            decision_hash="hash-soft-short",
+            snapshot_id="s-soft-short",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 11, 0, 35, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.64,
+            volume_confirmation=0.61,
+            liquidity_score=0.66,
+            volatility_penalty=0.66,
+            overheat_penalty=0.3,
+            predictability_score=67.0,
+            gross_expected_edge_bps=33.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=60.0,
+            stop_distance_bps=55.0,
+        )
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        adapter.execute_decision(decision=decision, reference_price=50000.0)
+
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 4)])
+
+    def test_live_order_adapter_uses_quote_order_qty_for_spot_market_buy(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        decision = DecisionIntent(
+            decision_id="d2",
+            decision_hash="hash-2",
+            snapshot_id="s2",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 10, 0, 30, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=66.0,
+            gross_expected_edge_bps=30.0,
+            net_expected_edge_bps=18.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=2400.0,
+            stop_distance_bps=80.0,
+        )
+        adapter = DecisionLiveOrderAdapter(FakeLiveOrderClient(), self.settings)  # type: ignore[arg-type]
+        built = adapter.build_order_params(decision=decision, reference_price=50000.0)
+        assert built is not None
+        market, params = built
+        self.assertEqual(market, "spot")
+        self.assertEqual(params["side"], "BUY")
+        self.assertEqual(params["quoteOrderQty"], "2400.00")
+        self.assertNotIn("quantity", params)
+
+    def test_session_survives_live_order_exception(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = RaisingLiveOrderClient()
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client),  # type: ignore[arg-type]
+            order_tester=DecisionOrderTestAdapter(RaisingTestOrderClient()),  # type: ignore[arg-type]
+            log_store=JsonlLogStore(ROOT / ".tmp-test-logs"),
+        )
+        payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971200000,
+                    "T": 1772971500000,
+                    "o": "49900",
+                    "h": "50100",
+                    "l": "49850",
+                    "c": "50050",
+                    "v": "12",
+                    "q": "600000",
+                    "x": True,
+                },
+            },
+        }
+        decision = session.process_payload(payload, now=now)
+        self.assertIsNotNone(decision)
+        self.assertEqual(len(session.decisions), 1)
+        self.assertEqual(len(session.live_orders), 0)
+        self.assertEqual(len(session.tested_orders), 0)
 
     def test_session_prevents_duplicate_live_order_hash(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
