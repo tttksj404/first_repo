@@ -24,7 +24,7 @@ from quant_binance.paths import prepare_run_paths
 from quant_binance.session import BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.service import PaperTradingService
 from quant_binance.settings import Settings
-from quant_binance.risk.capital import build_capital_adequacy_report
+from quant_binance.risk.capital import build_capital_adequacy_report, extract_account_capital_inputs
 from quant_binance.strategy.regime import observe_only_reasons
 from quant_binance.strategy.scorer import apply_score_and_costs
 from quant_binance.overlays import apply_altcoin_overlay, apply_macro_overlay, apply_sentiment_overlay, load_altcoin_inputs, load_macro_inputs
@@ -124,23 +124,24 @@ def run_live_paper_daemon(
             "Bitget live order daemon requires BITGET_API_KEY, BITGET_API_SECRET, and BITGET_API_PASSPHRASE"
         )
     if supports_private_reads:
-        rest_client.build_capital_report = lambda: build_capital_adequacy_report(  # type: ignore[attr-defined]
-            spot_available_balance_usd=float(
-                next(
-                    (
-                        item.get("free", 0.0)
-                        for item in rest_client.get_account(market="spot").get("balances", [])
-                        if item.get("asset") == "USDT"
-                    ),
-                    0.0,
-                )
-            ),
-            futures_available_balance_usd=float(
-                rest_client.get_account(market="futures").get("availableBalance", 0.0)
-            ),
-            settings=settings,
-            rest_client=rest_client,
-        )
+        def _build_capital_report():
+            spot_account = rest_client.get_account(market="spot")
+            futures_account = rest_client.get_account(market="futures")
+            capital_inputs = extract_account_capital_inputs(
+                spot_account=spot_account,
+                futures_account=futures_account,
+                rest_client=rest_client,
+            )
+            return build_capital_adequacy_report(
+                spot_available_balance_usd=capital_inputs.spot_available_balance_usd,
+                spot_recognized_balance_usd=capital_inputs.spot_recognized_balance_usd,
+                futures_available_balance_usd=capital_inputs.futures_execution_balance_usd,
+                futures_recognized_balance_usd=capital_inputs.futures_recognized_balance_usd,
+                settings=settings,
+                rest_client=rest_client,
+            )
+
+        rest_client.build_capital_report = _build_capital_report  # type: ignore[attr-defined]
     store = seed_market_store_from_rest(
         client=rest_client,
         symbols=settings.universe,
