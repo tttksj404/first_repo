@@ -122,7 +122,12 @@ class LivePaperSession:
             report = self.rest_client.build_capital_report()
             self.capital_report = {
                 "spot_available_balance_usd": report.spot_available_balance_usd,
+                "spot_recognized_balance_usd": report.spot_recognized_balance_usd,
                 "futures_available_balance_usd": report.futures_available_balance_usd,
+                "futures_recognized_balance_usd": report.futures_recognized_balance_usd,
+                "futures_execution_balance_usd": float(
+                    self.account_snapshot.get("executionAvailableBalance", report.futures_available_balance_usd)
+                ),
                 "minimum_operational_balance_usd": report.minimum_operational_balance_usd,
                 "minimum_full_universe_balance_usd": report.minimum_full_universe_balance_usd,
                 "recommended_balance_usd": report.recommended_balance_usd,
@@ -232,7 +237,12 @@ class LivePaperSession:
             available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
             max_notional = max(0.0, available * (1.0 - reserve_fraction))
         elif decision.final_mode == "futures":
-            available = float(self.capital_report.get("futures_available_balance_usd", 0.0))
+            available = float(
+                self.capital_report.get(
+                    "futures_execution_balance_usd",
+                    self.capital_report.get("futures_available_balance_usd", 0.0),
+                )
+            )
             leverage = select_futures_leverage(
                 predictability_score=decision.predictability_score,
                 trend_strength=decision.trend_strength,

@@ -19,6 +19,12 @@ BITGET_DEFAULT_PRODUCT_TYPE = "USDT-FUTURES"
 BITGET_DEFAULT_MARGIN_COIN = "USDT"
 
 
+def _optional_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    return float(value)
+
+
 def _bitget_futures_side(*, side: str, reduce_only: bool | None) -> str:
     normalized = side.strip().upper()
     if normalized not in {"BUY", "SELL"}:
@@ -296,12 +302,21 @@ class BitgetRestClient:
         rows = payload.get("data", [])
         if market == "futures":
             data_rows = rows if isinstance(rows, list) else []
-            available = 0.0
+            available: float | None = None
+            crossed_max_available: float | None = None
             for item in data_rows:
                 if str(item.get("marginCoin", "")).upper() == self.contract_config.margin_coin.upper():
-                    available = float(item.get("available", 0.0))
+                    available = _optional_float(item.get("available"))
+                    crossed_max_available = _optional_float(item.get("crossedMaxAvailable"))
                     break
-            return {"availableBalance": available, "accounts": data_rows, "raw": payload}
+            execution_available = crossed_max_available if crossed_max_available is not None else available
+            return {
+                "availableBalance": available or 0.0,
+                "executionAvailableBalance": execution_available or 0.0,
+                "crossedMaxAvailable": crossed_max_available or 0.0,
+                "accounts": data_rows,
+                "raw": payload,
+            }
         data_rows = rows if isinstance(rows, list) else []
         balances = [
             {
