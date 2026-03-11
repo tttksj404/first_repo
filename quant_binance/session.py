@@ -16,6 +16,7 @@ from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
+from quant_binance.risk.sizing import select_futures_leverage
 
 
 class SupportsAccountSync(Protocol):
@@ -232,7 +233,17 @@ class LivePaperSession:
             max_notional = max(0.0, available * (1.0 - reserve_fraction))
         elif decision.final_mode == "futures":
             available = float(self.capital_report.get("futures_available_balance_usd", 0.0))
-            leverage = self.runtime.paper_service.settings.risk.target_futures_leverage
+            leverage = select_futures_leverage(
+                predictability_score=decision.predictability_score,
+                trend_strength=decision.trend_strength,
+                volume_confirmation=decision.volume_confirmation,
+                liquidity_score=decision.liquidity_score,
+                volatility_penalty=decision.volatility_penalty,
+                overheat_penalty=decision.overheat_penalty,
+                net_expected_edge_bps=decision.net_expected_edge_bps,
+                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+                settings=self.runtime.paper_service.settings,
+            )
             max_notional = max(0.0, available * leverage * (1.0 - reserve_fraction))
         else:
             return decision
