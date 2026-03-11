@@ -151,6 +151,12 @@ class SpotSupportConfig:
     liquidity_relaxation: float = 0.0
     breakout_resistance_override_min: float = 1.0
     bottoming_support_override_min: float = 1.0
+    priority_symbols: tuple[str, ...] = ()
+    priority_support_alignment_min: float = 0.0
+    priority_resistance_penalty_max: float = 1.0
+    priority_sentiment_support_min: float = 0.0
+    priority_liquidity_relaxation: float = 0.0
+    priority_edge_relaxation_bps: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -175,6 +181,24 @@ class FuturesExposureConfig:
     strong_overheat_penalty_max: float
     strong_edge_to_cost_multiple_min: float
     strong_size_multiplier: float
+    macro_support_min: float = 1.0
+    macro_score_relaxation: float = 0.0
+    macro_liquidity_relaxation: float = 0.0
+    macro_overheat_relaxation: float = 0.0
+    macro_volatility_relaxation: float = 0.0
+    macro_min_entry_net_edge_bps: float = 0.0
+    macro_edge_to_cost_multiple_min: float = 1.0
+    macro_allow_caution: bool = False
+    priority_symbols: tuple[str, ...] = ()
+    priority_score_relaxation: float = 0.0
+    priority_min_entry_net_edge_bps: float = 0.0
+    priority_edge_to_cost_multiple_min: float = 1.0
+    priority_volatility_relaxation: float = 0.0
+    priority_allow_caution: bool = False
+    soft_reason_override_enabled: bool = True
+    soft_reason_override_edge_to_cost_multiple_min: float = 1.0
+    soft_reason_override_min_entry_net_edge_bps: float = 0.0
+    soft_reason_override_size_multiplier: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -196,6 +220,13 @@ class SymbolEligibilityConfig:
     observe_only_liquidity_max: float
     observe_only_alt_liquidity_max: float
     observe_only_cost_bps_min: float
+
+
+@dataclass(frozen=True)
+class HousekeepingConfig:
+    enabled: bool
+    max_log_bytes_per_stream: int
+    keep_recent_runs: int
 
 
 @dataclass(frozen=True)
@@ -224,13 +255,19 @@ class Settings:
     cash_reserve: CashReserveConfig
     altcoin_overlays: AltcoinOverlayConfig
     symbol_eligibility: SymbolEligibilityConfig
+    housekeeping: HousekeepingConfig
     strategy_profile: str
 
     @classmethod
-    def load(cls, path: str | Path) -> "Settings":
+    def load(
+        cls,
+        path: str | Path,
+        *,
+        strategy_profile: str | None = None,
+    ) -> "Settings":
         with Path(path).open("r", encoding="utf-8") as handle:
             raw = json.load(handle)
-        profile = resolve_strategy_profile() or "conservative"
+        profile = (strategy_profile or resolve_strategy_profile() or "conservative").strip().lower()
         raw = _deep_merge(raw, raw.get("strategy_profiles", {}).get(profile, {}))
         override_symbols = resolve_universe_symbols()
         if override_symbols:
@@ -240,6 +277,10 @@ class Settings:
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "Settings":
+        spot_support_raw = dict(raw["spot_support"])
+        spot_support_raw["priority_symbols"] = tuple(spot_support_raw.get("priority_symbols", ()))
+        futures_exposure_raw = dict(raw["futures_exposure"])
+        futures_exposure_raw["priority_symbols"] = tuple(futures_exposure_raw.get("priority_symbols", ()))
         return cls(
             config_version=raw["config_version"],
             snapshot_schema_version=raw["snapshot_schema_version"],
@@ -259,11 +300,12 @@ class Settings:
             operational_limits=OperationalLimitConfig(**raw["operational_limits"]),
             validation=ValidationConfig(**raw["validation"]),
             mode_behavior=ModeBehaviorConfig(**raw["mode_behavior"]),
-            spot_support=SpotSupportConfig(**raw["spot_support"]),
+            spot_support=SpotSupportConfig(**spot_support_raw),
             macro_gates=MacroGateConfig(**raw["macro_gates"]),
-            futures_exposure=FuturesExposureConfig(**raw["futures_exposure"]),
+            futures_exposure=FuturesExposureConfig(**futures_exposure_raw),
             cash_reserve=CashReserveConfig(**raw["cash_reserve"]),
             altcoin_overlays=AltcoinOverlayConfig(**raw["altcoin_overlays"]),
             symbol_eligibility=SymbolEligibilityConfig(**raw["symbol_eligibility"]),
+            housekeeping=HousekeepingConfig(**raw.get("housekeeping", {"enabled": False, "max_log_bytes_per_stream": 0, "keep_recent_runs": 0})),
             strategy_profile=raw["strategy_profile"],
         )

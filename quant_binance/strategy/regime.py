@@ -12,7 +12,15 @@ from quant_binance.settings import Settings
 from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gate
 
 
-FUTURES_SOFT_RISK_REASONS = {"SCORE_TOO_LOW", "LIQUIDITY_TOO_WEAK", "VOL_TOO_HIGH", "FUTURES_OVERHEAT", "EDGE_BELOW_COST", "SENTIMENT_CAUTION"}
+FUTURES_SOFT_RISK_REASONS = {
+    "SCORE_TOO_LOW",
+    "LIQUIDITY_TOO_WEAK",
+    "VOL_TOO_HIGH",
+    "FUTURES_OVERHEAT",
+    "EDGE_BELOW_COST",
+    "EDGE_TOO_THIN",
+    "SENTIMENT_CAUTION",
+}
 
 
 def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
@@ -115,6 +123,7 @@ def _futures_entry_plan(
     reasons: list[str] = []
     size_multiplier = 1.0
     reduced_size = False
+    soft_reason_override_applied = False
     priority_symbol = symbol in set(exposure.priority_symbols)
     supportive_macro = (
         features.macro_liquidity_support_score >= exposure.macro_support_min
@@ -232,9 +241,41 @@ def _futures_entry_plan(
         else:
             reasons.append("EDGE_TOO_THIN")
     if reasons:
-        return False, reasons, 0.0
+        unique_reasons = sorted(set(reasons))
+        hard_reasons = [reason for reason in unique_reasons if reason not in FUTURES_SOFT_RISK_REASONS]
+        if hard_reasons:
+            return False, hard_reasons, 0.0
+        soft_override_allowed = (
+            exposure.soft_reason_override_enabled
+            and features.net_expected_edge_bps >= exposure.soft_reason_override_min_entry_net_edge_bps
+            and _edge_to_cost_multiple(features) >= exposure.soft_reason_override_edge_to_cost_multiple_min
+            and features.macro_risk_penalty < macro_gates.futures_block_penalty
+            and abs(features.trend_direction) == 1
+        )
+        if not soft_override_allowed:
+            return False, unique_reasons, 0.0
+        reduced_size = True
+        soft_reason_override_applied = True
+        size_multiplier = min(
+            size_multiplier,
+            max(
+                0.1,
+                exposure.reduced_size_multiplier * exposure.soft_reason_override_size_multiplier,
+            ),
+        )
+    soft_floor_override_allowed = (
+        exposure.soft_reason_override_enabled
+        and features.net_expected_edge_bps >= exposure.soft_reason_override_min_entry_net_edge_bps
+        and _edge_to_cost_multiple(features) >= exposure.soft_reason_override_edge_to_cost_multiple_min
+        and features.macro_risk_penalty < macro_gates.futures_block_penalty
+        and abs(features.trend_direction) == 1
+    )
     if reduced_size and features.net_expected_edge_bps < exposure.reduced_entry_net_edge_bps:
-        return False, ["EDGE_TOO_THIN"], 0.0
+        if (
+            not (soft_reason_override_applied or soft_floor_override_allowed)
+            or features.net_expected_edge_bps < exposure.soft_reason_override_min_entry_net_edge_bps
+        ):
+            return False, ["EDGE_TOO_THIN"], 0.0
     if not reduced_size and _is_objectively_strong_futures_setup(features, settings):
         size_multiplier = max(size_multiplier, exposure.strong_size_multiplier)
     return True, reasons, size_multiplier

@@ -16,15 +16,27 @@ from quant_binance.overlays import (
     load_macro_inputs,
 )
 from quant_binance.settings import Settings
+from quant_binance.strategy.edge import ConditionalEdgeLookup
 from quant_binance.strategy.regime import evaluate_snapshot
 
 
 class PaperTradingService:
-    def __init__(self, settings: Settings, router: ExecutionRouter | None = None) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        router: ExecutionRouter | None = None,
+        edge_lookup: ConditionalEdgeLookup | None = None,
+    ) -> None:
+        self.edge_lookup = edge_lookup
         self.settings = settings
         self.snapshot_builder = SnapshotBuilder(settings)
         self.router = router or ExecutionRouter()
-        self.feature_extractor = MarketFeatureExtractor(settings)
+        self.feature_extractor = MarketFeatureExtractor(settings, edge_lookup=edge_lookup)
+
+    def apply_settings(self, settings: Settings) -> None:
+        self.settings = settings
+        self.snapshot_builder = SnapshotBuilder(settings)
+        self.feature_extractor = MarketFeatureExtractor(settings, edge_lookup=self.edge_lookup)
 
     def run_cycle(
         self,
