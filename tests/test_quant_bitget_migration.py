@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 import unittest
-from unittest.mock import patch
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from quant_binance.exchange import ExchangeCredentials, resolve_exchange_id, runtime_readiness
@@ -13,6 +14,7 @@ from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.models import DecisionIntent
 from quant_binance.runtime import run_paper_live_test_order_mode
+from quant_binance.session import LivePaperSession
 from quant_binance.settings import Settings
 
 
@@ -259,6 +261,76 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(close_params["reduceOnly"], "YES")
         self.assertNotIn("tradeSide", close_params)
         self.assertNotIn("holdSide", close_params)
+
+    def test_bitget_futures_account_prefers_crossed_executable_balance_when_available(self) -> None:
+        client = BitgetRestClient(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        payload = {
+            "code": "00000",
+            "msg": "success",
+            "data": [
+                {
+                    "marginCoin": "USDT",
+                    "available": "37.96533289",
+                    "crossedMaxAvailable": "4.93305789",
+                    "crossedMargin": "37.489375",
+                    "usdtEquity": "42.422432895899",
+                }
+            ],
+        }
+
+        with patch.object(client, "send", return_value=payload):
+            account = client.get_account(market="futures")
+
+        self.assertEqual(float(account["accounts"][0]["crossedMaxAvailable"]), 4.93305789)
+        self.assertEqual(float(account["availableBalance"]), 37.96533289)
+        self.assertEqual(float(account["executionAvailableBalance"]), 4.93305789)
+        self.assertEqual(float(account["crossedMaxAvailable"]), 4.93305789)
+
+    def test_crossed_executable_balance_assumption_reduces_bitget_futures_payload_size(self) -> None:
+        decision = self._decision(final_mode="futures")
+        live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
+
+        uncapped_market, uncapped_params = live_adapter.build_order_params(
+            decision=decision,
+            reference_price=50000.0,
+        ) or (None, None)
+        self.assertEqual(uncapped_market, "futures")
+        self.assertIsNotNone(uncapped_params)
+        assert uncapped_params is not None
+        self.assertEqual(uncapped_params["size"], "0.04000000")
+
+        session = LivePaperSession(
+            runtime=SimpleNamespace(paper_service=SimpleNamespace(settings=self.settings)),
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_available_balance_usd": 37.96533289,
+            "futures_execution_balance_usd": 4.93305789,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+        }
+
+        capped_decision = session._cap_live_order_decision(decision)
+        capped_market, capped_params = live_adapter.build_order_params(
+            decision=capped_decision,
+            reference_price=50000.0,
+        ) or (None, None)
+
+        self.assertEqual(capped_market, "futures")
+        self.assertIsNotNone(capped_params)
+        assert capped_params is not None
+        self.assertEqual(capped_decision.order_intent_notional_usd, 8.386198)
+        self.assertEqual(capped_params["marginMode"], "crossed")
+        self.assertEqual(capped_params["size"], "0.00016772")
+        self.assertLess(float(capped_params["size"]), float(uncapped_params["size"]))
 
     def test_bitget_paper_live_test_order_mode_runs_without_live_credentials(self) -> None:
         summary = run_paper_live_test_order_mode(
