@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from unittest.mock import patch
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -162,13 +163,18 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(resolve_exchange_id(), "bitget")
 
     def test_runtime_readiness_tracks_bitget_passphrase_requirement(self) -> None:
-        os.environ["BITGET_API_KEY"] = "key"
-        os.environ["BITGET_API_SECRET"] = "secret"
-        readiness = runtime_readiness("bitget")
-        self.assertFalse(readiness.is_ready)
-        os.environ["BITGET_API_PASSPHRASE"] = "passphrase"
-        readiness = runtime_readiness("bitget")
-        self.assertTrue(readiness.is_ready)
+        with patch("quant_binance.exchange._resolve_env_value") as mock_resolve:
+            values = {
+                "BITGET_API_KEY": "key",
+                "BITGET_API_SECRET": "secret",
+                "BITGET_API_PASSPHRASE": "",
+            }
+            mock_resolve.side_effect = lambda name: values.get(name, "")
+            readiness = runtime_readiness("bitget")
+            self.assertFalse(readiness.is_ready)
+            values["BITGET_API_PASSPHRASE"] = "passphrase"
+            readiness = runtime_readiness("bitget")
+            self.assertTrue(readiness.is_ready)
 
     def test_sign_and_request_builders_follow_bitget_headers_and_paths(self) -> None:
         signature = sign_bitget_request(
@@ -236,3 +242,12 @@ class QuantBitgetMigrationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_bitget_kline_granularity_mapping(self) -> None:
+        from quant_binance.execution.bitget_rest import _bitget_granularity
+
+        self.assertEqual(_bitget_granularity(market="spot", interval="5m"), "5min")
+        self.assertEqual(_bitget_granularity(market="spot", interval="1h"), "1h")
+        self.assertEqual(_bitget_granularity(market="futures", interval="5m"), "5m")
+        self.assertEqual(_bitget_granularity(market="futures", interval="1h"), "1H")
