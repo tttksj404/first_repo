@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -175,11 +176,52 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(summary["observe_only_symbols"], ["SIGNUSDT"])
             self.assertTrue(summary_path.exists())
             self.assertTrue(state_path.exists())
+            state_payload = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(state_payload["live_decision_loop"]["closed_decision_kline_count"], 1)
+            self.assertEqual(state_payload["live_decision_loop"]["emitted_decision_count"], 1)
         finally:
             if summary_path.exists():
                 summary_path.unlink()
             if state_path.exists():
                 state_path.unlink()
+
+    def test_session_continues_emitting_after_bootstrap(self) -> None:
+        session = self._build_session()
+        bootstrap_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        session.run_bootstrap_cycle(
+            state=state,
+            primitive_inputs=make_primitive(),
+            history=make_history(),
+            decision_time=bootstrap_time,
+        )
+        decision = session.process_payload(
+            {
+                "stream": "btcusdt@kline_5m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "5m",
+                        "t": 1772971500000,
+                        "T": 1772971799999,
+                        "o": "50000",
+                        "h": "50100",
+                        "l": "49950",
+                        "c": "50080",
+                        "v": "18",
+                        "q": "900000",
+                        "x": True,
+                    },
+                },
+            },
+            now=datetime(2026, 3, 8, 12, 10, 1, tzinfo=timezone.utc),
+        )
+        self.assertIsNotNone(decision)
+        self.assertEqual(len(session.decisions), 2)
+        self.assertEqual(session.decisions[-1].timestamp.isoformat(), "2026-03-08T12:10:00+00:00")
+        self.assertEqual(session.runtime.loop_stats.closed_decision_kline_count, 1)
+        self.assertEqual(session.runtime.loop_stats.emitted_decision_count, 1)
 
     def test_async_runner_consumes_payloads(self) -> None:
         session = self._build_session()
