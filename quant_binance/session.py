@@ -204,13 +204,43 @@ class LivePaperSession:
             ]
         )
 
+    def _consume_capital_after_live_order(self, decision: DecisionIntent) -> None:
+        if not self.capital_report:
+            return
+        if decision.final_mode == "spot":
+            available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
+            self.capital_report["spot_available_balance_usd"] = max(
+                0.0,
+                available - float(decision.order_intent_notional_usd),
+            )
+            return
+        if decision.final_mode == "futures":
+            available = float(self.capital_report.get("futures_available_balance_usd", 0.0))
+            leverage = select_futures_leverage(
+                predictability_score=decision.predictability_score,
+                trend_strength=decision.trend_strength,
+                volume_confirmation=decision.volume_confirmation,
+                liquidity_score=decision.liquidity_score,
+                volatility_penalty=decision.volatility_penalty,
+                overheat_penalty=decision.overheat_penalty,
+                net_expected_edge_bps=decision.net_expected_edge_bps,
+                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+                settings=self.runtime.paper_service.settings,
+            )
+            margin_used = float(decision.order_intent_notional_usd) / max(float(leverage), 1.0)
+            self.capital_report["futures_available_balance_usd"] = max(0.0, available - margin_used)
+
     def _market_capital_allowed(self, decision: DecisionIntent) -> bool:
         if not self.capital_report:
             return True
         if decision.final_mode == "spot":
-            return bool(self.capital_report.get("can_trade_spot_any", False))
+            if bool(self.capital_report.get("can_trade_spot_any", False)):
+                return True
+            return float(self.capital_report.get("spot_available_balance_usd", 0.0)) > 0.0
         if decision.final_mode == "futures":
-            return bool(self.capital_report.get("can_trade_futures_any", False))
+            if bool(self.capital_report.get("can_trade_futures_any", False)):
+                return True
+            return float(self.capital_report.get("futures_available_balance_usd", 0.0)) > 0.0
         return True
 
     def _cash_reserve_fraction(self) -> float:
@@ -298,6 +328,8 @@ class LivePaperSession:
                 else:
                     if live_result is not None:
                         self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                        if live_result.accepted:
+                            self._consume_capital_after_live_order(executable_decision)
                         payload = {
                             "timestamp": timestamp,
                             "symbol": live_result.symbol,

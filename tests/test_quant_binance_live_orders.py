@@ -79,6 +79,39 @@ class FakeLiveOrderClient:
         return {"status": "FILLED", "market": market, "orderId": self.calls}
 
 
+class BitgetMarginCapClient(FakeLiveOrderClient):
+    exchange_id = "bitget"
+
+    def __init__(
+        self,
+        *,
+        available_balance_usd: float,
+        leverage_response: dict[str, object] | None = None,
+        leverage_error: RuntimeError | None = None,
+    ) -> None:
+        super().__init__()
+        self.available_balance_usd = available_balance_usd
+        self.leverage_response = leverage_response if leverage_response is not None else {"leverage": 7}
+        self.leverage_error = leverage_error
+        self.last_order_params: dict[str, object] | None = None
+
+    def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
+        self.leverage_calls.append((symbol, leverage))
+        if self.leverage_error is not None:
+            raise self.leverage_error
+        return dict(self.leverage_response)
+
+    def get_account(self, *, market):  # type: ignore[no-untyped-def]
+        if market != "futures":
+            return {}
+        return {"availableBalance": self.available_balance_usd}
+
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        self.last_order_params = dict(order_params)
+        return {"status": "FILLED", "market": market, "orderId": self.calls}
+
+
 class RaisingLiveOrderClient(FakeLiveOrderClient):
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
@@ -247,6 +280,97 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(params["side"], "BUY")
         self.assertEqual(params["quoteOrderQty"], "2400.00")
         self.assertNotIn("quantity", params)
+
+    def test_live_order_adapter_caps_bitget_futures_size_by_available_balance(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("alpha_max")
+        decision = DecisionIntent(
+            decision_id="d-bitget-cap",
+            decision_hash="hash-bitget-cap",
+            snapshot_id="s-bitget-cap",
+            config_version="2026-03-11.v1",
+            timestamp=datetime(2026, 3, 11, 8, 0, tzinfo=timezone.utc),
+            symbol="XRPUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.58,
+            volume_confirmation=0.57,
+            liquidity_score=0.62,
+            volatility_penalty=0.72,
+            overheat_penalty=0.5,
+            predictability_score=59.7,
+            gross_expected_edge_bps=11.4,
+            net_expected_edge_bps=1.2,
+            estimated_round_trip_cost_bps=10.1,
+            order_intent_notional_usd=1245.607477,
+            stop_distance_bps=134.8,
+        )
+        client = BitgetMarginCapClient(
+            available_balance_usd=40.0,
+            leverage_response={"leverage": 7},
+        )
+        adapter = DecisionLiveOrderAdapter(client, settings)  # type: ignore[arg-type]
+
+        result = adapter.execute_decision(decision=decision, reference_price=8.185)
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertIsNotNone(client.last_order_params)
+        assert client.last_order_params is not None
+        capped_size = float(client.last_order_params["size"])
+        uncapped_size = decision.order_intent_notional_usd / 8.185
+        self.assertLess(capped_size, uncapped_size)
+        expected_max_notional = 40.0 * 7.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
+
+    def test_live_order_adapter_handles_bitget_leverage_margin_error_with_conservative_cap(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("alpha_max")
+        decision = DecisionIntent(
+            decision_id="d-bitget-lev-fail",
+            decision_hash="hash-bitget-lev-fail",
+            snapshot_id="s-bitget-lev-fail",
+            config_version="2026-03-11.v1",
+            timestamp=datetime(2026, 3, 11, 8, 15, tzinfo=timezone.utc),
+            symbol="XRPUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.63,
+            volume_confirmation=0.6,
+            liquidity_score=0.64,
+            volatility_penalty=0.7,
+            overheat_penalty=0.45,
+            predictability_score=62.6,
+            gross_expected_edge_bps=12.0,
+            net_expected_edge_bps=2.0,
+            estimated_round_trip_cost_bps=10.2,
+            order_intent_notional_usd=582.0,
+            stop_distance_bps=128.0,
+        )
+        client = BitgetMarginCapClient(
+            available_balance_usd=40.0,
+            leverage_error=RuntimeError(
+                "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/account/set-leverage: "
+                "code=40893 msg=Unable to update the leverage factor of this position, there is not enough margin!"
+            ),
+        )
+        adapter = DecisionLiveOrderAdapter(client, settings)  # type: ignore[arg-type]
+
+        result = adapter.execute_decision(decision=decision, reference_price=8.185)
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(client.leverage_calls, [("XRPUSDT", 6)])
+        assert client.last_order_params is not None
+        capped_size = float(client.last_order_params["size"])
+        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
 
     def test_session_survives_live_order_exception(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)

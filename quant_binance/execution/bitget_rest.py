@@ -9,6 +9,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from quant_binance.exchange import ExchangeCredentials
@@ -201,6 +202,47 @@ class BitgetRestClient:
             payload["clientOid"] = client_oid
         return payload
 
+    def get_futures_position_mode(self, *, symbol: str) -> str | None:
+        payload = self.send(
+            self.build_signed_request(
+                path="/api/v2/mix/account/account",
+                method="GET",
+                params={
+                    "symbol": symbol,
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                },
+            )
+        )
+        data = payload.get("data", {})
+        if isinstance(data, dict):
+            mode = data.get("posMode")
+            if isinstance(mode, str) and mode:
+                return mode
+        return None
+
+    def _normalize_futures_order_params_for_position_mode(self, params: dict[str, Any]) -> dict[str, Any]:
+        normalized = dict(params)
+        side = str(normalized.get("side", "")).lower()
+        is_buy = side in {"buy", "buy_single", "open_long"}
+        normalized["side"] = "buy" if is_buy else "sell"
+        symbol = str(normalized.get("symbol", "")).upper()
+        if not symbol:
+            return normalized
+        try:
+            pos_mode = self.get_futures_position_mode(symbol=symbol)
+        except Exception:
+            pos_mode = None
+        if pos_mode == "hedge_mode":
+            normalized["tradeSide"] = str(normalized.get("tradeSide", "open")).lower()
+            normalized.pop("reduceOnly", None)
+            normalized.pop("holdSide", None)
+        elif pos_mode == "one_way_mode":
+            normalized.pop("tradeSide", None)
+            normalized["reduceOnly"] = str(normalized.get("reduceOnly", "NO")).upper()
+            normalized.pop("holdSide", None)
+        return normalized
+
     def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return {
             "status": "PREVIEW",
@@ -211,7 +253,73 @@ class BitgetRestClient:
         }
 
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
-        payload = self.send(self.build_live_order_request(market=market, order_params=order_params))
+        def _send(params: dict[str, Any]) -> dict[str, Any]:
+            return self.send(self.build_live_order_request(market=market, order_params=params))
+
+        def _with_balance_backoff(params: dict[str, Any]) -> dict[str, Any]:
+            if market != "futures":
+                return _send(params)
+            current = dict(params)
+            last_error: RuntimeError | None = None
+            for _ in range(10):
+                try:
+                    return _send(current)
+                except RuntimeError as exc:
+                    if "code=40762" not in str(exc):
+                        raise
+                    last_error = exc
+                    try:
+                        size = float(current.get("size", 0.0))
+                    except (TypeError, ValueError):
+                        break
+                    if size <= 0:
+                        break
+                    reduced_size = round(size * 0.6, 8)
+                    if reduced_size <= 0 or reduced_size >= size:
+                        break
+                    current["size"] = f"{reduced_size:.8f}"
+            if last_error is not None:
+                raise last_error
+            return _send(current)
+
+        initial_params = dict(order_params)
+        if market == "futures":
+            initial_params = self._normalize_futures_order_params_for_position_mode(initial_params)
+        try:
+            payload = _with_balance_backoff(initial_params)
+        except RuntimeError as exc:
+            if market != "futures":
+                raise
+            raw_msg = str(exc)
+            side = str(initial_params.get("side", "")).lower()
+            is_buy = side in {"buy", "buy_single", "open_long"}
+            hedge_side = "buy" if is_buy else "sell"
+            one_way_side = "buy_single" if is_buy else "sell_single"
+            legacy_open_side = "open_long" if is_buy else "open_short"
+            hold_side = "long" if is_buy else "short"
+
+            retry_candidates: list[dict[str, Any]] = []
+            if "code=40774" in raw_msg:
+                retry_candidates.append({**initial_params, "side": one_way_side})
+                retry_candidates[-1].pop("tradeSide", None)
+                retry_candidates.append({**initial_params, "side": legacy_open_side, "holdSide": hold_side})
+            elif "code=400172" in raw_msg:
+                retry_candidates.append({**initial_params, "side": hedge_side, "tradeSide": "open"})
+                retry_candidates.append({**initial_params, "side": one_way_side})
+                retry_candidates[-1].pop("tradeSide", None)
+                retry_candidates.append({**initial_params, "side": legacy_open_side, "holdSide": hold_side})
+            else:
+                raise
+
+            last_error: RuntimeError = exc
+            for candidate in retry_candidates:
+                try:
+                    payload = _with_balance_backoff(candidate)
+                    break
+                except RuntimeError as retry_exc:
+                    last_error = retry_exc
+            else:
+                raise last_error
         data = payload.get("data")
         normalized: dict[str, Any] = {
             "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
@@ -252,11 +360,22 @@ class BitgetRestClient:
         if market == "futures":
             data_rows = rows if isinstance(rows, list) else []
             available = 0.0
+            raw_available = 0.0
+            crossed_max_available = 0.0
             for item in data_rows:
                 if str(item.get("marginCoin", "")).upper() == self.contract_config.margin_coin.upper():
-                    available = float(item.get("available", 0.0))
+                    raw_available = float(item.get("available", 0.0))
+                    crossed_max_available = float(item.get("crossedMaxAvailable", 0.0))
+                    # For crossed margin, crossedMaxAvailable reflects openable margin more accurately than raw available.
+                    available = crossed_max_available if crossed_max_available > 0 else raw_available
                     break
-            return {"availableBalance": available, "accounts": data_rows, "raw": payload}
+            return {
+                "availableBalance": available,
+                "rawAvailableBalance": raw_available,
+                "crossedMaxAvailable": crossed_max_available,
+                "accounts": data_rows,
+                "raw": payload,
+            }
         data_rows = rows if isinstance(rows, list) else []
         balances = [
             {
@@ -280,8 +399,17 @@ class BitgetRestClient:
         interval: str,
         limit: int,
     ) -> list[dict[str, Any]]:
+        granularity = interval
+        if market == "spot":
+            if interval.endswith("m"):
+                granularity = f"{interval[:-1]}min"
+        else:
+            if interval.endswith("h"):
+                granularity = f"{interval[:-1]}H"
+            elif interval.endswith("d"):
+                granularity = f"{interval[:-1]}D"
         path = "/api/v2/mix/market/candles" if market == "futures" else "/api/v2/spot/market/candles"
-        params: dict[str, Any] = {"symbol": symbol, "granularity": interval, "limit": limit}
+        params: dict[str, Any] = {"symbol": symbol, "granularity": granularity, "limit": limit}
         if market == "futures":
             params["productType"] = self.contract_config.product_type
         payload = self.send(self.build_public_request(path=path, params=params))
@@ -376,5 +504,18 @@ class BitgetRestClient:
         context = None
         if self.allow_insecure_ssl:
             context = ssl._create_unverified_context()
-        with urlopen(request, timeout=10, context=context) as response:
-            return json.loads(response.read().decode("utf-8"))
+        try:
+            with urlopen(request, timeout=10, context=context) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="ignore")
+            detail = raw
+            try:
+                payload = json.loads(raw) if raw else {}
+                if isinstance(payload, dict):
+                    detail = f"code={payload.get('code')} msg={payload.get('msg')}"
+            except Exception:
+                pass
+            raise RuntimeError(
+                f"Bitget HTTP {exc.code} {exc.reason} for {request.get_method()} {request.full_url}: {detail}"
+            ) from exc

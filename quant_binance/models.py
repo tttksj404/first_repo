@@ -35,6 +35,8 @@ class FeatureVector:
     resistance_penalty: float = 0.0
     macro_regime: str = "neutral"
     macro_risk_penalty: float = 0.0
+    macro_liquidity_support_score: float = 0.5
+    macro_event_risk_score: float = 0.0
     sentiment_regime: str = "neutral"
     sentiment_support_score: float = 0.5
     alt_market_regime: str = "neutral"

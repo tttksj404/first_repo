@@ -1,13 +1,35 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Any
 
 from quant_binance.data.market_store import MarketStateStore
 from quant_binance.data.state import KlineBar, SymbolMarketState, TopOfBook
-from quant_binance.execution.binance_rest import BinanceRestClient
 
 
-def _parse_kline(symbol: str, interval: str, row: list[object]) -> KlineBar:
+def _parse_kline(symbol: str, interval: str, row: Any) -> KlineBar:
+    if isinstance(row, dict):
+        open_time_ms = int(row["open_time"])
+        close_time_ms = open_time_ms
+        if interval.endswith("m"):
+            close_time_ms = open_time_ms + (int(interval[:-1]) * 60 * 1000) - 1
+        elif interval.endswith("h"):
+            close_time_ms = open_time_ms + (int(interval[:-1]) * 60 * 60 * 1000) - 1
+        return KlineBar(
+            symbol=symbol,
+            interval=interval,
+            start_time=datetime.fromtimestamp(open_time_ms / 1000, tz=timezone.utc),
+            close_time=datetime.fromtimestamp(close_time_ms / 1000, tz=timezone.utc),
+            open_price=float(row["open_price"]),
+            high_price=float(row["high_price"]),
+            low_price=float(row["low_price"]),
+            close_price=float(row["close_price"]),
+            volume=float(row["base_volume"]),
+            quote_volume=float(row["quote_volume"]),
+            is_closed=True,
+        )
+    if not isinstance(row, list):
+        raise RuntimeError(f"unsupported kline payload type: {type(row).__name__}")
     return KlineBar(
         symbol=symbol,
         interval=interval,
@@ -25,7 +47,7 @@ def _parse_kline(symbol: str, interval: str, row: list[object]) -> KlineBar:
 
 def seed_market_store_from_rest(
     *,
-    client: BinanceRestClient,
+    client: Any,
     symbols: tuple[str, ...],
     intervals: tuple[str, ...],
 ) -> MarketStateStore:

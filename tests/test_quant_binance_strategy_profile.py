@@ -31,6 +31,13 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertEqual(settings.mode_thresholds.spot_score_min, 55)
         self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 1.5)
 
+    def test_explicit_profile_override_ignores_env_profile(self) -> None:
+        os.environ["STRATEGY_PROFILE"] = "conservative"
+        settings = Settings.load(CONFIG_PATH, strategy_profile="scalp_ultra")
+        self.assertEqual(settings.strategy_profile, "scalp_ultra")
+        self.assertEqual(settings.decision_engine.decision_interval_minutes, 1)
+        self.assertEqual(settings.expected_edge.futures_horizon_minutes, 30)
+
     def test_balanced_profile_relaxes_spot_and_futures_constraints(self) -> None:
         os.environ["STRATEGY_PROFILE"] = "balanced"
         settings = Settings.load(CONFIG_PATH)
@@ -86,6 +93,17 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertTrue(settings.portfolio_focus.enabled)
         self.assertEqual(settings.portfolio_focus.spot_top_n, 1)
         self.assertEqual(settings.portfolio_focus.futures_top_n, 2)
+
+    def test_alpha_max_profile_enables_risk_on_overrides(self) -> None:
+        os.environ["STRATEGY_PROFILE"] = "alpha_max"
+        settings = Settings.load(CONFIG_PATH)
+        self.assertEqual(settings.strategy_profile, "alpha_max")
+        self.assertEqual(settings.mode_thresholds.futures_score_min, 54)
+        self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 0.82)
+        self.assertEqual(settings.risk.target_futures_leverage, 7.0)
+        self.assertEqual(settings.risk.max_futures_leverage, 12.0)
+        self.assertEqual(settings.futures_exposure.soft_reason_override_edge_to_cost_multiple_min, 0.88)
+        self.assertEqual(settings.futures_exposure.soft_reason_override_min_entry_net_edge_bps, 0.6)
 
     def test_active_profile_allows_strong_bearish_futures_short_under_caution(self) -> None:
         os.environ["STRATEGY_PROFILE"] = "active"
