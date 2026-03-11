@@ -15,6 +15,7 @@ from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.service import PaperTradingService
 from quant_binance.session import LivePaperSession
+from quant_binance.risk.sizing import select_futures_leverage
 from quant_binance.settings import Settings
 from quant_binance.observability.log_store import JsonlLogStore
 
@@ -247,6 +248,125 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(params["side"], "BUY")
         self.assertEqual(params["quoteOrderQty"], "2400.00")
         self.assertNotIn("quantity", params)
+
+    def test_session_caps_futures_notional_to_execution_balance(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        session.capital_report = {
+            "futures_available_balance_usd": 37.96533289,
+            "futures_execution_balance_usd": 4.85780789,
+            "can_trade_futures_any": True,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-exec-cap",
+            decision_hash="hash-exec-cap",
+            snapshot_id="s-exec-cap",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision)
+
+        leverage = select_futures_leverage(
+            predictability_score=decision.predictability_score,
+            trend_strength=decision.trend_strength,
+            volume_confirmation=decision.volume_confirmation,
+            liquidity_score=decision.liquidity_score,
+            volatility_penalty=decision.volatility_penalty,
+            overheat_penalty=decision.overheat_penalty,
+            net_expected_edge_bps=decision.net_expected_edge_bps,
+            estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+            settings=self.settings,
+        )
+        expected = round(
+            4.85780789 * leverage * (1.0 - self.settings.cash_reserve.when_futures_enabled),
+            6,
+        )
+        self.assertEqual(capped.order_intent_notional_usd, expected)
+        self.assertLess(capped.order_intent_notional_usd, decision.order_intent_notional_usd)
+
+    def test_session_caps_spot_notional_to_usdt_execution_balance_even_with_recognized_coin_assets(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        session.capital_report = {
+            "spot_available_balance_usd": 10.0,
+            "spot_recognized_balance_usd": 510.0,
+            "can_trade_spot_any": True,
+            "futures_requirements": [],
+            "spot_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-spot-exec-cap",
+            decision_hash="hash-spot-exec-cap",
+            snapshot_id="s-spot-exec-cap",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="BTCUSDT",
+            candidate_mode="spot",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=70.0,
+            gross_expected_edge_bps=20.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=8.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision)
+
+        expected = round(10.0 * (1.0 - self.settings.cash_reserve.when_futures_disabled), 6)
+        self.assertEqual(capped.order_intent_notional_usd, expected)
+        self.assertLess(capped.order_intent_notional_usd, decision.order_intent_notional_usd)
 
     def test_session_survives_live_order_exception(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
