@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from quant_binance.models import DecisionIntent
+from quant_binance.observability.log_store import _json_ready
 
 
 def build_runtime_summary(
@@ -42,4 +43,4 @@ def build_runtime_summary(
 def write_runtime_summary(path: str | Path, summary: dict[str, object]) -> None:
     output_path = Path(path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+    output_path.write_text(json.dumps(_json_ready(summary), indent=2, sort_keys=True), encoding="utf-8")

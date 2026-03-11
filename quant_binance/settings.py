@@ -160,6 +160,24 @@ class MacroGateConfig:
 
 
 @dataclass(frozen=True)
+class FuturesExposureConfig:
+    soft_liquidity_floor: float
+    soft_volatility_penalty_max: float
+    soft_overheat_penalty_max: float
+    reduced_size_multiplier: float
+    min_entry_net_edge_bps: float
+    reduced_entry_net_edge_bps: float
+    strong_score_buffer: float
+    strong_trend_strength_min: float
+    strong_volume_confirmation_min: float
+    strong_liquidity_min: float
+    strong_volatility_penalty_max: float
+    strong_overheat_penalty_max: float
+    strong_edge_to_cost_multiple_min: float
+    strong_size_multiplier: float
+
+
+@dataclass(frozen=True)
 class CashReserveConfig:
     when_futures_enabled: float
     when_futures_disabled: float
@@ -202,6 +220,7 @@ class Settings:
     mode_behavior: ModeBehaviorConfig
     spot_support: SpotSupportConfig
     macro_gates: MacroGateConfig
+    futures_exposure: FuturesExposureConfig
     cash_reserve: CashReserveConfig
     altcoin_overlays: AltcoinOverlayConfig
     symbol_eligibility: SymbolEligibilityConfig
@@ -242,6 +261,7 @@ class Settings:
             mode_behavior=ModeBehaviorConfig(**raw["mode_behavior"]),
             spot_support=SpotSupportConfig(**raw["spot_support"]),
             macro_gates=MacroGateConfig(**raw["macro_gates"]),
+            futures_exposure=FuturesExposureConfig(**raw["futures_exposure"]),
             cash_reserve=CashReserveConfig(**raw["cash_reserve"]),
             altcoin_overlays=AltcoinOverlayConfig(**raw["altcoin_overlays"]),
             symbol_eligibility=SymbolEligibilityConfig(**raw["symbol_eligibility"]),
