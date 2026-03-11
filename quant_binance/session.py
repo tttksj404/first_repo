@@ -157,6 +157,7 @@ class LivePaperSession:
                 "heartbeat_count": self.heartbeat_count,
                 "last_event_timestamp": self.last_event_timestamp,
                 "last_decision_timestamp": self.last_decision_timestamp,
+                "live_decision_loop": self.runtime.loop_stats.as_dict(),
                 "capital_report": self.capital_report,
                 "kill_switch": self.runtime.kill_switch.status(),
             },
