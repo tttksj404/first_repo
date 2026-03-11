@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from quant_binance.models import DecisionIntent
-from quant_binance.risk.sizing import quantity_from_notional
+from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
 from quant_binance.settings import Settings
 
 
@@ -34,27 +34,17 @@ class DecisionLiveOrderAdapter:
     def _target_futures_leverage(self, decision: DecisionIntent) -> int:
         if self.settings is None:
             return 1
-        risk = self.settings.risk
-        thresholds = self.settings.mode_thresholds
-        strong_setup = (
-            decision.predictability_score >= thresholds.futures_score_min + 8.0
-            and decision.net_expected_edge_bps >= decision.estimated_round_trip_cost_bps * 1.8
-            and decision.liquidity_score >= thresholds.futures_liquidity_min + 0.08
-            and decision.volatility_penalty <= max(0.0, thresholds.futures_volatility_penalty_max - 0.10)
-            and decision.overheat_penalty <= max(0.0, thresholds.futures_overheat_penalty_max - 0.08)
+        return select_futures_leverage(
+            predictability_score=decision.predictability_score,
+            trend_strength=decision.trend_strength,
+            volume_confirmation=decision.volume_confirmation,
+            liquidity_score=decision.liquidity_score,
+            volatility_penalty=decision.volatility_penalty,
+            overheat_penalty=decision.overheat_penalty,
+            net_expected_edge_bps=decision.net_expected_edge_bps,
+            estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+            settings=self.settings,
         )
-        good_setup = (
-            decision.predictability_score >= thresholds.futures_score_min + 3.0
-            and decision.net_expected_edge_bps >= decision.estimated_round_trip_cost_bps * 1.25
-            and decision.liquidity_score >= thresholds.futures_liquidity_min
-            and decision.volatility_penalty <= thresholds.futures_volatility_penalty_max
-            and decision.overheat_penalty <= thresholds.futures_overheat_penalty_max
-        )
-        if strong_setup:
-            return max(1, int(round(risk.max_futures_leverage)))
-        if good_setup:
-            return max(1, int(round(risk.target_futures_leverage)))
-        return 1
 
     def build_order_params(
         self,
