@@ -1,8 +1,10 @@
-# Binance Quant System Blueprint
+# Crypto Quant System Blueprint
 
 ## Goal
 
-This directory defines the implementation blueprint for a Binance regime-switching crypto trading system.
+This directory defines the implementation blueprint for a regime-switching crypto trading system.
+
+The package name is still `quant_binance` during the migration window, but runtime wiring is now Bitget-first for credentials and REST execution.
 
 The design intentionally separates market-state inference from execution so futures usage can be gated by quantifiable predictability rather than discretionary confidence.
 
@@ -61,9 +63,9 @@ quant_binance/
 
 - `replay`: run frozen snapshot fixtures through the deterministic strategy path
 - `paper-live`: run paper cycles from prebuilt fixture objects
-- `paper-live-test-order`: generate decisions and validate them against Binance `order/test`
+- `paper-live-test-order`: generate decisions and validate them against the active exchange adapter
 - `paper-live-shell`: run the event-driven paper shell with reconnect/backoff and periodic flush
-- `env-check`: verify required Binance API environment variables are present
+- `env-check`: verify required exchange API environment variables are present
 
 ## Output Convention
 
@@ -100,7 +102,7 @@ See [OPERATIONS.md](/Users/tttksj/first_repo/quant_binance/OPERATIONS.md) for th
 See [STRATEGY_REFINEMENT_FROM_NAVER.md](/Users/tttksj/first_repo/quant_binance/STRATEGY_REFINEMENT_FROM_NAVER.md) for rules extracted from crawled premium content and how they should influence the system.
 See [ALTCOIN_INTELLIGENCE.md](/Users/tttksj/first_repo/quant_binance/ALTCOIN_INTELLIGENCE.md) for the external altcoin-intelligence mapping.
 
-For local single-user usage, `quant_binance.env` checks shell environment first and then repository-root `.env` / `.env.local`.
+For local single-user usage, exchange env resolution checks shell environment first and then repository-root `.env` / `.env.local`.
 If `UNIVERSE_SYMBOLS` is set, it overrides the configured local trading universe.
 The Naver extraction helper saves markdown, screenshot, and downloaded article-body images when available.
 If `MACRO_INPUTS_PATH` or `MACRO_INPUTS_JSON` is set, macro regime inputs are loaded and applied before regime selection.
@@ -127,3 +129,8 @@ If `ALTCOIN_INPUTS_PATH` or `ALTCOIN_INPUTS_JSON` is set, altcoin intelligence i
 6. Paper broker adapter
 7. Replay/backtest harness
 8. Live execution adapter
+
+## Migration Status
+
+- Bitget-ready now: exchange/env selection, Bitget REST signing, Bitget order-preview mode, Bitget order parameter mapping, Bitget-first script defaults.
+- Still pending: live websocket market-data translation and the long-running live daemon for Bitget.

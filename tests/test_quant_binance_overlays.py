@@ -59,10 +59,43 @@ class QuantBinanceOverlayTests(unittest.TestCase):
             fed_balance_sheet_30d_pct=-0.1,
             mmf_30d_pct=0.2,
             labor_stress_score=0.8,
+            event_risk_score=1.0,
+            btc_safe_haven_score=0.0,
         )
         enriched = apply_macro_overlay(features, macro)
         self.assertEqual(enriched.macro_regime, "high_risk")
         self.assertGreaterEqual(enriched.macro_risk_penalty, 0.65)
+
+    def test_macro_overlay_marks_supportive_when_dollar_and_rates_fall(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8, ret_rank_4h=0.8, breakout_norm=0.8, ema_stack_score=1.0,
+            vol_z_5m_norm=0.7, vol_z_1h_norm=0.7, taker_imbalance_norm=0.7,
+            spread_bps_norm=0.2, probe_slippage_bps_norm=0.2, depth_10bps_norm=0.8,
+            book_stability_norm=0.8, realized_vol_1h_norm=0.3, realized_vol_4h_norm=0.3,
+            vol_shock_norm=0.3, funding_abs_percentile=0.2, oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.2, regime_alignment=1.0, trend_direction=1,
+            trend_strength=0.8, volume_confirmation=0.7, liquidity_score=0.8,
+            volatility_penalty=0.3, overheat_penalty=0.2, gross_expected_edge_bps=30.0,
+            estimated_round_trip_cost_bps=10.0
+        )
+        macro = MacroInputs(
+            truflation_yoy=1.9,
+            us10y_yield=4.1,
+            oil_momentum_pct=1.0,
+            tga_drain_score=0.7,
+            fed_balance_sheet_30d_pct=0.4,
+            mmf_30d_pct=-0.2,
+            labor_stress_score=0.3,
+            us10y_change_30d_bps=-35.0,
+            dxy_change_30d_pct=-2.0,
+            fed_liquidity_score=0.8,
+            policy_easing_score=0.75,
+            event_risk_score=0.2,
+            btc_safe_haven_score=0.65,
+        )
+        enriched = apply_macro_overlay(features, macro)
+        self.assertEqual(enriched.macro_regime, "supportive")
+        self.assertGreater(enriched.macro_liquidity_support_score, 0.7)
 
     def test_sentiment_overlay_marks_bottoming(self) -> None:
         features = FeatureVector(

@@ -91,11 +91,29 @@ class QuantBinanceOpsTests(unittest.TestCase):
             tested_orders=[{"symbol": "BTCUSDT"}],
             account_snapshot={"accountType": "SPOT"},
             open_orders_snapshot=[],
+            closed_trades=[
+                {
+                    "symbol": "BTCUSDT",
+                    "market": "spot",
+                    "exit_reason": "PARTIAL_TAKE_PROFIT",
+                    "realized_pnl_usd_estimate": 12.5,
+                    "realized_return_bps_estimate": 50.0,
+                }
+            ],
+            open_spot_positions=[
+                {
+                    "symbol": "ETHUSDT",
+                    "unrealized_pnl_usd_estimate": 7.5,
+                }
+            ],
             kill_switch_status={"armed": False, "reasons": []},
         )
         write_runtime_summary(self.summary_path, summary)
         self.assertTrue(self.summary_path.exists())
         self.assertIn("tested_order_count", self.summary_path.read_text(encoding="utf-8"))
+        self.assertEqual(summary["realized_pnl_usd_estimate"], 12.5)
+        self.assertEqual(summary["unrealized_pnl_usd_estimate"], 7.5)
+        self.assertEqual(summary["exit_reason_counts"], {"PARTIAL_TAKE_PROFIT": 1})
 
         write_runtime_state(self.state_path, {"mode": "paper-live"})
         payload = read_runtime_state(self.state_path)

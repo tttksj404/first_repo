@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from quant_binance.env import resolve_strategy_profile, resolve_universe_symbols
+from quant_binance.env import resolve_strategy_override_path, resolve_strategy_profile, resolve_universe_symbols
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -151,6 +151,12 @@ class SpotSupportConfig:
     liquidity_relaxation: float = 0.0
     breakout_resistance_override_min: float = 1.0
     bottoming_support_override_min: float = 1.0
+    priority_symbols: tuple[str, ...] = ()
+    priority_support_alignment_min: float = 0.0
+    priority_resistance_penalty_max: float = 1.0
+    priority_sentiment_support_min: float = 0.0
+    priority_liquidity_relaxation: float = 0.0
+    priority_edge_relaxation_bps: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -175,6 +181,20 @@ class FuturesExposureConfig:
     strong_overheat_penalty_max: float
     strong_edge_to_cost_multiple_min: float
     strong_size_multiplier: float
+    macro_support_min: float = 0.7
+    macro_score_relaxation: float = 0.0
+    macro_liquidity_relaxation: float = 0.0
+    macro_overheat_relaxation: float = 0.0
+    macro_volatility_relaxation: float = 0.0
+    macro_min_entry_net_edge_bps: float = 6.0
+    macro_edge_to_cost_multiple_min: float = 1.0
+    macro_allow_caution: bool = False
+    priority_symbols: tuple[str, ...] = ()
+    priority_score_relaxation: float = 0.0
+    priority_min_entry_net_edge_bps: float = 0.0
+    priority_edge_to_cost_multiple_min: float = 1.0
+    priority_volatility_relaxation: float = 0.0
+    priority_allow_caution: bool = False
 
 
 @dataclass(frozen=True)
@@ -196,6 +216,23 @@ class SymbolEligibilityConfig:
     observe_only_liquidity_max: float
     observe_only_alt_liquidity_max: float
     observe_only_cost_bps_min: float
+
+
+@dataclass(frozen=True)
+class PortfolioFocusConfig:
+    enabled: bool
+    spot_top_n: int
+    futures_top_n: int
+    min_score_advantage_to_replace: float
+    min_net_edge_advantage_bps: float = 0.0
+    min_incremental_pnl_usd: float = 0.0
+
+
+@dataclass(frozen=True)
+class HousekeepingConfig:
+    enabled: bool
+    max_log_bytes_per_stream: int
+    keep_recent_runs: int
 
 
 @dataclass(frozen=True)
@@ -224,6 +261,8 @@ class Settings:
     cash_reserve: CashReserveConfig
     altcoin_overlays: AltcoinOverlayConfig
     symbol_eligibility: SymbolEligibilityConfig
+    portfolio_focus: PortfolioFocusConfig
+    housekeeping: HousekeepingConfig
     strategy_profile: str
 
     @classmethod
@@ -232,6 +271,11 @@ class Settings:
             raw = json.load(handle)
         profile = resolve_strategy_profile() or "conservative"
         raw = _deep_merge(raw, raw.get("strategy_profiles", {}).get(profile, {}))
+        override_path = resolve_strategy_override_path()
+        if override_path:
+            candidate = Path(override_path)
+            if candidate.exists():
+                raw = _deep_merge(raw, json.loads(candidate.read_text(encoding="utf-8")))
         override_symbols = resolve_universe_symbols()
         if override_symbols:
             raw["universe"] = list(override_symbols)
@@ -240,6 +284,10 @@ class Settings:
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "Settings":
+        spot_support_raw = dict(raw["spot_support"])
+        spot_support_raw["priority_symbols"] = tuple(spot_support_raw.get("priority_symbols", ()))
+        futures_exposure_raw = dict(raw["futures_exposure"])
+        futures_exposure_raw["priority_symbols"] = tuple(futures_exposure_raw.get("priority_symbols", ()))
         return cls(
             config_version=raw["config_version"],
             snapshot_schema_version=raw["snapshot_schema_version"],
@@ -259,11 +307,13 @@ class Settings:
             operational_limits=OperationalLimitConfig(**raw["operational_limits"]),
             validation=ValidationConfig(**raw["validation"]),
             mode_behavior=ModeBehaviorConfig(**raw["mode_behavior"]),
-            spot_support=SpotSupportConfig(**raw["spot_support"]),
+            spot_support=SpotSupportConfig(**spot_support_raw),
             macro_gates=MacroGateConfig(**raw["macro_gates"]),
-            futures_exposure=FuturesExposureConfig(**raw["futures_exposure"]),
+            futures_exposure=FuturesExposureConfig(**futures_exposure_raw),
             cash_reserve=CashReserveConfig(**raw["cash_reserve"]),
             altcoin_overlays=AltcoinOverlayConfig(**raw["altcoin_overlays"]),
             symbol_eligibility=SymbolEligibilityConfig(**raw["symbol_eligibility"]),
+            portfolio_focus=PortfolioFocusConfig(**raw["portfolio_focus"]),
+            housekeeping=HousekeepingConfig(**raw["housekeeping"]),
             strategy_profile=raw["strategy_profile"],
         )
