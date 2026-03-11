@@ -23,6 +23,22 @@ PrimitiveBuilder = Callable[[str, datetime], PrimitiveInputs]
 HistoryProvider = Callable[[str, datetime], FeatureHistoryContext]
 
 
+def _binance_interval_label(interval_minutes: int) -> str:
+    if interval_minutes % (24 * 60) == 0:
+        return f"{interval_minutes // (24 * 60)}d"
+    if interval_minutes % 60 == 0:
+        return f"{interval_minutes // 60}h"
+    return f"{interval_minutes}m"
+
+
+def _closed_kline_decision_time(kline: dict[str, Any]) -> datetime:
+    close_time = datetime.fromtimestamp(int(kline["T"]) / 1000, tz=timezone.utc)
+    if close_time.second == 0 and close_time.microsecond == 0:
+        return close_time
+    # Binance live kline close timestamps are the final millisecond inside the bar.
+    return datetime.fromtimestamp((int(kline["T"]) + 1) / 1000, tz=timezone.utc)
+
+
 class EventDispatcher:
     def __init__(self, store: MarketStateStore) -> None:
         self.store = store
@@ -90,6 +106,7 @@ class LivePaperRuntime:
         self.primitive_builder = primitive_builder
         self.history_provider = history_provider
         self.decision_interval_minutes = decision_interval_minutes
+        self.decision_interval_stream = _binance_interval_label(decision_interval_minutes)
         self.kill_switch = kill_switch or KillSwitch()
         self.eligible_symbols = eligible_symbols
 
@@ -112,8 +129,10 @@ class LivePaperRuntime:
         kline = data["k"]
         if not bool(kline["x"]):
             return None
-        decision_time = datetime.fromtimestamp(kline["T"] / 1000, tz=timezone.utc)
-        if decision_time.minute % self.decision_interval_minutes != 0:
+        if str(kline.get("i", "")) != self.decision_interval_stream:
+            return None
+        decision_time = _closed_kline_decision_time(kline)
+        if int(decision_time.timestamp() // 60) % self.decision_interval_minutes != 0:
             return None
         state = self.dispatcher.store.get(symbol)
         if state is None:
