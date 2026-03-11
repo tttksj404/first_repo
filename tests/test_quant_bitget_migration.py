@@ -224,6 +224,41 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(futures_result.market, "futures")
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
         self.assertEqual(live_client.orders[0][1]["productType"], "USDT-FUTURES")
+        self.assertEqual(live_client.orders[0][1]["side"], "buy")
+        self.assertEqual(live_client.orders[0][1]["reduceOnly"], "NO")
+        self.assertNotIn("tradeSide", live_client.orders[0][1])
+        self.assertNotIn("holdSide", live_client.orders[0][1])
+
+    def test_bitget_futures_order_params_follow_one_way_mode_contract(self) -> None:
+        client = BitgetRestClient(credentials=None)
+
+        open_params = client.build_order_params(
+            market="futures",
+            symbol="BTCUSDT",
+            side="BUY",
+            order_type="MARKET",
+            quantity=0.04,
+            reduce_only=False,
+            client_oid="open-1",
+        )
+        self.assertEqual(open_params["side"], "buy")
+        self.assertEqual(open_params["reduceOnly"], "NO")
+        self.assertNotIn("tradeSide", open_params)
+        self.assertNotIn("holdSide", open_params)
+
+        close_params = client.build_order_params(
+            market="futures",
+            symbol="BTCUSDT",
+            side="SELL",
+            order_type="MARKET",
+            quantity=0.04,
+            reduce_only=True,
+            client_oid="close-1",
+        )
+        self.assertEqual(close_params["side"], "sell")
+        self.assertEqual(close_params["reduceOnly"], "YES")
+        self.assertNotIn("tradeSide", close_params)
+        self.assertNotIn("holdSide", close_params)
 
     def test_bitget_paper_live_test_order_mode_runs_without_live_credentials(self) -> None:
         summary = run_paper_live_test_order_mode(
