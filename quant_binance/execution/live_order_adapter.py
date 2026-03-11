@@ -9,6 +9,8 @@ from quant_binance.settings import Settings
 
 
 class SupportsLiveOrder(Protocol):
+    exchange_id: str
+
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         ...
 
@@ -30,6 +32,9 @@ class DecisionLiveOrderAdapter:
     def __init__(self, client: SupportsLiveOrder, settings: Settings | None = None) -> None:
         self.client = client
         self.settings = settings
+
+    def _exchange_id(self) -> str:
+        return getattr(self.client, "exchange_id", "binance")
 
     def _target_futures_leverage(self, decision: DecisionIntent) -> int:
         if self.settings is None:
@@ -57,6 +62,23 @@ class DecisionLiveOrderAdapter:
         quantity = quantity_from_notional(decision.order_intent_notional_usd, reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
         side = "BUY" if decision.side == "long" else "SELL"
+        if self._exchange_id() == "bitget":
+            params = {
+                "symbol": decision.symbol,
+                "side": side.lower(),
+                "orderType": "market",
+                "clientOid": decision.decision_id,
+            }
+            if market == "spot" and side == "BUY":
+                params["size"] = f"{decision.order_intent_notional_usd:.2f}"
+            else:
+                params["size"] = f"{quantity:.8f}"
+            if market == "futures":
+                params["productType"] = "USDT-FUTURES"
+                params["marginCoin"] = "USDT"
+                params["marginMode"] = "crossed"
+                params["reduceOnly"] = "NO"
+            return market, params
         params = {
             "symbol": decision.symbol,
             "side": side,
@@ -85,7 +107,7 @@ class DecisionLiveOrderAdapter:
             leverage = self._target_futures_leverage(decision)
             self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
         response = self.client.place_order(market=market, order_params=order_params)
-        quantity = float(order_params.get("quantity", 0.0))
+        quantity = float(order_params.get("quantity", order_params.get("size", 0.0)))
         accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
         return LiveOrderResult(
             symbol=decision.symbol,
