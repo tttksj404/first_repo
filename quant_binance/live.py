@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
@@ -21,6 +22,52 @@ from quant_binance.service import PaperTradingService
 
 PrimitiveBuilder = Callable[[str, datetime], PrimitiveInputs]
 HistoryProvider = Callable[[str, datetime], FeatureHistoryContext]
+
+
+@dataclass
+class LiveDecisionLoopStats:
+    closed_decision_kline_count: int = 0
+    emitted_decision_count: int = 0
+    dropped_closed_decision_kline_reasons: dict[str, int] = field(default_factory=dict)
+    last_closed_decision_kline_symbol: str | None = None
+    last_closed_decision_time: datetime | None = None
+    last_emitted_symbol: str | None = None
+    last_emitted_decision_time: datetime | None = None
+    last_drop_symbol: str | None = None
+    last_drop_decision_time: datetime | None = None
+    last_drop_reason: str | None = None
+
+    def note_closed_kline(self, *, symbol: str, decision_time: datetime) -> None:
+        self.closed_decision_kline_count += 1
+        self.last_closed_decision_kline_symbol = symbol
+        self.last_closed_decision_time = decision_time
+
+    def note_emitted_decision(self, *, symbol: str, decision_time: datetime) -> None:
+        self.emitted_decision_count += 1
+        self.last_emitted_symbol = symbol
+        self.last_emitted_decision_time = decision_time
+
+    def note_drop(self, *, reason: str, symbol: str, decision_time: datetime) -> None:
+        self.dropped_closed_decision_kline_reasons[reason] = (
+            self.dropped_closed_decision_kline_reasons.get(reason, 0) + 1
+        )
+        self.last_drop_symbol = symbol
+        self.last_drop_decision_time = decision_time
+        self.last_drop_reason = reason
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "closed_decision_kline_count": self.closed_decision_kline_count,
+            "emitted_decision_count": self.emitted_decision_count,
+            "dropped_closed_decision_kline_reasons": dict(self.dropped_closed_decision_kline_reasons),
+            "last_closed_decision_kline_symbol": self.last_closed_decision_kline_symbol,
+            "last_closed_decision_time": self.last_closed_decision_time,
+            "last_emitted_symbol": self.last_emitted_symbol,
+            "last_emitted_decision_time": self.last_emitted_decision_time,
+            "last_drop_symbol": self.last_drop_symbol,
+            "last_drop_decision_time": self.last_drop_decision_time,
+            "last_drop_reason": self.last_drop_reason,
+        }
 
 
 def _binance_interval_label(interval_minutes: int) -> str:
@@ -109,6 +156,7 @@ class LivePaperRuntime:
         self.decision_interval_stream = _binance_interval_label(decision_interval_minutes)
         self.kill_switch = kill_switch or KillSwitch()
         self.eligible_symbols = eligible_symbols
+        self.loop_stats = LiveDecisionLoopStats()
 
     def on_payload(
         self,
@@ -117,35 +165,73 @@ class LivePaperRuntime:
         equity_usd: float,
         remaining_portfolio_capacity_usd: float,
     ) -> DecisionIntent | None:
+        stream = payload.get("stream", "")
+        data = payload.get("data", payload)
+        kline = data.get("k") if isinstance(data, dict) else None
+        is_closed_decision_kline = (
+            "@kline_" in stream
+            and isinstance(kline, dict)
+            and bool(kline.get("x"))
+            and str(kline.get("i", "")) == self.decision_interval_stream
+        )
         if self.kill_switch.armed:
+            if is_closed_decision_kline:
+                symbol = str(kline.get("s") or data.get("s") or "")
+                decision_time = _closed_kline_decision_time(kline)
+                self.loop_stats.note_closed_kline(symbol=symbol, decision_time=decision_time)
+                self.loop_stats.note_drop(
+                    reason="KILL_SWITCH_ARMED",
+                    symbol=symbol,
+                    decision_time=decision_time,
+                )
             return None
         symbol = self.dispatcher.dispatch(payload)
         if symbol is None:
             return None
-        stream = payload.get("stream", "")
         if "@kline_" not in stream:
             return None
-        data = payload.get("data", payload)
-        kline = data["k"]
+        if not isinstance(data, dict) or not isinstance(kline, dict):
+            return None
         if not bool(kline["x"]):
             return None
         if str(kline.get("i", "")) != self.decision_interval_stream:
             return None
         decision_time = _closed_kline_decision_time(kline)
+        self.loop_stats.note_closed_kline(symbol=symbol, decision_time=decision_time)
         if int(decision_time.timestamp() // 60) % self.decision_interval_minutes != 0:
+            self.loop_stats.note_drop(
+                reason="MISALIGNED_CLOSE_TIME",
+                symbol=symbol,
+                decision_time=decision_time,
+            )
             return None
         state = self.dispatcher.store.get(symbol)
         if state is None:
+            self.loop_stats.note_drop(
+                reason="MISSING_STATE",
+                symbol=symbol,
+                decision_time=decision_time,
+            )
             return None
         if self.eligible_symbols is not None and symbol not in self.eligible_symbols:
+            self.loop_stats.note_drop(
+                reason="INELIGIBLE_SYMBOL",
+                symbol=symbol,
+                decision_time=decision_time,
+            )
             return None
         stale_ms = state.freshness_ms(decision_time)
         if stale_ms > self.paper_service.settings.operational_limits.stale_data_alarm_sla_seconds * 1000:
             self.kill_switch.arm("STALE_DATA")
+            self.loop_stats.note_drop(
+                reason="STALE_DATA",
+                symbol=symbol,
+                decision_time=decision_time,
+            )
             return None
         primitive_inputs = self.primitive_builder(symbol, decision_time)
         history = self.history_provider(symbol, decision_time)
-        return self.paper_service.run_cycle(
+        decision = self.paper_service.run_cycle(
             state=state,
             primitive_inputs=primitive_inputs,
             history=history,
@@ -153,3 +239,5 @@ class LivePaperRuntime:
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
         )
+        self.loop_stats.note_emitted_decision(symbol=symbol, decision_time=decision_time)
+        return decision

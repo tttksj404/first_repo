@@ -138,6 +138,9 @@ class QuantBinanceLiveTests(unittest.TestCase):
         assert decision is not None
         self.assertEqual(decision.symbol, "BTCUSDT")
         self.assertIn(decision.final_mode, {"futures", "spot", "cash"})
+        self.assertEqual(runtime.loop_stats.closed_decision_kline_count, 1)
+        self.assertEqual(runtime.loop_stats.emitted_decision_count, 1)
+        self.assertEqual(runtime.loop_stats.dropped_closed_decision_kline_reasons, {})
 
     def test_live_runtime_triggers_on_real_binance_closed_5m_kline_timestamp(self) -> None:
         _, runtime = self._make_runtime()
@@ -164,6 +167,8 @@ class QuantBinanceLiveTests(unittest.TestCase):
             remaining_portfolio_capacity_usd=5000.0,
         )
         self.assertIsNotNone(decision)
+        self.assertEqual(runtime.loop_stats.closed_decision_kline_count, 1)
+        self.assertEqual(runtime.loop_stats.emitted_decision_count, 1)
 
     def test_live_runtime_ignores_closed_non_decision_interval_kline(self) -> None:
         _, runtime = self._make_runtime()
@@ -190,6 +195,8 @@ class QuantBinanceLiveTests(unittest.TestCase):
             remaining_portfolio_capacity_usd=5000.0,
         )
         self.assertIsNone(decision)
+        self.assertEqual(runtime.loop_stats.closed_decision_kline_count, 0)
+        self.assertEqual(runtime.loop_stats.emitted_decision_count, 0)
 
     def test_live_runtime_skips_ineligible_symbols(self) -> None:
         _, runtime = self._make_runtime()
@@ -217,6 +224,12 @@ class QuantBinanceLiveTests(unittest.TestCase):
             remaining_portfolio_capacity_usd=5000.0,
         )
         self.assertIsNone(decision)
+        self.assertEqual(runtime.loop_stats.closed_decision_kline_count, 1)
+        self.assertEqual(runtime.loop_stats.emitted_decision_count, 0)
+        self.assertEqual(
+            runtime.loop_stats.dropped_closed_decision_kline_reasons,
+            {"INELIGIBLE_SYMBOL": 1},
+        )
 
 
 if __name__ == "__main__":
