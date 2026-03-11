@@ -9,8 +9,8 @@ from quant_binance.backtest.fixtures import load_snapshot_fixture
 from quant_binance.backtest.paper_live_fixtures import load_paper_live_cycles
 from quant_binance.backtest.replay import run_replay
 from quant_binance.daemon import run_live_paper_daemon
-from quant_binance.env import load_binance_credentials_from_env, runtime_readiness
-from quant_binance.execution.binance_rest import BinanceRestClient
+from quant_binance.exchange import resolve_exchange_id, runtime_readiness
+from quant_binance.execution.client_factory import build_exchange_rest_client
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
@@ -23,7 +23,7 @@ from quant_binance.settings import Settings
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Binance quant runtime entrypoint")
+    parser = argparse.ArgumentParser(description="Bitget-first quant runtime entrypoint")
     parser.add_argument(
         "--mode",
         choices=("replay", "paper-live", "paper-live-test-order", "paper-live-shell", "live-paper-daemon", "live-auto-trade-daemon", "env-check"),
@@ -38,6 +38,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--insecure-ssl", action="store_true")
     parser.add_argument("--output-base", default="quant_runtime")
     parser.add_argument("--ack-live-risk", default="")
+    parser.add_argument("--exchange", default="")
     return parser
 
 
@@ -92,15 +93,18 @@ def run_paper_live_test_order_mode(
     fixture_path: str | Path,
     equity_usd: float,
     capacity_usd: float,
-    client: BinanceRestClient | None = None,
+    client=None,
     allow_insecure_ssl: bool = False,
+    exchange: str | None = None,
 ) -> dict[str, object]:
     settings = Settings.load(config_path)
     cycles = load_paper_live_cycles(fixture_path)
     service = PaperTradingService(settings, router=ExecutionRouter())
-    rest_client = client or BinanceRestClient(
-        credentials=load_binance_credentials_from_env(),
+    exchange_id = resolve_exchange_id(exchange)
+    rest_client = client or build_exchange_rest_client(
+        exchange=exchange_id,
         allow_insecure_ssl=allow_insecure_ssl,
+        allow_missing_credentials=exchange_id == "bitget",
     )
     adapter = DecisionOrderTestAdapter(rest_client)
     tested_orders: list[dict[str, object]] = []
@@ -129,16 +133,13 @@ def run_paper_live_test_order_mode(
                     "accepted": result.accepted,
                 }
             )
-    account_snapshot = (
-        rest_client.get_account(market="futures")
-        if hasattr(rest_client, "get_account")
-        else {}
-    )
-    open_orders_snapshot = (
-        rest_client.get_open_orders(market="futures")
-        if hasattr(rest_client, "get_open_orders")
-        else {}
-    )
+    supports_private_reads = bool(getattr(rest_client, "supports_private_reads", True))
+    account_snapshot = {}
+    open_orders_snapshot = {}
+    if supports_private_reads and hasattr(rest_client, "get_account"):
+        account_snapshot = rest_client.get_account(market="futures")
+    if supports_private_reads and hasattr(rest_client, "get_open_orders"):
+        open_orders_snapshot = rest_client.get_open_orders(market="futures")
     kill_switch = KillSwitch()
     summary = build_runtime_summary(
         decisions=decisions,
@@ -148,6 +149,7 @@ def run_paper_live_test_order_mode(
         kill_switch_status=kill_switch.status(),
     )
     summary["cycle_count"] = len(cycles)
+    summary["exchange"] = exchange_id
     return summary
 
 
@@ -269,6 +271,7 @@ def main(argv: list[str] | None = None) -> int:
             equity_usd=args.equity_usd,
             capacity_usd=args.capacity_usd,
             allow_insecure_ssl=args.insecure_ssl,
+            exchange=args.exchange or None,
         )
         if args.output:
             write_runtime_summary(args.output, summary)
@@ -304,6 +307,7 @@ def main(argv: list[str] | None = None) -> int:
             allow_insecure_ssl=args.insecure_ssl,
             max_retries=args.max_retries,
             execute_live_orders=False,
+            exchange=args.exchange or None,
         )
         print(
             json.dumps(
@@ -325,6 +329,7 @@ def main(argv: list[str] | None = None) -> int:
             allow_insecure_ssl=args.insecure_ssl,
             max_retries=args.max_retries,
             execute_live_orders=True,
+            exchange=args.exchange or None,
         )
         print(
             json.dumps(
@@ -338,13 +343,16 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     if args.mode == "env-check":
-        readiness = runtime_readiness()
+        readiness = runtime_readiness(args.exchange or None)
         print(
             json.dumps(
                 {
+                    "exchange": readiness.exchange_id,
                     "has_api_key": readiness.has_api_key,
                     "has_api_secret": readiness.has_api_secret,
+                    "has_api_passphrase": readiness.has_api_passphrase,
                     "is_ready": readiness.is_ready,
+                    "required_env_vars": list(readiness.required_env_vars),
                 },
                 indent=2,
                 sort_keys=True,
