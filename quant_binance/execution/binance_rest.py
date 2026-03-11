@@ -154,6 +154,15 @@ class BinanceRestClient:
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return self.send(self.build_live_order_request(market=market, order_params=order_params))
 
+    def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
+        request = self.build_signed_request(
+            market="futures",
+            path="/fapi/v1/leverage",
+            method="POST",
+            params={"symbol": symbol, "leverage": leverage},
+        )
+        return self.send(request)
+
     def get_klines(
         self,
         *,
