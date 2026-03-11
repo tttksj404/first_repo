@@ -78,6 +78,13 @@ def resolve_strategy_profile(
     return _resolve_env_value(env_var).strip().lower()
 
 
+def resolve_strategy_override_path(
+    *,
+    env_var: str = "STRATEGY_OVERRIDE_PATH",
+) -> str:
+    return _resolve_env_value(env_var).strip()
+
+
 def load_binance_credentials_from_env(
     *,
     api_key_var: str = "BINANCE_API_KEY",

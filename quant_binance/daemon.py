@@ -9,9 +9,9 @@ from quant_binance.data.combined_ws import CombinedWebSocketClient
 from quant_binance.data.futures_stream import build_futures_streams
 from quant_binance.data.rest_seed import seed_market_store_from_rest
 from quant_binance.data.spot_stream import build_spot_streams
+from quant_binance.exchange import resolve_exchange_id
 from quant_binance.data.binance_ws import BinanceWebSocketClient
-from quant_binance.env import load_binance_credentials_from_env
-from quant_binance.execution.binance_rest import BinanceRestClient
+from quant_binance.execution.client_factory import build_exchange_rest_client
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.execution.router import ExecutionRouter
@@ -50,7 +50,13 @@ def run_live_paper_daemon(
     allow_insecure_ssl: bool = False,
     max_retries: int = 3,
     execute_live_orders: bool = False,
+    exchange: str | None = None,
 ) -> dict[str, object]:
+    exchange_id = resolve_exchange_id(exchange)
+    if exchange_id == "bitget":
+        raise RuntimeError(
+            "Bitget live daemon wiring is intentionally blocked in this first pass because public websocket market-data translation is still Binance-shaped. Replay, paper-live, and Bitget order-preview paths are ready."
+        )
     settings = Settings.load(config_path)
     initialize_workspace(output_base_dir)
     if settings.housekeeping.enabled:
@@ -61,9 +67,8 @@ def run_live_paper_daemon(
             keep_recent_runs=settings.housekeeping.keep_recent_runs,
         )
     run_paths = prepare_run_paths(base_dir=Path(output_base_dir) / "output", mode="paper-live-shell")
-    credentials = load_binance_credentials_from_env()
-    rest_client = BinanceRestClient(
-        credentials=credentials,
+    rest_client = build_exchange_rest_client(
+        exchange=exchange_id,
         allow_insecure_ssl=allow_insecure_ssl,
     )
     rest_client.build_capital_report = lambda: build_capital_adequacy_report(  # type: ignore[attr-defined]
