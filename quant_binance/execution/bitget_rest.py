@@ -19,6 +19,43 @@ BITGET_DEFAULT_PRODUCT_TYPE = "USDT-FUTURES"
 BITGET_DEFAULT_MARGIN_COIN = "USDT"
 
 
+_SPOT_KLINE_GRANULARITY = {
+    "1m": "1min",
+    "3m": "3min",
+    "5m": "5min",
+    "15m": "15min",
+    "30m": "30min",
+    "1h": "1h",
+    "4h": "4h",
+    "6h": "6h",
+    "12h": "12h",
+    "1d": "1day",
+    "1w": "1week",
+    "1M": "1M",
+}
+
+_FUTURES_KLINE_GRANULARITY = {
+    "1m": "1m",
+    "3m": "3m",
+    "5m": "5m",
+    "15m": "15m",
+    "30m": "30m",
+    "1h": "1H",
+    "4h": "4H",
+    "6h": "6H",
+    "12h": "12H",
+    "1d": "1D",
+    "1w": "1W",
+    "1M": "1M",
+}
+
+
+def _bitget_granularity(*, market: str, interval: str) -> str:
+    if market == "futures":
+        return _FUTURES_KLINE_GRANULARITY.get(interval, interval)
+    return _SPOT_KLINE_GRANULARITY.get(interval, interval)
+
+
 def _json_body(payload: dict[str, Any] | None) -> str:
     if not payload:
         return ""
@@ -281,7 +318,7 @@ class BitgetRestClient:
         limit: int,
     ) -> list[dict[str, Any]]:
         path = "/api/v2/mix/market/candles" if market == "futures" else "/api/v2/spot/market/candles"
-        params: dict[str, Any] = {"symbol": symbol, "granularity": interval, "limit": limit}
+        params: dict[str, Any] = {"symbol": symbol, "granularity": _bitget_granularity(market=market, interval=interval), "limit": limit}
         if market == "futures":
             params["productType"] = self.contract_config.product_type
         payload = self.send(self.build_public_request(path=path, params=params))
