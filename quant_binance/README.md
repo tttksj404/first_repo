@@ -101,6 +101,8 @@ See [STRATEGY_REFINEMENT_FROM_NAVER.md](/Users/tttksj/first_repo/quant_binance/S
 See [ALTCOIN_INTELLIGENCE.md](/Users/tttksj/first_repo/quant_binance/ALTCOIN_INTELLIGENCE.md) for the external altcoin-intelligence mapping.
 
 For local single-user usage, `quant_binance.env` checks shell environment first and then repository-root `.env` / `.env.local`.
+If `STRATEGY_PROFILE` is set (for example `aggressive_alt`, `alpha_max`, or `scalp_ultra`), that profile is deep-merged on top of the base config before runtime starts.
+If `AUTO_STRATEGY_SWITCH=1`, runtime can auto-switch between a calm and a fast profile (`AUTO_STRATEGY_CALM_PROFILE`, `AUTO_STRATEGY_FAST_PROFILE`) using volatility/return hysteresis gates.
 If `UNIVERSE_SYMBOLS` is set, it overrides the configured local trading universe.
 The Naver extraction helper saves markdown, screenshot, and downloaded article-body images when available.
 If `MACRO_INPUTS_PATH` or `MACRO_INPUTS_JSON` is set, macro regime inputs are loaded and applied before regime selection.
