@@ -55,11 +55,18 @@ Example:
 ```env
 BINANCE_API_KEY=your_key
 BINANCE_API_SECRET=your_secret
+STRATEGY_PROFILE=aggressive_alt
+AUTO_STRATEGY_SWITCH=1
+AUTO_STRATEGY_CALM_PROFILE=aggressive_alt
+AUTO_STRATEGY_FAST_PROFILE=scalp_ultra
+AUTO_STRATEGY_MIN_HOLD_CYCLES=3
 UNIVERSE_SYMBOLS=BTCUSDT,ETHUSDT,SOLUSDT
 MACRO_INPUTS_PATH=quant_binance/examples/macro_inputs.sample.json
 ALTCOIN_INPUTS_PATH=quant_binance/examples/altcoin_inputs.sample.json
 ```
 
+`STRATEGY_PROFILE` can be switched per market state (for example `aggressive_alt` for broader swing entries, `alpha_max` for higher-throughput risk-on entries, `scalp_ultra` for faster short-horizon entries).
+If `AUTO_STRATEGY_SWITCH=1`, runtime auto-switches between calm/fast profiles using 1h return and volatility-penalty hysteresis (`AUTO_STRATEGY_*` env vars).
 If `UNIVERSE_SYMBOLS` is set, it overrides the default `universe` in config.
 Use this to mirror the symbols you enabled in Binance symbol whitelist.
 If `MACRO_INPUTS_PATH` or `MACRO_INPUTS_JSON` is set, macro regime inputs are loaded and applied before regime selection.

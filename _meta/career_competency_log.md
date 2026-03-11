@@ -58,3 +58,45 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Traced the current short-activation bottlenecks across regime gating, fallback futures scoring, sizing, leverage selection, live-order execution, and session-level capital capping; added a bearish caution override for structurally strong shorts, replaced long-only futures flow bias with directional flow alignment, made futures sizing and cash-reserve checks leverage-aware, raised only the active profile leverage targets, and verified the path with focused bearish/leverage unit tests.
 - Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
 - Skill sharpened next: Add direct session-cap tests so leverage selection and executable notional caps stay aligned as the live risk model evolves.
+
+### 2026-03-11 - Live order runtime execution unblock attempt
+- Summary: Attempted end-to-end live order execution and converted multiple runtime crashes into explicit, actionable blockers.
+- What was done: Ran `live-auto-trade-daemon` with Bitget env, fixed runtime/daemon `exchange` argument mismatch, synced settings schema with current config fields, added missing housekeeping module, and re-ran to isolate final blockers (`bitget` daemon unsupported, `binance` requires BINANCE_API_KEY/SECRET).
+- Competency mapping: Data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Close exchange-specific runtime gaps by separating exchange-agnostic daemon flow from exchange adapters/credential paths.
+
+### 2026-03-11 - Aggressive alt-futures profile rollout on Bitget runtime
+- Summary: Expanded live trading scope from majors to a broader altcoin universe and loosened entry conditions while preserving existing risk management structure.
+- What was done: Added `aggressive_alt` strategy profile in config, enabled it via `.env.bitget`, expanded universe to nine symbols, restarted live daemon, and verified increased futures/alt decision flow from runtime logs.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Align exchange-specific order semantics (position mode and side schema) with live execution adapters to convert accepted decisions into filled orders.
+
+### 2026-03-11 - Ultra-scalp profile addition for adaptive execution
+- Summary: Added and validated a dedicated ultra-short-horizon strategy profile so runtime behavior can be switched by market state without code changes.
+- What was done: Introduced `scalp_ultra` profile parameters (1-minute decision cadence, shorter edge/holding horizons, higher leverage envelope, relaxed entry and priority-symbol futures settings), verified settings loading with `STRATEGY_PROFILE=scalp_ultra`, and documented profile switching in operations docs.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Add objective market-state triggers to automate profile switching instead of relying on manual environment toggles.
+
+### 2026-03-11 - Live auto profile switching between swing and scalp modes
+- Summary: Implemented runtime profile auto-switching so the live engine can move between calm and fast strategies without manual restarts.
+- What was done: Added explicit profile loading API, introduced an `AutoProfileSwitcher` with hysteresis/min-hold controls, wired dynamic settings reload into the live daemon/session (including leverage adapter updates and symbol eligibility refresh), added unit tests for switch behavior, enabled switch env vars in `.env.bitget`, and relaunched the Bitget live daemon with switcher activation verified in logs.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Replace static thresholds with data-driven regime classifiers to reduce manual tuning and profile thrash risk.
+
+### 2026-03-11 - Profile switch threshold tuning from live fill pattern
+- Summary: Tuned auto-switch thresholds using recent live decision/fill artifacts so fast-mode activation aligns better with observed executable conditions.
+- What was done: Aggregated latest `paper-live-shell` decision and live-order logs, measured accepted-order volatility range against overall distribution, lowered return-based trigger scale to match actual 1h return magnitudes, tightened volatility hysteresis around fill-zone levels, reduced min-hold cycles for faster adaptation, fixed switch-cycle accounting so hold budgets are consumed per decision interval (not per symbol), updated `.env.bitget`, and restarted the live Bitget daemon.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Add persistent switch-event telemetry to evaluate threshold precision and avoid overfitting on small fill samples.
+
+### 2026-03-11 - Risk-on profile rollout with soft-risk futures override
+- Summary: Shifted the runtime from conservative entry suppression to a risk-on profile while preserving hard risk blocks.
+- What was done: Added `alpha_max` strategy profile, changed live calm profile to `alpha_max`, implemented soft-risk-only futures override logic (retain hard blockers like direction/macro/structural alt risk), added targeted unit tests for override behavior, validated profile loading, compared same-snapshot mode outcomes (`aggressive_alt` vs `alpha_max`), and relaunched live runtime to confirm futures route activation.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Build automatic size backoff/retry on exchange balance-limit rejects so aggressive profiles keep execution continuity.
+
+### 2026-03-11 - Bitget live fill recovery via margin-aware execution fallback
+- Summary: Converted live futures rejection loops into executable orders by hardening the Bitget order path against leverage/balance mismatches.
+- What was done: Added balance-aware futures notional capping in the live order adapter, handled Bitget leverage-update margin errors (`40893`) with conservative fallback sizing, implemented repeated size backoff for balance rejects (`40762`) in the Bitget REST client, added regression tests, and validated in live logs with accepted futures orders.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Add symbol-level minimum-order-aware fallback so backoff can converge directly to exchange-valid minimum quantities without terminal rejects.

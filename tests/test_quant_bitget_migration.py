@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,6 +34,36 @@ class FakeBitgetLiveClient:
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.orders.append((market, order_params))
         return {"status": "SUCCESS", "orderId": "bitget-1"}
+
+
+class BackoffBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.order_sizes: list[float] = []
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/account" in url:
+            return {"code": "00000", "data": {"posMode": "one_way_mode"}}
+        if "/api/v2/mix/order/place-order" in url:
+            raw = (request.data or b"{}").decode("utf-8")
+            payload = json.loads(raw)
+            size = float(payload.get("size", 0.0))
+            self.order_sizes.append(size)
+            if len(self.order_sizes) < 3:
+                raise RuntimeError(
+                    "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+                    "code=40762 msg=The order amount exceeds the balance"
+                )
+            return {"code": "00000", "msg": "success", "data": {"orderId": "bitget-retry-ok"}}
+        return {"code": "00000", "data": {}}
 
 
 class QuantBitgetMigrationTests(unittest.TestCase):
@@ -232,6 +263,28 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(summary["cycle_count"], 1)
         self.assertEqual(summary["tested_order_count"], 1)
         self.assertEqual(summary["account_snapshot"], {})
+
+    def test_bitget_place_order_retries_with_smaller_size_on_balance_error(self) -> None:
+        client = BackoffBitgetRestClient()
+        response = client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "XRPUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "buy",
+                "orderType": "market",
+                "size": "120.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "test-retry",
+            },
+        )
+
+        self.assertEqual(response["status"], "SUCCESS")
+        self.assertGreaterEqual(len(client.order_sizes), 3)
+        self.assertLess(client.order_sizes[-1], client.order_sizes[0])
+        self.assertAlmostEqual(client.order_sizes[1], round(client.order_sizes[0] * 0.6, 8))
 
 
 if __name__ == "__main__":
