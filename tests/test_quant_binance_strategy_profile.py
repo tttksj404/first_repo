@@ -55,8 +55,8 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertEqual(settings.mode_thresholds.futures_trend_strength_min, 0.58)
         self.assertEqual(settings.mode_thresholds.spot_score_min, 48)
         self.assertEqual(settings.cost_gate.edge_to_cost_multiple_min, 1.05)
-        self.assertEqual(settings.risk.target_futures_leverage, 2.0)
-        self.assertEqual(settings.risk.max_futures_leverage, 3.0)
+        self.assertEqual(settings.risk.target_futures_leverage, 5.0)
+        self.assertEqual(settings.risk.max_futures_leverage, 10.0)
         self.assertFalse(settings.mode_behavior.spot_require_positive_trend)
         self.assertEqual(settings.cash_reserve.when_futures_enabled, 0.12)
         self.assertEqual(settings.spot_support.support_alignment_min, 0.12)
@@ -86,6 +86,133 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertTrue(settings.portfolio_focus.enabled)
         self.assertEqual(settings.portfolio_focus.spot_top_n, 1)
         self.assertEqual(settings.portfolio_focus.futures_top_n, 2)
+
+    def test_active_profile_allows_strong_bearish_futures_short_under_caution(self) -> None:
+        os.environ["STRATEGY_PROFILE"] = "active"
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.22,
+            ret_rank_4h=0.18,
+            breakout_norm=0.78,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.76,
+            vol_z_1h_norm=0.74,
+            taker_imbalance_norm=0.18,
+            spread_bps_norm=0.18,
+            probe_slippage_bps_norm=0.2,
+            depth_10bps_norm=0.88,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.66,
+            realized_vol_4h_norm=0.6,
+            vol_shock_norm=0.25,
+            funding_abs_percentile=0.22,
+            oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=-1,
+            trend_strength=0.74,
+            volume_confirmation=0.68,
+            liquidity_score=0.72,
+            volatility_penalty=0.66,
+            overheat_penalty=0.34,
+            support_alignment=0.08,
+            resistance_penalty=0.14,
+            sentiment_regime="caution",
+            sentiment_support_score=0.2,
+            gross_expected_edge_bps=44.0,
+            estimated_round_trip_cost_bps=20.0,
+            net_expected_edge_bps=24.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-active-bearish-short",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 11, 0, 0, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.5,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.side, "short")
+
+    def test_active_profile_uses_leverage_aware_notional_for_small_capital_strong_futures(self) -> None:
+        os.environ["STRATEGY_PROFILE"] = "active"
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.18,
+            ret_rank_4h=0.14,
+            breakout_norm=0.9,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.8,
+            vol_z_1h_norm=0.78,
+            taker_imbalance_norm=0.14,
+            spread_bps_norm=0.14,
+            probe_slippage_bps_norm=0.16,
+            depth_10bps_norm=0.9,
+            book_stability_norm=0.92,
+            realized_vol_1h_norm=0.25,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.12,
+            funding_abs_percentile=0.18,
+            oi_surge_percentile=0.16,
+            basis_stretch_percentile=0.14,
+            regime_alignment=1.0,
+            trend_direction=-1,
+            trend_strength=0.88,
+            volume_confirmation=0.82,
+            liquidity_score=0.85,
+            volatility_penalty=0.24,
+            overheat_penalty=0.18,
+            support_alignment=0.04,
+            resistance_penalty=0.1,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.1,
+            gross_expected_edge_bps=40.0,
+            estimated_round_trip_cost_bps=12.0,
+            net_expected_edge_bps=28.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-active-small-cap-futures",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 11, 0, 5, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.5,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=100.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.side, "short")
+        self.assertGreater(decision.order_intent_notional_usd, 100.0)
 
     def test_balanced_profile_routes_mildly_heated_futures_setup_to_spot(self) -> None:
         conservative_settings = Settings.load(CONFIG_PATH)
