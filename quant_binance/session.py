@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
@@ -52,6 +53,8 @@ class LivePaperSession:
     live_orders: list[dict[str, object]] = field(default_factory=list)
     observe_only_symbols: list[str] = field(default_factory=list)
     last_executed_fingerprint_by_symbol: dict[str, str] = field(default_factory=dict)
+    live_error_cooldown_until_by_symbol: dict[str, datetime] = field(default_factory=dict)
+    live_error_code_by_symbol: dict[str, str] = field(default_factory=dict)
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
@@ -204,6 +207,25 @@ class LivePaperSession:
             ]
         )
 
+    @staticmethod
+    def _extract_exchange_error_code(error: Exception) -> str | None:
+        matched = re.search(r"code=(\d+)", str(error))
+        if matched is None:
+            return None
+        return matched.group(1)
+
+    @staticmethod
+    def _cooldown_seconds_for_error_code(error_code: str | None) -> int:
+        if error_code in {"40762", "45111", "40774", "400172"}:
+            return 300
+        if error_code == "429":
+            return 120
+        return 0
+
+    def _live_order_blocked_by_cooldown(self, *, symbol: str, now: datetime) -> bool:
+        until = self.live_error_cooldown_until_by_symbol.get(symbol)
+        return until is not None and now < until
+
     def _consume_capital_after_live_order(self, decision: DecisionIntent) -> None:
         if not self.capital_report:
             return
@@ -308,44 +330,74 @@ class LivePaperSession:
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
-                try:
-                    live_result = self.live_order_executor.execute_decision(
-                        decision=executable_decision,
-                        reference_price=state.last_trade_price,
-                    )
-                except Exception as exc:
-                    payload = {
-                        "timestamp": timestamp,
-                        "symbol": executable_decision.symbol,
-                        "market": executable_decision.final_mode,
-                        "stage": "live_order",
-                        "error": repr(exc),
-                    }
+                if self._live_order_blocked_by_cooldown(symbol=executable_decision.symbol, now=timestamp):
+                    until = self.live_error_cooldown_until_by_symbol.get(executable_decision.symbol)
+                    error_code = self.live_error_code_by_symbol.get(executable_decision.symbol, "UNKNOWN")
                     if self.verbose:
-                        print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
+                        print(
+                            f"[LIVE_ORDER_SKIP] {executable_decision.symbol} cooldown_until={until.isoformat() if until else 'unknown'} code={error_code}",
+                            flush=True,
+                        )
                     if self.log_store is not None:
-                        self.log_store.append("order_errors", payload)
+                        self.log_store.append(
+                            "order_errors",
+                            {
+                                "timestamp": timestamp,
+                                "symbol": executable_decision.symbol,
+                                "market": executable_decision.final_mode,
+                                "stage": "live_order",
+                                "error": f"cooldown_active code={error_code}",
+                            },
+                        )
                 else:
-                    if live_result is not None:
-                        self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
-                        if live_result.accepted:
-                            self._consume_capital_after_live_order(executable_decision)
+                    try:
+                        live_result = self.live_order_executor.execute_decision(
+                            decision=executable_decision,
+                            reference_price=state.last_trade_price,
+                        )
+                    except Exception as exc:
+                        error_code = self._extract_exchange_error_code(exc)
+                        cooldown_seconds = self._cooldown_seconds_for_error_code(error_code)
+                        if cooldown_seconds > 0:
+                            self.live_error_cooldown_until_by_symbol[executable_decision.symbol] = (
+                                timestamp + timedelta(seconds=cooldown_seconds)
+                            )
+                            if error_code is not None:
+                                self.live_error_code_by_symbol[executable_decision.symbol] = error_code
                         payload = {
                             "timestamp": timestamp,
-                            "symbol": live_result.symbol,
-                            "market": live_result.market,
-                            "side": live_result.side,
-                            "quantity": live_result.quantity,
-                            "accepted": live_result.accepted,
+                            "symbol": executable_decision.symbol,
+                            "market": executable_decision.final_mode,
+                            "stage": "live_order",
+                            "error": repr(exc),
                         }
-                        self.live_orders.append(payload)
                         if self.verbose:
-                            print(
-                                f"[LIVE_ORDER] {live_result.symbol} market={live_result.market} side={live_result.side} qty={live_result.quantity} accepted={live_result.accepted}",
-                                flush=True,
-                            )
+                            print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
                         if self.log_store is not None:
-                            self.log_store.append("live_orders", payload)
+                            self.log_store.append("order_errors", payload)
+                    else:
+                        if live_result is not None:
+                            self.live_error_cooldown_until_by_symbol.pop(executable_decision.symbol, None)
+                            self.live_error_code_by_symbol.pop(executable_decision.symbol, None)
+                            self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                            if live_result.accepted:
+                                self._consume_capital_after_live_order(executable_decision)
+                            payload = {
+                                "timestamp": timestamp,
+                                "symbol": live_result.symbol,
+                                "market": live_result.market,
+                                "side": live_result.side,
+                                "quantity": live_result.quantity,
+                                "accepted": live_result.accepted,
+                            }
+                            self.live_orders.append(payload)
+                            if self.verbose:
+                                print(
+                                    f"[LIVE_ORDER] {live_result.symbol} market={live_result.market} side={live_result.side} qty={live_result.quantity} accepted={live_result.accepted}",
+                                    flush=True,
+                                )
+                            if self.log_store is not None:
+                                self.log_store.append("live_orders", payload)
         if self.order_tester is not None and state is not None and self._market_capital_allowed(decision):
             test_decision = self._cap_live_order_decision(decision)
             if test_decision.final_mode in {"spot", "futures"} and test_decision.order_intent_notional_usd > 0:

@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import json
+import math
 import ssl
 import time
 from dataclasses import dataclass
@@ -51,6 +52,9 @@ class BitgetContractConfig:
 
 class BitgetRestClient:
     exchange_id = "bitget"
+    _BALANCE_BACKOFF_FACTOR = 0.6
+    _BALANCE_BACKOFF_MAX_ATTEMPTS = 3
+    _BALANCE_BACKOFF_SLEEP_SECONDS = 0.25
 
     def __init__(
         self,
@@ -66,6 +70,7 @@ class BitgetRestClient:
         self.contract_config = contract_config or BitgetContractConfig()
         self.receive_window_ms = receive_window_ms
         self.allow_insecure_ssl = allow_insecure_ssl
+        self._futures_symbol_size_constraints: dict[str, tuple[float, float]] | None = None
 
     @property
     def supports_private_reads(self) -> bool:
@@ -243,6 +248,53 @@ class BitgetRestClient:
             normalized.pop("holdSide", None)
         return normalized
 
+    @staticmethod
+    def _safe_float(value: Any) -> float:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+    @staticmethod
+    def _decimal_places(step: float) -> int:
+        if step <= 0:
+            return 8
+        text = f"{step:.12f}".rstrip("0")
+        if "." not in text:
+            return 0
+        return min(len(text.split(".")[1]), 8)
+
+    def _load_futures_symbol_size_constraints(self) -> dict[str, tuple[float, float]]:
+        if self._futures_symbol_size_constraints is not None:
+            return self._futures_symbol_size_constraints
+        info = self.get_exchange_info(market="futures")
+        constraints: dict[str, tuple[float, float]] = {}
+        for item in info.get("symbols", []):
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", "")).upper()
+            raw = item.get("raw", {})
+            if not symbol or not isinstance(raw, dict):
+                continue
+            min_size = self._safe_float(raw.get("minTradeNum") or raw.get("minTradeAmount") or 0.0)
+            size_step = self._safe_float(raw.get("sizeMultiplier") or 0.0)
+            constraints[symbol] = (min_size, size_step)
+        self._futures_symbol_size_constraints = constraints
+        return constraints
+
+    def _normalize_futures_size(self, *, symbol: str, size: float) -> float:
+        normalized = max(float(size), 0.0)
+        constraints = self._load_futures_symbol_size_constraints()
+        min_size, size_step = constraints.get(symbol.upper(), (0.0, 0.0))
+        if size_step > 0:
+            normalized = math.floor((normalized + 1e-12) / size_step) * size_step
+            normalized = round(normalized, self._decimal_places(size_step))
+        else:
+            normalized = round(normalized, 8)
+        if min_size > 0 and normalized < min_size:
+            return 0.0
+        return normalized
+
     def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return {
             "status": "PREVIEW",
@@ -261,23 +313,30 @@ class BitgetRestClient:
                 return _send(params)
             current = dict(params)
             last_error: RuntimeError | None = None
-            for _ in range(10):
+            for attempt in range(self._BALANCE_BACKOFF_MAX_ATTEMPTS):
                 try:
                     return _send(current)
                 except RuntimeError as exc:
                     if "code=40762" not in str(exc):
                         raise
                     last_error = exc
+                    symbol = str(current.get("symbol", "")).upper()
                     try:
                         size = float(current.get("size", 0.0))
                     except (TypeError, ValueError):
                         break
                     if size <= 0:
                         break
-                    reduced_size = round(size * 0.6, 8)
+                    reduced_size = size * self._BALANCE_BACKOFF_FACTOR
+                    if symbol:
+                        reduced_size = self._normalize_futures_size(symbol=symbol, size=reduced_size)
+                    else:
+                        reduced_size = round(reduced_size, 8)
                     if reduced_size <= 0 or reduced_size >= size:
                         break
                     current["size"] = f"{reduced_size:.8f}"
+                    if attempt + 1 < self._BALANCE_BACKOFF_MAX_ATTEMPTS:
+                        time.sleep(self._BALANCE_BACKOFF_SLEEP_SECONDS * (attempt + 1))
             if last_error is not None:
                 raise last_error
             return _send(current)
@@ -285,6 +344,15 @@ class BitgetRestClient:
         initial_params = dict(order_params)
         if market == "futures":
             initial_params = self._normalize_futures_order_params_for_position_mode(initial_params)
+            symbol = str(initial_params.get("symbol", "")).upper()
+            size = self._safe_float(initial_params.get("size"))
+            if symbol and size > 0:
+                normalized_size = self._normalize_futures_size(symbol=symbol, size=size)
+                if normalized_size <= 0:
+                    raise RuntimeError(
+                        f"Bitget preflight rejected futures order for {symbol}: code=45111 msg=less than the minimum order quantity"
+                    )
+                initial_params["size"] = f"{normalized_size:.8f}"
         try:
             payload = _with_balance_backoff(initial_params)
         except RuntimeError as exc:
@@ -513,7 +581,8 @@ class BitgetRestClient:
             try:
                 payload = json.loads(raw) if raw else {}
                 if isinstance(payload, dict):
-                    detail = f"code={payload.get('code')} msg={payload.get('msg')}"
+                    compact_raw = raw.replace("\n", " ").strip()
+                    detail = f"code={payload.get('code')} msg={payload.get('msg')} raw={compact_raw}"
             except Exception:
                 pass
             raise RuntimeError(

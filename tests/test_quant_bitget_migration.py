@@ -66,6 +66,31 @@ class BackoffBitgetRestClient(BitgetRestClient):
         return {"code": "00000", "data": {}}
 
 
+class AlwaysFailBalanceBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.place_order_calls = 0
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/account" in url:
+            return {"code": "00000", "data": {"posMode": "one_way_mode"}}
+        if "/api/v2/mix/order/place-order" in url:
+            self.place_order_calls += 1
+            raise RuntimeError(
+                "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+                "code=40762 msg=The order amount exceeds the balance"
+            )
+        return {"code": "00000", "data": {}}
+
+
 class QuantBitgetMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -285,6 +310,25 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertGreaterEqual(len(client.order_sizes), 3)
         self.assertLess(client.order_sizes[-1], client.order_sizes[0])
         self.assertAlmostEqual(client.order_sizes[1], round(client.order_sizes[0] * 0.6, 8))
+
+    def test_bitget_place_order_limits_balance_retry_burst(self) -> None:
+        client = AlwaysFailBalanceBitgetRestClient()
+        with self.assertRaises(RuntimeError):
+            client.place_order(
+                market="futures",
+                order_params={
+                    "symbol": "ETHUSDT",
+                    "productType": "USDT-FUTURES",
+                    "marginCoin": "USDT",
+                    "marginMode": "crossed",
+                    "side": "buy",
+                    "orderType": "market",
+                    "size": "0.08000000",
+                    "reduceOnly": "NO",
+                    "clientOid": "retry-burst-guard",
+                },
+            )
+        self.assertEqual(client.place_order_calls, 3)
 
 
 if __name__ == "__main__":
