@@ -52,9 +52,10 @@ class BitgetContractConfig:
 
 class BitgetRestClient:
     exchange_id = "bitget"
-    _BALANCE_BACKOFF_FACTOR = 0.6
-    _BALANCE_BACKOFF_MAX_ATTEMPTS = 3
-    _BALANCE_BACKOFF_SLEEP_SECONDS = 0.25
+    _BALANCE_BACKOFF_FACTOR = 0.4
+    _BALANCE_BACKOFF_MAX_ATTEMPTS = 5
+    _BALANCE_BACKOFF_SLEEP_SECONDS = 0.2
+    _MIN_TRADE_USDT_BUFFER = 1.01
 
     def __init__(
         self,
@@ -72,6 +73,9 @@ class BitgetRestClient:
         self.allow_insecure_ssl = allow_insecure_ssl
         self._futures_symbol_size_constraints: dict[str, tuple[float, float, float]] | None = None
         self._spot_symbol_constraints: dict[str, tuple[int, float]] | None = None
+        self._futures_positions_available_cache: dict[tuple[str, str], float] | None = None
+        self._futures_positions_available_cache_at: float = 0.0
+        self._futures_positions_cache_ttl_seconds: float = 5.0
 
     @property
     def supports_private_reads(self) -> bool:
@@ -227,6 +231,42 @@ class BitgetRestClient:
                 return mode
         return None
 
+    def _futures_available_size_by_symbol_hold_side(self) -> dict[tuple[str, str], float]:
+        now = time.time()
+        if (
+            self._futures_positions_available_cache is not None
+            and (now - self._futures_positions_available_cache_at) <= self._futures_positions_cache_ttl_seconds
+        ):
+            return self._futures_positions_available_cache
+        try:
+            payload = self.send(
+                self.build_signed_request(
+                    path="/api/v2/mix/position/all-position",
+                    method="GET",
+                    params={
+                        "productType": self.contract_config.product_type,
+                        "marginCoin": self.contract_config.margin_coin,
+                    },
+                )
+            )
+        except Exception:
+            return {}
+        rows = payload.get("data", []) if isinstance(payload, dict) else []
+        mapped: dict[tuple[str, str], float] = {}
+        if isinstance(rows, list):
+            for item in rows:
+                if not isinstance(item, dict):
+                    continue
+                symbol = str(item.get("symbol", "")).upper()
+                hold_side = str(item.get("holdSide", "")).lower()
+                available = self._safe_float(item.get("available"))
+                if not symbol or hold_side not in {"long", "short"} or available <= 0:
+                    continue
+                mapped[(symbol, hold_side)] = available
+        self._futures_positions_available_cache = mapped
+        self._futures_positions_available_cache_at = now
+        return mapped
+
     def _normalize_futures_order_params_for_position_mode(self, params: dict[str, Any]) -> dict[str, Any]:
         normalized = dict(params)
         side = str(normalized.get("side", "")).lower()
@@ -240,7 +280,21 @@ class BitgetRestClient:
         except Exception:
             pos_mode = None
         if pos_mode == "hedge_mode":
-            normalized["tradeSide"] = str(normalized.get("tradeSide", "open")).lower()
+            opposite_hold_side = "short" if is_buy else "long"
+            available_by_side = self._futures_available_size_by_symbol_hold_side()
+            close_available = self._safe_float(available_by_side.get((symbol, opposite_hold_side)))
+            if close_available > 0:
+                # In hedge mode, prefer closing opposite exposure first to release margin.
+                normalized["tradeSide"] = "close"
+                # Bitget hedge close-side semantics:
+                # - close long  -> side=buy, tradeSide=close
+                # - close short -> side=sell, tradeSide=close
+                normalized["side"] = "buy" if opposite_hold_side == "long" else "sell"
+                requested_size = self._safe_float(normalized.get("size"))
+                if requested_size > 0:
+                    normalized["size"] = f"{min(requested_size, close_available):.8f}"
+            else:
+                normalized["tradeSide"] = str(normalized.get("tradeSide", "open")).lower()
             normalized.pop("reduceOnly", None)
             normalized.pop("holdSide", None)
         elif pos_mode == "one_way_mode":
@@ -333,6 +387,17 @@ class BitgetRestClient:
         constraints = self._load_futures_symbol_size_constraints()
         return constraints.get(symbol.upper(), (0.0, 0.0, 0.0))[2]
 
+    def _ceil_futures_size_for_min_notional(self, *, symbol: str, min_notional_usdt: float, bid_price: float) -> float:
+        if min_notional_usdt <= 0 or bid_price <= 0:
+            return 0.0
+        constraints = self._load_futures_symbol_size_constraints()
+        min_size, size_step, _ = constraints.get(symbol.upper(), (0.0, 0.0, 0.0))
+        raw_size = max((min_notional_usdt * self._MIN_TRADE_USDT_BUFFER) / bid_price, min_size)
+        if size_step > 0:
+            target = math.ceil((raw_size - 1e-12) / size_step) * size_step
+            return round(target, self._decimal_places(size_step))
+        return round(raw_size, 8)
+
     def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return {
             "status": "PREVIEW",
@@ -368,6 +433,21 @@ class BitgetRestClient:
                     reduced_size = size * self._BALANCE_BACKOFF_FACTOR
                     if symbol:
                         reduced_size = self._normalize_futures_size(symbol=symbol, size=reduced_size)
+                        min_trade_usdt = self._futures_min_trade_usdt(symbol=symbol)
+                        if min_trade_usdt > 0:
+                            try:
+                                ticker = self.get_book_ticker(market="futures", symbol=symbol)
+                            except Exception:
+                                ticker = {}
+                            bid_price = self._safe_float(ticker.get("bidPrice")) if isinstance(ticker, dict) else 0.0
+                            if bid_price > 0:
+                                min_size_floor = self._ceil_futures_size_for_min_notional(
+                                    symbol=symbol,
+                                    min_notional_usdt=min_trade_usdt,
+                                    bid_price=bid_price,
+                                )
+                                if min_size_floor > 0:
+                                    reduced_size = max(reduced_size, min_size_floor)
                     else:
                         reduced_size = round(reduced_size, 8)
                     if reduced_size <= 0 or reduced_size >= size:
@@ -394,7 +474,8 @@ class BitgetRestClient:
                 if min_trade_usdt > 0:
                     ticker = self.get_book_ticker(market="spot", symbol=symbol)
                     bid_price = self._safe_float(ticker.get("bidPrice"))
-                    if bid_price > 0 and normalized_size * bid_price < min_trade_usdt:
+                    required_min_notional = min_trade_usdt * self._MIN_TRADE_USDT_BUFFER
+                    if bid_price > 0 and normalized_size * bid_price + 1e-9 < required_min_notional:
                         raise RuntimeError(
                             f"Bitget preflight rejected spot order for {symbol}: code=45110 msg=less than the minimum amount {min_trade_usdt:g} USDT"
                         )
@@ -413,7 +494,8 @@ class BitgetRestClient:
                 if min_trade_usdt > 0:
                     ticker = self.get_book_ticker(market="futures", symbol=symbol)
                     bid_price = self._safe_float(ticker.get("bidPrice"))
-                    if bid_price > 0 and normalized_size * bid_price < min_trade_usdt:
+                    required_min_notional = min_trade_usdt * self._MIN_TRADE_USDT_BUFFER
+                    if bid_price > 0 and normalized_size * bid_price + 1e-9 < required_min_notional:
                         raise RuntimeError(
                             f"Bitget preflight rejected futures order for {symbol}: code=45110 msg=less than the minimum amount {min_trade_usdt:g} USDT"
                         )
@@ -460,6 +542,9 @@ class BitgetRestClient:
             "market": market,
             "raw": payload,
         }
+        if market == "futures":
+            self._futures_positions_available_cache = None
+            self._futures_positions_available_cache_at = 0.0
         if isinstance(data, dict):
             normalized.update(data)
         return normalized
@@ -572,6 +657,42 @@ class BitgetRestClient:
     def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, Any]:
         payload = self.send(self.build_open_orders_request(market=market, symbol=symbol))
         return {"orders": payload.get("data", []), "raw": payload}
+
+    def get_futures_positions(self) -> list[dict[str, Any]]:
+        payload = self.send(
+            self.build_signed_request(
+                path="/api/v2/mix/position/all-position",
+                method="GET",
+                params={
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                },
+            )
+        )
+        rows = payload.get("data", [])
+        data_rows = rows if isinstance(rows, list) else []
+        normalized: list[dict[str, Any]] = []
+        for item in data_rows:
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", "")).upper()
+            hold_side = str(item.get("holdSide", "")).lower()
+            total = self._safe_float(item.get("total"))
+            available = self._safe_float(item.get("available"))
+            margin_size = self._safe_float(item.get("marginSize") or item.get("margin"))
+            if not symbol or hold_side not in {"long", "short"} or available <= 0:
+                continue
+            normalized.append(
+                {
+                    "symbol": symbol,
+                    "holdSide": hold_side,
+                    "total": total,
+                    "available": available,
+                    "marginSize": margin_size,
+                    "raw": item,
+                }
+            )
+        return normalized
 
     def get_klines(
         self,

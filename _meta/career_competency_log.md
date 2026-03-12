@@ -78,6 +78,12 @@ This file stores only the conversations and work that materially connect to the 
 - Skill sharpened next: Add objective market-state triggers to automate profile switching instead of relying on manual environment toggles.
 
 ### 2026-03-11 - Live auto profile switching between swing and scalp modes
+
+### 2026-03-12 - Bitget live strategy objective reassessment
+- Summary: Re-evaluated whether the current Bitget live strategy is truly optimal by combining recent runtime evidence with exchange constraints and primary research references.
+- What was done: Parsed recent paper-live-shell decisions/order errors/account snapshots, quantified thin net-edge vs. cost conditions and minimum-order rejection patterns, and cross-checked conclusions against Bitget API/fee docs plus cryptocurrency momentum/risk factor literature.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Build a repeatable regime-by-regime evaluation framework that links live fill quality, funding/fee drag, and profile-switch thresholds to statistically testable performance.
 - Summary: Implemented runtime profile auto-switching so the live engine can move between calm and fast strategies without manual restarts.
 - What was done: Added explicit profile loading API, introduced an `AutoProfileSwitcher` with hysteresis/min-hold controls, wired dynamic settings reload into the live daemon/session (including leverage adapter updates and symbol eligibility refresh), added unit tests for switch behavior, enabled switch env vars in `.env.bitget`, and relaunched the Bitget live daemon with switcher activation verified in logs.
 - Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
@@ -112,3 +118,21 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Made `crossedMaxAvailable` authoritative (including zero) in account parsing and live sizing, added pre-trade refill attempt when futures openable balance is zero, prevented repeated transfer retries after `40014` permission failures, and added futures `minTradeUSDT` preflight validation to block invalid small orders before HTTP submission.
 - Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
 - Skill sharpened next: Add account permission diagnostics to env-check so transfer/write permission gaps are surfaced before daemon launch.
+
+### 2026-03-12 - Hedge-mode close-first routing for Bitget futures execution
+- Summary: Removed a live execution deadlock where hedge-mode orders kept opening exposure and starved openable margin.
+- What was done: Added Bitget position snapshot caching, changed futures order normalization to prefer `tradeSide=close` when opposite hedge positions exist, capped close size to available opposite position, invalidated position cache after fills, added focused regression tests, and verified daemon restart with fresh run logs showing no repeated `40762` loop in the latest cycle.
+- Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add symbol-level intent routing that explicitly distinguishes open vs close orders from strategy state to reduce unnecessary exchange-side rejections.
+
+### 2026-03-12 - Bitget US-stock proxy symbol integration path
+- Summary: Added a safe path to include Bitget spot-only stock-proxy symbols in strategy universe without breaking live futures execution.
+- What was done: Added env-driven universe extension (`UNIVERSE_SYMBOLS_APPEND`, `BITGET_US_STOCK_SYMBOLS`), enabled Bitget symbol-level market polling (spot/futures) in the live poller/daemon, added session-level market-support normalization so unsupported futures intents route safely (spot-long or cash), and added regression tests/docs.
+- Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add automatic exchange-symbol discovery tagging for stock-proxy candidates to reduce manual symbol curation.
+
+### 2026-03-12 - Bitget hedge close-side mapping fix for futures margin release
+- Summary: Fixed a live trading blocker where existing futures positions were not being correctly treated as releasable futures assets, causing repeated `22002 No position to close`.
+- What was done: Verified live API behavior for hedge-mode close semantics, corrected close-side mapping in Bitget order normalization and session margin-release flow (`long -> buy/close`, `short -> sell/close`), updated regression tests, and confirmed a real Bitget close-path order now succeeds on the prior failing ETHUSDT route.
+- Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add explicit position-state tagging in decision routing so open/close intent can be selected without relying on exchange-side normalization fallbacks.
