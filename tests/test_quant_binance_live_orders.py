@@ -168,6 +168,19 @@ class FirstFailThenFillLiveOrderClient(FakeLiveOrderClient):
         return {"status": "FILLED", "market": market, "orderId": self.calls}
 
 
+class SpotCaptureLiveOrderClient(FakeLiveOrderClient):
+    def __init__(self) -> None:
+        super().__init__()
+        self.last_market: str | None = None
+        self.last_order_params: dict[str, object] | None = None
+
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        self.last_market = str(market)
+        self.last_order_params = dict(order_params)
+        return {"status": "FILLED", "market": market, "orderId": self.calls}
+
+
 class RaisingTestOrderClient:
     def test_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         raise RuntimeError("simulated test order failure")
@@ -840,6 +853,81 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertLess(live_client.order_sizes[1], live_client.order_sizes[0])
         self.assertIn("BTCUSDT", session.futures_notional_scale_by_symbol)
         self.assertLess(session.futures_notional_scale_by_symbol["BTCUSDT"], 1.0)
+
+    def test_session_liquidates_spot_inventory_when_cash_signal_is_bearish(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 12, 2, 0, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = SpotCaptureLiveOrderClient()
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client, self.settings),  # type: ignore[arg-type]
+        )
+        session.account_snapshot = {
+            "spot": {"balances": [{"asset": "BTC", "free": "0.01000000", "locked": "0"}]},
+            "futures": {},
+        }
+        session.capital_report = {
+            "spot_available_balance_usd": 0.0,
+            "futures_available_balance_usd": 0.0,
+            "can_trade_spot_any": False,
+            "can_trade_futures_any": False,
+            "spot_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+            "futures_requirements": [],
+        }
+        decision = DecisionIntent(
+            decision_id="spot-liquidation-test",
+            decision_hash="spot-liquidation-hash",
+            snapshot_id="spot-liquidation-snapshot",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="BTCUSDT",
+            candidate_mode="cash",
+            final_mode="cash",
+            side="flat",
+            trend_direction=-1,
+            trend_strength=0.42,
+            volume_confirmation=0.41,
+            liquidity_score=0.62,
+            volatility_penalty=0.58,
+            overheat_penalty=0.3,
+            predictability_score=44.0,
+            gross_expected_edge_bps=0.0,
+            net_expected_edge_bps=-10.0,
+            estimated_round_trip_cost_bps=20.0,
+            order_intent_notional_usd=0.0,
+            stop_distance_bps=0.0,
+            rejection_reasons=("SCORE_TOO_LOW",),
+        )
+
+        session._record_decision(decision=decision, state=store.get("BTCUSDT"), timestamp=now)
+
+        self.assertEqual(live_client.calls, 1)
+        self.assertEqual(live_client.last_market, "spot")
+        assert live_client.last_order_params is not None
+        self.assertEqual(live_client.last_order_params["side"], "SELL")
+        self.assertGreater(float(live_client.last_order_params["quantity"]), 0.0)
 
 
 if __name__ == "__main__":
