@@ -119,6 +119,25 @@ class AccountSnapshotBitgetRestClient(BitgetRestClient):
         return {"code": "00000", "data": {}}
 
 
+class TransferCaptureBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.last_url = ""
+        self.last_body = ""
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        self.last_url = request.full_url
+        self.last_body = (request.data or b"").decode("utf-8")
+        return {"code": "00000", "msg": "success", "data": {"transferId": "x-1"}}
+
+
 class QuantBitgetMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -364,7 +383,20 @@ class QuantBitgetMigrationTests(unittest.TestCase):
 
         self.assertAlmostEqual(account["availableBalance"], 37.88836272)
         self.assertAlmostEqual(account["unionAvailable"], 17.82432174)
-        self.assertAlmostEqual(account["effectiveAvailableBalance"], 17.82432174)
+        self.assertAlmostEqual(account["effectiveAvailableBalance"], 0.0)
+        self.assertTrue(account["hasCrossedMaxAvailable"])
+
+    def test_bitget_transfer_spot_to_futures_builds_expected_request(self) -> None:
+        client = TransferCaptureBitgetRestClient()
+        payload = client.transfer_spot_to_futures_usdt(amount_usdt=12.34, client_oid="x-oid")
+
+        self.assertIn("/api/v2/spot/wallet/transfer", client.last_url)
+        self.assertIn("\"fromType\":\"spot\"", client.last_body)
+        self.assertIn("\"toType\":\"usdt_futures\"", client.last_body)
+        self.assertIn("\"coin\":\"USDT\"", client.last_body)
+        self.assertIn("\"amount\":\"12.34\"", client.last_body)
+        self.assertIn("\"clientOid\":\"x-oid\"", client.last_body)
+        self.assertEqual(payload["coin"], "USDT")
 
 
 if __name__ == "__main__":
