@@ -100,3 +100,9 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Added balance-aware futures notional capping in the live order adapter, handled Bitget leverage-update margin errors (`40893`) with conservative fallback sizing, implemented repeated size backoff for balance rejects (`40762`) in the Bitget REST client, added regression tests, and validated in live logs with accepted futures orders.
 - Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
 - Skill sharpened next: Add symbol-level minimum-order-aware fallback so backoff can converge directly to exchange-valid minimum quantities without terminal rejects.
+
+### 2026-03-12 - Bitget futures live-order validation hardening
+- Summary: Reduced repeated Bitget futures execution failures by aligning live sizing with crossed-margin openable balance semantics and tightening retry/cooldown behavior for invalid orders.
+- What was done: Updated Bitget account parsing to treat `crossedMaxAvailable` as authoritative for crossed-mode openable balance, propagated effective balance into live sizing, prevented zero-available fallback from sending full-size orders, strengthened per-symbol notional downscaling after balance errors, expanded cooldown/fingerprint suppression to `45110`, and validated with focused unit tests plus short live daemon reruns.
+- Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add exchange-account-state-aware symbol selection so futures intents automatically avoid symbols blocked by per-market minimums and openable-margin constraints.
