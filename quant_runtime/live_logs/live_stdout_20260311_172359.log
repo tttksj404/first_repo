@@ -14,3 +14,8 @@
 [DECISION] 2026-03-11T08:25:00+00:00 LINKUSDT mode=spot side=long score=60.08
 [DECISION] 2026-03-11T08:25:00+00:00 WLDUSDT mode=cash side=flat score=57.08
 [CONNECT] websocket attempt=1
+[SYNC] 2026-03-11T08:40:01.017823+00:00 account/open-order snapshot refreshed
+[ERROR] websocket attempt=1 error=Bitget HTTP 429 Too Many Requests for GET https://api.bitget.com/api/v2/mix/market/candles?granularity=5m&limit=2&productType=USDT-FUTURES&symbol=LINKUSDT: code=429 msg=Too Many Requests
+[RETRY] attempt=2 sleeping=1.00s
+[CONNECT] websocket attempt=2
+[SYNC] 2026-03-11T08:50:00.998282+00:00 account/open-order snapshot refreshed
