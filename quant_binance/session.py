@@ -7,6 +7,7 @@ from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
+from uuid import uuid4
 
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter, OrderTestResult
@@ -56,6 +57,7 @@ class LivePaperSession:
     live_error_cooldown_until_by_symbol: dict[str, datetime] = field(default_factory=dict)
     live_error_code_by_symbol: dict[str, str] = field(default_factory=dict)
     futures_notional_scale_by_symbol: dict[str, float] = field(default_factory=dict)
+    _margin_transfer_permission_denied: bool = False
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
@@ -298,6 +300,176 @@ class LivePaperSession:
                 return free_qty
         return 0.0
 
+    def _spot_available_usdt_balance(self) -> float:
+        spot_snapshot = self._spot_snapshot()
+        balances = spot_snapshot.get("balances", [])
+        if not isinstance(balances, list):
+            return 0.0
+        for item in balances:
+            if not isinstance(item, dict):
+                continue
+            asset = str(item.get("asset", "")).upper()
+            if asset != "USDT":
+                continue
+            free_qty = self._safe_float(item.get("free"))
+            if free_qty > 0:
+                return free_qty
+        return 0.0
+
+    def _spot_balance_rows(self) -> list[dict[str, Any]]:
+        spot_snapshot = self._spot_snapshot()
+        balances = spot_snapshot.get("balances", [])
+        if not isinstance(balances, list):
+            return []
+        rows: list[dict[str, Any]] = []
+        for item in balances:
+            if isinstance(item, dict):
+                rows.append(item)
+        return rows
+
+    def _futures_openable_balance(self) -> float:
+        futures_snapshot = self.account_snapshot.get("futures")
+        if not isinstance(futures_snapshot, dict):
+            return 0.0
+        if "effectiveAvailableBalance" in futures_snapshot:
+            return max(self._safe_float(futures_snapshot.get("effectiveAvailableBalance")), 0.0)
+        if "crossedMaxAvailable" in futures_snapshot:
+            return max(self._safe_float(futures_snapshot.get("crossedMaxAvailable")), 0.0)
+        return max(self._safe_float(futures_snapshot.get("availableBalance")), 0.0)
+
+    def _attempt_spot_asset_sale_for_usdt(
+        self,
+        *,
+        target_usdt: float,
+        timestamp: datetime,
+    ) -> float:
+        if self.rest_client is None:
+            return self._spot_available_usdt_balance()
+        place_order = getattr(self.rest_client, "place_order", None)
+        get_book_ticker = getattr(self.rest_client, "get_book_ticker", None)
+        if not callable(place_order) or not callable(get_book_ticker):
+            return self._spot_available_usdt_balance()
+        current_usdt = self._spot_available_usdt_balance()
+        for row in self._spot_balance_rows():
+            if current_usdt >= target_usdt:
+                break
+            asset = str(row.get("asset", "")).upper()
+            if not asset or asset == "USDT":
+                continue
+            free_qty = self._safe_float(row.get("free"))
+            if free_qty <= 0:
+                continue
+            symbol = f"{asset}USDT"
+            try:
+                ticker = get_book_ticker(market="spot", symbol=symbol)
+            except Exception:
+                continue
+            bid_price = self._safe_float(ticker.get("bidPrice")) if isinstance(ticker, dict) else 0.0
+            if bid_price <= 0:
+                continue
+            needed_usdt = max(target_usdt - current_usdt, 5.0)
+            sell_qty = min(free_qty, round((needed_usdt / bid_price) * 1.1, 8))
+            if sell_qty <= 0:
+                continue
+            try:
+                place_order(
+                    market="spot",
+                    order_params={
+                        "symbol": symbol,
+                        "side": "sell",
+                        "orderType": "market",
+                        "size": f"{sell_qty:.8f}",
+                        "clientOid": f"margin-refill-sell-{uuid4().hex[:12]}",
+                    },
+                )
+                self.sync_account()
+            except Exception as exc:
+                if self.verbose:
+                    print(f"[MARGIN_REFILL_SPOT_SELL_ERROR] {symbol} {exc}", flush=True)
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "order_errors",
+                        {
+                            "timestamp": timestamp,
+                            "symbol": symbol,
+                            "market": "spot",
+                            "stage": "margin_refill_spot_sell",
+                            "error": repr(exc),
+                        },
+                    )
+                continue
+            current_usdt = self._spot_available_usdt_balance()
+            if self.verbose:
+                print(
+                    f"[MARGIN_REFILL_SPOT_SELL] {symbol} qty={sell_qty:.8f} usdt_now={current_usdt:.2f}",
+                    flush=True,
+                )
+        return current_usdt
+
+    def _attempt_futures_margin_refill(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        timestamp: datetime,
+    ) -> bool:
+        if self.rest_client is None or decision.final_mode != "futures":
+            return False
+        if self._margin_transfer_permission_denied:
+            return False
+        transfer_method = getattr(self.rest_client, "transfer_spot_to_futures_usdt", None)
+        if not callable(transfer_method):
+            return False
+        spot_usdt = self._spot_available_usdt_balance()
+        target_refill_usd = max(10.0, min(decision.order_intent_notional_usd * 0.2, 60.0))
+        if spot_usdt < 5.0:
+            spot_usdt = self._attempt_spot_asset_sale_for_usdt(
+                target_usdt=target_refill_usd,
+                timestamp=timestamp,
+            )
+        if spot_usdt < 5.0:
+            return False
+        transfer_amount = round(min(max(spot_usdt * 0.8, 5.0), target_refill_usd), 2)
+        if transfer_amount < 5.0:
+            return False
+        try:
+            transfer_method(amount_usdt=transfer_amount, client_oid=f"margin-refill-{uuid4().hex[:12]}")
+            self.sync_account()
+        except Exception as exc:
+            error_code = self._extract_exchange_error_code(exc)
+            if error_code == "40014":
+                # API key missing transfer permission; repeated retries will not recover until key permissions are updated.
+                self._margin_transfer_permission_denied = True
+            if self.verbose:
+                print(f"[MARGIN_REFILL_ERROR] {decision.symbol} {exc}", flush=True)
+            if self.log_store is not None:
+                self.log_store.append(
+                    "order_errors",
+                    {
+                        "timestamp": timestamp,
+                        "symbol": decision.symbol,
+                        "market": decision.final_mode,
+                        "stage": "margin_refill",
+                        "error": repr(exc),
+                    },
+                )
+            return False
+        if self.verbose:
+            print(
+                f"[MARGIN_REFILL] {decision.symbol} transferred_usdt={transfer_amount:.2f}",
+                flush=True,
+            )
+        if self.log_store is not None:
+            self.log_store.append(
+                "account_sync",
+                {
+                    "timestamp": timestamp,
+                    "account_snapshot": self.account_snapshot,
+                    "open_orders_snapshot": self.open_orders_snapshot,
+                },
+            )
+        return True
+
     def _spot_liquidation_decision(
         self,
         *,
@@ -468,6 +640,12 @@ class LivePaperSession:
                             },
                         )
                 else:
+                    if executable_decision.final_mode == "futures" and self._futures_openable_balance() <= 0:
+                        self._attempt_futures_margin_refill(
+                            decision=executable_decision,
+                            reference_price=float(state.last_trade_price),
+                            timestamp=timestamp,
+                        )
                     try:
                         live_result = self.live_order_executor.execute_decision(
                             decision=executable_decision,
@@ -475,29 +653,74 @@ class LivePaperSession:
                         )
                     except Exception as exc:
                         error_code = self._extract_exchange_error_code(exc)
-                        cooldown_seconds = self._cooldown_seconds_for_error_code(error_code)
-                        if error_code in {"40762", "45111", "45110", "40774", "400172"}:
-                            # Prevent immediate re-submission of the same failing live intent fingerprint.
-                            self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                        recovered = False
                         if error_code == "40762" and executable_decision.final_mode == "futures":
-                            self._tighten_futures_notional_scale(symbol=executable_decision.symbol)
-                        if cooldown_seconds > 0:
-                            self.live_error_cooldown_until_by_symbol[executable_decision.symbol] = (
-                                timestamp + timedelta(seconds=cooldown_seconds)
+                            refill_ok = self._attempt_futures_margin_refill(
+                                decision=executable_decision,
+                                reference_price=float(state.last_trade_price),
+                                timestamp=timestamp,
                             )
-                            if error_code is not None:
-                                self.live_error_code_by_symbol[executable_decision.symbol] = error_code
-                        payload = {
-                            "timestamp": timestamp,
-                            "symbol": executable_decision.symbol,
-                            "market": executable_decision.final_mode,
-                            "stage": "live_order",
-                            "error": repr(exc),
-                        }
-                        if self.verbose:
-                            print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
-                        if self.log_store is not None:
-                            self.log_store.append("order_errors", payload)
+                            if not refill_ok and self._futures_openable_balance() > 0:
+                                # A pre-trade refill may have already increased openable balance; allow one retry.
+                                refill_ok = True
+                            if refill_ok:
+                                try:
+                                    recovered_result = self.live_order_executor.execute_decision(
+                                        decision=executable_decision,
+                                        reference_price=state.last_trade_price,
+                                    )
+                                except Exception as retry_exc:
+                                    exc = retry_exc
+                                    error_code = self._extract_exchange_error_code(retry_exc)
+                                else:
+                                    recovered = True
+                                    self.live_error_cooldown_until_by_symbol.pop(executable_decision.symbol, None)
+                                    self.live_error_code_by_symbol.pop(executable_decision.symbol, None)
+                                    self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                                    if recovered_result.accepted:
+                                        self._consume_capital_after_live_order(executable_decision)
+                                        if executable_decision.final_mode == "futures":
+                                            self._relax_futures_notional_scale(symbol=executable_decision.symbol)
+                                    payload = {
+                                        "timestamp": timestamp,
+                                        "symbol": recovered_result.symbol,
+                                        "market": recovered_result.market,
+                                        "side": recovered_result.side,
+                                        "quantity": recovered_result.quantity,
+                                        "accepted": recovered_result.accepted,
+                                    }
+                                    self.live_orders.append(payload)
+                                    if self.verbose:
+                                        print(
+                                            f"[LIVE_ORDER] {recovered_result.symbol} market={recovered_result.market} side={recovered_result.side} qty={recovered_result.quantity} accepted={recovered_result.accepted}",
+                                            flush=True,
+                                        )
+                                    if self.log_store is not None:
+                                        self.log_store.append("live_orders", payload)
+                        if not recovered:
+                            cooldown_seconds = self._cooldown_seconds_for_error_code(error_code)
+                            if error_code in {"40762", "45111", "45110", "40774", "400172"}:
+                                # Prevent immediate re-submission of the same failing live intent fingerprint.
+                                self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                            if error_code == "40762" and executable_decision.final_mode == "futures":
+                                self._tighten_futures_notional_scale(symbol=executable_decision.symbol)
+                            if cooldown_seconds > 0:
+                                self.live_error_cooldown_until_by_symbol[executable_decision.symbol] = (
+                                    timestamp + timedelta(seconds=cooldown_seconds)
+                                )
+                                if error_code is not None:
+                                    self.live_error_code_by_symbol[executable_decision.symbol] = error_code
+                            payload = {
+                                "timestamp": timestamp,
+                                "symbol": executable_decision.symbol,
+                                "market": executable_decision.final_mode,
+                                "stage": "live_order",
+                                "error": repr(exc),
+                            }
+                            if self.verbose:
+                                print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
+                            if self.log_store is not None:
+                                self.log_store.append("order_errors", payload)
                     else:
                         if live_result is not None:
                             self.live_error_cooldown_until_by_symbol.pop(executable_decision.symbol, None)
