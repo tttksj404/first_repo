@@ -12,6 +12,29 @@ class _DummyRestClient:
 
 
 class QuantBinanceBitgetPollingWsTests(unittest.TestCase):
+    def test_to_payload_marks_futures_only_with_ps(self) -> None:
+        client = BitgetPollingWebSocketClient(
+            rest_client=_DummyRestClient(),
+            symbols=("BTCUSDT",),
+            decision_interval_minutes=5,
+            poll_interval_seconds=1.0,
+            symbol_poll_interval_seconds=5.0,
+        )
+        candle = {
+            "open_time": 1741737000000,
+            "open_price": 1,
+            "high_price": 1,
+            "low_price": 1,
+            "close_price": 1,
+            "base_volume": 1,
+            "quote_volume": 1,
+        }
+        futures_payload = client._to_payload(symbol="BTCUSDT", candle=candle, market="futures")
+        spot_payload = client._to_payload(symbol="BTCUSDT", candle=candle, market="spot")
+
+        self.assertIn("ps", futures_payload["data"])
+        self.assertNotIn("ps", spot_payload["data"])
+
     def test_symbol_poll_interval_enforces_spacing(self) -> None:
         client = BitgetPollingWebSocketClient(
             rest_client=_DummyRestClient(),

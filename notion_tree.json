@@ -1,0 +1,2340 @@
+{
+  "page_map": {
+    "31eeacc8-175a-8183-b982-f39616d86dce": {
+      "id": "31eeacc8-175a-8183-b982-f39616d86dce",
+      "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+      "url": "https://www.notion.so/Master-A-31eeacc8175a8183b982f39616d86dce",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "30beacc8-175a-8059-9fc3-d262112c0fc4": {
+      "id": "30beacc8-175a-8059-9fc3-d262112c0fc4",
+      "title": "IM정리",
+      "url": "https://www.notion.so/IM-30beacc8175a80599fc3d262112c0fc4",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "318eacc8-175a-8129-a114-c74c4d8f911a": {
+      "id": "318eacc8-175a-8129-a114-c74c4d8f911a",
+      "title": "Step4_BinarySearch_Greedy 정리",
+      "url": "https://www.notion.so/Step4_BinarySearch_Greedy-318eacc8175a8129a114c74c4d8f911a",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+    },
+    "318eacc8-175a-8177-af49-ebcc4f2487b0": {
+      "id": "318eacc8-175a-8177-af49-ebcc4f2487b0",
+      "title": "Step2_BruteForce_Backtracking 정리",
+      "url": "https://www.notion.so/Step2_BruteForce_Backtracking-318eacc8175a8177af49ebcc4f2487b0",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+    },
+    "31feacc8-175a-81ca-9422-e98484530d97": {
+      "id": "31feacc8-175a-81ca-9422-e98484530d97",
+      "title": "📕 [최종완전판] 정보처리기사 실기 기출 해설 (문제/정답/기출이력 포함)",
+      "url": "https://www.notion.so/31feacc8175a81ca9422e98484530d97",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-8055-b8a3-dc0050747538"
+    },
+    "31feacc8-175a-8102-8d39-d57e063109b0": {
+      "id": "31feacc8-175a-8102-8d39-d57e063109b0",
+      "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+      "url": "https://www.notion.so/LEET-23-00-31feacc8175a81028d39d57e063109b0",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31feacc8-175a-8127-b2b2-ec68d26ec4a5": {
+      "id": "31feacc8-175a-8127-b2b2-ec68d26ec4a5",
+      "title": "🔥 [LEET] 20:15 Night 집중 학습 (기출 분석 메인)",
+      "url": "https://www.notion.so/LEET-20-15-Night-31feacc8175a8127b2b2ec68d26ec4a5",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31feacc8-175a-8116-8659-e5e3b4f769df": {
+      "id": "31feacc8-175a-8116-8659-e5e3b4f769df",
+      "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+      "url": "https://www.notion.so/LEET-13-10-Lunch-31feacc8175a81168659e5e3b4f769df",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31feacc8-175a-810e-86de-cbe17230ccf3": {
+      "id": "31feacc8-175a-810e-86de-cbe17230ccf3",
+      "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+      "url": "https://www.notion.so/SSAFY-09-00-31feacc8175a810e86decbe17230ccf3",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31feacc8-175a-81c1-ae82-e964c8c2c509": {
+      "id": "31feacc8-175a-81c1-ae82-e964c8c2c509",
+      "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+      "url": "https://www.notion.so/LEET-08-30-Morning-1-31feacc8175a81c1ae82e964c8c2c509",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "2f0eacc8-175a-8055-b8a3-dc0050747538": {
+      "id": "2f0eacc8-175a-8055-b8a3-dc0050747538",
+      "title": "ssafy 교육(python)",
+      "url": "https://www.notion.so/ssafy-python-2f0eacc8175a8055b8a3dc0050747538",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "2f0eacc8-175a-8072-8e4b-e298edcb69c5": {
+      "id": "2f0eacc8-175a-8072-8e4b-e298edcb69c5",
+      "title": "재귀&백트래킹(여기서부터 응용 1~3문제)",
+      "url": "https://www.notion.so/1-3-2f0eacc8175a80728e4be298edcb69c5",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "31beacc8-175a-813c-ba9b-c0ff8e8d5d98": {
+      "id": "31beacc8-175a-813c-ba9b-c0ff8e8d5d98",
+      "title": "📍 [Samsung A] DFS & 백트래킹 극한의 정복 (IM Master Style)",
+      "url": "https://www.notion.so/Samsung-A-DFS-IM-Master-Style-31beacc8175a813cba9bc0ff8e8d5d98",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+    },
+    "31feacc8-175a-815c-ab4b-cc5da3b4d039": {
+      "id": "31feacc8-175a-815c-ab4b-cc5da3b4d039",
+      "title": "📕 [마스터북] 백트래킹 3대 천왕 (순열, 조합, 부분집합) - IM 마스터 가이드",
+      "url": "https://www.notion.so/3-IM-31feacc8175a815cab4bcc5da3b4d039",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-8072-8e4b-e298edcb69c5"
+    },
+    "31eeacc8-175a-8156-836e-ee51a5adcdcb": {
+      "id": "31eeacc8-175a-8156-836e-ee51a5adcdcb",
+      "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+      "url": "https://www.notion.so/LEET-23-00-31eeacc8175a8156836eee51a5adcdcb",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31eeacc8-175a-81e4-93ed-ede9fa1d4ddb": {
+      "id": "31eeacc8-175a-81e4-93ed-ede9fa1d4ddb",
+      "title": "🔥 [LEET] 20:15 Night 집중 학습 (기출 분석 메인)",
+      "url": "https://www.notion.so/LEET-20-15-Night-31eeacc8175a81e493edede9fa1d4ddb",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31eeacc8-175a-812b-8e59-e96816eb91b4": {
+      "id": "31eeacc8-175a-812b-8e59-e96816eb91b4",
+      "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+      "url": "https://www.notion.so/LEET-13-10-Lunch-31eeacc8175a812b8e59e96816eb91b4",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31eeacc8-175a-81c2-a8a4-fa0b619fbfbe": {
+      "id": "31eeacc8-175a-81c2-a8a4-fa0b619fbfbe",
+      "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+      "url": "https://www.notion.so/SSAFY-09-00-31eeacc8175a81c2a8a4fa0b619fbfbe",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31eeacc8-175a-81b0-a98c-f3eff9a02e27": {
+      "id": "31eeacc8-175a-81b0-a98c-f3eff9a02e27",
+      "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+      "url": "https://www.notion.so/LEET-08-30-Morning-1-31eeacc8175a81b0a98cf3eff9a02e27",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "31eeacc8-175a-816d-9429-f1dfb5f064aa": {
+      "id": "31eeacc8-175a-816d-9429-f1dfb5f064aa",
+      "title": "🐍 [Syntax 3] Data Structures (Deque, Heapq, Set)",
+      "url": "https://www.notion.so/Syntax-3-Data-Structures-Deque-Heapq-Set-31eeacc8175a816d9429f1dfb5f064aa",
+      "parent_type": "page_id",
+      "parent_id": "31eeacc8-175a-8183-b982-f39616d86dce"
+    },
+    "31eeacc8-175a-814e-acb7-d642108aeaa5": {
+      "id": "31eeacc8-175a-814e-acb7-d642108aeaa5",
+      "title": "🐍 [Syntax 2] List & Matrix Mastery (2D Grid)",
+      "url": "https://www.notion.so/Syntax-2-List-Matrix-Mastery-2D-Grid-31eeacc8175a814eacb7d642108aeaa5",
+      "parent_type": "page_id",
+      "parent_id": "31eeacc8-175a-8183-b982-f39616d86dce"
+    },
+    "31eeacc8-175a-81d3-ae81-f53d62ac066c": {
+      "id": "31eeacc8-175a-81d3-ae81-f53d62ac066c",
+      "title": "🐍 [Syntax 1] Fast I/O & String Magic",
+      "url": "https://www.notion.so/Syntax-1-Fast-I-O-String-Magic-31eeacc8175a81d3ae81f53d62ac066c",
+      "parent_type": "page_id",
+      "parent_id": "31eeacc8-175a-8183-b982-f39616d86dce"
+    },
+    "303eacc8-175a-80a3-9154-f7a7acee7c80": {
+      "id": "303eacc8-175a-80a3-9154-f7a7acee7c80",
+      "title": "코테 대비",
+      "url": "https://www.notion.so/303eacc8175a80a39154f7a7acee7c80",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "31beacc8-175a-814f-b848-c84b74984e09": {
+      "id": "31beacc8-175a-814f-b848-c84b74984e09",
+      "title": "📍 [Backtracking] 1759 - 암호 만들기",
+      "url": "https://www.notion.so/Backtracking-1759-31beacc8175a814fb848c84b74984e09",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-8150-8859-e5dd986c528c": {
+      "id": "31beacc8-175a-8150-8859-e5dd986c528c",
+      "title": "📍 [BFS] 2178 - 미로 탐색 (최단 경로)",
+      "url": "https://www.notion.so/BFS-2178-31beacc8175a81508859e5dd986c528c",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-815b-bb0a-c5033af89e88": {
+      "id": "31beacc8-175a-815b-bb0a-c5033af89e88",
+      "title": "📍 [Parametric Search] 2805 - 나무 자르기",
+      "url": "https://www.notion.so/Parametric-Search-2805-31beacc8175a815bbb0ac5033af89e88",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-81ac-a2b6-df47a5723749": {
+      "id": "31beacc8-175a-81ac-a2b6-df47a5723749",
+      "title": "📍 [BFS] 3184 - 양과 늑대 (영역 탐색)",
+      "url": "https://www.notion.so/BFS-3184-31beacc8175a81aca2b6df47a5723749",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-81fc-a724-eb76f3b3d399": {
+      "id": "31beacc8-175a-81fc-a724-eb76f3b3d399",
+      "title": "📍 [Dijkstra] 1753 - 최단 경로",
+      "url": "https://www.notion.so/Dijkstra-1753-31beacc8175a81fca724eb76f3b3d399",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-816b-8379-facefbe8206e": {
+      "id": "31beacc8-175a-816b-8379-facefbe8206e",
+      "title": "📍 [Topological Sort] 14567 - 위상 정렬 (선수 과목)",
+      "url": "https://www.notion.so/Topological-Sort-14567-31beacc8175a816b8379facefbe8206e",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-81ea-8b47-c81bd0d10912": {
+      "id": "31beacc8-175a-81ea-8b47-c81bd0d10912",
+      "title": "📍 [Samsung A] 코딩 던전 (DFS & 예산 관리)",
+      "url": "https://www.notion.so/Samsung-A-DFS-31beacc8175a81ea8b47c81bd0d10912",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-819d-b98f-d208aa13c899": {
+      "id": "31beacc8-175a-819d-b98f-d208aa13c899",
+      "title": "📍 [Samsung A] 사과 먹기 (시뮬레이션 & 방향 전환)",
+      "url": "https://www.notion.so/Samsung-A-31beacc8175a819db98fd208aa13c899",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-81de-96b2-dc42b14ff10a": {
+      "id": "31beacc8-175a-81de-96b2-dc42b14ff10a",
+      "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열)",
+      "url": "https://www.notion.so/Samsung-A-DFS-31beacc8175a81de96b2dc42b14ff10a",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-81db-acda-fa02ac631576": {
+      "id": "31beacc8-175a-81db-acda-fa02ac631576",
+      "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+      "url": "https://www.notion.so/Samsung-A-DFS-31beacc8175a81dbacdafa02ac631576",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "31beacc8-175a-81e9-a302-dec0633ff5ea": {
+      "id": "31beacc8-175a-81e9-a302-dec0633ff5ea",
+      "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+      "url": "https://www.notion.so/Samsung-A-31beacc8175a81e9a302dec0633ff5ea",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "2f0eacc8-175a-805c-85b2-dca59899d3d8": {
+      "id": "2f0eacc8-175a-805c-85b2-dca59899d3d8",
+      "title": "DFS/BFS",
+      "url": "https://www.notion.so/DFS-BFS-2f0eacc8175a805c85b2dca59899d3d8",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "313eacc8-175a-817f-9ad8-fe6917b25c99": {
+      "id": "313eacc8-175a-817f-9ad8-fe6917b25c99",
+      "title": "📍 [Samsung A] 테트로미노 (DFS + 특수 모양)",
+      "url": "https://www.notion.so/Samsung-A-DFS-313eacc8175a817f9ad8fe6917b25c99",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8124-a142-c90eadfa6db3": {
+      "id": "313eacc8-175a-8124-a142-c90eadfa6db3",
+      "title": "📍 [Samsung A] 원판 돌리기 (배열 회전 & 평균)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a8124a142c90eadfa6db3",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-818c-9734-d93929cfbf83": {
+      "id": "313eacc8-175a-818c-9734-d93929cfbf83",
+      "title": "📍 [Samsung A] 미세먼지 안녕! (확산 & 회전)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a818c9734d93929cfbf83",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "314eacc8-175a-8120-93ec-f01ece5a531c": {
+      "id": "314eacc8-175a-8120-93ec-f01ece5a531c",
+      "title": "📍 [Samsung A] 학교 필수 과목 (위상 정렬)",
+      "url": "https://www.notion.so/Samsung-A-314eacc8175a812093ecf01ece5a531c",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81e5-a57e-d33266fd300c": {
+      "id": "313eacc8-175a-81e5-a57e-d33266fd300c",
+      "title": "📍 [Samsung A] 아기 상어 (우선순위 BFS 탐색)",
+      "url": "https://www.notion.so/Samsung-A-BFS-313eacc8175a81e5a57ed33266fd300c",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81d1-b45c-ff132d0b1f56": {
+      "id": "313eacc8-175a-81d1-b45c-ff132d0b1f56",
+      "title": "📍 [Samsung A] 연산자 끼워넣기 (백트래킹)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a81d1b45cff132d0b1f56",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8139-973e-e2e28a926f49": {
+      "id": "313eacc8-175a-8139-973e-e2e28a926f49",
+      "title": "📍 [Samsung A] 경사로 (인덱스 조건 체크)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a8139973ee2e28a926f49",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8172-a54f-fef8428fb6e4": {
+      "id": "313eacc8-175a-8172-a54f-fef8428fb6e4",
+      "title": "📍 [Samsung A] 이차원 배열과 연산 (커스텀 정렬)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a8172a54ffef8428fb6e4",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-812a-bed2-fbacb1f93d1c": {
+      "id": "313eacc8-175a-812a-bed2-fbacb1f93d1c",
+      "title": "📍 [Samsung A] 상어 초등학교 (우선순위 탐색)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a812abed2fbacb1f93d1c",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-819e-a0b8-e6c64fc18bd1": {
+      "id": "313eacc8-175a-819e-a0b8-e6c64fc18bd1",
+      "title": "📍 [Samsung A] 마법사 상어와 파이어볼 (격자 제어)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a819ea0b8e6c64fc18bd1",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8120-b249-efef529db6f8": {
+      "id": "313eacc8-175a-8120-b249-efef529db6f8",
+      "title": "📍 [Samsung A] 치킨 배달 (조합 & 최솟값)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a8120b249efef529db6f8",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8134-8838-f7c295125f8a": {
+      "id": "313eacc8-175a-8134-8838-f7c295125f8a",
+      "title": "📍 [Samsung A] 나무 재테크 (3차원 배열 관리)",
+      "url": "https://www.notion.so/Samsung-A-3-313eacc8175a81348838f7c295125f8a",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81cd-abb4-cd3ada7df20e": {
+      "id": "313eacc8-175a-81cd-abb4-cd3ada7df20e",
+      "title": "📍 [Samsung A] 낚시왕 (2D 이동 시뮬레이션)",
+      "url": "https://www.notion.so/Samsung-A-2D-313eacc8175a81cdabb4cd3ada7df20e",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-817a-b91e-fc823a0ab988": {
+      "id": "313eacc8-175a-817a-b91e-fc823a0ab988",
+      "title": "📍 [Samsung A] 인구 이동 (영역 탐색 & 갱신)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a817ab91efc823a0ab988",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8108-9c3a-f2fa6658f3b0": {
+      "id": "313eacc8-175a-8108-9c3a-f2fa6658f3b0",
+      "title": "📍 [Samsung A] 구슬 탈출 2 (조건부 BFS)",
+      "url": "https://www.notion.so/Samsung-A-2-BFS-313eacc8175a81089c3af2fa6658f3b0",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-8102-92f6-de849db9395d": {
+      "id": "313eacc8-175a-8102-92f6-de849db9395d",
+      "title": "📍 [Samsung A] 스타트와 링크 (백트래킹 & 조합)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a810292f6de849db9395d",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "314eacc8-175a-8180-bb7b-f0b83282fa25": {
+      "id": "314eacc8-175a-8180-bb7b-f0b83282fa25",
+      "title": "📍 [Samsung A] 몬스터 헌터 (비트마스크 백트래킹)",
+      "url": "https://www.notion.so/Samsung-A-314eacc8175a8180bb7bf0b83282fa25",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "319eacc8-175a-81c5-8bd2-ea179bf83820": {
+      "id": "319eacc8-175a-81c5-8bd2-ea179bf83820",
+      "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열 탐색)",
+      "url": "https://www.notion.so/Samsung-A-DFS-319eacc8175a81c58bd2ea179bf83820",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "319eacc8-175a-8168-98f3-e63ceafa8736": {
+      "id": "319eacc8-175a-8168-98f3-e63ceafa8736",
+      "title": "📍 [BFS] 2178 - 미로 탐색 (최단 거리의 정석)",
+      "url": "https://www.notion.so/BFS-2178-319eacc8175a816898f3e63ceafa8736",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "319eacc8-175a-81ac-aecf-dbc7aacebc69": {
+      "id": "319eacc8-175a-81ac-aecf-dbc7aacebc69",
+      "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+      "url": "https://www.notion.so/Samsung-A-319eacc8175a81acaecfdbc7aacebc69",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "318eacc8-175a-81e5-9b4a-f71b9243c136": {
+      "id": "318eacc8-175a-81e5-9b4a-f71b9243c136",
+      "title": "2178 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/2178-318eacc8175a81e59b4af71b9243c136",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-816f-9ad0-dcc1f05df53e"
+    },
+    "318eacc8-175a-816f-9ad0-dcc1f05df53e": {
+      "id": "318eacc8-175a-816f-9ad0-dcc1f05df53e",
+      "title": "Ungrouped 정리",
+      "url": "https://www.notion.so/Ungrouped-318eacc8175a816f9ad0dcc1f05df53e",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+    },
+    "318eacc8-175a-819b-aae7-ec4e5eaf9263": {
+      "id": "318eacc8-175a-819b-aae7-ec4e5eaf9263",
+      "title": "A형 준비 전체 정리 (Codex+Claude+Gemini 검증, 2026-03-03)",
+      "url": "https://www.notion.so/A-Codex-Claude-Gemini-2026-03-03-318eacc8175a819baae7ec4e5eaf9263",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "318eacc8-175a-81b0-989e-d779f91c6fc5": {
+      "id": "318eacc8-175a-81b0-989e-d779f91c6fc5",
+      "title": "CONCEPT_Fibonacci_DP - DP, 누적합/투포인터",
+      "url": "https://www.notion.so/CONCEPT_Fibonacci_DP-DP-318eacc8175a81b0989ed779f91c6fc5",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81b3-ac03-e73d137c307b": {
+      "id": "318eacc8-175a-81b3-ac03-e73d137c307b",
+      "title": "Step5_DP_AdvancedGraph 정리",
+      "url": "https://www.notion.so/Step5_DP_AdvancedGraph-318eacc8175a81b3ac03e73d137c307b",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+    },
+    "318eacc8-175a-8150-b7cb-f763eabbd2cc": {
+      "id": "318eacc8-175a-8150-b7cb-f763eabbd2cc",
+      "title": "9251 - DP",
+      "url": "https://www.notion.so/9251-DP-318eacc8175a8150b7cbf763eabbd2cc",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81ea-9aaf-daf148d64ddd": {
+      "id": "318eacc8-175a-81ea-9aaf-daf148d64ddd",
+      "title": "2623 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/2623-318eacc8175a81ea9aafdaf148d64ddd",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8153-acb1-e07c598d8457": {
+      "id": "318eacc8-175a-8153-acb1-e07c598d8457",
+      "title": "2579 - DP",
+      "url": "https://www.notion.so/2579-DP-318eacc8175a8153acb1e07c598d8457",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81df-8f2a-eede4d0ab41a": {
+      "id": "318eacc8-175a-81df-8f2a-eede4d0ab41a",
+      "title": "2252 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/2252-318eacc8175a81df8f2aeede4d0ab41a",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-818f-8c6d-d80339c914b3": {
+      "id": "318eacc8-175a-818f-8c6d-d80339c914b3",
+      "title": "1932 - DP",
+      "url": "https://www.notion.so/1932-DP-318eacc8175a818f8c6dd80339c914b3",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81f6-8805-dc1ce5614acd": {
+      "id": "318eacc8-175a-81f6-8805-dc1ce5614acd",
+      "title": "1916 - 다익스트라/최단거리, 그래프 BFS",
+      "url": "https://www.notion.so/1916-BFS-318eacc8175a81f68805dc1ce5614acd",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8134-bc87-fb16a756ac51": {
+      "id": "318eacc8-175a-8134-bc87-fb16a756ac51",
+      "title": "1912 - DP",
+      "url": "https://www.notion.so/1912-DP-318eacc8175a8134bc87fb16a756ac51",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8137-bc72-e0d546f76c49": {
+      "id": "318eacc8-175a-8137-bc72-e0d546f76c49",
+      "title": "1766 - 다익스트라/최단거리, 위상정렬",
+      "url": "https://www.notion.so/1766-318eacc8175a8137bc72e0d546f76c49",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-815c-8ac0-eb628f938b75": {
+      "id": "318eacc8-175a-815c-8ac0-eb628f938b75",
+      "title": "1753 - 다익스트라/최단거리, 그래프 BFS",
+      "url": "https://www.notion.so/1753-BFS-318eacc8175a815c8ac0eb628f938b75",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-818f-99b2-f24830be0b06": {
+      "id": "318eacc8-175a-818f-99b2-f24830be0b06",
+      "title": "1647 - 그래프 BFS, 그리디",
+      "url": "https://www.notion.so/1647-BFS-318eacc8175a818f99b2f24830be0b06",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8175-befe-c85672189e43": {
+      "id": "318eacc8-175a-8175-befe-c85672189e43",
+      "title": "1516 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/1516-318eacc8175a8175befec85672189e43",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8180-a735-f45edef905fa": {
+      "id": "318eacc8-175a-8180-a735-f45edef905fa",
+      "title": "1504 - 다익스트라/최단거리, 그래프 BFS",
+      "url": "https://www.notion.so/1504-BFS-318eacc8175a8180a735f45edef905fa",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8121-89eb-d4c7b3dd01b2": {
+      "id": "318eacc8-175a-8121-89eb-d4c7b3dd01b2",
+      "title": "1463 - DP",
+      "url": "https://www.notion.so/1463-DP-318eacc8175a812189ebd4c7b3dd01b2",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-815c-aec0-f9ded8b06151": {
+      "id": "318eacc8-175a-815c-aec0-f9ded8b06151",
+      "title": "14567 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/14567-318eacc8175a815caec0f9ded8b06151",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8126-abe6-da1a6c08872c": {
+      "id": "318eacc8-175a-8126-abe6-da1a6c08872c",
+      "title": "14002 - DP, 그래프 BFS",
+      "url": "https://www.notion.so/14002-DP-BFS-318eacc8175a8126abe6da1a6c08872c",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81fb-8b54-f7f90e498849": {
+      "id": "318eacc8-175a-81fb-8b54-f7f90e498849",
+      "title": "12865 - DP",
+      "url": "https://www.notion.so/12865-DP-318eacc8175a81fb8b54f7f90e498849",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81ed-b829-c51f077bd07b": {
+      "id": "318eacc8-175a-81ed-b829-c51f077bd07b",
+      "title": "12738 - 이분탐색/파라메트릭 서치, 그래프 BFS",
+      "url": "https://www.notion.so/12738-BFS-318eacc8175a81edb829c51f077bd07b",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8112-ba78-de8c0a191992": {
+      "id": "318eacc8-175a-8112-ba78-de8c0a191992",
+      "title": "1238 - 다익스트라/최단거리, 그래프 BFS",
+      "url": "https://www.notion.so/1238-BFS-318eacc8175a8112ba78de8c0a191992",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-81dd-82dc-cab2025726d9": {
+      "id": "318eacc8-175a-81dd-82dc-cab2025726d9",
+      "title": "12015 - 이분탐색/파라메트릭 서치, 그래프 BFS",
+      "url": "https://www.notion.so/12015-BFS-318eacc8175a81dd82dccab2025726d9",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-816a-8152-d2a0f160924a": {
+      "id": "318eacc8-175a-816a-8152-d2a0f160924a",
+      "title": "11727 - DP",
+      "url": "https://www.notion.so/11727-DP-318eacc8175a816a8152d2a0f160924a",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8139-a53e-c645630bfb3e": {
+      "id": "318eacc8-175a-8139-a53e-c645630bfb3e",
+      "title": "11722 - DP",
+      "url": "https://www.notion.so/11722-DP-318eacc8175a8139a53ec645630bfb3e",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-817e-86f9-ca7fd5d1821c": {
+      "id": "318eacc8-175a-817e-86f9-ca7fd5d1821c",
+      "title": "11055 - DP",
+      "url": "https://www.notion.so/11055-DP-318eacc8175a817e86f9ca7fd5d1821c",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-8144-91bb-d499febda1a0": {
+      "id": "318eacc8-175a-8144-91bb-d499febda1a0",
+      "title": "11053 - DP",
+      "url": "https://www.notion.so/11053-DP-318eacc8175a814491bbd499febda1a0",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-812f-a3b1-e9ec4f178798": {
+      "id": "318eacc8-175a-812f-a3b1-e9ec4f178798",
+      "title": "1005 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/1005-318eacc8175a812fa3b1e9ec4f178798",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+    },
+    "318eacc8-175a-811f-a6b1-f35546ddceb4": {
+      "id": "318eacc8-175a-811f-a6b1-f35546ddceb4",
+      "title": "6236 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/6236-318eacc8175a811fa6b1f35546ddceb4",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8180-b181-e081d5124650": {
+      "id": "318eacc8-175a-8180-b181-e081d5124650",
+      "title": "3079 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/3079-318eacc8175a8180b181e081d5124650",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-810e-8c88-f2208dfbdcb5": {
+      "id": "318eacc8-175a-810e-8c88-f2208dfbdcb5",
+      "title": "2805 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/2805-318eacc8175a810e8c88f2208dfbdcb5",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8168-a02e-d27de940bb28": {
+      "id": "318eacc8-175a-8168-a02e-d27de940bb28",
+      "title": "2559 - 누적합/투포인터",
+      "url": "https://www.notion.so/2559-318eacc8175a8168a02ed27de940bb28",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8122-af69-d366db3cc8cf": {
+      "id": "318eacc8-175a-8122-af69-d366db3cc8cf",
+      "title": "2512 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/2512-318eacc8175a8122af69d366db3cc8cf",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-81d4-be13-c3e5b0875fa1": {
+      "id": "318eacc8-175a-81d4-be13-c3e5b0875fa1",
+      "title": "2470 - 이분탐색/파라메트릭 서치, 그리디",
+      "url": "https://www.notion.so/2470-318eacc8175a81d4be13c3e5b0875fa1",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-810a-9cea-ebe9032d3bbd": {
+      "id": "318eacc8-175a-810a-9cea-ebe9032d3bbd",
+      "title": "2467 - 이분탐색/파라메트릭 서치, 그리디",
+      "url": "https://www.notion.so/2467-318eacc8175a810a9ceaebe9032d3bbd",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8171-86e5-c95693ac3032": {
+      "id": "318eacc8-175a-8171-86e5-c95693ac3032",
+      "title": "2110 - 이분탐색/파라메트릭 서치, 그리디",
+      "url": "https://www.notion.so/2110-318eacc8175a817186e5c95693ac3032",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-81d9-bb1f-d7b1d109cb87": {
+      "id": "318eacc8-175a-81d9-bb1f-d7b1d109cb87",
+      "title": "1654 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/1654-318eacc8175a81d9bb1fd7b1d109cb87",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-817c-90d3-d614d58d5d5f": {
+      "id": "318eacc8-175a-817c-90d3-d614d58d5d5f",
+      "title": "1477 - 이분탐색/파라메트릭 서치, 그리디",
+      "url": "https://www.notion.so/1477-318eacc8175a817c90d3d614d58d5d5f",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-81a8-adaf-e7ddb88c2201": {
+      "id": "318eacc8-175a-81a8-adaf-e7ddb88c2201",
+      "title": "13397 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/13397-318eacc8175a81a8adafe7ddb88c2201",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8137-94f1-e5b1ddfb0054": {
+      "id": "318eacc8-175a-8137-94f1-e5b1ddfb0054",
+      "title": "1300 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/1300-318eacc8175a813794f1e5b1ddfb0054",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8186-94db-de8cf276c4c9": {
+      "id": "318eacc8-175a-8186-94db-de8cf276c4c9",
+      "title": "11659 - 누적합/투포인터",
+      "url": "https://www.notion.so/11659-318eacc8175a818694dbde8cf276c4c9",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+    },
+    "318eacc8-175a-8170-8697-e62c9f1d24b5": {
+      "id": "318eacc8-175a-8170-8697-e62c9f1d24b5",
+      "title": "5639 - 이분탐색/파라메트릭 서치, 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/5639-DFS-318eacc8175a81708697e62c9f1d24b5",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-81d8-a077-dd9def363cf6": {
+      "id": "318eacc8-175a-81d8-a077-dd9def363cf6",
+      "title": "Step3_Graph_Traversal 정리",
+      "url": "https://www.notion.so/Step3_Graph_Traversal-318eacc8175a81d8a077dd9def363cf6",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+    },
+    "318eacc8-175a-81d1-ba07-e1b131de46f7": {
+      "id": "318eacc8-175a-81d1-ba07-e1b131de46f7",
+      "title": "3184 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/3184-318eacc8175a81d1ba07e1b131de46f7",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-81e1-a5a6-d99d9b522e8e": {
+      "id": "318eacc8-175a-81e1-a5a6-d99d9b522e8e",
+      "title": "2636 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/2636-318eacc8175a81e1a5a6d99d9b522e8e",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-814a-8ec5-e558ed62fa61": {
+      "id": "318eacc8-175a-814a-8ec5-e558ed62fa61",
+      "title": "21736 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/21736-318eacc8175a814a8ec5e558ed62fa61",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-8112-bdef-e9ef3e3e2bed": {
+      "id": "318eacc8-175a-8112-bdef-e9ef3e3e2bed",
+      "title": "1991 - 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/1991-318eacc8175a8112bdefe9ef3e3e2bed",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-8101-baa0-c5e477fa6804": {
+      "id": "318eacc8-175a-8101-baa0-c5e477fa6804",
+      "title": "1967 - 그래프 BFS, 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/1967-BFS-DFS-318eacc8175a8101baa0c5e477fa6804",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-8157-ad18-c433ca32e9c1": {
+      "id": "318eacc8-175a-8157-ad18-c433ca32e9c1",
+      "title": "1926 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/1926-318eacc8175a8157ad18c433ca32e9c1",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-817c-a043-c272c6b976ea": {
+      "id": "318eacc8-175a-817c-a043-c272c6b976ea",
+      "title": "18352 - 다익스트라/최단거리, 위상정렬",
+      "url": "https://www.notion.so/18352-318eacc8175a817ca043c272c6b976ea",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-8120-ae90-eaec3494d335": {
+      "id": "318eacc8-175a-8120-ae90-eaec3494d335",
+      "title": "11725 - 위상정렬, 이분탐색/파라메트릭 서치",
+      "url": "https://www.notion.so/11725-318eacc8175a8120ae90eaec3494d335",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+    },
+    "318eacc8-175a-81f5-9dba-cf7fa48dee2a": {
+      "id": "318eacc8-175a-81f5-9dba-cf7fa48dee2a",
+      "title": "7568 - 그래프 BFS",
+      "url": "https://www.notion.so/7568-BFS-318eacc8175a81f59dbacf7fa48dee2a",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-8192-bcb9-eaca27473245": {
+      "id": "318eacc8-175a-8192-bcb9-eaca27473245",
+      "title": "6603 - 그래프 BFS, 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/6603-BFS-DFS-318eacc8175a8192bcb9eaca27473245",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-8152-ab22-c55673a80e7b": {
+      "id": "318eacc8-175a-8152-ab22-c55673a80e7b",
+      "title": "2231 - 기본 구현/자료구조",
+      "url": "https://www.notion.so/2231-318eacc8175a8152ab22c55673a80e7b",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-8135-8150-e45ae825336b": {
+      "id": "318eacc8-175a-8135-8150-e45ae825336b",
+      "title": "1759 - 그래프 BFS, 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/1759-BFS-DFS-318eacc8175a81358150e45ae825336b",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-813e-ad96-d8cb6d6828d2": {
+      "id": "318eacc8-175a-813e-ad96-d8cb6d6828d2",
+      "title": "14889 - 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/14889-DFS-318eacc8175a813ead96d8cb6d6828d2",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-817f-8ae5-c275d6611039": {
+      "id": "318eacc8-175a-817f-8ae5-c275d6611039",
+      "title": "14888 - 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/14888-DFS-318eacc8175a817f8ae5c275d6611039",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-816a-bbac-cd7693840506": {
+      "id": "318eacc8-175a-816a-bbac-cd7693840506",
+      "title": "1182 - 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/1182-DFS-318eacc8175a816abbaccd7693840506",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-81d7-8438-fffd5c2946ee": {
+      "id": "318eacc8-175a-81d7-8438-fffd5c2946ee",
+      "title": "10974 - 그래프 BFS, 그래프 DFS/백트래킹",
+      "url": "https://www.notion.so/10974-BFS-DFS-318eacc8175a81d78438fffd5c2946ee",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+    },
+    "318eacc8-175a-8171-bfd0-dfeb14dfb329": {
+      "id": "318eacc8-175a-8171-bfd0-dfeb14dfb329",
+      "title": "2577 - 기본 구현/자료구조",
+      "url": "https://www.notion.so/2577-318eacc8175a8171bfd0dfeb14dfb329",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+    },
+    "318eacc8-175a-81a3-bd79-f510656ff6d5": {
+      "id": "318eacc8-175a-81a3-bd79-f510656ff6d5",
+      "title": "Step1_Basic_DataStructure 정리",
+      "url": "https://www.notion.so/Step1_Basic_DataStructure-318eacc8175a81a3bd79f510656ff6d5",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+    },
+    "318eacc8-175a-81e8-848d-cd61049f7b40": {
+      "id": "318eacc8-175a-81e8-848d-cd61049f7b40",
+      "title": "1920 - 기본 구현/자료구조",
+      "url": "https://www.notion.so/1920-318eacc8175a81e8848dcd61049f7b40",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+    },
+    "318eacc8-175a-81db-be0d-c4f54300d672": {
+      "id": "318eacc8-175a-81db-be0d-c4f54300d672",
+      "title": "1715 - 다익스트라/최단거리, 힙/우선순위큐",
+      "url": "https://www.notion.so/1715-318eacc8175a81dbbe0dc4f54300d672",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+    },
+    "318eacc8-175a-813d-bc44-ec4906ecfd93": {
+      "id": "318eacc8-175a-813d-bc44-ec4906ecfd93",
+      "title": "11286 - 다익스트라/최단거리, 힙/우선순위큐",
+      "url": "https://www.notion.so/11286-318eacc8175a813dbc44ec4906ecfd93",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+    },
+    "318eacc8-175a-815b-90e1-e8a634d36782": {
+      "id": "318eacc8-175a-815b-90e1-e8a634d36782",
+      "title": "11279 - 다익스트라/최단거리, 힙/우선순위큐",
+      "url": "https://www.notion.so/11279-318eacc8175a815b90e1e8a634d36782",
+      "parent_type": "page_id",
+      "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+    },
+    "2e7eacc8-175a-8035-8d30-ca6bf5e1c524": {
+      "id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524",
+      "title": "알고리즘 스터디 ",
+      "url": "https://www.notion.so/2e7eacc8175a80358d30ca6bf5e1c524",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "2f7eacc8-175a-8037-b6f8-dc9907e07ae0": {
+      "id": "2f7eacc8-175a-8037-b6f8-dc9907e07ae0",
+      "title": "2월",
+      "url": "https://www.notion.so/2-2f7eacc8175a8037b6f8dc9907e07ae0",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-8055-b8a3-dc0050747538"
+    },
+    "231eacc8-175a-80b6-b30b-e061e8f5a3c5": {
+      "id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5",
+      "title": "스터디 로드맵 ",
+      "url": "https://www.notion.so/231eacc8175a80b6b30be061e8f5a3c5",
+      "parent_type": "workspace",
+      "parent_id": "workspace"
+    },
+    "316eacc8-175a-81fd-82f7-fa89b180ecc8": {
+      "id": "316eacc8-175a-81fd-82f7-fa89b180ecc8",
+      "title": "📍 [BFS] 9205 - 맥주 마시며 걸어가기 (거리 기반 점프)",
+      "url": "https://www.notion.so/BFS-9205-316eacc8175a81fd82f7fa89b180ecc8",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+    },
+    "316eacc8-175a-81c5-b2c0-c50710b7755b": {
+      "id": "316eacc8-175a-81c5-b2c0-c50710b7755b",
+      "title": "📍 [BFS] 2667 - 단지번호붙이기 (연결 요소 정렬)",
+      "url": "https://www.notion.so/BFS-2667-316eacc8175a81c5b2c0c50710b7755b",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+    },
+    "316eacc8-175a-815d-972a-e945b06eb5e5": {
+      "id": "316eacc8-175a-815d-972a-e945b06eb5e5",
+      "title": "📍 [BFS] 1926 - 그림 (영역 탐색)",
+      "url": "https://www.notion.so/BFS-1926-316eacc8175a815d972ae945b06eb5e5",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+    },
+    "316eacc8-175a-8140-8712-e0e2ae4f8a24": {
+      "id": "316eacc8-175a-8140-8712-e0e2ae4f8a24",
+      "title": "🔥 [LEET 140+] 3월 기출 해부 데일리 루틴 (2026-03-01)",
+      "url": "https://www.notion.so/LEET-140-3-2026-03-01-316eacc8175a81408712e0e2ae4f8a24",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-817c-8fa6-c89fd1e36a66": {
+      "id": "314eacc8-175a-817c-8fa6-c89fd1e36a66",
+      "title": "🏆 [2026] LEET 140+ 합격 사수: SSAFY 병행 마스터 워크스페이스",
+      "url": "https://www.notion.so/2026-LEET-140-SSAFY-314eacc8175a817c8fa6c89fd1e36a66",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "314eacc8-175a-819d-985b-ee4f4d006c90": {
+      "id": "314eacc8-175a-819d-985b-ee4f4d006c90",
+      "title": "📘 [완전판] LEET 추리논증 기본 정리 및 전략 마스터북",
+      "url": "https://www.notion.so/LEET-314eacc8175a819d985bee4f4d006c90",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "314eacc8-175a-818a-92da-cd2d38cc4f4c": {
+      "id": "314eacc8-175a-818a-92da-cd2d38cc4f4c",
+      "title": "📕 [완전판] LEET 언어이해 기출 출제원리 및 오답 거름망",
+      "url": "https://www.notion.so/LEET-314eacc8175a818a92dacd2d38cc4f4c",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "314eacc8-175a-8176-9445-d770e721d284": {
+      "id": "314eacc8-175a-8176-9445-d770e721d284",
+      "title": "[LEET] 💤 23:00 수면 및 회복 (7시간 사수)",
+      "url": "https://www.notion.so/LEET-23-00-7-314eacc8175a81769445d770e721d284",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-8187-a318-e78f24c7ea37": {
+      "id": "314eacc8-175a-8187-a318-e78f24c7ea37",
+      "title": "[LEET] 🔥 20:15 Night 집중 학습 (기출분석)",
+      "url": "https://www.notion.so/LEET-20-15-Night-314eacc8175a8187a318e78f24c7ea37",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-81ec-bf0a-d21c317b1225": {
+      "id": "314eacc8-175a-81ec-bf0a-d21c317b1225",
+      "title": "[LEET] 🍴 13:10 Lunch 틈새 (추리 퀴즈)",
+      "url": "https://www.notion.so/LEET-13-10-Lunch-314eacc8175a81ecbf0ad21c317b1225",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-8180-a36a-da26378dee0f": {
+      "id": "314eacc8-175a-8180-a36a-da26378dee0f",
+      "title": "[SSAFY] 🏢 09:00 교육 및 알고리즘 집중",
+      "url": "https://www.notion.so/SSAFY-09-00-314eacc8175a8180a36ada26378dee0f",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-81da-a5e3-e15c721de930": {
+      "id": "314eacc8-175a-81da-a5e3-e15c721de930",
+      "title": "[LEET] 🌅 08:30 Morning 예열 (언어 1지문)",
+      "url": "https://www.notion.so/LEET-08-30-Morning-1-314eacc8175a81daa5e3e15c721de930",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-80a8-b8e0-f8c467ae8ab3": {
+      "id": "314eacc8-175a-80a8-b8e0-f8c467ae8ab3",
+      "title": "Untitled",
+      "url": "https://www.notion.so/314eacc8175a80a8b8e0f8c467ae8ab3",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+    },
+    "314eacc8-175a-81a0-842a-cd10e53374e4": {
+      "id": "314eacc8-175a-81a0-842a-cd10e53374e4",
+      "title": "2025학년도 추리 15번",
+      "url": "https://www.notion.so/2025-15-314eacc8175a81a0842acd10e53374e4",
+      "parent_type": "database_id",
+      "parent_id": "314eacc8-175a-8101-8889-ebd834aa2a46"
+    },
+    "313eacc8-175a-8193-9f05-cf0f5a097b85": {
+      "id": "313eacc8-175a-8193-9f05-cf0f5a097b85",
+      "title": "📍 [Samsung A] 주사위 윷놀이 (백트래킹 & 상태)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a81939f05cf0f5a097b85",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81f8-b518-fbfea3edcac5": {
+      "id": "313eacc8-175a-81f8-b518-fbfea3edcac5",
+      "title": "📍 [Samsung A] 스타트 택시 (복합 BFS)",
+      "url": "https://www.notion.so/Samsung-A-BFS-313eacc8175a81f8b518fbfea3edcac5",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81a1-b46f-d1de909db499": {
+      "id": "313eacc8-175a-81a1-b46f-d1de909db499",
+      "title": "📍 [Samsung A] 새로운 게임 2 (말 쌓기 관리)",
+      "url": "https://www.notion.so/Samsung-A-2-313eacc8175a81a1b46fd1de909db499",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81cc-b101-fbd9f48aa4e8": {
+      "id": "313eacc8-175a-81cc-b101-fbd9f48aa4e8",
+      "title": "📍 [Samsung A] 뱀 (덱 관리 & 시뮬레이션)",
+      "url": "https://www.notion.so/Samsung-A-313eacc8175a81ccb101fbd9f48aa4e8",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81d1-8add-c2ee0f78236d": {
+      "id": "313eacc8-175a-81d1-8add-c2ee0f78236d",
+      "title": "📍 [Samsung A] 연구소 (조합 + 확산 BFS)",
+      "url": "https://www.notion.so/Samsung-A-BFS-313eacc8175a81d18addc2ee0f78236d",
+      "parent_type": "page_id",
+      "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+    },
+    "313eacc8-175a-81fd-93d5-d90dbc0b7285": {
+      "id": "313eacc8-175a-81fd-93d5-d90dbc0b7285",
+      "title": "📚 AI 활용 가이드: 똑똑하게 명령하고 200% 활용하기",
+      "url": "https://www.notion.so/AI-200-313eacc8175a81fd93d5d90dbc0b7285",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "30ceacc8-175a-804d-9888-cf3288329719": {
+      "id": "30ceacc8-175a-804d-9888-cf3288329719",
+      "title": "다익스트라(Dijkstra)",
+      "url": "https://www.notion.so/Dijkstra-30ceacc8175a804d9888cf3288329719",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "302eacc8-175a-8072-aad8-db2ca96b67e4": {
+      "id": "302eacc8-175a-8072-aad8-db2ca96b67e4",
+      "title": "DP 탐색(최종값 저장탐색)",
+      "url": "https://www.notion.so/DP-302eacc8175a8072aad8db2ca96b67e4",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2feeacc8-175a-80ee-9739-cb395ef4cc64": {
+      "id": "2feeacc8-175a-80ee-9739-cb395ef4cc64",
+      "title": "투포인터,그리디",
+      "url": "https://www.notion.so/2feeacc8175a80ee9739cb395ef4cc64",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2faeacc8-175a-8009-9587-edcfe01dbb4e": {
+      "id": "2faeacc8-175a-8009-9587-edcfe01dbb4e",
+      "title": "이진 탐색",
+      "url": "https://www.notion.so/2faeacc8175a80099587edcfe01dbb4e",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2e7eacc8-175a-8049-8859-c2d0efe9cbe4": {
+      "id": "2e7eacc8-175a-8049-8859-c2d0efe9cbe4",
+      "title": "해시",
+      "url": "https://www.notion.so/2e7eacc8175a80498859c2d0efe9cbe4",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2f3eacc8-175a-8022-970c-c9c4ed4f1c43": {
+      "id": "2f3eacc8-175a-8022-970c-c9c4ed4f1c43",
+      "title": "시뮬레이션",
+      "url": "https://www.notion.so/2f3eacc8175a8022970cc9c4ed4f1c43",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2e7eacc8-175a-803b-af45-d17145aba517": {
+      "id": "2e7eacc8-175a-803b-af45-d17145aba517",
+      "title": "배열 & 문자열 ",
+      "url": "https://www.notion.so/2e7eacc8175a803baf45d17145aba517",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2eaeacc8-175a-80fa-98b4-e0a61bda22cb": {
+      "id": "2eaeacc8-175a-80fa-98b4-e0a61bda22cb",
+      "title": "스택&큐",
+      "url": "https://www.notion.so/2eaeacc8175a80fa98b4e0a61bda22cb",
+      "parent_type": "page_id",
+      "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+    },
+    "2fceacc8-175a-8097-8a09-dec951049ee0": {
+      "id": "2fceacc8-175a-8097-8a09-dec951049ee0",
+      "title": "격자탐색 마스터",
+      "url": "https://www.notion.so/2fceacc8175a80978a09dec951049ee0",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "310eacc8-175a-806b-a9cb-ddfec721be71": {
+      "id": "310eacc8-175a-806b-a9cb-ddfec721be71",
+      "title": "반복문 혹은 원형에서의 반복",
+      "url": "https://www.notion.so/310eacc8175a806ba9cbddfec721be71",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "2ebeacc8-175a-803e-8ffc-d832509624c1": {
+      "id": "2ebeacc8-175a-803e-8ffc-d832509624c1",
+      "title": "파이썬 문법",
+      "url": "https://www.notion.so/2ebeacc8175a803e8ffcd832509624c1",
+      "parent_type": "page_id",
+      "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+    },
+    "2fceacc8-175a-80bf-bfc1-eb2daffafad5": {
+      "id": "2fceacc8-175a-80bf-bfc1-eb2daffafad5",
+      "title": "인덱스 사용법/ 인덱스[0] 과 [-1]을 이용해 최대 최소값 이용  ",
+      "url": "https://www.notion.so/0-1-2fceacc8175a80bfbfc1eb2daffafad5",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "2fbeacc8-175a-8057-8677-e1da08202692": {
+      "id": "2fbeacc8-175a-8057-8677-e1da08202692",
+      "title": "따로 알아둬야하는 입력 출력 방법들",
+      "url": "https://www.notion.so/2fbeacc8175a80578677e1da08202692",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "2ffeacc8-175a-80dd-b167-d583f11597a3": {
+      "id": "2ffeacc8-175a-80dd-b167-d583f11597a3",
+      "title": "회문분석",
+      "url": "https://www.notion.so/2ffeacc8175a80ddb167d583f11597a3",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "2fdeacc8-175a-8054-81f4-ecb052b4d0fe": {
+      "id": "2fdeacc8-175a-8054-81f4-ecb052b4d0fe",
+      "title": "차분배열, 누적합",
+      "url": "https://www.notion.so/2fdeacc8175a805481f4ecb052b4d0fe",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "2fceacc8-175a-8049-a889-f4dfad72a7de": {
+      "id": "2fceacc8-175a-8049-a889-f4dfad72a7de",
+      "title": "2차원 배열의 응용",
+      "url": "https://www.notion.so/2-2fceacc8175a8049a889f4dfad72a7de",
+      "parent_type": "page_id",
+      "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+    },
+    "8938fced-ff81-4868-9e97-96e01212b875": {
+      "id": "8938fced-ff81-4868-9e97-96e01212b875",
+      "title": "데이터 분석 ",
+      "url": "https://www.notion.so/8938fcedff8148689e9796e01212b875",
+      "parent_type": "workspace",
+      "parent_id": "workspace"
+    },
+    "2f7eacc8-175a-80e4-87f7-f4b955153e66": {
+      "id": "2f7eacc8-175a-80e4-87f7-f4b955153e66",
+      "title": "26~30일",
+      "url": "https://www.notion.so/26-30-2f7eacc8175a80e487f7f4b955153e66",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-8054-932b-c1824f53c326"
+    },
+    "2f0eacc8-175a-8054-932b-c1824f53c326": {
+      "id": "2f0eacc8-175a-8054-932b-c1824f53c326",
+      "title": "1월",
+      "url": "https://www.notion.so/1-2f0eacc8175a8054932bc1824f53c326",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-8055-b8a3-dc0050747538"
+    },
+    "2f0eacc8-175a-803d-98eb-c965d8d9e1d3": {
+      "id": "2f0eacc8-175a-803d-98eb-c965d8d9e1d3",
+      "title": "19~23일",
+      "url": "https://www.notion.so/19-23-2f0eacc8175a803d98ebc965d8d9e1d3",
+      "parent_type": "page_id",
+      "parent_id": "2f0eacc8-175a-8054-932b-c1824f53c326"
+    }
+  },
+  "children_map": {
+    "303eacc8-175a-80a3-9154-f7a7acee7c80": [
+      {
+        "id": "31eeacc8-175a-8183-b982-f39616d86dce",
+        "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+        "url": "https://www.notion.so/Master-A-31eeacc8175a8183b982f39616d86dce",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "30beacc8-175a-8059-9fc3-d262112c0fc4",
+        "title": "IM정리",
+        "url": "https://www.notion.so/IM-30beacc8175a80599fc3d262112c0fc4",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-814f-b848-c84b74984e09",
+        "title": "📍 [Backtracking] 1759 - 암호 만들기",
+        "url": "https://www.notion.so/Backtracking-1759-31beacc8175a814fb848c84b74984e09",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-8150-8859-e5dd986c528c",
+        "title": "📍 [BFS] 2178 - 미로 탐색 (최단 경로)",
+        "url": "https://www.notion.so/BFS-2178-31beacc8175a81508859e5dd986c528c",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-815b-bb0a-c5033af89e88",
+        "title": "📍 [Parametric Search] 2805 - 나무 자르기",
+        "url": "https://www.notion.so/Parametric-Search-2805-31beacc8175a815bbb0ac5033af89e88",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-81ac-a2b6-df47a5723749",
+        "title": "📍 [BFS] 3184 - 양과 늑대 (영역 탐색)",
+        "url": "https://www.notion.so/BFS-3184-31beacc8175a81aca2b6df47a5723749",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-81fc-a724-eb76f3b3d399",
+        "title": "📍 [Dijkstra] 1753 - 최단 경로",
+        "url": "https://www.notion.so/Dijkstra-1753-31beacc8175a81fca724eb76f3b3d399",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-816b-8379-facefbe8206e",
+        "title": "📍 [Topological Sort] 14567 - 위상 정렬 (선수 과목)",
+        "url": "https://www.notion.so/Topological-Sort-14567-31beacc8175a816b8379facefbe8206e",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-81ea-8b47-c81bd0d10912",
+        "title": "📍 [Samsung A] 코딩 던전 (DFS & 예산 관리)",
+        "url": "https://www.notion.so/Samsung-A-DFS-31beacc8175a81ea8b47c81bd0d10912",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-819d-b98f-d208aa13c899",
+        "title": "📍 [Samsung A] 사과 먹기 (시뮬레이션 & 방향 전환)",
+        "url": "https://www.notion.so/Samsung-A-31beacc8175a819db98fd208aa13c899",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-81de-96b2-dc42b14ff10a",
+        "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열)",
+        "url": "https://www.notion.so/Samsung-A-DFS-31beacc8175a81de96b2dc42b14ff10a",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-81db-acda-fa02ac631576",
+        "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+        "url": "https://www.notion.so/Samsung-A-DFS-31beacc8175a81dbacdafa02ac631576",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "31beacc8-175a-81e9-a302-dec0633ff5ea",
+        "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+        "url": "https://www.notion.so/Samsung-A-31beacc8175a81e9a302dec0633ff5ea",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-817f-9ad8-fe6917b25c99",
+        "title": "📍 [Samsung A] 테트로미노 (DFS + 특수 모양)",
+        "url": "https://www.notion.so/Samsung-A-DFS-313eacc8175a817f9ad8fe6917b25c99",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8124-a142-c90eadfa6db3",
+        "title": "📍 [Samsung A] 원판 돌리기 (배열 회전 & 평균)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a8124a142c90eadfa6db3",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-818c-9734-d93929cfbf83",
+        "title": "📍 [Samsung A] 미세먼지 안녕! (확산 & 회전)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a818c9734d93929cfbf83",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "314eacc8-175a-8120-93ec-f01ece5a531c",
+        "title": "📍 [Samsung A] 학교 필수 과목 (위상 정렬)",
+        "url": "https://www.notion.so/Samsung-A-314eacc8175a812093ecf01ece5a531c",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81e5-a57e-d33266fd300c",
+        "title": "📍 [Samsung A] 아기 상어 (우선순위 BFS 탐색)",
+        "url": "https://www.notion.so/Samsung-A-BFS-313eacc8175a81e5a57ed33266fd300c",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81d1-b45c-ff132d0b1f56",
+        "title": "📍 [Samsung A] 연산자 끼워넣기 (백트래킹)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a81d1b45cff132d0b1f56",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8139-973e-e2e28a926f49",
+        "title": "📍 [Samsung A] 경사로 (인덱스 조건 체크)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a8139973ee2e28a926f49",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8172-a54f-fef8428fb6e4",
+        "title": "📍 [Samsung A] 이차원 배열과 연산 (커스텀 정렬)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a8172a54ffef8428fb6e4",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-812a-bed2-fbacb1f93d1c",
+        "title": "📍 [Samsung A] 상어 초등학교 (우선순위 탐색)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a812abed2fbacb1f93d1c",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-819e-a0b8-e6c64fc18bd1",
+        "title": "📍 [Samsung A] 마법사 상어와 파이어볼 (격자 제어)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a819ea0b8e6c64fc18bd1",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8120-b249-efef529db6f8",
+        "title": "📍 [Samsung A] 치킨 배달 (조합 & 최솟값)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a8120b249efef529db6f8",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8134-8838-f7c295125f8a",
+        "title": "📍 [Samsung A] 나무 재테크 (3차원 배열 관리)",
+        "url": "https://www.notion.so/Samsung-A-3-313eacc8175a81348838f7c295125f8a",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81cd-abb4-cd3ada7df20e",
+        "title": "📍 [Samsung A] 낚시왕 (2D 이동 시뮬레이션)",
+        "url": "https://www.notion.so/Samsung-A-2D-313eacc8175a81cdabb4cd3ada7df20e",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-817a-b91e-fc823a0ab988",
+        "title": "📍 [Samsung A] 인구 이동 (영역 탐색 & 갱신)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a817ab91efc823a0ab988",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8108-9c3a-f2fa6658f3b0",
+        "title": "📍 [Samsung A] 구슬 탈출 2 (조건부 BFS)",
+        "url": "https://www.notion.so/Samsung-A-2-BFS-313eacc8175a81089c3af2fa6658f3b0",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8102-92f6-de849db9395d",
+        "title": "📍 [Samsung A] 스타트와 링크 (백트래킹 & 조합)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a810292f6de849db9395d",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "314eacc8-175a-8180-bb7b-f0b83282fa25",
+        "title": "📍 [Samsung A] 몬스터 헌터 (비트마스크 백트래킹)",
+        "url": "https://www.notion.so/Samsung-A-314eacc8175a8180bb7bf0b83282fa25",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "319eacc8-175a-81c5-8bd2-ea179bf83820",
+        "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열 탐색)",
+        "url": "https://www.notion.so/Samsung-A-DFS-319eacc8175a81c58bd2ea179bf83820",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "319eacc8-175a-8168-98f3-e63ceafa8736",
+        "title": "📍 [BFS] 2178 - 미로 탐색 (최단 거리의 정석)",
+        "url": "https://www.notion.so/BFS-2178-319eacc8175a816898f3e63ceafa8736",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "319eacc8-175a-81ac-aecf-dbc7aacebc69",
+        "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+        "url": "https://www.notion.so/Samsung-A-319eacc8175a81acaecfdbc7aacebc69",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-8193-9f05-cf0f5a097b85",
+        "title": "📍 [Samsung A] 주사위 윷놀이 (백트래킹 & 상태)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a81939f05cf0f5a097b85",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81f8-b518-fbfea3edcac5",
+        "title": "📍 [Samsung A] 스타트 택시 (복합 BFS)",
+        "url": "https://www.notion.so/Samsung-A-BFS-313eacc8175a81f8b518fbfea3edcac5",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81a1-b46f-d1de909db499",
+        "title": "📍 [Samsung A] 새로운 게임 2 (말 쌓기 관리)",
+        "url": "https://www.notion.so/Samsung-A-2-313eacc8175a81a1b46fd1de909db499",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81cc-b101-fbd9f48aa4e8",
+        "title": "📍 [Samsung A] 뱀 (덱 관리 & 시뮬레이션)",
+        "url": "https://www.notion.so/Samsung-A-313eacc8175a81ccb101fbd9f48aa4e8",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      },
+      {
+        "id": "313eacc8-175a-81d1-8add-c2ee0f78236d",
+        "title": "📍 [Samsung A] 연구소 (조합 + 확산 BFS)",
+        "url": "https://www.notion.so/Samsung-A-BFS-313eacc8175a81d18addc2ee0f78236d",
+        "parent_type": "page_id",
+        "parent_id": "303eacc8-175a-80a3-9154-f7a7acee7c80"
+      }
+    ],
+    "318eacc8-175a-819b-aae7-ec4e5eaf9263": [
+      {
+        "id": "318eacc8-175a-8129-a114-c74c4d8f911a",
+        "title": "Step4_BinarySearch_Greedy 정리",
+        "url": "https://www.notion.so/Step4_BinarySearch_Greedy-318eacc8175a8129a114c74c4d8f911a",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+      },
+      {
+        "id": "318eacc8-175a-8177-af49-ebcc4f2487b0",
+        "title": "Step2_BruteForce_Backtracking 정리",
+        "url": "https://www.notion.so/Step2_BruteForce_Backtracking-318eacc8175a8177af49ebcc4f2487b0",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+      },
+      {
+        "id": "318eacc8-175a-816f-9ad0-dcc1f05df53e",
+        "title": "Ungrouped 정리",
+        "url": "https://www.notion.so/Ungrouped-318eacc8175a816f9ad0dcc1f05df53e",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+      },
+      {
+        "id": "318eacc8-175a-81b3-ac03-e73d137c307b",
+        "title": "Step5_DP_AdvancedGraph 정리",
+        "url": "https://www.notion.so/Step5_DP_AdvancedGraph-318eacc8175a81b3ac03e73d137c307b",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+      },
+      {
+        "id": "318eacc8-175a-81d8-a077-dd9def363cf6",
+        "title": "Step3_Graph_Traversal 정리",
+        "url": "https://www.notion.so/Step3_Graph_Traversal-318eacc8175a81d8a077dd9def363cf6",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+      },
+      {
+        "id": "318eacc8-175a-81a3-bd79-f510656ff6d5",
+        "title": "Step1_Basic_DataStructure 정리",
+        "url": "https://www.notion.so/Step1_Basic_DataStructure-318eacc8175a81a3bd79f510656ff6d5",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-819b-aae7-ec4e5eaf9263"
+      }
+    ],
+    "2f0eacc8-175a-8055-b8a3-dc0050747538": [
+      {
+        "id": "31feacc8-175a-81ca-9422-e98484530d97",
+        "title": "📕 [최종완전판] 정보처리기사 실기 기출 해설 (문제/정답/기출이력 포함)",
+        "url": "https://www.notion.so/31feacc8175a81ca9422e98484530d97",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-8055-b8a3-dc0050747538"
+      },
+      {
+        "id": "2f7eacc8-175a-8037-b6f8-dc9907e07ae0",
+        "title": "2월",
+        "url": "https://www.notion.so/2-2f7eacc8175a8037b6f8dc9907e07ae0",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-8055-b8a3-dc0050747538"
+      },
+      {
+        "id": "2f0eacc8-175a-8054-932b-c1824f53c326",
+        "title": "1월",
+        "url": "https://www.notion.so/1-2f0eacc8175a8054932bc1824f53c326",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-8055-b8a3-dc0050747538"
+      }
+    ],
+    "314eacc8-175a-8100-b638-fdfe053da235": [
+      {
+        "id": "31feacc8-175a-8102-8d39-d57e063109b0",
+        "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+        "url": "https://www.notion.so/LEET-23-00-31feacc8175a81028d39d57e063109b0",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31feacc8-175a-8127-b2b2-ec68d26ec4a5",
+        "title": "🔥 [LEET] 20:15 Night 집중 학습 (기출 분석 메인)",
+        "url": "https://www.notion.so/LEET-20-15-Night-31feacc8175a8127b2b2ec68d26ec4a5",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31feacc8-175a-8116-8659-e5e3b4f769df",
+        "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+        "url": "https://www.notion.so/LEET-13-10-Lunch-31feacc8175a81168659e5e3b4f769df",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31feacc8-175a-810e-86de-cbe17230ccf3",
+        "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+        "url": "https://www.notion.so/SSAFY-09-00-31feacc8175a810e86decbe17230ccf3",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31feacc8-175a-81c1-ae82-e964c8c2c509",
+        "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+        "url": "https://www.notion.so/LEET-08-30-Morning-1-31feacc8175a81c1ae82e964c8c2c509",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31eeacc8-175a-8156-836e-ee51a5adcdcb",
+        "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+        "url": "https://www.notion.so/LEET-23-00-31eeacc8175a8156836eee51a5adcdcb",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31eeacc8-175a-81e4-93ed-ede9fa1d4ddb",
+        "title": "🔥 [LEET] 20:15 Night 집중 학습 (기출 분석 메인)",
+        "url": "https://www.notion.so/LEET-20-15-Night-31eeacc8175a81e493edede9fa1d4ddb",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31eeacc8-175a-812b-8e59-e96816eb91b4",
+        "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+        "url": "https://www.notion.so/LEET-13-10-Lunch-31eeacc8175a812b8e59e96816eb91b4",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31eeacc8-175a-81c2-a8a4-fa0b619fbfbe",
+        "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+        "url": "https://www.notion.so/SSAFY-09-00-31eeacc8175a81c2a8a4fa0b619fbfbe",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "31eeacc8-175a-81b0-a98c-f3eff9a02e27",
+        "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+        "url": "https://www.notion.so/LEET-08-30-Morning-1-31eeacc8175a81b0a98cf3eff9a02e27",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "316eacc8-175a-8140-8712-e0e2ae4f8a24",
+        "title": "🔥 [LEET 140+] 3월 기출 해부 데일리 루틴 (2026-03-01)",
+        "url": "https://www.notion.so/LEET-140-3-2026-03-01-316eacc8175a81408712e0e2ae4f8a24",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "314eacc8-175a-8176-9445-d770e721d284",
+        "title": "[LEET] 💤 23:00 수면 및 회복 (7시간 사수)",
+        "url": "https://www.notion.so/LEET-23-00-7-314eacc8175a81769445d770e721d284",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "314eacc8-175a-8187-a318-e78f24c7ea37",
+        "title": "[LEET] 🔥 20:15 Night 집중 학습 (기출분석)",
+        "url": "https://www.notion.so/LEET-20-15-Night-314eacc8175a8187a318e78f24c7ea37",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "314eacc8-175a-81ec-bf0a-d21c317b1225",
+        "title": "[LEET] 🍴 13:10 Lunch 틈새 (추리 퀴즈)",
+        "url": "https://www.notion.so/LEET-13-10-Lunch-314eacc8175a81ecbf0ad21c317b1225",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "314eacc8-175a-8180-a36a-da26378dee0f",
+        "title": "[SSAFY] 🏢 09:00 교육 및 알고리즘 집중",
+        "url": "https://www.notion.so/SSAFY-09-00-314eacc8175a8180a36ada26378dee0f",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "314eacc8-175a-81da-a5e3-e15c721de930",
+        "title": "[LEET] 🌅 08:30 Morning 예열 (언어 1지문)",
+        "url": "https://www.notion.so/LEET-08-30-Morning-1-314eacc8175a81daa5e3e15c721de930",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      },
+      {
+        "id": "314eacc8-175a-80a8-b8e0-f8c467ae8ab3",
+        "title": "Untitled",
+        "url": "https://www.notion.so/314eacc8175a80a8b8e0f8c467ae8ab3",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8100-b638-fdfe053da235"
+      }
+    ],
+    "231eacc8-175a-80b6-b30b-e061e8f5a3c5": [
+      {
+        "id": "2f0eacc8-175a-8055-b8a3-dc0050747538",
+        "title": "ssafy 교육(python)",
+        "url": "https://www.notion.so/ssafy-python-2f0eacc8175a8055b8a3dc0050747538",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "303eacc8-175a-80a3-9154-f7a7acee7c80",
+        "title": "코테 대비",
+        "url": "https://www.notion.so/303eacc8175a80a39154f7a7acee7c80",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524",
+        "title": "알고리즘 스터디 ",
+        "url": "https://www.notion.so/2e7eacc8175a80358d30ca6bf5e1c524",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "314eacc8-175a-817c-8fa6-c89fd1e36a66",
+        "title": "🏆 [2026] LEET 140+ 합격 사수: SSAFY 병행 마스터 워크스페이스",
+        "url": "https://www.notion.so/2026-LEET-140-SSAFY-314eacc8175a817c8fa6c89fd1e36a66",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "314eacc8-175a-819d-985b-ee4f4d006c90",
+        "title": "📘 [완전판] LEET 추리논증 기본 정리 및 전략 마스터북",
+        "url": "https://www.notion.so/LEET-314eacc8175a819d985bee4f4d006c90",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "314eacc8-175a-818a-92da-cd2d38cc4f4c",
+        "title": "📕 [완전판] LEET 언어이해 기출 출제원리 및 오답 거름망",
+        "url": "https://www.notion.so/LEET-314eacc8175a818a92dacd2d38cc4f4c",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "313eacc8-175a-81fd-93d5-d90dbc0b7285",
+        "title": "📚 AI 활용 가이드: 똑똑하게 명령하고 200% 활용하기",
+        "url": "https://www.notion.so/AI-200-313eacc8175a81fd93d5d90dbc0b7285",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      },
+      {
+        "id": "2ebeacc8-175a-803e-8ffc-d832509624c1",
+        "title": "파이썬 문법",
+        "url": "https://www.notion.so/2ebeacc8175a803e8ffcd832509624c1",
+        "parent_type": "page_id",
+        "parent_id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5"
+      }
+    ],
+    "2e7eacc8-175a-8035-8d30-ca6bf5e1c524": [
+      {
+        "id": "2f0eacc8-175a-8072-8e4b-e298edcb69c5",
+        "title": "재귀&백트래킹(여기서부터 응용 1~3문제)",
+        "url": "https://www.notion.so/1-3-2f0eacc8175a80728e4be298edcb69c5",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2f0eacc8-175a-805c-85b2-dca59899d3d8",
+        "title": "DFS/BFS",
+        "url": "https://www.notion.so/DFS-BFS-2f0eacc8175a805c85b2dca59899d3d8",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "318eacc8-175a-819b-aae7-ec4e5eaf9263",
+        "title": "A형 준비 전체 정리 (Codex+Claude+Gemini 검증, 2026-03-03)",
+        "url": "https://www.notion.so/A-Codex-Claude-Gemini-2026-03-03-318eacc8175a819baae7ec4e5eaf9263",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "30ceacc8-175a-804d-9888-cf3288329719",
+        "title": "다익스트라(Dijkstra)",
+        "url": "https://www.notion.so/Dijkstra-30ceacc8175a804d9888cf3288329719",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "302eacc8-175a-8072-aad8-db2ca96b67e4",
+        "title": "DP 탐색(최종값 저장탐색)",
+        "url": "https://www.notion.so/DP-302eacc8175a8072aad8db2ca96b67e4",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2feeacc8-175a-80ee-9739-cb395ef4cc64",
+        "title": "투포인터,그리디",
+        "url": "https://www.notion.so/2feeacc8175a80ee9739cb395ef4cc64",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2faeacc8-175a-8009-9587-edcfe01dbb4e",
+        "title": "이진 탐색",
+        "url": "https://www.notion.so/2faeacc8175a80099587edcfe01dbb4e",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2e7eacc8-175a-8049-8859-c2d0efe9cbe4",
+        "title": "해시",
+        "url": "https://www.notion.so/2e7eacc8175a80498859c2d0efe9cbe4",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2f3eacc8-175a-8022-970c-c9c4ed4f1c43",
+        "title": "시뮬레이션",
+        "url": "https://www.notion.so/2f3eacc8175a8022970cc9c4ed4f1c43",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2e7eacc8-175a-803b-af45-d17145aba517",
+        "title": "배열 & 문자열 ",
+        "url": "https://www.notion.so/2e7eacc8175a803baf45d17145aba517",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      },
+      {
+        "id": "2eaeacc8-175a-80fa-98b4-e0a61bda22cb",
+        "title": "스택&큐",
+        "url": "https://www.notion.so/2eaeacc8175a80fa98b4e0a61bda22cb",
+        "parent_type": "page_id",
+        "parent_id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524"
+      }
+    ],
+    "2f0eacc8-175a-805c-85b2-dca59899d3d8": [
+      {
+        "id": "31beacc8-175a-813c-ba9b-c0ff8e8d5d98",
+        "title": "📍 [Samsung A] DFS & 백트래킹 극한의 정복 (IM Master Style)",
+        "url": "https://www.notion.so/Samsung-A-DFS-IM-Master-Style-31beacc8175a813cba9bc0ff8e8d5d98",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+      },
+      {
+        "id": "316eacc8-175a-81fd-82f7-fa89b180ecc8",
+        "title": "📍 [BFS] 9205 - 맥주 마시며 걸어가기 (거리 기반 점프)",
+        "url": "https://www.notion.so/BFS-9205-316eacc8175a81fd82f7fa89b180ecc8",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+      },
+      {
+        "id": "316eacc8-175a-81c5-b2c0-c50710b7755b",
+        "title": "📍 [BFS] 2667 - 단지번호붙이기 (연결 요소 정렬)",
+        "url": "https://www.notion.so/BFS-2667-316eacc8175a81c5b2c0c50710b7755b",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+      },
+      {
+        "id": "316eacc8-175a-815d-972a-e945b06eb5e5",
+        "title": "📍 [BFS] 1926 - 그림 (영역 탐색)",
+        "url": "https://www.notion.so/BFS-1926-316eacc8175a815d972ae945b06eb5e5",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-805c-85b2-dca59899d3d8"
+      }
+    ],
+    "2f0eacc8-175a-8072-8e4b-e298edcb69c5": [
+      {
+        "id": "31feacc8-175a-815c-ab4b-cc5da3b4d039",
+        "title": "📕 [마스터북] 백트래킹 3대 천왕 (순열, 조합, 부분집합) - IM 마스터 가이드",
+        "url": "https://www.notion.so/3-IM-31feacc8175a815cab4bcc5da3b4d039",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-8072-8e4b-e298edcb69c5"
+      }
+    ],
+    "31eeacc8-175a-8183-b982-f39616d86dce": [
+      {
+        "id": "31eeacc8-175a-816d-9429-f1dfb5f064aa",
+        "title": "🐍 [Syntax 3] Data Structures (Deque, Heapq, Set)",
+        "url": "https://www.notion.so/Syntax-3-Data-Structures-Deque-Heapq-Set-31eeacc8175a816d9429f1dfb5f064aa",
+        "parent_type": "page_id",
+        "parent_id": "31eeacc8-175a-8183-b982-f39616d86dce"
+      },
+      {
+        "id": "31eeacc8-175a-814e-acb7-d642108aeaa5",
+        "title": "🐍 [Syntax 2] List & Matrix Mastery (2D Grid)",
+        "url": "https://www.notion.so/Syntax-2-List-Matrix-Mastery-2D-Grid-31eeacc8175a814eacb7d642108aeaa5",
+        "parent_type": "page_id",
+        "parent_id": "31eeacc8-175a-8183-b982-f39616d86dce"
+      },
+      {
+        "id": "31eeacc8-175a-81d3-ae81-f53d62ac066c",
+        "title": "🐍 [Syntax 1] Fast I/O & String Magic",
+        "url": "https://www.notion.so/Syntax-1-Fast-I-O-String-Magic-31eeacc8175a81d3ae81f53d62ac066c",
+        "parent_type": "page_id",
+        "parent_id": "31eeacc8-175a-8183-b982-f39616d86dce"
+      }
+    ],
+    "318eacc8-175a-816f-9ad0-dcc1f05df53e": [
+      {
+        "id": "318eacc8-175a-81e5-9b4a-f71b9243c136",
+        "title": "2178 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/2178-318eacc8175a81e59b4af71b9243c136",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-816f-9ad0-dcc1f05df53e"
+      }
+    ],
+    "318eacc8-175a-81b3-ac03-e73d137c307b": [
+      {
+        "id": "318eacc8-175a-81b0-989e-d779f91c6fc5",
+        "title": "CONCEPT_Fibonacci_DP - DP, 누적합/투포인터",
+        "url": "https://www.notion.so/CONCEPT_Fibonacci_DP-DP-318eacc8175a81b0989ed779f91c6fc5",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8150-b7cb-f763eabbd2cc",
+        "title": "9251 - DP",
+        "url": "https://www.notion.so/9251-DP-318eacc8175a8150b7cbf763eabbd2cc",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-81ea-9aaf-daf148d64ddd",
+        "title": "2623 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/2623-318eacc8175a81ea9aafdaf148d64ddd",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8153-acb1-e07c598d8457",
+        "title": "2579 - DP",
+        "url": "https://www.notion.so/2579-DP-318eacc8175a8153acb1e07c598d8457",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-81df-8f2a-eede4d0ab41a",
+        "title": "2252 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/2252-318eacc8175a81df8f2aeede4d0ab41a",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-818f-8c6d-d80339c914b3",
+        "title": "1932 - DP",
+        "url": "https://www.notion.so/1932-DP-318eacc8175a818f8c6dd80339c914b3",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-81f6-8805-dc1ce5614acd",
+        "title": "1916 - 다익스트라/최단거리, 그래프 BFS",
+        "url": "https://www.notion.so/1916-BFS-318eacc8175a81f68805dc1ce5614acd",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8134-bc87-fb16a756ac51",
+        "title": "1912 - DP",
+        "url": "https://www.notion.so/1912-DP-318eacc8175a8134bc87fb16a756ac51",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8137-bc72-e0d546f76c49",
+        "title": "1766 - 다익스트라/최단거리, 위상정렬",
+        "url": "https://www.notion.so/1766-318eacc8175a8137bc72e0d546f76c49",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-815c-8ac0-eb628f938b75",
+        "title": "1753 - 다익스트라/최단거리, 그래프 BFS",
+        "url": "https://www.notion.so/1753-BFS-318eacc8175a815c8ac0eb628f938b75",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-818f-99b2-f24830be0b06",
+        "title": "1647 - 그래프 BFS, 그리디",
+        "url": "https://www.notion.so/1647-BFS-318eacc8175a818f99b2f24830be0b06",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8175-befe-c85672189e43",
+        "title": "1516 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/1516-318eacc8175a8175befec85672189e43",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8180-a735-f45edef905fa",
+        "title": "1504 - 다익스트라/최단거리, 그래프 BFS",
+        "url": "https://www.notion.so/1504-BFS-318eacc8175a8180a735f45edef905fa",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8121-89eb-d4c7b3dd01b2",
+        "title": "1463 - DP",
+        "url": "https://www.notion.so/1463-DP-318eacc8175a812189ebd4c7b3dd01b2",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-815c-aec0-f9ded8b06151",
+        "title": "14567 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/14567-318eacc8175a815caec0f9ded8b06151",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8126-abe6-da1a6c08872c",
+        "title": "14002 - DP, 그래프 BFS",
+        "url": "https://www.notion.so/14002-DP-BFS-318eacc8175a8126abe6da1a6c08872c",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-81fb-8b54-f7f90e498849",
+        "title": "12865 - DP",
+        "url": "https://www.notion.so/12865-DP-318eacc8175a81fb8b54f7f90e498849",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-81ed-b829-c51f077bd07b",
+        "title": "12738 - 이분탐색/파라메트릭 서치, 그래프 BFS",
+        "url": "https://www.notion.so/12738-BFS-318eacc8175a81edb829c51f077bd07b",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8112-ba78-de8c0a191992",
+        "title": "1238 - 다익스트라/최단거리, 그래프 BFS",
+        "url": "https://www.notion.so/1238-BFS-318eacc8175a8112ba78de8c0a191992",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-81dd-82dc-cab2025726d9",
+        "title": "12015 - 이분탐색/파라메트릭 서치, 그래프 BFS",
+        "url": "https://www.notion.so/12015-BFS-318eacc8175a81dd82dccab2025726d9",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-816a-8152-d2a0f160924a",
+        "title": "11727 - DP",
+        "url": "https://www.notion.so/11727-DP-318eacc8175a816a8152d2a0f160924a",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8139-a53e-c645630bfb3e",
+        "title": "11722 - DP",
+        "url": "https://www.notion.so/11722-DP-318eacc8175a8139a53ec645630bfb3e",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-817e-86f9-ca7fd5d1821c",
+        "title": "11055 - DP",
+        "url": "https://www.notion.so/11055-DP-318eacc8175a817e86f9ca7fd5d1821c",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-8144-91bb-d499febda1a0",
+        "title": "11053 - DP",
+        "url": "https://www.notion.so/11053-DP-318eacc8175a814491bbd499febda1a0",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      },
+      {
+        "id": "318eacc8-175a-812f-a3b1-e9ec4f178798",
+        "title": "1005 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/1005-318eacc8175a812fa3b1e9ec4f178798",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81b3-ac03-e73d137c307b"
+      }
+    ],
+    "318eacc8-175a-8129-a114-c74c4d8f911a": [
+      {
+        "id": "318eacc8-175a-811f-a6b1-f35546ddceb4",
+        "title": "6236 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/6236-318eacc8175a811fa6b1f35546ddceb4",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-8180-b181-e081d5124650",
+        "title": "3079 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/3079-318eacc8175a8180b181e081d5124650",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-810e-8c88-f2208dfbdcb5",
+        "title": "2805 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/2805-318eacc8175a810e8c88f2208dfbdcb5",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-8168-a02e-d27de940bb28",
+        "title": "2559 - 누적합/투포인터",
+        "url": "https://www.notion.so/2559-318eacc8175a8168a02ed27de940bb28",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-8122-af69-d366db3cc8cf",
+        "title": "2512 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/2512-318eacc8175a8122af69d366db3cc8cf",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-81d4-be13-c3e5b0875fa1",
+        "title": "2470 - 이분탐색/파라메트릭 서치, 그리디",
+        "url": "https://www.notion.so/2470-318eacc8175a81d4be13c3e5b0875fa1",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-810a-9cea-ebe9032d3bbd",
+        "title": "2467 - 이분탐색/파라메트릭 서치, 그리디",
+        "url": "https://www.notion.so/2467-318eacc8175a810a9ceaebe9032d3bbd",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-8171-86e5-c95693ac3032",
+        "title": "2110 - 이분탐색/파라메트릭 서치, 그리디",
+        "url": "https://www.notion.so/2110-318eacc8175a817186e5c95693ac3032",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-81d9-bb1f-d7b1d109cb87",
+        "title": "1654 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/1654-318eacc8175a81d9bb1fd7b1d109cb87",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-817c-90d3-d614d58d5d5f",
+        "title": "1477 - 이분탐색/파라메트릭 서치, 그리디",
+        "url": "https://www.notion.so/1477-318eacc8175a817c90d3d614d58d5d5f",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-81a8-adaf-e7ddb88c2201",
+        "title": "13397 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/13397-318eacc8175a81a8adafe7ddb88c2201",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-8137-94f1-e5b1ddfb0054",
+        "title": "1300 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/1300-318eacc8175a813794f1e5b1ddfb0054",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      },
+      {
+        "id": "318eacc8-175a-8186-94db-de8cf276c4c9",
+        "title": "11659 - 누적합/투포인터",
+        "url": "https://www.notion.so/11659-318eacc8175a818694dbde8cf276c4c9",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8129-a114-c74c4d8f911a"
+      }
+    ],
+    "318eacc8-175a-81d8-a077-dd9def363cf6": [
+      {
+        "id": "318eacc8-175a-8170-8697-e62c9f1d24b5",
+        "title": "5639 - 이분탐색/파라메트릭 서치, 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/5639-DFS-318eacc8175a81708697e62c9f1d24b5",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-81d1-ba07-e1b131de46f7",
+        "title": "3184 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/3184-318eacc8175a81d1ba07e1b131de46f7",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-81e1-a5a6-d99d9b522e8e",
+        "title": "2636 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/2636-318eacc8175a81e1a5a6d99d9b522e8e",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-814a-8ec5-e558ed62fa61",
+        "title": "21736 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/21736-318eacc8175a814a8ec5e558ed62fa61",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-8112-bdef-e9ef3e3e2bed",
+        "title": "1991 - 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/1991-318eacc8175a8112bdefe9ef3e3e2bed",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-8101-baa0-c5e477fa6804",
+        "title": "1967 - 그래프 BFS, 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/1967-BFS-DFS-318eacc8175a8101baa0c5e477fa6804",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-8157-ad18-c433ca32e9c1",
+        "title": "1926 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/1926-318eacc8175a8157ad18c433ca32e9c1",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-817c-a043-c272c6b976ea",
+        "title": "18352 - 다익스트라/최단거리, 위상정렬",
+        "url": "https://www.notion.so/18352-318eacc8175a817ca043c272c6b976ea",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      },
+      {
+        "id": "318eacc8-175a-8120-ae90-eaec3494d335",
+        "title": "11725 - 위상정렬, 이분탐색/파라메트릭 서치",
+        "url": "https://www.notion.so/11725-318eacc8175a8120ae90eaec3494d335",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81d8-a077-dd9def363cf6"
+      }
+    ],
+    "318eacc8-175a-8177-af49-ebcc4f2487b0": [
+      {
+        "id": "318eacc8-175a-81f5-9dba-cf7fa48dee2a",
+        "title": "7568 - 그래프 BFS",
+        "url": "https://www.notion.so/7568-BFS-318eacc8175a81f59dbacf7fa48dee2a",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-8192-bcb9-eaca27473245",
+        "title": "6603 - 그래프 BFS, 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/6603-BFS-DFS-318eacc8175a8192bcb9eaca27473245",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-8152-ab22-c55673a80e7b",
+        "title": "2231 - 기본 구현/자료구조",
+        "url": "https://www.notion.so/2231-318eacc8175a8152ab22c55673a80e7b",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-8135-8150-e45ae825336b",
+        "title": "1759 - 그래프 BFS, 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/1759-BFS-DFS-318eacc8175a81358150e45ae825336b",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-813e-ad96-d8cb6d6828d2",
+        "title": "14889 - 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/14889-DFS-318eacc8175a813ead96d8cb6d6828d2",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-817f-8ae5-c275d6611039",
+        "title": "14888 - 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/14888-DFS-318eacc8175a817f8ae5c275d6611039",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-816a-bbac-cd7693840506",
+        "title": "1182 - 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/1182-DFS-318eacc8175a816abbaccd7693840506",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      },
+      {
+        "id": "318eacc8-175a-81d7-8438-fffd5c2946ee",
+        "title": "10974 - 그래프 BFS, 그래프 DFS/백트래킹",
+        "url": "https://www.notion.so/10974-BFS-DFS-318eacc8175a81d78438fffd5c2946ee",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-8177-af49-ebcc4f2487b0"
+      }
+    ],
+    "318eacc8-175a-81a3-bd79-f510656ff6d5": [
+      {
+        "id": "318eacc8-175a-8171-bfd0-dfeb14dfb329",
+        "title": "2577 - 기본 구현/자료구조",
+        "url": "https://www.notion.so/2577-318eacc8175a8171bfd0dfeb14dfb329",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+      },
+      {
+        "id": "318eacc8-175a-81e8-848d-cd61049f7b40",
+        "title": "1920 - 기본 구현/자료구조",
+        "url": "https://www.notion.so/1920-318eacc8175a81e8848dcd61049f7b40",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+      },
+      {
+        "id": "318eacc8-175a-81db-be0d-c4f54300d672",
+        "title": "1715 - 다익스트라/최단거리, 힙/우선순위큐",
+        "url": "https://www.notion.so/1715-318eacc8175a81dbbe0dc4f54300d672",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+      },
+      {
+        "id": "318eacc8-175a-813d-bc44-ec4906ecfd93",
+        "title": "11286 - 다익스트라/최단거리, 힙/우선순위큐",
+        "url": "https://www.notion.so/11286-318eacc8175a813dbc44ec4906ecfd93",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+      },
+      {
+        "id": "318eacc8-175a-815b-90e1-e8a634d36782",
+        "title": "11279 - 다익스트라/최단거리, 힙/우선순위큐",
+        "url": "https://www.notion.so/11279-318eacc8175a815b90e1e8a634d36782",
+        "parent_type": "page_id",
+        "parent_id": "318eacc8-175a-81a3-bd79-f510656ff6d5"
+      }
+    ],
+    "314eacc8-175a-8101-8889-ebd834aa2a46": [
+      {
+        "id": "314eacc8-175a-81a0-842a-cd10e53374e4",
+        "title": "2025학년도 추리 15번",
+        "url": "https://www.notion.so/2025-15-314eacc8175a81a0842acd10e53374e4",
+        "parent_type": "database_id",
+        "parent_id": "314eacc8-175a-8101-8889-ebd834aa2a46"
+      }
+    ],
+    "2ebeacc8-175a-803e-8ffc-d832509624c1": [
+      {
+        "id": "2fceacc8-175a-8097-8a09-dec951049ee0",
+        "title": "격자탐색 마스터",
+        "url": "https://www.notion.so/2fceacc8175a80978a09dec951049ee0",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      },
+      {
+        "id": "310eacc8-175a-806b-a9cb-ddfec721be71",
+        "title": "반복문 혹은 원형에서의 반복",
+        "url": "https://www.notion.so/310eacc8175a806ba9cbddfec721be71",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      },
+      {
+        "id": "2fceacc8-175a-80bf-bfc1-eb2daffafad5",
+        "title": "인덱스 사용법/ 인덱스[0] 과 [-1]을 이용해 최대 최소값 이용  ",
+        "url": "https://www.notion.so/0-1-2fceacc8175a80bfbfc1eb2daffafad5",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      },
+      {
+        "id": "2fbeacc8-175a-8057-8677-e1da08202692",
+        "title": "따로 알아둬야하는 입력 출력 방법들",
+        "url": "https://www.notion.so/2fbeacc8175a80578677e1da08202692",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      },
+      {
+        "id": "2ffeacc8-175a-80dd-b167-d583f11597a3",
+        "title": "회문분석",
+        "url": "https://www.notion.so/2ffeacc8175a80ddb167d583f11597a3",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      },
+      {
+        "id": "2fdeacc8-175a-8054-81f4-ecb052b4d0fe",
+        "title": "차분배열, 누적합",
+        "url": "https://www.notion.so/2fdeacc8175a805481f4ecb052b4d0fe",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      },
+      {
+        "id": "2fceacc8-175a-8049-a889-f4dfad72a7de",
+        "title": "2차원 배열의 응용",
+        "url": "https://www.notion.so/2-2fceacc8175a8049a889f4dfad72a7de",
+        "parent_type": "page_id",
+        "parent_id": "2ebeacc8-175a-803e-8ffc-d832509624c1"
+      }
+    ],
+    "2f0eacc8-175a-8054-932b-c1824f53c326": [
+      {
+        "id": "2f7eacc8-175a-80e4-87f7-f4b955153e66",
+        "title": "26~30일",
+        "url": "https://www.notion.so/26-30-2f7eacc8175a80e487f7f4b955153e66",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-8054-932b-c1824f53c326"
+      },
+      {
+        "id": "2f0eacc8-175a-803d-98eb-c965d8d9e1d3",
+        "title": "19~23일",
+        "url": "https://www.notion.so/19-23-2f0eacc8175a803d98ebc965d8d9e1d3",
+        "parent_type": "page_id",
+        "parent_id": "2f0eacc8-175a-8054-932b-c1824f53c326"
+      }
+    ]
+  },
+  "root_pages": [
+    {
+      "id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5",
+      "title": "스터디 로드맵 ",
+      "url": "https://www.notion.so/231eacc8175a80b6b30be061e8f5a3c5",
+      "parent_type": "workspace",
+      "parent_id": "workspace"
+    },
+    {
+      "id": "8938fced-ff81-4868-9e97-96e01212b875",
+      "title": "데이터 분석 ",
+      "url": "https://www.notion.so/8938fcedff8148689e9796e01212b875",
+      "parent_type": "workspace",
+      "parent_id": "workspace"
+    }
+  ]
+}
