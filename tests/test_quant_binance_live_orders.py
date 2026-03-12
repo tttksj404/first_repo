@@ -181,6 +181,70 @@ class SpotCaptureLiveOrderClient(FakeLiveOrderClient):
         return {"status": "FILLED", "market": market, "orderId": self.calls}
 
 
+class MarginRefillThenFillLiveOrderClient(FakeLiveOrderClient):
+    exchange_id = "bitget"
+
+    def __init__(self, *, spot_usdt: float = 20.0, eth_qty: float = 0.0) -> None:
+        super().__init__()
+        self.futures_order_calls = 0
+        self.transfers: list[float] = []
+        self.spot_usdt = spot_usdt
+        self.eth_qty = eth_qty
+        self.spot_sell_calls = 0
+        self.futures_available = 0.0
+
+    def get_account(self, *, market):  # type: ignore[no-untyped-def]
+        if market == "spot":
+            balances = [{"asset": "USDT", "free": f"{self.spot_usdt:.8f}", "locked": "0"}]
+            if self.eth_qty > 0:
+                balances.append({"asset": "ETH", "free": f"{self.eth_qty:.8f}", "locked": "0"})
+            return {"balances": balances}
+        return {
+            "availableBalance": self.futures_available,
+            "effectiveAvailableBalance": self.futures_available,
+            "crossedMaxAvailable": self.futures_available,
+            "rawAvailableBalance": self.futures_available,
+        }
+
+    def get_open_orders(self, *, market, symbol=None):  # type: ignore[no-untyped-def]
+        return {"orders": []}
+
+    def transfer_spot_to_futures_usdt(self, *, amount_usdt, client_oid=None):  # type: ignore[no-untyped-def]
+        amount = float(amount_usdt)
+        self.transfers.append(amount)
+        self.spot_usdt = max(0.0, self.spot_usdt - amount)
+        self.futures_available += amount
+        return {"status": "SUCCESS", "amount": amount, "clientOid": client_oid}
+
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        if market == "spot":
+            symbol = str(order_params.get("symbol", "")).upper()
+            side = str(order_params.get("side", "")).lower()
+            size = float(order_params.get("size", 0.0))
+            if symbol == "ETHUSDT" and side == "sell" and size > 0:
+                self.spot_sell_calls += 1
+                sold = min(size, self.eth_qty)
+                self.eth_qty = max(0.0, self.eth_qty - sold)
+                self.spot_usdt += sold * 2000.0
+            self.calls += 1
+            return {"status": "FILLED", "market": market, "orderId": self.calls}
+        if market == "futures":
+            self.futures_order_calls += 1
+            if self.futures_order_calls == 1:
+                raise RuntimeError(
+                    "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+                    "code=40762 msg=The order amount exceeds the balance"
+                )
+            return {"status": "FILLED", "market": market, "orderId": self.futures_order_calls}
+        self.calls += 1
+        return {"status": "FILLED", "market": market, "orderId": self.calls}
+
+    def get_book_ticker(self, *, market, symbol):  # type: ignore[no-untyped-def]
+        if market == "spot" and str(symbol).upper() == "ETHUSDT":
+            return {"bidPrice": "2000", "askPrice": "2001"}
+        raise RuntimeError("unsupported symbol")
+
+
 class RaisingTestOrderClient:
     def test_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         raise RuntimeError("simulated test order failure")
@@ -422,7 +486,7 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         capped_size = float(client.last_order_params["size"])
         uncapped_size = decision.order_intent_notional_usd / 8.185
         self.assertLess(capped_size, uncapped_size)
-        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.45
+        expected_max_notional = 40.0 * 6.0 * 0.9
         self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
 
     def test_live_order_adapter_handles_bitget_leverage_margin_error_with_cached_or_target_fallback(self) -> None:
@@ -468,7 +532,7 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(client.leverage_calls, [("XRPUSDT", 6)])
         assert client.last_order_params is not None
         capped_size = float(client.last_order_params["size"])
-        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.45
+        expected_max_notional = 40.0 * 6.0 * 0.9
         self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
 
     def test_live_order_adapter_prefers_effective_available_balance_for_bitget_futures_cap(self) -> None:
@@ -512,7 +576,7 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         assert client.last_order_params is not None
         capped_size = float(client.last_order_params["size"])
         capped_notional = capped_size * 3000.0
-        expected_max_notional = 18.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.45
+        expected_max_notional = 18.0 * 6.0 * 0.9
         self.assertLessEqual(capped_notional, expected_max_notional + 1e-6)
 
     def test_live_order_adapter_falls_back_when_cross_available_is_zero(self) -> None:
@@ -547,8 +611,8 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
 
         result = adapter.execute_decision(decision=decision, reference_price=85000.0)
 
-        self.assertIsNotNone(result)
-        self.assertEqual(client.calls, 1)
+        self.assertIsNone(result)
+        self.assertEqual(client.calls, 0)
 
     def test_session_survives_live_order_exception(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
@@ -928,6 +992,153 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         assert live_client.last_order_params is not None
         self.assertEqual(live_client.last_order_params["side"], "SELL")
         self.assertGreater(float(live_client.last_order_params["quantity"]), 0.0)
+
+    def test_session_refills_futures_margin_on_40762_then_retries_once(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 12, 2, 30, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(84999.5, 1.0, 85000.5, 1.2, now),
+                last_trade_price=85000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = MarginRefillThenFillLiveOrderClient()
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            rest_client=live_client,  # type: ignore[arg-type]
+            live_order_executor=DecisionLiveOrderAdapter(live_client, self.settings),  # type: ignore[arg-type]
+        )
+        session.account_snapshot = {
+            "spot": {"balances": [{"asset": "USDT", "free": "20.00", "locked": "0"}]},
+            "futures": {"availableBalance": 0.0, "effectiveAvailableBalance": 0.0, "crossedMaxAvailable": 0.0},
+        }
+        session.capital_report = {
+            "spot_available_balance_usd": 20.0,
+            "futures_available_balance_usd": 100.0,
+            "can_trade_spot_any": True,
+            "can_trade_futures_any": True,
+            "spot_requirements": [],
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+        }
+        decision = DecisionIntent(
+            decision_id="futures-refill-test",
+            decision_hash="futures-refill-hash",
+            snapshot_id="futures-refill-snapshot",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.75,
+            volume_confirmation=0.72,
+            liquidity_score=0.8,
+            volatility_penalty=0.52,
+            overheat_penalty=0.2,
+            predictability_score=72.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=8.0,
+            order_intent_notional_usd=1200.0,
+            stop_distance_bps=100.0,
+        )
+
+        session._record_decision(decision=decision, state=store.get("BTCUSDT"), timestamp=now)
+
+        self.assertGreaterEqual(live_client.futures_order_calls, 2)
+        self.assertGreaterEqual(len(live_client.transfers), 1)
+        self.assertEqual(len(session.live_orders), 1)
+
+    def test_session_refills_margin_by_selling_spot_asset_then_retries(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 12, 2, 35, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(84999.5, 1.0, 85000.5, 1.2, now),
+                last_trade_price=85000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = MarginRefillThenFillLiveOrderClient(spot_usdt=0.0, eth_qty=0.02)
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            rest_client=live_client,  # type: ignore[arg-type]
+            live_order_executor=DecisionLiveOrderAdapter(live_client, self.settings),  # type: ignore[arg-type]
+        )
+        session.account_snapshot = {
+            "spot": {"balances": [{"asset": "USDT", "free": "0.00", "locked": "0"}, {"asset": "ETH", "free": "0.02000000", "locked": "0"}]},
+            "futures": {"availableBalance": 0.0, "effectiveAvailableBalance": 0.0, "crossedMaxAvailable": 0.0},
+        }
+        session.capital_report = {
+            "spot_available_balance_usd": 0.0,
+            "futures_available_balance_usd": 100.0,
+            "can_trade_spot_any": True,
+            "can_trade_futures_any": True,
+            "spot_requirements": [],
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+        }
+        decision = DecisionIntent(
+            decision_id="futures-refill-spot-sale-test",
+            decision_hash="futures-refill-spot-sale-hash",
+            snapshot_id="futures-refill-spot-sale-snapshot",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.75,
+            volume_confirmation=0.72,
+            liquidity_score=0.8,
+            volatility_penalty=0.52,
+            overheat_penalty=0.2,
+            predictability_score=72.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=8.0,
+            order_intent_notional_usd=1200.0,
+            stop_distance_bps=100.0,
+        )
+
+        session._record_decision(decision=decision, state=store.get("BTCUSDT"), timestamp=now)
+
+        self.assertGreaterEqual(live_client.spot_sell_calls, 1)
+        self.assertGreaterEqual(len(live_client.transfers), 1)
+        self.assertGreaterEqual(live_client.futures_order_calls, 2)
+        self.assertEqual(len(session.live_orders), 1)
 
 
 if __name__ == "__main__":

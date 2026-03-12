@@ -70,7 +70,8 @@ class BitgetRestClient:
         self.contract_config = contract_config or BitgetContractConfig()
         self.receive_window_ms = receive_window_ms
         self.allow_insecure_ssl = allow_insecure_ssl
-        self._futures_symbol_size_constraints: dict[str, tuple[float, float]] | None = None
+        self._futures_symbol_size_constraints: dict[str, tuple[float, float, float]] | None = None
+        self._spot_symbol_constraints: dict[str, tuple[int, float]] | None = None
 
     @property
     def supports_private_reads(self) -> bool:
@@ -264,11 +265,43 @@ class BitgetRestClient:
             return 0
         return min(len(text.split(".")[1]), 8)
 
-    def _load_futures_symbol_size_constraints(self) -> dict[str, tuple[float, float]]:
+    def _load_spot_symbol_constraints(self) -> dict[str, tuple[int, float]]:
+        if self._spot_symbol_constraints is not None:
+            return self._spot_symbol_constraints
+        info = self.get_exchange_info(market="spot")
+        constraints: dict[str, tuple[int, float]] = {}
+        for item in info.get("symbols", []):
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", "")).upper()
+            raw = item.get("raw", {})
+            if not symbol or not isinstance(raw, dict):
+                continue
+            try:
+                quantity_precision = max(int(raw.get("quantityPrecision", 8)), 0)
+            except (TypeError, ValueError):
+                quantity_precision = 8
+            min_trade_usdt = self._safe_float(raw.get("minTradeUSDT") or 0.0)
+            constraints[symbol] = (quantity_precision, min_trade_usdt)
+        self._spot_symbol_constraints = constraints
+        return constraints
+
+    def _normalize_spot_sell_size(self, *, symbol: str, size: float) -> float:
+        constraints = self._load_spot_symbol_constraints()
+        quantity_precision, _ = constraints.get(symbol.upper(), (8, 0.0))
+        multiplier = 10**quantity_precision
+        normalized = math.floor(max(float(size), 0.0) * multiplier + 1e-12) / multiplier
+        return round(normalized, quantity_precision)
+
+    def _spot_min_trade_usdt(self, *, symbol: str) -> float:
+        constraints = self._load_spot_symbol_constraints()
+        return constraints.get(symbol.upper(), (8, 0.0))[1]
+
+    def _load_futures_symbol_size_constraints(self) -> dict[str, tuple[float, float, float]]:
         if self._futures_symbol_size_constraints is not None:
             return self._futures_symbol_size_constraints
         info = self.get_exchange_info(market="futures")
-        constraints: dict[str, tuple[float, float]] = {}
+        constraints: dict[str, tuple[float, float, float]] = {}
         for item in info.get("symbols", []):
             if not isinstance(item, dict):
                 continue
@@ -278,14 +311,15 @@ class BitgetRestClient:
                 continue
             min_size = self._safe_float(raw.get("minTradeNum") or raw.get("minTradeAmount") or 0.0)
             size_step = self._safe_float(raw.get("sizeMultiplier") or 0.0)
-            constraints[symbol] = (min_size, size_step)
+            min_trade_usdt = self._safe_float(raw.get("minTradeUSDT") or 0.0)
+            constraints[symbol] = (min_size, size_step, min_trade_usdt)
         self._futures_symbol_size_constraints = constraints
         return constraints
 
     def _normalize_futures_size(self, *, symbol: str, size: float) -> float:
         normalized = max(float(size), 0.0)
         constraints = self._load_futures_symbol_size_constraints()
-        min_size, size_step = constraints.get(symbol.upper(), (0.0, 0.0))
+        min_size, size_step, _ = constraints.get(symbol.upper(), (0.0, 0.0, 0.0))
         if size_step > 0:
             normalized = math.floor((normalized + 1e-12) / size_step) * size_step
             normalized = round(normalized, self._decimal_places(size_step))
@@ -294,6 +328,10 @@ class BitgetRestClient:
         if min_size > 0 and normalized < min_size:
             return 0.0
         return normalized
+
+    def _futures_min_trade_usdt(self, *, symbol: str) -> float:
+        constraints = self._load_futures_symbol_size_constraints()
+        return constraints.get(symbol.upper(), (0.0, 0.0, 0.0))[2]
 
     def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -342,6 +380,25 @@ class BitgetRestClient:
             return _send(current)
 
         initial_params = dict(order_params)
+        if market == "spot":
+            symbol = str(initial_params.get("symbol", "")).upper()
+            side = str(initial_params.get("side", "")).lower()
+            if symbol and side == "sell":
+                raw_size = self._safe_float(initial_params.get("size"))
+                normalized_size = self._normalize_spot_sell_size(symbol=symbol, size=raw_size)
+                if normalized_size <= 0:
+                    raise RuntimeError(
+                        f"Bitget preflight rejected spot order for {symbol}: code=45110 msg=less than the minimum amount 1 USDT"
+                    )
+                min_trade_usdt = self._spot_min_trade_usdt(symbol=symbol)
+                if min_trade_usdt > 0:
+                    ticker = self.get_book_ticker(market="spot", symbol=symbol)
+                    bid_price = self._safe_float(ticker.get("bidPrice"))
+                    if bid_price > 0 and normalized_size * bid_price < min_trade_usdt:
+                        raise RuntimeError(
+                            f"Bitget preflight rejected spot order for {symbol}: code=45110 msg=less than the minimum amount {min_trade_usdt:g} USDT"
+                        )
+                initial_params["size"] = f"{normalized_size:.8f}"
         if market == "futures":
             initial_params = self._normalize_futures_order_params_for_position_mode(initial_params)
             symbol = str(initial_params.get("symbol", "")).upper()
@@ -352,6 +409,14 @@ class BitgetRestClient:
                     raise RuntimeError(
                         f"Bitget preflight rejected futures order for {symbol}: code=45111 msg=less than the minimum order quantity"
                     )
+                min_trade_usdt = self._futures_min_trade_usdt(symbol=symbol)
+                if min_trade_usdt > 0:
+                    ticker = self.get_book_ticker(market="futures", symbol=symbol)
+                    bid_price = self._safe_float(ticker.get("bidPrice"))
+                    if bid_price > 0 and normalized_size * bid_price < min_trade_usdt:
+                        raise RuntimeError(
+                            f"Bitget preflight rejected futures order for {symbol}: code=45110 msg=less than the minimum amount {min_trade_usdt:g} USDT"
+                        )
                 initial_params["size"] = f"{normalized_size:.8f}"
         try:
             payload = _with_balance_backoff(initial_params)
@@ -422,6 +487,42 @@ class BitgetRestClient:
             normalized.update(data)
         return normalized
 
+    def transfer_spot_to_futures_usdt(
+        self,
+        *,
+        amount_usdt: float,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        amount = round(max(float(amount_usdt), 0.0), 2)
+        if amount <= 0:
+            raise RuntimeError("transfer amount must be positive")
+        body: dict[str, Any] = {
+            "fromType": "spot",
+            "toType": "usdt_futures",
+            "amount": f"{amount:.2f}",
+            "coin": "USDT",
+        }
+        if client_oid:
+            body["clientOid"] = client_oid
+        payload = self.send(
+            self.build_signed_request(
+                path="/api/v2/spot/wallet/transfer",
+                method="POST",
+                body_params=body,
+            )
+        )
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "fromType": "spot",
+            "toType": "usdt_futures",
+            "amount": amount,
+            "coin": "USDT",
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
+
     def get_account(self, *, market: str) -> dict[str, Any]:
         payload = self.send(self.build_account_request(market=market))
         rows = payload.get("data", [])
@@ -440,14 +541,17 @@ class BitgetRestClient:
                     union_available = float(item.get("unionAvailable", 0.0))
                     available = raw_available
                     break
-            if has_crossed_max_available and crossed_max_available > 0:
-                effective_available = crossed_max_available
+            if has_crossed_max_available:
+                # Bitget exposes crossedMaxAvailable as the true cross-margin openable amount.
+                # When this is 0, opening any new futures position will be rejected (e.g. 40762).
+                effective_available = max(crossed_max_available, 0.0)
             else:
                 effective_candidates = [value for value in (raw_available, union_available) if value > 0]
                 effective_available = min(effective_candidates) if effective_candidates else available
             return {
                 "availableBalance": available,
                 "effectiveAvailableBalance": effective_available,
+                "hasCrossedMaxAvailable": has_crossed_max_available,
                 "rawAvailableBalance": raw_available,
                 "crossedMaxAvailable": crossed_max_available,
                 "unionAvailable": union_available,
