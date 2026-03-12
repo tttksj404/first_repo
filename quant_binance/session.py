@@ -120,8 +120,26 @@ class LivePaperSession:
     def sync_account(self) -> None:
         if self.rest_client is None:
             return
-        self.account_snapshot = self.rest_client.get_account(market="futures")
-        self.open_orders_snapshot = self.rest_client.get_open_orders(market="futures")
+        futures_account_snapshot = self.rest_client.get_account(market="futures")
+        spot_account_snapshot: dict[str, Any] = {}
+        try:
+            spot_account_snapshot = self.rest_client.get_account(market="spot")
+        except Exception:
+            spot_account_snapshot = {}
+        self.account_snapshot = {
+            "futures": futures_account_snapshot,
+            "spot": spot_account_snapshot,
+        }
+        futures_open_orders = self.rest_client.get_open_orders(market="futures")
+        spot_open_orders: dict[str, Any] = {}
+        try:
+            spot_open_orders = self.rest_client.get_open_orders(market="spot")
+        except Exception:
+            spot_open_orders = {}
+        self.open_orders_snapshot = {
+            "futures": futures_open_orders,
+            "spot": spot_open_orders,
+        }
         if hasattr(self.rest_client, "build_capital_report"):
             report = self.rest_client.build_capital_report()
             self.capital_report = {
@@ -240,6 +258,71 @@ class LivePaperSession:
             return
         self.futures_notional_scale_by_symbol[symbol] = min(1.0, round(current + 0.1, 4))
 
+    @staticmethod
+    def _base_asset_from_symbol(symbol: str) -> str:
+        upper_symbol = symbol.upper()
+        if upper_symbol.endswith("USDT"):
+            return upper_symbol[:-4]
+        return upper_symbol
+
+    @staticmethod
+    def _safe_float(value: Any) -> float:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _spot_snapshot(self) -> dict[str, Any]:
+        spot_snapshot = self.account_snapshot.get("spot")
+        if isinstance(spot_snapshot, dict):
+            return spot_snapshot
+        # Backward compatibility for previous snapshot shape.
+        if "balances" in self.account_snapshot:
+            return self.account_snapshot
+        return {}
+
+    def _spot_available_base_quantity(self, *, symbol: str) -> float:
+        base_asset = self._base_asset_from_symbol(symbol)
+        spot_snapshot = self._spot_snapshot()
+        balances = spot_snapshot.get("balances", [])
+        if not isinstance(balances, list):
+            return 0.0
+        for item in balances:
+            if not isinstance(item, dict):
+                continue
+            asset = str(item.get("asset", "")).upper()
+            if asset != base_asset:
+                continue
+            free_qty = self._safe_float(item.get("free"))
+            if free_qty > 0:
+                return free_qty
+        return 0.0
+
+    def _spot_liquidation_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+    ) -> DecisionIntent:
+        if decision.final_mode != "cash" or decision.trend_direction >= 0:
+            return decision
+        available_qty = self._spot_available_base_quantity(symbol=decision.symbol)
+        if available_qty <= 0:
+            return decision
+        liquidation_notional = round(available_qty * max(reference_price, 0.0), 6)
+        if liquidation_notional <= 0:
+            return decision
+        return replace(
+            decision,
+            final_mode="spot",
+            side="short",
+            order_intent_notional_usd=liquidation_notional,
+            stop_distance_bps=max(decision.stop_distance_bps, 1.0),
+            rejection_reasons=tuple(
+                sorted(set(decision.rejection_reasons + ("SPOT_POSITION_LIQUIDATION",)))
+            ),
+        )
+
     def _consume_capital_after_live_order(self, decision: DecisionIntent) -> None:
         if not self.capital_report:
             return
@@ -270,6 +353,8 @@ class LivePaperSession:
         if not self.capital_report:
             return True
         if decision.final_mode == "spot":
+            if decision.side == "short" and self._spot_available_base_quantity(symbol=decision.symbol) > 0:
+                return True
             if bool(self.capital_report.get("can_trade_spot_any", False)):
                 return True
             return float(self.capital_report.get("spot_available_balance_usd", 0.0)) > 0.0
@@ -295,6 +380,20 @@ class LivePaperSession:
                 min_notional = float(item.get("min_notional_usd", 0.0))
                 break
         if decision.final_mode == "spot":
+            if decision.side == "short":
+                if min_notional > 0.0 and decision.order_intent_notional_usd < min_notional:
+                    rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
+                    return replace(
+                        decision,
+                        final_mode="cash",
+                        side="flat",
+                        order_intent_notional_usd=0.0,
+                        stop_distance_bps=0.0,
+                        rejection_reasons=tuple(
+                            sorted(set(decision.rejection_reasons + (rejection_code,)))
+                        ),
+                    )
+                return decision
             available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
             max_notional = max(0.0, available * (1.0 - reserve_fraction))
         elif decision.final_mode == "futures":
@@ -341,7 +440,11 @@ class LivePaperSession:
         if self.log_store is not None:
             self.log_store.append("decisions", decision.as_dict())
         if self.live_order_executor is not None and state is not None and self._market_capital_allowed(decision):
-            executable_decision = self._cap_live_order_decision(decision)
+            liquidation_adjusted = self._spot_liquidation_decision(
+                decision=decision,
+                reference_price=float(state.last_trade_price),
+            )
+            executable_decision = self._cap_live_order_decision(liquidation_adjusted)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
