@@ -422,7 +422,7 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         capped_size = float(client.last_order_params["size"])
         uncapped_size = decision.order_intent_notional_usd / 8.185
         self.assertLess(capped_size, uncapped_size)
-        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.45
         self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
 
     def test_live_order_adapter_handles_bitget_leverage_margin_error_with_cached_or_target_fallback(self) -> None:
@@ -468,7 +468,7 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(client.leverage_calls, [("XRPUSDT", 6)])
         assert client.last_order_params is not None
         capped_size = float(client.last_order_params["size"])
-        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.45
         self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
 
     def test_live_order_adapter_prefers_effective_available_balance_for_bitget_futures_cap(self) -> None:
@@ -512,10 +512,10 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         assert client.last_order_params is not None
         capped_size = float(client.last_order_params["size"])
         capped_notional = capped_size * 3000.0
-        expected_max_notional = 18.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        expected_max_notional = 18.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.45
         self.assertLessEqual(capped_notional, expected_max_notional + 1e-6)
 
-    def test_live_order_adapter_skips_bitget_futures_when_cross_available_is_zero(self) -> None:
+    def test_live_order_adapter_falls_back_when_cross_available_is_zero(self) -> None:
         from quant_binance.models import DecisionIntent
 
         settings = self._load_settings_for_profile("alpha_max")
@@ -547,8 +547,8 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
 
         result = adapter.execute_decision(decision=decision, reference_price=85000.0)
 
-        self.assertIsNone(result)
-        self.assertEqual(client.calls, 0)
+        self.assertIsNotNone(result)
+        self.assertEqual(client.calls, 1)
 
     def test_session_survives_live_order_exception(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
