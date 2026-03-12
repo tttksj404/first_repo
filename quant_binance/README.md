@@ -104,6 +104,8 @@ For local single-user usage, `quant_binance.env` checks shell environment first 
 If `STRATEGY_PROFILE` is set (for example `aggressive_alt`, `alpha_max`, or `scalp_ultra`), that profile is deep-merged on top of the base config before runtime starts.
 If `AUTO_STRATEGY_SWITCH=1`, runtime can auto-switch between a calm and a fast profile (`AUTO_STRATEGY_CALM_PROFILE`, `AUTO_STRATEGY_FAST_PROFILE`) using volatility/return hysteresis gates.
 If `UNIVERSE_SYMBOLS` is set, it overrides the configured local trading universe.
+If `UNIVERSE_SYMBOLS_APPEND` is set, those symbols are appended to the configured universe.
+If `BITGET_US_STOCK_SYMBOLS` is set, those symbols are appended too (intended for Bitget spot-style stock proxy symbols).
 The Naver extraction helper saves markdown, screenshot, and downloaded article-body images when available.
 If `MACRO_INPUTS_PATH` or `MACRO_INPUTS_JSON` is set, macro regime inputs are loaded and applied before regime selection.
 If `ALTCOIN_INPUTS_PATH` or `ALTCOIN_INPUTS_JSON` is set, altcoin intelligence inputs are loaded for non-BTC/ETH symbols before final scoring and regime selection.
