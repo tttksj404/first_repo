@@ -438,10 +438,9 @@ class BitgetRestClient:
                     has_crossed_max_available = "crossedMaxAvailable" in item
                     crossed_max_available = float(item.get("crossedMaxAvailable", 0.0))
                     union_available = float(item.get("unionAvailable", 0.0))
-                    # For crossed margin orders, crossedMaxAvailable is the authoritative openable amount (can be 0).
-                    available = crossed_max_available if has_crossed_max_available else raw_available
+                    available = raw_available
                     break
-            if has_crossed_max_available:
+            if has_crossed_max_available and crossed_max_available > 0:
                 effective_available = crossed_max_available
             else:
                 effective_candidates = [value for value in (raw_available, union_available) if value > 0]

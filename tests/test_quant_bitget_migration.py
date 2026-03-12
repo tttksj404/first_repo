@@ -362,9 +362,9 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         client = AccountSnapshotBitgetRestClient()
         account = client.get_account(market="futures")
 
-        self.assertAlmostEqual(account["availableBalance"], 0.0)
+        self.assertAlmostEqual(account["availableBalance"], 37.88836272)
         self.assertAlmostEqual(account["unionAvailable"], 17.82432174)
-        self.assertAlmostEqual(account["effectiveAvailableBalance"], 0.0)
+        self.assertAlmostEqual(account["effectiveAvailableBalance"], 17.82432174)
 
 
 if __name__ == "__main__":

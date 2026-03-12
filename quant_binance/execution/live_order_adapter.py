@@ -30,7 +30,7 @@ class LiveOrderResult:
 
 
 class DecisionLiveOrderAdapter:
-    _BITGET_MARGIN_SAFETY_BUFFER = 0.9
+    _BITGET_MARGIN_SAFETY_BUFFER = 0.45
     _BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING = 1.0
 
     def __init__(self, client: SupportsLiveOrder, settings: Settings | None = None) -> None:
@@ -84,11 +84,12 @@ class DecisionLiveOrderAdapter:
             return None
         if not isinstance(payload, dict):
             return None
-        if "crossedMaxAvailable" in payload:
-            return max(self._safe_float(payload.get("crossedMaxAvailable")), 0.0)
         effective = self._safe_float(payload.get("effectiveAvailableBalance"))
         if effective > 0:
             return effective
+        crossed = self._safe_float(payload.get("crossedMaxAvailable"))
+        if crossed > 0:
+            return crossed
         union_available = self._safe_float(payload.get("unionAvailable"))
         available = self._safe_float(payload.get("availableBalance"))
         if union_available > 0 and available > 0:
@@ -116,7 +117,7 @@ class DecisionLiveOrderAdapter:
         if available_balance is None:
             return requested_notional_usd
         if available_balance <= 0:
-            return 0.0
+            return requested_notional_usd
         reserve_fraction = max(self.settings.cash_reserve.when_futures_enabled, 0.0)
         leverage_for_sizing = max(float(effective_leverage), 1.0)
         if self._exchange_id() == "bitget":
