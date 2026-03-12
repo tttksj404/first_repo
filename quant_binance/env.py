@@ -71,6 +71,20 @@ def resolve_universe_symbols(
     return tuple(deduped)
 
 
+def resolve_universe_symbols_append(
+    *,
+    env_var: str = "UNIVERSE_SYMBOLS_APPEND",
+) -> tuple[str, ...]:
+    return resolve_universe_symbols(env_var=env_var)
+
+
+def resolve_bitget_us_stock_symbols(
+    *,
+    env_var: str = "BITGET_US_STOCK_SYMBOLS",
+) -> tuple[str, ...]:
+    return resolve_universe_symbols(env_var=env_var)
+
+
 def resolve_strategy_profile(
     *,
     env_var: str = "STRATEGY_PROFILE",

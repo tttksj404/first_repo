@@ -13,6 +13,7 @@ class BitgetPollingWebSocketClient:
         *,
         rest_client: Any,
         symbols: tuple[str, ...],
+        symbol_market_by_symbol: dict[str, str] | None = None,
         decision_interval_minutes: int,
         poll_interval_seconds: float = 2.0,
         symbol_poll_interval_seconds: float | None = None,
@@ -21,6 +22,11 @@ class BitgetPollingWebSocketClient:
     ) -> None:
         self.rest_client = rest_client
         self.symbols = symbols
+        self.symbol_market_by_symbol = {
+            str(symbol).upper(): str(market).strip().lower()
+            for symbol, market in (symbol_market_by_symbol or {}).items()
+            if str(symbol).strip()
+        }
         self.decision_interval_minutes = decision_interval_minutes
         self.poll_interval_seconds = poll_interval_seconds
         base_symbol_interval = max(self.poll_interval_seconds * max(len(self.symbols), 1), 20.0)
@@ -43,14 +49,13 @@ class BitgetPollingWebSocketClient:
     def _interval_ms(self) -> int:
         return self.decision_interval_minutes * 60 * 1000
 
-    def _to_payload(self, *, symbol: str, candle: dict[str, Any]) -> dict[str, Any]:
+    def _to_payload(self, *, symbol: str, candle: dict[str, Any], market: str) -> dict[str, Any]:
         open_time_ms = int(candle["open_time"])
         close_time_ms = open_time_ms + self._interval_ms() - 1
-        return {
+        payload = {
             "stream": f"{symbol.lower()}@kline_{self.interval_label}",
             "data": {
                 "s": symbol,
-                "ps": symbol,
                 "k": {
                     "i": self.interval_label,
                     "t": open_time_ms,
@@ -66,6 +71,9 @@ class BitgetPollingWebSocketClient:
                 },
             },
         }
+        if market == "futures":
+            payload["data"]["ps"] = symbol
+        return payload
 
     def _can_poll_symbol(self, *, symbol: str, now: datetime) -> bool:
         if self._rate_limit_backoff_until is not None and now < self._rate_limit_backoff_until:
@@ -126,9 +134,12 @@ class BitgetPollingWebSocketClient:
                 if not self._can_poll_symbol(symbol=symbol, now=poll_time):
                     continue
                 self._record_symbol_polled(symbol=symbol, now=poll_time)
+                market = self.symbol_market_by_symbol.get(symbol.upper(), "futures")
+                if market not in {"spot", "futures"}:
+                    market = "futures"
                 try:
                     candles = self.rest_client.get_klines(
-                        market="futures",
+                        market=market,
                         symbol=symbol,
                         interval=self.interval_label,
                         limit=2,
@@ -151,6 +162,6 @@ class BitgetPollingWebSocketClient:
                     continue
                 if close_time_ms <= prev_close:
                     continue
-                await handler(self._to_payload(symbol=symbol, candle=latest))
+                await handler(self._to_payload(symbol=symbol, candle=latest, market=market))
                 self._last_emitted_close_ms[symbol] = close_time_ms
             await asyncio.sleep(self.poll_interval_seconds)

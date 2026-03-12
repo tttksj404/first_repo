@@ -68,7 +68,9 @@ ALTCOIN_INPUTS_PATH=quant_binance/examples/altcoin_inputs.sample.json
 `STRATEGY_PROFILE` can be switched per market state (for example `aggressive_alt` for broader swing entries, `alpha_max` for higher-throughput risk-on entries, `scalp_ultra` for faster short-horizon entries).
 If `AUTO_STRATEGY_SWITCH=1`, runtime auto-switches between calm/fast profiles using 1h return and volatility-penalty hysteresis (`AUTO_STRATEGY_*` env vars).
 If `UNIVERSE_SYMBOLS` is set, it overrides the default `universe` in config.
-Use this to mirror the symbols you enabled in Binance symbol whitelist.
+Use this to mirror the symbols you enabled in exchange whitelist.
+If `UNIVERSE_SYMBOLS_APPEND` is set, those symbols are appended to the configured universe.
+If `BITGET_US_STOCK_SYMBOLS` is set, those symbols are appended as well (for Bitget spot-style stock proxy symbols).
 If `MACRO_INPUTS_PATH` or `MACRO_INPUTS_JSON` is set, macro regime inputs are loaded and applied before regime selection.
 If `ALTCOIN_INPUTS_PATH` or `ALTCOIN_INPUTS_JSON` is set, altcoin intelligence inputs are loaded for non-BTC/ETH symbols and affect edge estimation and regime gating.
 
