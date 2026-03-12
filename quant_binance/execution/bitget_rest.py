@@ -430,17 +430,28 @@ class BitgetRestClient:
             available = 0.0
             raw_available = 0.0
             crossed_max_available = 0.0
+            union_available = 0.0
+            has_crossed_max_available = False
             for item in data_rows:
                 if str(item.get("marginCoin", "")).upper() == self.contract_config.margin_coin.upper():
                     raw_available = float(item.get("available", 0.0))
+                    has_crossed_max_available = "crossedMaxAvailable" in item
                     crossed_max_available = float(item.get("crossedMaxAvailable", 0.0))
-                    # For crossed margin, crossedMaxAvailable reflects openable margin more accurately than raw available.
-                    available = crossed_max_available if crossed_max_available > 0 else raw_available
+                    union_available = float(item.get("unionAvailable", 0.0))
+                    # For crossed margin orders, crossedMaxAvailable is the authoritative openable amount (can be 0).
+                    available = crossed_max_available if has_crossed_max_available else raw_available
                     break
+            if has_crossed_max_available:
+                effective_available = crossed_max_available
+            else:
+                effective_candidates = [value for value in (raw_available, union_available) if value > 0]
+                effective_available = min(effective_candidates) if effective_candidates else available
             return {
                 "availableBalance": available,
+                "effectiveAvailableBalance": effective_available,
                 "rawAvailableBalance": raw_available,
                 "crossedMaxAvailable": crossed_max_available,
+                "unionAvailable": union_available,
                 "accounts": data_rows,
                 "raw": payload,
             }

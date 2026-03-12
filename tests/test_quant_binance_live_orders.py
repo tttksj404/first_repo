@@ -86,11 +86,15 @@ class BitgetMarginCapClient(FakeLiveOrderClient):
         self,
         *,
         available_balance_usd: float,
+        effective_available_balance_usd: float | None = None,
+        union_available_usd: float | None = None,
         leverage_response: dict[str, object] | None = None,
         leverage_error: RuntimeError | None = None,
     ) -> None:
         super().__init__()
         self.available_balance_usd = available_balance_usd
+        self.effective_available_balance_usd = effective_available_balance_usd
+        self.union_available_usd = union_available_usd
         self.leverage_response = leverage_response if leverage_response is not None else {"leverage": 7}
         self.leverage_error = leverage_error
         self.last_order_params: dict[str, object] | None = None
@@ -104,12 +108,28 @@ class BitgetMarginCapClient(FakeLiveOrderClient):
     def get_account(self, *, market):  # type: ignore[no-untyped-def]
         if market != "futures":
             return {}
-        return {"availableBalance": self.available_balance_usd}
+        payload: dict[str, float] = {"availableBalance": self.available_balance_usd}
+        if self.effective_available_balance_usd is not None:
+            payload["effectiveAvailableBalance"] = self.effective_available_balance_usd
+        if self.union_available_usd is not None:
+            payload["unionAvailable"] = self.union_available_usd
+        return payload
 
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
         self.last_order_params = dict(order_params)
         return {"status": "FILLED", "market": market, "orderId": self.calls}
+
+
+class BitgetCrossUnavailableClient(BitgetMarginCapClient):
+    def get_account(self, *, market):  # type: ignore[no-untyped-def]
+        if market != "futures":
+            return {}
+        return {
+            "availableBalance": self.available_balance_usd,
+            "crossedMaxAvailable": 0.0,
+            "rawAvailableBalance": self.available_balance_usd,
+        }
 
 
 class RaisingLiveOrderClient(FakeLiveOrderClient):
@@ -130,6 +150,22 @@ class CodedRaisingLiveOrderClient(FakeLiveOrderClient):
             f"Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
             f"code={self.code} msg={self.msg}"
         )
+
+
+class FirstFailThenFillLiveOrderClient(FakeLiveOrderClient):
+    def __init__(self) -> None:
+        super().__init__()
+        self.order_sizes: list[float] = []
+
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        self.order_sizes.append(float(order_params.get("size", order_params.get("quantity", 0.0))))
+        if self.calls == 1:
+            raise RuntimeError(
+                "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+                "code=40762 msg=The order amount exceeds the balance"
+            )
+        return {"status": "FILLED", "market": market, "orderId": self.calls}
 
 
 class RaisingTestOrderClient:
@@ -260,6 +296,42 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
 
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 4)])
 
+    def test_live_order_adapter_reuses_recent_symbol_leverage_setting(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("active")
+        decision = DecisionIntent(
+            decision_id="d-cache-1",
+            decision_hash="hash-cache-1",
+            snapshot_id="s-cache-1",
+            config_version="2026-03-12.v1",
+            timestamp=datetime(2026, 3, 12, 0, 35, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.64,
+            volume_confirmation=0.61,
+            liquidity_score=0.66,
+            volatility_penalty=0.66,
+            overheat_penalty=0.3,
+            predictability_score=67.0,
+            gross_expected_edge_bps=33.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=60.0,
+            stop_distance_bps=55.0,
+        )
+        live_client = FakeLiveOrderClient()
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        adapter.execute_decision(decision=decision, reference_price=50000.0)
+        adapter.execute_decision(decision=decision, reference_price=50010.0)
+
+        self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 4)])
+        self.assertEqual(live_client.calls, 2)
+
     def test_live_order_adapter_uses_quote_order_qty_for_spot_market_buy(self) -> None:
         from quant_binance.models import DecisionIntent
 
@@ -337,10 +409,10 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         capped_size = float(client.last_order_params["size"])
         uncapped_size = decision.order_intent_notional_usd / 8.185
         self.assertLess(capped_size, uncapped_size)
-        expected_max_notional = 40.0 * 7.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
         self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
 
-    def test_live_order_adapter_handles_bitget_leverage_margin_error_with_conservative_cap(self) -> None:
+    def test_live_order_adapter_handles_bitget_leverage_margin_error_with_cached_or_target_fallback(self) -> None:
         from quant_binance.models import DecisionIntent
 
         settings = self._load_settings_for_profile("alpha_max")
@@ -385,6 +457,85 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         capped_size = float(client.last_order_params["size"])
         expected_max_notional = 40.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
         self.assertLessEqual(capped_size * 8.185, expected_max_notional + 1e-6)
+
+    def test_live_order_adapter_prefers_effective_available_balance_for_bitget_futures_cap(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("alpha_max")
+        decision = DecisionIntent(
+            decision_id="d-bitget-effective-cap",
+            decision_hash="hash-bitget-effective-cap",
+            snapshot_id="s-bitget-effective-cap",
+            config_version="2026-03-12.v1",
+            timestamp=datetime(2026, 3, 12, 1, 0, tzinfo=timezone.utc),
+            symbol="ETHUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.66,
+            volume_confirmation=0.63,
+            liquidity_score=0.67,
+            volatility_penalty=0.54,
+            overheat_penalty=0.25,
+            predictability_score=69.2,
+            gross_expected_edge_bps=20.0,
+            net_expected_edge_bps=8.0,
+            estimated_round_trip_cost_bps=9.5,
+            order_intent_notional_usd=900.0,
+            stop_distance_bps=120.0,
+        )
+        client = BitgetMarginCapClient(
+            available_balance_usd=40.0,
+            effective_available_balance_usd=18.0,
+            leverage_response={"leverage": 6},
+        )
+        adapter = DecisionLiveOrderAdapter(client, settings)  # type: ignore[arg-type]
+
+        result = adapter.execute_decision(decision=decision, reference_price=3000.0)
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        assert client.last_order_params is not None
+        capped_size = float(client.last_order_params["size"])
+        capped_notional = capped_size * 3000.0
+        expected_max_notional = 18.0 * 1.0 * (1.0 - settings.cash_reserve.when_futures_enabled) * 0.9
+        self.assertLessEqual(capped_notional, expected_max_notional + 1e-6)
+
+    def test_live_order_adapter_skips_bitget_futures_when_cross_available_is_zero(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = self._load_settings_for_profile("alpha_max")
+        decision = DecisionIntent(
+            decision_id="d-bitget-cross-zero",
+            decision_hash="hash-bitget-cross-zero",
+            snapshot_id="s-bitget-cross-zero",
+            config_version="2026-03-12.v1",
+            timestamp=datetime(2026, 3, 12, 1, 10, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.67,
+            volume_confirmation=0.65,
+            liquidity_score=0.68,
+            volatility_penalty=0.52,
+            overheat_penalty=0.24,
+            predictability_score=70.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=10.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=1200.0,
+            stop_distance_bps=100.0,
+        )
+        client = BitgetCrossUnavailableClient(available_balance_usd=40.0, leverage_response={"leverage": 6})
+        adapter = DecisionLiveOrderAdapter(client, settings)  # type: ignore[arg-type]
+
+        result = adapter.execute_decision(decision=decision, reference_price=85000.0)
+
+        self.assertIsNone(result)
+        self.assertEqual(client.calls, 0)
 
     def test_session_survives_live_order_exception(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
@@ -560,6 +711,135 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         session.process_payload(second_payload, now=now + timedelta(seconds=60))
         self.assertEqual(live_client.calls, 1)
         self.assertIn("BTCUSDT", session.live_error_cooldown_until_by_symbol)
+
+    def test_session_marks_failing_fingerprint_to_block_identical_retries(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = CodedRaisingLiveOrderClient(code="40762", msg="The order amount exceeds the balance")
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client),  # type: ignore[arg-type]
+        )
+        payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971200000,
+                    "T": 1772971500000,
+                    "o": "49900",
+                    "h": "50100",
+                    "l": "49850",
+                    "c": "50050",
+                    "v": "12",
+                    "q": "600000",
+                    "x": True,
+                },
+            },
+        }
+        session.process_payload(payload, now=now)
+        session.process_payload(payload, now=now + timedelta(seconds=360))
+        self.assertEqual(live_client.calls, 1)
+
+    def test_session_reduces_futures_notional_scale_after_balance_error(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = FirstFailThenFillLiveOrderClient()
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client),  # type: ignore[arg-type]
+        )
+        session.capital_report = {
+            "spot_available_balance_usd": 0.0,
+            "futures_available_balance_usd": 100.0,
+            "can_trade_spot_any": False,
+            "can_trade_futures_any": True,
+            "spot_requirements": [],
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
+        }
+        payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971200000,
+                    "T": 1772971500000,
+                    "o": "49900",
+                    "h": "50100",
+                    "l": "49850",
+                    "c": "50050",
+                    "v": "12",
+                    "q": "600000",
+                    "x": True,
+                },
+            },
+        }
+        payload_after_cooldown = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971500000,
+                    "T": 1772971800000,
+                    "o": "50020",
+                    "h": "50150",
+                    "l": "49990",
+                    "c": "50110",
+                    "v": "13",
+                    "q": "640000",
+                    "x": True,
+                },
+            },
+        }
+        session.process_payload(payload, now=now)
+        session.process_payload(payload_after_cooldown, now=now + timedelta(seconds=301))
+        self.assertEqual(live_client.calls, 2)
+        self.assertLess(live_client.order_sizes[1], live_client.order_sizes[0])
+        self.assertIn("BTCUSDT", session.futures_notional_scale_by_symbol)
+        self.assertLess(session.futures_notional_scale_by_symbol["BTCUSDT"], 1.0)
 
 
 if __name__ == "__main__":

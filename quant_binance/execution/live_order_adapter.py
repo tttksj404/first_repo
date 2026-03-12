@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from typing import Any, Protocol
 
 from quant_binance.models import DecisionIntent
@@ -30,10 +31,14 @@ class LiveOrderResult:
 
 class DecisionLiveOrderAdapter:
     _BITGET_MARGIN_SAFETY_BUFFER = 0.9
+    _BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING = 1.0
 
     def __init__(self, client: SupportsLiveOrder, settings: Settings | None = None) -> None:
         self.client = client
         self.settings = settings
+        self._last_set_leverage_by_symbol: dict[str, int] = {}
+        self._last_set_leverage_at_by_symbol: dict[str, datetime] = {}
+        self._leverage_refresh_interval = timedelta(seconds=300)
 
     def _exchange_id(self) -> str:
         return getattr(self.client, "exchange_id", "binance")
@@ -79,6 +84,15 @@ class DecisionLiveOrderAdapter:
             return None
         if not isinstance(payload, dict):
             return None
+        if "crossedMaxAvailable" in payload:
+            return max(self._safe_float(payload.get("crossedMaxAvailable")), 0.0)
+        effective = self._safe_float(payload.get("effectiveAvailableBalance"))
+        if effective > 0:
+            return effective
+        union_available = self._safe_float(payload.get("unionAvailable"))
+        available = self._safe_float(payload.get("availableBalance"))
+        if union_available > 0 and available > 0:
+            return min(union_available, available)
         available = self._safe_float(payload.get("availableBalance"))
         if available > 0:
             return available
@@ -99,18 +113,35 @@ class DecisionLiveOrderAdapter:
         if self.settings is None:
             return requested_notional_usd
         available_balance = self._fetch_futures_available_balance_usd()
-        if available_balance is None or available_balance <= 0:
+        if available_balance is None:
             return requested_notional_usd
+        if available_balance <= 0:
+            return 0.0
         reserve_fraction = max(self.settings.cash_reserve.when_futures_enabled, 0.0)
+        leverage_for_sizing = max(float(effective_leverage), 1.0)
+        if self._exchange_id() == "bitget":
+            # Keep Bitget live sizing bounded by available margin to avoid repeated 40762 balance rejections.
+            leverage_for_sizing = min(leverage_for_sizing, self._BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING)
         capped_notional = (
             available_balance
-            * max(float(effective_leverage), 1.0)
+            * leverage_for_sizing
             * max(1.0 - reserve_fraction, 0.0)
             * self._BITGET_MARGIN_SAFETY_BUFFER
         )
         if capped_notional <= 0:
             return requested_notional_usd
         return min(requested_notional_usd, round(capped_notional, 6))
+
+    def _should_refresh_leverage(self, *, symbol: str, target_leverage: int, now: datetime) -> bool:
+        previous = self._last_set_leverage_by_symbol.get(symbol)
+        if previous is None:
+            return True
+        if previous != target_leverage:
+            return True
+        last_set_at = self._last_set_leverage_at_by_symbol.get(symbol)
+        if last_set_at is None:
+            return True
+        return now - last_set_at >= self._leverage_refresh_interval
 
     def build_order_params(
         self,
@@ -171,21 +202,32 @@ class DecisionLiveOrderAdapter:
             return None
         market, order_params = built
         if market == "futures" and self.settings is not None:
+            now = datetime.now(tz=timezone.utc)
             leverage = self._target_futures_leverage(decision)
             effective_leverage = leverage
-            try:
-                leverage_response = self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
-                effective_leverage = self._extract_effective_futures_leverage(leverage_response, fallback=leverage)
-            except Exception as exc:
-                if self._exchange_id() == "bitget" and "code=40893" in str(exc):
-                    # Bitget can reject leverage updates for temporary margin reasons; continue with conservative sizing.
-                    effective_leverage = 1
-                else:
-                    raise
+            if self._should_refresh_leverage(symbol=decision.symbol, target_leverage=leverage, now=now):
+                try:
+                    leverage_response = self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
+                    effective_leverage = self._extract_effective_futures_leverage(leverage_response, fallback=leverage)
+                    self._last_set_leverage_by_symbol[decision.symbol] = effective_leverage
+                    self._last_set_leverage_at_by_symbol[decision.symbol] = now
+                except Exception as exc:
+                    if self._exchange_id() == "bitget" and "code=40893" in str(exc):
+                        # Bitget can reject leverage updates when changing leverage is temporarily blocked.
+                        # Fall back to the most recent known leverage (or target leverage if unknown).
+                        effective_leverage = max(self._last_set_leverage_by_symbol.get(decision.symbol, leverage), 1)
+                        self._last_set_leverage_by_symbol[decision.symbol] = effective_leverage
+                        self._last_set_leverage_at_by_symbol[decision.symbol] = now
+                    else:
+                        raise
+            else:
+                effective_leverage = self._last_set_leverage_by_symbol.get(decision.symbol, leverage)
             capped_notional = self._cap_futures_notional_by_balance(
                 requested_notional_usd=decision.order_intent_notional_usd,
                 effective_leverage=effective_leverage,
             )
+            if capped_notional <= 0:
+                return None
             if capped_notional < decision.order_intent_notional_usd:
                 rebuilt = self.build_order_params(
                     decision=decision,
