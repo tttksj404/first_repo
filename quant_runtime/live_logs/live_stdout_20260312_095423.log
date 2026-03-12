@@ -1,0 +1,12 @@
+[PROFILE_SWITCHER] enabled calm=alpha_max fast=scalp_ultra active=alpha_max
+[DECISION] 2026-03-12T00:55:00+00:00 BTCUSDT mode=futures side=long score=63.64
+[LIVE_ORDER] BTCUSDT market=futures side=buy qty=0.00012075 accepted=True
+[DECISION] 2026-03-12T00:55:00+00:00 ETHUSDT mode=futures side=long score=61.56
+[DECISION] 2026-03-12T00:55:00+00:00 SOLUSDT mode=futures side=long score=61.17
+[DECISION] 2026-03-12T00:55:00+00:00 DOGEUSDT mode=cash side=flat score=44.46
+[DECISION] 2026-03-12T00:55:00+00:00 ADAUSDT mode=spot side=long score=55.80
+[DECISION] 2026-03-12T00:55:00+00:00 XRPUSDT mode=futures side=long score=59.59
+[DECISION] 2026-03-12T00:55:00+00:00 TRXUSDT mode=cash side=flat score=50.34
+[DECISION] 2026-03-12T00:55:00+00:00 LINKUSDT mode=spot side=long score=58.97
+[DECISION] 2026-03-12T00:55:00+00:00 WLDUSDT mode=cash side=flat score=60.66
+[CONNECT] websocket attempt=1

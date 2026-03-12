@@ -1,0 +1,30 @@
+[PROFILE_SWITCHER] enabled calm=profit_push fast=profit_push active=profit_push
+[DECISION] 2026-03-12T06:50:00+00:00 BTCUSDT mode=spot side=long score=44.09
+[DECISION] 2026-03-12T06:50:00+00:00 ETHUSDT mode=spot side=long score=46.70
+[DECISION] 2026-03-12T06:50:00+00:00 SOLUSDT mode=spot side=long score=48.67
+[DECISION] 2026-03-12T06:50:00+00:00 DOGEUSDT mode=cash side=flat score=55.91
+[DECISION] 2026-03-12T06:50:00+00:00 ADAUSDT mode=cash side=flat score=43.73
+[DECISION] 2026-03-12T06:50:00+00:00 XRPUSDT mode=cash side=flat score=54.10
+[DECISION] 2026-03-12T06:50:00+00:00 TRXUSDT mode=cash side=flat score=63.59
+[DECISION] 2026-03-12T06:50:00+00:00 LINKUSDT mode=spot side=long score=48.68
+[DECISION] 2026-03-12T06:50:00+00:00 WLDUSDT mode=futures side=short score=65.40
+[LIVE_ORDER_ERROR] WLDUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=40762 msg=The order amount exceeds the balance raw={"code":"40762","msg":"The order amount exceeds the balance","requestTime":1773298094639,"data":null}
+[TEST_ORDER] WLDUSDT market=futures side=sell qty=361.12490609 accepted=True
+[CONNECT] websocket attempt=1
+[SYNC] 2026-03-12T06:50:20.465351+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T06:50:00+00:00 BTCUSDT mode=spot side=long score=51.03
+[DECISION] 2026-03-12T06:50:00+00:00 ETHUSDT mode=spot side=long score=52.02
+[DECISION] 2026-03-12T06:50:00+00:00 SOLUSDT mode=spot side=long score=53.19
+[DECISION] 2026-03-12T06:50:00+00:00 DOGEUSDT mode=futures side=short score=56.35
+[LIVE_ORDER_SKIP] DOGEUSDT reason=NET_EDGE_TOO_THIN_LIVE
+[TEST_ORDER] DOGEUSDT market=futures side=sell qty=6891.45715217 accepted=True
+[DECISION] 2026-03-12T06:50:00+00:00 ADAUSDT mode=spot side=long score=49.08
+[DECISION] 2026-03-12T06:50:00+00:00 XRPUSDT mode=futures side=short score=58.20
+[TEST_ORDER] XRPUSDT market=futures side=sell qty=462.56212 accepted=True
+[DECISION] 2026-03-12T06:50:00+00:00 TRXUSDT mode=futures side=long score=68.01
+[LIVE_ORDER_SKIP] TRXUSDT reason=EDGE_TO_COST_TOO_LOW_LIVE
+[TEST_ORDER] TRXUSDT market=futures side=buy qty=2186.03431525 accepted=True
+[DECISION] 2026-03-12T06:50:00+00:00 LINKUSDT mode=spot side=long score=52.26
+[DECISION] 2026-03-12T06:50:00+00:00 WLDUSDT mode=futures side=short score=70.25
+[LIVE_ORDER_SKIP] WLDUSDT cooldown_until=2026-03-12T06:55:00+00:00 code=40762
+[TEST_ORDER] WLDUSDT market=futures side=sell qty=361.12490609 accepted=True

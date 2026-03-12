@@ -1,0 +1,105 @@
+[PROFILE_SWITCHER] enabled calm=alpha_profit fast=scalp_ultra active=alpha_profit
+[DECISION] 2026-03-12T05:30:00+00:00 BTCUSDT mode=cash side=flat score=43.83
+[DECISION] 2026-03-12T05:30:00+00:00 ETHUSDT mode=cash side=flat score=42.51
+[DECISION] 2026-03-12T05:30:00+00:00 SOLUSDT mode=cash side=flat score=47.88
+[DECISION] 2026-03-12T05:30:00+00:00 DOGEUSDT mode=cash side=flat score=53.21
+[DECISION] 2026-03-12T05:30:00+00:00 ADAUSDT mode=cash side=flat score=44.68
+[DECISION] 2026-03-12T05:30:00+00:00 XRPUSDT mode=cash side=flat score=46.05
+[DECISION] 2026-03-12T05:30:00+00:00 TRXUSDT mode=cash side=flat score=51.08
+[DECISION] 2026-03-12T05:30:00+00:00 LINKUSDT mode=cash side=flat score=42.60
+[DECISION] 2026-03-12T05:30:00+00:00 WLDUSDT mode=cash side=flat score=53.55
+[CONNECT] websocket attempt=1
+[SYNC] 2026-03-12T05:30:14.905475+00:00 account/open-order snapshot refreshed
+[PROFILE_SWITCH] from=alpha_profit to=scalp_ultra reason=FAST_SIGNAL vol_penalty=0.6580 abs_ret_1h=0.0028
+[DECISION] 2026-03-12T05:30:00+00:00 BTCUSDT mode=cash side=flat score=48.30
+[DECISION] 2026-03-12T05:30:00+00:00 ETHUSDT mode=cash side=flat score=47.30
+[DECISION] 2026-03-12T05:30:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T05:30:00+00:00 DOGEUSDT mode=cash side=flat score=57.34
+[DECISION] 2026-03-12T05:30:00+00:00 ADAUSDT mode=cash side=flat score=50.04
+[DECISION] 2026-03-12T05:30:00+00:00 XRPUSDT mode=cash side=flat score=50.87
+[DECISION] 2026-03-12T05:30:00+00:00 TRXUSDT mode=cash side=flat score=51.41
+[DECISION] 2026-03-12T05:30:00+00:00 LINKUSDT mode=cash side=flat score=47.79
+[DECISION] 2026-03-12T05:30:00+00:00 WLDUSDT mode=cash side=flat score=54.70
+[SYNC] 2026-03-12T05:35:08.630978+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T05:35:00+00:00 BTCUSDT mode=cash side=flat score=48.30
+[DECISION] 2026-03-12T05:35:00+00:00 ETHUSDT mode=cash side=flat score=47.30
+[DECISION] 2026-03-12T05:35:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T05:35:00+00:00 DOGEUSDT mode=cash side=flat score=53.92
+[DECISION] 2026-03-12T05:35:00+00:00 ADAUSDT mode=cash side=flat score=48.22
+[DECISION] 2026-03-12T05:35:00+00:00 XRPUSDT mode=cash side=flat score=50.87
+[DECISION] 2026-03-12T05:35:00+00:00 TRXUSDT mode=cash side=flat score=56.80
+[DECISION] 2026-03-12T05:35:00+00:00 LINKUSDT mode=cash side=flat score=47.75
+[DECISION] 2026-03-12T05:35:00+00:00 WLDUSDT mode=cash side=flat score=54.61
+[SYNC] 2026-03-12T05:40:02.027476+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T05:40:00+00:00 BTCUSDT mode=cash side=flat score=48.30
+[DECISION] 2026-03-12T05:40:00+00:00 ETHUSDT mode=cash side=flat score=47.06
+[DECISION] 2026-03-12T05:40:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T05:40:00+00:00 DOGEUSDT mode=cash side=flat score=55.52
+[DECISION] 2026-03-12T05:40:00+00:00 ADAUSDT mode=cash side=flat score=50.04
+[DECISION] 2026-03-12T05:40:00+00:00 XRPUSDT mode=cash side=flat score=48.81
+[HEARTBEAT] events=25 decisions=33 live_orders=0 tested_orders=0
+[DECISION] 2026-03-12T05:40:00+00:00 TRXUSDT mode=cash side=flat score=51.41
+[DECISION] 2026-03-12T05:40:00+00:00 LINKUSDT mode=cash side=flat score=43.48
+[DECISION] 2026-03-12T05:40:00+00:00 WLDUSDT mode=cash side=flat score=54.99
+[SYNC] 2026-03-12T05:45:15.770985+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T05:45:00+00:00 BTCUSDT mode=cash side=flat score=48.30
+[DECISION] 2026-03-12T05:45:00+00:00 ETHUSDT mode=cash side=flat score=47.30
+[DECISION] 2026-03-12T05:45:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T05:45:00+00:00 DOGEUSDT mode=cash side=flat score=57.34
+[DECISION] 2026-03-12T05:45:00+00:00 ADAUSDT mode=cash side=flat score=49.19
+[DECISION] 2026-03-12T05:45:00+00:00 XRPUSDT mode=cash side=flat score=50.87
+[DECISION] 2026-03-12T05:45:00+00:00 TRXUSDT mode=cash side=flat score=52.42
+[DECISION] 2026-03-12T05:45:00+00:00 LINKUSDT mode=cash side=flat score=47.79
+[DECISION] 2026-03-12T05:45:00+00:00 WLDUSDT mode=cash side=flat score=55.06
+[SYNC] 2026-03-12T05:50:08.844232+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T05:50:00+00:00 BTCUSDT mode=cash side=flat score=48.30
+[DECISION] 2026-03-12T05:50:00+00:00 ETHUSDT mode=cash side=flat score=45.22
+[DECISION] 2026-03-12T05:50:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T05:50:00+00:00 DOGEUSDT mode=cash side=flat score=53.48
+[DECISION] 2026-03-12T05:50:00+00:00 ADAUSDT mode=cash side=flat score=48.17
+[DECISION] 2026-03-12T05:50:00+00:00 XRPUSDT mode=cash side=flat score=50.87
+[DECISION] 2026-03-12T05:50:00+00:00 TRXUSDT mode=cash side=flat score=52.56
+[DECISION] 2026-03-12T05:50:00+00:00 LINKUSDT mode=cash side=flat score=46.71
+[DECISION] 2026-03-12T05:50:00+00:00 WLDUSDT mode=cash side=flat score=53.66
+[SYNC] 2026-03-12T05:55:01.959347+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T05:55:00+00:00 BTCUSDT mode=cash side=flat score=47.01
+[DECISION] 2026-03-12T05:55:00+00:00 ETHUSDT mode=cash side=flat score=44.72
+[DECISION] 2026-03-12T05:55:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T05:55:00+00:00 DOGEUSDT mode=cash side=flat score=57.34
+[HEARTBEAT] events=50 decisions=58 live_orders=0 tested_orders=0
+[DECISION] 2026-03-12T05:55:00+00:00 ADAUSDT mode=cash side=flat score=46.19
+[DECISION] 2026-03-12T05:55:00+00:00 XRPUSDT mode=cash side=flat score=50.23
+[DECISION] 2026-03-12T05:55:00+00:00 TRXUSDT mode=cash side=flat score=51.56
+[DECISION] 2026-03-12T05:55:00+00:00 LINKUSDT mode=cash side=flat score=47.79
+[DECISION] 2026-03-12T05:55:00+00:00 WLDUSDT mode=cash side=flat score=58.44
+[SYNC] 2026-03-12T06:00:16.220919+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T06:00:00+00:00 BTCUSDT mode=cash side=flat score=46.86
+[DECISION] 2026-03-12T06:00:00+00:00 ETHUSDT mode=cash side=flat score=47.30
+[DECISION] 2026-03-12T06:00:00+00:00 SOLUSDT mode=cash side=flat score=52.41
+[DECISION] 2026-03-12T06:00:00+00:00 DOGEUSDT mode=cash side=flat score=57.34
+[DECISION] 2026-03-12T06:00:00+00:00 ADAUSDT mode=cash side=flat score=49.04
+[DECISION] 2026-03-12T06:00:00+00:00 XRPUSDT mode=cash side=flat score=50.87
+[DECISION] 2026-03-12T06:00:00+00:00 TRXUSDT mode=cash side=flat score=51.44
+[DECISION] 2026-03-12T06:00:00+00:00 LINKUSDT mode=cash side=flat score=47.79
+[DECISION] 2026-03-12T06:00:00+00:00 WLDUSDT mode=cash side=flat score=53.88
+[SYNC] 2026-03-12T06:05:07.388912+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T06:05:00+00:00 BTCUSDT mode=cash side=flat score=48.30
+[DECISION] 2026-03-12T06:05:00+00:00 ETHUSDT mode=cash side=flat score=47.30
+[DECISION] 2026-03-12T06:05:00+00:00 SOLUSDT mode=cash side=flat score=52.87
+[DECISION] 2026-03-12T06:05:00+00:00 DOGEUSDT mode=cash side=flat score=57.34
+[DECISION] 2026-03-12T06:05:00+00:00 ADAUSDT mode=cash side=flat score=48.90
+[DECISION] 2026-03-12T06:05:00+00:00 XRPUSDT mode=cash side=flat score=50.87
+[DECISION] 2026-03-12T06:05:00+00:00 TRXUSDT mode=cash side=flat score=52.84
+[DECISION] 2026-03-12T06:05:00+00:00 LINKUSDT mode=cash side=flat score=46.19
+[DECISION] 2026-03-12T06:05:00+00:00 WLDUSDT mode=cash side=flat score=57.77
+[SYNC] 2026-03-12T06:10:00.358470+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T06:10:00+00:00 BTCUSDT mode=cash side=flat score=46.20
+[DECISION] 2026-03-12T06:10:00+00:00 ETHUSDT mode=cash side=flat score=47.30
+[HEARTBEAT] events=75 decisions=83 live_orders=0 tested_orders=0
+[DECISION] 2026-03-12T06:10:00+00:00 SOLUSDT mode=cash side=flat score=50.17
+[DECISION] 2026-03-12T06:10:00+00:00 DOGEUSDT mode=cash side=flat score=56.22
+[DECISION] 2026-03-12T06:10:00+00:00 ADAUSDT mode=cash side=flat score=48.08
+[DECISION] 2026-03-12T06:10:00+00:00 XRPUSDT mode=cash side=flat score=47.23
+[DECISION] 2026-03-12T06:10:00+00:00 TRXUSDT mode=cash side=flat score=53.60
+[DECISION] 2026-03-12T06:10:00+00:00 LINKUSDT mode=cash side=flat score=45.33
+[DECISION] 2026-03-12T06:10:00+00:00 WLDUSDT mode=cash side=flat score=53.58

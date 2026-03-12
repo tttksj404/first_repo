@@ -1,0 +1,15 @@
+[PROFILE_SWITCHER] enabled calm=profit_push fast=profit_push active=profit_push
+[DECISION] 2026-03-12T08:10:00+00:00 BTCUSDT mode=spot side=long score=44.90
+[DECISION] 2026-03-12T08:10:00+00:00 ETHUSDT mode=futures side=long score=61.02
+[MARGIN_RELEASE_ERROR] ETHUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773302810681,"data":null}
+[MARGIN_RELEASE_ERROR] WLDUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773302811057,"data":null}
+[MARGIN_RELEASE] SOLUSDT hold=short close_side=buy size=0.10000000
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.31082837 accepted=True
+[DECISION] 2026-03-12T08:10:00+00:00 SOLUSDT mode=spot side=long score=45.06
+[DECISION] 2026-03-12T08:10:00+00:00 DOGEUSDT mode=spot side=long score=45.93
+[DECISION] 2026-03-12T08:10:00+00:00 ADAUSDT mode=cash side=flat score=42.87
+[DECISION] 2026-03-12T08:10:00+00:00 XRPUSDT mode=cash side=flat score=52.70
+[DECISION] 2026-03-12T08:10:00+00:00 TRXUSDT mode=cash side=flat score=53.33
+[DECISION] 2026-03-12T08:10:00+00:00 LINKUSDT mode=cash side=flat score=44.77
+[DECISION] 2026-03-12T08:10:00+00:00 WLDUSDT mode=cash side=flat score=56.97
+[CONNECT] websocket attempt=1

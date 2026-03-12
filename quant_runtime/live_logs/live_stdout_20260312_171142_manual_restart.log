@@ -1,0 +1,55 @@
+[PROFILE_SWITCHER] enabled calm=profit_push fast=profit_push active=profit_push
+[DECISION] 2026-03-12T08:15:00+00:00 BTCUSDT mode=cash side=flat score=42.59
+[DECISION] 2026-03-12T08:15:00+00:00 ETHUSDT mode=futures side=long score=58.11
+[MARGIN_RELEASE_ERROR] ETHUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303111479,"data":null}
+[MARGIN_RELEASE_ERROR] WLDUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303111858,"data":null}
+[MARGIN_RELEASE_ERROR] SOLUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303112228,"data":null}
+[MARGIN_RELEASE_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303112608,"data":null}
+[MARGIN_RELEASE_ERROR] BTCUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303112980,"data":null}
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.31124857 accepted=True
+[DECISION] 2026-03-12T08:15:00+00:00 SOLUSDT mode=cash side=flat score=39.94
+[DECISION] 2026-03-12T08:15:00+00:00 DOGEUSDT mode=cash side=flat score=42.88
+[DECISION] 2026-03-12T08:15:00+00:00 ADAUSDT mode=cash side=flat score=41.78
+[DECISION] 2026-03-12T08:15:00+00:00 XRPUSDT mode=cash side=flat score=51.80
+[DECISION] 2026-03-12T08:15:00+00:00 TRXUSDT mode=cash side=flat score=53.99
+[DECISION] 2026-03-12T08:15:00+00:00 LINKUSDT mode=cash side=flat score=43.52
+[DECISION] 2026-03-12T08:15:00+00:00 WLDUSDT mode=cash side=flat score=55.69
+[CONNECT] websocket attempt=1
+[SYNC] 2026-03-12T08:15:01.875287+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T08:15:00+00:00 BTCUSDT mode=spot side=long score=49.30
+[DECISION] 2026-03-12T08:15:00+00:00 ETHUSDT mode=futures side=long score=63.49
+[MARGIN_RELEASE_ERROR] ETHUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303305068,"data":null}
+[MARGIN_RELEASE_ERROR] WLDUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303305442,"data":null}
+[MARGIN_RELEASE_ERROR] SOLUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303305767,"data":null}
+[MARGIN_RELEASE_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303306135,"data":null}
+[MARGIN_RELEASE_ERROR] BTCUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303306490,"data":null}
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.31124857 accepted=True
+[DECISION] 2026-03-12T08:15:00+00:00 SOLUSDT mode=cash side=flat score=44.14
+[DECISION] 2026-03-12T08:15:00+00:00 DOGEUSDT mode=spot side=long score=45.73
+[DECISION] 2026-03-12T08:15:00+00:00 ADAUSDT mode=cash side=flat score=44.91
+[DECISION] 2026-03-12T08:15:00+00:00 XRPUSDT mode=futures side=short score=56.67
+[LIVE_ORDER_SKIP] XRPUSDT reason=NET_EDGE_TOO_THIN_LIVE
+[TEST_ORDER] XRPUSDT market=futures side=sell qty=461.73067831 accepted=True
+[DECISION] 2026-03-12T08:15:00+00:00 TRXUSDT mode=cash side=flat score=53.65
+[DECISION] 2026-03-12T08:15:00+00:00 LINKUSDT mode=cash side=flat score=43.03
+[DECISION] 2026-03-12T08:15:00+00:00 WLDUSDT mode=cash side=flat score=55.64
+[SYNC] 2026-03-12T08:20:15.627094+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T08:20:00+00:00 BTCUSDT mode=spot side=long score=49.30
+[DECISION] 2026-03-12T08:20:00+00:00 ETHUSDT mode=futures side=long score=63.49
+[MARGIN_RELEASE_ERROR] ETHUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303620014,"data":null}
+[MARGIN_RELEASE_ERROR] WLDUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303620396,"data":null}
+[MARGIN_RELEASE_ERROR] XRPUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303620767,"data":null}
+[MARGIN_RELEASE_ERROR] BTCUSDT Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: code=22002 msg=No position to close raw={"code":"22002","msg":"No position to close","requestTime":1773303621104,"data":null}
+[LIVE_ORDER] ETHUSDT market=futures side=buy qty=0.02 accepted=True
+[TEST_ORDER] ETHUSDT market=futures side=buy qty=0.02495208 accepted=True
+[DECISION] 2026-03-12T08:20:00+00:00 SOLUSDT mode=cash side=flat score=44.14
+[DECISION] 2026-03-12T08:20:00+00:00 DOGEUSDT mode=spot side=long score=45.73
+[DECISION] 2026-03-12T08:20:00+00:00 ADAUSDT mode=spot side=long score=47.22
+[DECISION] 2026-03-12T08:20:00+00:00 XRPUSDT mode=futures side=short score=56.99
+[LIVE_ORDER_SKIP] XRPUSDT reason=NET_EDGE_TOO_THIN_LIVE
+[TEST_ORDER] XRPUSDT market=futures side=sell qty=37.0158821 accepted=True
+[DECISION] 2026-03-12T08:20:00+00:00 TRXUSDT mode=cash side=flat score=54.48
+[DECISION] 2026-03-12T08:20:00+00:00 LINKUSDT mode=spot side=long score=48.65
+[DECISION] 2026-03-12T08:20:00+00:00 WLDUSDT mode=futures side=short score=60.50
+[LIVE_ORDER_SKIP] WLDUSDT reason=EDGE_TO_COST_TOO_LOW_LIVE
+[TEST_ORDER] WLDUSDT market=futures side=sell qty=144.81726082 accepted=True

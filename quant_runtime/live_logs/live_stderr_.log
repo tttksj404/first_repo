@@ -1,0 +1,13 @@
+usage: python.exe -m quant_binance.runtime [-h]
+                                           --mode {replay,paper-live,paper-live-test-order,paper-live-shell,live-paper-daemon,live-auto-trade-daemon,env-check}
+                                           [--config CONFIG]
+                                           [--fixture FIXTURE]
+                                           [--equity-usd EQUITY_USD]
+                                           [--capacity-usd CAPACITY_USD]
+                                           [--output OUTPUT]
+                                           [--max-retries MAX_RETRIES]
+                                           [--insecure-ssl]
+                                           [--output-base OUTPUT_BASE]
+                                           [--ack-live-risk ACK_LIVE_RISK]
+                                           [--exchange EXCHANGE]
+python.exe -m quant_binance.runtime: error: argument --exchange: expected one argument

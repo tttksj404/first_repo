@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\SSAFY\Desktop\first_repo\quant_binance\runtime.py", line 367, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\SSAFY\Desktop\first_repo\quant_binance\runtime.py", line 326, in main
+    result = run_live_paper_daemon(
+        config_path=args.config,
+    ...<4 lines>...
+        exchange=args.exchange or None,
+    )
+  File "C:\Users\SSAFY\Desktop\first_repo\quant_binance\daemon.py", line 186, in run_live_paper_daemon
+    exchange_id = resolve_exchange_id(exchange)
+  File "C:\Users\SSAFY\Desktop\first_repo\quant_binance\exchange.py", line 99, in resolve_exchange_id
+    raise RuntimeError(f"unsupported exchange '{candidate}'. supported exchanges: {supported}")
+RuntimeError: unsupported exchange 'bitget:-bitget'. supported exchanges: bitget, binance

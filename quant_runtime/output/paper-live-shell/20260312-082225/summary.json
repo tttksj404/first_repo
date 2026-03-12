@@ -1,0 +1,489 @@
+{
+  "account_snapshot": {
+    "futures": {
+      "accounts": [
+        {
+          "accountEquity": "104.19634369",
+          "assetList": [
+            {
+              "available": "0.00025473",
+              "balance": "0.00025473",
+              "coin": "BTC"
+            }
+          ],
+          "assetMode": "single",
+          "available": "98.67502156",
+          "btcEquity": "0.001492321629",
+          "coupon": "0",
+          "crossedMargin": "104.23667285",
+          "crossedMaxAvailable": "0",
+          "crossedRiskRate": "0.056693679479",
+          "crossedUnrealizedPL": "",
+          "grant": "0",
+          "isolatedMargin": "0",
+          "isolatedMaxAvailable": "0",
+          "isolatedUnrealizedPL": "",
+          "locked": "0",
+          "marginCoin": "USDT",
+          "maxTransferOut": "0",
+          "unionAvailable": "17.78566637",
+          "unionMm": "5.90727412",
+          "unionTotalMargin": "121.98201006",
+          "unrealizedPL": "5.521322125775",
+          "usdtEquity": "104.196343690495"
+        }
+      ],
+      "availableBalance": 98.67502156,
+      "crossedMaxAvailable": 0.0,
+      "effectiveAvailableBalance": 0.0,
+      "hasCrossedMaxAvailable": true,
+      "raw": {
+        "code": "00000",
+        "data": [
+          {
+            "accountEquity": "104.19634369",
+            "assetList": [
+              {
+                "available": "0.00025473",
+                "balance": "0.00025473",
+                "coin": "BTC"
+              }
+            ],
+            "assetMode": "single",
+            "available": "98.67502156",
+            "btcEquity": "0.001492321629",
+            "coupon": "0",
+            "crossedMargin": "104.23667285",
+            "crossedMaxAvailable": "0",
+            "crossedRiskRate": "0.056693679479",
+            "crossedUnrealizedPL": "",
+            "grant": "0",
+            "isolatedMargin": "0",
+            "isolatedMaxAvailable": "0",
+            "isolatedUnrealizedPL": "",
+            "locked": "0",
+            "marginCoin": "USDT",
+            "maxTransferOut": "0",
+            "unionAvailable": "17.78566637",
+            "unionMm": "5.90727412",
+            "unionTotalMargin": "121.98201006",
+            "unrealizedPL": "5.521322125775",
+            "usdtEquity": "104.196343690495"
+          }
+        ],
+        "msg": "success",
+        "requestTime": 1773305102538
+      },
+      "rawAvailableBalance": 98.67502156,
+      "unionAvailable": 17.78566637
+    },
+    "spot": {
+      "balances": [
+        {
+          "asset": "BTC",
+          "free": "0.0000149850000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "USDT",
+          "free": "0.2214556342580000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "ETH",
+          "free": "0.0000088500000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "TRX",
+          "free": "0.0000240000000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "XRP",
+          "free": "0.4250000000000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "DOGE",
+          "free": "0.0000149000000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "SOL",
+          "free": "0.0000456000000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "BABYDOGE",
+          "free": "1000000000.0000000000000000",
+          "locked": "0.0000000000000000"
+        },
+        {
+          "asset": "VIRTUAL",
+          "free": "0.0026000000000000",
+          "locked": "0.0000000000000000"
+        }
+      ],
+      "raw": {
+        "code": "00000",
+        "data": [
+          {
+            "available": "0.0000149850000000",
+            "coin": "BTC",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773290710661"
+          },
+          {
+            "available": "0.2214556342580000",
+            "coin": "USDT",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773290710661"
+          },
+          {
+            "available": "0.0000088500000000",
+            "coin": "ETH",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773285011320"
+          },
+          {
+            "available": "0.0000240000000000",
+            "coin": "TRX",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773288202576"
+          },
+          {
+            "available": "0.4250000000000000",
+            "coin": "XRP",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1759905137819"
+          },
+          {
+            "available": "0.0000149000000000",
+            "coin": "DOGE",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773290583038"
+          },
+          {
+            "available": "0.0000456000000000",
+            "coin": "SOL",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773288203798"
+          },
+          {
+            "available": "1000000000.0000000000000000",
+            "coin": "BABYDOGE",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1759913112091"
+          },
+          {
+            "available": "0.0026000000000000",
+            "coin": "VIRTUAL",
+            "frozen": "0.0000000000000000",
+            "limitAvailable": "0",
+            "locked": "0.0000000000000000",
+            "uTime": "1773288204999"
+          }
+        ],
+        "msg": "success",
+        "requestTime": 1773305102638
+      }
+    }
+  },
+  "capital_report": {
+    "can_trade_any": true,
+    "can_trade_futures_any": true,
+    "can_trade_spot_any": false,
+    "futures_available_balance_usd": 98.67502156,
+    "futures_requirements": [
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "BTCUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "SOLUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "DOGEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "ADAUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "XRPUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "TRXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "LINKUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 17.857143,
+        "market": "futures",
+        "min_equity_usd": 14.285714,
+        "min_notional_usd": 5.0,
+        "symbol": "WLDUSDT"
+      }
+    ],
+    "minimum_full_universe_balance_usd": 17.857143,
+    "minimum_operational_balance_usd": 3.571429,
+    "note": "5% \uc218\uc775 \ubcf4\uc7a5\uc740 \ubd88\uac00\ud558\uba70, \uc544\ub798 \uae08\uc561\uc740 \ud604\uc7ac \uc124\uc815\uacfc \ucd5c\uc18c \uc8fc\ubb38 \uc870\uac74 \uae30\uc900\uc758 \uc6b4\uc601 \uac00\ub2a5 \uc790\uae08 \ucd94\uc815\uce58\uc785\ub2c8\ub2e4.",
+    "pending_symbols": [],
+    "recommended_balance_usd": 28.571429,
+    "spot_available_balance_usd": 0.221455634258,
+    "spot_requirements": [
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "BTCUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "SOLUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "DOGEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "ADAUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "XRPUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "TRXUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "LINKUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.571429,
+        "market": "spot",
+        "min_equity_usd": 2.857143,
+        "min_notional_usd": 1.0,
+        "symbol": "WLDUSDT"
+      }
+    ]
+  },
+  "decision_count": 46,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "live_order_count": 0,
+  "live_orders": [],
+  "modes": [
+    "spot",
+    "futures",
+    "spot",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "cash",
+    "cash",
+    "spot",
+    "futures",
+    "spot",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "spot",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "cash",
+    "cash",
+    "spot",
+    "futures",
+    "spot",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "spot",
+    "futures",
+    "spot",
+    "futures",
+    "spot",
+    "spot",
+    "cash",
+    "spot",
+    "cash",
+    "cash",
+    "cash",
+    "futures"
+  ],
+  "observe_only_symbols": [],
+  "open_orders_snapshot": {
+    "futures": {
+      "orders": {
+        "endId": null,
+        "entrustedList": null
+      },
+      "raw": {
+        "code": "00000",
+        "data": {
+          "endId": null,
+          "entrustedList": null
+        },
+        "msg": "success",
+        "requestTime": 1773305102740
+      }
+    },
+    "spot": {
+      "orders": [],
+      "raw": {
+        "code": "00000",
+        "data": [],
+        "msg": "success",
+        "requestTime": 1773305102858
+      }
+    }
+  },
+  "symbols": [
+    "ADAUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT",
+    "LINKUSDT",
+    "SOLUSDT",
+    "TRXUSDT",
+    "WLDUSDT",
+    "XRPUSDT"
+  ],
+  "tested_order_count": 6,
+  "tested_orders": [
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 0.31042311,
+      "side": "buy",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 0.35476926,
+      "side": "buy",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 0.35476926,
+      "side": "buy",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 0.35476926,
+      "side": "buy",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 0.31042311,
+      "side": "buy",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 0.35476926,
+      "side": "buy",
+      "symbol": "ETHUSDT"
+    }
+  ]
+}
