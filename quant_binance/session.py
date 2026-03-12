@@ -55,6 +55,7 @@ class LivePaperSession:
     last_executed_fingerprint_by_symbol: dict[str, str] = field(default_factory=dict)
     live_error_cooldown_until_by_symbol: dict[str, datetime] = field(default_factory=dict)
     live_error_code_by_symbol: dict[str, str] = field(default_factory=dict)
+    futures_notional_scale_by_symbol: dict[str, float] = field(default_factory=dict)
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
@@ -216,7 +217,7 @@ class LivePaperSession:
 
     @staticmethod
     def _cooldown_seconds_for_error_code(error_code: str | None) -> int:
-        if error_code in {"40762", "45111", "40774", "400172"}:
+        if error_code in {"40762", "45111", "45110", "40774", "400172"}:
             return 300
         if error_code == "429":
             return 120
@@ -225,6 +226,19 @@ class LivePaperSession:
     def _live_order_blocked_by_cooldown(self, *, symbol: str, now: datetime) -> bool:
         until = self.live_error_cooldown_until_by_symbol.get(symbol)
         return until is not None and now < until
+
+    def _futures_notional_scale(self, *, symbol: str) -> float:
+        return max(0.05, min(1.0, self.futures_notional_scale_by_symbol.get(symbol, 1.0)))
+
+    def _tighten_futures_notional_scale(self, *, symbol: str) -> None:
+        current = self._futures_notional_scale(symbol=symbol)
+        self.futures_notional_scale_by_symbol[symbol] = max(0.05, round(current * 0.2, 4))
+
+    def _relax_futures_notional_scale(self, *, symbol: str) -> None:
+        current = self._futures_notional_scale(symbol=symbol)
+        if current >= 1.0:
+            return
+        self.futures_notional_scale_by_symbol[symbol] = min(1.0, round(current + 0.1, 4))
 
     def _consume_capital_after_live_order(self, decision: DecisionIntent) -> None:
         if not self.capital_report:
@@ -296,7 +310,8 @@ class LivePaperSession:
                 estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
                 settings=self.runtime.paper_service.settings,
             )
-            max_notional = max(0.0, available * leverage * (1.0 - reserve_fraction))
+            scale = self._futures_notional_scale(symbol=decision.symbol)
+            max_notional = max(0.0, available * leverage * (1.0 - reserve_fraction) * scale)
         else:
             return decision
         rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
@@ -358,6 +373,11 @@ class LivePaperSession:
                     except Exception as exc:
                         error_code = self._extract_exchange_error_code(exc)
                         cooldown_seconds = self._cooldown_seconds_for_error_code(error_code)
+                        if error_code in {"40762", "45111", "45110", "40774", "400172"}:
+                            # Prevent immediate re-submission of the same failing live intent fingerprint.
+                            self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                        if error_code == "40762" and executable_decision.final_mode == "futures":
+                            self._tighten_futures_notional_scale(symbol=executable_decision.symbol)
                         if cooldown_seconds > 0:
                             self.live_error_cooldown_until_by_symbol[executable_decision.symbol] = (
                                 timestamp + timedelta(seconds=cooldown_seconds)
@@ -382,6 +402,8 @@ class LivePaperSession:
                             self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
                             if live_result.accepted:
                                 self._consume_capital_after_live_order(executable_decision)
+                                if executable_decision.final_mode == "futures":
+                                    self._relax_futures_notional_scale(symbol=executable_decision.symbol)
                             payload = {
                                 "timestamp": timestamp,
                                 "symbol": live_result.symbol,

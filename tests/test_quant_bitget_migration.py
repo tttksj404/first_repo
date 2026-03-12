@@ -91,6 +91,34 @@ class AlwaysFailBalanceBitgetRestClient(BitgetRestClient):
         return {"code": "00000", "data": {}}
 
 
+class AccountSnapshotBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/accounts" in url:
+            return {
+                "code": "00000",
+                "data": [
+                    {
+                        "marginCoin": "USDT",
+                        "available": "37.88836272",
+                        "crossedMaxAvailable": "0",
+                        "unionAvailable": "17.82432174",
+                    }
+                ],
+            }
+        return {"code": "00000", "data": {}}
+
+
 class QuantBitgetMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -329,6 +357,14 @@ class QuantBitgetMigrationTests(unittest.TestCase):
                 },
             )
         self.assertEqual(client.place_order_calls, 3)
+
+    def test_bitget_get_account_includes_effective_available_balance(self) -> None:
+        client = AccountSnapshotBitgetRestClient()
+        account = client.get_account(market="futures")
+
+        self.assertAlmostEqual(account["availableBalance"], 0.0)
+        self.assertAlmostEqual(account["unionAvailable"], 17.82432174)
+        self.assertAlmostEqual(account["effectiveAvailableBalance"], 0.0)
 
 
 if __name__ == "__main__":
