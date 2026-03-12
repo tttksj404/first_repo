@@ -30,8 +30,8 @@ class LiveOrderResult:
 
 
 class DecisionLiveOrderAdapter:
-    _BITGET_MARGIN_SAFETY_BUFFER = 0.45
-    _BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING = 1.0
+    _BITGET_MARGIN_SAFETY_BUFFER = 0.9
+    _BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING = 6.0
 
     def __init__(self, client: SupportsLiveOrder, settings: Settings | None = None) -> None:
         self.client = client
@@ -84,6 +84,11 @@ class DecisionLiveOrderAdapter:
             return None
         if not isinstance(payload, dict):
             return None
+        if self._exchange_id() == "bitget":
+            if "effectiveAvailableBalance" in payload:
+                return max(self._safe_float(payload.get("effectiveAvailableBalance")), 0.0)
+            if "crossedMaxAvailable" in payload:
+                return max(self._safe_float(payload.get("crossedMaxAvailable")), 0.0)
         effective = self._safe_float(payload.get("effectiveAvailableBalance"))
         if effective > 0:
             return effective
@@ -117,8 +122,13 @@ class DecisionLiveOrderAdapter:
         if available_balance is None:
             return requested_notional_usd
         if available_balance <= 0:
+            if self._exchange_id() == "bitget":
+                return 0.0
             return requested_notional_usd
         reserve_fraction = max(self.settings.cash_reserve.when_futures_enabled, 0.0)
+        if self._exchange_id() == "bitget":
+            # Session-level execution capping already applies reserve; avoid compounding conservative reserve twice.
+            reserve_fraction = 0.0
         leverage_for_sizing = max(float(effective_leverage), 1.0)
         if self._exchange_id() == "bitget":
             # Keep Bitget live sizing bounded by available margin to avoid repeated 40762 balance rejections.
@@ -209,7 +219,14 @@ class DecisionLiveOrderAdapter:
             if self._should_refresh_leverage(symbol=decision.symbol, target_leverage=leverage, now=now):
                 try:
                     leverage_response = self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
-                    effective_leverage = self._extract_effective_futures_leverage(leverage_response, fallback=leverage)
+                    fallback_leverage = self._last_set_leverage_by_symbol.get(
+                        decision.symbol,
+                        1 if self._exchange_id() == "bitget" else leverage,
+                    )
+                    effective_leverage = self._extract_effective_futures_leverage(
+                        leverage_response,
+                        fallback=fallback_leverage,
+                    )
                     self._last_set_leverage_by_symbol[decision.symbol] = effective_leverage
                     self._last_set_leverage_at_by_symbol[decision.symbol] = now
                 except Exception as exc:
@@ -222,7 +239,10 @@ class DecisionLiveOrderAdapter:
                     else:
                         raise
             else:
-                effective_leverage = self._last_set_leverage_by_symbol.get(decision.symbol, leverage)
+                effective_leverage = self._last_set_leverage_by_symbol.get(
+                    decision.symbol,
+                    1 if self._exchange_id() == "bitget" else leverage,
+                )
             capped_notional = self._cap_futures_notional_by_balance(
                 requested_notional_usd=decision.order_intent_notional_usd,
                 effective_leverage=effective_leverage,
