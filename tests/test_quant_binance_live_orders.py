@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
@@ -116,6 +116,20 @@ class RaisingLiveOrderClient(FakeLiveOrderClient):
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
         raise RuntimeError("simulated live order failure")
+
+
+class CodedRaisingLiveOrderClient(FakeLiveOrderClient):
+    def __init__(self, *, code: str, msg: str) -> None:
+        super().__init__()
+        self.code = code
+        self.msg = msg
+
+    def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        raise RuntimeError(
+            f"Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+            f"code={self.code} msg={self.msg}"
+        )
 
 
 class RaisingTestOrderClient:
@@ -477,6 +491,75 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         session.process_payload(payload, now=now)
         session.process_payload(payload, now=now)
         self.assertEqual(live_client.calls, 1)
+
+    def test_session_applies_error_code_cooldown_to_avoid_live_order_spam(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = CodedRaisingLiveOrderClient(code="40762", msg="The order amount exceeds the balance")
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client),  # type: ignore[arg-type]
+        )
+        payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971200000,
+                    "T": 1772971500000,
+                    "o": "49900",
+                    "h": "50100",
+                    "l": "49850",
+                    "c": "50050",
+                    "v": "12",
+                    "q": "600000",
+                    "x": True,
+                },
+            },
+        }
+        second_payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971500000,
+                    "T": 1772971800000,
+                    "o": "50020",
+                    "h": "50150",
+                    "l": "49990",
+                    "c": "50110",
+                    "v": "13",
+                    "q": "640000",
+                    "x": True,
+                },
+            },
+        }
+        session.process_payload(payload, now=now)
+        session.process_payload(second_payload, now=now + timedelta(seconds=60))
+        self.assertEqual(live_client.calls, 1)
+        self.assertIn("BTCUSDT", session.live_error_cooldown_until_by_symbol)
 
 
 if __name__ == "__main__":
