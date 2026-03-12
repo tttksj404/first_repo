@@ -138,6 +138,52 @@ class TransferCaptureBitgetRestClient(BitgetRestClient):
         return {"code": "00000", "msg": "success", "data": {"transferId": "x-1"}}
 
 
+class HedgeCloseBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.place_payloads: list[dict[str, object]] = []
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/account" in url:
+            return {"code": "00000", "data": {"posMode": "hedge_mode"}}
+        if "/api/v2/mix/position/all-position" in url:
+            return {
+                "code": "00000",
+                "data": [
+                    {"symbol": "ETHUSDT", "holdSide": "long", "available": "0.47", "total": "0.47"},
+                    {"symbol": "WLDUSDT", "holdSide": "short", "available": "225", "total": "225"},
+                ],
+            }
+        if "/api/v2/mix/market/contracts" in url:
+            return {
+                "code": "00000",
+                "data": [
+                    {"symbol": "ETHUSDT", "minTradeNum": "0.01", "sizeMultiplier": "0.01", "minTradeUSDT": "5"},
+                    {"symbol": "WLDUSDT", "minTradeNum": "1", "sizeMultiplier": "1", "minTradeUSDT": "5"},
+                ],
+            }
+        if "/api/v2/mix/market/ticker" in url:
+            if "symbol=ETHUSDT" in url:
+                return {"code": "00000", "data": [{"bidPr": "2000"}]}
+            if "symbol=WLDUSDT" in url:
+                return {"code": "00000", "data": [{"bidPr": "1.0"}]}
+            return {"code": "00000", "data": [{"bidPr": "1.0"}]}
+        if "/api/v2/mix/order/place-order" in url:
+            raw = (request.data or b"{}").decode("utf-8")
+            payload = json.loads(raw)
+            self.place_payloads.append(payload)
+            return {"code": "00000", "msg": "success", "data": {"orderId": "hedge-close-ok"}}
+        return {"code": "00000", "data": {}}
+
+
 class QuantBitgetMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -356,7 +402,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(response["status"], "SUCCESS")
         self.assertGreaterEqual(len(client.order_sizes), 3)
         self.assertLess(client.order_sizes[-1], client.order_sizes[0])
-        self.assertAlmostEqual(client.order_sizes[1], round(client.order_sizes[0] * 0.6, 8))
+        self.assertAlmostEqual(client.order_sizes[1], round(client.order_sizes[0] * 0.4, 8))
 
     def test_bitget_place_order_limits_balance_retry_burst(self) -> None:
         client = AlwaysFailBalanceBitgetRestClient()
@@ -375,7 +421,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
                     "clientOid": "retry-burst-guard",
                 },
             )
-        self.assertEqual(client.place_order_calls, 3)
+        self.assertEqual(client.place_order_calls, 5)
 
     def test_bitget_get_account_includes_effective_available_balance(self) -> None:
         client = AccountSnapshotBitgetRestClient()
@@ -397,6 +443,73 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertIn("\"amount\":\"12.34\"", client.last_body)
         self.assertIn("\"clientOid\":\"x-oid\"", client.last_body)
         self.assertEqual(payload["coin"], "USDT")
+
+    def test_bitget_hedge_mode_uses_close_when_opposite_position_exists(self) -> None:
+        client = HedgeCloseBitgetRestClient()
+        client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "ETHUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "sell",
+                "orderType": "market",
+                "size": "1.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "hedge-close-test",
+            },
+        )
+        self.assertEqual(len(client.place_payloads), 1)
+        payload = client.place_payloads[0]
+        self.assertEqual(payload.get("side"), "buy")
+        self.assertEqual(payload.get("tradeSide"), "close")
+        self.assertAlmostEqual(float(payload.get("size", 0.0)), 0.47, places=8)
+        self.assertNotIn("reduceOnly", payload)
+
+    def test_bitget_hedge_mode_uses_close_side_for_short_position(self) -> None:
+        client = HedgeCloseBitgetRestClient()
+        client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "WLDUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "buy",
+                "orderType": "market",
+                "size": "10.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "hedge-close-short-test",
+            },
+        )
+        self.assertEqual(len(client.place_payloads), 1)
+        payload = client.place_payloads[0]
+        self.assertEqual(payload.get("side"), "sell")
+        self.assertEqual(payload.get("tradeSide"), "close")
+        self.assertAlmostEqual(float(payload.get("size", 0.0)), 10.0, places=8)
+
+    def test_bitget_hedge_mode_keeps_open_when_no_opposite_position(self) -> None:
+        client = HedgeCloseBitgetRestClient()
+        client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "WLDUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "sell",
+                "orderType": "market",
+                "size": "10.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "hedge-open-test",
+            },
+        )
+        self.assertEqual(len(client.place_payloads), 1)
+        payload = client.place_payloads[0]
+        self.assertEqual(payload.get("side"), "sell")
+        self.assertEqual(payload.get("tradeSide"), "open")
+        self.assertAlmostEqual(float(payload.get("size", 0.0)), 10.0, places=8)
 
 
 if __name__ == "__main__":
