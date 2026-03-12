@@ -5,7 +5,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from quant_binance.env import resolve_strategy_profile, resolve_universe_symbols
+from quant_binance.env import (
+    resolve_bitget_us_stock_symbols,
+    resolve_strategy_profile,
+    resolve_universe_symbols,
+    resolve_universe_symbols_append,
+)
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -269,9 +274,21 @@ class Settings:
             raw = json.load(handle)
         profile = (strategy_profile or resolve_strategy_profile() or "conservative").strip().lower()
         raw = _deep_merge(raw, raw.get("strategy_profiles", {}).get(profile, {}))
+        base_universe = list(raw.get("universe", ()))
         override_symbols = resolve_universe_symbols()
         if override_symbols:
-            raw["universe"] = list(override_symbols)
+            base_universe = list(override_symbols)
+        append_symbols = resolve_universe_symbols_append()
+        us_stock_symbols = resolve_bitget_us_stock_symbols()
+        merged_universe: list[str] = []
+        seen_symbols: set[str] = set()
+        for symbol in (*base_universe, *append_symbols, *us_stock_symbols):
+            normalized = str(symbol).strip().upper()
+            if not normalized or normalized in seen_symbols:
+                continue
+            merged_universe.append(normalized)
+            seen_symbols.add(normalized)
+        raw["universe"] = merged_universe
         raw["strategy_profile"] = profile
         return cls.from_dict(raw)
 

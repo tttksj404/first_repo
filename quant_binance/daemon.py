@@ -81,6 +81,42 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _resolve_bitget_symbol_market_by_symbol(
+    *,
+    rest_client: Any,
+    symbols: tuple[str, ...],
+) -> dict[str, str]:
+    get_exchange_info = getattr(rest_client, "get_exchange_info", None)
+    if not callable(get_exchange_info):
+        return {symbol: "futures" for symbol in symbols}
+    try:
+        spot_info = get_exchange_info(market="spot")
+    except Exception:
+        spot_info = {}
+    try:
+        futures_info = get_exchange_info(market="futures")
+    except Exception:
+        futures_info = {}
+    spot_symbols = {
+        str(item.get("symbol", "")).upper()
+        for item in (spot_info.get("symbols", []) if isinstance(spot_info, dict) else [])
+        if isinstance(item, dict)
+    }
+    futures_symbols = {
+        str(item.get("symbol", "")).upper()
+        for item in (futures_info.get("symbols", []) if isinstance(futures_info, dict) else [])
+        if isinstance(item, dict)
+    }
+    resolved: dict[str, str] = {}
+    for symbol in symbols:
+        upper = symbol.upper()
+        if upper in futures_symbols:
+            resolved[symbol] = "futures"
+        elif upper in spot_symbols:
+            resolved[symbol] = "spot"
+    return resolved
+
+
 def _resolve_symbol_eligibility(
     *,
     settings: Settings,
@@ -193,6 +229,7 @@ def run_live_paper_daemon(
         symbols=settings.universe,
         intervals=("5m", "1h", "4h"),
     )
+    active_universe = tuple(symbol for symbol in settings.universe if store.get(symbol) is not None)
     learner = OnlineEdgeLearner(
         min_observations=max(20, settings.feature_thresholds.min_expected_edge_observations)
     )
@@ -355,6 +392,13 @@ def run_live_paper_daemon(
         futures_streams.extend(build_futures_streams(symbol, futures_intervals))
         futures_streams.append(f"{symbol.lower()}@openInterest")
     if exchange_id == "bitget":
+        bitget_symbol_market_by_symbol = _resolve_bitget_symbol_market_by_symbol(
+            rest_client=rest_client,
+            symbols=active_universe,
+        )
+        polling_symbols = tuple(
+            symbol for symbol in active_universe if symbol in bitget_symbol_market_by_symbol
+        )
         poll_interval_seconds = max(_env_float("BITGET_POLL_LOOP_INTERVAL_SECONDS", 2.0), 0.5)
         symbol_poll_interval_seconds = max(
             _env_float("BITGET_POLL_SYMBOL_INTERVAL_SECONDS", 20.0),
@@ -370,7 +414,8 @@ def run_live_paper_daemon(
         )
         ws_client_factory = lambda: BitgetPollingWebSocketClient(
             rest_client=rest_client,
-            symbols=paper_service.settings.universe,
+            symbols=polling_symbols,
+            symbol_market_by_symbol=bitget_symbol_market_by_symbol,
             decision_interval_minutes=runtime_decision_interval_minutes,
             poll_interval_seconds=poll_interval_seconds,
             symbol_poll_interval_seconds=symbol_poll_interval_seconds,
