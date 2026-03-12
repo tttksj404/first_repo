@@ -1,0 +1,36 @@
+[PROFILE_SWITCHER] enabled calm=profit_push fast=profit_push active=profit_push
+[DECISION] 2026-03-12T07:45:00+00:00 BTCUSDT mode=spot side=long score=48.88
+[DECISION] 2026-03-12T07:45:00+00:00 ETHUSDT mode=spot side=long score=50.19
+[DECISION] 2026-03-12T07:45:00+00:00 SOLUSDT mode=spot side=long score=50.79
+[DECISION] 2026-03-12T07:45:00+00:00 DOGEUSDT mode=spot side=long score=53.28
+[DECISION] 2026-03-12T07:45:00+00:00 ADAUSDT mode=cash side=flat score=44.21
+[DECISION] 2026-03-12T07:45:00+00:00 XRPUSDT mode=spot side=long score=48.01
+[DECISION] 2026-03-12T07:45:00+00:00 TRXUSDT mode=cash side=flat score=55.53
+[DECISION] 2026-03-12T07:45:00+00:00 LINKUSDT mode=spot side=long score=47.81
+[DECISION] 2026-03-12T07:45:00+00:00 WLDUSDT mode=futures side=short score=64.57
+[LIVE_ORDER] WLDUSDT market=futures side=sell qty=42.0 accepted=True
+[TEST_ORDER] WLDUSDT market=futures side=sell qty=143.87354308 accepted=True
+[CONNECT] websocket attempt=1
+[SYNC] 2026-03-12T07:45:01.690053+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T07:45:00+00:00 BTCUSDT mode=spot side=long score=56.38
+[DECISION] 2026-03-12T07:45:00+00:00 ETHUSDT mode=spot side=long score=55.52
+[DECISION] 2026-03-12T07:45:00+00:00 SOLUSDT mode=spot side=long score=56.16
+[DECISION] 2026-03-12T07:45:00+00:00 DOGEUSDT mode=spot side=long score=57.03
+[DECISION] 2026-03-12T07:45:00+00:00 ADAUSDT mode=cash side=flat score=49.86
+[DECISION] 2026-03-12T07:45:00+00:00 XRPUSDT mode=spot side=long score=53.08
+[DECISION] 2026-03-12T07:45:00+00:00 TRXUSDT mode=cash side=flat score=56.09
+[DECISION] 2026-03-12T07:45:00+00:00 LINKUSDT mode=spot side=long score=52.52
+[DECISION] 2026-03-12T07:45:00+00:00 WLDUSDT mode=futures side=short score=65.92
+[TEST_ORDER] WLDUSDT market=futures side=sell qty=1798.31114512 accepted=True
+[SYNC] 2026-03-12T07:50:15.747295+00:00 account/open-order snapshot refreshed
+[DECISION] 2026-03-12T07:50:00+00:00 BTCUSDT mode=spot side=long score=56.38
+[DECISION] 2026-03-12T07:50:00+00:00 ETHUSDT mode=spot side=long score=55.52
+[DECISION] 2026-03-12T07:50:00+00:00 SOLUSDT mode=spot side=long score=56.16
+[DECISION] 2026-03-12T07:50:00+00:00 DOGEUSDT mode=spot side=long score=55.98
+[DECISION] 2026-03-12T07:50:00+00:00 ADAUSDT mode=cash side=flat score=49.86
+[DECISION] 2026-03-12T07:50:00+00:00 XRPUSDT mode=spot side=long score=53.22
+[DECISION] 2026-03-12T07:50:00+00:00 TRXUSDT mode=cash side=flat score=55.76
+[DECISION] 2026-03-12T07:50:00+00:00 LINKUSDT mode=spot side=long score=49.82
+[DECISION] 2026-03-12T07:50:00+00:00 WLDUSDT mode=futures side=short score=67.32
+[LIVE_ORDER] WLDUSDT market=futures side=sell qty=21.0 accepted=True
+[TEST_ORDER] WLDUSDT market=futures side=sell qty=143.86489229 accepted=True

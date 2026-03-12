@@ -1,0 +1,125 @@
+{
+  "observation_count": 28,
+  "symbols": {
+    "BTCUSDT": [
+      {
+        "bucket": 4,
+        "median_bps": 20.397446,
+        "mode": "spot",
+        "observations": [
+          20.397446
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 5,
+        "median_bps": 27.023815,
+        "mode": "spot",
+        "observations": [
+          27.023815,
+          27.023815,
+          27.023815,
+          25.104879
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "DOGEUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 25.846474,
+        "mode": "spot",
+        "observations": [
+          21.463962,
+          25.846474,
+          26.055199,
+          26.42681,
+          23.224865
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "bucket": 6,
+        "median_bps": 21.810908,
+        "mode": "futures",
+        "observations": [
+          19.158134,
+          21.810908
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 7,
+        "median_bps": 24.988473,
+        "mode": "futures",
+        "observations": [
+          24.988473,
+          24.988473,
+          24.988473,
+          24.988473
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "LINKUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": 24.950778,
+        "mode": "spot",
+        "observations": [
+          24.950778,
+          24.950778
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "bucket": 4,
+        "median_bps": 18.07014,
+        "mode": "spot",
+        "observations": [
+          18.07014
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 5,
+        "median_bps": 23.925066,
+        "mode": "spot",
+        "observations": [
+          23.925066,
+          23.925066,
+          23.925066,
+          23.925066
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "XRPUSDT": [
+      {
+        "bucket": 4,
+        "median_bps": 26.201583,
+        "mode": "spot",
+        "observations": [
+          26.201583
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 5,
+        "median_bps": 30.043917,
+        "mode": "spot",
+        "observations": [
+          31.447929,
+          29.393454,
+          30.043917,
+          26.839212
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}
