@@ -355,10 +355,27 @@ def run_live_paper_daemon(
         futures_streams.extend(build_futures_streams(symbol, futures_intervals))
         futures_streams.append(f"{symbol.lower()}@openInterest")
     if exchange_id == "bitget":
+        poll_interval_seconds = max(_env_float("BITGET_POLL_LOOP_INTERVAL_SECONDS", 2.0), 0.5)
+        symbol_poll_interval_seconds = max(
+            _env_float("BITGET_POLL_SYMBOL_INTERVAL_SECONDS", 20.0),
+            poll_interval_seconds,
+        )
+        rate_limit_backoff_initial_seconds = max(
+            _env_float("BITGET_RATE_LIMIT_BACKOFF_INITIAL_SECONDS", 5.0),
+            1.0,
+        )
+        rate_limit_backoff_max_seconds = max(
+            _env_float("BITGET_RATE_LIMIT_BACKOFF_MAX_SECONDS", 60.0),
+            rate_limit_backoff_initial_seconds,
+        )
         ws_client_factory = lambda: BitgetPollingWebSocketClient(
             rest_client=rest_client,
             symbols=paper_service.settings.universe,
             decision_interval_minutes=runtime_decision_interval_minutes,
+            poll_interval_seconds=poll_interval_seconds,
+            symbol_poll_interval_seconds=symbol_poll_interval_seconds,
+            rate_limit_backoff_initial_seconds=rate_limit_backoff_initial_seconds,
+            rate_limit_backoff_max_seconds=rate_limit_backoff_max_seconds,
         )
     else:
         ws_client_factory = lambda: CombinedWebSocketClient(
