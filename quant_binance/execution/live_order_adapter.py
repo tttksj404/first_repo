@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -73,24 +74,57 @@ class DecisionLiveOrderAdapter:
             raise
 
     def _is_bitget_unilateral_error(self, message: str) -> bool:
+        code = self._bitget_error_code(message)
         normalized = message.lower()
-        return (
-            "40774" in message
-            or "40762" in message
-            or "unilateral position type" in normalized
+        has_unilateral_marker = (
+            "unilateral position type" in normalized
             or "one-way position" in normalized
             or "one way position" in normalized
         )
+        return code == "40774" or has_unilateral_marker
 
-    def _bitget_alternate_futures_params(self, order_params: dict[str, Any]) -> dict[str, Any]:
-        alternate = dict(order_params)
-        if "tradeSide" in alternate:
-            alternate.pop("tradeSide", None)
-            alternate["reduceOnly"] = "NO"
-        else:
-            alternate.pop("reduceOnly", None)
-            alternate["tradeSide"] = "open"
-        return alternate
+    def _bitget_error_code(self, message: str) -> str:
+        match = re.search(r'"code":"?([0-9A-Za-z_-]+)"?', message)
+        if match is None:
+            return ""
+        return match.group(1)
+
+    def _bitget_reduce_only_value(self, order_params: dict[str, Any]) -> str:
+        existing = str(order_params.get("reduceOnly", "")).strip().upper()
+        if existing in {"YES", "NO"}:
+            return existing
+        trade_side = str(order_params.get("tradeSide", "")).strip().lower()
+        return "YES" if trade_side == "close" else "NO"
+
+    def _bitget_alternate_futures_params(self, order_params: dict[str, Any]) -> tuple[dict[str, Any], ...]:
+        reduce_only_value = self._bitget_reduce_only_value(order_params)
+        trade_side = str(order_params.get("tradeSide", "")).strip().lower() or "open"
+        alternates: list[dict[str, Any]] = []
+
+        def add(candidate: dict[str, Any]) -> None:
+            if candidate == order_params:
+                return
+            if candidate in alternates:
+                return
+            alternates.append(candidate)
+
+        without_trade_side = dict(order_params)
+        without_trade_side.pop("tradeSide", None)
+        add(without_trade_side)
+
+        with_reduce_only = dict(without_trade_side)
+        with_reduce_only["reduceOnly"] = reduce_only_value
+        add(with_reduce_only)
+
+        without_reduce_only = dict(order_params)
+        without_reduce_only.pop("reduceOnly", None)
+        add(without_reduce_only)
+
+        with_trade_side = dict(without_reduce_only)
+        with_trade_side["tradeSide"] = trade_side
+        add(with_trade_side)
+
+        return tuple(alternates)
 
     def _format_price(self, value: float) -> str:
         return f"{max(value, 0.0):.8f}"
@@ -263,11 +297,21 @@ class DecisionLiveOrderAdapter:
         try:
             response = self.client.place_order(market=market, order_params=order_params)
         except Exception as exc:
-            if self._exchange_id() == "bitget" and market == "futures" and self._is_bitget_unilateral_error(str(exc)):
-                order_params = self._bitget_alternate_futures_params(order_params)
-                response = self.client.place_order(market=market, order_params=order_params)
-            else:
+            if self._exchange_id() != "bitget" or market != "futures" or not self._is_bitget_unilateral_error(str(exc)):
                 raise
+            retry_error = exc
+            for alternate_params in self._bitget_alternate_futures_params(order_params):
+                try:
+                    response = self.client.place_order(market=market, order_params=alternate_params)
+                except Exception as retry_exc:
+                    retry_error = retry_exc
+                    if not self._is_bitget_unilateral_error(str(retry_exc)):
+                        raise
+                    continue
+                order_params = alternate_params
+                break
+            else:
+                raise retry_error
         quantity = float(order_params.get("quantity", order_params.get("size", 0.0)))
         accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
         protection_orders = ()
