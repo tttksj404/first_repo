@@ -113,6 +113,7 @@ def build_runtime_summary(
     closed_trades: list[dict[str, object]] | tuple[dict[str, object], ...] | None = None,
     telegram_alerts: list[dict[str, object]] | tuple[dict[str, object], ...] | None = None,
     live_positions: list[dict[str, object]] | tuple[dict[str, object], ...] | None = None,
+    self_healing: dict[str, object] | None = None,
 ) -> dict[str, object]:
     derived_observe_only = {
         decision.symbol
@@ -174,6 +175,7 @@ def build_runtime_summary(
         "open_orders_snapshot": open_orders_snapshot or {},
         "capital_report": capital_report or {},
         "kill_switch": kill_switch_status or {"armed": False, "reasons": []},
+        "self_healing": self_healing or {},
     }
 
 

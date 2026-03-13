@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import suppress
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
@@ -18,6 +19,7 @@ from quant_binance.observability.report import build_runtime_summary, write_runt
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
+from quant_binance.self_healing import RuntimeSelfHealing, parse_error_code
 from quant_binance.telegram_notify import send_telegram_message
 
 
@@ -146,6 +148,7 @@ class LivePaperSession:
     futures_missing_in_paper_counts: dict[str, int] = field(default_factory=dict)
     futures_missing_on_exchange_counts: dict[str, int] = field(default_factory=dict)
     futures_reallocation_cooldown_until: datetime | None = None
+    self_healing: RuntimeSelfHealing = field(default_factory=RuntimeSelfHealing)
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
@@ -160,6 +163,7 @@ class LivePaperSession:
         timestamp = now or datetime.now(tz=timezone.utc)
         self.heartbeat_count += 1
         self.last_event_timestamp = timestamp
+        self.self_healing.note_progress(timestamp=timestamp, heartbeat_count=self.heartbeat_count)
         if self._should_sync(timestamp):
             self.sync_account()
             self._last_sync_at = timestamp
@@ -250,6 +254,14 @@ class LivePaperSession:
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
         open_spot_positions = self._open_positions_for_market("spot")
         open_futures_positions = self._open_positions_for_market("futures")
+        mismatch_active, mismatch_details = self._self_healing_mismatch_snapshot()
+        self_healing_status = self.self_healing.snapshot(
+            now=datetime.now(tz=timezone.utc),
+            order_error_cooldowns=self.order_error_cooldowns,
+            manual_symbol_cooldowns=self.manual_symbol_cooldowns,
+            mismatch_active=mismatch_active,
+            mismatch_details=mismatch_details,
+        )
         summary = build_runtime_summary(
             decisions=self.decisions,
             tested_orders=self.tested_orders,
@@ -264,6 +276,7 @@ class LivePaperSession:
             closed_trades=self.closed_trades,
             telegram_alerts=self.telegram_alerts,
             live_positions=self.live_positions_snapshot,
+            self_healing=self_healing_status,
         )
         write_runtime_summary(summary_path, summary)
         write_runtime_state(
@@ -285,6 +298,7 @@ class LivePaperSession:
                 "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
                 "futures_position_mismatch": summary["futures_position_mismatch"],
                 "futures_position_mismatch_details": summary["futures_position_mismatch_details"],
+                "self_healing": self_healing_status,
                 "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
             },
@@ -292,6 +306,23 @@ class LivePaperSession:
         if self.learner is not None and self.learner_output_path is not None:
             self.learner.export(self.learner_output_path)
         return summary
+
+    def _self_healing_mismatch_snapshot(self) -> tuple[bool, dict[str, list[str]]]:
+        if self.rest_client is None and not self.live_positions_snapshot:
+            return False, {"missing_in_paper": [], "missing_on_exchange": []}
+        details = {
+            "missing_in_paper": sorted(
+                symbol
+                for symbol, count in self.futures_missing_in_paper_counts.items()
+                if count >= self._missing_in_paper_threshold()
+            ),
+            "missing_on_exchange": sorted(
+                symbol
+                for symbol, count in self.futures_missing_on_exchange_counts.items()
+                if count >= self._missing_on_exchange_threshold()
+            ),
+        }
+        return bool(details["missing_in_paper"] or details["missing_on_exchange"]), details
 
     def maybe_flush(
         self,
@@ -585,10 +616,7 @@ class LivePaperSession:
         )
 
     def _parse_order_error_code(self, error_message: str) -> str:
-        match = re.search(r'"code":"?([0-9A-Za-z_-]+)"?', error_message)
-        if match:
-            return match.group(1)
-        return ""
+        return parse_error_code(error_message)
 
     def _cooldown_seconds_for_error_code(self, code: str) -> int:
         if code == "429":
@@ -597,13 +625,28 @@ class LivePaperSession:
             return 900
         return 120
 
-    def _apply_order_error_cooldown(self, *, symbol: str, error_message: str, timestamp: datetime) -> None:
+    def _apply_order_error_cooldown(
+        self,
+        *,
+        symbol: str,
+        error_message: str,
+        timestamp: datetime,
+        stage: str = "live_order",
+        exchange_id: str | None = None,
+    ) -> None:
         code = self._parse_order_error_code(error_message)
         cooldown_seconds = self._cooldown_seconds_for_error_code(code)
         until = timestamp + timedelta(seconds=cooldown_seconds)
         current = self.order_error_cooldowns.get(symbol)
         if current is None or until > current:
             self.order_error_cooldowns[symbol] = until
+        self.self_healing.record_runtime_error(
+            now=timestamp,
+            symbol=symbol,
+            error_message=error_message,
+            exchange_id=exchange_id or (getattr(self.live_order_executor, "_exchange_id", lambda: "binance")() if self.live_order_executor is not None else "binance"),
+            stage=stage,
+        )
         self._send_telegram_alert(
             key=f"order-cooldown:{symbol}:{code}:{timestamp.isoformat()}",
             text=f"[ORDER_COOLDOWN] {symbol}\ncode={code or 'unknown'}\nuntil={until.isoformat()}",
@@ -794,6 +837,12 @@ class LivePaperSession:
             return
         self.paper_positions[paper_position.symbol] = paper_position
         self._reserve_capacity_for_reconciled_position(paper_position)
+        self.self_healing.record_mismatch_recovery(
+            now=datetime.now(tz=timezone.utc),
+            symbol=paper_position.symbol,
+            action="reconcile_missing_in_paper",
+            persisted_cycles=persisted_cycles,
+        )
         if self.log_store is not None:
             self.log_store.append(
                 "futures_position_reconciliation",
@@ -825,6 +874,12 @@ class LivePaperSession:
         current = self.manual_symbol_cooldowns.get(symbol)
         if current is None or cooldown_until > current:
             self.manual_symbol_cooldowns[symbol] = cooldown_until
+        self.self_healing.record_mismatch_recovery(
+            now=now,
+            symbol=symbol,
+            action="cleanup_missing_on_exchange",
+            persisted_cycles=self._missing_on_exchange_threshold(),
+        )
         self._send_telegram_alert(
             key=f"manual-close:{symbol}:{now.isoformat()}",
             text=(
@@ -1593,7 +1648,14 @@ class LivePaperSession:
             allow_new_submission = False
         if self._is_manual_symbol_cooldown_active(managed_decision.symbol, timestamp):
             allow_new_submission = False
-        if self.live_order_executor is not None and state is not None and allow_new_submission and self._market_capital_allowed(managed_decision):
+        live_orders_allowed = not self.self_healing.is_live_order_cooldown_active(now=timestamp)
+        if (
+            self.live_order_executor is not None
+            and state is not None
+            and allow_new_submission
+            and live_orders_allowed
+            and self._market_capital_allowed(managed_decision)
+        ):
             executable_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
@@ -1613,7 +1675,13 @@ class LivePaperSession:
                     }
                     if self.verbose:
                         print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
-                    self._apply_order_error_cooldown(symbol=executable_decision.symbol, error_message=repr(exc), timestamp=timestamp)
+                    self._apply_order_error_cooldown(
+                        symbol=executable_decision.symbol,
+                        error_message=repr(exc),
+                        timestamp=timestamp,
+                        stage="live_order",
+                        exchange_id=self.live_order_executor._exchange_id(),
+                    )
                     if self.log_store is not None:
                         self.log_store.append("order_errors", payload)
                 else:
@@ -1652,6 +1720,8 @@ class LivePaperSession:
                                 symbol=live_result.symbol,
                                 error_message=live_result.protection_error,
                                 timestamp=timestamp,
+                                stage="protection_order",
+                                exchange_id=self.live_order_executor._exchange_id(),
                             )
         if self.order_tester is not None and state is not None and allow_new_submission and self._market_capital_allowed(managed_decision):
             test_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
@@ -1671,7 +1741,13 @@ class LivePaperSession:
                     }
                     if self.verbose:
                         print(f"[TEST_ORDER_ERROR] {test_decision.symbol} {exc}", flush=True)
-                    self._apply_order_error_cooldown(symbol=test_decision.symbol, error_message=repr(exc), timestamp=timestamp)
+                    self._apply_order_error_cooldown(
+                        symbol=test_decision.symbol,
+                        error_message=repr(exc),
+                        timestamp=timestamp,
+                        stage="test_order",
+                        exchange_id=getattr(self.order_tester.client, "exchange_id", "binance"),
+                    )
                     if self.log_store is not None:
                         self.log_store.append("order_errors", payload)
                 else:
@@ -1756,6 +1832,43 @@ class LivePaperShell:
         self.summary_path = summary_path
         self.state_path = state_path
 
+    async def _run_with_monitor(self, runner: AsyncLivePaperRunner) -> None:
+        task = asyncio.create_task(
+            runner.run(
+                summary_path=self.summary_path,
+                state_path=self.state_path,
+            )
+        )
+        self.session.self_healing.begin_monitoring(
+            timestamp=datetime.now(tz=timezone.utc),
+            heartbeat_count=self.session.heartbeat_count,
+        )
+        poll_seconds = max(1.0, min(5.0, self.session.self_healing.stall_timeout_seconds / 6.0))
+        try:
+            while not task.done():
+                await asyncio.sleep(poll_seconds)
+                if task.done():
+                    break
+                now = datetime.now(tz=timezone.utc)
+                if not self.session.self_healing.detect_stall(now=now):
+                    continue
+                allowed = self.session.self_healing.register_stall_recovery(
+                    now=now,
+                    heartbeat_count=self.session.heartbeat_count,
+                )
+                task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await task
+                if not allowed:
+                    raise RuntimeError("STALL_RECOVERY_LIMIT_EXCEEDED")
+                raise RuntimeError("SELF_HEAL_STALL_RESTART")
+            await task
+        finally:
+            if not task.done():
+                task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await task
+
     async def run(self) -> dict[str, object] | None:
         last_error: Exception | None = None
         for attempt in range(1, self.backoff_policy.max_attempts + 1):
@@ -1766,14 +1879,18 @@ class LivePaperShell:
             try:
                 print(f"[CONNECT] websocket attempt={attempt}", flush=True)
                 runner = AsyncLivePaperRunner(self.ws_client_factory(), self.session)
-                await runner.run(
-                    summary_path=self.summary_path,
-                    state_path=self.state_path,
-                )
+                await self._run_with_monitor(runner)
                 break
             except Exception as exc:  # pragma: no cover - exercised in tests
                 last_error = exc
+                if self.summary_path is not None and self.state_path is not None:
+                    self.session.flush(
+                        summary_path=self.summary_path,
+                        state_path=self.state_path,
+                    )
                 print(f"[ERROR] websocket attempt={attempt} error={exc}", flush=True)
+                if str(exc) == "STALL_RECOVERY_LIMIT_EXCEEDED":
+                    raise
                 if attempt >= self.backoff_policy.max_attempts:
                     raise
         if self.summary_path is not None and self.state_path is not None:
