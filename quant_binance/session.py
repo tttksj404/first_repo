@@ -65,6 +65,7 @@ class PaperPosition:
     partial_take_profit_taken: bool = False
     exit_confirmation_count: int = 0
     last_exit_signal_reason: str = ""
+    peak_roe_percent: float = 0.0
 
     def unrealized_pnl_usd_estimate(self) -> float:
         if self.side == "short":
@@ -106,6 +107,7 @@ class PaperPosition:
             "latest_decision_time": self.latest_decision_time,
             "exit_confirmation_count": self.exit_confirmation_count,
             "last_exit_signal_reason": self.last_exit_signal_reason,
+            "peak_roe_percent": round(self.peak_roe_percent, 6),
         }
 
 
@@ -456,6 +458,27 @@ class LivePaperSession:
             return (position.entry_price - price) / position.entry_price * 10000.0
         return (price - position.entry_price) / position.entry_price * 10000.0
 
+    def _paper_position_roe_percent(self, *, position: PaperPosition, reward_bps: float) -> float:
+        if position.market != "futures":
+            return 0.0
+        leverage = max(int(position.entry_planned_leverage), 1)
+        return (reward_bps / 100.0) * leverage
+
+    def _profit_protection_partial_triggered(
+        self,
+        *,
+        peak_roe_percent: float,
+        current_roe_percent: float,
+        partial_taken: bool,
+    ) -> bool:
+        exit_rules = self.runtime.paper_service.settings.exit_rules
+        if partial_taken or current_roe_percent <= 0.0:
+            return False
+        if peak_roe_percent < exit_rules.futures_profit_protection_arm_roe_percent:
+            return False
+        drawdown = peak_roe_percent - current_roe_percent
+        return drawdown >= exit_rules.futures_profit_protection_retrace_roe_percent
+
     def _position_stop_hit(self, *, position: PaperPosition, price: float) -> bool:
         if position.side == "short":
             return price >= position.active_stop_price
@@ -514,7 +537,7 @@ class LivePaperSession:
 
     def _send_trade_alert(self, trade: dict[str, object]) -> None:
         reason = str(trade.get("exit_reason", ""))
-        if reason not in {"PARTIAL_TAKE_PROFIT", "BREAKEVEN_STOP", "STOP_LOSS"}:
+        if reason not in {"PARTIAL_TAKE_PROFIT", "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT", "BREAKEVEN_STOP", "STOP_LOSS"}:
             return
         symbol = str(trade.get("symbol", ""))
         pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
@@ -802,6 +825,24 @@ class LivePaperSession:
             peak_roe = self.live_peak_roe_by_identity.get(identity, roe)
             peak_roe = max(peak_roe, roe)
             self.live_peak_roe_by_identity[identity] = peak_roe
+            if roe <= cfg.stop_loss_roe_percent:
+                self._close_live_position(position=position, reason="LIVE_POSITION_STOP_LOSS")
+                continue
+            if margin_ratio >= cfg.margin_ratio_emergency:
+                self._close_live_position(position=position, reason="LIVE_POSITION_MARGIN_RISK")
+                continue
+            if self._profit_protection_partial_triggered(
+                peak_roe_percent=peak_roe,
+                current_roe_percent=roe,
+                partial_taken=identity in self.live_partial_take_profit_keys,
+            ):
+                self.live_partial_take_profit_keys.add(identity)
+                self._close_live_position(
+                    position=position,
+                    reason="LIVE_POSITION_PROFIT_PROTECTION",
+                    fraction=0.5,
+                )
+                continue
             if peak_roe >= cfg.take_profit_roe_percent:
                 if identity not in self.live_partial_take_profit_keys:
                     drawdown = peak_roe - roe
@@ -812,10 +853,6 @@ class LivePaperSession:
                             reason="LIVE_POSITION_PARTIAL_TAKE_PROFIT",
                             fraction=0.5,
                         )
-            elif roe <= cfg.stop_loss_roe_percent:
-                self._close_live_position(position=position, reason="LIVE_POSITION_STOP_LOSS")
-            elif margin_ratio >= cfg.margin_ratio_emergency:
-                self._close_live_position(position=position, reason="LIVE_POSITION_MARGIN_RISK")
 
     def _current_unrealized_total(self) -> float:
         return round(sum(position.unrealized_pnl_usd_estimate() for position in self.paper_positions.values()), 6)
@@ -970,6 +1007,8 @@ class LivePaperSession:
         position.latest_estimated_round_trip_cost_bps = decision.estimated_round_trip_cost_bps
         position.latest_decision_time = timestamp
         reward_bps = self._reward_bps(position=position, price=price)
+        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
+        position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
         exit_rules = self.runtime.paper_service.settings.exit_rules
 
         if (
@@ -984,6 +1023,31 @@ class LivePaperSession:
                 quantity_closed=quantity_to_close,
                 exit_time=timestamp,
                 exit_reason="PARTIAL_TAKE_PROFIT",
+            )
+            position.quantity_remaining -= quantity_to_close
+            position.partial_take_profit_taken = True
+            position.exit_confirmation_count = 0
+            position.last_exit_signal_reason = ""
+            self._apply_post_take_profit_stop(position=position, current_price=price)
+            if position.quantity_remaining <= 0:
+                self.paper_positions.pop(position.symbol, None)
+                return
+
+        if (
+            position.market == "futures"
+            and self._profit_protection_partial_triggered(
+                peak_roe_percent=position.peak_roe_percent,
+                current_roe_percent=current_roe_percent,
+                partial_taken=position.partial_take_profit_taken,
+            )
+        ):
+            quantity_to_close = position.quantity_remaining * 0.5
+            self._record_closed_trade(
+                position=position,
+                exit_price=price,
+                quantity_closed=quantity_to_close,
+                exit_time=timestamp,
+                exit_reason="PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT",
             )
             position.quantity_remaining -= quantity_to_close
             position.partial_take_profit_taken = True

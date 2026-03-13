@@ -116,6 +116,8 @@ class ExitRuleConfig:
     score_drop_exit_buffer: float
     liquidity_drop_exit_buffer: float
     confirmation_cycles_for_exit: int
+    futures_profit_protection_arm_roe_percent: float = 8.0
+    futures_profit_protection_retrace_roe_percent: float = 3.0
 
 
 @dataclass(frozen=True)
@@ -219,6 +221,14 @@ class SymbolEligibilityConfig:
 
 
 @dataclass(frozen=True)
+class LivePositionRiskConfig:
+    enabled: bool
+    take_profit_roe_percent: float
+    stop_loss_roe_percent: float
+    margin_ratio_emergency: float
+
+
+@dataclass(frozen=True)
 class PortfolioFocusConfig:
     enabled: bool
     spot_top_n: int
@@ -261,6 +271,7 @@ class Settings:
     cash_reserve: CashReserveConfig
     altcoin_overlays: AltcoinOverlayConfig
     symbol_eligibility: SymbolEligibilityConfig
+    live_position_risk: LivePositionRiskConfig
     portfolio_focus: PortfolioFocusConfig
     housekeeping: HousekeepingConfig
     strategy_profile: str
@@ -313,6 +324,7 @@ class Settings:
             cash_reserve=CashReserveConfig(**raw["cash_reserve"]),
             altcoin_overlays=AltcoinOverlayConfig(**raw["altcoin_overlays"]),
             symbol_eligibility=SymbolEligibilityConfig(**raw["symbol_eligibility"]),
+            live_position_risk=LivePositionRiskConfig(**raw["live_position_risk"]),
             portfolio_focus=PortfolioFocusConfig(**raw["portfolio_focus"]),
             housekeeping=HousekeepingConfig(**raw["housekeeping"]),
             strategy_profile=raw["strategy_profile"],
