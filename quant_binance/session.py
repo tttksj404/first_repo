@@ -298,6 +298,8 @@ class LivePaperSession:
                 "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
                 "futures_position_mismatch": summary["futures_position_mismatch"],
                 "futures_position_mismatch_details": summary["futures_position_mismatch_details"],
+                "futures_missing_in_paper_counts": dict(sorted(self.futures_missing_in_paper_counts.items())),
+                "futures_missing_on_exchange_counts": dict(sorted(self.futures_missing_on_exchange_counts.items())),
                 "self_healing": self_healing_status,
                 "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
@@ -769,6 +771,17 @@ class LivePaperSession:
                 continue
         return None
 
+    def _parse_runtime_datetime(self, raw_value: Any) -> datetime | None:
+        if isinstance(raw_value, datetime):
+            return raw_value if raw_value.tzinfo is not None else raw_value.replace(tzinfo=timezone.utc)
+        if raw_value in (None, "") or not isinstance(raw_value, str):
+            return None
+        try:
+            parsed = datetime.fromisoformat(raw_value)
+        except ValueError:
+            return None
+        return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
+
     def _live_position_reference_price(self, *, symbol: str, position: dict[str, Any]) -> float:
         state = self.runtime.dispatcher.store.get(symbol)
         market_price = self._market_price(state=state, fallback=0.0)
@@ -827,6 +840,104 @@ class LivePaperSession:
             0.0,
             self.remaining_portfolio_capacity_usd - position.current_notional_usd_estimate(),
         )
+
+    def _paper_position_from_runtime_payload(self, payload: dict[str, Any]) -> PaperPosition | None:
+        symbol = str(payload.get("symbol", ""))
+        market = str(payload.get("market", ""))
+        side = str(payload.get("side", ""))
+        quantity_remaining = float(payload.get("quantity_remaining") or 0.0)
+        if not symbol or market != "futures" or side not in {"long", "short"} or quantity_remaining <= 0.0:
+            return None
+        current_price = float(payload.get("current_price") or payload.get("entry_price") or 0.0)
+        entry_price = float(payload.get("entry_price") or current_price or 0.0)
+        if current_price <= 0.0 or entry_price <= 0.0:
+            return None
+        quantity_opened = max(float(payload.get("quantity_opened") or quantity_remaining), quantity_remaining)
+        return PaperPosition(
+            symbol=symbol,
+            market=market,
+            side=side,
+            entry_time=self._parse_runtime_datetime(payload.get("entry_time")) or datetime.now(tz=timezone.utc),
+            entry_price=entry_price,
+            current_price=current_price,
+            quantity_opened=quantity_opened,
+            quantity_remaining=quantity_remaining,
+            stop_distance_bps=float(payload.get("stop_distance_bps") or 0.0),
+            active_stop_price=float(payload.get("active_stop_price") or entry_price),
+            best_price=float(payload.get("best_price") or max(entry_price, current_price)),
+            worst_price=float(payload.get("worst_price") or min(entry_price, current_price)),
+            entry_predictability_score=float(payload.get("entry_predictability_score") or 0.0),
+            entry_liquidity_score=float(payload.get("entry_liquidity_score") or 0.0),
+            entry_net_expected_edge_bps=float(payload.get("entry_net_expected_edge_bps") or 0.0),
+            entry_estimated_round_trip_cost_bps=float(payload.get("entry_estimated_round_trip_cost_bps") or 0.0),
+            entry_planned_leverage=max(int(float(payload.get("entry_planned_leverage") or 1.0)), 1),
+            latest_predictability_score=float(
+                payload.get("latest_predictability_score")
+                if payload.get("latest_predictability_score") is not None
+                else payload.get("entry_predictability_score") or 0.0
+            ),
+            latest_liquidity_score=float(
+                payload.get("latest_liquidity_score")
+                if payload.get("latest_liquidity_score") is not None
+                else payload.get("entry_liquidity_score") or 0.0
+            ),
+            latest_net_expected_edge_bps=float(
+                payload.get("latest_net_expected_edge_bps")
+                if payload.get("latest_net_expected_edge_bps") is not None
+                else payload.get("entry_net_expected_edge_bps") or 0.0
+            ),
+            latest_estimated_round_trip_cost_bps=float(
+                payload.get("latest_estimated_round_trip_cost_bps")
+                if payload.get("latest_estimated_round_trip_cost_bps") is not None
+                else payload.get("entry_estimated_round_trip_cost_bps") or 0.0
+            ),
+            latest_decision_time=self._parse_runtime_datetime(payload.get("latest_decision_time")),
+            partial_take_profit_taken=bool(payload.get("partial_take_profit_taken", False)),
+            exit_confirmation_count=int(payload.get("exit_confirmation_count") or 0),
+            last_exit_signal_reason=str(payload.get("last_exit_signal_reason") or ""),
+            peak_roe_percent=float(payload.get("peak_roe_percent") or 0.0),
+        )
+
+    def restore_futures_state_from_runtime(
+        self,
+        *,
+        state_payload: dict[str, Any],
+        summary_payload: dict[str, Any] | None = None,
+    ) -> int:
+        live_symbols = set(self._active_live_futures_positions_by_symbol())
+        if not live_symbols:
+            self.futures_missing_in_paper_counts = {}
+            self.futures_missing_on_exchange_counts = {}
+            return 0
+        summary = summary_payload or {}
+        candidate_positions = (
+            state_payload.get("paper_open_futures_positions")
+            or summary.get("paper_open_futures_positions")
+            or summary.get("open_futures_positions")
+            or []
+        )
+        restored = 0
+        for item in candidate_positions:
+            if not isinstance(item, dict):
+                continue
+            position = self._paper_position_from_runtime_payload(item)
+            if position is None or position.symbol not in live_symbols or position.symbol in self.paper_positions:
+                continue
+            self.paper_positions[position.symbol] = position
+            self._reserve_capacity_for_reconciled_position(position)
+            restored += 1
+        active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
+        self.futures_missing_in_paper_counts = {
+            str(symbol): int(count)
+            for symbol, count in (state_payload.get("futures_missing_in_paper_counts") or {}).items()
+            if symbol in (live_symbols - active_paper_symbols)
+        }
+        self.futures_missing_on_exchange_counts = {
+            str(symbol): int(count)
+            for symbol, count in (state_payload.get("futures_missing_on_exchange_counts") or {}).items()
+            if symbol in (active_paper_symbols - live_symbols)
+        }
+        return restored
 
     def _reconcile_missing_in_paper_position(self, *, position: dict[str, Any], persisted_cycles: int) -> None:
         paper_position = self._build_reconciled_paper_position(position=position)
