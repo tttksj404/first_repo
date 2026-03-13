@@ -238,13 +238,17 @@ class LivePaperSession:
     def sync_account(self) -> None:
         if self.rest_client is None:
             return
+        previous_account_snapshot = dict(self.account_snapshot)
         previous_live_positions = list(self.live_positions_snapshot)
         self.account_snapshot = self.rest_client.get_account(market="futures")
         self.open_orders_snapshot = self.rest_client.get_open_orders(market="futures")
         if hasattr(self.rest_client, "get_positions"):
             positions_payload = self.rest_client.get_positions()
             self.live_positions_snapshot = positions_payload.get("positions", [])
-        self._reconcile_manual_live_closes(previous_live_positions=previous_live_positions)
+        self._reconcile_manual_live_closes(
+            previous_live_positions=previous_live_positions,
+            previous_account_snapshot=previous_account_snapshot,
+        )
         self._reconcile_persistent_futures_position_mismatch()
         if hasattr(self.rest_client, "build_capital_report"):
             report = self.rest_client.build_capital_report()
@@ -750,11 +754,99 @@ class LivePaperSession:
                     },
                 )
 
-    def _reconcile_manual_live_closes(self, *, previous_live_positions: list[dict[str, Any]]) -> None:
-        # Exchange position snapshots can briefly omit active futures positions.
-        # Cleanup is handled by persistent mismatch reconciliation so a single
-        # disappearance here does not immediately close the paper position.
-        return
+    def _account_execution_balance_usd(self, snapshot: dict[str, Any]) -> float | None:
+        raw_value = snapshot.get("executionAvailableBalance", snapshot.get("availableBalance"))
+        try:
+            return float(raw_value)
+        except (TypeError, ValueError):
+            return None
+
+    def _estimated_position_margin_release_usd(
+        self,
+        *,
+        previous_live_position: dict[str, Any],
+        paper_position: PaperPosition,
+    ) -> float:
+        margin_size = float(previous_live_position.get("marginSize") or 0.0)
+        if margin_size > 0.0:
+            return margin_size
+        quantity = self._live_position_quantity(previous_live_position)
+        if quantity <= 0.0:
+            quantity = paper_position.quantity_remaining
+        price = 0.0
+        for key in ("markPrice", "breakEvenPrice", "openPriceAvg"):
+            try:
+                price = float(previous_live_position.get(key) or 0.0)
+            except (TypeError, ValueError):
+                price = 0.0
+            if price > 0.0:
+                break
+        if price <= 0.0:
+            price = paper_position.current_price if paper_position.current_price > 0.0 else paper_position.entry_price
+        leverage = max(
+            int(
+                float(
+                    previous_live_position.get("leverage")
+                    or previous_live_position.get("marginLeverage")
+                    or paper_position.entry_planned_leverage
+                    or 1.0
+                )
+            ),
+            1,
+        )
+        return max((price * quantity) / leverage, 0.0)
+
+    def _manual_close_is_confirmed(
+        self,
+        *,
+        symbol: str,
+        previous_live_position: dict[str, Any],
+        previous_account_snapshot: dict[str, Any],
+    ) -> bool:
+        paper_position = self.paper_positions.get(symbol)
+        if paper_position is None or paper_position.market != "futures" or paper_position.quantity_remaining <= 0.0:
+            return False
+        previous_balance = self._account_execution_balance_usd(previous_account_snapshot)
+        current_balance = self._account_execution_balance_usd(self.account_snapshot)
+        if previous_balance is None or current_balance is None or current_balance <= previous_balance:
+            return False
+        estimated_margin_release = self._estimated_position_margin_release_usd(
+            previous_live_position=previous_live_position,
+            paper_position=paper_position,
+        )
+        if estimated_margin_release <= 0.0:
+            return False
+        balance_released = current_balance - previous_balance
+        required_release = max(estimated_margin_release * 0.5, 1.0)
+        return balance_released >= required_release
+
+    def _reconcile_manual_live_closes(
+        self,
+        *,
+        previous_live_positions: list[dict[str, Any]],
+        previous_account_snapshot: dict[str, Any],
+    ) -> None:
+        previous_positions_by_symbol: dict[str, dict[str, Any]] = {}
+        for position in previous_live_positions:
+            symbol = str(position.get("symbol", ""))
+            if not symbol or self._live_position_quantity(position) <= 0.0:
+                continue
+            previous_positions_by_symbol[symbol] = position
+        if not previous_positions_by_symbol:
+            return
+        active_symbols = set(self._active_live_futures_positions_by_symbol())
+        now = datetime.now(tz=timezone.utc)
+        for symbol, previous_live_position in previous_positions_by_symbol.items():
+            if symbol in active_symbols:
+                continue
+            if not self._manual_close_is_confirmed(
+                symbol=symbol,
+                previous_live_position=previous_live_position,
+                previous_account_snapshot=previous_account_snapshot,
+            ):
+                continue
+            self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
+            self.futures_missing_on_exchange_counts.pop(symbol, None)
 
     def _consecutive_mismatch_threshold(self) -> int:
         return 2
