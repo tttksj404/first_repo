@@ -136,3 +136,9 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Verified live API behavior for hedge-mode close semantics, corrected close-side mapping in Bitget order normalization and session margin-release flow (`long -> buy/close`, `short -> sell/close`), updated regression tests, and confirmed a real Bitget close-path order now succeeds on the prior failing ETHUSDT route.
 - Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
 - Skill sharpened next: Add explicit position-state tagging in decision routing so open/close intent can be selected without relying on exchange-side normalization fallbacks.
+
+### 2026-03-13 - SSAFY AI 실습 환경(WSL2 + Docker + Jupyter + GPU) 자동 구축
+- Summary: PDF 가이드 기준으로 Windows/WSL2/Docker 기반 AI 실습 환경을 end-to-end로 맞추고 실행 검증까지 완료.
+- What was done: Python 3.12 및 Jupyter 계열 설치 확인, WSL2 Ubuntu-24.04 설치/동작 검증, Ubuntu 기본 계정(`ssafy06`/`1234`) 및 기본 사용자 설정, `ssafy_ai_2` 압축 해제/필수 파일 검증, Docker 이미지 빌드 및 컨테이너 기동, JupyterLab(8888) 접속 확인, 컨테이너 내부 `nvidia-smi`와 PyTorch CUDA 사용 가능 상태 검증.
+- Competency mapping: Data pipeline/system integration development, generative AI architecture understanding, technical communication
+- Skill sharpened next: 컨테이너 의존성 충돌(예: tokenizers/langchain-upstage) 탐지 자동화와 버전 고정 전략 수립.
