@@ -1167,6 +1167,63 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(len(session.live_orders), 1)
 
     @patch("quant_binance.session.send_telegram_message")
+    def test_session_uses_reduce_only_payload_for_bitget_one_way_proactive_partial_close(self, mock_send) -> None:
+        class PositionRestClient(BitgetRestClient):
+            def __init__(self) -> None:
+                super().__init__(credentials=None)
+                self.placed_orders = []
+                self.tpsl_orders = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                return {"market": market, "balance": 1000}
+
+            def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, object]:
+                return {"market": market, "orders": []}
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "posMode": "one_way_mode",
+                            "total": "0.0016",
+                            "available": "0.0016",
+                            "marginSize": "14.49026",
+                            "unrealizedPL": "2.664829999999",
+                            "marginRatio": "0.030481094756",
+                            "breakEvenPrice": "70839.679387192378",
+                            "openPriceAvg": "70785.781250000001",
+                            "leverage": "8",
+                            "uTime": "1773388807347",
+                            "cTime": "1773276221655",
+                        }
+                    ]
+                }
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "close-one-way"}
+
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                self.tpsl_orders.append(order_params)
+                return {"status": "SUCCESS", "orderId": "tpsl-1"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["response"]["orderId"], "close-one-way")
+        self.assertEqual(len(session.rest_client.placed_orders), 1)
+        self.assertEqual(session.rest_client.placed_orders[0][1]["side"], "sell")
+        self.assertEqual(session.rest_client.placed_orders[0][1]["reduceOnly"], "YES")
+        self.assertNotIn("tradeSide", session.rest_client.placed_orders[0][1])
+        self.assertEqual(len(session.rest_client.tpsl_orders), 1)
+
+    @patch("quant_binance.session.send_telegram_message")
     def test_session_retries_bitget_live_take_profit_close_on_one_way_mode_error(self, mock_send) -> None:
         class PositionRestClient(BitgetRestClient):
             def __init__(self) -> None:
@@ -1186,6 +1243,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
                         {
                             "symbol": "BTCUSDT",
                             "holdSide": "long",
+                            "posMode": "hedge_mode",
                             "total": "0.0016",
                             "available": "0.0016",
                             "marginSize": "14.49026",
@@ -1202,7 +1260,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
             def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
                 self.placed_orders.append((market, dict(order_params)))
-                if len(self.placed_orders) < 3:
+                if len(self.placed_orders) == 1:
                     raise RuntimeError(
                         'Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}'
                     )
@@ -1223,10 +1281,12 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(session.live_orders[0]["partial_exit"])
         self.assertEqual(session.live_orders[0]["quantity"], 0.0004)
         self.assertEqual(session.live_orders[0]["response"]["orderId"], "close-40774")
-        self.assertEqual(len(session.rest_client.placed_orders), 3)
+        self.assertEqual(len(session.rest_client.placed_orders), 2)
+        self.assertEqual(session.rest_client.placed_orders[0][1]["side"], "buy")
         self.assertEqual(session.rest_client.placed_orders[0][1]["tradeSide"], "close")
         self.assertNotIn("tradeSide", session.rest_client.placed_orders[1][1])
-        self.assertEqual(session.rest_client.placed_orders[2][1].get("reduceOnly"), "YES")
+        self.assertEqual(session.rest_client.placed_orders[1][1]["side"], "sell")
+        self.assertEqual(session.rest_client.placed_orders[1][1].get("reduceOnly"), "YES")
         self.assertEqual(len(session.rest_client.tpsl_orders), 1)
         self.assertTrue(any("LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
 
@@ -1285,8 +1345,11 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT")
         self.assertEqual(session.live_orders[0]["response"]["orderId"], "close-22002-retry")
         self.assertEqual(len(session.rest_client.placed_orders), 2)
+        self.assertEqual(session.rest_client.placed_orders[0][1]["side"], "buy")
         self.assertEqual(session.rest_client.placed_orders[0][1]["tradeSide"], "close")
         self.assertNotIn("tradeSide", session.rest_client.placed_orders[1][1])
+        self.assertEqual(session.rest_client.placed_orders[1][1]["side"], "sell")
+        self.assertEqual(session.rest_client.placed_orders[1][1].get("reduceOnly"), "YES")
         self.assertEqual(len(session.rest_client.tpsl_orders), 1)
         self.assertTrue(any("LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
 

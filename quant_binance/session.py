@@ -1282,6 +1282,52 @@ class LivePaperSession:
                 },
             )
 
+    def _bitget_live_position_mode(self, position: dict[str, Any]) -> str:
+        raw_mode = str(position.get("posMode") or position.get("positionMode") or "").strip().lower()
+        if "hedge" in raw_mode or "double" in raw_mode:
+            return "hedge"
+        if "one_way" in raw_mode or "one-way" in raw_mode or "unilateral" in raw_mode or "single" in raw_mode:
+            return "one_way"
+        return "unknown"
+
+    def _bitget_partial_close_order_candidates(
+        self,
+        *,
+        position: dict[str, Any],
+        quantity: float,
+        reason: str,
+    ) -> tuple[dict[str, Any], ...]:
+        symbol = str(position.get("symbol", ""))
+        position_side = self._normalize_live_position_side(position)
+        one_way_side = "sell" if position_side == "long" else "buy"
+        hedge_side = "buy" if position_side == "long" else "sell"
+        base_payload: dict[str, Any] = {
+            "symbol": symbol,
+            "productType": "USDT-FUTURES",
+            "marginCoin": "USDT",
+            "marginMode": "crossed",
+            "orderType": "market",
+            "size": f"{quantity:.8f}",
+            "clientOid": f"{symbol}-{reason.lower()}",
+        }
+        one_way_close = dict(base_payload)
+        one_way_close["side"] = one_way_side
+        one_way_close["reduceOnly"] = "YES"
+
+        hedge_close = dict(base_payload)
+        hedge_close["side"] = hedge_side
+        hedge_close["tradeSide"] = "close"
+
+        one_way_without_reduce_only = dict(base_payload)
+        one_way_without_reduce_only["side"] = one_way_side
+
+        mode = self._bitget_live_position_mode(position)
+        if mode == "hedge":
+            return (hedge_close, one_way_close, one_way_without_reduce_only)
+        if mode == "one_way":
+            return (one_way_close, hedge_close, one_way_without_reduce_only)
+        return (one_way_close, hedge_close, one_way_without_reduce_only)
+
     def _close_live_position(self, *, position: dict[str, Any], reason: str, fraction: float = 1.0) -> None:
         if self.rest_client is None or not hasattr(self.rest_client, "build_order_params") or not hasattr(self.rest_client, "place_order"):
             return
@@ -1296,19 +1342,27 @@ class LivePaperSession:
         alert_key = f"live-position-close:{symbol}:{u_time}:{reason}:{fraction:.4f}"
         if alert_key in self.sent_alert_keys:
             return
-        proactive_partial_reasons = {
-            "LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT",
-            "LIVE_POSITION_PARTIAL_TAKE_PROFIT",
-        }
-        order_params = self.rest_client.build_order_params(
-            market="futures",
-            symbol=symbol,
-            side=side,
-            order_type="MARKET",
-            quantity=quantity,
-            reduce_only=True,
-            client_oid=f"{symbol}-{reason.lower()}",
-        )
+        exchange_id = getattr(self.rest_client, "exchange_id", "")
+        is_bitget_partial_close = exchange_id == "bitget" and fraction < 0.999
+        if is_bitget_partial_close:
+            order_candidates = self._bitget_partial_close_order_candidates(
+                position=position,
+                quantity=quantity,
+                reason=reason,
+            )
+            order_params = dict(order_candidates[0])
+        else:
+            order_candidates = ()
+            order_params = self.rest_client.build_order_params(
+                market="futures",
+                symbol=symbol,
+                side=side,
+                order_type="MARKET",
+                quantity=quantity,
+                reduce_only=True,
+                client_oid=f"{symbol}-{reason.lower()}",
+            )
+        attempted_order_params = dict(order_params)
 
         def _record_already_closed(exc: Exception) -> None:
             if self.log_store is not None:
@@ -1318,7 +1372,7 @@ class LivePaperSession:
                         "timestamp": datetime.now(tz=timezone.utc),
                         "symbol": symbol,
                         "market": "futures",
-                        "side": side.lower(),
+                        "side": str(attempted_order_params.get("side", side)).lower(),
                         "quantity": quantity,
                         "accepted": False,
                         "reason": f"{reason}_ALREADY_CLOSED",
@@ -1327,6 +1381,7 @@ class LivePaperSession:
                 )
 
         try:
+            attempted_order_params = dict(order_params)
             response = self.rest_client.place_order(market="futures", order_params=order_params)
         except Exception as exc:
             message = str(exc)
@@ -1335,8 +1390,7 @@ class LivePaperSession:
                 self.runtime.paper_service.settings,
             )
             can_retry_bitget_partial_close = (
-                getattr(self.rest_client, "exchange_id", "") == "bitget"
-                and reason in proactive_partial_reasons
+                is_bitget_partial_close
                 and (
                     adapter._is_bitget_unilateral_error(message)
                     or "22002" in message
@@ -1345,8 +1399,10 @@ class LivePaperSession:
             )
             if can_retry_bitget_partial_close:
                 retry_error = exc
-                for alternate_params in adapter._bitget_alternate_futures_params(order_params):
+                alternates = order_candidates[1:] or adapter._bitget_alternate_futures_params(order_params)
+                for alternate_params in alternates:
                     try:
+                        attempted_order_params = dict(alternate_params)
                         response = self.rest_client.place_order(market="futures", order_params=alternate_params)
                     except Exception as retry_exc:
                         retry_error = retry_exc
@@ -1374,7 +1430,7 @@ class LivePaperSession:
             "timestamp": datetime.now(tz=timezone.utc),
             "symbol": symbol,
             "market": "futures",
-            "side": side.lower(),
+            "side": str(order_params.get("side", side)).lower(),
             "quantity": quantity,
             "accepted": str(response.get("status", "")).upper() not in {"REJECTED", "EXPIRED", "ERROR"},
             "reason": reason,
