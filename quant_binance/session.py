@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
@@ -16,7 +17,8 @@ from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
-from quant_binance.risk.sizing import select_futures_leverage
+from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
+from quant_binance.telegram_notify import send_telegram_message
 
 
 class SupportsAccountSync(Protocol):
@@ -29,12 +31,68 @@ class SupportsAccountSync(Protocol):
     def build_capital_report(self) -> CapitalAdequacyReport:
         ...
 
+    def get_positions(self) -> dict[str, Any]:
+        ...
+
+
+@dataclass
+class PaperPosition:
+    symbol: str
+    market: str
+    side: str
+    entry_time: datetime
+    entry_price: float
+    current_price: float
+    quantity_opened: float
+    quantity_remaining: float
+    stop_distance_bps: float
+    active_stop_price: float
+    best_price: float
+    worst_price: float
+    entry_predictability_score: float
+    entry_liquidity_score: float
+    partial_take_profit_taken: bool = False
+    exit_confirmation_count: int = 0
+    last_exit_signal_reason: str = ""
+
+    def unrealized_pnl_usd_estimate(self) -> float:
+        if self.side == "short":
+            return round((self.entry_price - self.current_price) * self.quantity_remaining, 6)
+        return round((self.current_price - self.entry_price) * self.quantity_remaining, 6)
+
+    def current_notional_usd_estimate(self) -> float:
+        return round(self.current_price * self.quantity_remaining, 6)
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "symbol": self.symbol,
+            "market": self.market,
+            "side": self.side,
+            "entry_time": self.entry_time,
+            "entry_price": round(self.entry_price, 6),
+            "current_price": round(self.current_price, 6),
+            "quantity_opened": round(self.quantity_opened, 8),
+            "quantity_remaining": round(self.quantity_remaining, 8),
+            "current_notional_usd_estimate": self.current_notional_usd_estimate(),
+            "unrealized_pnl_usd_estimate": self.unrealized_pnl_usd_estimate(),
+            "stop_distance_bps": round(self.stop_distance_bps, 6),
+            "active_stop_price": round(self.active_stop_price, 6),
+            "best_price": round(self.best_price, 6),
+            "worst_price": round(self.worst_price, 6),
+            "partial_take_profit_taken": self.partial_take_profit_taken,
+            "entry_predictability_score": round(self.entry_predictability_score, 6),
+            "entry_liquidity_score": round(self.entry_liquidity_score, 6),
+            "exit_confirmation_count": self.exit_confirmation_count,
+            "last_exit_signal_reason": self.last_exit_signal_reason,
+        }
+
 
 @dataclass
 class LivePaperSession:
     runtime: LivePaperRuntime
     equity_usd: float
     remaining_portfolio_capacity_usd: float
+    max_portfolio_capacity_usd: float | None = None
     rest_client: SupportsAccountSync | None = None
     order_tester: DecisionOrderTestAdapter | None = None
     live_order_executor: DecisionLiveOrderAdapter | None = None
@@ -52,11 +110,24 @@ class LivePaperSession:
     live_orders: list[dict[str, object]] = field(default_factory=list)
     observe_only_symbols: list[str] = field(default_factory=list)
     last_executed_fingerprint_by_symbol: dict[str, str] = field(default_factory=dict)
+    paper_positions: dict[str, PaperPosition] = field(default_factory=dict)
+    closed_trades: list[dict[str, object]] = field(default_factory=list)
+    telegram_alerts: list[dict[str, object]] = field(default_factory=list)
+    sent_alert_keys: set[str] = field(default_factory=set)
+    live_positions_snapshot: list[dict[str, object]] = field(default_factory=list)
+    live_partial_take_profit_keys: set[str] = field(default_factory=set)
+    live_peak_roe_by_identity: dict[str, float] = field(default_factory=dict)
+    order_error_cooldowns: dict[str, datetime] = field(default_factory=dict)
+    manual_symbol_cooldowns: dict[str, datetime] = field(default_factory=dict)
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
     _last_sync_at: datetime | None = None
     _last_flush_at: datetime | None = None
+
+    def __post_init__(self) -> None:
+        if self.max_portfolio_capacity_usd is None:
+            self.max_portfolio_capacity_usd = self.remaining_portfolio_capacity_usd
 
     def process_payload(self, payload: dict[str, Any], *, now: datetime | None = None) -> DecisionIntent | None:
         timestamp = now or datetime.now(tz=timezone.utc)
@@ -116,8 +187,13 @@ class LivePaperSession:
     def sync_account(self) -> None:
         if self.rest_client is None:
             return
+        previous_live_positions = list(self.live_positions_snapshot)
         self.account_snapshot = self.rest_client.get_account(market="futures")
         self.open_orders_snapshot = self.rest_client.get_open_orders(market="futures")
+        if hasattr(self.rest_client, "get_positions"):
+            positions_payload = self.rest_client.get_positions()
+            self.live_positions_snapshot = positions_payload.get("positions", [])
+        self._reconcile_manual_live_closes(previous_live_positions=previous_live_positions)
         if hasattr(self.rest_client, "build_capital_report"):
             report = self.rest_client.build_capital_report()
             self.capital_report = {
@@ -141,6 +217,7 @@ class LivePaperSession:
             }
             if not report.can_trade_any:
                 self.runtime.kill_switch.arm("INSUFFICIENT_CAPITAL")
+        self._evaluate_live_positions()
 
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
         summary = build_runtime_summary(
@@ -152,6 +229,11 @@ class LivePaperSession:
             capital_report=self.capital_report,
             kill_switch_status=self.runtime.kill_switch.status(),
             observe_only_symbols=self.observe_only_symbols,
+            open_spot_positions=self._open_positions_for_market("spot"),
+            open_futures_positions=self._open_positions_for_market("futures"),
+            closed_trades=self.closed_trades,
+            telegram_alerts=self.telegram_alerts,
+            live_positions=self.live_positions_snapshot,
         )
         write_runtime_summary(summary_path, summary)
         write_runtime_state(
@@ -165,6 +247,9 @@ class LivePaperSession:
                 "last_decision_timestamp": self.last_decision_timestamp,
                 "live_decision_loop": self.runtime.loop_stats.as_dict(),
                 "capital_report": self.capital_report,
+                "open_spot_position_count": len(self._open_positions_for_market("spot")),
+                "open_futures_position_count": len(self._open_positions_for_market("futures")),
+                "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
             },
         )
@@ -223,15 +308,30 @@ class LivePaperSession:
             return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
         return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
-    def _cap_live_order_decision(self, decision: DecisionIntent) -> DecisionIntent:
+    def _cap_live_order_decision(self, decision: DecisionIntent, *, reference_price: float | None = None) -> DecisionIntent:
         if not self.capital_report:
             return decision
+        if decision.final_mode == "futures":
+            live_position = self._find_live_futures_position(decision.symbol)
+            if live_position is not None:
+                live_side = self._normalize_live_position_side(live_position)
+                if live_side != decision.side:
+                    return replace(
+                        decision,
+                        final_mode="cash",
+                        side="flat",
+                        order_intent_notional_usd=0.0,
+                        stop_distance_bps=0.0,
+                        rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("LIVE_POSITION_CONFLICT",)))),
+                    )
         reserve_fraction = self._cash_reserve_fraction()
         requirements_key = "spot_requirements" if decision.final_mode == "spot" else "futures_requirements"
         min_notional = 0.0
+        min_quantity = 0.0
         for item in self.capital_report.get(requirements_key, []):
             if item.get("symbol") == decision.symbol:
                 min_notional = float(item.get("min_notional_usd", 0.0))
+                min_quantity = float(item.get("min_quantity", 0.0))
                 break
         if decision.final_mode == "spot":
             available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
@@ -261,9 +361,561 @@ class LivePaperSession:
         if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
             return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (rejection_code,)))))
         if decision.order_intent_notional_usd <= max_notional:
-            return decision
-        floored_notional = round(max_notional, 6)
-        return replace(decision, order_intent_notional_usd=floored_notional)
+            candidate = decision
+        else:
+            floored_notional = round(max_notional, 6)
+            candidate = replace(decision, order_intent_notional_usd=floored_notional)
+        if reference_price is not None and min_quantity > 0.0:
+            quantity = quantity_from_notional(candidate.order_intent_notional_usd, reference_price)
+            if quantity < min_quantity:
+                return replace(
+                    candidate,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(sorted(set(candidate.rejection_reasons + ("MIN_ORDER_QUANTITY",)))),
+                )
+        return candidate
+
+    def _normalize_live_position_side(self, position: dict[str, Any]) -> str:
+        hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()
+        if hold_side in {"long", "buy"}:
+            return "long"
+        if hold_side in {"short", "sell"}:
+            return "short"
+        side = str(position.get("side") or "").lower()
+        if side in {"buy", "long"}:
+            return "long"
+        return "short"
+
+    def _find_live_futures_position(self, symbol: str) -> dict[str, Any] | None:
+        for position in self.live_positions_snapshot:
+            if str(position.get("symbol", "")) != symbol:
+                continue
+            total = float(position.get("total") or position.get("available") or 0.0)
+            if total > 0.0:
+                return position
+        return None
+
+    def _open_positions_for_market(self, market: str) -> list[dict[str, object]]:
+        return [
+            position.as_dict()
+            for position in self.paper_positions.values()
+            if position.market == market and position.quantity_remaining > 0
+        ]
+
+    def _market_price(self, *, state: Any, fallback: float) -> float:
+        if state is None:
+            return fallback
+        price = float(getattr(state, "last_trade_price", 0.0) or 0.0)
+        return price if price > 0 else fallback
+
+    def _position_stop_price(self, *, entry_price: float, stop_distance_bps: float, side: str) -> float:
+        if stop_distance_bps <= 0:
+            return entry_price
+        stop_fraction = stop_distance_bps / 10000.0
+        if side == "short":
+            return entry_price * (1.0 + stop_fraction)
+        return entry_price * (1.0 - stop_fraction)
+
+    def _reward_bps(self, *, position: PaperPosition, price: float) -> float:
+        if position.entry_price <= 0:
+            return 0.0
+        if position.side == "short":
+            return (position.entry_price - price) / position.entry_price * 10000.0
+        return (price - position.entry_price) / position.entry_price * 10000.0
+
+    def _position_stop_hit(self, *, position: PaperPosition, price: float) -> bool:
+        if position.side == "short":
+            return price >= position.active_stop_price
+        return price <= position.active_stop_price
+
+    def _record_closed_trade(
+        self,
+        *,
+        position: PaperPosition,
+        exit_price: float,
+        quantity_closed: float,
+        exit_time: datetime,
+        exit_reason: str,
+    ) -> None:
+        if quantity_closed <= 0:
+            return
+        if position.side == "short":
+            realized = (position.entry_price - exit_price) * quantity_closed
+            return_bps = (position.entry_price - exit_price) / position.entry_price * 10000.0 if position.entry_price > 0 else 0.0
+        else:
+            realized = (exit_price - position.entry_price) * quantity_closed
+            return_bps = (exit_price - position.entry_price) / position.entry_price * 10000.0 if position.entry_price > 0 else 0.0
+        trade = {
+            "symbol": position.symbol,
+            "market": position.market,
+            "side": position.side,
+            "entry_time": position.entry_time,
+            "exit_time": exit_time,
+            "entry_price": round(position.entry_price, 6),
+            "exit_price": round(exit_price, 6),
+            "quantity": round(quantity_closed, 8),
+            "realized_pnl_usd_estimate": round(realized, 6),
+            "realized_return_bps_estimate": round(return_bps, 6),
+            "exit_reason": exit_reason,
+            "partial_exit": quantity_closed < position.quantity_opened,
+        }
+        self.closed_trades.append(trade)
+        self._release_portfolio_capacity(exit_notional_usd=exit_price * quantity_closed)
+        if self.log_store is not None:
+            self.log_store.append("closed_trades", trade)
+        self._send_trade_alert(trade)
+        self._enforce_risk_limits(exit_time)
+
+    def _send_telegram_alert(self, *, key: str, text: str) -> None:
+        if key in self.sent_alert_keys:
+            return
+        try:
+            result = send_telegram_message(text)
+        except Exception as exc:  # pragma: no cover
+            result = {"sent": False, "error": repr(exc)}
+        self.sent_alert_keys.add(key)
+        payload = {"key": key, "text": text, "result": result}
+        self.telegram_alerts.append(payload)
+        if self.log_store is not None:
+            self.log_store.append("telegram_alerts", payload)
+
+    def _send_trade_alert(self, trade: dict[str, object]) -> None:
+        reason = str(trade.get("exit_reason", ""))
+        if reason not in {"PARTIAL_TAKE_PROFIT", "BREAKEVEN_STOP", "STOP_LOSS"}:
+            return
+        symbol = str(trade.get("symbol", ""))
+        pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
+        bps = float(trade.get("realized_return_bps_estimate", 0.0))
+        text = (
+            f"[{reason}] {symbol}\n"
+            f"realized_pnl_usd_estimate={pnl:.2f}\n"
+            f"realized_return_bps_estimate={bps:.2f}"
+        )
+        self._send_telegram_alert(
+            key=f"trade:{trade.get('exit_time')}:{symbol}:{reason}:{trade.get('quantity')}",
+            text=text,
+        )
+
+    def _parse_order_error_code(self, error_message: str) -> str:
+        match = re.search(r'"code":"?([0-9A-Za-z_-]+)"?', error_message)
+        if match:
+            return match.group(1)
+        return ""
+
+    def _cooldown_seconds_for_error_code(self, code: str) -> int:
+        if code == "429":
+            return 300
+        if code in {"40774", "40893", "45110", "45111"}:
+            return 900
+        return 120
+
+    def _apply_order_error_cooldown(self, *, symbol: str, error_message: str, timestamp: datetime) -> None:
+        code = self._parse_order_error_code(error_message)
+        cooldown_seconds = self._cooldown_seconds_for_error_code(code)
+        until = timestamp + timedelta(seconds=cooldown_seconds)
+        current = self.order_error_cooldowns.get(symbol)
+        if current is None or until > current:
+            self.order_error_cooldowns[symbol] = until
+        self._send_telegram_alert(
+            key=f"order-cooldown:{symbol}:{code}:{timestamp.isoformat()}",
+            text=f"[ORDER_COOLDOWN] {symbol}\ncode={code or 'unknown'}\nuntil={until.isoformat()}",
+        )
+
+    def _is_order_cooldown_active(self, symbol: str, timestamp: datetime) -> bool:
+        until = self.order_error_cooldowns.get(symbol)
+        if until is None:
+            return False
+        if timestamp >= until:
+            self.order_error_cooldowns.pop(symbol, None)
+            return False
+        return True
+
+    def _manual_reentry_cooldown_until(self, timestamp: datetime) -> datetime:
+        seconds = max(60, self.runtime.decision_interval_minutes * 60)
+        return timestamp + timedelta(seconds=seconds)
+
+    def _is_manual_symbol_cooldown_active(self, symbol: str, timestamp: datetime) -> bool:
+        until = self.manual_symbol_cooldowns.get(symbol)
+        if until is None:
+            return False
+        if timestamp >= until:
+            self.manual_symbol_cooldowns.pop(symbol, None)
+            return False
+        return True
+
+    def _reconcile_manual_live_closes(self, *, previous_live_positions: list[dict[str, Any]]) -> None:
+        now = datetime.now(tz=timezone.utc)
+        previous_symbols = {
+            str(position.get("symbol", ""))
+            for position in previous_live_positions
+            if float(position.get("total") or position.get("available") or 0.0) > 0.0
+        }
+        current_symbols = {
+            str(position.get("symbol", ""))
+            for position in self.live_positions_snapshot
+            if float(position.get("total") or position.get("available") or 0.0) > 0.0
+        }
+        disappeared_symbols = {symbol for symbol in previous_symbols if symbol and symbol not in current_symbols}
+        for symbol in sorted(disappeared_symbols):
+            paper_position = self.paper_positions.pop(symbol, None)
+            if paper_position is not None and paper_position.quantity_remaining > 0:
+                self._record_closed_trade(
+                    position=paper_position,
+                    exit_price=paper_position.current_price,
+                    quantity_closed=paper_position.quantity_remaining,
+                    exit_time=now,
+                    exit_reason="MANUAL_CLOSE_SYNCED",
+                )
+            cooldown_until = self._manual_reentry_cooldown_until(now)
+            current = self.manual_symbol_cooldowns.get(symbol)
+            if current is None or cooldown_until > current:
+                self.manual_symbol_cooldowns[symbol] = cooldown_until
+            self._send_telegram_alert(
+                key=f"manual-close:{symbol}:{now.isoformat()}",
+                text=(
+                    f"[MANUAL_CLOSE_SYNCED] {symbol}\n"
+                    f"reentry_block_until={cooldown_until.isoformat()}"
+                ),
+            )
+            if self.log_store is not None:
+                self.log_store.append(
+                    "manual_close_sync",
+                    {
+                        "timestamp": now,
+                        "symbol": symbol,
+                        "cooldown_until": cooldown_until,
+                    },
+                )
+
+    def _position_roe_percent(self, position: dict[str, Any]) -> float:
+        margin = float(position.get("marginSize") or 0.0)
+        if margin <= 0.0:
+            return 0.0
+        unrealized = float(position.get("unrealizedPL") or 0.0)
+        return (unrealized / margin) * 100.0
+
+    def _live_position_identity(self, position: dict[str, Any]) -> str:
+        return "|".join(
+            [
+                str(position.get("symbol", "")),
+                str(position.get("holdSide") or position.get("posSide") or ""),
+                str(position.get("cTime") or position.get("uTime") or ""),
+            ]
+        )
+
+    def _reset_live_position_breakeven_protection(self, *, position: dict[str, Any]) -> None:
+        if self.rest_client is None or not hasattr(self.rest_client, "place_futures_position_tpsl"):
+            return
+        symbol = str(position.get("symbol", ""))
+        hold_side = str(position.get("holdSide", "")).lower()
+        if not symbol or hold_side not in {"long", "short"}:
+            return
+        breakeven_price = float(position.get("breakEvenPrice") or position.get("openPriceAvg") or 0.0)
+        if breakeven_price <= 0.0:
+            return
+        payload = {
+            "marginCoin": "USDT",
+            "productType": "USDT-FUTURES",
+            "symbol": symbol,
+            "holdSide": "buy" if hold_side == "long" else "sell",
+            "stopLossTriggerPrice": f"{breakeven_price:.8f}",
+            "stopLossTriggerType": "mark_price",
+            "stopLossExecutePrice": "0",
+            "stopLossClientOid": f"{symbol}-breakeven",
+        }
+        response = self.rest_client.place_futures_position_tpsl(order_params=payload)
+        if self.log_store is not None:
+            self.log_store.append(
+                "live_position_actions",
+                {
+                    "timestamp": datetime.now(tz=timezone.utc),
+                    "symbol": symbol,
+                    "market": "futures",
+                    "action": "RESET_BREAKEVEN_PROTECTION",
+                    "payload": payload,
+                    "response": response,
+                },
+            )
+
+    def _close_live_position(self, *, position: dict[str, Any], reason: str, fraction: float = 1.0) -> None:
+        if self.rest_client is None or not hasattr(self.rest_client, "build_order_params") or not hasattr(self.rest_client, "place_order"):
+            return
+        symbol = str(position.get("symbol", ""))
+        hold_side = str(position.get("holdSide", "")).lower()
+        total_quantity = float(position.get("total") or position.get("available") or 0.0)
+        quantity = total_quantity * max(min(fraction, 1.0), 0.0)
+        if not symbol or quantity <= 0.0:
+            return
+        side = "SELL" if hold_side == "long" else "BUY"
+        u_time = str(position.get("uTime", ""))
+        alert_key = f"live-position-close:{symbol}:{u_time}:{reason}:{fraction:.4f}"
+        if alert_key in self.sent_alert_keys:
+            return
+        order_params = self.rest_client.build_order_params(
+            market="futures",
+            symbol=symbol,
+            side=side,
+            order_type="MARKET",
+            quantity=quantity,
+            reduce_only=True,
+            client_oid=f"{symbol}-{reason.lower()}",
+        )
+        response = self.rest_client.place_order(market="futures", order_params=order_params)
+        payload = {
+            "timestamp": datetime.now(tz=timezone.utc),
+            "symbol": symbol,
+            "market": "futures",
+            "side": side.lower(),
+            "quantity": quantity,
+            "accepted": str(response.get("status", "")).upper() not in {"REJECTED", "EXPIRED", "ERROR"},
+            "reason": reason,
+            "partial_exit": fraction < 0.999,
+            "response": response,
+        }
+        self.live_orders.append(payload)
+        if self.log_store is not None:
+            self.log_store.append("live_position_actions", payload)
+        roe = self._position_roe_percent(position)
+        self._send_telegram_alert(
+            key=alert_key,
+            text=f"[{reason}] {symbol}\nroe_percent={roe:.2f}\nunrealized_pl={float(position.get('unrealizedPL') or 0.0):.2f}",
+        )
+        if fraction < 0.999:
+            self._reset_live_position_breakeven_protection(position=position)
+
+    def _evaluate_live_positions(self) -> None:
+        cfg = self.runtime.paper_service.settings.live_position_risk
+        if not cfg.enabled or not self.live_positions_snapshot:
+            return
+        for position in self.live_positions_snapshot:
+            roe = self._position_roe_percent(position)
+            margin_ratio = float(position.get("marginRatio") or 0.0)
+            identity = self._live_position_identity(position)
+            peak_roe = self.live_peak_roe_by_identity.get(identity, roe)
+            peak_roe = max(peak_roe, roe)
+            self.live_peak_roe_by_identity[identity] = peak_roe
+            if peak_roe >= cfg.take_profit_roe_percent:
+                if identity not in self.live_partial_take_profit_keys:
+                    drawdown = peak_roe - roe
+                    if drawdown >= 2.0 or roe >= cfg.take_profit_roe_percent + 2.0:
+                        self.live_partial_take_profit_keys.add(identity)
+                        self._close_live_position(
+                            position=position,
+                            reason="LIVE_POSITION_PARTIAL_TAKE_PROFIT",
+                            fraction=0.5,
+                        )
+            elif roe <= cfg.stop_loss_roe_percent:
+                self._close_live_position(position=position, reason="LIVE_POSITION_STOP_LOSS")
+            elif margin_ratio >= cfg.margin_ratio_emergency:
+                self._close_live_position(position=position, reason="LIVE_POSITION_MARGIN_RISK")
+
+    def _current_unrealized_total(self) -> float:
+        return round(sum(position.unrealized_pnl_usd_estimate() for position in self.paper_positions.values()), 6)
+
+    def _realized_loss_ratio(self, *, now: datetime, scope: str) -> float:
+        realized_loss = 0.0
+        iso_year, iso_week, _ = now.isocalendar()
+        for trade in self.closed_trades:
+            exit_time = trade.get("exit_time")
+            if not isinstance(exit_time, datetime):
+                continue
+            same_scope = False
+            if scope == "daily":
+                same_scope = exit_time.date() == now.date()
+            elif scope == "weekly":
+                year, week, _ = exit_time.isocalendar()
+                same_scope = (year, week) == (iso_year, iso_week)
+            if not same_scope:
+                continue
+            pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
+            if pnl < 0:
+                realized_loss += abs(pnl)
+        return realized_loss / max(self.equity_usd, 1e-9)
+
+    def _intraday_drawdown_ratio(self, *, now: datetime) -> float:
+        realized_today = 0.0
+        for trade in self.closed_trades:
+            exit_time = trade.get("exit_time")
+            if not isinstance(exit_time, datetime) or exit_time.date() != now.date():
+                continue
+            realized_today += float(trade.get("realized_pnl_usd_estimate", 0.0))
+        combined = realized_today + self._current_unrealized_total()
+        return abs(min(combined, 0.0)) / max(self.equity_usd, 1e-9)
+
+    def _enforce_risk_limits(self, now: datetime) -> None:
+        risk = self.runtime.paper_service.settings.risk
+        checks = (
+            ("DAILY_REALIZED_LOSS_LIMIT", self._realized_loss_ratio(now=now, scope="daily"), risk.daily_realized_loss_limit),
+            ("WEEKLY_REALIZED_LOSS_LIMIT", self._realized_loss_ratio(now=now, scope="weekly"), risk.weekly_realized_loss_limit),
+            ("INTRADAY_DRAWDOWN_LIMIT", self._intraday_drawdown_ratio(now=now), risk.intraday_drawdown_limit),
+        )
+        for code, ratio, limit in checks:
+            if ratio < limit:
+                continue
+            if not self.runtime.kill_switch.armed or code not in self.runtime.kill_switch.reasons:
+                self.runtime.kill_switch.arm(code)
+                self._send_telegram_alert(
+                    key=f"risk:{code}:{now.date().isoformat()}",
+                    text=f"[{code}] ratio={ratio:.4f} limit={limit:.4f}",
+                )
+
+    def _apply_post_take_profit_stop(self, *, position: PaperPosition, current_price: float) -> None:
+        mode = self.runtime.paper_service.settings.exit_rules.post_tp_stop_mode.strip().lower()
+        if mode == "breakeven":
+            position.active_stop_price = position.entry_price
+            return
+        if "trail" in mode:
+            stop_fraction = max(position.stop_distance_bps / 10000.0, 0.0025)
+            if position.side == "short":
+                position.active_stop_price = min(position.active_stop_price, current_price * (1.0 + stop_fraction))
+            else:
+                position.active_stop_price = max(position.active_stop_price, current_price * (1.0 - stop_fraction))
+            return
+        position.active_stop_price = position.entry_price
+
+    def _open_paper_position(self, *, decision: DecisionIntent, price: float) -> bool:
+        if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
+            return False
+        if price <= 0 or decision.order_intent_notional_usd <= 0:
+            return False
+        quantity = decision.order_intent_notional_usd / price
+        self.remaining_portfolio_capacity_usd = max(
+            0.0,
+            self.remaining_portfolio_capacity_usd - decision.order_intent_notional_usd,
+        )
+        self.paper_positions[decision.symbol] = PaperPosition(
+            symbol=decision.symbol,
+            market=decision.final_mode,
+            side=decision.side,
+            entry_time=decision.timestamp,
+            entry_price=price,
+            current_price=price,
+            quantity_opened=quantity,
+            quantity_remaining=quantity,
+            stop_distance_bps=max(decision.stop_distance_bps, 0.0),
+            active_stop_price=self._position_stop_price(
+                entry_price=price,
+                stop_distance_bps=max(decision.stop_distance_bps, 0.0),
+                side=decision.side,
+            ),
+            best_price=price,
+            worst_price=price,
+            entry_predictability_score=decision.predictability_score,
+            entry_liquidity_score=decision.liquidity_score,
+        )
+        return True
+
+    def _release_portfolio_capacity(self, *, exit_notional_usd: float) -> None:
+        cap = self.max_portfolio_capacity_usd
+        if cap is None:
+            return
+        self.remaining_portfolio_capacity_usd = min(
+            cap,
+            self.remaining_portfolio_capacity_usd + max(0.0, exit_notional_usd),
+        )
+
+    def _close_position(self, *, position: PaperPosition, exit_price: float, timestamp: datetime, exit_reason: str) -> None:
+        self._record_closed_trade(
+            position=position,
+            exit_price=exit_price,
+            quantity_closed=position.quantity_remaining,
+            exit_time=timestamp,
+            exit_reason=exit_reason,
+        )
+        self.paper_positions.pop(position.symbol, None)
+
+    def _update_paper_position(
+        self,
+        *,
+        position: PaperPosition,
+        decision: DecisionIntent,
+        price: float,
+        timestamp: datetime,
+    ) -> None:
+        position.current_price = price
+        position.best_price = max(position.best_price, price)
+        position.worst_price = min(position.worst_price, price)
+        reward_bps = self._reward_bps(position=position, price=price)
+        exit_rules = self.runtime.paper_service.settings.exit_rules
+
+        if (
+            not position.partial_take_profit_taken
+            and position.stop_distance_bps > 0
+            and reward_bps >= position.stop_distance_bps * exit_rules.partial_take_profit_r
+        ):
+            quantity_to_close = position.quantity_remaining * 0.5
+            self._record_closed_trade(
+                position=position,
+                exit_price=price,
+                quantity_closed=quantity_to_close,
+                exit_time=timestamp,
+                exit_reason="PARTIAL_TAKE_PROFIT",
+            )
+            position.quantity_remaining -= quantity_to_close
+            position.partial_take_profit_taken = True
+            position.exit_confirmation_count = 0
+            position.last_exit_signal_reason = ""
+            self._apply_post_take_profit_stop(position=position, current_price=price)
+            if position.quantity_remaining <= 0:
+                self.paper_positions.pop(position.symbol, None)
+                return
+
+        if position.partial_take_profit_taken and "trail" in exit_rules.post_tp_stop_mode.strip().lower():
+            self._apply_post_take_profit_stop(position=position, current_price=price)
+
+        if self._position_stop_hit(position=position, price=price):
+            exit_reason = "BREAKEVEN_STOP" if position.partial_take_profit_taken else "STOP_LOSS"
+            self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason=exit_reason)
+            return
+
+        holding_minutes = (timestamp - position.entry_time).total_seconds() / 60.0
+        max_holding_minutes = (
+            exit_rules.futures_max_holding_minutes if position.market == "futures" else exit_rules.spot_max_holding_minutes
+        )
+        if holding_minutes >= max_holding_minutes:
+            self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason="MAX_HOLDING_TIME")
+            return
+
+        exit_reason = ""
+        if decision.final_mode == "cash" or decision.final_mode != position.market or decision.side != position.side:
+            exit_reason = "SIGNAL_REVERSAL"
+        elif decision.predictability_score <= position.entry_predictability_score - exit_rules.score_drop_exit_buffer:
+            exit_reason = "SCORE_DROP_EXIT"
+        elif decision.liquidity_score <= position.entry_liquidity_score - exit_rules.liquidity_drop_exit_buffer:
+            exit_reason = "LIQUIDITY_DROP_EXIT"
+
+        if exit_reason:
+            if position.last_exit_signal_reason == exit_reason:
+                position.exit_confirmation_count += 1
+            else:
+                position.last_exit_signal_reason = exit_reason
+                position.exit_confirmation_count = 1
+            if position.exit_confirmation_count >= max(1, exit_rules.confirmation_cycles_for_exit):
+                self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason=exit_reason)
+            return
+
+        position.exit_confirmation_count = 0
+        position.last_exit_signal_reason = ""
+
+    def _apply_paper_trade_management(
+        self,
+        *,
+        decision: DecisionIntent,
+        state: Any,
+        timestamp: datetime,
+    ) -> bool:
+        position = self.paper_positions.get(decision.symbol)
+        fallback_price = 0.0
+        if position is not None:
+            fallback_price = position.current_price if position.current_price > 0 else position.entry_price
+        price = self._market_price(state=state, fallback=fallback_price)
+        if position is None:
+            return self._open_paper_position(decision=decision, price=price)
+        self._update_paper_position(position=position, decision=decision, price=price, timestamp=timestamp)
+        return False
 
     def _record_decision(
         self,
@@ -283,8 +935,19 @@ class LivePaperSession:
             self.learner.ingest_decisions((decision,))
         if self.log_store is not None:
             self.log_store.append("decisions", decision.as_dict())
-        if self.live_order_executor is not None and state is not None and self._market_capital_allowed(decision):
-            executable_decision = self._cap_live_order_decision(decision)
+        allow_new_submission = False
+        if state is not None:
+            allow_new_submission = self._apply_paper_trade_management(
+                decision=decision,
+                state=state,
+                timestamp=timestamp,
+            )
+        if self._is_order_cooldown_active(decision.symbol, timestamp):
+            allow_new_submission = False
+        if self._is_manual_symbol_cooldown_active(decision.symbol, timestamp):
+            allow_new_submission = False
+        if self.live_order_executor is not None and state is not None and allow_new_submission and self._market_capital_allowed(decision):
+            executable_decision = self._cap_live_order_decision(decision, reference_price=state.last_trade_price)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
@@ -303,6 +966,7 @@ class LivePaperSession:
                     }
                     if self.verbose:
                         print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
+                    self._apply_order_error_cooldown(symbol=executable_decision.symbol, error_message=repr(exc), timestamp=timestamp)
                     if self.log_store is not None:
                         self.log_store.append("order_errors", payload)
                 else:
@@ -315,6 +979,8 @@ class LivePaperSession:
                             "side": live_result.side,
                             "quantity": live_result.quantity,
                             "accepted": live_result.accepted,
+                            "protection_orders": list(live_result.protection_orders),
+                            "protection_error": live_result.protection_error,
                         }
                         self.live_orders.append(payload)
                         if self.verbose:
@@ -324,8 +990,24 @@ class LivePaperSession:
                             )
                         if self.log_store is not None:
                             self.log_store.append("live_orders", payload)
-        if self.order_tester is not None and state is not None and self._market_capital_allowed(decision):
-            test_decision = self._cap_live_order_decision(decision)
+                        if live_result.protection_error and self.log_store is not None:
+                            self.log_store.append(
+                                "order_errors",
+                                {
+                                    "timestamp": timestamp,
+                                    "symbol": live_result.symbol,
+                                    "market": live_result.market,
+                                    "stage": "protection_order",
+                                    "error": live_result.protection_error,
+                                },
+                            )
+                            self._apply_order_error_cooldown(
+                                symbol=live_result.symbol,
+                                error_message=live_result.protection_error,
+                                timestamp=timestamp,
+                            )
+        if self.order_tester is not None and state is not None and allow_new_submission and self._market_capital_allowed(decision):
+            test_decision = self._cap_live_order_decision(decision, reference_price=state.last_trade_price)
             if test_decision.final_mode in {"spot", "futures"} and test_decision.order_intent_notional_usd > 0:
                 try:
                     test_result = self.order_tester.test_decision(
@@ -342,6 +1024,7 @@ class LivePaperSession:
                     }
                     if self.verbose:
                         print(f"[TEST_ORDER_ERROR] {test_decision.symbol} {exc}", flush=True)
+                    self._apply_order_error_cooldown(symbol=test_decision.symbol, error_message=repr(exc), timestamp=timestamp)
                     if self.log_store is not None:
                         self.log_store.append("order_errors", payload)
                 else:
