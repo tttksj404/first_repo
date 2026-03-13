@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import json
+
 from quant_binance.daemon import _build_live_ws_client, run_live_paper_daemon
 from quant_binance.data.bitget_ws import BitgetWebSocketClient
 from quant_binance.data.rest_seed import seed_market_store_from_rest
@@ -65,6 +67,14 @@ class FakeBitgetDaemonClient(FakeRestClient):
         return {"status": "PREVIEW", "market": market, "request": dict(order_params)}
 
 
+class FakeBitgetPartialSeedClient(FakeBitgetDaemonClient):
+    def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
+        symbols = [{"symbol": "BTCUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "100"}]}]
+        if market == "futures":
+            symbols.append({"symbol": "STEEMUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "5"}]})
+        return {"symbols": symbols}
+
+
 class FakePrivateDaemonClient(FakeRestClient):
     supports_private_reads = True
 
@@ -105,6 +115,19 @@ class FakeShell:
             "status": "ok",
             "client_types": [type(item).__name__ for item in client.clients],
             "rest_sync_enabled": self.session.rest_client is not None,
+        }
+
+
+class SubscriptionShell(FakeShell):
+    async def run(self) -> dict[str, object]:
+        client = self.ws_client_factory()
+        subscriptions = []
+        for child in client.clients:
+            if hasattr(child, "subscription_args"):
+                subscriptions.extend(child.subscription_args())
+        return {
+            "status": "ok",
+            "subscription_inst_ids": sorted({item["instId"] for item in subscriptions}),
         }
 
 
@@ -215,6 +238,23 @@ class QuantBinanceDaemonTests(unittest.TestCase):
         self.assertEqual(float(capital_report["futures_recognized_balance_usd"]), 50.0)
         self.assertTrue(capital_report["can_trade_futures_any"])
         self.assertEqual(float(capital_report["futures_execution_balance_usd"]), 5.0)
+
+    def test_run_live_paper_daemon_subscribes_only_seeded_symbols(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            config_path = Path(output_dir) / "config.json"
+            config_payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            config_payload["universe"] = ["BTCUSDT", "STEEMUSDT"]
+            config_path.write_text(json.dumps(config_payload), encoding="utf-8")
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetPartialSeedClient()):
+                with patch("quant_binance.daemon.LivePaperShell", SubscriptionShell):
+                    result = run_live_paper_daemon(
+                        config_path=config_path,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+
+        self.assertEqual(result["summary"]["subscription_inst_ids"], ["BTCUSDT"])
 
 
 if __name__ == "__main__":
