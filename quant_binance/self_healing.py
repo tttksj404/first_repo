@@ -13,6 +13,7 @@ KNOWN_BITGET_COMPATIBILITY_CODES = frozenset({"40762", "40774", "40893"})
 KNOWN_CATEGORY_DAEMON_STALLED = "daemon_stalled"
 KNOWN_CATEGORY_FUTURES_MISMATCH = "persistent_futures_mismatch"
 KNOWN_CATEGORY_BITGET_LIVE_ORDER = "bitget_live_order_compatibility"
+KNOWN_CATEGORY_MISSING_MARKET_STATE = "missing_market_state"
 UNKNOWN_CATEGORY_RUNTIME_ERROR = "unknown_runtime_error"
 
 
@@ -21,6 +22,11 @@ def parse_error_code(error_message: str) -> str:
     if match is None:
         return ""
     return match.group(1)
+
+
+def is_missing_market_state_error(error_message: str) -> bool:
+    normalized = error_message.lower()
+    return "missing market state for symbol=" in normalized or "missing symbol state for symbol=" in normalized
 
 
 def classify_runtime_issue(
@@ -67,6 +73,15 @@ def classify_runtime_issue(
             "stage": stage or "live_order",
             "summary": "Bitget live-order compatibility error matched a known safe fallback path",
             "automatic_action": "cooldown_and_reuse_test_order_path",
+        }
+    if is_missing_market_state_error(error_message):
+        return {
+            "category": KNOWN_CATEGORY_MISSING_MARKET_STATE,
+            "known": True,
+            "error_code": "",
+            "stage": stage or "market_data",
+            "summary": "live payload arrived before symbol market state was ready",
+            "automatic_action": "skip_payload_until_market_state_ready",
         }
     return {
         "category": UNKNOWN_CATEGORY_RUNTIME_ERROR,
@@ -177,11 +192,23 @@ class RuntimeSelfHealing:
             return "guarded"
         if mismatch_active:
             return "degraded"
+        if self._active_missing_market_state_symbols(now=now):
+            return "degraded"
         if self._recent_events:
             last = self._recent_events[-1]
             if last.category == "daemon_stalled" and last.status == "suppressed":
                 return "blocked"
         return "healthy"
+
+    def _active_missing_market_state_symbols(self, *, now: datetime) -> list[str]:
+        cutoff = now - timedelta(seconds=self.known_error_window_seconds)
+        active_symbols = {
+            str(event.details.get("symbol", ""))
+            for event in self._recent_events
+            if event.category == KNOWN_CATEGORY_MISSING_MARKET_STATE and event.timestamp >= cutoff
+        }
+        active_symbols.discard("")
+        return sorted(active_symbols)
 
     def note_progress(self, *, timestamp: datetime, heartbeat_count: int) -> None:
         self.last_progress_at = timestamp
@@ -267,8 +294,13 @@ class RuntimeSelfHealing:
         stage: str,
     ) -> dict[str, Any]:
         self._prune(now=now)
-        code = parse_error_code(error_message)
-        if self._is_known_bitget_compatibility_error(error_message=error_message, exchange_id=exchange_id):
+        issue = classify_runtime_issue(
+            error_message=error_message,
+            exchange_id=exchange_id,
+            stage=stage,
+        )
+        code = str(issue.get("error_code", "") or parse_error_code(error_message))
+        if issue["category"] == KNOWN_CATEGORY_BITGET_LIVE_ORDER:
             self._known_runtime_error_times.append(now)
             action = "symbol_cooldown"
             summary = f"Applied conservative cooldown for Bitget compatibility issue on {symbol}"
@@ -300,6 +332,29 @@ class RuntimeSelfHealing:
                 "error_code": code,
                 "stage": stage,
                 "automatic_action": "cooldown_and_reuse_test_order_path",
+            }
+        if issue["category"] == KNOWN_CATEGORY_MISSING_MARKET_STATE:
+            self._record_event(
+                SelfHealingEvent(
+                    timestamp=now,
+                    category=KNOWN_CATEGORY_MISSING_MARKET_STATE,
+                    action="skip_payload",
+                    automatic_action="skip_payload_until_market_state_ready",
+                    status="applied",
+                    summary=f"Skipped live payload for {symbol} because market state was missing",
+                    details={
+                        "symbol": symbol,
+                        "stage": stage,
+                        "exchange_id": exchange_id,
+                    },
+                )
+            )
+            return {
+                "category": KNOWN_CATEGORY_MISSING_MARKET_STATE,
+                "known": True,
+                "error_code": "",
+                "stage": stage,
+                "automatic_action": "skip_payload_until_market_state_ready",
             }
         self._record_event(
             SelfHealingEvent(
@@ -369,12 +424,14 @@ class RuntimeSelfHealing:
         self._prune(now=now)
         active_order_symbols = sorted(symbol for symbol, until in order_error_cooldowns.items() if until > now)
         active_manual_symbols = sorted(symbol for symbol, until in manual_symbol_cooldowns.items() if until > now)
+        missing_market_state_symbols = self._active_missing_market_state_symbols(now=now)
         return {
             "status": self._current_status(now=now, mismatch_active=mismatch_active),
             "active_guards": {
                 "live_order_cooldown_until": self.live_order_cooldown_until,
                 "symbol_order_cooldowns": active_order_symbols,
                 "manual_symbol_cooldowns": active_manual_symbols,
+                "missing_market_state_symbols": missing_market_state_symbols,
                 "mismatch_active": mismatch_active,
                 "mismatch_details": mismatch_details,
                 "stall_restart_budget_remaining": max(

@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
+from quant_binance.data.market_store import MissingMarketStateError
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter, OrderTestResult
 from quant_binance.learning import OnlineEdgeLearner
@@ -180,13 +181,30 @@ class LivePaperSession:
                         "open_orders_snapshot": self.open_orders_snapshot,
                     },
                 )
-        decision = self.runtime.on_payload(
-            payload,
-            equity_usd=self.equity_usd,
-            remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
-        )
+        event_payload: dict[str, Any] = {"timestamp": timestamp, "payload": payload}
+        try:
+            decision = self.runtime.on_payload(
+                payload,
+                equity_usd=self.equity_usd,
+                remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
+            )
+        except MissingMarketStateError as exc:
+            issue = self.self_healing.record_runtime_error(
+                now=timestamp,
+                symbol=exc.symbol,
+                error_message=str(exc),
+                exchange_id=getattr(self.rest_client, "exchange_id", "binance"),
+                stage="market_data",
+            )
+            event_payload["self_healing"] = issue
+            event_payload["status"] = "skipped_known_runtime_issue"
+            if self.verbose:
+                print(f"[SELF_HEAL] skipped payload due to missing market state for {exc.symbol}", flush=True)
+            if self.log_store is not None:
+                self.log_store.append("events", event_payload)
+            return None
         if self.log_store is not None:
-            self.log_store.append("events", {"timestamp": timestamp, "payload": payload})
+            self.log_store.append("events", event_payload)
         if self.verbose and self.heartbeat_count % 25 == 0:
             print(
                 f"[HEARTBEAT] events={self.heartbeat_count} decisions={len(self.decisions)} live_orders={len(self.live_orders)} tested_orders={len(self.tested_orders)}",
