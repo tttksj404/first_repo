@@ -143,6 +143,8 @@ class LivePaperSession:
     live_peak_roe_by_identity: dict[str, float] = field(default_factory=dict)
     order_error_cooldowns: dict[str, datetime] = field(default_factory=dict)
     manual_symbol_cooldowns: dict[str, datetime] = field(default_factory=dict)
+    futures_missing_in_paper_counts: dict[str, int] = field(default_factory=dict)
+    futures_missing_on_exchange_counts: dict[str, int] = field(default_factory=dict)
     futures_reallocation_cooldown_until: datetime | None = None
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
@@ -219,6 +221,7 @@ class LivePaperSession:
             positions_payload = self.rest_client.get_positions()
             self.live_positions_snapshot = positions_payload.get("positions", [])
         self._reconcile_manual_live_closes(previous_live_positions=previous_live_positions)
+        self._reconcile_persistent_futures_position_mismatch()
         if hasattr(self.rest_client, "build_capital_report"):
             report = self.rest_client.build_capital_report()
             self.capital_report = {
@@ -433,10 +436,31 @@ class LivePaperSession:
         for position in self.live_positions_snapshot:
             if str(position.get("symbol", "")) != symbol:
                 continue
-            total = float(position.get("total") or position.get("available") or 0.0)
+            total = self._live_position_quantity(position)
             if total > 0.0:
                 return position
         return None
+
+    def _live_position_quantity(self, position: dict[str, Any]) -> float:
+        return float(position.get("total") or position.get("available") or 0.0)
+
+    def _active_live_futures_positions_by_symbol(self) -> dict[str, dict[str, Any]]:
+        positions: dict[str, dict[str, Any]] = {}
+        for position in self.live_positions_snapshot:
+            symbol = str(position.get("symbol", ""))
+            if not symbol:
+                continue
+            if self._live_position_quantity(position) <= 0.0:
+                continue
+            positions[symbol] = position
+        return positions
+
+    def _open_paper_futures_positions_by_symbol(self) -> dict[str, PaperPosition]:
+        return {
+            symbol: position
+            for symbol, position in self.paper_positions.items()
+            if position.market == "futures" and position.quantity_remaining > 0.0
+        }
 
     def _open_positions_for_market(self, market: str) -> list[dict[str, object]]:
         return [
@@ -666,45 +690,193 @@ class LivePaperSession:
         previous_symbols = {
             str(position.get("symbol", ""))
             for position in previous_live_positions
-            if float(position.get("total") or position.get("available") or 0.0) > 0.0
+            if self._live_position_quantity(position) > 0.0
         }
         current_symbols = {
             str(position.get("symbol", ""))
             for position in self.live_positions_snapshot
-            if float(position.get("total") or position.get("available") or 0.0) > 0.0
+            if self._live_position_quantity(position) > 0.0
         }
         disappeared_symbols = {symbol for symbol in previous_symbols if symbol and symbol not in current_symbols}
         for symbol in sorted(disappeared_symbols):
-            paper_position = self.paper_positions.pop(symbol, None)
-            if paper_position is not None and paper_position.quantity_remaining > 0:
-                self._record_closed_trade(
-                    position=paper_position,
-                    exit_price=paper_position.current_price,
-                    quantity_closed=paper_position.quantity_remaining,
-                    exit_time=now,
-                    exit_reason="MANUAL_CLOSE_SYNCED",
-                )
-            self._cancel_symbol_open_orders(symbol=symbol)
-            cooldown_until = self._manual_reentry_cooldown_until(now)
-            current = self.manual_symbol_cooldowns.get(symbol)
-            if current is None or cooldown_until > current:
-                self.manual_symbol_cooldowns[symbol] = cooldown_until
-            self._send_telegram_alert(
-                key=f"manual-close:{symbol}:{now.isoformat()}",
-                text=(
-                    f"[MANUAL_CLOSE_SYNCED] {symbol}\n"
-                    f"reentry_block_until={cooldown_until.isoformat()}"
-                ),
+            self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
+
+    def _consecutive_mismatch_threshold(self) -> int:
+        return 2
+
+    def _update_consecutive_mismatch_counts(self, *, counts: dict[str, int], active_symbols: set[str]) -> None:
+        for symbol in list(counts):
+            if symbol not in active_symbols:
+                counts.pop(symbol, None)
+        for symbol in active_symbols:
+            counts[symbol] = counts.get(symbol, 0) + 1
+
+    def _parse_live_position_timestamp(self, position: dict[str, Any]) -> datetime | None:
+        for key in ("cTime", "uTime"):
+            raw_value = position.get(key)
+            if raw_value in (None, ""):
+                continue
+            try:
+                parsed = float(raw_value)
+            except (TypeError, ValueError):
+                continue
+            if parsed <= 0.0:
+                continue
+            if parsed >= 1_000_000_000_000:
+                parsed /= 1000.0
+            try:
+                return datetime.fromtimestamp(parsed, tz=timezone.utc)
+            except (OverflowError, OSError, ValueError):
+                continue
+        return None
+
+    def _live_position_reference_price(self, *, symbol: str, position: dict[str, Any]) -> float:
+        state = self.runtime.dispatcher.store.get(symbol)
+        market_price = self._market_price(state=state, fallback=0.0)
+        if market_price > 0.0:
+            return market_price
+        for key in ("markPrice", "breakEvenPrice", "openPriceAvg"):
+            value = float(position.get(key) or 0.0)
+            if value > 0.0:
+                return value
+        return 0.0
+
+    def _build_reconciled_paper_position(self, *, position: dict[str, Any]) -> PaperPosition | None:
+        symbol = str(position.get("symbol", ""))
+        if not symbol:
+            return None
+        quantity = self._live_position_quantity(position)
+        if quantity <= 0.0:
+            return None
+        current_price = self._live_position_reference_price(symbol=symbol, position=position)
+        if current_price <= 0.0:
+            return None
+        entry_price = float(position.get("openPriceAvg") or position.get("breakEvenPrice") or 0.0)
+        if entry_price <= 0.0:
+            entry_price = current_price
+        side = self._normalize_live_position_side(position)
+        leverage = max(int(float(position.get("leverage") or 1.0)), 1)
+        entry_time = self._parse_live_position_timestamp(position) or datetime.now(tz=timezone.utc)
+        best_price = max(entry_price, current_price)
+        worst_price = min(entry_price, current_price)
+        return PaperPosition(
+            symbol=symbol,
+            market="futures",
+            side=side,
+            entry_time=entry_time,
+            entry_price=entry_price,
+            current_price=current_price,
+            quantity_opened=quantity,
+            quantity_remaining=quantity,
+            stop_distance_bps=0.0,
+            active_stop_price=entry_price,
+            best_price=best_price,
+            worst_price=worst_price,
+            entry_predictability_score=0.0,
+            entry_liquidity_score=0.0,
+            entry_net_expected_edge_bps=0.0,
+            entry_estimated_round_trip_cost_bps=0.0,
+            entry_planned_leverage=leverage,
+            latest_predictability_score=0.0,
+            latest_liquidity_score=0.0,
+            latest_net_expected_edge_bps=0.0,
+            latest_estimated_round_trip_cost_bps=0.0,
+        )
+
+    def _reserve_capacity_for_reconciled_position(self, position: PaperPosition) -> None:
+        self.remaining_portfolio_capacity_usd = max(
+            0.0,
+            self.remaining_portfolio_capacity_usd - position.current_notional_usd_estimate(),
+        )
+
+    def _reconcile_missing_in_paper_position(self, *, position: dict[str, Any], persisted_cycles: int) -> None:
+        paper_position = self._build_reconciled_paper_position(position=position)
+        if paper_position is None:
+            return
+        existing = self.paper_positions.get(paper_position.symbol)
+        if existing is not None:
+            return
+        self.paper_positions[paper_position.symbol] = paper_position
+        self._reserve_capacity_for_reconciled_position(paper_position)
+        if self.log_store is not None:
+            self.log_store.append(
+                "futures_position_reconciliation",
+                {
+                    "timestamp": datetime.now(tz=timezone.utc),
+                    "symbol": paper_position.symbol,
+                    "action": "SYNC_MISSING_IN_PAPER",
+                    "persisted_cycles": persisted_cycles,
+                    "side": paper_position.side,
+                    "entry_price": paper_position.entry_price,
+                    "current_price": paper_position.current_price,
+                    "quantity_remaining": paper_position.quantity_remaining,
+                    "entry_planned_leverage": paper_position.entry_planned_leverage,
+                },
             )
-            if self.log_store is not None:
-                self.log_store.append(
-                    "manual_close_sync",
-                    {
-                        "timestamp": now,
-                        "symbol": symbol,
-                        "cooldown_until": cooldown_until,
-                    },
-                )
+
+    def _cleanup_missing_on_exchange_position(self, *, symbol: str, now: datetime, reason: str) -> None:
+        paper_position = self.paper_positions.pop(symbol, None)
+        if paper_position is not None and paper_position.quantity_remaining > 0:
+            self._record_closed_trade(
+                position=paper_position,
+                exit_price=paper_position.current_price,
+                quantity_closed=paper_position.quantity_remaining,
+                exit_time=now,
+                exit_reason=reason,
+            )
+        self._cancel_symbol_open_orders(symbol=symbol)
+        cooldown_until = self._manual_reentry_cooldown_until(now)
+        current = self.manual_symbol_cooldowns.get(symbol)
+        if current is None or cooldown_until > current:
+            self.manual_symbol_cooldowns[symbol] = cooldown_until
+        self._send_telegram_alert(
+            key=f"manual-close:{symbol}:{now.isoformat()}",
+            text=(
+                f"[{reason}] {symbol}\n"
+                f"reentry_block_until={cooldown_until.isoformat()}"
+            ),
+        )
+        if self.log_store is not None:
+            self.log_store.append(
+                "manual_close_sync",
+                {
+                    "timestamp": now,
+                    "symbol": symbol,
+                    "cooldown_until": cooldown_until,
+                    "reason": reason,
+                },
+            )
+
+    def _reconcile_persistent_futures_position_mismatch(self) -> None:
+        live_positions_by_symbol = self._active_live_futures_positions_by_symbol()
+        paper_positions_by_symbol = self._open_paper_futures_positions_by_symbol()
+        missing_in_paper = set(live_positions_by_symbol) - set(paper_positions_by_symbol)
+        missing_on_exchange = set(paper_positions_by_symbol) - set(live_positions_by_symbol)
+        self._update_consecutive_mismatch_counts(
+            counts=self.futures_missing_in_paper_counts,
+            active_symbols=missing_in_paper,
+        )
+        self._update_consecutive_mismatch_counts(
+            counts=self.futures_missing_on_exchange_counts,
+            active_symbols=missing_on_exchange,
+        )
+        threshold = self._consecutive_mismatch_threshold()
+        for symbol in sorted(missing_in_paper):
+            cycles = self.futures_missing_in_paper_counts.get(symbol, 0)
+            if cycles < threshold:
+                continue
+            self._reconcile_missing_in_paper_position(
+                position=live_positions_by_symbol[symbol],
+                persisted_cycles=cycles,
+            )
+            self.futures_missing_in_paper_counts.pop(symbol, None)
+        now = datetime.now(tz=timezone.utc)
+        for symbol in sorted(missing_on_exchange):
+            cycles = self.futures_missing_on_exchange_counts.get(symbol, 0)
+            if cycles < threshold:
+                continue
+            self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
+            self.futures_missing_on_exchange_counts.pop(symbol, None)
 
     def _position_roe_percent(self, position: dict[str, Any]) -> float:
         margin = float(position.get("marginSize") or 0.0)
