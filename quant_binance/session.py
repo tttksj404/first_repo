@@ -686,23 +686,19 @@ class LivePaperSession:
                 )
 
     def _reconcile_manual_live_closes(self, *, previous_live_positions: list[dict[str, Any]]) -> None:
-        now = datetime.now(tz=timezone.utc)
-        previous_symbols = {
-            str(position.get("symbol", ""))
-            for position in previous_live_positions
-            if self._live_position_quantity(position) > 0.0
-        }
-        current_symbols = {
-            str(position.get("symbol", ""))
-            for position in self.live_positions_snapshot
-            if self._live_position_quantity(position) > 0.0
-        }
-        disappeared_symbols = {symbol for symbol in previous_symbols if symbol and symbol not in current_symbols}
-        for symbol in sorted(disappeared_symbols):
-            self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
+        # Exchange position snapshots can briefly omit active futures positions.
+        # Cleanup is handled by persistent mismatch reconciliation so a single
+        # disappearance here does not immediately close the paper position.
+        return
 
     def _consecutive_mismatch_threshold(self) -> int:
         return 2
+
+    def _missing_in_paper_threshold(self) -> int:
+        return self._consecutive_mismatch_threshold()
+
+    def _missing_on_exchange_threshold(self) -> int:
+        return max(self._consecutive_mismatch_threshold(), 4)
 
     def _update_consecutive_mismatch_counts(self, *, counts: dict[str, int], active_symbols: set[str]) -> None:
         for symbol in list(counts):
@@ -860,10 +856,9 @@ class LivePaperSession:
             counts=self.futures_missing_on_exchange_counts,
             active_symbols=missing_on_exchange,
         )
-        threshold = self._consecutive_mismatch_threshold()
         for symbol in sorted(missing_in_paper):
             cycles = self.futures_missing_in_paper_counts.get(symbol, 0)
-            if cycles < threshold:
+            if cycles < self._missing_in_paper_threshold():
                 continue
             self._reconcile_missing_in_paper_position(
                 position=live_positions_by_symbol[symbol],
@@ -873,7 +868,7 @@ class LivePaperSession:
         now = datetime.now(tz=timezone.utc)
         for symbol in sorted(missing_on_exchange):
             cycles = self.futures_missing_on_exchange_counts.get(symbol, 0)
-            if cycles < threshold:
+            if cycles < self._missing_on_exchange_threshold():
                 continue
             self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
             self.futures_missing_on_exchange_counts.pop(symbol, None)
