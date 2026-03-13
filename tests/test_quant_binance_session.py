@@ -17,7 +17,7 @@ from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.models import DecisionIntent
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
-from quant_binance.self_healing import RuntimeSelfHealing
+from quant_binance.self_healing import KNOWN_CATEGORY_MISSING_MARKET_STATE, RuntimeSelfHealing
 from quant_binance.settings import Settings
 
 
@@ -347,6 +347,62 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.runtime.loop_stats.closed_decision_kline_count, 1)
         self.assertEqual(session.runtime.loop_stats.emitted_decision_count, 1)
 
+    def test_session_skips_missing_market_state_payload_without_crashing(self) -> None:
+        session = self._build_session()
+        skip_time = datetime(2026, 3, 8, 12, 6, tzinfo=timezone.utc)
+        decision_time = datetime(2026, 3, 8, 12, 10, 1, tzinfo=timezone.utc)
+        summary_path = ROOT / "tests" / "tmp_session_missing_market_state_summary.json"
+        state_path = ROOT / "tests" / "tmp_session_missing_market_state_state.json"
+
+        skipped = session.process_payload(
+            {
+                "stream": "ethusdt@trade",
+                "data": {"s": "ETHUSDT", "p": "2100", "q": "0.2", "E": 1772971560000, "m": False},
+            },
+            now=skip_time,
+        )
+        decision = session.process_payload(
+            {
+                "stream": "btcusdt@kline_5m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "5m",
+                        "t": 1772971500000,
+                        "T": 1772971799999,
+                        "o": "50000",
+                        "h": "50100",
+                        "l": "49950",
+                        "c": "50080",
+                        "v": "18",
+                        "q": "900000",
+                        "x": True,
+                    },
+                },
+            },
+            now=decision_time,
+        )
+
+        self.assertIsNone(skipped)
+        self.assertIsNotNone(decision)
+        self.assertEqual(len(session.decisions), 1)
+        self.assertEqual(session.self_healing.recent_events[-1].category, KNOWN_CATEGORY_MISSING_MARKET_STATE)
+        try:
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            self.assertEqual(
+                summary["self_healing"]["issue_counts"][KNOWN_CATEGORY_MISSING_MARKET_STATE],
+                1,
+            )
+            self.assertEqual(
+                summary["self_healing"]["recent_events"][-1]["category"],
+                KNOWN_CATEGORY_MISSING_MARKET_STATE,
+            )
+        finally:
+            if summary_path.exists():
+                summary_path.unlink()
+            if state_path.exists():
+                state_path.unlink()
+
     def test_session_takes_partial_profit_then_closes_remainder_at_breakeven(self) -> None:
         session = self._build_session()
         state = session.runtime.dispatcher.store.get("BTCUSDT")
@@ -616,6 +672,152 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.rest_client.cancelled_orders, [("futures", "BTCUSDT", "open-1")])
         self.assertIn("BTCUSDT", session.manual_symbol_cooldowns)
         self.assertTrue(any("MANUAL_CLOSE_SYNCED" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_sync_account_releases_capacity_and_slot_on_confirmed_manual_close(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self._balances = [5.0, 605.0]
+                self._balance_index = 0
+                self._positions = [
+                    [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "10.0",
+                            "available": "10.0",
+                            "openPriceAvg": "100.0",
+                            "markPrice": "100.0",
+                            "leverage": "2",
+                        }
+                    ],
+                    [],
+                ]
+                self._position_index = 0
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                balance = self._balances[min(self._balance_index, len(self._balances) - 1)]
+                self._balance_index += 1
+                return {
+                    "market": market,
+                    "balance": 1000.0,
+                    "availableBalance": balance,
+                    "executionAvailableBalance": balance,
+                }
+
+            def get_positions(self) -> dict[str, object]:
+                positions = self._positions[min(self._position_index, len(self._positions) - 1)]
+                self._position_index += 1
+                return {"positions": positions}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=self._focus_settings(futures_top_n=1))
+        session.rest_client = PositionRestClient()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=now),
+            state=state,
+            timestamp=now,
+        )
+
+        self.assertEqual(session.remaining_portfolio_capacity_usd, 4000.0)
+        session.sync_account()
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.remaining_portfolio_capacity_usd, 4000.0)
+
+        session.sync_account()
+
+        self.assertNotIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {})
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
+        self.assertEqual(session.remaining_portfolio_capacity_usd, 5000.0)
+
+        eth_now = now + timedelta(minutes=1)
+        session.runtime.dispatcher.store.put(
+            SymbolMarketState(
+                symbol="ETHUSDT",
+                top_of_book=TopOfBook(199.5, 1.0, 200.5, 1.2, eth_now),
+                last_trade_price=200.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=eth_now,
+            )
+        )
+        eth_state = session.runtime.dispatcher.store.get("ETHUSDT")
+        assert eth_state is not None
+
+        managed = session._maybe_reallocate_futures_entry(
+            decision=make_decision(timestamp=eth_now, symbol="ETHUSDT"),
+            state=eth_state,
+            timestamp=eth_now,
+        )
+
+        self.assertEqual(managed.final_mode, "futures")
+        self.assertNotIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_sync_account_requires_balance_release_before_fast_manual_close_cleanup(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self._balances = [5.0, 5.0]
+                self._balance_index = 0
+                self._positions = [
+                    [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "10.0",
+                            "available": "10.0",
+                            "openPriceAvg": "100.0",
+                            "markPrice": "100.0",
+                            "leverage": "2",
+                        }
+                    ],
+                    [],
+                ]
+                self._position_index = 0
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                balance = self._balances[min(self._balance_index, len(self._balances) - 1)]
+                self._balance_index += 1
+                return {
+                    "market": market,
+                    "balance": 1000.0,
+                    "availableBalance": balance,
+                    "executionAvailableBalance": balance,
+                }
+
+            def get_positions(self) -> dict[str, object]:
+                positions = self._positions[min(self._position_index, len(self._positions) - 1)]
+                self._position_index += 1
+                return {"positions": positions}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=self._focus_settings(futures_top_n=1))
+        session.rest_client = PositionRestClient()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=now),
+            state=state,
+            timestamp=now,
+        )
+
+        session.sync_account()
+        session.sync_account()
+
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {"BTCUSDT": 1})
+        self.assertEqual(session.remaining_portfolio_capacity_usd, 4000.0)
+        self.assertEqual(mock_send.call_count, 0)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_sync_account_is_noop_when_paper_and_exchange_futures_positions_are_aligned(self, mock_send) -> None:
@@ -1007,12 +1209,18 @@ class QuantBinanceSessionTests(unittest.TestCase):
         )
         self.assertIn("BTCUSDT", session.paper_positions)
         session.live_positions_snapshot = [{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}]
-        session._reconcile_manual_live_closes(previous_live_positions=session.live_positions_snapshot)
+        session._reconcile_manual_live_closes(
+            previous_live_positions=session.live_positions_snapshot,
+            previous_account_snapshot={},
+        )
         self.assertIn("BTCUSDT", session.paper_positions)
 
         session.live_positions_snapshot = []
         session.open_orders_snapshot = {"orders": {"entrustedList": [{"symbol": "BTCUSDT", "orderId": "open-1"}]}}
-        session._reconcile_manual_live_closes(previous_live_positions=[{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}])
+        session._reconcile_manual_live_closes(
+            previous_live_positions=[{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}],
+            previous_account_snapshot={},
+        )
 
         self.assertIn("BTCUSDT", session.paper_positions)
         self.assertEqual(session.closed_trades, [])
@@ -1510,6 +1718,68 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(len(session.decisions), 1)
             self.assertTrue(summary_path.exists())
             self.assertTrue(state_path.exists())
+        finally:
+            if summary_path.exists():
+                summary_path.unlink()
+            if state_path.exists():
+                state_path.unlink()
+
+    def test_live_paper_shell_keeps_running_after_missing_market_state_payload(self) -> None:
+        session = self._build_session()
+        payloads = [
+            {
+                "stream": "ethusdt@trade",
+                "data": {"s": "ETHUSDT", "p": "2100", "q": "0.2", "E": 1772971560000, "m": False},
+            },
+            {
+                "stream": "btcusdt@kline_5m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "5m",
+                        "t": 1772971500000,
+                        "T": 1772971799999,
+                        "o": "50000",
+                        "h": "50100",
+                        "l": "49950",
+                        "c": "50080",
+                        "v": "18",
+                        "q": "900000",
+                        "x": True,
+                    },
+                },
+            },
+        ]
+        summary_path = ROOT / "tests" / "tmp_shell_missing_market_state_summary.json"
+        state_path = ROOT / "tests" / "tmp_shell_missing_market_state_state.json"
+        try:
+            shell = LivePaperShell(
+                ws_client_factory=lambda: FakeWsClient(payloads),
+                session=session,
+                backoff_policy=BackoffPolicy(
+                    initial_delay_seconds=0.0,
+                    max_delay_seconds=0.0,
+                    multiplier=1.0,
+                    max_attempts=1,
+                ),
+                summary_path=summary_path,
+                state_path=state_path,
+            )
+            summary = asyncio.run(shell.run())
+            assert summary is not None
+            self.assertEqual(len(session.decisions), 1)
+            self.assertEqual(summary["self_healing"]["status"], "degraded")
+            self.assertEqual(
+                summary["self_healing"]["active_guards"]["missing_market_state_symbols"],
+                ["ETHUSDT"],
+            )
+            self.assertTrue(
+                any(
+                    event["category"] == KNOWN_CATEGORY_MISSING_MARKET_STATE
+                    and event["action"] == "skip_payload"
+                    for event in summary["self_healing"]["recent_events"]
+                )
+            )
         finally:
             if summary_path.exists():
                 summary_path.unlink()
