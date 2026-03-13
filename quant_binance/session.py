@@ -68,6 +68,7 @@ class PaperPosition:
     exit_confirmation_count: int = 0
     last_exit_signal_reason: str = ""
     peak_roe_percent: float = 0.0
+    exchange_synced: bool = False
 
     def unrealized_pnl_usd_estimate(self) -> float:
         if self.side == "short":
@@ -110,6 +111,7 @@ class PaperPosition:
             "exit_confirmation_count": self.exit_confirmation_count,
             "last_exit_signal_reason": self.last_exit_signal_reason,
             "peak_roe_percent": round(self.peak_roe_percent, 6),
+            "exchange_synced": self.exchange_synced,
         }
 
 
@@ -833,6 +835,7 @@ class LivePaperSession:
             latest_liquidity_score=0.0,
             latest_net_expected_edge_bps=0.0,
             latest_estimated_round_trip_cost_bps=0.0,
+            exchange_synced=True,
         )
 
     def _reserve_capacity_for_reconciled_position(self, position: PaperPosition) -> None:
@@ -853,6 +856,15 @@ class LivePaperSession:
         if current_price <= 0.0 or entry_price <= 0.0:
             return None
         quantity_opened = max(float(payload.get("quantity_opened") or quantity_remaining), quantity_remaining)
+        exchange_synced = bool(payload.get("exchange_synced", False))
+        if not exchange_synced:
+            exchange_synced = (
+                float(payload.get("stop_distance_bps") or 0.0) <= 0.0
+                and float(payload.get("entry_predictability_score") or 0.0) == 0.0
+                and float(payload.get("entry_liquidity_score") or 0.0) == 0.0
+                and float(payload.get("entry_net_expected_edge_bps") or 0.0) == 0.0
+                and float(payload.get("entry_estimated_round_trip_cost_bps") or 0.0) == 0.0
+            )
         return PaperPosition(
             symbol=symbol,
             market=market,
@@ -896,6 +908,7 @@ class LivePaperSession:
             exit_confirmation_count=int(payload.get("exit_confirmation_count") or 0),
             last_exit_signal_reason=str(payload.get("last_exit_signal_reason") or ""),
             peak_roe_percent=float(payload.get("peak_roe_percent") or 0.0),
+            exchange_synced=exchange_synced,
         )
 
     def restore_futures_state_from_runtime(
@@ -1350,6 +1363,10 @@ class LivePaperSession:
         reward_bps = self._reward_bps(position=position, price=price)
         current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
         position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
+        if position.exchange_synced:
+            position.exit_confirmation_count = 0
+            position.last_exit_signal_reason = ""
+            return
         exit_rules = self.runtime.paper_service.settings.exit_rules
 
         if (
