@@ -433,6 +433,129 @@ class QuantBinanceSessionTests(unittest.TestCase):
             if state_path.exists():
                 state_path.unlink()
 
+    def test_sync_account_reconciles_persistent_live_futures_position_missing_in_paper(self) -> None:
+        class PositionRestClient(FakeRestClient):
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "ETHUSDT",
+                            "holdSide": "short",
+                            "total": "0.50",
+                            "available": "0.50",
+                            "openPriceAvg": "2100.0",
+                            "markPrice": "2110.0",
+                            "leverage": "5",
+                            "cTime": "1772971200000",
+                        }
+                    ]
+                }
+
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+        starting_capacity = session.remaining_portfolio_capacity_usd
+
+        session.sync_account()
+        self.assertNotIn("ETHUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_in_paper_counts, {"ETHUSDT": 1})
+        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity)
+
+        session.sync_account()
+        self.assertIn("ETHUSDT", session.paper_positions)
+        position = session.paper_positions["ETHUSDT"]
+        self.assertEqual(position.side, "short")
+        self.assertEqual(position.entry_time.isoformat(), "2026-03-08T12:00:00+00:00")
+        self.assertEqual(position.entry_price, 2100.0)
+        self.assertEqual(position.current_price, 2110.0)
+        self.assertEqual(position.entry_planned_leverage, 5)
+        self.assertEqual(position.stop_distance_bps, 0.0)
+        self.assertEqual(position.active_stop_price, 2100.0)
+        self.assertEqual(position.entry_predictability_score, 0.0)
+        self.assertEqual(position.latest_net_expected_edge_bps, 0.0)
+        self.assertAlmostEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 1055.0)
+        self.assertEqual(session.futures_missing_in_paper_counts, {})
+
+        session.sync_account()
+        self.assertAlmostEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 1055.0)
+        self.assertEqual(session.paper_positions["ETHUSDT"].quantity_remaining, 0.5)
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_sync_account_cleans_up_persistent_paper_futures_position_missing_on_exchange(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, object]:
+                return {"market": market, "orders": {"entrustedList": [{"symbol": "BTCUSDT", "orderId": "open-1"}]}}
+
+            def get_positions(self) -> dict[str, object]:
+                return {"positions": []}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=now),
+            state=state,
+            timestamp=now,
+        )
+        self.assertIn("BTCUSDT", session.paper_positions)
+
+        session.sync_account()
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {"BTCUSDT": 1})
+
+        session.sync_account()
+        self.assertNotIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {})
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
+        self.assertEqual(session.rest_client.cancelled_orders, [("futures", "BTCUSDT", "open-1")])
+        self.assertIn("BTCUSDT", session.manual_symbol_cooldowns)
+        self.assertTrue(any("MANUAL_CLOSE_SYNCED" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_sync_account_is_noop_when_paper_and_exchange_futures_positions_are_aligned(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "10.0",
+                            "available": "10.0",
+                            "openPriceAvg": "100.0",
+                            "markPrice": "100.0",
+                        }
+                    ]
+                }
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state.last_trade_price = 100.0
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        session._record_decision(
+            decision=make_decision(timestamp=now),
+            state=state,
+            timestamp=now,
+        )
+        starting_capacity = session.remaining_portfolio_capacity_usd
+        starting_trade_count = len(session.closed_trades)
+
+        session.sync_account()
+        session.sync_account()
+
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(len(session.closed_trades), starting_trade_count)
+        self.assertEqual(session.futures_missing_in_paper_counts, {})
+        self.assertEqual(session.futures_missing_on_exchange_counts, {})
+        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity)
+        self.assertEqual(mock_send.call_count, 0)
+
     def test_session_trims_futures_position_on_profit_protection_retrace(self) -> None:
         session = self._build_session()
         state = session.runtime.dispatcher.store.get("BTCUSDT")
