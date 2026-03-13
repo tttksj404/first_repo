@@ -1,7 +1,37 @@
 [
   {
-    "id": "31eeacc8-175a-8122-bc26-ca316b8f2c44",
-    "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+    "id": "321eacc8-175a-8165-8626-cd137a3120f5",
+    "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+    "type": "page"
+  },
+  {
+    "id": "321eacc8-175a-819f-9681-c73018f7e1ae",
+    "title": "📚 [LEET] 20:40 Night 복습 (스터디 내용 정리)",
+    "type": "page"
+  },
+  {
+    "id": "321eacc8-175a-81a5-b2bd-e81709302c2f",
+    "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+    "type": "page"
+  },
+  {
+    "id": "321eacc8-175a-81c1-b270-d89b815dcbf9",
+    "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+    "type": "page"
+  },
+  {
+    "id": "321eacc8-175a-813a-befd-d0de83ad62fa",
+    "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+    "type": "page"
+  },
+  {
+    "id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5",
+    "title": "🏠 HOME (메인 대시보드)",
+    "type": "page"
+  },
+  {
+    "id": "31feacc8-175a-81ca-9422-e98484530d97",
+    "title": "📕 [최종완전판] 정보처리기사 실기 기출 해설 (문제/정답/기출이력 포함)",
     "type": "page"
   },
   {
@@ -10,8 +40,63 @@
     "type": "page"
   },
   {
-    "id": "31eeacc8-175a-8183-b982-f39616d86dce",
+    "id": "31eeacc8-175a-8122-bc26-ca316b8f2c44",
     "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "2f0eacc8-175a-8055-b8a3-dc0050747538",
+    "title": "ssafy 교육(python)",
+    "type": "page"
+  },
+  {
+    "id": "2ebeacc8-175a-803e-8ffc-d832509624c1",
+    "title": "파이썬 문법",
+    "type": "page"
+  },
+  {
+    "id": "313eacc8-175a-81fd-93d5-d90dbc0b7285",
+    "title": "📚 AI 활용 가이드: 똑똑하게 명령하고 200% 활용하기",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-818a-92da-cd2d38cc4f4c",
+    "title": "📕 [완전판] LEET 언어이해 기출 출제원리 및 오답 거름망",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-819d-985b-ee4f4d006c90",
+    "title": "📘 [완전판] LEET 추리논증 기본 정리 및 전략 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "314eacc8-175a-817c-8fa6-c89fd1e36a66",
+    "title": "🏆 [2026] LEET 140+ 합격 사수: SSAFY 병행 마스터 워크스페이스",
+    "type": "page"
+  },
+  {
+    "id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524",
+    "title": "알고리즘 스터디 ",
+    "type": "page"
+  },
+  {
+    "id": "319eacc8-175a-81e0-9669-f9661759d4f0",
+    "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81e9-a302-dec0633ff5ea",
+    "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-81de-96b2-dc42b14ff10a",
+    "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열)",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-8150-8859-e5dd986c528c",
+    "title": "📍 [BFS] 2178 - 미로 탐색 (최단 경로)",
     "type": "page"
   },
   {
@@ -20,18 +105,108 @@
     "type": "page"
   },
   {
+    "id": "31eeacc8-175a-8183-b982-f39616d86dce",
+    "title": "🏆 [Master] 삼성 A형 알고리즘 백지코딩 마스터북",
+    "type": "page"
+  },
+  {
+    "id": "30beacc8-175a-8059-9fc3-d262112c0fc4",
+    "title": "IM정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8129-a114-c74c4d8f911a",
+    "title": "Step4_BinarySearch_Greedy 정리",
+    "type": "page"
+  },
+  {
+    "id": "318eacc8-175a-8177-af49-ebcc4f2487b0",
+    "title": "Step2_BruteForce_Backtracking 정리",
+    "type": "page"
+  },
+  {
+    "id": "31feacc8-175a-8102-8d39-d57e063109b0",
+    "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+    "type": "page"
+  },
+  {
+    "id": "31feacc8-175a-8127-b2b2-ec68d26ec4a5",
+    "title": "🔥 [LEET] 20:15 Night 집중 학습 (기출 분석 메인)",
+    "type": "page"
+  },
+  {
+    "id": "31feacc8-175a-8116-8659-e5e3b4f769df",
+    "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+    "type": "page"
+  },
+  {
+    "id": "31feacc8-175a-810e-86de-cbe17230ccf3",
+    "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+    "type": "page"
+  },
+  {
+    "id": "31feacc8-175a-81c1-ae82-e964c8c2c509",
+    "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+    "type": "page"
+  },
+  {
     "id": "2f0eacc8-175a-8072-8e4b-e298edcb69c5",
     "title": "재귀&백트래킹(여기서부터 응용 1~3문제)",
     "type": "page"
   },
   {
-    "id": "31beacc8-175a-814f-b848-c84b74984e09",
-    "title": "📍 [Backtracking] 1759 - 암호 만들기",
+    "id": "31beacc8-175a-813c-ba9b-c0ff8e8d5d98",
+    "title": "📍 [Samsung A] DFS & 백트래킹 극한의 정복 (IM Master Style)",
     "type": "page"
   },
   {
-    "id": "31beacc8-175a-8150-8859-e5dd986c528c",
-    "title": "📍 [BFS] 2178 - 미로 탐색 (최단 경로)",
+    "id": "31feacc8-175a-815c-ab4b-cc5da3b4d039",
+    "title": "📕 [마스터북] 백트래킹 3대 천왕 (순열, 조합, 부분집합) - IM 마스터 가이드",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-8156-836e-ee51a5adcdcb",
+    "title": "💤 [LEET] 23:00 수면 사수 (숙면 회복)",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-81e4-93ed-ede9fa1d4ddb",
+    "title": "🔥 [LEET] 20:15 Night 집중 학습 (기출 분석 메인)",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-812b-8e59-e96816eb91b4",
+    "title": "🍴 [LEET] 13:10 Lunch 틈새 (추리 퀴즈)",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-81c2-a8a4-fa0b619fbfbe",
+    "title": "🏢 [SSAFY] 09:00 교육 및 알고리즘 집중",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-81b0-a98c-f3eff9a02e27",
+    "title": "🌅 [LEET] 08:30 Morning 예열 (언어 1지문)",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-816d-9429-f1dfb5f064aa",
+    "title": "🐍 [Syntax 3] Data Structures (Deque, Heapq, Set)",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-814e-acb7-d642108aeaa5",
+    "title": "🐍 [Syntax 2] List & Matrix Mastery (2D Grid)",
+    "type": "page"
+  },
+  {
+    "id": "31eeacc8-175a-81d3-ae81-f53d62ac066c",
+    "title": "🐍 [Syntax 1] Fast I/O & String Magic",
+    "type": "page"
+  },
+  {
+    "id": "31beacc8-175a-814f-b848-c84b74984e09",
+    "title": "📍 [Backtracking] 1759 - 암호 만들기",
     "type": "page"
   },
   {
@@ -65,23 +240,8 @@
     "type": "page"
   },
   {
-    "id": "31beacc8-175a-81de-96b2-dc42b14ff10a",
-    "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열)",
-    "type": "page"
-  },
-  {
     "id": "31beacc8-175a-81db-acda-fa02ac631576",
     "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
-    "type": "page"
-  },
-  {
-    "id": "31beacc8-175a-81e9-a302-dec0633ff5ea",
-    "title": "📍 [Samsung A] 풍선 팡 (재귀 & 브루트포스)",
-    "type": "page"
-  },
-  {
-    "id": "31beacc8-175a-813c-ba9b-c0ff8e8d5d98",
-    "title": "📍 [Samsung A] DFS & 백트래킹 극한의 정복 (IM Master Style)",
     "type": "page"
   },
   {
@@ -177,11 +337,6 @@
   {
     "id": "319eacc8-175a-81c5-8bd2-ea179bf83820",
     "title": "📍 [Samsung A] 몬스터 소탕 (DFS & 순열 탐색)",
-    "type": "page"
-  },
-  {
-    "id": "319eacc8-175a-81e0-9669-f9661759d4f0",
-    "title": "📍 [Samsung A] 장기 포의 이동 (DFS & 백트래킹)",
     "type": "page"
   },
   {
@@ -345,11 +500,6 @@
     "type": "page"
   },
   {
-    "id": "318eacc8-175a-8129-a114-c74c4d8f911a",
-    "title": "Step4_BinarySearch_Greedy 정리",
-    "type": "page"
-  },
-  {
     "id": "318eacc8-175a-8180-b181-e081d5124650",
     "title": "3079 - 이분탐색/파라메트릭 서치",
     "type": "page"
@@ -465,11 +615,6 @@
     "type": "page"
   },
   {
-    "id": "318eacc8-175a-8177-af49-ebcc4f2487b0",
-    "title": "Step2_BruteForce_Backtracking 정리",
-    "type": "page"
-  },
-  {
     "id": "318eacc8-175a-8192-bcb9-eaca27473245",
     "title": "6603 - 그래프 BFS, 그래프 DFS/백트래킹",
     "type": "page"
@@ -535,18 +680,8 @@
     "type": "page"
   },
   {
-    "id": "2e7eacc8-175a-8035-8d30-ca6bf5e1c524",
-    "title": "알고리즘 스터디 ",
-    "type": "page"
-  },
-  {
     "id": "2f7eacc8-175a-8037-b6f8-dc9907e07ae0",
     "title": "2월",
-    "type": "page"
-  },
-  {
-    "id": "231eacc8-175a-80b6-b30b-e061e8f5a3c5",
-    "title": "스터디 로드맵 ",
     "type": "page"
   },
   {
@@ -570,11 +705,6 @@
     "type": "page"
   },
   {
-    "id": "314eacc8-175a-817c-8fa6-c89fd1e36a66",
-    "title": "🏆 [2026] LEET 140+ 합격 사수: SSAFY 병행 마스터 워크스페이스",
-    "type": "page"
-  },
-  {
     "id": "314eacc8-175a-8100-b638-fdfe053da235",
     "title": "⏰ [섹션 2] 데일리 루틴 & 체크리스트",
     "type": "database"
@@ -583,16 +713,6 @@
     "id": "314eacc8-175a-8101-8889-ebd834aa2a46",
     "title": "🔍 [섹션 3] 논리 피드백 연구소",
     "type": "database"
-  },
-  {
-    "id": "314eacc8-175a-819d-985b-ee4f4d006c90",
-    "title": "📘 [완전판] LEET 추리논증 기본 정리 및 전략 마스터북",
-    "type": "page"
-  },
-  {
-    "id": "314eacc8-175a-818a-92da-cd2d38cc4f4c",
-    "title": "📕 [완전판] LEET 언어이해 기출 출제원리 및 오답 거름망",
-    "type": "page"
   },
   {
     "id": "314eacc8-175a-8176-9445-d770e721d284",
@@ -655,11 +775,6 @@
     "type": "page"
   },
   {
-    "id": "313eacc8-175a-81fd-93d5-d90dbc0b7285",
-    "title": "📚 AI 활용 가이드: 똑똑하게 명령하고 200% 활용하기",
-    "type": "page"
-  },
-  {
     "id": "30ceacc8-175a-804d-9888-cf3288329719",
     "title": "다익스트라(Dijkstra)",
     "type": "page"
@@ -710,16 +825,6 @@
     "type": "page"
   },
   {
-    "id": "2ebeacc8-175a-803e-8ffc-d832509624c1",
-    "title": "파이썬 문법",
-    "type": "page"
-  },
-  {
-    "id": "30beacc8-175a-8059-9fc3-d262112c0fc4",
-    "title": "IM정리",
-    "type": "page"
-  },
-  {
     "id": "2fceacc8-175a-80bf-bfc1-eb2daffafad5",
     "title": "인덱스 사용법/ 인덱스[0] 과 [-1]을 이용해 최대 최소값 이용  ",
     "type": "page"
@@ -757,11 +862,6 @@
   {
     "id": "2f0eacc8-175a-8054-932b-c1824f53c326",
     "title": "1월",
-    "type": "page"
-  },
-  {
-    "id": "2f0eacc8-175a-8055-b8a3-dc0050747538",
-    "title": "ssafy 교육(python)",
     "type": "page"
   },
   {
