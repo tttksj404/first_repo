@@ -60,6 +60,10 @@ print("unrealized_pnl_usd_estimate:", summary.get("unrealized_pnl_usd_estimate")
 print("exit_reason_counts:", summary.get("exit_reason_counts"))
 print("symbol_performance:", summary.get("symbol_performance"))
 print("kill_switch:", summary.get("kill_switch"))
+self_healing = summary.get("self_healing") or {}
+print("self_healing_status:", self_healing.get("status"))
+print("self_healing_active_guards:", self_healing.get("active_guards"))
+print("self_healing_recent_events:", self_healing.get("recent_events"))
 print("updated_at:", state.get("updated_at"))
 print("heartbeat_count:", state.get("heartbeat_count"))
 print("last_event_timestamp:", state.get("last_event_timestamp"))
@@ -75,15 +79,22 @@ if capital:
 spot_positions = summary.get("open_spot_positions") or []
 paper_futures_positions = summary.get("paper_open_futures_positions") or summary.get("open_futures_positions") or []
 exchange_futures_positions = summary.get("exchange_live_futures_positions") or []
+mismatch_details = summary.get("futures_position_mismatch_details") or {}
 print("open_spot_positions:", spot_positions)
 print("paper_open_futures_position_count:", summary.get("paper_open_futures_position_count", len(paper_futures_positions)))
+print("paper_open_futures_symbols:", [item.get("symbol") for item in paper_futures_positions])
 print("paper_open_futures_positions:", paper_futures_positions)
 print("exchange_live_futures_position_count:", summary.get("exchange_live_futures_position_count", len(exchange_futures_positions)))
+print("exchange_live_futures_symbols:", [item.get("symbol") for item in exchange_futures_positions])
 print("exchange_live_futures_positions:", exchange_futures_positions)
 print("futures_position_mismatch:", summary.get("futures_position_mismatch"))
-print("futures_position_mismatch_details:", summary.get("futures_position_mismatch_details"))
-print("open_futures_positions:", summary.get("open_futures_positions"))
-print("live_positions:", summary.get("live_positions"))
+print(
+    "futures_position_warning:",
+    {
+        "missing_in_paper": mismatch_details.get("missing_in_paper") or [],
+        "missing_on_exchange": mismatch_details.get("missing_on_exchange") or [],
+    },
+)
 if exchange_futures_positions:
     print("exchange_live_futures_positions_brief:")
     for item in exchange_futures_positions[:5]:
