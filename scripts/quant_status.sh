@@ -63,16 +63,29 @@ print("live_order_count:", state.get("live_order_count"))
 print("last_event_timestamp:", state.get("last_event_timestamp"))
 print("last_decision_timestamp:", state.get("last_decision_timestamp"))
 print("kill_switch:", state.get("kill_switch"))
+self_healing = state.get("self_healing") or summary.get("self_healing") or {}
+print("self_healing_status:", self_healing.get("status"))
+print("self_healing_active_guards:", self_healing.get("active_guards"))
+print("self_healing_recent_events:", self_healing.get("recent_events"))
 paper_futures_positions = state.get("paper_open_futures_positions")
 if paper_futures_positions is None:
     paper_futures_positions = summary.get("paper_open_futures_positions") or summary.get("open_futures_positions") or []
 exchange_futures_positions = state.get("exchange_live_futures_positions")
 if exchange_futures_positions is None:
     exchange_futures_positions = summary.get("exchange_live_futures_positions") or []
+mismatch_details = state.get("futures_position_mismatch_details") or summary.get("futures_position_mismatch_details") or {}
 print("paper_open_futures_position_count:", state.get("paper_open_futures_position_count", len(paper_futures_positions)))
+print("paper_open_futures_symbols:", [item.get("symbol") for item in paper_futures_positions])
 print("exchange_live_futures_position_count:", state.get("exchange_live_futures_position_count", len(exchange_futures_positions)))
+print("exchange_live_futures_symbols:", [item.get("symbol") for item in exchange_futures_positions])
 print("futures_position_mismatch:", state.get("futures_position_mismatch"))
-print("futures_position_mismatch_details:", state.get("futures_position_mismatch_details"))
+print(
+    "futures_position_warning:",
+    {
+        "missing_in_paper": mismatch_details.get("missing_in_paper") or [],
+        "missing_on_exchange": mismatch_details.get("missing_on_exchange") or [],
+    },
+)
 for item in exchange_futures_positions[:5]:
     print(
         "live_position:",
