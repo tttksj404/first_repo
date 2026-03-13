@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import tempfile
 import unittest
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
@@ -15,6 +16,7 @@ from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.models import DecisionIntent
+from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.self_healing import KNOWN_CATEGORY_MISSING_MARKET_STATE, RuntimeSelfHealing
@@ -1612,43 +1614,178 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertNotIn("SOLUSDT", session.paper_positions)
         self.assertEqual(len(session.closed_trades), 2)
 
-    def test_futures_reallocation_does_not_replace_exchange_synced_positions(self) -> None:
-        settings = self._focus_settings(futures_top_n=1)
-        session = self._build_session(settings=settings)
-        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
-        self._seed_weak_futures_position(session, symbol="ETHUSDT", entry_time=now - timedelta(minutes=10))
-        session.paper_positions["ETHUSDT"].exchange_synced = True
-        session.capital_report = {
-            "futures_available_balance_usd": 50.0,
-            "futures_execution_balance_usd": 1.0,
-            "can_trade_futures_any": True,
-            "futures_requirements": [
-                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
-            ],
-        }
-        state = session.runtime.dispatcher.store.get("BTCUSDT")
-        assert state is not None
+    def test_futures_reallocation_logs_skip_reason_when_cooldown_blocks_retry(self) -> None:
+        settings = self._focus_settings(futures_top_n=2)
+        with tempfile.TemporaryDirectory() as tempdir:
+            session = self._build_session(settings=settings)
+            session.log_store = JsonlLogStore(tempdir)
+            now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+            self._seed_weak_futures_position(session, symbol="ETHUSDT", entry_time=now - timedelta(minutes=10))
+            session.capital_report = {
+                "futures_available_balance_usd": 50.0,
+                "futures_execution_balance_usd": 1.0,
+                "can_trade_futures_any": True,
+                "futures_requirements": [
+                    {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                    {"symbol": "ADAUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                ],
+            }
+            state = session.runtime.dispatcher.store.get("BTCUSDT")
+            assert state is not None
 
-        managed = session._maybe_reallocate_futures_entry(
-            decision=make_decision(
+            first = session._maybe_reallocate_futures_entry(
+                decision=make_decision(
+                    timestamp=now,
+                    symbol="BTCUSDT",
+                    predictability_score=94.0,
+                    gross_expected_edge_bps=36.0,
+                    net_expected_edge_bps=24.0,
+                    estimated_round_trip_cost_bps=6.0,
+                    order_intent_notional_usd=2500.0,
+                ),
+                state=state,
                 timestamp=now,
-                symbol="BTCUSDT",
-                predictability_score=96.0,
-                gross_expected_edge_bps=36.0,
-                net_expected_edge_bps=24.0,
-                estimated_round_trip_cost_bps=6.0,
-                order_intent_notional_usd=2500.0,
-            ),
-            state=state,
-            timestamp=now,
-        )
+            )
+            self.assertEqual(first.final_mode, "futures")
 
-        self.assertEqual(managed.final_mode, "cash")
-        self.assertIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
-        self.assertIn("ETHUSDT", session.paper_positions)
-        self.assertTrue(session.paper_positions["ETHUSDT"].exchange_synced)
-        self.assertEqual(session.closed_trades, [])
-        self.assertIsNone(session.futures_reallocation_cooldown_until)
+            self._seed_weak_futures_position(session, symbol="SOLUSDT", entry_time=now - timedelta(minutes=5))
+            blocked = session._maybe_reallocate_futures_entry(
+                decision=make_decision(
+                    timestamp=now + timedelta(minutes=5),
+                    symbol="ADAUSDT",
+                    predictability_score=95.0,
+                    gross_expected_edge_bps=38.0,
+                    net_expected_edge_bps=26.0,
+                    estimated_round_trip_cost_bps=6.0,
+                    order_intent_notional_usd=2500.0,
+                ),
+                state=state,
+                timestamp=now + timedelta(minutes=5),
+            )
+
+            self.assertEqual(blocked.final_mode, "cash")
+            events = session.log_store.read("futures_reallocation")
+            self.assertEqual(len(events), 2)
+            skip_event = events[-1]
+            self.assertEqual(skip_event["status"], "skipped")
+            self.assertEqual(skip_event["blocked_reason"], "INSUFFICIENT_EXECUTION_BALANCE")
+            self.assertEqual(skip_event["skip_reason"], "REALLOCATION_COOLDOWN_ACTIVE")
+            self.assertEqual(skip_event["incoming_symbol"], "ADAUSDT")
+            self.assertEqual(skip_event["candidate_strength"]["score"], 95.0)
+            self.assertEqual(skip_event["candidate_strength"]["net_edge_bps"], 26.0)
+            self.assertEqual(skip_event["cooldown_until"], (now + timedelta(minutes=10)).isoformat())
+
+    def test_futures_reallocation_keeps_exchange_synced_position_protected_in_ordinary_case(self) -> None:
+        settings = self._focus_settings(futures_top_n=1)
+        with tempfile.TemporaryDirectory() as tempdir:
+            session = self._build_session(settings=settings)
+            session.log_store = JsonlLogStore(tempdir)
+            now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+            self._seed_weak_futures_position(session, symbol="ETHUSDT", entry_time=now - timedelta(minutes=5))
+            session.paper_positions["ETHUSDT"].exchange_synced = True
+            session.capital_report = {
+                "futures_available_balance_usd": 50.0,
+                "futures_execution_balance_usd": 1.0,
+                "can_trade_futures_any": True,
+                "futures_requirements": [
+                    {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                ],
+            }
+            state = session.runtime.dispatcher.store.get("BTCUSDT")
+            assert state is not None
+
+            managed = session._maybe_reallocate_futures_entry(
+                decision=make_decision(
+                    timestamp=now,
+                    symbol="BTCUSDT",
+                    predictability_score=96.0,
+                    gross_expected_edge_bps=36.0,
+                    net_expected_edge_bps=24.0,
+                    estimated_round_trip_cost_bps=6.0,
+                    order_intent_notional_usd=2500.0,
+                ),
+                state=state,
+                timestamp=now,
+            )
+
+            self.assertEqual(managed.final_mode, "cash")
+            self.assertIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
+            self.assertIn("ETHUSDT", session.paper_positions)
+            self.assertTrue(session.paper_positions["ETHUSDT"].exchange_synced)
+            self.assertEqual(session.closed_trades, [])
+            self.assertIsNone(session.futures_reallocation_cooldown_until)
+
+            events = session.log_store.read("futures_reallocation")
+            self.assertEqual(len(events), 1)
+            skip_event = events[0]
+            self.assertEqual(skip_event["status"], "skipped")
+            self.assertEqual(skip_event["blocked_reason"], "MAX_CONCURRENT_FUTURES")
+            self.assertEqual(skip_event["skip_reason"], "NO_ELIGIBLE_TARGETS")
+            self.assertEqual(skip_event["protected_symbols"], ["ETHUSDT"])
+            self.assertEqual(skip_event["targets"][0]["symbol"], "ETHUSDT")
+            self.assertEqual(skip_event["targets"][0]["protected_reason"], "EXCHANGE_SYNCED_RECENCY_GUARD")
+            self.assertEqual(session.log_store.read("closed_trades"), [])
+
+    def test_futures_reallocation_replaces_exchange_synced_position_in_strict_exception_case(self) -> None:
+        settings = self._focus_settings(futures_top_n=1)
+        with tempfile.TemporaryDirectory() as tempdir:
+            session = self._build_session(settings=settings)
+            session.log_store = JsonlLogStore(tempdir)
+            now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+            self._seed_weak_futures_position(
+                session,
+                symbol="ETHUSDT",
+                entry_time=now - timedelta(minutes=25),
+            )
+            session.paper_positions["ETHUSDT"].exchange_synced = True
+            session.capital_report = {
+                "futures_available_balance_usd": 50.0,
+                "futures_execution_balance_usd": 1.0,
+                "can_trade_futures_any": True,
+                "futures_requirements": [
+                    {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                ],
+            }
+            state = session.runtime.dispatcher.store.get("BTCUSDT")
+            assert state is not None
+
+            managed = session._maybe_reallocate_futures_entry(
+                decision=make_decision(
+                    timestamp=now,
+                    symbol="BTCUSDT",
+                    predictability_score=96.0,
+                    gross_expected_edge_bps=36.0,
+                    net_expected_edge_bps=24.0,
+                    estimated_round_trip_cost_bps=6.0,
+                    order_intent_notional_usd=2500.0,
+                ),
+                state=state,
+                timestamp=now,
+            )
+
+            self.assertEqual(managed.final_mode, "futures")
+            self.assertEqual(managed.order_intent_notional_usd, 2500.0)
+            self.assertNotIn("ETHUSDT", session.paper_positions)
+            self.assertEqual(len(session.closed_trades), 1)
+            self.assertEqual(session.closed_trades[0]["symbol"], "ETHUSDT")
+            self.assertEqual(session.closed_trades[0]["exit_reason"], "CAPITAL_REALLOCATION")
+            self.assertEqual(session.futures_reallocation_cooldown_until, now + timedelta(minutes=10))
+
+            trade_rows = session.log_store.read("closed_trades")
+            self.assertEqual(len(trade_rows), 1)
+            self.assertEqual(trade_rows[0]["symbol"], "ETHUSDT")
+            self.assertEqual(trade_rows[0]["exit_reason"], "CAPITAL_REALLOCATION")
+
+            events = session.log_store.read("futures_reallocation")
+            self.assertEqual(len(events), 1)
+            success_event = events[0]
+            self.assertEqual(success_event["status"], "executed")
+            self.assertEqual(success_event["blocked_reason"], "MAX_CONCURRENT_FUTURES")
+            self.assertEqual(success_event["override_reason"], "STRICT_EXCHANGE_SYNCED_EXCEPTION")
+            self.assertEqual(success_event["replaced_symbols"], ["ETHUSDT"])
+            self.assertEqual(success_event["replaced_count"], 1)
+            self.assertEqual(success_event["targets"][0]["exchange_synced"], True)
+            self.assertEqual(success_event["targets"][0]["exchange_synced_exception"], True)
 
     def test_async_runner_consumes_payloads(self) -> None:
         session = self._build_session()

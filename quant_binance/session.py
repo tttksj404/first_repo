@@ -691,9 +691,12 @@ class LivePaperSession:
         seconds = max(60, self.runtime.decision_interval_minutes * 60)
         return timestamp + timedelta(seconds=seconds)
 
-    def _futures_reallocation_cooldown_for_timestamp(self, timestamp: datetime) -> datetime:
+    def _futures_reallocation_cooldown_window(self) -> timedelta:
         seconds = max(60, self.runtime.decision_interval_minutes * 120)
-        return timestamp + timedelta(seconds=seconds)
+        return timedelta(seconds=seconds)
+
+    def _futures_reallocation_cooldown_for_timestamp(self, timestamp: datetime) -> datetime:
+        return timestamp + self._futures_reallocation_cooldown_window()
 
     def _is_futures_reallocation_cooldown_active(self, timestamp: datetime) -> bool:
         until = self.futures_reallocation_cooldown_until
@@ -1693,28 +1696,182 @@ class LivePaperSession:
         pnl = position.unrealized_pnl_usd_estimate()
         return current_score, current_edge, pnl, position.entry_time
 
-    def _weak_futures_reallocation_targets(self, *, incoming_decision: DecisionIntent) -> list[PaperPosition]:
+    def _exchange_synced_reallocation_loss_floor_usd(
+        self,
+        *,
+        position: PaperPosition,
+        incoming_decision: DecisionIntent,
+    ) -> float:
+        focus = self.runtime.paper_service.settings.portfolio_focus
+        max_cost_bps = max(
+            incoming_decision.estimated_round_trip_cost_bps,
+            position.entry_estimated_round_trip_cost_bps,
+            position.latest_estimated_round_trip_cost_bps or position.entry_estimated_round_trip_cost_bps,
+        )
+        cost_floor = position.current_notional_usd_estimate() * max(max_cost_bps, 0.0) * 4.0 / 10000.0
+        return round(max(focus.min_incremental_pnl_usd * 4.0, cost_floor, 10.0), 6)
+
+    def _futures_reallocation_target_assessments(
+        self,
+        *,
+        incoming_decision: DecisionIntent,
+        timestamp: datetime,
+    ) -> list[dict[str, Any]]:
         settings = self.runtime.paper_service.settings
         focus = settings.portfolio_focus
-        weakest: list[tuple[tuple[float, float, float, datetime], PaperPosition]] = []
+        weakest: list[dict[str, Any]] = []
         for position in self.paper_positions.values():
             if position.market != "futures" or position.quantity_remaining <= 0 or position.symbol == incoming_decision.symbol:
-                continue
-            if position.exchange_synced:
                 continue
             current_score, current_edge, pnl, _ = self._futures_reallocation_target_state(position)
             score_erosion = position.entry_predictability_score - current_score
             edge_erosion = position.entry_net_expected_edge_bps - current_edge
-            weakness_detected = (
-                score_erosion >= settings.exit_rules.score_drop_exit_buffer
-                or edge_erosion >= max(focus.min_net_edge_advantage_bps, 0.0)
-                or pnl <= -max(focus.min_incremental_pnl_usd, 0.0)
+            weakness_flags: list[str] = []
+            if score_erosion >= settings.exit_rules.score_drop_exit_buffer:
+                weakness_flags.append("score_drop")
+            if edge_erosion >= max(focus.min_net_edge_advantage_bps, 0.0):
+                weakness_flags.append("edge_drop")
+            if pnl <= -max(focus.min_incremental_pnl_usd, 0.0):
+                weakness_flags.append("negative_pnl")
+            weakness_detected = bool(weakness_flags)
+            protected_reason: str | None = None
+            exchange_synced_exception = False
+            exchange_synced_age_minutes: float | None = None
+            exchange_synced_loss_floor_usd: float | None = None
+            if position.exchange_synced:
+                exchange_synced_age_minutes = round(
+                    max((timestamp - position.entry_time).total_seconds(), 0.0) / 60.0,
+                    6,
+                )
+                exchange_synced_loss_floor_usd = self._exchange_synced_reallocation_loss_floor_usd(
+                    position=position,
+                    incoming_decision=incoming_decision,
+                )
+                if exchange_synced_age_minutes < (self._futures_reallocation_cooldown_window().total_seconds() / 60.0):
+                    protected_reason = "EXCHANGE_SYNCED_RECENCY_GUARD"
+                elif pnl > -exchange_synced_loss_floor_usd:
+                    protected_reason = "EXCHANGE_SYNCED_LOSS_GUARD"
+                else:
+                    exchange_synced_exception = True
+            elif not weakness_detected:
+                protected_reason = "TARGET_NOT_WEAK_ENOUGH"
+            eligible = weakness_detected and protected_reason is None
+            weakest.append(
+                {
+                    "position": position,
+                    "sort_key": self._futures_reallocation_target_state(position),
+                    "symbol": position.symbol,
+                    "score": round(current_score, 6),
+                    "edge_bps": round(current_edge, 6),
+                    "pnl_usd": round(pnl, 6),
+                    "score_erosion": round(score_erosion, 6),
+                    "edge_erosion_bps": round(edge_erosion, 6),
+                    "weakness_flags": weakness_flags,
+                    "eligible": eligible,
+                    "exchange_synced": position.exchange_synced,
+                    "protected_reason": protected_reason,
+                    "exchange_synced_exception": exchange_synced_exception,
+                    "exchange_synced_age_minutes": exchange_synced_age_minutes,
+                    "exchange_synced_loss_floor_usd": exchange_synced_loss_floor_usd,
+                }
             )
-            if not weakness_detected:
-                continue
-            weakest.append((self._futures_reallocation_target_state(position), position))
-        weakest.sort(key=lambda item: item[0])
-        return [position for _, position in weakest]
+        weakest.sort(key=lambda item: item["sort_key"])
+        return weakest
+
+    def _weak_futures_reallocation_targets(
+        self,
+        *,
+        incoming_decision: DecisionIntent,
+        timestamp: datetime,
+    ) -> list[PaperPosition]:
+        assessments = self._futures_reallocation_target_assessments(
+            incoming_decision=incoming_decision,
+            timestamp=timestamp,
+        )
+        return [item["position"] for item in assessments if item["eligible"]]
+
+    def _compact_futures_reallocation_targets(
+        self,
+        assessments: list[dict[str, Any]],
+        *,
+        limit: int = 4,
+    ) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for item in assessments[:limit]:
+            row: dict[str, Any] = {
+                "symbol": item["symbol"],
+                "score": item["score"],
+                "edge_bps": item["edge_bps"],
+                "pnl_usd": item["pnl_usd"],
+                "weakness_flags": list(item["weakness_flags"]),
+                "eligible": item["eligible"],
+                "exchange_synced": item["exchange_synced"],
+                "protected_reason": item["protected_reason"],
+                "exchange_synced_exception": item["exchange_synced_exception"],
+            }
+            if item["exchange_synced"]:
+                row["exchange_synced_age_minutes"] = item["exchange_synced_age_minutes"]
+                row["exchange_synced_loss_floor_usd"] = item["exchange_synced_loss_floor_usd"]
+            rows.append(row)
+        return rows
+
+    def _log_futures_reallocation_event(
+        self,
+        *,
+        timestamp: datetime,
+        decision: DecisionIntent,
+        blocked_reason: str,
+        status: str,
+        skip_reason: str | None = None,
+        cooldown_until: datetime | None = None,
+        target_assessments: list[dict[str, Any]] | None = None,
+        selected_targets: list[PaperPosition] | None = None,
+        override_reason: str | None = None,
+        score_advantage: float | None = None,
+        edge_advantage_after_costs_bps: float | None = None,
+        aggregate_switching_cost_bps: float | None = None,
+        incremental_pnl_usd_estimate: float | None = None,
+    ) -> None:
+        if self.log_store is None:
+            return
+        payload: dict[str, Any] = {
+            "timestamp": timestamp,
+            "status": status,
+            "blocked_reason": blocked_reason,
+            "incoming_symbol": decision.symbol,
+            "candidate_strength": {
+                "score": round(decision.predictability_score, 6),
+                "net_edge_bps": round(decision.net_expected_edge_bps, 6),
+                "estimated_round_trip_cost_bps": round(decision.estimated_round_trip_cost_bps, 6),
+                "requested_notional_usd": round(decision.order_intent_notional_usd, 6),
+            },
+            "cooldown_until": cooldown_until,
+            "max_replacements": self._max_futures_reallocation_replacements(),
+        }
+        if skip_reason is not None:
+            payload["skip_reason"] = skip_reason
+        if override_reason is not None:
+            payload["override_reason"] = override_reason
+        if target_assessments is not None:
+            payload["targets"] = self._compact_futures_reallocation_targets(target_assessments)
+            payload["protected_symbols"] = [
+                item["symbol"]
+                for item in target_assessments
+                if item["protected_reason"] is not None
+            ]
+        if selected_targets:
+            payload["replaced_symbol"] = selected_targets[0].symbol
+            payload["replaced_symbols"] = [target.symbol for target in selected_targets]
+            payload["replaced_count"] = len(selected_targets)
+        if score_advantage is not None:
+            payload["score_advantage"] = round(score_advantage, 6)
+        if edge_advantage_after_costs_bps is not None:
+            payload["edge_advantage_after_costs_bps"] = round(edge_advantage_after_costs_bps, 6)
+        if aggregate_switching_cost_bps is not None:
+            payload["aggregate_switching_cost_bps"] = round(aggregate_switching_cost_bps, 6)
+        if incremental_pnl_usd_estimate is not None:
+            payload["incremental_pnl_usd_estimate"] = round(incremental_pnl_usd_estimate, 6)
+        self.log_store.append("futures_reallocation", payload)
 
     def _max_futures_reallocation_replacements(self) -> int:
         return 2
@@ -1755,14 +1912,36 @@ class LivePaperSession:
         )
         if blocked_reason is None:
             return capped_decision
+        target_assessments = self._futures_reallocation_target_assessments(
+            incoming_decision=decision,
+            timestamp=timestamp,
+        )
         fallback = self._fallback_blocked_futures_decision(
             decision=decision,
             blocked_reason=blocked_reason,
             blocked_decision=capped_decision,
         )
         if not self._is_strong_reallocation_candidate(decision):
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="CANDIDATE_NOT_STRONG_ENOUGH",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+            )
             return fallback
         if self._is_futures_reallocation_cooldown_active(timestamp):
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="REALLOCATION_COOLDOWN_ACTIVE",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+            )
             return fallback
         futures_positions = [
             position
@@ -1774,8 +1953,17 @@ class LivePaperSession:
         candidate: DecisionIntent | None = None
         released_capacity_usd = 0.0
         released_execution_balance_usd = 0.0
-        weak_targets = self._weak_futures_reallocation_targets(incoming_decision=decision)
+        weak_targets = [item["position"] for item in target_assessments if item["eligible"]]
         if not weak_targets:
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="NO_ELIGIBLE_TARGETS",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+            )
             return fallback
         for target in weak_targets[: self._max_futures_reallocation_replacements()]:
             selected_targets.append(target)
@@ -1802,6 +1990,16 @@ class LivePaperSession:
                 candidate = candidate_option
                 break
         if candidate is None:
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="REPLACEMENT_CANDIDATE_STILL_BLOCKED_AFTER_RELEASE",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+                selected_targets=selected_targets,
+            )
             return fallback
         replaced_scores: list[float] = []
         replaced_edges: list[float] = []
@@ -1820,14 +2018,70 @@ class LivePaperSession:
         incremental_pnl_usd = edge_advantage_after_costs * candidate.order_intent_notional_usd / 10000.0
         focus = self.runtime.paper_service.settings.portfolio_focus
         if score_advantage < focus.min_score_advantage_to_replace:
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="SCORE_ADVANTAGE_BELOW_FLOOR",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+                selected_targets=selected_targets,
+                score_advantage=score_advantage,
+                edge_advantage_after_costs_bps=edge_advantage_after_costs,
+                aggregate_switching_cost_bps=switching_cost_bps,
+                incremental_pnl_usd_estimate=incremental_pnl_usd,
+            )
             return fallback
         if edge_advantage_after_costs < focus.min_net_edge_advantage_bps:
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="EDGE_ADVANTAGE_BELOW_FLOOR",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+                selected_targets=selected_targets,
+                score_advantage=score_advantage,
+                edge_advantage_after_costs_bps=edge_advantage_after_costs,
+                aggregate_switching_cost_bps=switching_cost_bps,
+                incremental_pnl_usd_estimate=incremental_pnl_usd,
+            )
             return fallback
         if incremental_pnl_usd < focus.min_incremental_pnl_usd:
+            self._log_futures_reallocation_event(
+                timestamp=timestamp,
+                decision=decision,
+                blocked_reason=blocked_reason,
+                status="skipped",
+                skip_reason="INCREMENTAL_PNL_BELOW_FLOOR",
+                cooldown_until=self.futures_reallocation_cooldown_until,
+                target_assessments=target_assessments,
+                selected_targets=selected_targets,
+                score_advantage=score_advantage,
+                edge_advantage_after_costs_bps=edge_advantage_after_costs,
+                aggregate_switching_cost_bps=switching_cost_bps,
+                incremental_pnl_usd_estimate=incremental_pnl_usd,
+            )
             return fallback
         if self.live_order_executor is not None:
             live_targets = [self._find_live_futures_position(target.symbol) for target in selected_targets]
             if any(target is None for target in live_targets):
+                self._log_futures_reallocation_event(
+                    timestamp=timestamp,
+                    decision=decision,
+                    blocked_reason=blocked_reason,
+                    status="skipped",
+                    skip_reason="LIVE_EXCHANGE_TARGET_NOT_FOUND",
+                    cooldown_until=self.futures_reallocation_cooldown_until,
+                    target_assessments=target_assessments,
+                    selected_targets=selected_targets,
+                    score_advantage=score_advantage,
+                    edge_advantage_after_costs_bps=edge_advantage_after_costs,
+                    aggregate_switching_cost_bps=switching_cost_bps,
+                    incremental_pnl_usd_estimate=incremental_pnl_usd,
+                )
                 return fallback
             for live_target in live_targets:
                 assert live_target is not None
@@ -1841,23 +2095,23 @@ class LivePaperSession:
                 exit_reason="CAPITAL_REALLOCATION",
             )
         self.futures_reallocation_cooldown_until = self._futures_reallocation_cooldown_for_timestamp(timestamp)
-        if self.log_store is not None:
-            self.log_store.append(
-                "futures_reallocation",
-                {
-                    "timestamp": timestamp,
-                    "incoming_symbol": candidate.symbol,
-                    "replaced_symbol": selected_targets[0].symbol,
-                    "replaced_symbols": [target.symbol for target in selected_targets],
-                    "replaced_count": len(selected_targets),
-                    "blocked_reason": blocked_reason,
-                    "score_advantage": round(score_advantage, 6),
-                    "edge_advantage_after_costs_bps": round(edge_advantage_after_costs, 6),
-                    "aggregate_switching_cost_bps": round(switching_cost_bps, 6),
-                    "incremental_pnl_usd_estimate": round(incremental_pnl_usd, 6),
-                    "cooldown_until": self.futures_reallocation_cooldown_until,
-                },
-            )
+        override_reason = None
+        if any(target.exchange_synced for target in selected_targets):
+            override_reason = "STRICT_EXCHANGE_SYNCED_EXCEPTION"
+        self._log_futures_reallocation_event(
+            timestamp=timestamp,
+            decision=candidate,
+            blocked_reason=blocked_reason,
+            status="executed",
+            cooldown_until=self.futures_reallocation_cooldown_until,
+            target_assessments=target_assessments,
+            selected_targets=selected_targets,
+            override_reason=override_reason,
+            score_advantage=score_advantage,
+            edge_advantage_after_costs_bps=edge_advantage_after_costs,
+            aggregate_switching_cost_bps=switching_cost_bps,
+            incremental_pnl_usd_estimate=incremental_pnl_usd,
+        )
         return candidate
 
     def _record_decision(
