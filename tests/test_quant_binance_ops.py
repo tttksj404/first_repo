@@ -120,6 +120,62 @@ class QuantBinanceOpsTests(unittest.TestCase):
         self.assertEqual(payload["mode"], "paper-live")
         self.assertIn("updated_at", payload)
 
+    def test_runtime_summary_reports_matching_exchange_and_paper_futures_positions(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            open_futures_positions=[
+                {"symbol": "BTCUSDT", "market": "futures"},
+                {"symbol": "ETHUSDT", "market": "futures"},
+            ],
+            live_positions=[
+                {"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02"},
+                {"symbol": "ETHUSDT", "holdSide": "short", "total": "0.50"},
+            ],
+        )
+
+        self.assertEqual(summary["paper_open_futures_position_count"], 2)
+        self.assertEqual(summary["exchange_live_futures_position_count"], 2)
+        self.assertFalse(summary["futures_position_mismatch"])
+        self.assertEqual(
+            summary["futures_position_mismatch_details"],
+            {"missing_in_paper": [], "missing_on_exchange": []},
+        )
+
+    def test_runtime_summary_reports_count_difference_between_exchange_and_paper_futures_positions(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            open_futures_positions=[
+                {"symbol": "BTCUSDT", "market": "futures"},
+            ],
+            live_positions=[
+                {"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02"},
+                {"symbol": "ETHUSDT", "holdSide": "short", "total": "0.50"},
+            ],
+        )
+
+        self.assertEqual(summary["paper_open_futures_position_count"], 1)
+        self.assertEqual(summary["exchange_live_futures_position_count"], 2)
+        self.assertTrue(summary["futures_position_mismatch"])
+
+    def test_runtime_summary_populates_futures_position_mismatch_details(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            open_futures_positions=[
+                {"symbol": "BTCUSDT", "market": "futures"},
+                {"symbol": "SOLUSDT", "market": "futures"},
+            ],
+            live_positions=[
+                {"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02"},
+                {"symbol": "ETHUSDT", "holdSide": "short", "total": "0.50"},
+                {"symbol": "XRPUSDT", "holdSide": "long", "total": "0.00"},
+            ],
+        )
+
+        self.assertEqual(
+            summary["futures_position_mismatch_details"],
+            {"missing_in_paper": ["ETHUSDT"], "missing_on_exchange": ["SOLUSDT"]},
+        )
+
     def test_live_runtime_respects_kill_switch(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, 0, tzinfo=timezone.utc)
         store = MarketStateStore()

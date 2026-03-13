@@ -3,9 +3,55 @@ from __future__ import annotations
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
+import shutil
 
 from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
+
+
+def _active_exchange_futures_positions(
+    live_positions: list[dict[str, object]] | tuple[dict[str, object], ...] | None,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for position in live_positions or []:
+        total = float(position.get("total") or position.get("available") or 0.0)
+        if total <= 0.0:
+            continue
+        rows.append(dict(position))
+    return rows
+
+
+def _futures_position_sync_payload(
+    *,
+    open_futures_positions: list[dict[str, object]] | None,
+    live_positions: list[dict[str, object]] | tuple[dict[str, object], ...] | None,
+) -> dict[str, object]:
+    paper_open_futures_positions = list(open_futures_positions or [])
+    exchange_live_futures_positions = _active_exchange_futures_positions(live_positions)
+    paper_symbols = {
+        str(position.get("symbol", ""))
+        for position in paper_open_futures_positions
+        if str(position.get("symbol", ""))
+    }
+    exchange_symbols = {
+        str(position.get("symbol", ""))
+        for position in exchange_live_futures_positions
+        if str(position.get("symbol", ""))
+    }
+    missing_in_paper = sorted(exchange_symbols - paper_symbols)
+    missing_on_exchange = sorted(paper_symbols - exchange_symbols)
+    mismatch_details = {
+        "missing_in_paper": missing_in_paper,
+        "missing_on_exchange": missing_on_exchange,
+    }
+    return {
+        "paper_open_futures_positions": paper_open_futures_positions,
+        "paper_open_futures_position_count": len(paper_open_futures_positions),
+        "exchange_live_futures_positions": exchange_live_futures_positions,
+        "exchange_live_futures_position_count": len(exchange_live_futures_positions),
+        "futures_position_mismatch": bool(missing_in_paper or missing_on_exchange),
+        "futures_position_mismatch_details": mismatch_details,
+    }
 
 
 def _aggregate_closed_trades(closed_trades: list[dict[str, object]] | tuple[dict[str, object], ...]) -> tuple[list[dict[str, object]], dict[str, int], float]:
@@ -65,6 +111,8 @@ def build_runtime_summary(
     open_spot_positions: list[dict[str, object]] | None = None,
     open_futures_positions: list[dict[str, object]] | None = None,
     closed_trades: list[dict[str, object]] | tuple[dict[str, object], ...] | None = None,
+    telegram_alerts: list[dict[str, object]] | tuple[dict[str, object], ...] | None = None,
+    live_positions: list[dict[str, object]] | tuple[dict[str, object], ...] | None = None,
 ) -> dict[str, object]:
     derived_observe_only = {
         decision.symbol
@@ -81,6 +129,24 @@ def build_runtime_summary(
         sum(float(position.get("unrealized_pnl_usd_estimate", 0.0)) for position in (open_futures_positions or [])),
         6,
     )
+    futures_position_sync = _futures_position_sync_payload(
+        open_futures_positions=open_futures_positions,
+        live_positions=live_positions,
+    )
+    rejection_counts = Counter()
+    for decision in decisions:
+        for reason in decision.rejection_reasons:
+            rejection_counts[reason] += 1
+    recent_decisions = [
+        {
+            "symbol": decision.symbol,
+            "mode": decision.final_mode,
+            "side": decision.side,
+            "score": round(decision.predictability_score, 2),
+            "reasons": list(decision.rejection_reasons[:4]),
+        }
+        for decision in list(decisions)[-5:]
+    ]
     return {
         "decision_count": len(decisions),
         "modes": [decision.final_mode for decision in decisions],
@@ -88,7 +154,12 @@ def build_runtime_summary(
         "observe_only_symbols": combined_observe_only,
         "open_spot_positions": list(open_spot_positions or []),
         "open_futures_positions": list(open_futures_positions or []),
+        "live_positions": list(live_positions or []),
+        **futures_position_sync,
         "closed_trades": list(closed_trades or []),
+        "telegram_alerts": list(telegram_alerts or []),
+        "recent_decisions": recent_decisions,
+        "top_rejection_reasons": dict(rejection_counts.most_common(8)),
         "exit_reason_counts": exit_reason_counts,
         "symbol_performance": symbol_performance,
         "realized_pnl_usd_estimate": realized_total,
@@ -110,3 +181,6 @@ def write_runtime_summary(path: str | Path, summary: dict[str, object]) -> None:
     output_path = Path(path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(_json_ready(summary), indent=2, sort_keys=True), encoding="utf-8")
+    latest_root = output_path.parent.parent / "latest"
+    latest_root.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(output_path, latest_root / "summary.json")
