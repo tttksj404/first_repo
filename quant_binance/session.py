@@ -34,6 +34,9 @@ class SupportsAccountSync(Protocol):
     def get_positions(self) -> dict[str, Any]:
         ...
 
+    def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, Any]:
+        ...
+
 
 @dataclass
 class PaperPosition:
@@ -546,6 +549,47 @@ class LivePaperSession:
             return False
         return True
 
+    def _cancel_symbol_open_orders(self, *, symbol: str) -> None:
+        if self.rest_client is None or not hasattr(self.rest_client, "cancel_order"):
+            return
+        orders_payload = self.open_orders_snapshot.get("orders", [])
+        if isinstance(orders_payload, dict):
+            candidate_orders = orders_payload.get("entrustedList") or orders_payload.get("list") or []
+        else:
+            candidate_orders = orders_payload or []
+        for order in candidate_orders:
+            if str(order.get("symbol", "")) != symbol:
+                continue
+            order_id = str(order.get("orderId") or order.get("id") or order.get("clientOid") or "")
+            if not order_id:
+                continue
+            try:
+                response = self.rest_client.cancel_order(market="futures", symbol=symbol, order_id=order_id)
+            except Exception as exc:
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "order_errors",
+                        {
+                            "timestamp": datetime.now(tz=timezone.utc),
+                            "symbol": symbol,
+                            "market": "futures",
+                            "stage": "manual_close_cancel_order",
+                            "order_id": order_id,
+                            "error": repr(exc),
+                        },
+                    )
+                continue
+            if self.log_store is not None:
+                self.log_store.append(
+                    "manual_close_order_cleanup",
+                    {
+                        "timestamp": datetime.now(tz=timezone.utc),
+                        "symbol": symbol,
+                        "order_id": order_id,
+                        "response": response,
+                    },
+                )
+
     def _reconcile_manual_live_closes(self, *, previous_live_positions: list[dict[str, Any]]) -> None:
         now = datetime.now(tz=timezone.utc)
         previous_symbols = {
@@ -569,6 +613,7 @@ class LivePaperSession:
                     exit_time=now,
                     exit_reason="MANUAL_CLOSE_SYNCED",
                 )
+            self._cancel_symbol_open_orders(symbol=symbol)
             cooldown_until = self._manual_reentry_cooldown_until(now)
             current = self.manual_symbol_cooldowns.get(symbol)
             if current is None or cooldown_until > current:
@@ -663,7 +708,27 @@ class LivePaperSession:
             reduce_only=True,
             client_oid=f"{symbol}-{reason.lower()}",
         )
-        response = self.rest_client.place_order(market="futures", order_params=order_params)
+        try:
+            response = self.rest_client.place_order(market="futures", order_params=order_params)
+        except Exception as exc:
+            message = str(exc)
+            if "22002" in message or "No position to close" in message:
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "live_position_actions",
+                        {
+                            "timestamp": datetime.now(tz=timezone.utc),
+                            "symbol": symbol,
+                            "market": "futures",
+                            "side": side.lower(),
+                            "quantity": quantity,
+                            "accepted": False,
+                            "reason": f"{reason}_ALREADY_CLOSED",
+                            "response": {"error": repr(exc)},
+                        },
+                    )
+                return
+            raise
         payload = {
             "timestamp": datetime.now(tz=timezone.utc),
             "symbol": symbol,
