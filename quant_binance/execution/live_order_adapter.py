@@ -17,6 +17,12 @@ class SupportsLiveOrder(Protocol):
     def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
         ...
 
+    def place_futures_position_tpsl(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
+        ...
+
+    def place_spot_plan_order(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
+        ...
+
 
 @dataclass(frozen=True)
 class LiveOrderResult:
@@ -26,6 +32,8 @@ class LiveOrderResult:
     quantity: float
     accepted: bool
     response: dict[str, Any]
+    protection_orders: tuple[dict[str, Any], ...] = ()
+    protection_error: str = ""
 
 
 class DecisionLiveOrderAdapter:
@@ -50,6 +58,153 @@ class DecisionLiveOrderAdapter:
             estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
             settings=self.settings,
         )
+
+    def _set_futures_leverage_if_supported(self, *, decision: DecisionIntent) -> None:
+        if self.settings is None:
+            return
+        leverage = self._target_futures_leverage(decision)
+        try:
+            self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
+        except Exception as exc:
+            if self._exchange_id() == "bitget":
+                message = str(exc)
+                if "40893" in message or "Unable to update the leverage factor" in message:
+                    return
+            raise
+
+    def _is_bitget_unilateral_error(self, message: str) -> bool:
+        normalized = message.lower()
+        return (
+            "40774" in message
+            or "40762" in message
+            or "unilateral position type" in normalized
+            or "one-way position" in normalized
+            or "one way position" in normalized
+        )
+
+    def _bitget_alternate_futures_params(self, order_params: dict[str, Any]) -> dict[str, Any]:
+        alternate = dict(order_params)
+        if "tradeSide" in alternate:
+            alternate.pop("tradeSide", None)
+            alternate["reduceOnly"] = "NO"
+        else:
+            alternate.pop("reduceOnly", None)
+            alternate["tradeSide"] = "open"
+        return alternate
+
+    def _format_price(self, value: float) -> str:
+        return f"{max(value, 0.0):.8f}"
+
+    def _protection_prices(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+    ) -> tuple[float, float]:
+        stop_fraction = max(decision.stop_distance_bps, 0.0) / 10000.0
+        reward_fraction = stop_fraction
+        if self.settings is not None:
+            reward_fraction = stop_fraction * self.settings.exit_rules.partial_take_profit_r
+        if decision.side == "short":
+            take_profit = reference_price * max(0.0, 1.0 - reward_fraction)
+            stop_loss = reference_price * (1.0 + stop_fraction)
+        else:
+            take_profit = reference_price * (1.0 + reward_fraction)
+            stop_loss = reference_price * max(0.0, 1.0 - stop_fraction)
+        return take_profit, stop_loss
+
+    def _build_bitget_protection_payloads(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        quantity: float,
+    ) -> tuple[tuple[str, dict[str, Any]], ...]:
+        take_profit, stop_loss = self._protection_prices(
+            decision=decision,
+            reference_price=reference_price,
+        )
+        if decision.final_mode == "futures":
+            hold_side = "buy" if decision.side == "long" else "sell"
+            return (
+                (
+                    "futures",
+                    {
+                        "marginCoin": "USDT",
+                        "productType": "USDT-FUTURES",
+                        "symbol": decision.symbol,
+                        "stopSurplusTriggerPrice": self._format_price(take_profit),
+                        "stopSurplusTriggerType": "mark_price",
+                        "stopSurplusExecutePrice": "0",
+                        "stopLossTriggerPrice": self._format_price(stop_loss),
+                        "stopLossTriggerType": "mark_price",
+                        "stopLossExecutePrice": "0",
+                        "holdSide": hold_side,
+                        "stopSurplusClientOid": f"{decision.decision_id}-tp",
+                        "stopLossClientOid": f"{decision.decision_id}-sl",
+                    },
+                ),
+            )
+        if decision.final_mode == "spot" and decision.side == "long":
+            size = f"{quantity:.8f}"
+            return (
+                (
+                    "spot",
+                    {
+                        "symbol": decision.symbol,
+                        "side": "sell",
+                        "triggerPrice": self._format_price(take_profit),
+                        "triggerType": "market_price",
+                        "orderType": "market",
+                        "planType": "amount",
+                        "size": size,
+                        "clientOid": f"{decision.decision_id}-tp",
+                    },
+                ),
+                (
+                    "spot",
+                    {
+                        "symbol": decision.symbol,
+                        "side": "sell",
+                        "triggerPrice": self._format_price(stop_loss),
+                        "triggerType": "market_price",
+                        "orderType": "market",
+                        "planType": "amount",
+                        "size": size,
+                        "clientOid": f"{decision.decision_id}-sl",
+                    },
+                ),
+            )
+        return ()
+
+    def _submit_protection_orders(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        quantity: float,
+    ) -> tuple[dict[str, Any], ...]:
+        if self._exchange_id() != "bitget":
+            return ()
+        payloads = self._build_bitget_protection_payloads(
+            decision=decision,
+            reference_price=reference_price,
+            quantity=quantity,
+        )
+        results: list[dict[str, Any]] = []
+        for market, order_params in payloads:
+            if market == "futures":
+                result = self.client.place_futures_position_tpsl(order_params=order_params)
+            else:
+                result = self.client.place_spot_plan_order(order_params=order_params)
+            results.append(
+                {
+                    "market": market,
+                    "request": order_params,
+                    "response": result,
+                }
+            )
+        return tuple(results)
 
     def build_order_params(
         self,
@@ -77,7 +232,7 @@ class DecisionLiveOrderAdapter:
                 params["productType"] = "USDT-FUTURES"
                 params["marginCoin"] = "USDT"
                 params["marginMode"] = "crossed"
-                params["reduceOnly"] = "NO"
+                params["tradeSide"] = "close" if decision.side == "flat" else "open"
             return market, params
         params = {
             "symbol": decision.symbol,
@@ -103,12 +258,29 @@ class DecisionLiveOrderAdapter:
         if built is None:
             return None
         market, order_params = built
-        if market == "futures" and self.settings is not None:
-            leverage = self._target_futures_leverage(decision)
-            self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
-        response = self.client.place_order(market=market, order_params=order_params)
+        if market == "futures":
+            self._set_futures_leverage_if_supported(decision=decision)
+        try:
+            response = self.client.place_order(market=market, order_params=order_params)
+        except Exception as exc:
+            if self._exchange_id() == "bitget" and market == "futures" and self._is_bitget_unilateral_error(str(exc)):
+                order_params = self._bitget_alternate_futures_params(order_params)
+                response = self.client.place_order(market=market, order_params=order_params)
+            else:
+                raise
         quantity = float(order_params.get("quantity", order_params.get("size", 0.0)))
         accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
+        protection_orders = ()
+        protection_error = ""
+        if accepted:
+            try:
+                protection_orders = self._submit_protection_orders(
+                    decision=decision,
+                    reference_price=reference_price,
+                    quantity=quantity,
+                )
+            except Exception as exc:
+                protection_error = repr(exc)
         return LiveOrderResult(
             symbol=decision.symbol,
             market=market,
@@ -116,4 +288,6 @@ class DecisionLiveOrderAdapter:
             quantity=quantity,
             accepted=accepted,
             response=response,
+            protection_orders=protection_orders,
+            protection_error=protection_error,
         )

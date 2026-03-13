@@ -282,6 +282,50 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(len(live_client.orders), 1)
         self.assertIn("40774", result.protection_error)
 
+    def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40762(self) -> None:
+        class RetryClient(FakeBitgetLiveClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.calls = 0
+
+            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+                self.calls += 1
+                self.orders.append((market, dict(order_params)))
+                if self.calls == 1:
+                    raise RuntimeError('Bitget HTTP 400: {"code":"40762","msg":"The order type for one-way position must match the one-way position mode."}')
+                return {"status": "SUCCESS", "orderId": "retried-40762"}
+
+        adapter = DecisionLiveOrderAdapter(RetryClient(), self.settings)  # type: ignore[arg-type]
+        decision = DecisionIntent(
+            decision_id="bitget-40762",
+            decision_hash="hash-40762",
+            snapshot_id="snap-40762",
+            config_version="2026-03-13.v1",
+            timestamp=datetime(2026, 3, 10, 0, 30, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=66.0,
+            gross_expected_edge_bps=30.0,
+            net_expected_edge_bps=18.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=1200.0,
+            stop_distance_bps=80.0,
+        )
+        result = adapter.execute_decision(decision=decision, reference_price=50000.0)
+
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.response.get("orderId"), "retried-40762")
+        self.assertEqual(len(adapter.client.orders), 2)  # type: ignore[attr-defined]
+
     def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40774(self) -> None:
         class RetryClient(FakeBitgetLiveClient):
             def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
