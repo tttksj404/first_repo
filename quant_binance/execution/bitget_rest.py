@@ -385,16 +385,24 @@ class BitgetRestClient:
             data_rows = rows if isinstance(rows, list) else []
             available: float | None = None
             crossed_max_available: float | None = None
+            union_available: float | None = None
             for item in data_rows:
                 if str(item.get("marginCoin", "")).upper() == self.contract_config.margin_coin.upper():
                     available = _optional_float(item.get("available"))
                     crossed_max_available = _optional_float(item.get("crossedMaxAvailable"))
+                    union_available = _optional_float(item.get("unionAvailable"))
                     break
-            execution_available = crossed_max_available if crossed_max_available is not None else available
+            if crossed_max_available is not None and crossed_max_available > 0:
+                execution_available = crossed_max_available
+            elif available is not None and available > 0:
+                execution_available = available
+            else:
+                execution_available = union_available
             return {
                 "availableBalance": available or 0.0,
                 "executionAvailableBalance": execution_available or 0.0,
                 "crossedMaxAvailable": crossed_max_available or 0.0,
+                "unionAvailable": union_available or 0.0,
                 "accounts": data_rows,
                 "raw": payload,
             }
