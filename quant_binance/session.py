@@ -245,6 +245,8 @@ class LivePaperSession:
         self._evaluate_live_positions()
 
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
+        open_spot_positions = self._open_positions_for_market("spot")
+        open_futures_positions = self._open_positions_for_market("futures")
         summary = build_runtime_summary(
             decisions=self.decisions,
             tested_orders=self.tested_orders,
@@ -254,8 +256,8 @@ class LivePaperSession:
             capital_report=self.capital_report,
             kill_switch_status=self.runtime.kill_switch.status(),
             observe_only_symbols=self.observe_only_symbols,
-            open_spot_positions=self._open_positions_for_market("spot"),
-            open_futures_positions=self._open_positions_for_market("futures"),
+            open_spot_positions=open_spot_positions,
+            open_futures_positions=open_futures_positions,
             closed_trades=self.closed_trades,
             telegram_alerts=self.telegram_alerts,
             live_positions=self.live_positions_snapshot,
@@ -272,8 +274,14 @@ class LivePaperSession:
                 "last_decision_timestamp": self.last_decision_timestamp,
                 "live_decision_loop": self.runtime.loop_stats.as_dict(),
                 "capital_report": self.capital_report,
-                "open_spot_position_count": len(self._open_positions_for_market("spot")),
-                "open_futures_position_count": len(self._open_positions_for_market("futures")),
+                "open_spot_position_count": len(open_spot_positions),
+                "open_futures_position_count": len(open_futures_positions),
+                "paper_open_futures_position_count": summary["paper_open_futures_position_count"],
+                "paper_open_futures_positions": summary["paper_open_futures_positions"],
+                "exchange_live_futures_position_count": summary["exchange_live_futures_position_count"],
+                "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
+                "futures_position_mismatch": summary["futures_position_mismatch"],
+                "futures_position_mismatch_details": summary["futures_position_mismatch_details"],
                 "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
             },

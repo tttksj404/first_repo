@@ -2,12 +2,15 @@
 set -eu
 
 BASE_DIR="${1:-quant_runtime}"
-
 STATE_FILE="$(python3 - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
-paths = sorted(base.rglob('summary.state.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+latest = base / 'output' / 'paper-live-shell' / 'latest' / 'summary.state.json'
+paths = [p for p in base.rglob('summary.state.json') if p.exists()]
+if latest.exists() and latest not in paths:
+    paths.append(latest)
+paths = sorted(paths, key=lambda p: p.stat().st_mtime, reverse=True)
 print(paths[0] if paths else '')
 PY
 )"
@@ -25,7 +28,11 @@ if [ -z "$SUMMARY_FILE" ]; then
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
-paths = sorted(base.rglob('summary.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+latest = base / 'output' / 'paper-live-shell' / 'latest' / 'summary.json'
+paths = [p for p in base.rglob('summary.json') if p.exists()]
+if latest.exists() and latest not in paths:
+    paths.append(latest)
+paths = sorted(paths, key=lambda p: p.stat().st_mtime, reverse=True)
 print(paths[0] if paths else '')
 PY
 )"
@@ -39,19 +46,47 @@ fi
 echo "STATE_FILE=$STATE_FILE"
 [ -n "$SUMMARY_FILE" ] && echo "SUMMARY_FILE=$SUMMARY_FILE"
 echo
-python3 - <<'PY' "$STATE_FILE"
+python3 - <<'PY' "$STATE_FILE" "$SUMMARY_FILE"
 import json, sys
 from pathlib import Path
 
-path = Path(sys.argv[1])
-data = json.loads(path.read_text(encoding='utf-8'))
+state_path = Path(sys.argv[1])
+summary_path = Path(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] else None
+state = json.loads(state_path.read_text(encoding='utf-8'))
+summary = json.loads(summary_path.read_text(encoding='utf-8')) if summary_path and summary_path.exists() else {}
 
-print("updated_at:", data.get("updated_at"))
-print("heartbeat_count:", data.get("heartbeat_count"))
-print("decision_count:", data.get("decision_count"))
-print("tested_order_count:", data.get("tested_order_count"))
-print("live_order_count:", data.get("live_order_count"))
-print("last_event_timestamp:", data.get("last_event_timestamp"))
-print("last_decision_timestamp:", data.get("last_decision_timestamp"))
-print("kill_switch:", data.get("kill_switch"))
+print("updated_at:", state.get("updated_at"))
+print("heartbeat_count:", state.get("heartbeat_count"))
+print("decision_count:", state.get("decision_count"))
+print("tested_order_count:", state.get("tested_order_count"))
+print("live_order_count:", state.get("live_order_count"))
+print("last_event_timestamp:", state.get("last_event_timestamp"))
+print("last_decision_timestamp:", state.get("last_decision_timestamp"))
+print("kill_switch:", state.get("kill_switch"))
+paper_futures_positions = state.get("paper_open_futures_positions")
+if paper_futures_positions is None:
+    paper_futures_positions = summary.get("paper_open_futures_positions") or summary.get("open_futures_positions") or []
+exchange_futures_positions = state.get("exchange_live_futures_positions")
+if exchange_futures_positions is None:
+    exchange_futures_positions = summary.get("exchange_live_futures_positions") or []
+print("paper_open_futures_position_count:", state.get("paper_open_futures_position_count", len(paper_futures_positions)))
+print("exchange_live_futures_position_count:", state.get("exchange_live_futures_position_count", len(exchange_futures_positions)))
+print("futures_position_mismatch:", state.get("futures_position_mismatch"))
+print("futures_position_mismatch_details:", state.get("futures_position_mismatch_details"))
+for item in exchange_futures_positions[:5]:
+    print(
+        "live_position:",
+        item.get("symbol"),
+        item.get("holdSide"),
+        "roe=",
+        round((float(item.get("unrealizedPL") or 0.0) / max(float(item.get("marginSize") or 1e-9), 1e-9)) * 100.0, 2),
+        "marginRatio=",
+        item.get("marginRatio"),
+    )
+recent_decisions = summary.get("recent_decisions") or []
+if recent_decisions:
+    print("recent_decisions:", recent_decisions)
+top_rejections = summary.get("top_rejection_reasons") or {}
+if top_rejections:
+    print("top_rejection_reasons:", top_rejections)
 PY
