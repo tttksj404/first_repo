@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,7 @@ from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.paths import prepare_run_paths
 from quant_binance.session import BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.service import PaperTradingService
+from quant_binance.self_healing import RuntimeSelfHealing
 from quant_binance.settings import Settings
 from quant_binance.risk.capital import build_capital_adequacy_report, extract_account_capital_inputs
 from quant_binance.strategy.regime import observe_only_reasons
@@ -203,6 +205,12 @@ def run_live_paper_daemon(
         verbose=True,
         observe_only_symbols=sorted(observe_only_symbols),
     )
+    session.self_healing.log_store = log_store
+    session.self_healing.stall_timeout_seconds = RuntimeSelfHealing.recommended_stall_timeout_seconds(
+        sync_interval_seconds=sync_interval_seconds,
+        decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
+        stale_data_alarm_sla_seconds=settings.operational_limits.stale_data_alarm_sla_seconds,
+    )
     if supports_private_reads:
         session.sync_account()
     bootstrap_time = _next_decision_boundary(
@@ -239,4 +247,13 @@ def run_live_paper_daemon(
         state_path=run_paths.state_path,
     )
     summary = asyncio.run(shell.run()) or {}
+    if "self_healing" not in summary:
+        mismatch_active, mismatch_details = session._self_healing_mismatch_snapshot()  # type: ignore[attr-defined]
+        summary["self_healing"] = session.self_healing.snapshot(
+            now=datetime.now(tz=timezone.utc),
+            order_error_cooldowns=session.order_error_cooldowns,
+            manual_symbol_cooldowns=session.manual_symbol_cooldowns,
+            mismatch_active=mismatch_active,
+            mismatch_details=mismatch_details,
+        )
     return {"run_paths": run_paths, "summary": summary}
