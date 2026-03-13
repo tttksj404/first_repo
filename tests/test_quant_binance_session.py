@@ -1354,6 +1354,117 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(any("LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
 
     @patch("quant_binance.session.send_telegram_message")
+    def test_session_uses_hedge_close_payload_for_bitget_full_stop_loss_close(self, mock_send) -> None:
+        class PositionRestClient(BitgetRestClient):
+            def __init__(self) -> None:
+                super().__init__(credentials=None)
+                self.placed_orders = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                return {"market": market, "balance": 1000}
+
+            def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, object]:
+                return {"market": market, "orders": []}
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "short",
+                            "posMode": "hedge_mode",
+                            "total": "0.0016",
+                            "available": "0.0016",
+                            "marginSize": "0.8",
+                            "unrealizedPL": "-0.6",
+                            "marginRatio": "0.030195709553",
+                            "breakEvenPrice": "70839.679387192378",
+                            "openPriceAvg": "70785.781250000001",
+                            "leverage": "8",
+                            "uTime": "1773388807347",
+                            "cTime": "1773276221655",
+                        }
+                    ]
+                }
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "close-stop-loss"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_STOP_LOSS")
+        self.assertFalse(session.live_orders[0]["partial_exit"])
+        self.assertEqual(session.live_orders[0]["response"]["orderId"], "close-stop-loss")
+        self.assertEqual(len(session.rest_client.placed_orders), 1)
+        self.assertEqual(session.rest_client.placed_orders[0][1]["side"], "sell")
+        self.assertEqual(session.rest_client.placed_orders[0][1]["tradeSide"], "close")
+        self.assertNotIn("reduceOnly", session.rest_client.placed_orders[0][1])
+        self.assertTrue(any("LIVE_POSITION_STOP_LOSS" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_retries_bitget_full_live_close_before_treating_22002_as_already_closed(self, mock_send) -> None:
+        class PositionRestClient(BitgetRestClient):
+            def __init__(self) -> None:
+                super().__init__(credentials=None)
+                self.placed_orders = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                return {"market": market, "balance": 1000}
+
+            def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, object]:
+                return {"market": market, "orders": []}
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "short",
+                            "posMode": "hedge_mode",
+                            "total": "0.0016",
+                            "available": "0.0016",
+                            "marginSize": "0.8",
+                            "unrealizedPL": "-0.6",
+                            "marginRatio": "0.030195709553",
+                            "breakEvenPrice": "70839.679387192378",
+                            "openPriceAvg": "70785.781250000001",
+                            "leverage": "8",
+                            "uTime": "1773388807347",
+                            "cTime": "1773276221655",
+                        }
+                    ]
+                }
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                if len(self.placed_orders) == 1:
+                    raise RuntimeError('Bitget HTTP 400: {"code":"22002","msg":"No position to close"}')
+                return {"status": "SUCCESS", "orderId": "close-stop-loss-retry"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_STOP_LOSS")
+        self.assertEqual(session.live_orders[0]["response"]["orderId"], "close-stop-loss-retry")
+        self.assertEqual(len(session.rest_client.placed_orders), 2)
+        self.assertEqual(session.rest_client.placed_orders[0][1]["side"], "sell")
+        self.assertEqual(session.rest_client.placed_orders[0][1]["tradeSide"], "close")
+        self.assertEqual(session.rest_client.placed_orders[1][1]["side"], "buy")
+        self.assertEqual(session.rest_client.placed_orders[1][1].get("reduceOnly"), "YES")
+        self.assertNotIn("tradeSide", session.rest_client.placed_orders[1][1])
+        self.assertTrue(any("LIVE_POSITION_STOP_LOSS" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
     def test_session_trims_live_position_on_profit_protection_retrace(self, mock_send) -> None:
         class PositionRestClient(FakeRestClient):
             def __init__(self) -> None:
@@ -2083,6 +2194,66 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(success_event["replaced_symbols"], ["ETHUSDT"])
             self.assertEqual(success_event["replaced_count"], 1)
             self.assertEqual(success_event["targets"][0]["exchange_synced"], True)
+            self.assertEqual(success_event["targets"][0]["exchange_synced_exception"], True)
+
+    def test_futures_reallocation_allows_small_exchange_synced_loss_under_aggressive_profile(self) -> None:
+        settings = replace(
+            self._focus_settings(futures_top_n=1),
+            portfolio_focus=replace(
+                self._focus_settings(futures_top_n=1).portfolio_focus,
+                min_score_advantage_to_replace=0.0,
+                min_net_edge_advantage_bps=0.0,
+                min_incremental_pnl_usd=0.0,
+            ),
+        )
+        with tempfile.TemporaryDirectory() as tempdir:
+            session = self._build_session(settings=settings)
+            session.log_store = JsonlLogStore(tempdir)
+            now = datetime(2026, 3, 8, 12, 30, tzinfo=timezone.utc)
+            self._seed_weak_futures_position(
+                session,
+                symbol="ETHUSDT",
+                entry_time=now - timedelta(minutes=25),
+                current_price=99.0,
+                quantity=0.05,
+                entry_net_expected_edge_bps=8.0,
+                latest_net_expected_edge_bps=1.0,
+            )
+            session.paper_positions["ETHUSDT"].exchange_synced = True
+            session.capital_report = {
+                "futures_available_balance_usd": 1000.0,
+                "futures_execution_balance_usd": 1000.0,
+                "can_trade_futures_any": True,
+                "futures_requirements": [
+                    {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                ],
+            }
+            state = session.runtime.dispatcher.store.get("BTCUSDT")
+            assert state is not None
+
+            managed = session._maybe_reallocate_futures_entry(
+                decision=make_decision(
+                    timestamp=now,
+                    symbol="BTCUSDT",
+                    predictability_score=96.0,
+                    gross_expected_edge_bps=36.0,
+                    net_expected_edge_bps=24.0,
+                    estimated_round_trip_cost_bps=6.0,
+                    order_intent_notional_usd=2500.0,
+                ),
+                state=state,
+                timestamp=now,
+            )
+
+            self.assertEqual(managed.final_mode, "futures")
+            self.assertNotIn("ETHUSDT", session.paper_positions)
+
+            events = session.log_store.read("futures_reallocation")
+            self.assertEqual(len(events), 1)
+            success_event = events[0]
+            self.assertEqual(success_event["status"], "executed")
+            self.assertEqual(success_event["targets"][0]["symbol"], "ETHUSDT")
+            self.assertEqual(success_event["targets"][0]["exchange_synced_loss_floor_usd"], 0.01188)
             self.assertEqual(success_event["targets"][0]["exchange_synced_exception"], True)
 
     def test_async_runner_consumes_payloads(self) -> None:

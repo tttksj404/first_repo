@@ -144,8 +144,12 @@ class RuntimeSelfHealing:
         self.started_at = datetime.now(tz=timezone.utc)
         self.last_progress_at: datetime | None = None
         self.last_heartbeat_count = 0
+        self.last_decision_at: datetime | None = None
+        self.last_decision_count = 0
+        self.last_decision_heartbeat_count = 0
         self.monitor_started_at: datetime | None = None
         self.monitor_started_heartbeat_count = 0
+        self.monitor_started_decision_count = 0
         self.live_order_cooldown_until: datetime | None = None
         self._stall_restart_attempts: deque[datetime] = deque()
         self._known_runtime_error_times: deque[datetime] = deque()
@@ -153,6 +157,7 @@ class RuntimeSelfHealing:
         self._issue_counts: Counter[str] = Counter()
         self._recovery_counts: Counter[str] = Counter()
         self._last_stall_signature = ""
+        self._last_stall_kind = ""
 
     @staticmethod
     def recommended_stall_timeout_seconds(
@@ -213,14 +218,25 @@ class RuntimeSelfHealing:
     def note_progress(self, *, timestamp: datetime, heartbeat_count: int) -> None:
         self.last_progress_at = timestamp
         self.last_heartbeat_count = heartbeat_count
-        self._last_stall_signature = ""
+        if self._last_stall_kind == "heartbeat":
+            self._last_stall_signature = ""
+            self._last_stall_kind = ""
 
-    def begin_monitoring(self, *, timestamp: datetime, heartbeat_count: int) -> None:
+    def note_decision(self, *, timestamp: datetime, decision_count: int, heartbeat_count: int) -> None:
+        self.last_decision_at = timestamp
+        self.last_decision_count = decision_count
+        self.last_decision_heartbeat_count = heartbeat_count
+        self._last_stall_signature = ""
+        self._last_stall_kind = ""
+
+    def begin_monitoring(self, *, timestamp: datetime, heartbeat_count: int, decision_count: int = 0) -> None:
         self.monitor_started_at = timestamp
         self.monitor_started_heartbeat_count = heartbeat_count
+        self.monitor_started_decision_count = decision_count
         if self.last_progress_at is None:
             self.last_progress_at = timestamp
         self._last_stall_signature = ""
+        self._last_stall_kind = ""
 
     @property
     def recent_events(self) -> list[SelfHealingEvent]:
@@ -230,17 +246,39 @@ class RuntimeSelfHealing:
         reference_time = self.last_progress_at or self.monitor_started_at or self.started_at
         age_seconds = (now - reference_time).total_seconds()
         if age_seconds < self.stall_timeout_seconds:
+            heartbeat_stalled = False
+        else:
+            signature = "|".join(
+                [
+                    "heartbeat",
+                    reference_time.isoformat(),
+                    str(self.last_heartbeat_count),
+                    str(self.monitor_started_heartbeat_count),
+                ]
+            )
+            if signature != self._last_stall_signature:
+                self._last_stall_signature = signature
+                self._last_stall_kind = "heartbeat"
+                return True
+            heartbeat_stalled = True
+        decision_reference = self.last_decision_at or self.monitor_started_at or self.started_at
+        decision_age_seconds = (now - decision_reference).total_seconds()
+        if decision_age_seconds < self.stall_timeout_seconds:
             return False
+        if self.last_heartbeat_count <= max(self.last_decision_heartbeat_count, self.monitor_started_heartbeat_count):
+            return heartbeat_stalled
         signature = "|".join(
             [
-                reference_time.isoformat(),
-                str(self.last_heartbeat_count),
-                str(self.monitor_started_heartbeat_count),
+                "decision_progress",
+                decision_reference.isoformat(),
+                str(self.last_decision_count),
+                str(self.monitor_started_decision_count),
             ]
         )
         if signature == self._last_stall_signature:
             return False
         self._last_stall_signature = signature
+        self._last_stall_kind = "decision_progress"
         return True
 
     def register_stall_recovery(self, *, now: datetime, heartbeat_count: int) -> bool:
@@ -248,8 +286,26 @@ class RuntimeSelfHealing:
         allowed = len(self._stall_restart_attempts) < self.max_stall_restarts_per_window
         if allowed:
             self._stall_restart_attempts.append(now)
-        reference_time = self.last_progress_at or self.monitor_started_at or self.started_at
-        age_seconds = max((now - reference_time).total_seconds(), 0.0)
+        stall_kind = self._last_stall_kind or "heartbeat"
+        if stall_kind == "decision_progress":
+            reference_time = self.last_decision_at or self.monitor_started_at or self.started_at
+            age_seconds = max((now - reference_time).total_seconds(), 0.0)
+            summary = (
+                f"Restarted websocket after {int(age_seconds)}s without decision progress while heartbeats continued"
+                if allowed
+                else (
+                    f"Decision stall detected after {int(age_seconds)}s without decision progress "
+                    "but restart budget is exhausted"
+                )
+            )
+        else:
+            reference_time = self.last_progress_at or self.monitor_started_at or self.started_at
+            age_seconds = max((now - reference_time).total_seconds(), 0.0)
+            summary = (
+                f"Restarted websocket after {int(age_seconds)}s without progress"
+                if allowed
+                else f"Daemon stall detected after {int(age_seconds)}s but restart budget is exhausted"
+            )
         self._record_event(
             SelfHealingEvent(
                 timestamp=now,
@@ -257,12 +313,10 @@ class RuntimeSelfHealing:
                 action="restart_websocket" if allowed else "report_only",
                 automatic_action="restart_websocket" if allowed else "report_only",
                 status="applied" if allowed else "suppressed",
-                summary=(
-                    f"Restarted websocket after {int(age_seconds)}s without progress"
-                    if allowed
-                    else f"Daemon stall detected after {int(age_seconds)}s but restart budget is exhausted"
-                ),
+                summary=summary,
                 details={
+                    "stall_kind": stall_kind,
+                    "decision_count": self.last_decision_count,
                     "heartbeat_count": heartbeat_count,
                     "stall_timeout_seconds": self.stall_timeout_seconds,
                     "restart_attempts_in_window": len(self._stall_restart_attempts),

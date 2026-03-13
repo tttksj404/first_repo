@@ -1290,7 +1290,7 @@ class LivePaperSession:
             return "one_way"
         return "unknown"
 
-    def _bitget_partial_close_order_candidates(
+    def _bitget_close_order_candidates(
         self,
         *,
         position: dict[str, Any],
@@ -1343,9 +1343,9 @@ class LivePaperSession:
         if alert_key in self.sent_alert_keys:
             return
         exchange_id = getattr(self.rest_client, "exchange_id", "")
-        is_bitget_partial_close = exchange_id == "bitget" and fraction < 0.999
-        if is_bitget_partial_close:
-            order_candidates = self._bitget_partial_close_order_candidates(
+        is_bitget_close = exchange_id == "bitget"
+        if is_bitget_close:
+            order_candidates = self._bitget_close_order_candidates(
                 position=position,
                 quantity=quantity,
                 reason=reason,
@@ -1389,15 +1389,15 @@ class LivePaperSession:
                 self.rest_client,
                 self.runtime.paper_service.settings,
             )
-            can_retry_bitget_partial_close = (
-                is_bitget_partial_close
+            can_retry_bitget_close = (
+                is_bitget_close
                 and (
                     adapter._is_bitget_unilateral_error(message)
                     or "22002" in message
                     or "No position to close" in message
                 )
             )
-            if can_retry_bitget_partial_close:
+            if can_retry_bitget_close:
                 retry_error = exc
                 alternates = order_candidates[1:] or adapter._bitget_alternate_futures_params(order_params)
                 for alternate_params in alternates:
@@ -1939,7 +1939,7 @@ class LivePaperSession:
             position.latest_estimated_round_trip_cost_bps or position.entry_estimated_round_trip_cost_bps,
         )
         cost_floor = position.current_notional_usd_estimate() * max(max_cost_bps, 0.0) * 4.0 / 10000.0
-        return round(max(focus.min_incremental_pnl_usd * 4.0, cost_floor, 10.0), 6)
+        return round(max(focus.min_incremental_pnl_usd * 4.0, cost_floor), 6)
 
     def _futures_reallocation_target_assessments(
         self,
@@ -2353,6 +2353,11 @@ class LivePaperSession:
     ) -> None:
         self.decisions.append(decision)
         self.last_decision_timestamp = timestamp
+        self.self_healing.note_decision(
+            timestamp=timestamp,
+            decision_count=len(self.decisions),
+            heartbeat_count=self.heartbeat_count,
+        )
         if self.verbose:
             print(
                 f"[DECISION] {decision.timestamp.isoformat()} {decision.symbol} mode={decision.final_mode} side={decision.side} score={decision.predictability_score:.2f}",
@@ -2574,6 +2579,7 @@ class LivePaperShell:
         self.session.self_healing.begin_monitoring(
             timestamp=datetime.now(tz=timezone.utc),
             heartbeat_count=self.session.heartbeat_count,
+            decision_count=len(self.session.decisions),
         )
         poll_seconds = max(1.0, min(5.0, self.session.self_healing.stall_timeout_seconds / 6.0))
         try:
