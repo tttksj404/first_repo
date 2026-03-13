@@ -3,8 +3,9 @@ from __future__ import annotations
 import asyncio
 import json
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 from quant_binance.data.market_store import MarketStateStore
 from quant_binance.data.state import SymbolMarketState, TopOfBook
@@ -12,6 +13,7 @@ from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.live import EventDispatcher, LivePaperRuntime
+from quant_binance.models import DecisionIntent
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.settings import Settings
@@ -63,6 +65,41 @@ def make_primitive() -> PrimitiveInputs:
     )
 
 
+def make_decision(
+    *,
+    timestamp: datetime,
+    final_mode: str = "futures",
+    side: str = "long",
+    predictability_score: float = 82.0,
+    liquidity_score: float = 0.8,
+    order_intent_notional_usd: float = 1000.0,
+    stop_distance_bps: float = 500.0,
+) -> DecisionIntent:
+    return DecisionIntent(
+        decision_id=f"decision-{timestamp.isoformat()}-{final_mode}-{side}",
+        decision_hash=f"hash-{timestamp.isoformat()}-{final_mode}-{side}",
+        snapshot_id=f"snapshot-{timestamp.isoformat()}",
+        config_version="2026-03-10.v1",
+        timestamp=timestamp,
+        symbol="BTCUSDT",
+        candidate_mode="futures",
+        final_mode=final_mode,
+        side=side,
+        trend_direction=1 if side == "long" else -1,
+        trend_strength=0.85,
+        volume_confirmation=0.78,
+        liquidity_score=liquidity_score,
+        volatility_penalty=0.2,
+        overheat_penalty=0.1,
+        predictability_score=predictability_score,
+        gross_expected_edge_bps=28.0,
+        net_expected_edge_bps=18.0,
+        estimated_round_trip_cost_bps=10.0,
+        order_intent_notional_usd=order_intent_notional_usd,
+        stop_distance_bps=stop_distance_bps,
+    )
+
+
 class FakeRestClient:
     def __init__(self) -> None:
         self.account_calls = 0
@@ -75,6 +112,9 @@ class FakeRestClient:
     def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, object]:
         self.open_order_calls += 1
         return {"market": market, "orders": []}
+
+    def get_positions(self) -> dict[str, object]:
+        return {"positions": []}
 
 
 class FakeOrderTestClient:
@@ -222,6 +262,254 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.decisions[-1].timestamp.isoformat(), "2026-03-08T12:10:00+00:00")
         self.assertEqual(session.runtime.loop_stats.closed_decision_kline_count, 1)
         self.assertEqual(session.runtime.loop_stats.emitted_decision_count, 1)
+
+    def test_session_takes_partial_profit_then_closes_remainder_at_breakeven(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        starting_capacity = session.remaining_portfolio_capacity_usd
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        self.assertEqual(len(session.paper_positions), 1)
+        self.assertEqual(len(session.tested_orders), 1)
+        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 1000.0)
+
+        take_profit_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 108.0
+        session._record_decision(
+            decision=make_decision(timestamp=take_profit_time, order_intent_notional_usd=1200.0),
+            state=state,
+            timestamp=take_profit_time,
+        )
+
+        self.assertEqual(len(session.paper_positions), 1)
+        self.assertEqual(len(session.closed_trades), 1)
+        self.assertEqual(session.closed_trades[0]["exit_reason"], "PARTIAL_TAKE_PROFIT")
+        self.assertEqual(len(session.tested_orders), 1)
+        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 460.0)
+
+        breakeven_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=breakeven_time, order_intent_notional_usd=900.0),
+            state=state,
+            timestamp=breakeven_time,
+        )
+
+        self.assertEqual(len(session.paper_positions), 0)
+        self.assertEqual(len(session.closed_trades), 2)
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "BREAKEVEN_STOP")
+        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity)
+
+        summary_path = ROOT / "tests" / "tmp_session_profit_summary.json"
+        state_path = ROOT / "tests" / "tmp_session_profit_state.json"
+        try:
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            self.assertEqual(summary["closed_trades"][0]["exit_reason"], "PARTIAL_TAKE_PROFIT")
+            self.assertEqual(summary["closed_trades"][-1]["exit_reason"], "BREAKEVEN_STOP")
+            self.assertEqual(summary["open_futures_positions"], [])
+            self.assertEqual(summary["realized_pnl_usd_estimate"], 40.0)
+            state_payload = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(state_payload["closed_trade_count"], 2)
+            self.assertEqual(state_payload["open_futures_position_count"], 0)
+        finally:
+            if summary_path.exists():
+                summary_path.unlink()
+            if state_path.exists():
+                state_path.unlink()
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_sends_telegram_alerts_for_profit_and_stop(self, mock_send) -> None:
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        take_profit_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 108.0
+        session._record_decision(
+            decision=make_decision(timestamp=take_profit_time, order_intent_notional_usd=1200.0),
+            state=state,
+            timestamp=take_profit_time,
+        )
+
+        stop_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=stop_time, order_intent_notional_usd=900.0),
+            state=state,
+            timestamp=stop_time,
+        )
+
+        self.assertGreaterEqual(mock_send.call_count, 2)
+        self.assertTrue(any("PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
+        self.assertTrue(any("BREAKEVEN_STOP" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_arms_kill_switch_and_alerts_on_daily_loss_limit(self, mock_send) -> None:
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        position = session.paper_positions.setdefault(
+            "BTCUSDT",
+            __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+                symbol="BTCUSDT",
+                market="futures",
+                side="long",
+                entry_time=datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc),
+                entry_price=100.0,
+                current_price=100.0,
+                quantity_opened=30.0,
+                quantity_remaining=30.0,
+                stop_distance_bps=500.0,
+                active_stop_price=95.0,
+                best_price=100.0,
+                worst_price=100.0,
+                entry_predictability_score=82.0,
+                entry_liquidity_score=0.8,
+            ),
+        )
+        session._record_closed_trade(
+            position=position,
+            exit_price=92.0,
+            quantity_closed=30.0,
+            exit_time=datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc),
+            exit_reason="STOP_LOSS",
+        )
+        self.assertTrue(session.runtime.kill_switch.armed)
+        self.assertIn("DAILY_REALIZED_LOSS_LIMIT", session.runtime.kill_switch.reasons)
+        self.assertTrue(any("DAILY_REALIZED_LOSS_LIMIT" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_closes_live_position_on_take_profit_roe(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+                self.tpsl_orders = []
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "0.02",
+                            "marginSize": "10",
+                            "unrealizedPL": "2.0",
+                            "marginRatio": "0.1",
+                            "breakEvenPrice": "50000.0",
+                            "uTime": "1234567890",
+                            "cTime": "1234567890",
+                        }
+                    ]
+                }
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, order_params))
+                return {"status": "SUCCESS", "orderId": "close-1"}
+
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                self.tpsl_orders.append(order_params)
+                return {"status": "SUCCESS", "orderId": "tpsl-1"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_PARTIAL_TAKE_PROFIT")
+        self.assertTrue(session.live_orders[0]["partial_exit"])
+        self.assertEqual(len(session.rest_client.tpsl_orders), 1)
+        self.assertTrue(any("LIVE_POSITION_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
+        session.sync_account()
+        self.assertEqual(len(session.live_orders), 1)
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_manual_close_sync_reconciles_paper_position_and_applies_one_candle_cooldown(self, mock_send) -> None:
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        session._record_decision(
+            decision=make_decision(timestamp=now),
+            state=state,
+            timestamp=now,
+        )
+        self.assertIn("BTCUSDT", session.paper_positions)
+        session.live_positions_snapshot = [{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}]
+        session._reconcile_manual_live_closes(previous_live_positions=session.live_positions_snapshot)
+        self.assertIn("BTCUSDT", session.paper_positions)
+
+        session.live_positions_snapshot = []
+        session._reconcile_manual_live_closes(previous_live_positions=[{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}])
+
+        self.assertNotIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
+        cooldown_until = session.manual_symbol_cooldowns["BTCUSDT"]
+        remaining = (cooldown_until - datetime.now(timezone.utc)).total_seconds()
+        self.assertGreater(remaining, 0)
+        self.assertLessEqual(remaining, 5 * 60 + 5)
+        self.assertFalse(session._is_manual_symbol_cooldown_active("BTCUSDT", cooldown_until + timedelta(seconds=1)))
+        self.assertTrue(any("MANUAL_CLOSE_SYNCED" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_order_error_applies_symbol_cooldown(self, mock_send) -> None:
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        session._apply_order_error_cooldown(
+            symbol="ETHUSDT",
+            error_message='RuntimeError(\'Bitget HTTP 400: {"code":"45111","msg":"less than the minimum order quantity"}\')',
+            timestamp=now,
+        )
+        self.assertTrue(session._is_order_cooldown_active("ETHUSDT", now))
+        self.assertFalse(session._is_order_cooldown_active("ETHUSDT", now + timedelta(seconds=901)))
+        self.assertTrue(any("ORDER_COOLDOWN" in call.args[0] for call in mock_send.call_args_list))
+
+    def test_session_blocks_duplicate_order_submission_while_position_remains_open(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        follow_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 103.0
+        session._record_decision(
+            decision=make_decision(timestamp=follow_time, order_intent_notional_usd=1400.0),
+            state=state,
+            timestamp=follow_time,
+        )
+
+        self.assertEqual(len(session.paper_positions), 1)
+        self.assertEqual(len(session.closed_trades), 0)
+        self.assertEqual(len(session.tested_orders), 1)
 
     def test_async_runner_consumes_payloads(self) -> None:
         session = self._build_session()

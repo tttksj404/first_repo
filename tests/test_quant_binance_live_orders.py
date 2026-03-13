@@ -70,6 +70,7 @@ class FakeLiveOrderClient:
     def __init__(self) -> None:
         self.calls = 0
         self.leverage_calls: list[tuple[str, int]] = []
+        self.protection_calls: list[tuple[str, dict[str, object]]] = []
 
     def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
         self.leverage_calls.append((symbol, leverage))
@@ -78,6 +79,14 @@ class FakeLiveOrderClient:
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
         return {"status": "FILLED", "market": market, "orderId": self.calls}
+
+    def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+        self.protection_calls.append(("futures", order_params))
+        return {"status": "SUCCESS", "orderId": "tp-sl"}
+
+    def place_spot_plan_order(self, *, order_params):  # type: ignore[no-untyped-def]
+        self.protection_calls.append(("spot", order_params))
+        return {"status": "SUCCESS", "orderId": "spot-plan"}
 
 
 class RaisingLiveOrderClient(FakeLiveOrderClient):
@@ -315,6 +324,57 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(capped.order_intent_notional_usd, expected)
         self.assertLess(capped.order_intent_notional_usd, decision.order_intent_notional_usd)
 
+    def test_session_rejects_futures_order_below_min_quantity(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        session.capital_report = {
+            "futures_available_balance_usd": 98.0,
+            "futures_execution_balance_usd": 6.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [{"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.01}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-min-qty",
+            decision_hash="hash-min-qty",
+            snapshot_id="s-min-qty",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="ETHUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=5.1,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=2069.58)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertIn("MIN_ORDER_QUANTITY", capped.rejection_reasons)
+
     def test_session_caps_spot_notional_to_usdt_execution_balance_even_with_recognized_coin_assets(self) -> None:
         from quant_binance.models import DecisionIntent
 
@@ -367,6 +427,110 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         expected = round(10.0 * (1.0 - self.settings.cash_reserve.when_futures_disabled), 6)
         self.assertEqual(capped.order_intent_notional_usd, expected)
         self.assertLess(capped.order_intent_notional_usd, decision.order_intent_notional_usd)
+
+    def test_session_blocks_new_futures_entry_when_live_position_already_exists(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        session.capital_report = {
+            "futures_available_balance_usd": 98.0,
+            "futures_execution_balance_usd": 50.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_positions_snapshot = [
+            {"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "unrealizedPL": "2", "marginSize": "10"}
+        ]
+        decision = DecisionIntent(
+            decision_id="d-existing-live",
+            decision_hash="hash-existing-live",
+            snapshot_id="s-existing-live",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertNotIn("LIVE_POSITION_ALREADY_OPEN", capped.rejection_reasons)
+
+    def test_session_blocks_live_order_during_manual_close_cooldown(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        store = MarketStateStore()
+        store.put(
+            SymbolMarketState(
+                symbol="BTCUSDT",
+                top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, now),
+                last_trade_price=50000.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=now,
+            )
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        live_client = FakeLiveOrderClient()
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            live_order_executor=DecisionLiveOrderAdapter(live_client),  # type: ignore[arg-type]
+        )
+        session.manual_symbol_cooldowns["BTCUSDT"] = now.replace(minute=10)
+        payload = {
+            "stream": "btcusdt@kline_5m",
+            "data": {
+                "s": "BTCUSDT",
+                "k": {
+                    "i": "5m",
+                    "t": 1772971200000,
+                    "T": 1772971500000,
+                    "o": "49900",
+                    "h": "50100",
+                    "l": "49850",
+                    "c": "50050",
+                    "v": "12",
+                    "q": "600000",
+                    "x": True,
+                },
+            },
+        }
+        session.process_payload(payload, now=now)
+        self.assertEqual(live_client.calls, 0)
 
     def test_session_survives_live_order_exception(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
