@@ -391,6 +391,80 @@ class QuantBinanceSessionTests(unittest.TestCase):
             if state_path.exists():
                 state_path.unlink()
 
+    def test_session_trims_futures_position_on_profit_protection_retrace(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        peak_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 104.0
+        session._record_decision(
+            decision=make_decision(timestamp=peak_time, order_intent_notional_usd=1100.0),
+            state=state,
+            timestamp=peak_time,
+        )
+
+        self.assertEqual(len(session.closed_trades), 0)
+        self.assertAlmostEqual(session.paper_positions["BTCUSDT"].peak_roe_percent, 8.0)
+
+        retrace_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
+        state.last_trade_price = 102.5
+        session._record_decision(
+            decision=make_decision(timestamp=retrace_time, order_intent_notional_usd=1050.0),
+            state=state,
+            timestamp=retrace_time,
+        )
+
+        position = session.paper_positions["BTCUSDT"]
+        self.assertEqual(len(session.closed_trades), 1)
+        self.assertEqual(session.closed_trades[0]["exit_reason"], "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT")
+        self.assertTrue(position.partial_take_profit_taken)
+        self.assertAlmostEqual(position.quantity_remaining, position.quantity_opened * 0.5)
+        self.assertEqual(position.active_stop_price, position.entry_price)
+
+    def test_session_does_not_trim_futures_position_on_small_profit_retrace_noise(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        peak_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 104.0
+        session._record_decision(
+            decision=make_decision(timestamp=peak_time, order_intent_notional_usd=1100.0),
+            state=state,
+            timestamp=peak_time,
+        )
+
+        noise_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
+        state.last_trade_price = 103.2
+        session._record_decision(
+            decision=make_decision(timestamp=noise_time, order_intent_notional_usd=1075.0),
+            state=state,
+            timestamp=noise_time,
+        )
+
+        position = session.paper_positions["BTCUSDT"]
+        self.assertEqual(len(session.closed_trades), 0)
+        self.assertFalse(position.partial_take_profit_taken)
+        self.assertAlmostEqual(position.peak_roe_percent, 8.0)
+        self.assertEqual(position.active_stop_price, 95.0)
+
     @patch("quant_binance.session.send_telegram_message")
     def test_session_sends_telegram_alerts_for_profit_and_stop(self, mock_send) -> None:
         mock_send.return_value = {"ok": True}
@@ -508,6 +582,148 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(any("LIVE_POSITION_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
         session.sync_account()
         self.assertEqual(len(session.live_orders), 1)
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_trims_live_position_on_profit_protection_retrace(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+                self.tpsl_orders = []
+                self.snapshots = [
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "long",
+                                "total": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "0.8",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "uTime": "1234567890",
+                                "cTime": "1234567890",
+                            }
+                        ]
+                    },
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "long",
+                                "total": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "0.5",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "uTime": "1234567890",
+                                "cTime": "1234567890",
+                            }
+                        ]
+                    },
+                ]
+                self.position_calls = 0
+
+            def get_positions(self) -> dict[str, object]:
+                index = min(self.position_calls, len(self.snapshots) - 1)
+                self.position_calls += 1
+                return self.snapshots[index]
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, order_params))
+                return {"status": "SUCCESS", "orderId": "close-1"}
+
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                self.tpsl_orders.append(order_params)
+                return {"status": "SUCCESS", "orderId": "tpsl-1"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+        self.assertEqual(len(session.live_orders), 0)
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_PROFIT_PROTECTION")
+        self.assertTrue(session.live_orders[0]["partial_exit"])
+        self.assertEqual(len(session.rest_client.tpsl_orders), 1)
+        self.assertTrue(any("LIVE_POSITION_PROFIT_PROTECTION" in call.args[0] for call in mock_send.call_args_list))
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_does_not_trim_live_position_on_small_profit_retrace_noise(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+                self.tpsl_orders = []
+                self.snapshots = [
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "long",
+                                "total": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "0.8",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "uTime": "1234567890",
+                                "cTime": "1234567890",
+                            }
+                        ]
+                    },
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "long",
+                                "total": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "0.7",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "uTime": "1234567890",
+                                "cTime": "1234567890",
+                            }
+                        ]
+                    },
+                ]
+                self.position_calls = 0
+
+            def get_positions(self) -> dict[str, object]:
+                index = min(self.position_calls, len(self.snapshots) - 1)
+                self.position_calls += 1
+                return self.snapshots[index]
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, order_params))
+                return {"status": "SUCCESS", "orderId": "close-1"}
+
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                self.tpsl_orders.append(order_params)
+                return {"status": "SUCCESS", "orderId": "tpsl-1"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+        session.sync_account()
+
+        live_position = session.live_positions_snapshot[0]
+        identity = session._live_position_identity(live_position)
+        self.assertEqual(len(session.live_orders), 0)
+        self.assertEqual(len(session.rest_client.tpsl_orders), 0)
+        self.assertAlmostEqual(session.live_peak_roe_by_identity[identity], 8.0)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_manual_close_sync_reconciles_paper_position_and_applies_one_candle_cooldown(self, mock_send) -> None:
