@@ -330,7 +330,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         class RetryClient(FakeBitgetLiveClient):
             def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
                 self.orders.append((market, dict(order_params)))
-                if len(self.orders) == 1:
+                if len(self.orders) < 3:
                     raise RuntimeError('Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}')
                 return {"status": "SUCCESS", "orderId": "bitget-2"}
 
@@ -345,9 +345,28 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertIsNotNone(result)
         assert result is not None
         self.assertTrue(result.accepted)
-        self.assertEqual(len(live_client.orders), 2)
+        self.assertEqual(len(live_client.orders), 3)
         self.assertIn("tradeSide", live_client.orders[0][1])
-        self.assertIn("reduceOnly", live_client.orders[1][1])
+        self.assertNotIn("tradeSide", live_client.orders[1][1])
+        self.assertNotIn("reduceOnly", live_client.orders[1][1])
+        self.assertEqual(live_client.orders[2][1].get("reduceOnly"), "NO")
+
+    def test_bitget_live_order_does_not_retry_balance_40762_as_position_mode_error(self) -> None:
+        class InsufficientBalanceClient(FakeBitgetLiveClient):
+            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+                self.orders.append((market, dict(order_params)))
+                raise RuntimeError('Bitget HTTP 400: {"code":"40762","msg":"The order amount exceeds the balance"}')
+
+        live_client = InsufficientBalanceClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        with self.assertRaisesRegex(RuntimeError, "40762"):
+            live_adapter.execute_decision(
+                decision=self._decision(final_mode="futures"),
+                reference_price=50000.0,
+            )
+
+        self.assertEqual(len(live_client.orders), 1)
 
     def test_bitget_exchange_info_exposes_min_quantity(self) -> None:
         client = BitgetRestClient(credentials=None)
