@@ -144,6 +144,47 @@ def run_gemini_task(task: str) -> str:
     return output
 
 
+def explain_latest_runtime() -> str:
+    base = ROOT / 'quant_runtime'
+    state_candidates = sorted(base.rglob('summary.state.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+    summary_candidates = sorted(base.rglob('summary.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+    state_path = state_candidates[0] if state_candidates else None
+    summary_path = summary_candidates[0] if summary_candidates else None
+    if state_path is None or summary_path is None or not summary_path.exists() or not state_path.exists():
+        return '최신 런타임 요약 파일이 없습니다.'
+    summary = json.loads(summary_path.read_text(encoding='utf-8'))
+    state = json.loads(state_path.read_text(encoding='utf-8'))
+    lines = [
+        f"최신 상태: decision_count={summary.get('decision_count')} live_order_count={summary.get('live_order_count')} tested_order_count={summary.get('tested_order_count')}",
+        f"kill_switch={summary.get('kill_switch')}",
+    ]
+    top_reasons = summary.get('top_rejection_reasons') or {}
+    if top_reasons:
+        top_text = ', '.join(f'{k}:{v}' for k, v in list(top_reasons.items())[:5])
+        lines.append(f"주요 차단 사유: {top_text}")
+    recent = summary.get('recent_decisions') or []
+    if recent:
+        lines.append("최근 판단:")
+        for item in recent[-3:]:
+            reasons = ','.join(item.get('reasons', []))
+            lines.append(f"- {item.get('symbol')} {item.get('mode')} side={item.get('side')} score={item.get('score')} reasons={reasons}")
+    paper_count = summary.get('paper_open_futures_position_count', len(summary.get('open_futures_positions') or []))
+    exchange_count = summary.get('exchange_live_futures_position_count', len(summary.get('exchange_live_futures_positions') or []))
+    lines.append(
+        f"열린 spot 포지션={len(summary.get('open_spot_positions') or [])}, "
+        f"paper futures={paper_count}, exchange futures={exchange_count}"
+    )
+    if summary.get('futures_position_mismatch'):
+        details = summary.get('futures_position_mismatch_details') or {}
+        lines.append(
+            "futures 불일치: "
+            f"missing_in_paper={details.get('missing_in_paper') or []}, "
+            f"missing_on_exchange={details.get('missing_on_exchange') or []}"
+        )
+    lines.append(f"last_decision_timestamp={state.get('last_decision_timestamp')}")
+    return '\\n'.join(lines)
+
+
 def main() -> int:
     allowed = load_env_value('TELEGRAM_CHAT_ID_ALLOWLIST')
     allowlist = {item.strip() for item in allowed.split(',') if item.strip()}
@@ -164,6 +205,9 @@ def main() -> int:
                     continue
                 if full_text in {'/help', 'help', '도움말', '명령어', '사용법'}:
                     send_message(int(chat_id), help_message_ko())
+                    continue
+                if full_text in {'왜 거래 안돼', '왜 거래 안 돼', '왜 주문 안돼', '왜 주문 안 돼', '왜 변동이 없어', '왜 변동이 없지'}:
+                    send_message(int(chat_id), explain_latest_runtime())
                     continue
                 if full_text.lower().startswith('/codex'):
                     parts = full_text.split()

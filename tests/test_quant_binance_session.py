@@ -391,6 +391,48 @@ class QuantBinanceSessionTests(unittest.TestCase):
             if state_path.exists():
                 state_path.unlink()
 
+    def test_session_flush_writes_exchange_and_paper_futures_position_mismatch_state(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+        session.live_positions_snapshot = [
+            {"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"},
+            {"symbol": "ETHUSDT", "holdSide": "short", "total": "0.05", "available": "0.05"},
+        ]
+
+        summary_path = ROOT / "tests" / "tmp_session_mismatch_summary.json"
+        state_path = ROOT / "tests" / "tmp_session_mismatch_state.json"
+        try:
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            state_payload = json.loads(state_path.read_text(encoding="utf-8"))
+
+            self.assertEqual(summary["paper_open_futures_position_count"], 1)
+            self.assertEqual(summary["exchange_live_futures_position_count"], 2)
+            self.assertTrue(summary["futures_position_mismatch"])
+            self.assertEqual(
+                summary["futures_position_mismatch_details"],
+                {"missing_in_paper": ["ETHUSDT"], "missing_on_exchange": []},
+            )
+            self.assertEqual(state_payload["paper_open_futures_position_count"], 1)
+            self.assertEqual(state_payload["exchange_live_futures_position_count"], 2)
+            self.assertTrue(state_payload["futures_position_mismatch"])
+            self.assertEqual(
+                state_payload["futures_position_mismatch_details"],
+                {"missing_in_paper": ["ETHUSDT"], "missing_on_exchange": []},
+            )
+        finally:
+            if summary_path.exists():
+                summary_path.unlink()
+            if state_path.exists():
+                state_path.unlink()
+
     def test_session_trims_futures_position_on_profit_protection_retrace(self) -> None:
         session = self._build_session()
         state = session.runtime.dispatcher.store.get("BTCUSDT")
