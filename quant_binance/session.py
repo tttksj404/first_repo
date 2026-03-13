@@ -54,6 +54,14 @@ class PaperPosition:
     worst_price: float
     entry_predictability_score: float
     entry_liquidity_score: float
+    entry_net_expected_edge_bps: float = 0.0
+    entry_estimated_round_trip_cost_bps: float = 0.0
+    entry_planned_leverage: int = 1
+    latest_predictability_score: float = 0.0
+    latest_liquidity_score: float = 0.0
+    latest_net_expected_edge_bps: float = 0.0
+    latest_estimated_round_trip_cost_bps: float = 0.0
+    latest_decision_time: datetime | None = None
     partial_take_profit_taken: bool = False
     exit_confirmation_count: int = 0
     last_exit_signal_reason: str = ""
@@ -85,6 +93,17 @@ class PaperPosition:
             "partial_take_profit_taken": self.partial_take_profit_taken,
             "entry_predictability_score": round(self.entry_predictability_score, 6),
             "entry_liquidity_score": round(self.entry_liquidity_score, 6),
+            "entry_net_expected_edge_bps": round(self.entry_net_expected_edge_bps, 6),
+            "entry_estimated_round_trip_cost_bps": round(self.entry_estimated_round_trip_cost_bps, 6),
+            "entry_planned_leverage": int(max(self.entry_planned_leverage, 1)),
+            "latest_predictability_score": round(self.latest_predictability_score or self.entry_predictability_score, 6),
+            "latest_liquidity_score": round(self.latest_liquidity_score or self.entry_liquidity_score, 6),
+            "latest_net_expected_edge_bps": round(self.latest_net_expected_edge_bps or self.entry_net_expected_edge_bps, 6),
+            "latest_estimated_round_trip_cost_bps": round(
+                self.latest_estimated_round_trip_cost_bps or self.entry_estimated_round_trip_cost_bps,
+                6,
+            ),
+            "latest_decision_time": self.latest_decision_time,
             "exit_confirmation_count": self.exit_confirmation_count,
             "last_exit_signal_reason": self.last_exit_signal_reason,
         }
@@ -122,6 +141,7 @@ class LivePaperSession:
     live_peak_roe_by_identity: dict[str, float] = field(default_factory=dict)
     order_error_cooldowns: dict[str, datetime] = field(default_factory=dict)
     manual_symbol_cooldowns: dict[str, datetime] = field(default_factory=dict)
+    futures_reallocation_cooldown_until: datetime | None = None
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
@@ -311,7 +331,13 @@ class LivePaperSession:
             return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
         return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
-    def _cap_live_order_decision(self, decision: DecisionIntent, *, reference_price: float | None = None) -> DecisionIntent:
+    def _cap_live_order_decision(
+        self,
+        decision: DecisionIntent,
+        *,
+        reference_price: float | None = None,
+        extra_futures_execution_balance_usd: float = 0.0,
+    ) -> DecisionIntent:
         if not self.capital_report:
             return decision
         if decision.final_mode == "futures":
@@ -346,6 +372,7 @@ class LivePaperSession:
                     self.capital_report.get("futures_available_balance_usd", 0.0),
                 )
             )
+            available += max(extra_futures_execution_balance_usd, 0.0)
             leverage = select_futures_leverage(
                 predictability_score=decision.predictability_score,
                 trend_strength=decision.trend_strength,
@@ -539,6 +566,19 @@ class LivePaperSession:
     def _manual_reentry_cooldown_until(self, timestamp: datetime) -> datetime:
         seconds = max(60, self.runtime.decision_interval_minutes * 60)
         return timestamp + timedelta(seconds=seconds)
+
+    def _futures_reallocation_cooldown_for_timestamp(self, timestamp: datetime) -> datetime:
+        seconds = max(60, self.runtime.decision_interval_minutes * 120)
+        return timestamp + timedelta(seconds=seconds)
+
+    def _is_futures_reallocation_cooldown_active(self, timestamp: datetime) -> bool:
+        until = self.futures_reallocation_cooldown_until
+        if until is None:
+            return False
+        if timestamp >= until:
+            self.futures_reallocation_cooldown_until = None
+            return False
+        return True
 
     def _is_manual_symbol_cooldown_active(self, symbol: str, timestamp: datetime) -> bool:
         until = self.manual_symbol_cooldowns.get(symbol)
@@ -847,6 +887,19 @@ class LivePaperSession:
         if price <= 0 or decision.order_intent_notional_usd <= 0:
             return False
         quantity = decision.order_intent_notional_usd / price
+        leverage = 1
+        if decision.final_mode == "futures":
+            leverage = select_futures_leverage(
+                predictability_score=decision.predictability_score,
+                trend_strength=decision.trend_strength,
+                volume_confirmation=decision.volume_confirmation,
+                liquidity_score=decision.liquidity_score,
+                volatility_penalty=decision.volatility_penalty,
+                overheat_penalty=decision.overheat_penalty,
+                net_expected_edge_bps=decision.net_expected_edge_bps,
+                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+                settings=self.runtime.paper_service.settings,
+            )
         self.remaining_portfolio_capacity_usd = max(
             0.0,
             self.remaining_portfolio_capacity_usd - decision.order_intent_notional_usd,
@@ -870,6 +923,14 @@ class LivePaperSession:
             worst_price=price,
             entry_predictability_score=decision.predictability_score,
             entry_liquidity_score=decision.liquidity_score,
+            entry_net_expected_edge_bps=decision.net_expected_edge_bps,
+            entry_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+            entry_planned_leverage=max(int(leverage), 1),
+            latest_predictability_score=decision.predictability_score,
+            latest_liquidity_score=decision.liquidity_score,
+            latest_net_expected_edge_bps=decision.net_expected_edge_bps,
+            latest_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+            latest_decision_time=decision.timestamp,
         )
         return True
 
@@ -903,6 +964,11 @@ class LivePaperSession:
         position.current_price = price
         position.best_price = max(position.best_price, price)
         position.worst_price = min(position.worst_price, price)
+        position.latest_predictability_score = decision.predictability_score
+        position.latest_liquidity_score = decision.liquidity_score
+        position.latest_net_expected_edge_bps = decision.net_expected_edge_bps
+        position.latest_estimated_round_trip_cost_bps = decision.estimated_round_trip_cost_bps
+        position.latest_decision_time = timestamp
         reward_bps = self._reward_bps(position=position, price=price)
         exit_rules = self.runtime.paper_service.settings.exit_rules
 
@@ -982,6 +1048,247 @@ class LivePaperSession:
         self._update_paper_position(position=position, decision=decision, price=price, timestamp=timestamp)
         return False
 
+    def _futures_slot_limit(self) -> int:
+        settings = self.runtime.paper_service.settings
+        limits = [max(int(settings.operational_limits.max_concurrent_futures_symbols), 0)]
+        if settings.portfolio_focus.enabled:
+            limits.append(max(int(settings.portfolio_focus.futures_top_n), 0))
+        positive_limits = [limit for limit in limits if limit > 0]
+        if not positive_limits:
+            return 0
+        return min(positive_limits)
+
+    def _is_strong_reallocation_candidate(self, decision: DecisionIntent) -> bool:
+        settings = self.runtime.paper_service.settings
+        focus = settings.portfolio_focus
+        if not focus.enabled or decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return False
+        score_floor = settings.mode_thresholds.futures_score_min + max(focus.min_score_advantage_to_replace, 0.0)
+        edge_floor = max(
+            settings.futures_exposure.min_entry_net_edge_bps,
+            focus.min_net_edge_advantage_bps + (decision.estimated_round_trip_cost_bps * 2.0),
+        )
+        if decision.predictability_score < score_floor:
+            return False
+        if decision.net_expected_edge_bps < edge_floor:
+            return False
+        if decision.estimated_round_trip_cost_bps > 0:
+            edge_to_cost = decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
+            if edge_to_cost < max(settings.cost_gate.edge_to_cost_multiple_min + 0.25, 1.75):
+                return False
+        return True
+
+    def _blocked_futures_reallocation_reason(
+        self,
+        decision: DecisionIntent,
+        *,
+        reference_price: float,
+    ) -> tuple[str | None, DecisionIntent]:
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return None, decision
+        if decision.symbol in self.paper_positions:
+            return None, decision
+        futures_positions = [
+            position
+            for position in self.paper_positions.values()
+            if position.market == "futures" and position.quantity_remaining > 0 and position.symbol != decision.symbol
+        ]
+        slot_limit = self._futures_slot_limit()
+        if slot_limit > 0 and len(futures_positions) >= slot_limit:
+            return "MAX_CONCURRENT_FUTURES", decision
+        if decision.order_intent_notional_usd <= 0:
+            return "PORTFOLIO_CAPACITY", decision
+        if not self.capital_report or not self._market_capital_allowed(decision):
+            return None, decision
+        capped = self._cap_live_order_decision(decision, reference_price=reference_price)
+        if capped.final_mode != "futures" or capped.order_intent_notional_usd <= 0:
+            if "INSUFFICIENT_EXECUTION_BALANCE" in capped.rejection_reasons:
+                return "INSUFFICIENT_EXECUTION_BALANCE", capped
+            if "MIN_ORDER_QUANTITY" in capped.rejection_reasons:
+                return "MIN_ORDER_QUANTITY", capped
+        return None, capped
+
+    def _recomputed_futures_notional(
+        self,
+        decision: DecisionIntent,
+        *,
+        additional_capacity_usd: float,
+    ) -> float:
+        if decision.stop_distance_bps <= 0:
+            return 0.0
+        settings = self.runtime.paper_service.settings
+        leverage = select_futures_leverage(
+            predictability_score=decision.predictability_score,
+            trend_strength=decision.trend_strength,
+            volume_confirmation=decision.volume_confirmation,
+            liquidity_score=decision.liquidity_score,
+            volatility_penalty=decision.volatility_penalty,
+            overheat_penalty=decision.overheat_penalty,
+            net_expected_edge_bps=decision.net_expected_edge_bps,
+            estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+            settings=settings,
+        )
+        risk_dollars = self.equity_usd * settings.risk.per_trade_equity_risk
+        raw_notional = risk_dollars / (decision.stop_distance_bps / 10000.0)
+        restored_capacity = max(self.remaining_portfolio_capacity_usd + additional_capacity_usd, 0.0)
+        capped = min(
+            raw_notional,
+            self.equity_usd * settings.risk.max_symbol_notional_fraction * max(float(leverage), 1.0),
+            restored_capacity,
+        )
+        return round(max(capped, 0.0), 6)
+
+    def _weakest_futures_reallocation_target(self, *, incoming_decision: DecisionIntent) -> PaperPosition | None:
+        settings = self.runtime.paper_service.settings
+        focus = settings.portfolio_focus
+        weakest: PaperPosition | None = None
+        weakest_key: tuple[float, float, float, datetime] | None = None
+        for position in self.paper_positions.values():
+            if position.market != "futures" or position.quantity_remaining <= 0 or position.symbol == incoming_decision.symbol:
+                continue
+            current_score = min(
+                position.entry_predictability_score,
+                position.latest_predictability_score or position.entry_predictability_score,
+            )
+            current_edge = min(
+                position.entry_net_expected_edge_bps,
+                position.latest_net_expected_edge_bps or position.entry_net_expected_edge_bps,
+            )
+            score_erosion = position.entry_predictability_score - current_score
+            edge_erosion = position.entry_net_expected_edge_bps - current_edge
+            pnl = position.unrealized_pnl_usd_estimate()
+            weakness_detected = (
+                score_erosion >= settings.exit_rules.score_drop_exit_buffer
+                or edge_erosion >= max(focus.min_net_edge_advantage_bps, 0.0)
+                or pnl <= -max(focus.min_incremental_pnl_usd, 0.0)
+            )
+            if not weakness_detected:
+                continue
+            key = (current_score, current_edge, pnl, position.entry_time)
+            if weakest_key is None or key < weakest_key:
+                weakest_key = key
+                weakest = position
+        return weakest
+
+    def _fallback_blocked_futures_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        blocked_reason: str,
+        blocked_decision: DecisionIntent,
+    ) -> DecisionIntent:
+        if blocked_reason == "MAX_CONCURRENT_FUTURES":
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MAX_CONCURRENT_FUTURES",)))),
+            )
+        if blocked_reason in {"INSUFFICIENT_EXECUTION_BALANCE", "MIN_ORDER_QUANTITY"}:
+            return blocked_decision
+        return decision
+
+    def _maybe_reallocate_futures_entry(
+        self,
+        *,
+        decision: DecisionIntent,
+        state: Any,
+        timestamp: datetime,
+    ) -> DecisionIntent:
+        price = self._market_price(state=state, fallback=0.0)
+        if price <= 0:
+            return decision
+        blocked_reason, capped_decision = self._blocked_futures_reallocation_reason(
+            decision,
+            reference_price=price,
+        )
+        if blocked_reason is None:
+            return capped_decision
+        fallback = self._fallback_blocked_futures_decision(
+            decision=decision,
+            blocked_reason=blocked_reason,
+            blocked_decision=capped_decision,
+        )
+        if not self._is_strong_reallocation_candidate(decision):
+            return fallback
+        if self._is_futures_reallocation_cooldown_active(timestamp):
+            return fallback
+        target = self._weakest_futures_reallocation_target(incoming_decision=decision)
+        if target is None:
+            return fallback
+        released_capacity_usd = target.current_notional_usd_estimate()
+        released_execution_balance_usd = released_capacity_usd / max(float(target.entry_planned_leverage), 1.0)
+        candidate_notional = decision.order_intent_notional_usd
+        if candidate_notional <= 0:
+            candidate_notional = self._recomputed_futures_notional(
+                decision,
+                additional_capacity_usd=released_capacity_usd,
+            )
+        if candidate_notional <= 0:
+            return decision
+        candidate = replace(decision, order_intent_notional_usd=candidate_notional)
+        if self.capital_report and self._market_capital_allowed(candidate):
+            candidate = self._cap_live_order_decision(
+                candidate,
+                reference_price=price,
+                extra_futures_execution_balance_usd=released_execution_balance_usd,
+            )
+            if candidate.final_mode != "futures" or candidate.order_intent_notional_usd <= 0:
+                return fallback
+        current_score = min(
+            target.entry_predictability_score,
+            target.latest_predictability_score or target.entry_predictability_score,
+        )
+        current_edge = min(
+            target.entry_net_expected_edge_bps,
+            target.latest_net_expected_edge_bps or target.entry_net_expected_edge_bps,
+        )
+        switching_cost_bps = max(
+            target.entry_estimated_round_trip_cost_bps,
+            target.latest_estimated_round_trip_cost_bps or target.entry_estimated_round_trip_cost_bps,
+            candidate.estimated_round_trip_cost_bps,
+        ) * 2.0
+        score_advantage = candidate.predictability_score - current_score
+        edge_advantage_after_costs = candidate.net_expected_edge_bps - current_edge - switching_cost_bps
+        incremental_pnl_usd = edge_advantage_after_costs * candidate.order_intent_notional_usd / 10000.0
+        focus = self.runtime.paper_service.settings.portfolio_focus
+        if score_advantage < focus.min_score_advantage_to_replace:
+            return fallback
+        if edge_advantage_after_costs < focus.min_net_edge_advantage_bps:
+            return fallback
+        if incremental_pnl_usd < focus.min_incremental_pnl_usd:
+            return fallback
+        if self.live_order_executor is not None:
+            live_target = self._find_live_futures_position(target.symbol)
+            if live_target is None:
+                return fallback
+            self._close_live_position(position=live_target, reason="CAPITAL_REALLOCATION")
+        self._cancel_symbol_open_orders(symbol=target.symbol)
+        self._close_position(
+            position=target,
+            exit_price=target.current_price,
+            timestamp=timestamp,
+            exit_reason="CAPITAL_REALLOCATION",
+        )
+        self.futures_reallocation_cooldown_until = self._futures_reallocation_cooldown_for_timestamp(timestamp)
+        if self.log_store is not None:
+            self.log_store.append(
+                "futures_reallocation",
+                {
+                    "timestamp": timestamp,
+                    "incoming_symbol": candidate.symbol,
+                    "replaced_symbol": target.symbol,
+                    "blocked_reason": blocked_reason,
+                    "score_advantage": round(score_advantage, 6),
+                    "edge_advantage_after_costs_bps": round(edge_advantage_after_costs, 6),
+                    "incremental_pnl_usd_estimate": round(incremental_pnl_usd, 6),
+                    "cooldown_until": self.futures_reallocation_cooldown_until,
+                },
+            )
+        return candidate
+
     def _record_decision(
         self,
         *,
@@ -1000,19 +1307,26 @@ class LivePaperSession:
             self.learner.ingest_decisions((decision,))
         if self.log_store is not None:
             self.log_store.append("decisions", decision.as_dict())
-        allow_new_submission = False
+        managed_decision = decision
         if state is not None:
-            allow_new_submission = self._apply_paper_trade_management(
+            managed_decision = self._maybe_reallocate_futures_entry(
                 decision=decision,
                 state=state,
                 timestamp=timestamp,
             )
-        if self._is_order_cooldown_active(decision.symbol, timestamp):
+        allow_new_submission = False
+        if state is not None:
+            allow_new_submission = self._apply_paper_trade_management(
+                decision=managed_decision,
+                state=state,
+                timestamp=timestamp,
+            )
+        if self._is_order_cooldown_active(managed_decision.symbol, timestamp):
             allow_new_submission = False
-        if self._is_manual_symbol_cooldown_active(decision.symbol, timestamp):
+        if self._is_manual_symbol_cooldown_active(managed_decision.symbol, timestamp):
             allow_new_submission = False
-        if self.live_order_executor is not None and state is not None and allow_new_submission and self._market_capital_allowed(decision):
-            executable_decision = self._cap_live_order_decision(decision, reference_price=state.last_trade_price)
+        if self.live_order_executor is not None and state is not None and allow_new_submission and self._market_capital_allowed(managed_decision):
+            executable_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
@@ -1071,8 +1385,8 @@ class LivePaperSession:
                                 error_message=live_result.protection_error,
                                 timestamp=timestamp,
                             )
-        if self.order_tester is not None and state is not None and allow_new_submission and self._market_capital_allowed(decision):
-            test_decision = self._cap_live_order_decision(decision, reference_price=state.last_trade_price)
+        if self.order_tester is not None and state is not None and allow_new_submission and self._market_capital_allowed(managed_decision):
+            test_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
             if test_decision.final_mode in {"spot", "futures"} and test_decision.order_intent_notional_usd > 0:
                 try:
                     test_result = self.order_tester.test_decision(
