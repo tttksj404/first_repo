@@ -21,6 +21,7 @@ from quant_binance.features.extractor import MarketFeatureExtractor
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.observability.log_store import JsonlLogStore
+from quant_binance.observability.runtime_snapshot import load_latest_runtime_payloads
 from quant_binance.paths import prepare_run_paths
 from quant_binance.session import BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.service import PaperTradingService
@@ -213,6 +214,11 @@ def run_live_paper_daemon(
     )
     if supports_private_reads:
         session.sync_account()
+        previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
+        session.restore_futures_state_from_runtime(
+            state_payload=previous_state,
+            summary_payload=previous_summary,
+        )
     bootstrap_time = _next_decision_boundary(
         next(iter(store._states.values())).last_update_time,
         settings.decision_engine.decision_interval_minutes,
