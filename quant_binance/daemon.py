@@ -96,6 +96,14 @@ def _build_live_ws_client(
     )
 
 
+def _stateful_runtime_symbols(
+    *,
+    configured_symbols: tuple[str, ...],
+    store,
+) -> tuple[str, ...]:
+    return tuple(symbol for symbol in configured_symbols if store.get(symbol) is not None)
+
+
 def run_live_paper_daemon(
     *,
     config_path: str | Path,
@@ -151,6 +159,12 @@ def run_live_paper_daemon(
         symbols=settings.universe,
         intervals=("5m", "1h", "4h"),
     )
+    runtime_symbols = _stateful_runtime_symbols(
+        configured_symbols=settings.universe,
+        store=store,
+    )
+    if not runtime_symbols:
+        raise RuntimeError("no seeded market states available for the configured live runtime universe")
     learner = OnlineEdgeLearner(
         min_observations=max(20, settings.feature_thresholds.min_expected_edge_observations)
     )
@@ -159,7 +173,7 @@ def run_live_paper_daemon(
     altcoin_inputs = load_altcoin_inputs()
     observe_only_symbols: list[str] = []
     eligible_symbols: set[str] = set()
-    for symbol in settings.universe:
+    for symbol in runtime_symbols:
         state = store.get(symbol)
         if state is None:
             continue
@@ -223,7 +237,7 @@ def run_live_paper_daemon(
         next(iter(store._states.values())).last_update_time,
         settings.decision_engine.decision_interval_minutes,
     )
-    for symbol in settings.universe:
+    for symbol in runtime_symbols:
         if symbol not in eligible_symbols:
             continue
         state = store.get(symbol)
@@ -244,7 +258,7 @@ def run_live_paper_daemon(
     shell = LivePaperShell(
         ws_client_factory=lambda: _build_live_ws_client(
             exchange_id=exchange_id,
-            symbols=settings.universe,
+            symbols=runtime_symbols,
             allow_insecure_ssl=allow_insecure_ssl,
         ),
         session=session,
