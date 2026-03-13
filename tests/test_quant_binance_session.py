@@ -937,6 +937,115 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertAlmostEqual(position.peak_roe_percent, 8.0)
         self.assertEqual(position.active_stop_price, 95.0)
 
+    def test_session_trims_futures_position_on_proactive_roe_threshold(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        trigger_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 105.0
+        session._record_decision(
+            decision=make_decision(timestamp=trigger_time, order_intent_notional_usd=1100.0),
+            state=state,
+            timestamp=trigger_time,
+        )
+
+        position = session.paper_positions["BTCUSDT"]
+        self.assertEqual(len(session.closed_trades), 1)
+        self.assertEqual(session.closed_trades[0]["exit_reason"], "PROACTIVE_PARTIAL_TAKE_PROFIT")
+        self.assertTrue(position.partial_take_profit_taken)
+        self.assertEqual(position.proactive_take_profit_thresholds_hit, (10.0,))
+        self.assertAlmostEqual(position.quantity_remaining, position.quantity_opened * 0.75)
+        self.assertEqual(position.active_stop_price, position.entry_price)
+
+    def test_session_does_not_retrigger_same_proactive_roe_threshold(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        first_trigger_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 105.0
+        session._record_decision(
+            decision=make_decision(timestamp=first_trigger_time, order_intent_notional_usd=1100.0),
+            state=state,
+            timestamp=first_trigger_time,
+        )
+
+        second_trigger_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
+        state.last_trade_price = 105.5
+        session._record_decision(
+            decision=make_decision(timestamp=second_trigger_time, order_intent_notional_usd=1120.0),
+            state=state,
+            timestamp=second_trigger_time,
+        )
+
+        position = session.paper_positions["BTCUSDT"]
+        self.assertEqual(len(session.closed_trades), 1)
+        self.assertEqual(position.proactive_take_profit_thresholds_hit, (10.0,))
+        self.assertAlmostEqual(position.quantity_remaining, position.quantity_opened * 0.75)
+
+    def test_session_proactive_take_profit_coexists_with_profit_protection_retrace(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time),
+            state=state,
+            timestamp=entry_time,
+        )
+
+        proactive_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 105.0
+        session._record_decision(
+            decision=make_decision(timestamp=proactive_time, order_intent_notional_usd=1100.0),
+            state=state,
+            timestamp=proactive_time,
+        )
+
+        peak_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
+        state.last_trade_price = 106.0
+        session._record_decision(
+            decision=make_decision(timestamp=peak_time, order_intent_notional_usd=1150.0),
+            state=state,
+            timestamp=peak_time,
+        )
+
+        retrace_time = datetime(2026, 3, 8, 12, 20, tzinfo=timezone.utc)
+        state.last_trade_price = 104.5
+        session._record_decision(
+            decision=make_decision(timestamp=retrace_time, order_intent_notional_usd=1090.0),
+            state=state,
+            timestamp=retrace_time,
+        )
+
+        position = session.paper_positions["BTCUSDT"]
+        self.assertEqual(
+            [trade["exit_reason"] for trade in session.closed_trades],
+            ["PROACTIVE_PARTIAL_TAKE_PROFIT", "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT"],
+        )
+        self.assertTrue(position.profit_protection_retrace_taken)
+        self.assertEqual(position.proactive_take_profit_thresholds_hit, (10.0,))
+        self.assertAlmostEqual(position.quantity_remaining, position.quantity_opened * 0.375)
+
     @patch("quant_binance.session.send_telegram_message")
     def test_session_sends_telegram_alerts_for_profit_and_stop(self, mock_send) -> None:
         mock_send.return_value = {"ok": True}
@@ -1048,10 +1157,11 @@ class QuantBinanceSessionTests(unittest.TestCase):
         session.sync_account()
 
         self.assertEqual(len(session.live_orders), 1)
-        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_PARTIAL_TAKE_PROFIT")
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT")
         self.assertTrue(session.live_orders[0]["partial_exit"])
+        self.assertEqual(session.live_orders[0]["quantity"], 0.005)
         self.assertEqual(len(session.rest_client.tpsl_orders), 1)
-        self.assertTrue(any("LIVE_POSITION_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
+        self.assertTrue(any("LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT" in call.args[0] for call in mock_send.call_args_list))
         session.sync_account()
         self.assertEqual(len(session.live_orders), 1)
 
