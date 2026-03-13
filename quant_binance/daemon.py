@@ -101,6 +101,7 @@ def run_live_paper_daemon(
     max_retries: int = 3,
     execute_live_orders: bool = False,
     exchange: str | None = None,
+    sync_interval_seconds: int = 60,
 ) -> dict[str, object]:
     exchange_id = resolve_exchange_id(exchange)
     settings = Settings.load(config_path)
@@ -192,6 +193,7 @@ def run_live_paper_daemon(
         runtime=runtime,
         equity_usd=10000.0,
         remaining_portfolio_capacity_usd=5000.0,
+        sync_interval_seconds=sync_interval_seconds,
         rest_client=rest_client if supports_private_reads else None,
         order_tester=DecisionOrderTestAdapter(rest_client),
         live_order_executor=DecisionLiveOrderAdapter(rest_client, settings) if execute_live_orders else None,
@@ -221,6 +223,10 @@ def run_live_paper_daemon(
             history=history,
             decision_time=bootstrap_time,
         )
+    session.flush(
+        summary_path=run_paths.summary_path,
+        state_path=run_paths.state_path,
+    )
     shell = LivePaperShell(
         ws_client_factory=lambda: _build_live_ws_client(
             exchange_id=exchange_id,

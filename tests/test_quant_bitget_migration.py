@@ -28,6 +28,7 @@ class FakeBitgetLiveClient:
     def __init__(self) -> None:
         self.leverage_calls: list[tuple[str, int]] = []
         self.orders: list[tuple[str, dict[str, object]]] = []
+        self.protection_orders: list[tuple[str, dict[str, object]]] = []
 
     def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
         self.leverage_calls.append((symbol, leverage))
@@ -36,6 +37,14 @@ class FakeBitgetLiveClient:
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.orders.append((market, order_params))
         return {"status": "SUCCESS", "orderId": "bitget-1"}
+
+    def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+        self.protection_orders.append(("futures", order_params))
+        return {"status": "SUCCESS", "orderId": "bitget-tpsl-1"}
+
+    def place_spot_plan_order(self, *, order_params):  # type: ignore[no-untyped-def]
+        self.protection_orders.append(("spot", order_params))
+        return {"status": "SUCCESS", "orderId": "bitget-plan-1"}
 
 
 class QuantBitgetMigrationTests(unittest.TestCase):
@@ -227,9 +236,107 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
         self.assertEqual(live_client.orders[0][1]["productType"], "USDT-FUTURES")
         self.assertEqual(live_client.orders[0][1]["side"], "buy")
-        self.assertEqual(live_client.orders[0][1]["reduceOnly"], "NO")
-        self.assertNotIn("tradeSide", live_client.orders[0][1])
+        self.assertEqual(live_client.orders[0][1]["tradeSide"], "open")
         self.assertNotIn("holdSide", live_client.orders[0][1])
+        self.assertEqual(live_client.protection_orders[0][0], "futures")
+        self.assertIn("stopLossTriggerPrice", live_client.protection_orders[0][1])
+        self.assertIn("stopSurplusTriggerPrice", live_client.protection_orders[0][1])
+
+    def test_bitget_live_order_ignores_margin_leverage_update_error(self) -> None:
+        class FlakyLeverageClient(FakeBitgetLiveClient):
+            def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
+                raise RuntimeError(
+                    'Bitget HTTP 400: {"code":"40893","msg":"Unable to update the leverage factor of this position, there is not enough margin!"}'
+                )
+
+        live_client = FlakyLeverageClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=50000.0,
+        )
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result.market, "futures")
+        self.assertEqual(len(live_client.orders), 1)
+
+    def test_bitget_live_order_still_returns_success_when_protection_order_fails(self) -> None:
+        class FlakyProtectionClient(FakeBitgetLiveClient):
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                raise RuntimeError('Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}')
+
+        live_client = FlakyProtectionClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=50000.0,
+        )
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.market, "futures")
+        self.assertEqual(len(live_client.orders), 1)
+        self.assertIn("40774", result.protection_error)
+
+    def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40774(self) -> None:
+        class RetryClient(FakeBitgetLiveClient):
+            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+                self.orders.append((market, dict(order_params)))
+                if len(self.orders) == 1:
+                    raise RuntimeError('Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}')
+                return {"status": "SUCCESS", "orderId": "bitget-2"}
+
+        live_client = RetryClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=50000.0,
+        )
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(len(live_client.orders), 2)
+        self.assertIn("tradeSide", live_client.orders[0][1])
+        self.assertIn("reduceOnly", live_client.orders[1][1])
+
+    def test_bitget_exchange_info_exposes_min_quantity(self) -> None:
+        client = BitgetRestClient(credentials=None)
+        with patch.object(
+            client,
+            "send",
+            return_value={
+                "data": [
+                    {
+                        "symbol": "ETHUSDT",
+                        "minTradeUSDT": "5",
+                        "minTradeNum": "0.01",
+                        "sizeMultiplier": "0.01",
+                    }
+                ]
+            },
+        ):
+            info = client.get_exchange_info(market="futures")
+        row = info["symbols"][0]
+        lot = next(item for item in row["filters"] if item["filterType"] == "LOT_SIZE")
+        self.assertEqual(lot["minQty"], "0.01")
+
+    def test_bitget_positions_request_builder(self) -> None:
+        client = BitgetRestClient(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        request = client.build_positions_request()
+        self.assertIn("/api/v2/mix/position/all-position", request.full_url)
 
     def test_bitget_futures_order_params_follow_one_way_mode_contract(self) -> None:
         client = BitgetRestClient(credentials=None)
@@ -244,8 +351,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
             client_oid="open-1",
         )
         self.assertEqual(open_params["side"], "buy")
-        self.assertEqual(open_params["reduceOnly"], "NO")
-        self.assertNotIn("tradeSide", open_params)
+        self.assertEqual(open_params["tradeSide"], "open")
         self.assertNotIn("holdSide", open_params)
 
         close_params = client.build_order_params(
@@ -258,8 +364,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
             client_oid="close-1",
         )
         self.assertEqual(close_params["side"], "sell")
-        self.assertEqual(close_params["reduceOnly"], "YES")
-        self.assertNotIn("tradeSide", close_params)
+        self.assertEqual(close_params["tradeSide"], "close")
         self.assertNotIn("holdSide", close_params)
 
     def test_bitget_futures_account_prefers_crossed_executable_balance_when_available(self) -> None:
@@ -347,14 +452,10 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(summary["account_snapshot"], {})
 
 
+    def test_bitget_cancel_order_builder(self) -> None:
+        request = BitgetRestClient(credentials=ExchangeCredentials(exchange_id="bitget", api_key="key", api_secret="secret", api_passphrase="pass")).build_cancel_order_request(market="futures", symbol="BTCUSDT", order_id="123")
+        self.assertIn("/api/v2/mix/order/cancel-order", request.full_url)
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-    def test_bitget_kline_granularity_mapping(self) -> None:
-        from quant_binance.execution.bitget_rest import _bitget_granularity
-
-        self.assertEqual(_bitget_granularity(market="spot", interval="5m"), "5min")
-        self.assertEqual(_bitget_granularity(market="spot", interval="1h"), "1h")
-        self.assertEqual(_bitget_granularity(market="futures", interval="5m"), "5m")
-        self.assertEqual(_bitget_granularity(market="futures", interval="1h"), "1H")
