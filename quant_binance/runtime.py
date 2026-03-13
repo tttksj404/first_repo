@@ -39,6 +39,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-base", default="quant_runtime")
     parser.add_argument("--ack-live-risk", default="")
     parser.add_argument("--exchange", default="")
+    parser.add_argument("--sync-interval-seconds", type=int, default=60)
     return parser
 
 
