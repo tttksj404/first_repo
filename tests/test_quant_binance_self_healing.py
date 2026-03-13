@@ -19,6 +19,7 @@ from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.self_healing import (
     KNOWN_CATEGORY_BITGET_LIVE_ORDER,
     KNOWN_CATEGORY_DAEMON_STALLED,
+    KNOWN_CATEGORY_MISSING_MARKET_STATE,
     UNKNOWN_CATEGORY_RUNTIME_ERROR,
     RuntimeSelfHealing,
     classify_runtime_issue,
@@ -195,6 +196,17 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
         self.assertTrue(issue["known"])
         self.assertEqual(issue["automatic_action"], "cooldown_and_reuse_test_order_path")
 
+    def test_classify_runtime_issue_knows_missing_market_state_errors(self) -> None:
+        issue = classify_runtime_issue(
+            error_message="KeyError('missing market state for symbol=STEEMUSDT')",
+            exchange_id="binance",
+            stage="market_data",
+        )
+
+        self.assertEqual(issue["category"], KNOWN_CATEGORY_MISSING_MARKET_STATE)
+        self.assertTrue(issue["known"])
+        self.assertEqual(issue["automatic_action"], "skip_payload_until_market_state_ready")
+
     def test_runtime_self_healing_activates_global_live_order_cooldown_after_tripwire(self) -> None:
         healing = RuntimeSelfHealing(known_error_escalation_count=3, live_order_cooldown_seconds=600)
         now = datetime(2026, 3, 13, 4, 0, tzinfo=timezone.utc)
@@ -241,6 +253,32 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
         self.assertFalse(issue["known"])
         self.assertFalse(healing.is_live_order_cooldown_active(now=now))
         self.assertEqual(healing._recent_events[-1].status, "reported")
+
+    def test_runtime_self_healing_tracks_missing_market_state_in_snapshot(self) -> None:
+        healing = RuntimeSelfHealing()
+        now = datetime(2026, 3, 13, 4, 0, tzinfo=timezone.utc)
+
+        issue = healing.record_runtime_error(
+            now=now,
+            symbol="STEEMUSDT",
+            error_message="KeyError('missing market state for symbol=STEEMUSDT')",
+            exchange_id="binance",
+            stage="market_data",
+        )
+
+        snapshot = healing.snapshot(
+            now=now,
+            order_error_cooldowns={},
+            manual_symbol_cooldowns={},
+            mismatch_active=False,
+            mismatch_details={},
+        )
+
+        self.assertEqual(issue["category"], KNOWN_CATEGORY_MISSING_MARKET_STATE)
+        self.assertTrue(issue["known"])
+        self.assertEqual(snapshot["status"], "degraded")
+        self.assertEqual(snapshot["active_guards"]["missing_market_state_symbols"], ["STEEMUSDT"])
+        self.assertEqual(snapshot["recent_events"][-1]["category"], KNOWN_CATEGORY_MISSING_MARKET_STATE)
 
     def test_live_paper_shell_restarts_once_on_stall_and_records_event(self) -> None:
         session = self._build_session()
