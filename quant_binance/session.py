@@ -1296,6 +1296,10 @@ class LivePaperSession:
         alert_key = f"live-position-close:{symbol}:{u_time}:{reason}:{fraction:.4f}"
         if alert_key in self.sent_alert_keys:
             return
+        proactive_partial_reasons = {
+            "LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT",
+            "LIVE_POSITION_PARTIAL_TAKE_PROFIT",
+        }
         order_params = self.rest_client.build_order_params(
             market="futures",
             symbol=symbol,
@@ -1305,27 +1309,67 @@ class LivePaperSession:
             reduce_only=True,
             client_oid=f"{symbol}-{reason.lower()}",
         )
+
+        def _record_already_closed(exc: Exception) -> None:
+            if self.log_store is not None:
+                self.log_store.append(
+                    "live_position_actions",
+                    {
+                        "timestamp": datetime.now(tz=timezone.utc),
+                        "symbol": symbol,
+                        "market": "futures",
+                        "side": side.lower(),
+                        "quantity": quantity,
+                        "accepted": False,
+                        "reason": f"{reason}_ALREADY_CLOSED",
+                        "response": {"error": repr(exc)},
+                    },
+                )
+
         try:
             response = self.rest_client.place_order(market="futures", order_params=order_params)
         except Exception as exc:
             message = str(exc)
-            if "22002" in message or "No position to close" in message:
-                if self.log_store is not None:
-                    self.log_store.append(
-                        "live_position_actions",
-                        {
-                            "timestamp": datetime.now(tz=timezone.utc),
-                            "symbol": symbol,
-                            "market": "futures",
-                            "side": side.lower(),
-                            "quantity": quantity,
-                            "accepted": False,
-                            "reason": f"{reason}_ALREADY_CLOSED",
-                            "response": {"error": repr(exc)},
-                        },
-                    )
-                return
-            raise
+            adapter = self.live_order_executor or DecisionLiveOrderAdapter(
+                self.rest_client,
+                self.runtime.paper_service.settings,
+            )
+            can_retry_bitget_partial_close = (
+                getattr(self.rest_client, "exchange_id", "") == "bitget"
+                and reason in proactive_partial_reasons
+                and (
+                    adapter._is_bitget_unilateral_error(message)
+                    or "22002" in message
+                    or "No position to close" in message
+                )
+            )
+            if can_retry_bitget_partial_close:
+                retry_error = exc
+                for alternate_params in adapter._bitget_alternate_futures_params(order_params):
+                    try:
+                        response = self.rest_client.place_order(market="futures", order_params=alternate_params)
+                    except Exception as retry_exc:
+                        retry_error = retry_exc
+                        retry_message = str(retry_exc)
+                        if not (
+                            adapter._is_bitget_unilateral_error(retry_message)
+                            or "22002" in retry_message
+                            or "No position to close" in retry_message
+                        ):
+                            raise
+                        continue
+                    order_params = alternate_params
+                    break
+                else:
+                    if "22002" in str(retry_error) or "No position to close" in str(retry_error):
+                        _record_already_closed(retry_error)
+                        return
+                    raise retry_error
+            else:
+                if "22002" in message or "No position to close" in message:
+                    _record_already_closed(exc)
+                    return
+                raise
         payload = {
             "timestamp": datetime.now(tz=timezone.utc),
             "symbol": symbol,
