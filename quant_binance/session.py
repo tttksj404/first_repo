@@ -917,7 +917,8 @@ class LivePaperSession:
         state_payload: dict[str, Any],
         summary_payload: dict[str, Any] | None = None,
     ) -> int:
-        live_symbols = set(self._active_live_futures_positions_by_symbol())
+        live_positions_by_symbol = self._active_live_futures_positions_by_symbol()
+        live_symbols = set(live_positions_by_symbol)
         if not live_symbols:
             self.futures_missing_in_paper_counts = {}
             self.futures_missing_on_exchange_counts = {}
@@ -938,6 +939,13 @@ class LivePaperSession:
                 continue
             self.paper_positions[position.symbol] = position
             self._reserve_capacity_for_reconciled_position(position)
+            restored += 1
+        active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
+        for symbol in sorted(live_symbols - active_paper_symbols):
+            self._reconcile_missing_in_paper_position(
+                position=live_positions_by_symbol[symbol],
+                persisted_cycles=0,
+            )
             restored += 1
         active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
         self.futures_missing_in_paper_counts = {
@@ -1581,6 +1589,8 @@ class LivePaperSession:
         weakest: list[tuple[tuple[float, float, float, datetime], PaperPosition]] = []
         for position in self.paper_positions.values():
             if position.market != "futures" or position.quantity_remaining <= 0 or position.symbol == incoming_decision.symbol:
+                continue
+            if position.exchange_synced:
                 continue
             current_score, current_edge, pnl, _ = self._futures_reallocation_target_state(position)
             score_erosion = position.entry_predictability_score - current_score

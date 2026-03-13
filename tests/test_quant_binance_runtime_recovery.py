@@ -254,6 +254,17 @@ class RuntimeRecoveryTests(unittest.TestCase):
         self.assertEqual(session.paper_positions["ETHUSDT"].entry_planned_leverage, 5)
         self.assertEqual(session.futures_missing_in_paper_counts, {})
 
+    def test_restore_futures_state_from_runtime_immediately_adopts_live_positions_missing_from_snapshot(self) -> None:
+        session = self._build_session()
+        session.sync_account()
+
+        restored = session.restore_futures_state_from_runtime(state_payload={})
+
+        self.assertEqual(restored, 1)
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertTrue(session.paper_positions["ETHUSDT"].exchange_synced)
+        self.assertEqual(session.futures_missing_in_paper_counts, {})
+
     def test_run_live_paper_daemon_restores_latest_paper_futures_state_before_shell_run(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
             previous_run = Path(output_dir) / "output" / "paper-live-shell" / "20260313-previous"
@@ -282,6 +293,26 @@ class RuntimeRecoveryTests(unittest.TestCase):
                     "futures_missing_in_paper_counts": {"ADAUSDT": 1},
                 },
             )
+
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", RestoredPositionsShell):
+                    result = run_live_paper_daemon(
+                        config_path=CONFIG_PATH,
+                        output_base_dir=output_dir,
+                        exchange="binance",
+                        max_retries=1,
+                    )
+
+        self.assertIn("ADAUSDT", result["summary"]["paper_symbols"])
+        self.assertEqual(result["summary"]["missing_in_paper_counts"], {})
+
+    def test_run_live_paper_daemon_immediately_adopts_live_positions_missing_from_previous_runtime_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            previous_run = Path(output_dir) / "output" / "paper-live-shell" / "20260313-previous"
+            previous_run.mkdir(parents=True, exist_ok=True)
+            previous_summary = build_runtime_summary(decisions=[])
+            write_runtime_summary(previous_run / "summary.json", previous_summary)
+            write_runtime_state(previous_run / "summary.state.json", {})
 
             with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeDaemonClient()):
                 with patch("quant_binance.daemon.LivePaperShell", RestoredPositionsShell):
