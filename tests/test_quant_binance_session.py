@@ -17,6 +17,7 @@ from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.models import DecisionIntent
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
+from quant_binance.self_healing import RuntimeSelfHealing
 from quant_binance.settings import Settings
 
 
@@ -156,6 +157,23 @@ class FlakyWsFactory:
 class FailingWsClient:
     async def run(self, handler):
         raise RuntimeError("temporary websocket failure")
+
+
+class StalledWsClient:
+    async def run(self, handler):
+        await asyncio.Event().wait()
+
+
+class StalledThenHealthyFactory:
+    def __init__(self, payloads):
+        self.payloads = payloads
+        self.calls = 0
+
+    def __call__(self):
+        self.calls += 1
+        if self.calls == 1:
+            return StalledWsClient()
+        return FakeWsClient(self.payloads)
 
 
 class QuantBinanceSessionTests(unittest.TestCase):
@@ -1386,6 +1404,44 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertNotIn("SOLUSDT", session.paper_positions)
         self.assertEqual(len(session.closed_trades), 2)
 
+    def test_futures_reallocation_does_not_replace_exchange_synced_positions(self) -> None:
+        settings = self._focus_settings(futures_top_n=1)
+        session = self._build_session(settings=settings)
+        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        self._seed_weak_futures_position(session, symbol="ETHUSDT", entry_time=now - timedelta(minutes=10))
+        session.paper_positions["ETHUSDT"].exchange_synced = True
+        session.capital_report = {
+            "futures_available_balance_usd": 50.0,
+            "futures_execution_balance_usd": 1.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+            ],
+        }
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        managed = session._maybe_reallocate_futures_entry(
+            decision=make_decision(
+                timestamp=now,
+                symbol="BTCUSDT",
+                predictability_score=96.0,
+                gross_expected_edge_bps=36.0,
+                net_expected_edge_bps=24.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=2500.0,
+            ),
+            state=state,
+            timestamp=now,
+        )
+
+        self.assertEqual(managed.final_mode, "cash")
+        self.assertIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertTrue(session.paper_positions["ETHUSDT"].exchange_synced)
+        self.assertEqual(session.closed_trades, [])
+        self.assertIsNone(session.futures_reallocation_cooldown_until)
+
     def test_async_runner_consumes_payloads(self) -> None:
         session = self._build_session()
         payloads = [
@@ -1454,6 +1510,63 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(len(session.decisions), 1)
             self.assertTrue(summary_path.exists())
             self.assertTrue(state_path.exists())
+        finally:
+            if summary_path.exists():
+                summary_path.unlink()
+            if state_path.exists():
+                state_path.unlink()
+
+    def test_live_paper_shell_self_heals_stalled_websocket_once_then_recovers(self) -> None:
+        session = self._build_session()
+        session.self_healing = RuntimeSelfHealing(
+            stall_timeout_seconds=1,
+            max_stall_restarts_per_window=2,
+            stall_restart_window_seconds=600,
+        )
+        payloads = [
+            {
+                "stream": "btcusdt@kline_5m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "5m",
+                        "t": 1772971200000,
+                        "T": 1772971500000,
+                        "o": "49900",
+                        "h": "50100",
+                        "l": "49850",
+                        "c": "50050",
+                        "v": "12",
+                        "q": "600000",
+                        "x": True,
+                    },
+                },
+            }
+        ]
+        summary_path = ROOT / "tests" / "tmp_shell_heal_summary.json"
+        state_path = ROOT / "tests" / "tmp_shell_heal_state.json"
+        try:
+            shell = LivePaperShell(
+                ws_client_factory=StalledThenHealthyFactory(payloads),
+                session=session,
+                backoff_policy=BackoffPolicy(
+                    initial_delay_seconds=0.0,
+                    max_delay_seconds=0.0,
+                    multiplier=1.0,
+                    max_attempts=2,
+                ),
+                summary_path=summary_path,
+                state_path=state_path,
+            )
+            summary = asyncio.run(shell.run())
+            assert summary is not None
+            self.assertEqual(len(session.decisions), 1)
+            self.assertTrue(
+                any(
+                    event["category"] == "daemon_stalled" and event["action"] == "restart_websocket"
+                    for event in summary["self_healing"]["recent_events"]
+                )
+            )
         finally:
             if summary_path.exists():
                 summary_path.unlink()
