@@ -479,6 +479,83 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertAlmostEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 1055.0)
         self.assertEqual(session.paper_positions["ETHUSDT"].quantity_remaining, 0.5)
 
+    def test_sync_account_keeps_reconciled_futures_position_through_brief_exchange_snapshot_gap(self) -> None:
+        class FlappingPositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self._snapshots = [
+                    [
+                        {
+                            "symbol": "ETHUSDT",
+                            "holdSide": "short",
+                            "total": "0.50",
+                            "available": "0.50",
+                            "openPriceAvg": "2100.0",
+                            "markPrice": "2110.0",
+                            "leverage": "5",
+                            "cTime": "1772971200000",
+                        }
+                    ],
+                    [
+                        {
+                            "symbol": "ETHUSDT",
+                            "holdSide": "short",
+                            "total": "0.50",
+                            "available": "0.50",
+                            "openPriceAvg": "2100.0",
+                            "markPrice": "2110.0",
+                            "leverage": "5",
+                            "cTime": "1772971200000",
+                        }
+                    ],
+                    [],
+                    [],
+                    [
+                        {
+                            "symbol": "ETHUSDT",
+                            "holdSide": "short",
+                            "total": "0.50",
+                            "available": "0.50",
+                            "openPriceAvg": "2100.0",
+                            "markPrice": "2110.0",
+                            "leverage": "5",
+                            "cTime": "1772971200000",
+                        }
+                    ],
+                ]
+                self._index = 0
+
+            def get_positions(self) -> dict[str, object]:
+                if self._index < len(self._snapshots):
+                    positions = self._snapshots[self._index]
+                    self._index += 1
+                else:
+                    positions = self._snapshots[-1]
+                return {"positions": positions}
+
+        session = self._build_session()
+        session.rest_client = FlappingPositionRestClient()
+
+        session.sync_account()
+        self.assertNotIn("ETHUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_in_paper_counts, {"ETHUSDT": 1})
+
+        session.sync_account()
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_in_paper_counts, {})
+
+        session.sync_account()
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {"ETHUSDT": 1})
+
+        session.sync_account()
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {"ETHUSDT": 2})
+
+        session.sync_account()
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {})
+
     @patch("quant_binance.session.send_telegram_message")
     def test_sync_account_cleans_up_persistent_paper_futures_position_missing_on_exchange(self, mock_send) -> None:
         class PositionRestClient(FakeRestClient):
@@ -505,6 +582,14 @@ class QuantBinanceSessionTests(unittest.TestCase):
         session.sync_account()
         self.assertIn("BTCUSDT", session.paper_positions)
         self.assertEqual(session.futures_missing_on_exchange_counts, {"BTCUSDT": 1})
+
+        session.sync_account()
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {"BTCUSDT": 2})
+
+        session.sync_account()
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {"BTCUSDT": 3})
 
         session.sync_account()
         self.assertNotIn("BTCUSDT", session.paper_positions)
@@ -911,15 +996,11 @@ class QuantBinanceSessionTests(unittest.TestCase):
         session.open_orders_snapshot = {"orders": {"entrustedList": [{"symbol": "BTCUSDT", "orderId": "open-1"}]}}
         session._reconcile_manual_live_closes(previous_live_positions=[{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}])
 
-        self.assertNotIn("BTCUSDT", session.paper_positions)
-        self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
-        self.assertEqual(session.rest_client.cancelled_orders, [("futures", "BTCUSDT", "open-1")])
-        cooldown_until = session.manual_symbol_cooldowns["BTCUSDT"]
-        remaining = (cooldown_until - datetime.now(timezone.utc)).total_seconds()
-        self.assertGreater(remaining, 0)
-        self.assertLessEqual(remaining, 5 * 60 + 5)
-        self.assertFalse(session._is_manual_symbol_cooldown_active("BTCUSDT", cooldown_until + timedelta(seconds=1)))
-        self.assertTrue(any("MANUAL_CLOSE_SYNCED" in call.args[0] for call in mock_send.call_args_list))
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.closed_trades, [])
+        self.assertEqual(session.rest_client.cancelled_orders, [])
+        self.assertEqual(session.manual_symbol_cooldowns, {})
+        mock_send.assert_not_called()
 
     @patch("quant_binance.session.send_telegram_message")
     def test_order_error_applies_symbol_cooldown(self, mock_send) -> None:
