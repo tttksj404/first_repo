@@ -21,7 +21,9 @@ class FakeRestClient:
     def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
         return {
             "symbols": [
-                {"symbol": "BTCUSDT"},
+                {"symbol": "BTCUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "100"}]},
+                {"symbol": "ETHUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "20"}]},
+                {"symbol": "SOLUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "5"}]},
             ]
         }
 
@@ -63,6 +65,32 @@ class FakeBitgetDaemonClient(FakeRestClient):
         return {"status": "PREVIEW", "market": market, "request": dict(order_params)}
 
 
+class FakePrivateDaemonClient(FakeRestClient):
+    supports_private_reads = True
+
+    def __init__(self) -> None:
+        self.spot_account = {
+            "balances": [
+                {"asset": "USDT", "free": "10.0", "locked": "0.0"},
+                {"asset": "BTC", "free": "0.01", "locked": "0.0"},
+            ]
+        }
+        self.futures_account = {
+            "availableBalance": 40.0,
+            "executionAvailableBalance": 5.0,
+            "totalWalletBalance": 50.0,
+            "totalMarginBalance": 50.0,
+        }
+
+    def get_account(self, *, market):  # type: ignore[no-untyped-def]
+        if market == "spot":
+            return self.spot_account
+        return self.futures_account
+
+    def get_open_orders(self, *, market, symbol=None):  # type: ignore[no-untyped-def]
+        return {"market": market, "orders": []}
+
+
 class FakeShell:
     def __init__(self, *, ws_client_factory, session, backoff_policy, summary_path, state_path):  # type: ignore[no-untyped-def]
         self.ws_client_factory = ws_client_factory
@@ -77,6 +105,15 @@ class FakeShell:
             "status": "ok",
             "client_types": [type(item).__name__ for item in client.clients],
             "rest_sync_enabled": self.session.rest_client is not None,
+        }
+
+
+class CapitalReportShell(FakeShell):
+    async def run(self) -> dict[str, object]:
+        return {
+            "status": "ok",
+            "capital_report": self.session.capital_report,
+            "account_snapshot": self.session.account_snapshot,
         }
 
 
@@ -126,6 +163,8 @@ class QuantBinanceDaemonTests(unittest.TestCase):
             ["BitgetWebSocketClient", "BitgetWebSocketClient"],
         )
         self.assertFalse(result["summary"]["rest_sync_enabled"])
+        self.assertIn("self_healing", result["summary"])
+        self.assertIn("status", result["summary"]["self_healing"])
 
     def test_run_live_paper_daemon_requires_credentials_for_bitget_live_orders(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
@@ -137,6 +176,45 @@ class QuantBinanceDaemonTests(unittest.TestCase):
                         exchange="bitget",
                         execute_live_orders=True,
                     )
+
+    def test_run_live_paper_daemon_recognizes_non_usdt_spot_assets_for_capital_adequacy(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakePrivateDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", CapitalReportShell):
+                    result = run_live_paper_daemon(
+                        config_path=CONFIG_PATH,
+                        output_base_dir=output_dir,
+                        exchange="binance",
+                        max_retries=1,
+                    )
+
+        capital_report = result["summary"]["capital_report"]
+        assert isinstance(capital_report, dict)
+        self.assertEqual(float(capital_report["spot_available_balance_usd"]), 10.0)
+        self.assertEqual(float(capital_report["spot_recognized_balance_usd"]), 509.995)
+        self.assertGreater(
+            float(capital_report["spot_recognized_balance_usd"]),
+            float(capital_report["spot_available_balance_usd"]),
+        )
+        self.assertTrue(capital_report["can_trade_spot_any"])
+
+    def test_run_live_paper_daemon_uses_futures_equity_for_adequacy_when_execution_balance_is_lower(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakePrivateDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", CapitalReportShell):
+                    result = run_live_paper_daemon(
+                        config_path=CONFIG_PATH,
+                        output_base_dir=output_dir,
+                        exchange="binance",
+                        max_retries=1,
+                    )
+
+        capital_report = result["summary"]["capital_report"]
+        assert isinstance(capital_report, dict)
+        self.assertEqual(float(capital_report["futures_available_balance_usd"]), 5.0)
+        self.assertEqual(float(capital_report["futures_recognized_balance_usd"]), 50.0)
+        self.assertTrue(capital_report["can_trade_futures_any"])
+        self.assertEqual(float(capital_report["futures_execution_balance_usd"]), 5.0)
 
 
 if __name__ == "__main__":

@@ -7,10 +7,15 @@ from pathlib import Path
 import sys
 base = Path(sys.argv[1])
 latest = base / 'output' / 'paper-live-shell' / 'latest' / 'summary.state.json'
-paths = [p for p in base.rglob('summary.state.json') if p.exists()]
-if latest.exists() and latest not in paths:
-    paths.append(latest)
-paths = sorted(paths, key=lambda p: p.stat().st_mtime, reverse=True)
+if latest.exists():
+    print(latest)
+    raise SystemExit
+mode_root = base / 'output' / 'paper-live-shell'
+paths = sorted(
+    [p for p in mode_root.rglob('summary.state.json') if p.exists()],
+    key=lambda p: p.stat().st_mtime,
+    reverse=True,
+)
 print(paths[0] if paths else '')
 PY
 )"
@@ -29,10 +34,15 @@ from pathlib import Path
 import sys
 base = Path(sys.argv[1])
 latest = base / 'output' / 'paper-live-shell' / 'latest' / 'summary.json'
-paths = [p for p in base.rglob('summary.json') if p.exists()]
-if latest.exists() and latest not in paths:
-    paths.append(latest)
-paths = sorted(paths, key=lambda p: p.stat().st_mtime, reverse=True)
+if latest.exists():
+    print(latest)
+    raise SystemExit
+mode_root = base / 'output' / 'paper-live-shell'
+paths = sorted(
+    [p for p in mode_root.rglob('summary.json') if p.exists()],
+    key=lambda p: p.stat().st_mtime,
+    reverse=True,
+)
 print(paths[0] if paths else '')
 PY
 )"
@@ -64,7 +74,7 @@ print("last_event_timestamp:", state.get("last_event_timestamp"))
 print("last_decision_timestamp:", state.get("last_decision_timestamp"))
 print("kill_switch:", state.get("kill_switch"))
 self_healing = state.get("self_healing") or summary.get("self_healing") or {}
-print("self_healing_status:", self_healing.get("status"))
+print("self_healing_status:", self_healing.get("status") or "unavailable")
 print("self_healing_active_guards:", self_healing.get("active_guards"))
 print("self_healing_recent_events:", self_healing.get("recent_events"))
 paper_futures_positions = state.get("paper_open_futures_positions")
