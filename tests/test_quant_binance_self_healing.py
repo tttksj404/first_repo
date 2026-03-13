@@ -304,6 +304,30 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
         self.assertEqual(summary["self_healing"]["recent_events"][-1]["category"], KNOWN_CATEGORY_DAEMON_STALLED)
         self.assertEqual(summary["self_healing"]["recent_events"][-1]["status"], "applied")
 
+    def test_runtime_self_healing_detects_decision_stall_while_heartbeats_continue(self) -> None:
+        healing = RuntimeSelfHealing(
+            stall_timeout_seconds=60,
+            max_stall_restarts_per_window=1,
+            stall_restart_window_seconds=600,
+        )
+        started = datetime(2026, 3, 13, 4, 0, tzinfo=timezone.utc)
+        healing.begin_monitoring(timestamp=started, heartbeat_count=0, decision_count=1)
+        healing.note_decision(timestamp=started, decision_count=1, heartbeat_count=0)
+        healing.note_progress(timestamp=started + timedelta(seconds=30), heartbeat_count=5)
+
+        self.assertTrue(healing.detect_stall(now=started + timedelta(seconds=61)))
+        self.assertTrue(healing.register_stall_recovery(now=started + timedelta(seconds=61), heartbeat_count=5))
+
+        snapshot = healing.snapshot(
+            now=started + timedelta(seconds=61),
+            order_error_cooldowns={},
+            manual_symbol_cooldowns={},
+            mismatch_active=False,
+            mismatch_details={"missing_in_paper": [], "missing_on_exchange": []},
+        )
+
+        self.assertEqual(snapshot["recent_events"][-1]["details"]["stall_kind"], "decision_progress")
+
     def test_runtime_self_healing_blocks_second_stall_restart_when_budget_is_exhausted(self) -> None:
         healing = RuntimeSelfHealing(max_stall_restarts_per_window=1)
         now = datetime(2026, 3, 13, 4, 0, tzinfo=timezone.utc)
