@@ -104,6 +104,7 @@ class FakeRestClient:
     def __init__(self) -> None:
         self.account_calls = 0
         self.open_order_calls = 0
+        self.cancelled_orders: list[tuple[str, str, str]] = []
 
     def get_account(self, *, market: str) -> dict[str, object]:
         self.account_calls += 1
@@ -115,6 +116,10 @@ class FakeRestClient:
 
     def get_positions(self) -> dict[str, object]:
         return {"positions": []}
+
+    def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, object]:
+        self.cancelled_orders.append((market, symbol, order_id))
+        return {"status": "SUCCESS", "orderId": order_id}
 
 
 class FakeOrderTestClient:
@@ -461,10 +466,12 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertIn("BTCUSDT", session.paper_positions)
 
         session.live_positions_snapshot = []
+        session.open_orders_snapshot = {"orders": {"entrustedList": [{"symbol": "BTCUSDT", "orderId": "open-1"}]}}
         session._reconcile_manual_live_closes(previous_live_positions=[{"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"}])
 
         self.assertNotIn("BTCUSDT", session.paper_positions)
         self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
+        self.assertEqual(session.rest_client.cancelled_orders, [("futures", "BTCUSDT", "open-1")])
         cooldown_until = session.manual_symbol_cooldowns["BTCUSDT"]
         remaining = (cooldown_until - datetime.now(timezone.utc)).total_seconds()
         self.assertGreater(remaining, 0)
@@ -485,6 +492,23 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(session._is_order_cooldown_active("ETHUSDT", now))
         self.assertFalse(session._is_order_cooldown_active("ETHUSDT", now + timedelta(seconds=901)))
         self.assertTrue(any("ORDER_COOLDOWN" in call.args[0] for call in mock_send.call_args_list))
+
+    def test_close_live_position_ignores_already_closed_exchange_race(self) -> None:
+        class AlreadyClosedRestClient(FakeRestClient):
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                raise RuntimeError('Bitget HTTP 400: {"code":"22002","msg":"No position to close"}')
+
+        session = self._build_session()
+        session.rest_client = AlreadyClosedRestClient()
+        session._close_live_position(
+            position={"symbol": "BTCUSDT", "holdSide": "long", "total": "0.02", "available": "0.02"},
+            reason="LIVE_POSITION_PARTIAL_TAKE_PROFIT",
+            fraction=0.5,
+        )
+        self.assertEqual(len(session.live_orders), 0)
 
     def test_session_blocks_duplicate_order_submission_while_position_remains_open(self) -> None:
         session = self._build_session()

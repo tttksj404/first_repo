@@ -9,6 +9,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from quant_binance.exchange import ExchangeCredentials
@@ -29,7 +30,6 @@ def _bitget_futures_side(*, side: str, reduce_only: bool | None) -> str:
     normalized = side.strip().upper()
     if normalized not in {"BUY", "SELL"}:
         raise ValueError(f"unsupported Bitget futures side '{side}'")
-    # This runtime uses Bitget unilateral mode: open/close is expressed via reduceOnly.
     return normalized.lower()
 
 
@@ -199,6 +199,16 @@ class BitgetRestClient:
             params={"symbol": symbol},
         )
 
+    def build_positions_request(self) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/position/all-position",
+            method="GET",
+            params={
+                "productType": self.contract_config.product_type,
+                "marginCoin": self.contract_config.margin_coin,
+            },
+        )
+
     def build_live_order_request(self, *, market: str, order_params: dict[str, Any]) -> Request:
         if market == "futures":
             return self.build_signed_request(
@@ -208,6 +218,38 @@ class BitgetRestClient:
             )
         return self.build_signed_request(
             path="/api/v2/spot/trade/place-order",
+            method="POST",
+            body_params=order_params,
+        )
+
+    def build_futures_position_tpsl_request(self, *, order_params: dict[str, Any]) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/order/place-pos-tpsl",
+            method="POST",
+            body_params=order_params,
+        )
+
+    def build_cancel_order_request(self, *, market: str, symbol: str, order_id: str) -> Request:
+        if market == "futures":
+            return self.build_signed_request(
+                path="/api/v2/mix/order/cancel-order",
+                method="POST",
+                body_params={
+                    "symbol": symbol,
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                    "orderId": order_id,
+                },
+            )
+        return self.build_signed_request(
+            path="/api/v2/spot/trade/cancel-order",
+            method="POST",
+            body_params={"symbol": symbol, "orderId": order_id},
+        )
+
+    def build_spot_plan_order_request(self, *, order_params: dict[str, Any]) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/spot/trade/place-plan-order",
             method="POST",
             body_params=order_params,
         )
@@ -243,11 +285,10 @@ class BitgetRestClient:
             "marginCoin": self.contract_config.margin_coin,
             "marginMode": "crossed",
             "side": _bitget_futures_side(side=side, reduce_only=reduce_only),
+            "tradeSide": "close" if reduce_only else "open",
             "orderType": order_type.lower(),
             "size": f"{quantity:.8f}",
         }
-        if reduce_only is not None:
-            payload["reduceOnly"] = "YES" if reduce_only else "NO"
         if client_oid:
             payload["clientOid"] = client_oid
         return payload
@@ -268,6 +309,46 @@ class BitgetRestClient:
             "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
             "exchange": self.exchange_id,
             "market": market,
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
+
+    def place_futures_position_tpsl(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
+        payload = self.send(self.build_futures_position_tpsl_request(order_params=order_params))
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
+            "exchange": self.exchange_id,
+            "market": "futures",
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
+
+    def place_spot_plan_order(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
+        payload = self.send(self.build_spot_plan_order_request(order_params=order_params))
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
+            "exchange": self.exchange_id,
+            "market": "spot",
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
+
+    def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, Any]:
+        payload = self.send(self.build_cancel_order_request(market=market, symbol=symbol, order_id=order_id))
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
+            "exchange": self.exchange_id,
+            "market": market,
+            "orderId": order_id,
             "raw": payload,
         }
         if isinstance(data, dict):
@@ -331,6 +412,11 @@ class BitgetRestClient:
     def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, Any]:
         payload = self.send(self.build_open_orders_request(market=market, symbol=symbol))
         return {"orders": payload.get("data", []), "raw": payload}
+
+    def get_positions(self) -> dict[str, Any]:
+        payload = self.send(self.build_positions_request())
+        rows = payload.get("data", [])
+        return {"positions": rows if isinstance(rows, list) else [], "raw": payload}
 
     def get_klines(
         self,
@@ -428,7 +514,11 @@ class BitgetRestClient:
             if not symbol:
                 continue
             min_notional = item.get("minTradeUSDT") or item.get("minTradeAmount") or item.get("minTradeNum") or "0"
-            filters = [{"filterType": "MIN_NOTIONAL", "minNotional": min_notional}]
+            min_qty = item.get("minTradeNum") or item.get("sizeMultiplier") or "0"
+            filters = [
+                {"filterType": "MIN_NOTIONAL", "minNotional": min_notional},
+                {"filterType": "LOT_SIZE", "minQty": min_qty},
+            ]
             symbols.append({"symbol": symbol, "filters": filters, "raw": item})
         return {"symbols": symbols, "raw": payload}
 
@@ -436,5 +526,9 @@ class BitgetRestClient:
         context = None
         if self.allow_insecure_ssl:
             context = ssl._create_unverified_context()
-        with urlopen(request, timeout=10, context=context) as response:
-            return json.loads(response.read().decode("utf-8"))
+        try:
+            with urlopen(request, timeout=10, context=context) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
