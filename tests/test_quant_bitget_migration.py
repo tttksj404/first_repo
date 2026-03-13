@@ -398,6 +398,38 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(float(account["executionAvailableBalance"]), 4.93305789)
         self.assertEqual(float(account["crossedMaxAvailable"]), 4.93305789)
 
+
+    def test_bitget_futures_account_falls_back_to_available_when_crossed_executable_balance_is_zero(self) -> None:
+        client = BitgetRestClient(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        payload = {
+            "code": "00000",
+            "msg": "success",
+            "data": [
+                {
+                    "marginCoin": "USDT",
+                    "available": "147.50760642",
+                    "crossedMaxAvailable": "0",
+                    "unionAvailable": "18.17050274",
+                    "crossedMargin": "150.45935428",
+                    "usdtEquity": "149.237136425496",
+                }
+            ],
+        }
+
+        with patch.object(client, "send", return_value=payload):
+            account = client.get_account(market="futures")
+
+        self.assertEqual(float(account["availableBalance"]), 147.50760642)
+        self.assertEqual(float(account["executionAvailableBalance"]), 147.50760642)
+        self.assertEqual(float(account["unionAvailable"]), 18.17050274)
+
     def test_crossed_executable_balance_assumption_reduces_bitget_futures_payload_size(self) -> None:
         decision = self._decision(final_mode="futures")
         live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
