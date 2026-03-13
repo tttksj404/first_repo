@@ -1138,25 +1138,31 @@ class LivePaperSession:
         )
         return round(max(capped, 0.0), 6)
 
-    def _weakest_futures_reallocation_target(self, *, incoming_decision: DecisionIntent) -> PaperPosition | None:
+    def _futures_reallocation_target_state(
+        self,
+        position: PaperPosition,
+    ) -> tuple[float, float, float, datetime]:
+        current_score = min(
+            position.entry_predictability_score,
+            position.latest_predictability_score or position.entry_predictability_score,
+        )
+        current_edge = min(
+            position.entry_net_expected_edge_bps,
+            position.latest_net_expected_edge_bps or position.entry_net_expected_edge_bps,
+        )
+        pnl = position.unrealized_pnl_usd_estimate()
+        return current_score, current_edge, pnl, position.entry_time
+
+    def _weak_futures_reallocation_targets(self, *, incoming_decision: DecisionIntent) -> list[PaperPosition]:
         settings = self.runtime.paper_service.settings
         focus = settings.portfolio_focus
-        weakest: PaperPosition | None = None
-        weakest_key: tuple[float, float, float, datetime] | None = None
+        weakest: list[tuple[tuple[float, float, float, datetime], PaperPosition]] = []
         for position in self.paper_positions.values():
             if position.market != "futures" or position.quantity_remaining <= 0 or position.symbol == incoming_decision.symbol:
                 continue
-            current_score = min(
-                position.entry_predictability_score,
-                position.latest_predictability_score or position.entry_predictability_score,
-            )
-            current_edge = min(
-                position.entry_net_expected_edge_bps,
-                position.latest_net_expected_edge_bps or position.entry_net_expected_edge_bps,
-            )
+            current_score, current_edge, pnl, _ = self._futures_reallocation_target_state(position)
             score_erosion = position.entry_predictability_score - current_score
             edge_erosion = position.entry_net_expected_edge_bps - current_edge
-            pnl = position.unrealized_pnl_usd_estimate()
             weakness_detected = (
                 score_erosion >= settings.exit_rules.score_drop_exit_buffer
                 or edge_erosion >= max(focus.min_net_edge_advantage_bps, 0.0)
@@ -1164,11 +1170,12 @@ class LivePaperSession:
             )
             if not weakness_detected:
                 continue
-            key = (current_score, current_edge, pnl, position.entry_time)
-            if weakest_key is None or key < weakest_key:
-                weakest_key = key
-                weakest = position
-        return weakest
+            weakest.append((self._futures_reallocation_target_state(position), position))
+        weakest.sort(key=lambda item: item[0])
+        return [position for _, position in weakest]
+
+    def _max_futures_reallocation_replacements(self) -> int:
+        return 2
 
     def _fallback_blocked_futures_decision(
         self,
@@ -1215,43 +1222,59 @@ class LivePaperSession:
             return fallback
         if self._is_futures_reallocation_cooldown_active(timestamp):
             return fallback
-        target = self._weakest_futures_reallocation_target(incoming_decision=decision)
-        if target is None:
+        futures_positions = [
+            position
+            for position in self.paper_positions.values()
+            if position.market == "futures" and position.quantity_remaining > 0 and position.symbol != decision.symbol
+        ]
+        slot_limit = self._futures_slot_limit()
+        selected_targets: list[PaperPosition] = []
+        candidate: DecisionIntent | None = None
+        released_capacity_usd = 0.0
+        released_execution_balance_usd = 0.0
+        weak_targets = self._weak_futures_reallocation_targets(incoming_decision=decision)
+        if not weak_targets:
             return fallback
-        released_capacity_usd = target.current_notional_usd_estimate()
-        released_execution_balance_usd = released_capacity_usd / max(float(target.entry_planned_leverage), 1.0)
-        candidate_notional = decision.order_intent_notional_usd
-        if candidate_notional <= 0:
-            candidate_notional = self._recomputed_futures_notional(
-                decision,
-                additional_capacity_usd=released_capacity_usd,
-            )
-        if candidate_notional <= 0:
-            return decision
-        candidate = replace(decision, order_intent_notional_usd=candidate_notional)
-        if self.capital_report and self._market_capital_allowed(candidate):
-            candidate = self._cap_live_order_decision(
-                candidate,
-                reference_price=price,
-                extra_futures_execution_balance_usd=released_execution_balance_usd,
-            )
-            if candidate.final_mode != "futures" or candidate.order_intent_notional_usd <= 0:
-                return fallback
-        current_score = min(
-            target.entry_predictability_score,
-            target.latest_predictability_score or target.entry_predictability_score,
-        )
-        current_edge = min(
-            target.entry_net_expected_edge_bps,
-            target.latest_net_expected_edge_bps or target.entry_net_expected_edge_bps,
-        )
-        switching_cost_bps = max(
-            target.entry_estimated_round_trip_cost_bps,
-            target.latest_estimated_round_trip_cost_bps or target.entry_estimated_round_trip_cost_bps,
-            candidate.estimated_round_trip_cost_bps,
-        ) * 2.0
-        score_advantage = candidate.predictability_score - current_score
-        edge_advantage_after_costs = candidate.net_expected_edge_bps - current_edge - switching_cost_bps
+        for target in weak_targets[: self._max_futures_reallocation_replacements()]:
+            selected_targets.append(target)
+            target_notional = target.current_notional_usd_estimate()
+            released_capacity_usd += target_notional
+            released_execution_balance_usd += target_notional / max(float(target.entry_planned_leverage), 1.0)
+            candidate_notional = decision.order_intent_notional_usd
+            if candidate_notional <= 0:
+                candidate_notional = self._recomputed_futures_notional(
+                    decision,
+                    additional_capacity_usd=released_capacity_usd,
+                )
+            if candidate_notional <= 0:
+                continue
+            candidate_option = replace(decision, order_intent_notional_usd=candidate_notional)
+            if self.capital_report and self._market_capital_allowed(candidate_option):
+                candidate_option = self._cap_live_order_decision(
+                    candidate_option,
+                    reference_price=price,
+                    extra_futures_execution_balance_usd=released_execution_balance_usd,
+                )
+            slot_unlocked = slot_limit <= 0 or (len(futures_positions) - len(selected_targets)) < slot_limit
+            if candidate_option.final_mode == "futures" and candidate_option.order_intent_notional_usd > 0 and slot_unlocked:
+                candidate = candidate_option
+                break
+        if candidate is None:
+            return fallback
+        replaced_scores: list[float] = []
+        replaced_edges: list[float] = []
+        switching_cost_bps = 0.0
+        for target in selected_targets:
+            current_score, current_edge, _, _ = self._futures_reallocation_target_state(target)
+            replaced_scores.append(current_score)
+            replaced_edges.append(current_edge)
+            switching_cost_bps += max(
+                target.entry_estimated_round_trip_cost_bps,
+                target.latest_estimated_round_trip_cost_bps or target.entry_estimated_round_trip_cost_bps,
+                candidate.estimated_round_trip_cost_bps,
+            ) * 2.0
+        score_advantage = candidate.predictability_score - max(replaced_scores)
+        edge_advantage_after_costs = candidate.net_expected_edge_bps - max(replaced_edges) - switching_cost_bps
         incremental_pnl_usd = edge_advantage_after_costs * candidate.order_intent_notional_usd / 10000.0
         focus = self.runtime.paper_service.settings.portfolio_focus
         if score_advantage < focus.min_score_advantage_to_replace:
@@ -1261,17 +1284,20 @@ class LivePaperSession:
         if incremental_pnl_usd < focus.min_incremental_pnl_usd:
             return fallback
         if self.live_order_executor is not None:
-            live_target = self._find_live_futures_position(target.symbol)
-            if live_target is None:
+            live_targets = [self._find_live_futures_position(target.symbol) for target in selected_targets]
+            if any(target is None for target in live_targets):
                 return fallback
-            self._close_live_position(position=live_target, reason="CAPITAL_REALLOCATION")
-        self._cancel_symbol_open_orders(symbol=target.symbol)
-        self._close_position(
-            position=target,
-            exit_price=target.current_price,
-            timestamp=timestamp,
-            exit_reason="CAPITAL_REALLOCATION",
-        )
+            for live_target in live_targets:
+                assert live_target is not None
+                self._close_live_position(position=live_target, reason="CAPITAL_REALLOCATION")
+        for target in selected_targets:
+            self._cancel_symbol_open_orders(symbol=target.symbol)
+            self._close_position(
+                position=target,
+                exit_price=target.current_price,
+                timestamp=timestamp,
+                exit_reason="CAPITAL_REALLOCATION",
+            )
         self.futures_reallocation_cooldown_until = self._futures_reallocation_cooldown_for_timestamp(timestamp)
         if self.log_store is not None:
             self.log_store.append(
@@ -1279,10 +1305,13 @@ class LivePaperSession:
                 {
                     "timestamp": timestamp,
                     "incoming_symbol": candidate.symbol,
-                    "replaced_symbol": target.symbol,
+                    "replaced_symbol": selected_targets[0].symbol,
+                    "replaced_symbols": [target.symbol for target in selected_targets],
+                    "replaced_count": len(selected_targets),
                     "blocked_reason": blocked_reason,
                     "score_advantage": round(score_advantage, 6),
                     "edge_advantage_after_costs_bps": round(edge_advantage_after_costs, 6),
+                    "aggregate_switching_cost_bps": round(switching_cost_bps, 6),
                     "incremental_pnl_usd_estimate": round(incremental_pnl_usd, 6),
                     "cooldown_until": self.futures_reallocation_cooldown_until,
                 },

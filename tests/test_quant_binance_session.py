@@ -213,29 +213,39 @@ class QuantBinanceSessionTests(unittest.TestCase):
         *,
         symbol: str,
         entry_time: datetime,
+        entry_price: float = 100.0,
+        current_price: float = 90.0,
+        quantity: float = 40.0,
+        entry_predictability_score: float = 82.0,
+        latest_predictability_score: float = 73.0,
+        entry_net_expected_edge_bps: float = 16.0,
+        latest_net_expected_edge_bps: float = 7.0,
+        entry_estimated_round_trip_cost_bps: float = 6.0,
+        latest_estimated_round_trip_cost_bps: float = 6.0,
+        entry_planned_leverage: int = 2,
     ) -> None:
         session.paper_positions[symbol] = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
             symbol=symbol,
             market="futures",
             side="long",
             entry_time=entry_time,
-            entry_price=100.0,
-            current_price=90.0,
-            quantity_opened=40.0,
-            quantity_remaining=40.0,
+            entry_price=entry_price,
+            current_price=current_price,
+            quantity_opened=quantity,
+            quantity_remaining=quantity,
             stop_distance_bps=500.0,
             active_stop_price=95.0,
-            best_price=100.0,
-            worst_price=88.0,
-            entry_predictability_score=82.0,
+            best_price=max(entry_price, current_price),
+            worst_price=min(entry_price, current_price, 88.0),
+            entry_predictability_score=entry_predictability_score,
             entry_liquidity_score=0.8,
-            entry_net_expected_edge_bps=16.0,
-            entry_estimated_round_trip_cost_bps=6.0,
-            entry_planned_leverage=2,
-            latest_predictability_score=73.0,
+            entry_net_expected_edge_bps=entry_net_expected_edge_bps,
+            entry_estimated_round_trip_cost_bps=entry_estimated_round_trip_cost_bps,
+            entry_planned_leverage=entry_planned_leverage,
+            latest_predictability_score=latest_predictability_score,
             latest_liquidity_score=0.7,
-            latest_net_expected_edge_bps=7.0,
-            latest_estimated_round_trip_cost_bps=6.0,
+            latest_net_expected_edge_bps=latest_net_expected_edge_bps,
+            latest_estimated_round_trip_cost_bps=latest_estimated_round_trip_cost_bps,
             latest_decision_time=entry_time + timedelta(minutes=5),
         )
 
@@ -651,6 +661,194 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(len(session.closed_trades), 1)
         self.assertEqual(session.closed_trades[0]["exit_reason"], "CAPITAL_REALLOCATION")
         self.assertEqual(session.futures_reallocation_cooldown_until, now + timedelta(minutes=10))
+
+    def test_futures_reallocation_replaces_multiple_weakest_positions_until_capacity_is_sufficient(self) -> None:
+        settings = self._focus_settings(futures_top_n=2)
+        session = self._build_session(settings=settings)
+        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        self._seed_weak_futures_position(
+            session,
+            symbol="ETHUSDT",
+            entry_time=now - timedelta(minutes=15),
+            current_price=75.0,
+            quantity=20.0,
+            latest_predictability_score=71.0,
+            latest_net_expected_edge_bps=6.0,
+        )
+        self._seed_weak_futures_position(
+            session,
+            symbol="SOLUSDT",
+            entry_time=now - timedelta(minutes=12),
+            current_price=50.0,
+            quantity=30.0,
+            latest_predictability_score=72.0,
+            latest_net_expected_edge_bps=6.0,
+        )
+        self._seed_weak_futures_position(
+            session,
+            symbol="XRPUSDT",
+            entry_time=now - timedelta(minutes=9),
+            current_price=102.0,
+            quantity=10.0,
+            entry_predictability_score=89.0,
+            latest_predictability_score=86.0,
+            entry_net_expected_edge_bps=18.0,
+            latest_net_expected_edge_bps=16.0,
+        )
+        session.capital_report = {
+            "futures_available_balance_usd": 50.0,
+            "futures_execution_balance_usd": 1.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+            ],
+        }
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        managed = session._maybe_reallocate_futures_entry(
+            decision=make_decision(
+                timestamp=now,
+                symbol="BTCUSDT",
+                predictability_score=96.0,
+                gross_expected_edge_bps=46.0,
+                net_expected_edge_bps=34.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=2500.0,
+            ),
+            state=state,
+            timestamp=now,
+        )
+
+        self.assertEqual(managed.final_mode, "futures")
+        self.assertEqual(managed.order_intent_notional_usd, 2500.0)
+        self.assertNotIn("ETHUSDT", session.paper_positions)
+        self.assertNotIn("SOLUSDT", session.paper_positions)
+        self.assertIn("XRPUSDT", session.paper_positions)
+        self.assertEqual(
+            [trade["symbol"] for trade in session.closed_trades],
+            ["ETHUSDT", "SOLUSDT"],
+        )
+        self.assertTrue(all(trade["exit_reason"] == "CAPITAL_REALLOCATION" for trade in session.closed_trades))
+        self.assertEqual(session.futures_reallocation_cooldown_until, now + timedelta(minutes=10))
+
+    def test_futures_reallocation_rejects_multi_replacement_when_aggregated_switching_costs_fail(self) -> None:
+        settings = self._focus_settings(futures_top_n=2)
+        session = self._build_session(settings=settings)
+        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        self._seed_weak_futures_position(
+            session,
+            symbol="ETHUSDT",
+            entry_time=now - timedelta(minutes=15),
+            current_price=75.0,
+            quantity=20.0,
+            latest_predictability_score=71.0,
+            latest_net_expected_edge_bps=8.0,
+        )
+        self._seed_weak_futures_position(
+            session,
+            symbol="SOLUSDT",
+            entry_time=now - timedelta(minutes=12),
+            current_price=50.0,
+            quantity=30.0,
+            latest_predictability_score=72.0,
+            latest_net_expected_edge_bps=8.0,
+        )
+        self._seed_weak_futures_position(
+            session,
+            symbol="XRPUSDT",
+            entry_time=now - timedelta(minutes=9),
+            current_price=102.0,
+            quantity=10.0,
+            entry_predictability_score=89.0,
+            latest_predictability_score=86.0,
+            entry_net_expected_edge_bps=18.0,
+            latest_net_expected_edge_bps=16.0,
+        )
+        session.capital_report = {
+            "futures_available_balance_usd": 50.0,
+            "futures_execution_balance_usd": 1.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+            ],
+        }
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        managed = session._maybe_reallocate_futures_entry(
+            decision=make_decision(
+                timestamp=now,
+                symbol="BTCUSDT",
+                predictability_score=96.0,
+                gross_expected_edge_bps=42.0,
+                net_expected_edge_bps=30.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=2500.0,
+            ),
+            state=state,
+            timestamp=now,
+        )
+
+        self.assertEqual(managed.final_mode, "cash")
+        self.assertIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
+        self.assertEqual(len(session.closed_trades), 0)
+        self.assertIn("ETHUSDT", session.paper_positions)
+        self.assertIn("SOLUSDT", session.paper_positions)
+        self.assertIn("XRPUSDT", session.paper_positions)
+        self.assertIsNone(session.futures_reallocation_cooldown_until)
+
+    def test_futures_reallocation_respects_replacement_cap_when_more_positions_would_be_needed(self) -> None:
+        settings = self._focus_settings(futures_top_n=2)
+        session = self._build_session(settings=settings)
+        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        for minutes, symbol, score in (
+            (18, "ETHUSDT", 70.0),
+            (15, "SOLUSDT", 71.0),
+            (12, "ADAUSDT", 72.0),
+            (9, "XRPUSDT", 86.0),
+        ):
+            self._seed_weak_futures_position(
+                session,
+                symbol=symbol,
+                entry_time=now - timedelta(minutes=minutes),
+                current_price=90.0 if symbol == "XRPUSDT" else 75.0,
+                quantity=10.0,
+                entry_predictability_score=89.0 if symbol == "XRPUSDT" else 82.0,
+                latest_predictability_score=score,
+                entry_net_expected_edge_bps=18.0 if symbol == "XRPUSDT" else 16.0,
+                latest_net_expected_edge_bps=15.0 if symbol == "XRPUSDT" else 6.0,
+            )
+        session.capital_report = {
+            "futures_available_balance_usd": 50.0,
+            "futures_execution_balance_usd": 1.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+            ],
+        }
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        managed = session._maybe_reallocate_futures_entry(
+            decision=make_decision(
+                timestamp=now,
+                symbol="BTCUSDT",
+                predictability_score=96.0,
+                gross_expected_edge_bps=46.0,
+                net_expected_edge_bps=34.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=2500.0,
+            ),
+            state=state,
+            timestamp=now,
+        )
+
+        self.assertEqual(managed.final_mode, "cash")
+        self.assertIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
+        self.assertEqual(len(session.closed_trades), 0)
+        self.assertEqual(set(session.paper_positions), {"ETHUSDT", "SOLUSDT", "ADAUSDT", "XRPUSDT"})
+        self.assertIsNone(session.futures_reallocation_cooldown_until)
 
     def test_futures_reallocation_cooldown_blocks_repeat_replacement_until_expiry(self) -> None:
         settings = self._focus_settings(futures_top_n=2)
