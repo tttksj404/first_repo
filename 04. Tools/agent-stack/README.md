@@ -8,8 +8,10 @@
 - `repos/` — GitHub 레포 로컬 체크아웃 위치
 - `docs/catalog.md` — 뭐가 왜 유용한지 정리한 카탈로그
 - `docs/integration-notes.md` — 바로 적용할 아이디어 메모
+- `docs/nl-routing-registry.md` — Telegram/OpenClaw 요청을 intent/skill/repo로 매핑하는 레지스트리
 - `scripts/agent_stack_sync.sh` — GitHub 레포 clone/pull
 - `scripts/codex_agent_stack.sh` — 특정 레포를 작업 디렉터리로 Codex에 바로 질의
+- `scripts/nl_route.py` — 자연어 요청을 로컬 skill/repo/실행 경로로 분류하는 라우터
 
 ## 빠른 사용법
 
@@ -24,6 +26,25 @@ scripts/agent_stack_sync.sh
 ```bash
 scripts/codex_agent_stack.sh agency-agents "Summarize the orchestration model and suggest how to adapt it for OpenClaw."
 ```
+
+### 3) Telegram/OpenClaw 요청 라우팅
+
+```bash
+python3 "04. Tools/agent-stack/scripts/nl_route.py" \
+  "Summarize these daemon logs and tell me the latest real failure."
+```
+
+기본 출력은 JSON이다. 포함 항목:
+- `intent_id`
+- `why_it_matched`
+- `recommended_skills`
+- `recommended_repos`
+- `handle_via`
+- `execution_path`
+
+추가 옵션:
+- `--list-intents` — 등록된 intent 목록 확인
+- `--format text` — 사람이 읽기 쉬운 텍스트 출력
 
 가능한 repo id:
 - `agency-agents`
@@ -60,6 +81,15 @@ scripts/codex_agent_stack.sh agency-agents "Summarize the orchestration model an
 
 예시 질문:
 - "Obsidian 코드 워크플로우를 내 vault 구조에 맞게 적용안 작성해줘"
+
+### 운영 라우팅 intent
+- `obsidian_note_work`
+- `openclaw_orchestration_ideas`
+- `quant_autoresearch`
+- `security_secrets`
+- `code_review_commit_hygiene`
+- `logs_debugging`
+- `long_running_work_tracking`
 
 ## 메모
 
