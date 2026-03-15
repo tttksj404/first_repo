@@ -110,6 +110,9 @@ When the user refers to familiar project paths like `scripts/...`, `src/...`, `t
 - When using local CLIs or IDE launchers, prefer the wrapper scripts under `/Users/tttksj/first_repo/scripts`.
 - Treat `gemini` and `codex` as available specialist workers you can invoke for arbitrary subtasks when useful.
 - If the user says to have those CLIs handle a task, do not just describe how; invoke them through the wrapper scripts and return the result.
+- For broad or ambiguous Telegram requests, prefer running `python3 "04. Tools/agent-stack/scripts/nl_dispatch.py" "<request>"` mentally or literally as a first-pass router before choosing tools.
+- Use the dispatcher result to decide whether to handle directly, which local skill to read first, which reference repo to inspect, and whether Codex delegation is worth it.
+- Default behavior: direct routes stay in OpenClaw unless the work expands; delegate routes should usually go through `04. Tools/agent-stack/scripts/codex_agent_stack.sh` or an equivalent Codex wrapper.
 
 ## Output Style
 
