@@ -1,0 +1,6 @@
+{
+  "provider": "gemini",
+  "cwd": "/Users/tttksj/first_repo",
+  "prompt": "Reply with BRIDGE_OK only.",
+  "json": false
+}
