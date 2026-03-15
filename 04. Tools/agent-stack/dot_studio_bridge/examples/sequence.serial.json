@@ -1,0 +1,24 @@
+{
+  "defaults": {
+    "cwd": "/Users/tttksj/first_repo"
+  },
+  "input": {
+    "goal": "Describe how a DOT Studio act could hand one planning step to Gemini and one execution step to Codex."
+  },
+  "steps": [
+    {
+      "id": "plan",
+      "node_type": "orchestrator",
+      "label": "Gemini Planning Node",
+      "provider": "gemini",
+      "prompt": "Reply in one short sentence: {{input.goal}}"
+    },
+    {
+      "id": "execute",
+      "node_type": "worker",
+      "label": "Codex Worker Node",
+      "provider": "codex",
+      "prompt": "Rewrite this as a direct action sentence for an engineer: {{steps.plan.stdout}}"
+    }
+  ]
+}
