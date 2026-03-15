@@ -123,6 +123,13 @@ def build_result(route: dict, hits: list[dict], score: int, manifest: dict[str, 
     }
 
 
+def top_existing_repo(result: dict) -> dict | None:
+    for repo in result.get("recommended_repos", []):
+        if repo.get("exists"):
+            return repo
+    return None
+
+
 def format_text(result: dict) -> str:
     lines = [
         f"intent_id: {result['intent_id']}",
