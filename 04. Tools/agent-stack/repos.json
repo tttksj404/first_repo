@@ -1,0 +1,92 @@
+[
+  {
+    "id": "agency-agents",
+    "name": "agency-agents",
+    "type": "github",
+    "url": "https://github.com/msitarzewski/agency-agents",
+    "local_path": "04. Tools/agent-stack/repos/agency-agents",
+    "why": "멀티 에이전트 역할 분리와 오케스트레이션 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "autoresearch",
+    "name": "autoresearch",
+    "type": "github",
+    "url": "https://github.com/karpathy/autoresearch",
+    "local_path": "04. Tools/agent-stack/repos/autoresearch",
+    "why": "자동 연구 루프와 실험 반복 구조 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "dot-studio",
+    "name": "dot-studio",
+    "type": "github",
+    "url": "https://github.com/dance-of-tal/dot-studio",
+    "local_path": "04. Tools/agent-stack/repos/dot-studio",
+    "why": "드래그앤드롭 기반 오케스트레이션 UI 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "onecli",
+    "name": "onecli",
+    "type": "github",
+    "url": "https://github.com/onecli/onecli",
+    "local_path": "04. Tools/agent-stack/repos/onecli",
+    "why": "CLI 단일 진입점 설계 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "dgk-gpt",
+    "name": "dgk-gpt",
+    "type": "github",
+    "url": "https://github.com/dgk-dev/dgk-gpt",
+    "local_path": "04. Tools/agent-stack/repos/dgk-gpt",
+    "why": "에이전트/CLI 실험 구조 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "awesome-openclaw-usecases",
+    "name": "awesome-openclaw-usecases",
+    "type": "github",
+    "url": "https://github.com/hesamsheikh/awesome-openclaw-usecases",
+    "local_path": "04. Tools/agent-stack/repos/awesome-openclaw-usecases",
+    "why": "OpenClaw 실사용 사례 모음",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "symphony",
+    "name": "symphony",
+    "type": "github",
+    "url": "https://github.com/openai/symphony",
+    "local_path": "04. Tools/agent-stack/repos/symphony",
+    "why": "작업 분해와 에이전트 협업 구조 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "obsidian-code",
+    "name": "obsidian-code",
+    "type": "github",
+    "url": "https://github.com/reallygood83/obsidian-code",
+    "local_path": "04. Tools/agent-stack/repos/obsidian-code",
+    "why": "Obsidian 기반 개발/코드 워크플로우 참고",
+    "use_with": ["codex", "openclaw"]
+  },
+  {
+    "id": "obsidian-clipper",
+    "name": "Obsidian Clipper",
+    "type": "web",
+    "url": "https://obsidian.md/clipper",
+    "local_path": null,
+    "why": "웹 클리핑 수집 플로우 참고",
+    "use_with": ["openclaw"]
+  },
+  {
+    "id": "gpters-autoresearch-post",
+    "name": "GPters AutoResearch 글",
+    "type": "web",
+    "url": "https://www.gpters.org/nocode/post/autoresearch-karpathy-automatically-leave-Bk0shiVsTJOzhp8?utm_source=threads&utm_medium=broad&utm_campaign=threadtogpters&utm_term=260311",
+    "local_path": null,
+    "why": "AutoResearch 개념 한글 참고",
+    "use_with": ["openclaw"]
+  }
+]
