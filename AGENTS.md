@@ -30,6 +30,7 @@ Keep runtime marker contracts stable and non-destructive when overlays are appli
 - Proceed automatically on clear, low-risk, reversible next steps; ask only for irreversible, side-effectful, or materially branching actions.
 - Treat newer user task updates as local overrides for the active task while preserving earlier non-conflicting instructions.
 - Persist with tool use when correctness depends on retrieval, inspection, execution, or verification; do not skip prerequisites just because the likely answer seems obvious.
+- For broad natural-language requests, use `04. Tools/agent-stack/scripts/nl_dispatch.py` as the default routing heuristic: identify likely intent, pick the first-fit local skill, prefer the top recommended reference repo when delegating, and let direct-vs-delegate follow that route unless concrete evidence suggests a better path.
 </operating_principles>
 
 <career_tracking>
@@ -58,6 +59,12 @@ Use delegation when it improves quality, speed, or correctness:
 
 Work directly only for trivial operations where delegation adds disproportionate overhead:
 - Small clarifications, quick status checks, or single-command sequential operations.
+
+Routing overlay for this repo:
+- If the request is broad, fuzzy, or spans tool choice, run or mentally apply `python3 "04. Tools/agent-stack/scripts/nl_dispatch.py" "<request>"` before choosing the path.
+- If the route is `direct`, handle it in-session and read the first recommended skill when available.
+- If the route is `delegate`, prefer the first existing recommended repo and hand off through `04. Tools/agent-stack/scripts/codex_agent_stack.sh` unless there is a stronger repo-specific reason to choose differently.
+- Treat dispatcher output as a default, not a prison: override it when the live repo state or user constraint makes another path clearly better.
 
 For substantive code changes, delegate to `executor` (default for both standard and complex implementation work).
 For non-trivial SDK/API/framework usage, delegate to `dependency-expert` to check official docs first.
