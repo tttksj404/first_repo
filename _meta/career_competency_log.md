@@ -137,6 +137,30 @@ This file stores only the conversations and work that materially connect to the 
 - Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
 - Skill sharpened next: Add runtime artifact views for active combo cooldowns so live risk state is easier to inspect without reading raw trade history.
 
+### 2026-03-15 - Live order starvation root-cause fix
+- Summary: Removed a runtime state-flow bug that could leave the live bot with no new orders even while fresh decisions kept arriving.
+- What was done: Traced live runtime artifacts to stale paper-only positions and zero live orders, fixed session logic so cooldown-blocked symbols no longer open new paper positions, split bootstrap decision recording from position/order side effects, restarted the live supervisor on the patched code, and verified that the latest runtime came up healthy with zero paper/exchange futures mismatch.
+- Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Keep tightening startup and cooldown state transitions so live execution intent cannot silently diverge from internal paper state.
+
+### 2026-03-15 - Report-only OpenClaw Telegram notification mode
+- Summary: Reworked live runtime notifications so noisy per-event Telegram messages are suppressed and supervisor events send a single Korean summary report instead.
+- What was done: Added report-only Telegram mode for runtime scripts, changed direct session alerts to record-only when that mode is enabled, introduced a Korean OpenClaw-oriented runtime report formatter with positions/orders/self-healing context, updated the supervisor notifier to send that consolidated report, and verified the behavior with focused plus broader notification/session/self-healing tests.
+- Competency mapping: Data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Extend report-only alerting with periodic digest cadence so important changes are surfaced promptly without returning to event-level noise.
+
+### 2026-03-15 - Portfolio-level full-exit and synthetic add-on position policy
+- Summary: Shifted the live strategy toward portfolio-level profit capture, weaker stop-loss intervention, and same-symbol additive entries while preserving synthetic aggregate position management.
+- What was done: Added config-backed portfolio full-exit and standard-stop-loss disable switches, wired live evaluation to close all positions once portfolio profit ratio crosses the configured threshold, disabled routine stop-loss exits while keeping emergency margin protection, aligned paper-position management with the new no-partial/full-exit policy, enabled profit-only same-symbol pyramiding beyond majors through the live override, restarted the live supervisor, and verified the behavior with focused plus full session regressions.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Compare this higher-conviction exit/add-on policy against the prior regime with replay and live evidence before expanding its risk budget.
+
+### 2026-03-15 - GPT/OpenClaw strategy advisor pipeline
+- Summary: Added a non-invasive strategy advisor layer that periodically assembles live runtime, profitability, execution quality, macro inputs, official macro event schedules, and OpenClaw reference material into a Korean strategy guidance package.
+- What was done: Implemented context and prompt builders for profitability-first advisor reports, added official macro schedule collectors for Fed/BLS/BEA sources, wired a strategy-advisor CLI and cycle script, exposed the advisor through the Telegram/OpenClaw intent bridge, generated advisor artifacts under `quant_runtime/artifacts`, and validated the pipeline with unit tests plus a live prepare-mode cycle run that produced artifacts and sent a summary message.
+- Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, generative AI architecture understanding, technical communication
+- Skill sharpened next: Add recurring orchestration and richer source-backed macro interpretation so advisor output becomes both timely and more decision-ready.
+
 ### 2026-03-14 - Runtime failure alerting through OpenClaw Telegram fallback
 - Summary: Hardened the live trading runtime so crashes, unhealthy restarts, and stop events can notify the operator through the same Telegram path used by OpenClaw.
 - What was done: Extended Telegram notification resolution to fall back to OpenClaw `allowFrom` credentials when repo env allowlists are missing, enriched runtime alert payloads with health reasons, exit codes, and latest order-error context, added duplicate-alert suppression, updated the live supervisor script to emit start/unhealthy/exit/stopped alerts, verified with focused unit tests, and confirmed an end-to-end Telegram test message reached the configured private chat.
@@ -364,3 +388,16 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Added an intent registry, local router, semi-automatic dispatcher, reusable reference stack scripts, and then wired the repo guidance (`AGENTS.md`, `BOOTSTRAP.md`) to treat that dispatcher as the default heuristic for broad requests.
 - Competency mapping: Data pipeline/system integration development, logical data structuring, generative AI architecture understanding, technical communication
 - Skill sharpened next: Close the loop by capturing actual dispatch outcomes and using them to improve routing rules from real request history.
+
+### 2026-03-15 - Quant strategy advisor profitability review
+- Summary: Produced a profitability-first advisory readout from the live trading context by weighing runtime state, realized expectancy by symbol, execution quality, and scheduled macro catalysts without changing the engine.
+- What was done: Reviewed the strategy advisor runtime context, compared futures/cash/spot edge quality, interpreted BTC/ETH/SOL symbol profitability, checked approved overrides against current exposure and capital constraints, and translated the findings into time-bounded strategy suggestions with explicit uncertainty notes.
+- Competency mapping: Data analysis and optimization, logical data structuring, generative AI architecture understanding, technical communication
+- Skill sharpened next: Add a repeatable liquidity-input layer so macro event interpretation can be tied to DXY/yield/liquidity evidence rather than schedule-only caution.
+
+### 2026-03-16 - Runtime-aware crypto strategy advisory refresh
+- Summary: Refreshed the strategy advisory using the latest runtime context, rejection-pressure data, and official macro schedule to separate what currently has positive trading edge from what only looks active.
+- What was done: Validated the newest context snapshot, compared live regime edge between futures and cash, checked override state and recovery events, noted the weak sample size and report inconsistencies, folded in the referenced BTC/ETH/macro notes, and converted that into profitability-first time-window suggestions without directing engine changes.
+- Competency mapping: Data analysis and optimization, logical data structuring, generative AI architecture understanding, technical communication
+- Skill sharpened next: Build a consistent symbol-level profitability report that reconciles summary, validation, and performance outputs before advisory decisions are made.
+- 2026-03-16 | Quant runtime reporting ops | Audited overnight strategy-report generation vs Telegram delivery, found missing scheduler binding, wired the live supervisor to launch an immediate + every-4-hours advisor cycle with Telegram send path, and verified supervisor log evidence. | Competencies: runtime/ops debugging, automation integration, evidence-based verification, technical communication. | Next skill: make scheduled paths dry-run/testable without production side effects.
