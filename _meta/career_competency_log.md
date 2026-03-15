@@ -358,3 +358,9 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Introduced settings-driven medium-tier major sizing and cap-relaxation controls, wired the tier into live decision capping while preserving the existing strong-major path, adjusted profile expectations, and re-verified session/profile behavior with focused unittests before checking the live runtime state.
 - Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
 - Skill sharpened next: Compare the number and expectancy of medium-tier major entries versus strong-tier entries to see whether the new middle tier improves capital efficiency without raising churn too much.
+
+### 2026-03-15 - Natural-language routing and semi-auto dispatch for agent workflows
+- Summary: Turned a loose set of skills and reference repos into a reusable routing layer so broad Telegram/OpenClaw requests can be mapped to the right skill, local reference, and Codex handoff path with less manual judgment each time.
+- What was done: Added an intent registry, local router, semi-automatic dispatcher, reusable reference stack scripts, and then wired the repo guidance (`AGENTS.md`, `BOOTSTRAP.md`) to treat that dispatcher as the default heuristic for broad requests.
+- Competency mapping: Data pipeline/system integration development, logical data structuring, generative AI architecture understanding, technical communication
+- Skill sharpened next: Close the loop by capturing actual dispatch outcomes and using them to improve routing rules from real request history.
