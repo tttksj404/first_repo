@@ -1,0 +1,25 @@
+{
+  "description": "Prototype mapping from DOT Studio node intent to bridge task shape.",
+  "nodes": [
+    {
+      "node_id": "node-plan-1",
+      "node_type": "orchestrator",
+      "performer_provider": "gemini",
+      "bridge_task": {
+        "provider": "gemini",
+        "cwd": "/Users/tttksj/first_repo",
+        "prompt": "Summarize the user's request in one sentence."
+      }
+    },
+    {
+      "node_id": "node-build-1",
+      "node_type": "worker",
+      "performer_provider": "codex",
+      "bridge_task": {
+        "provider": "codex",
+        "cwd": "/Users/tttksj/first_repo",
+        "prompt": "Use the prior plan to describe the next implementation action."
+      }
+    }
+  ]
+}
