@@ -1,0 +1,6 @@
+{
+  "provider": "gemini",
+  "cwd": "/Users/tttksj/first_repo",
+  "prompt": "Return a JSON object with keys provider and status. Set provider to gemini and status to ok.",
+  "json": true
+}
