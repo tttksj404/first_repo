@@ -6,7 +6,8 @@
 
 - `repos.json` — 추적 중인 링크/레포 목록
 - `repos/` — GitHub 레포 로컬 체크아웃 위치
-- `docs/` — 활용 메모
+- `docs/catalog.md` — 뭐가 왜 유용한지 정리한 카탈로그
+- `docs/integration-notes.md` — 바로 적용할 아이디어 메모
 - `scripts/agent_stack_sync.sh` — GitHub 레포 clone/pull
 - `scripts/codex_agent_stack.sh` — 특정 레포를 작업 디렉터리로 Codex에 바로 질의
 
