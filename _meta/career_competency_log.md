@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-03-15 - Natural-language routing for local skill and repo selection
+- Summary: Added a lightweight routing layer that maps Telegram/OpenClaw-style requests to the right local skill set, reference repo, and execution path.
+- What was done: Inspected the current `.agents/skills` and `04. Tools/agent-stack` assets, created a markdown routing registry for seven practical intent classes, implemented a small CLI router that resolves skill paths plus repo metadata from the local manifest, documented usage in the agent-stack README, and verified the classifier with a minimal multi-intent self-check.
+- Competency mapping: Data pipeline/system integration development, logical data structuring, generative AI architecture understanding, technical communication
+- Skill sharpened next: Improve lightweight intent routing so new operational request patterns can be added without losing inspectability or overcomplicating the execution path.
+
 ### 2026-03-15 - Agent reference stack for Codex/OpenClaw
 - Summary: Turned a loose set of agent/orchestration links into a local reference stack that can be queried directly from Codex and partially installed into OpenClaw.
 - What was done: Created a tracked manifest of selected GitHub/web resources, added sync and Codex-launcher scripts, cloned the target repos into a stable local workspace, documented direct usage patterns, and validated Codex execution against a synced repo while starting OpenClaw installation for agency-agents.
