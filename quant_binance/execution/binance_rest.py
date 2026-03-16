@@ -3,16 +3,27 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import socket
 import ssl
 import time
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
+from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 
 BINANCE_SPOT_REST_URL = "https://api.binance.com"
 BINANCE_FUTURES_REST_URL = "https://fapi.binance.com"
+
+
+def _transport_error_message(*, request: Request, exc: URLError) -> str:
+    reason = exc.reason
+    target = request.full_url
+    host = getattr(getattr(request, "host", None), "strip", lambda: "")() or "unknown-host"
+    if isinstance(reason, socket.gaierror):
+        return f"Binance transport error for {target} (host={host}): DNS resolution failed: {reason}"
+    return f"Binance transport error for {target} (host={host}): {reason}"
 
 
 def sign_query_string(secret: str, params: dict[str, Any]) -> tuple[str, str]:
@@ -142,6 +153,31 @@ class BinanceRestClient:
             params=order_params,
         )
 
+    def build_asset_transfer_request(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str,
+        amount: float,
+    ) -> Request:
+        transfer_type = {
+            ("spot", "futures"): "MAIN_UMFUTURE",
+            ("futures", "spot"): "UMFUTURE_MAIN",
+        }.get((source_market, target_market))
+        if transfer_type is None:
+            raise ValueError(f"unsupported Binance transfer route {source_market!r}->{target_market!r}")
+        return self.build_signed_request(
+            market="spot",
+            path="/sapi/v1/asset/transfer",
+            method="POST",
+            params={
+                "type": transfer_type,
+                "asset": asset.upper(),
+                "amount": f"{float(amount):.8f}",
+            },
+        )
+
     def get_account(self, *, market: str) -> dict[str, Any]:
         return self.send(self.build_account_request(market=market))
 
@@ -153,6 +189,52 @@ class BinanceRestClient:
 
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return self.send(self.build_live_order_request(market=market, order_params=order_params))
+
+    def transfer_asset(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str,
+        amount: float,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        del client_oid
+        return self.send(
+            self.build_asset_transfer_request(
+                source_market=source_market,
+                target_market=target_market,
+                asset=asset,
+                amount=amount,
+            )
+        )
+
+    def transfer_wallet_balance(
+        self,
+        *,
+        asset: str,
+        amount: float,
+        source_market: str,
+        target_market: str,
+    ) -> dict[str, Any]:
+        transfer_type_map = {
+            ("spot", "futures"): "MAIN_UMFUTURE",
+            ("futures", "spot"): "UMFUTURE_MAIN",
+        }
+        transfer_type = transfer_type_map.get((source_market, target_market))
+        if transfer_type is None:
+            raise ValueError(f"unsupported Binance wallet transfer route {source_market}->{target_market}")
+        request = self.build_signed_request(
+            market="spot",
+            path="/sapi/v1/asset/transfer",
+            method="POST",
+            params={
+                "type": transfer_type,
+                "asset": asset.upper(),
+                "amount": f"{max(float(amount), 0.0):.8f}",
+            },
+        )
+        return self.send(request)
 
     def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
         request = self.build_signed_request(
@@ -214,5 +296,8 @@ class BinanceRestClient:
         context = None
         if self.allow_insecure_ssl:
             context = ssl._create_unverified_context()
-        with urlopen(request, timeout=10, context=context) as response:
-            return json.loads(response.read().decode("utf-8"))
+        try:
+            with urlopen(request, timeout=10, context=context) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except URLError as exc:
+            raise RuntimeError(_transport_error_message(request=request, exc=exc)) from exc

@@ -319,7 +319,7 @@ class DecisionLiveOrderAdapter:
                 (
                     "spot",
                     {
-                        "symbol": self._execution_symbol(decision),
+                        "symbol": execution_symbol,
                         "side": "sell",
                         "triggerPrice": self.format_trigger_price(
                             value=take_profit,
@@ -336,7 +336,7 @@ class DecisionLiveOrderAdapter:
                 (
                     "spot",
                     {
-                        "symbol": self._execution_symbol(decision),
+                        "symbol": execution_symbol,
                         "side": "sell",
                         "triggerPrice": self.format_trigger_price(
                             value=stop_loss,
@@ -404,6 +404,7 @@ class DecisionLiveOrderAdapter:
         quantity = quantity_from_notional(decision.order_intent_notional_usd, self._spot_quantity_reference_price(decision, reference_price) if decision.final_mode == "spot" else reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
         side = "BUY" if decision.side == "long" else "SELL"
+        execution_symbol = self._execution_symbol(decision)
         if market == "futures" and self._exchange_id() == "bitget" and hasattr(self.client, "get_max_openable_quantity"):
             max_open = self.client.get_max_openable_quantity(
                 symbol=decision.symbol,
@@ -421,8 +422,19 @@ class DecisionLiveOrderAdapter:
                     return None
                 quantity = min(quantity, max_open)
         if self._exchange_id() == "bitget":
+            quantity = self.normalize_quantity(market=market, symbol=execution_symbol, quantity=quantity)
+            min_quantity = self._bitget_min_quantity(market=market, symbol=execution_symbol)
+            if quantity <= 0.0 or (min_quantity > 0.0 and quantity < min_quantity):
+                reason = "BITGET_MAX_OPEN_BELOW_MIN_QTY" if market == "futures" else "BITGET_MIN_QTY"
+                self._last_preflight_rejection = {
+                    "symbol": decision.symbol,
+                    "market": market,
+                    "reason": reason,
+                    "message": f"Bitget preflight rejected order because normalized quantity {quantity:.8f} is below minimum {min_quantity:.8f} for {execution_symbol}.",
+                }
+                return None
             params = {
-                "symbol": self._execution_symbol(decision),
+                "symbol": execution_symbol,
                 "side": side.lower(),
                 "orderType": "market",
                 "clientOid": decision.decision_id,
