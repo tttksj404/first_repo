@@ -4,9 +4,11 @@ import argparse
 
 from quant_binance.backtest.comparison import compare_strategies, render_compact_report, write_comparison_report
 from quant_binance.backtest.recent_comparison import (
+    build_recent_comparison_services,
     default_recent_comparison_output_root,
     prepare_recent_comparison_fixture,
 )
+from quant_binance.settings import Settings
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -42,11 +44,17 @@ def main(argv: list[str] | None = None) -> int:
         equity_usd=args.equity_usd,
         capacity_usd=args.capacity_usd,
     )
+    settings = Settings.load(args.config)
+    services = build_recent_comparison_services(
+        settings=settings,
+        decisions_path=prepared.source.decisions_path,
+    )
     report = compare_strategies(
         config_path=args.config,
         fixture_path=prepared.fixture_path,
         equity_usd=prepared.equity_usd,
         capacity_usd=prepared.capacity_usd,
+        services=services,
     )
     write_comparison_report(comparison_output, report)
 
@@ -54,6 +62,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"fixture={prepared.fixture_path}")
     print(f"prep_report={prepared.preparation_report_path}")
     print(f"comparison_report={comparison_output}")
+    print("current_strategy_source=recorded decisions.jsonl trace on reconstructed market fixture")
     print(
         "fidelity_limits="
         + "; ".join(prepared.missing_inputs)

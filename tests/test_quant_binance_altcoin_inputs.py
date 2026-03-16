@@ -78,6 +78,12 @@ class QuantBinanceAltcoinInputsTests(unittest.TestCase):
         self.assertEqual(enriched.alt_market_regime, "neutral")
         self.assertEqual(enriched.alt_breadth_score, 0.5)
 
+    def test_load_altcoin_inputs_reuses_cached_value_for_same_source(self) -> None:
+        os.environ["ALTCOIN_INPUTS_PATH"] = str(SAMPLE_PATH)
+        first = load_altcoin_inputs()
+        second = load_altcoin_inputs()
+        self.assertIs(first, second)
+
 
 if __name__ == "__main__":
     unittest.main()

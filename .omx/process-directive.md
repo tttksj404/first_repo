@@ -17,3 +17,4 @@ Additional instruction:
 - If disk space becomes constrained or file growth threatens runtime stability, prioritize log/file housekeeping work above other optimizations.
 - When storage pressure blocks edits or tests, first reclaim space by pruning generated artifacts, oversized logs, and stale runtime outputs, then continue the requested work.
 - Treat automatic file cleanup and retention control for runtime outputs as a standing high-priority maintenance concern in this workspace.
+- Proceed autonomously without pausing for permission on this workspace by default; only stop when a side effect is genuinely irreversible or technically blocked.

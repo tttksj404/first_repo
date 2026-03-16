@@ -19,6 +19,8 @@ from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.self_healing import (
     KNOWN_CATEGORY_BITGET_LIVE_ORDER,
     KNOWN_CATEGORY_DAEMON_STALLED,
+    KNOWN_CATEGORY_LIVE_ENTRY_STARVATION,
+    KNOWN_CATEGORY_LIVE_ORDER_CAPACITY,
     KNOWN_CATEGORY_MISSING_MARKET_STATE,
     UNKNOWN_CATEGORY_RUNTIME_ERROR,
     RuntimeSelfHealing,
@@ -207,6 +209,17 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
         self.assertTrue(issue["known"])
         self.assertEqual(issue["automatic_action"], "skip_payload_until_market_state_ready")
 
+    def test_classify_runtime_issue_knows_capacity_and_minimum_order_errors(self) -> None:
+        issue = classify_runtime_issue(
+            error_message='RuntimeError(\'Bitget HTTP 400: {"code":"40762","msg":"The order amount exceeds the balance"}\')',
+            exchange_id="bitget",
+            stage="live_order",
+        )
+
+        self.assertEqual(issue["category"], KNOWN_CATEGORY_LIVE_ORDER_CAPACITY)
+        self.assertTrue(issue["known"])
+        self.assertEqual(issue["automatic_action"], "cooldown_symbol_and_wait_for_capacity")
+
     def test_runtime_self_healing_activates_global_live_order_cooldown_after_tripwire(self) -> None:
         healing = RuntimeSelfHealing(known_error_escalation_count=3, live_order_cooldown_seconds=600)
         now = datetime(2026, 3, 13, 4, 0, tzinfo=timezone.utc)
@@ -253,6 +266,31 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
         self.assertFalse(issue["known"])
         self.assertFalse(healing.is_live_order_cooldown_active(now=now))
         self.assertEqual(healing._recent_events[-1].status, "reported")
+
+    def test_runtime_self_healing_records_live_entry_starvation_progression(self) -> None:
+        healing = RuntimeSelfHealing()
+        now = datetime(2026, 3, 13, 4, 0, tzinfo=timezone.utc)
+
+        issue1 = healing.record_entry_starvation(
+            now=now,
+            symbol="BTCUSDT",
+            attempt_count=1,
+            reason="STALE_FINGERPRINT_SUPPRESSION",
+            details={"fingerprint": "fp-1"},
+        )
+        issue3 = healing.record_entry_starvation(
+            now=now + timedelta(minutes=2),
+            symbol="BTCUSDT",
+            attempt_count=3,
+            reason="LIVE_ORDER_NO_RESULT",
+            details={"fingerprint": "fp-1"},
+        )
+
+        self.assertEqual(issue1["category"], KNOWN_CATEGORY_LIVE_ENTRY_STARVATION)
+        self.assertEqual(issue1["automatic_action"], "clear_stale_fingerprint")
+        self.assertEqual(issue3["automatic_action"], "cooldown_symbol_and_wait_for_reentry")
+        self.assertEqual(healing.recent_events[-1].category, KNOWN_CATEGORY_LIVE_ENTRY_STARVATION)
+        self.assertEqual(healing.recent_events[-1].action, "symbol_cooldown")
 
     def test_runtime_self_healing_tracks_missing_market_state_in_snapshot(self) -> None:
         healing = RuntimeSelfHealing()

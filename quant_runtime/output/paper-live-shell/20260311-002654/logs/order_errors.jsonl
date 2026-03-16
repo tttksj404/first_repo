@@ -1,2 +1,0 @@
-{"error": "<HTTPError 400: 'Bad Request'>", "market": "futures", "stage": "live_order", "symbol": "ETHUSDT", "timestamp": "2026-03-11T00:30:00.135015+00:00"}
-{"error": "<HTTPError 400: 'Bad Request'>", "market": "futures", "stage": "test_order", "symbol": "ETHUSDT", "timestamp": "2026-03-11T00:30:00.135015+00:00"}

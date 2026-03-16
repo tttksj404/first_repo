@@ -16,6 +16,8 @@ except ImportError:  # pragma: no cover - optional dependency
 BITGET_PUBLIC_WS_URL = "wss://ws.bitget.com/v2/ws/public"
 BITGET_SPOT_PUBLIC_WS_URL = BITGET_PUBLIC_WS_URL
 BITGET_FUTURES_PUBLIC_WS_URL = BITGET_PUBLIC_WS_URL
+BITGET_MAX_CHANNELS_PER_CONNECTION = 40
+BITGET_MAX_CHANNELS_PER_SUBSCRIBE = 40
 
 MessageHandler = Callable[[dict[str, Any]], Awaitable[None]]
 
@@ -148,12 +150,32 @@ class BitgetWebSocketClient:
     def build_subscribe_message(self) -> dict[str, Any]:
         return build_subscribe_message(self.subscription_args())
 
+    def build_subscribe_messages(self) -> list[dict[str, Any]]:
+        args = self.subscription_args()
+        if not args:
+            return []
+        messages: list[dict[str, Any]] = []
+        for index in range(0, len(args), BITGET_MAX_CHANNELS_PER_SUBSCRIBE):
+            messages.append(build_subscribe_message(args[index : index + BITGET_MAX_CHANNELS_PER_SUBSCRIBE]))
+        return messages
+
+    def _connect_kwargs(self, *, ssl_context: ssl.SSLContext | None) -> dict[str, Any]:
+        # Let the runtime stall watchdog own reconnect decisions instead of the
+        # websockets client's ping timeout, which has been causing false-positive
+        # disconnects on long-lived Bitget sessions.
+        return {
+            "ssl": ssl_context,
+            "ping_interval": 20,
+            "ping_timeout": None,
+        }
+
     async def run(self, handler: MessageHandler) -> None:
         if websockets is None:
             raise RuntimeError("websockets package is required for live websocket consumption")
         ssl_context = ssl._create_unverified_context() if self.allow_insecure_ssl else None
-        async with websockets.connect(self.url, ssl=ssl_context) as connection:
-            await connection.send(json.dumps(self.build_subscribe_message()))
+        async with websockets.connect(self.url, **self._connect_kwargs(ssl_context=ssl_context)) as connection:
+            for message in self.build_subscribe_messages():
+                await connection.send(json.dumps(message))
             async for raw in connection:
                 if raw == "ping":
                     await connection.send("pong")

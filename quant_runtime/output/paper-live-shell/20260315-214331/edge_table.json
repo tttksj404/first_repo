@@ -1,0 +1,27 @@
+{
+  "observation_count": 2,
+  "symbols": {
+    "BTCUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 36.324628,
+        "mode": "futures",
+        "observations": [
+          36.324628
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 40.321164,
+        "mode": "futures",
+        "observations": [
+          40.321164
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}

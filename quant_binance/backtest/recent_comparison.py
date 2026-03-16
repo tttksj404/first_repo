@@ -7,10 +7,18 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from statistics import mean, pstdev
 from typing import Any
+from uuid import uuid4
 
+from quant_binance.backtest.comparison import (
+    ComparisonService,
+    DirectionalHoldBaselineService,
+    MeanReversionBaselineService,
+    MomentumBaselineService,
+)
 from quant_binance.data.state import KlineBar, SpotTrade, SymbolMarketState, TopOfBook
 from quant_binance.features.extractor import MarketFeatureExtractor
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
+from quant_binance.models import DecisionIntent
 from quant_binance.paths import prepare_run_paths
 from quant_binance.settings import Settings
 from quant_binance.strategy.normalize import clamp, zscore_to_unit
@@ -69,14 +77,31 @@ class PreparedRecentComparison:
 
 @dataclass(frozen=True)
 class _DecisionRecord:
+    candidate_mode: str
+    config_version: str
+    decision_hash: str
+    decision_id: str
+    divergence_code: str
+    exit_reason_code: str
+    final_mode: str
     symbol: str
+    side: str
+    snapshot_id: str
     timestamp: datetime
     estimated_round_trip_cost_bps: float
     gross_expected_edge_bps: float
     liquidity_score: float
+    linked_order_ids: tuple[str, ...]
+    net_expected_edge_bps: float
+    order_intent_notional_usd: float
     volume_confirmation: float
     overheat_penalty: float
+    predictability_score: float
+    rejection_reasons: tuple[str, ...]
+    stop_distance_bps: float
     trend_direction: int
+    trend_strength: float
+    volatility_penalty: float
 
 
 def _parse_timestamp(value: str) -> datetime:
@@ -171,14 +196,31 @@ def _load_decisions(path: Path) -> list[_DecisionRecord]:
             raw = json.loads(line)
             decisions.append(
                 _DecisionRecord(
+                    candidate_mode=str(raw.get("candidate_mode", raw.get("final_mode", "cash"))),
+                    config_version=str(raw.get("config_version", "")),
+                    decision_hash=str(raw.get("decision_hash", "")),
+                    decision_id=str(raw.get("decision_id", str(uuid4()))),
+                    divergence_code=str(raw.get("divergence_code", "")),
+                    exit_reason_code=str(raw.get("exit_reason_code", "")),
+                    final_mode=str(raw.get("final_mode", "cash")),
                     symbol=raw["symbol"],
+                    side=str(raw.get("side", "flat")),
+                    snapshot_id=str(raw.get("snapshot_id", "")),
                     timestamp=_parse_timestamp(raw["timestamp"]),
                     estimated_round_trip_cost_bps=float(raw.get("estimated_round_trip_cost_bps", 0.0)),
                     gross_expected_edge_bps=float(raw.get("gross_expected_edge_bps", 0.0)),
                     liquidity_score=float(raw.get("liquidity_score", 0.0)),
+                    linked_order_ids=tuple(str(item) for item in raw.get("linked_order_ids", [])),
+                    net_expected_edge_bps=float(raw.get("net_expected_edge_bps", 0.0)),
+                    order_intent_notional_usd=float(raw.get("order_intent_notional_usd", 0.0)),
                     volume_confirmation=float(raw.get("volume_confirmation", 0.0)),
                     overheat_penalty=float(raw.get("overheat_penalty", 0.0)),
+                    predictability_score=float(raw.get("predictability_score", 0.0)),
+                    rejection_reasons=tuple(str(item) for item in raw.get("rejection_reasons", [])),
+                    stop_distance_bps=float(raw.get("stop_distance_bps", 0.0)),
                     trend_direction=int(raw.get("trend_direction", 0)),
+                    trend_strength=float(raw.get("trend_strength", 0.0)),
+                    volatility_penalty=float(raw.get("volatility_penalty", 0.0)),
                 )
             )
     decisions.sort(key=lambda item: (item.timestamp, item.symbol))
@@ -591,3 +633,69 @@ def default_recent_comparison_output_root(*, base_dir: str | Path) -> Path:
         mode="output/strategy-comparison-recent",
     )
     return run_paths.root
+
+
+class RecordedDecisionComparisonService:
+    name = "current_strategy"
+
+    def __init__(self, settings: Settings, decisions: list[_DecisionRecord]) -> None:
+        self.settings = settings
+        self._decisions = {
+            (item.timestamp.isoformat(), item.symbol): item
+            for item in decisions
+        }
+
+    def run_cycle(
+        self,
+        *,
+        state,
+        primitive_inputs,
+        history,
+        decision_time: datetime,
+        equity_usd: float,
+        remaining_portfolio_capacity_usd: float,
+        cash_reserve_fraction: float = 0.0,
+    ) -> DecisionIntent:
+        del primitive_inputs, history, equity_usd, remaining_portfolio_capacity_usd, cash_reserve_fraction
+        record = self._decisions[(decision_time.isoformat(), state.symbol)]
+        return DecisionIntent(
+            decision_id=record.decision_id,
+            decision_hash=record.decision_hash,
+            snapshot_id=record.snapshot_id,
+            config_version=record.config_version,
+            timestamp=record.timestamp,
+            symbol=record.symbol,
+            candidate_mode=record.candidate_mode,
+            final_mode=record.final_mode,
+            side=record.side,
+            trend_direction=record.trend_direction,
+            trend_strength=record.trend_strength,
+            volume_confirmation=record.volume_confirmation,
+            liquidity_score=record.liquidity_score,
+            volatility_penalty=record.volatility_penalty,
+            overheat_penalty=record.overheat_penalty,
+            predictability_score=record.predictability_score,
+            gross_expected_edge_bps=record.gross_expected_edge_bps,
+            net_expected_edge_bps=record.net_expected_edge_bps,
+            estimated_round_trip_cost_bps=record.estimated_round_trip_cost_bps,
+            order_intent_notional_usd=record.order_intent_notional_usd,
+            stop_distance_bps=record.stop_distance_bps,
+            linked_order_ids=record.linked_order_ids,
+            rejection_reasons=record.rejection_reasons,
+            exit_reason_code=record.exit_reason_code,
+            divergence_code=record.divergence_code,
+        )
+
+
+def build_recent_comparison_services(
+    *,
+    settings: Settings,
+    decisions_path: str | Path,
+) -> tuple[ComparisonService, ...]:
+    decisions = _load_decisions(Path(decisions_path))
+    return (
+        RecordedDecisionComparisonService(settings, decisions),
+        DirectionalHoldBaselineService(settings),
+        MomentumBaselineService(settings),
+        MeanReversionBaselineService(settings),
+    )

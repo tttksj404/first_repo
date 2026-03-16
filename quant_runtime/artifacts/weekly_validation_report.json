@@ -1,0 +1,61 @@
+{
+  "base_dir": "/Users/tttksj/first_repo/quant_runtime",
+  "criteria": [
+    {
+      "action": "universe\uc5d0\uc11c \uc81c\uac70 \ub610\ub294 priority \ud574\uc81c",
+      "category": "prune",
+      "rule": "trade_count >= 3 and expectancy_usd < 0, or repeated thin-edge/liquidity rejections without positive edge"
+    },
+    {
+      "action": "\ub9e4\ub9e4 \uc81c\uc678, \uad00\ucc30\ub9cc \uc720\uc9c0",
+      "category": "observe_only",
+      "rule": "cash_count\uac00 \ub192\uace0 LIQUIDITY_TOO_WEAK/EDGE_TOO_THIN \ubc18\ubcf5, \ud558\uc9c0\ub9cc trade_count \ud45c\ubcf8\uc774 \ubd80\uc871\ud568"
+    },
+    {
+      "action": "\ud604\uc7ac \uc720\ub2c8\ubc84\uc2a4 \uc720\uc9c0",
+      "category": "keep",
+      "rule": "expectancy_usd >= 0 \ub610\ub294 \ud45c\ubcf8 \ubd80\uc871\uc774\uc9c0\ub9cc \ud3c9\uade0 edge\uac00 \uc591\uc218"
+    },
+    {
+      "action": "priority_symbols \ud6c4\ubcf4\ub85c \uc2b9\uaca9 \uac80\ud1a0",
+      "category": "promote",
+      "rule": "trade_count >= 3, expectancy_usd > 0, avg_net_edge_bps > 0, rejection pressure \ub0ae\uc74c"
+    }
+  ],
+  "generated_at": "2026-03-15T22:14:09.844069+00:00",
+  "lookback_days": 7,
+  "period_end": "2026-03-15T22:14:09.820836+00:00",
+  "period_start": "2026-03-15T14:09:10.560203+00:00",
+  "regime_summary": [
+    {
+      "avg_cost_bps": 67.977506,
+      "avg_net_edge_bps": -13.845357,
+      "avg_score": 66.779432,
+      "decision_count": 142,
+      "mode": "cash"
+    },
+    {
+      "avg_cost_bps": 16.583735,
+      "avg_net_edge_bps": 33.36536,
+      "avg_score": 70.811019,
+      "decision_count": 410,
+      "mode": "futures"
+    }
+  ],
+  "run_count": 3,
+  "symbol_summary": [
+    {
+      "expectancy_usd": -1.711081,
+      "loss_count": 1,
+      "realized_pnl_usd": -1.711081,
+      "recommendation": "keep",
+      "symbol": "BTCUSDT",
+      "trade_count": 1,
+      "win_count": 0
+    }
+  ],
+  "total_closed_trade_count": 1,
+  "total_live_order_count": 2,
+  "total_realized_pnl_usd": -1.711081,
+  "total_tested_order_count": 1
+}

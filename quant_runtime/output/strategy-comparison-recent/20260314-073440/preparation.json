@@ -1,0 +1,43 @@
+{
+  "capacity_usd": 92.219406,
+  "cycle_count": 156,
+  "equity_usd": 135.588124,
+  "fixture_path": "/Users/tttksj/first_repo/quant_runtime/output/strategy-comparison-recent/20260314-073440/recent_fixture.json",
+  "missing_inputs": [
+    "full historical book-ticker depth ladder",
+    "dense trade tape per decision",
+    "historical funding, basis, and open-interest streams for every decision time",
+    "exact original primitive inputs and feature history from live runtime memory"
+  ],
+  "preparation_report_path": "/Users/tttksj/first_repo/quant_runtime/output/strategy-comparison-recent/20260314-073440/preparation.json",
+  "represented_inputs": [
+    "decision timestamps and symbols from decisions.jsonl",
+    "5m/1h/4h price and quote-volume history from closed kline events",
+    "gross expected edge and trend direction from recorded decisions",
+    "synthetic top-of-book spread/depth calibrated from recorded cost and liquidity"
+  ],
+  "skipped_before_warmup_count": 304,
+  "skipped_decision_count": 304,
+  "source": {
+    "convertible_decision_count": 156,
+    "decision_count": 460,
+    "decisions_path": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260314-065940/logs/decisions.jsonl",
+    "events_path": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260314-065940/logs/events.jsonl",
+    "first_decision_time": "2026-03-14T07:00:00+00:00",
+    "last_decision_time": "2026-03-14T07:25:00+00:00",
+    "overlap_symbols": [
+      "ADAUSDT",
+      "BCHUSDT",
+      "DOGEUSDT",
+      "TRXUSDT"
+    ],
+    "run_dir": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260314-065940",
+    "state_path": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260314-065940/summary.state.json",
+    "summary_path": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260314-065940/summary.json"
+  },
+  "symbol_cycle_counts": {
+    "ADAUSDT": 54,
+    "DOGEUSDT": 53,
+    "TRXUSDT": 49
+  }
+}

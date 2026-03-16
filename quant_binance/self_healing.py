@@ -13,6 +13,8 @@ KNOWN_BITGET_COMPATIBILITY_CODES = frozenset({"40762", "40774", "40893"})
 KNOWN_CATEGORY_DAEMON_STALLED = "daemon_stalled"
 KNOWN_CATEGORY_FUTURES_MISMATCH = "persistent_futures_mismatch"
 KNOWN_CATEGORY_BITGET_LIVE_ORDER = "bitget_live_order_compatibility"
+KNOWN_CATEGORY_LIVE_ORDER_CAPACITY = "live_order_capacity"
+KNOWN_CATEGORY_LIVE_ENTRY_STARVATION = "live_entry_starvation"
 KNOWN_CATEGORY_MISSING_MARKET_STATE = "missing_market_state"
 UNKNOWN_CATEGORY_RUNTIME_ERROR = "unknown_runtime_error"
 
@@ -65,6 +67,10 @@ def classify_runtime_issue(
         or "one way position" in normalized
     )
     leverage_marker = "unable to update the leverage factor" in normalized
+    insufficient_balance_marker = "exceeds the balance" in normalized
+    min_amount_marker = "less than the minimum amount" in normalized
+    min_quantity_marker = "minimum quantity" in normalized or "min quantity" in normalized
+    max_open_zero_marker = "max openable quantity is 0" in normalized or "maxopen=0" in normalized
     if is_bitget and ((code in {"40774", "40762"} and order_mode_marker) or (code == "40893" and leverage_marker)):
         return {
             "category": KNOWN_CATEGORY_BITGET_LIVE_ORDER,
@@ -73,6 +79,21 @@ def classify_runtime_issue(
             "stage": stage or "live_order",
             "summary": "Bitget live-order compatibility error matched a known safe fallback path",
             "automatic_action": "cooldown_and_reuse_test_order_path",
+        }
+    if is_bitget and (
+        (code == "40762" and insufficient_balance_marker)
+        or code in {"45110", "45111"}
+        or max_open_zero_marker
+        or min_amount_marker
+        or min_quantity_marker
+    ):
+        return {
+            "category": KNOWN_CATEGORY_LIVE_ORDER_CAPACITY,
+            "known": True,
+            "error_code": code,
+            "stage": stage or "live_order",
+            "summary": "Live order exceeded current exchange capacity or minimum tradable bounds",
+            "automatic_action": "cooldown_symbol_and_wait_for_capacity",
         }
     if is_missing_market_state_error(error_message):
         return {
@@ -153,6 +174,7 @@ class RuntimeSelfHealing:
         self.live_order_cooldown_until: datetime | None = None
         self._stall_restart_attempts: deque[datetime] = deque()
         self._known_runtime_error_times: deque[datetime] = deque()
+        self._entry_starvation_times_by_symbol: dict[str, deque[datetime]] = {}
         self._recent_events: deque[SelfHealingEvent] = deque(maxlen=20)
         self._issue_counts: Counter[str] = Counter()
         self._recovery_counts: Counter[str] = Counter()
@@ -167,10 +189,10 @@ class RuntimeSelfHealing:
         stale_data_alarm_sla_seconds: int,
     ) -> int:
         return max(
-            300,
+            180,
             int(sync_interval_seconds) * 4,
-            int(decision_interval_minutes) * 120,
-            int(stale_data_alarm_sla_seconds) * 20,
+            int(decision_interval_minutes) * 72,
+            int(stale_data_alarm_sla_seconds) * 12,
         )
 
     def _record_event(self, event: SelfHealingEvent) -> None:
@@ -461,6 +483,55 @@ class RuntimeSelfHealing:
                 },
             )
         )
+
+    def record_entry_starvation(
+        self,
+        *,
+        now: datetime,
+        symbol: str,
+        attempt_count: int,
+        reason: str,
+        details: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        self._prune(now=now)
+        attempts = self._entry_starvation_times_by_symbol.setdefault(symbol, deque())
+        cutoff = now - timedelta(seconds=self.known_error_window_seconds)
+        while attempts and attempts[0] < cutoff:
+            attempts.popleft()
+        attempts.append(now)
+        automatic_action = "clear_stale_fingerprint"
+        action = "refresh_entry_state"
+        status = "applied"
+        summary = f"Refreshed live-entry state for {symbol} after missed executable entry"
+        if attempt_count >= 3:
+            action = "symbol_cooldown"
+            automatic_action = "cooldown_symbol_and_wait_for_reentry"
+            summary = f"Paused new entry attempts for {symbol} after repeated missed executable entries"
+        elif attempt_count >= 2:
+            automatic_action = "refresh_state_and_retry_next_cycle"
+        self._record_event(
+            SelfHealingEvent(
+                timestamp=now,
+                category=KNOWN_CATEGORY_LIVE_ENTRY_STARVATION,
+                action=action,
+                automatic_action=automatic_action,
+                status=status,
+                summary=summary,
+                details={
+                    "symbol": symbol,
+                    "attempt_count": attempt_count,
+                    "reason": reason,
+                    **(details or {}),
+                },
+            )
+        )
+        return {
+            "category": KNOWN_CATEGORY_LIVE_ENTRY_STARVATION,
+            "known": True,
+            "error_code": "",
+            "stage": "live_entry_watchdog",
+            "automatic_action": automatic_action,
+        }
 
     def is_live_order_cooldown_active(self, *, now: datetime) -> bool:
         self._prune(now=now)

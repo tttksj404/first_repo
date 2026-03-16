@@ -1,0 +1,69 @@
+{
+  "decision_count": 18388,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 129.365908,
+  "futures_execution_balance_usd": 129.36590769,
+  "heartbeat_count": 1100652,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-03-15T21:53:23.601023+00:00",
+  "last_decision_timestamp": "2026-03-15T15:30:00+00:00",
+  "last_event_timestamp": "2026-03-15T21:53:23.411283+00:00",
+  "live_order_count": 2,
+  "realized_pnl_usd_estimate": -1.711081,
+  "recent_decisions": [
+    {
+      "mode": "futures",
+      "reasons": [],
+      "score": 59.85,
+      "side": "long",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "mode": "futures",
+      "reasons": [],
+      "score": 59.41,
+      "side": "long",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "mode": "futures",
+      "reasons": [],
+      "score": 72.64,
+      "side": "short",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "mode": "futures",
+      "reasons": [],
+      "score": 77.79,
+      "side": "long",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "mode": "futures",
+      "reasons": [],
+      "score": 73.62,
+      "side": "short",
+      "symbol": "ETHUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.221456,
+  "status": "healthy",
+  "tested_order_count": 1,
+  "top_rejection_reasons": {
+    "BUYING_INTO_RESISTANCE": 6032,
+    "DIRECTION_CONFLICT": 3505,
+    "EDGE_BELOW_COST": 4782,
+    "EDGE_TOO_THIN": 7249,
+    "SCORE_TOO_LOW": 1451,
+    "SENTIMENT_CAUTION": 2338,
+    "SENTIMENT_TOO_WEAK": 2158,
+    "SUPPORT_NOT_CONFIRMED": 3220
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-03-15T21:53:23.609304+00:00"
+}

@@ -34,13 +34,14 @@ def select_futures_leverage(
         estimated_round_trip_cost_bps=estimated_round_trip_cost_bps,
     )
     strong_setup = (
-        predictability_score >= thresholds.futures_score_min + exposure.strong_score_buffer + 2.0
-        and trend_strength >= exposure.strong_trend_strength_min
-        and volume_confirmation >= max(0.6, exposure.strong_volume_confirmation_min - 0.02)
-        and liquidity_score >= exposure.strong_liquidity_min
-        and volatility_penalty <= (exposure.strong_volatility_penalty_max + 0.02)
-        and overheat_penalty <= (exposure.strong_overheat_penalty_max + 0.02)
-        and edge_to_cost_multiple >= exposure.strong_edge_to_cost_multiple_min
+        predictability_score >= max(thresholds.futures_score_min + exposure.strong_score_buffer + 12.0, 72.0)
+        and trend_strength >= max(exposure.strong_trend_strength_min, 0.8)
+        and volume_confirmation >= max(exposure.strong_volume_confirmation_min, 0.72)
+        and liquidity_score >= max(exposure.strong_liquidity_min, 0.82)
+        and volatility_penalty <= min(exposure.strong_volatility_penalty_max + 0.02, 0.35)
+        and overheat_penalty <= min(exposure.strong_overheat_penalty_max + 0.02, 0.3)
+        and net_expected_edge_bps >= max(exposure.min_entry_net_edge_bps + 8.0, 12.0)
+        and edge_to_cost_multiple >= max(exposure.strong_edge_to_cost_multiple_min, 1.8)
     )
     soft_setup = (
         predictability_score < thresholds.futures_score_min + 2.0

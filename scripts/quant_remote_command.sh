@@ -13,7 +13,7 @@ cd "$ROOT"
 
 case "$CMD" in
   start)
-    exec sh scripts/quant_run_forever.sh quant_runtime
+    exec sh scripts/quant_run_live_orders.sh quant_runtime
     ;;
   start-live)
     exec sh scripts/quant_run_live_orders.sh quant_runtime

@@ -2,6 +2,79 @@
 set -eu
 
 BASE_DIR="${1:-quant_runtime}"
+OVERVIEW_FILE="$(python3 - <<'PY' "$BASE_DIR"
+from pathlib import Path
+import sys
+base = Path(sys.argv[1])
+latest = base / 'output' / 'paper-live-shell' / 'latest' / 'overview.json'
+print(latest if latest.exists() else '')
+PY
+)"
+if [ -n "$OVERVIEW_FILE" ]; then
+  echo "OVERVIEW_FILE=$OVERVIEW_FILE"
+  echo
+  python3 - <<'PY' "$OVERVIEW_FILE"
+import json, sys
+from pathlib import Path
+overview_path = Path(sys.argv[1])
+data = json.loads(overview_path.read_text(encoding='utf-8'))
+summary_path = overview_path.with_name("summary.json")
+summary = json.loads(summary_path.read_text(encoding='utf-8')) if summary_path.exists() else {}
+for key in [
+    'updated_at',
+    'status',
+    'decision_count',
+    'heartbeat_count',
+    'last_event_timestamp',
+    'last_decision_timestamp',
+    'last_decision_emitted_at',
+    'live_order_count',
+    'tested_order_count',
+    'realized_pnl_usd_estimate',
+    'unrealized_pnl_usd_estimate',
+]:
+    print(f"{key}: {data.get(key)}")
+print("kill_switch:", data.get("kill_switch"))
+print("top_rejection_reasons:", data.get("top_rejection_reasons"))
+print("recent_decisions:", data.get("recent_decisions"))
+print("exchange_live_futures_positions:", data.get("exchange_live_futures_positions"))
+open_orders_payload = summary.get("open_orders_snapshot") or {}
+orders = open_orders_payload.get("orders") if isinstance(open_orders_payload, dict) else {}
+entrusted = []
+if isinstance(orders, dict):
+    entrusted = orders.get("entrustedList") or orders.get("list") or []
+elif isinstance(orders, list):
+    entrusted = orders
+print("open_order_count:", len(entrusted))
+if entrusted:
+    for item in entrusted[:5]:
+        print(
+            "open_order:",
+            item.get("symbol"),
+            item.get("side") or item.get("tradeSide"),
+            "qty=",
+            item.get("size") or item.get("quantity"),
+            "orderId=",
+            item.get("orderId") or item.get("clientOid"),
+        )
+recent_live_orders = summary.get("live_orders") or []
+print("recent_live_order_count:", len(recent_live_orders))
+for item in recent_live_orders[-5:]:
+    print(
+        "recent_live_order:",
+        item.get("timestamp"),
+        item.get("symbol"),
+        item.get("side"),
+        "accepted=",
+        item.get("accepted"),
+        "qty=",
+        item.get("quantity"),
+        "orderId=",
+        item.get("order_id"),
+    )
+PY
+  exit 0
+fi
 STATE_FILE="$(python3 - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
@@ -112,4 +185,38 @@ if recent_decisions:
 top_rejections = summary.get("top_rejection_reasons") or {}
 if top_rejections:
     print("top_rejection_reasons:", top_rejections)
+open_orders_payload = summary.get("open_orders_snapshot") or {}
+orders = open_orders_payload.get("orders") if isinstance(open_orders_payload, dict) else {}
+entrusted = []
+if isinstance(orders, dict):
+    entrusted = orders.get("entrustedList") or orders.get("list") or []
+elif isinstance(orders, list):
+    entrusted = orders
+print("open_order_count:", len(entrusted))
+if entrusted:
+    for item in entrusted[:5]:
+        print(
+            "open_order:",
+            item.get("symbol"),
+            item.get("side") or item.get("tradeSide"),
+            "qty=",
+            item.get("size") or item.get("quantity"),
+            "orderId=",
+            item.get("orderId") or item.get("clientOid"),
+        )
+recent_live_orders = summary.get("live_orders") or []
+print("recent_live_order_count:", len(recent_live_orders))
+for item in recent_live_orders[-5:]:
+    print(
+        "recent_live_order:",
+        item.get("timestamp"),
+        item.get("symbol"),
+        item.get("side"),
+        "accepted=",
+        item.get("accepted"),
+        "qty=",
+        item.get("quantity"),
+        "orderId=",
+        item.get("order_id"),
+    )
 PY

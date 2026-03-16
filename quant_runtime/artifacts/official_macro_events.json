@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-03-15T22:17:30.176184+00:00",
+  "events": [
+    {
+      "name": "미국 산업생산(G.17)",
+      "start": "2026-03-16T13:15:00+00:00",
+      "end": "",
+      "impact": "medium",
+      "source": "https://www.federalreserve.gov/releases/g17/",
+      "summary_ko": "연준 산업생산은 경기민감 자산 선호와 제조업 모멘텀 해석에 영향을 주는 당일 이벤트입니다.",
+      "strategy_hint_ko": "발표 직후 미 국채금리와 달러가 같이 움직이는지 확인하기 전까지는 메이저 추격 진입을 늦춥니다.",
+      "assets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "name": "미국 PPI",
+      "start": "2026-03-18T12:30:00+00:00",
+      "end": "",
+      "impact": "high",
+      "source": "https://www.bls.gov/ppi/",
+      "summary_ko": "2월 PPI는 다음 CPI 기대와 금리 경로 재평가를 자극할 수 있어 메이저 코인 변동성을 키울 수 있습니다.",
+      "strategy_hint_ko": "3월 18일 21:30 KST 직후에는 BTC·ETH 레버리지를 줄이고, 결과가 약달러·금리하락과 정렬될 때만 공격도를 회복합니다.",
+      "assets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "name": "FOMC",
+      "start": "2026-03-17T18:00:00+00:00",
+      "end": "2026-03-18T18:30:00+00:00",
+      "impact": "high",
+      "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240809a.htm",
+      "summary_ko": "3월 17~18일 FOMC와 18일 14:00 ET 성명, 14:30 ET 기자회견은 유동성 기대를 직접 흔드는 최상위 리스크 구간입니다.",
+      "strategy_hint_ko": "3월 18일 03:00 KST부터 3월 19일 04:30 KST까지는 신규 메이저 고배율 진입보다 기존 포지션 관리와 이익 보호를 우선합니다.",
+      "assets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "name": "미국 고용지표",
+      "start": "2026-04-03T12:30:00+00:00",
+      "end": "",
+      "impact": "high",
+      "source": "https://www.bls.gov/cps/",
+      "summary_ko": "3월 고용지표는 성장 둔화와 금리 인하 기대를 동시에 재가격화할 수 있는 핵심 이벤트입니다.",
+      "strategy_hint_ko": "고용 발표일 21:30 KST 전후에는 SOL 등 고베타 알트의 공격적 확장보다 BTC/ETH 위주 선별 진입이 낫습니다.",
+      "assets": [
+        "BTC",
+        "ETH",
+        "SOL"
+      ]
+    },
+    {
+      "name": "미국 GDP(3차)·개인소득/소비(PCE)",
+      "start": "2026-04-09T12:30:00+00:00",
+      "end": "",
+      "impact": "high",
+      "source": "https://www.bea.gov/taxonomy/term/1051",
+      "summary_ko": "BEA는 셧다운 이후 일정을 조정해 GDP 3차 추정과 2월 개인소득·소비를 4월 9일 동시 발표합니다.",
+      "strategy_hint_ko": "4월 9일 21:30 KST에는 성장/물가 조합을 함께 해석해야 하므로 메이저 방향성이 확정되기 전에는 순추세 베팅을 줄입니다.",
+      "assets": [
+        "BTC",
+        "ETH"
+      ]
+    },
+    {
+      "name": "미국 CPI",
+      "start": "2026-04-10T12:30:00+00:00",
+      "end": "",
+      "impact": "high",
+      "source": "https://www.bls.gov/cpi/",
+      "summary_ko": "3월 CPI는 연준 경로와 달러 방향에 직접 연결돼 직전 BEA 발표와 함께 메이저 변동성 확대 구간을 형성할 수 있습니다.",
+      "strategy_hint_ko": "4월 10일 21:30 KST 전후에는 BTC·ETH 우선, DOGE·TRX는 이벤트 소화 이후로 미루는 편이 수익성 친화적입니다.",
+      "assets": [
+        "BTC",
+        "ETH",
+        "DOGE",
+        "TRX"
+      ]
+    }
+  ],
+  "notes": [
+    "Census 2026 economic indicator calendar shows several retail/manufacturing April releases as TBD after schedule disruptions; excluded until dates are fixed.",
+    "All times stored in UTC; Korean local time references are reflected in report text."
+  ],
+  "source_notes": [
+    "Fed G.17 release calendar last updated February 18, 2026",
+    "BLS CPI page crawled last week and states next release April 10, 2026 8:30 a.m. ET",
+    "BLS PPI page crawled last week and states next release March 18, 2026 8:30 a.m. ET",
+    "BLS CPS page crawled last week and states next release April 3, 2026 8:30 a.m. ET",
+    "BEA release schedule update states GDP/Personal Income and Outlays moved to April 9, 2026 8:30 a.m. ET"
+  ]
+}

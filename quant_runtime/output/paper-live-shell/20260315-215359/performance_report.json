@@ -1,0 +1,107 @@
+{
+  "closed_trade_count": 0,
+  "pruning_recommendations": [
+    {
+      "avg_net_edge_bps": 19.539822,
+      "cash_count": 6,
+      "decision_count": 40,
+      "edge_too_thin_count": 4,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "repeated weak-liquidity or thin-edge rejections",
+      "recommendation": "observe_only",
+      "symbol": "BTCUSDT",
+      "trade_count": 0
+    },
+    {
+      "avg_net_edge_bps": 31.876575,
+      "cash_count": 0,
+      "decision_count": 40,
+      "edge_too_thin_count": 0,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "trade_count": 0
+    },
+    {
+      "avg_net_edge_bps": 35.914395,
+      "cash_count": 0,
+      "decision_count": 36,
+      "edge_too_thin_count": 0,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "SOLUSDT",
+      "trade_count": 0
+    }
+  ],
+  "realized_pnl_usd": 0.0,
+  "regime_performance": [
+    {
+      "avg_cost_bps": 30.707552,
+      "avg_net_edge_bps": -0.22424,
+      "avg_score": 60.613463,
+      "decision_count": 6,
+      "mode": "cash"
+    },
+    {
+      "avg_cost_bps": 11.904833,
+      "avg_net_edge_bps": 30.462905,
+      "avg_score": 74.47682,
+      "decision_count": 110,
+      "mode": "futures"
+    }
+  ],
+  "run_dir": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260315-215359",
+  "summary_path": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260315-215359/summary.json",
+  "symbol_expectancy": [],
+  "walk_forward": [
+    {
+      "avg_net_edge_bps": 27.779983,
+      "avg_score": 72.932675,
+      "cash_count": 3,
+      "decision_count": 38,
+      "end": "2026-03-15T21:55:00+00:00",
+      "futures_count": 35,
+      "spot_count": 0,
+      "start": "2026-03-15T21:55:00+00:00",
+      "window_index": 1
+    },
+    {
+      "avg_net_edge_bps": 29.393565,
+      "avg_score": 73.699783,
+      "cash_count": 2,
+      "decision_count": 38,
+      "end": "2026-03-15T22:00:00+00:00",
+      "futures_count": 36,
+      "spot_count": 0,
+      "start": "2026-03-15T22:00:00+00:00",
+      "window_index": 2
+    },
+    {
+      "avg_net_edge_bps": 29.424482,
+      "avg_score": 74.602441,
+      "cash_count": 1,
+      "decision_count": 40,
+      "end": "2026-03-15T22:10:00+00:00",
+      "futures_count": 39,
+      "spot_count": 0,
+      "start": "2026-03-15T22:05:00+00:00",
+      "window_index": 3
+    },
+    {
+      "avg_net_edge_bps": 30.631799,
+      "avg_score": 75.354838,
+      "cash_count": 0,
+      "decision_count": 14,
+      "end": "2026-03-15T22:10:00+00:00",
+      "futures_count": 14,
+      "spot_count": 0,
+      "start": "2026-03-15T22:10:00+00:00",
+      "window_index": 4
+    }
+  ]
+}
