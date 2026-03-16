@@ -42,8 +42,14 @@ class LiveOrderResult:
     market: str
     side: str
     quantity: float
+    filled_quantity: float
+    fill_ratio: float
+    fill_status: str
     accepted: bool
     response: dict[str, Any]
+    avg_fill_price: float = 0.0
+    slippage_bps: float = 0.0
+    realized_edge_bps: float = 0.0
     protection_orders: tuple[dict[str, Any], ...] = ()
     protection_error: str = ""
 
@@ -255,6 +261,105 @@ class DecisionLiveOrderAdapter:
         rounded = Decimal(str(safe_value)).quantize(quantum, rounding=ROUND_HALF_UP)
         return format(rounded, f".{decimals}f")
 
+    def _safe_float(self, value: Any, default: float = 0.0) -> float:
+        try:
+            if value in (None, ""):
+                return default
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    def _requested_fill_measure(self, *, market: str, order_params: dict[str, Any]) -> float:
+        if market == "spot" and "quoteOrderQty" in order_params:
+            return self._safe_float(order_params.get("quoteOrderQty"))
+        if market == "spot" and self._exchange_id() == "bitget" and "size" in order_params and str(order_params.get("side", "")).upper() == "BUY":
+            return self._safe_float(order_params.get("size"))
+        return self._safe_float(order_params.get("quantity", order_params.get("size")))
+
+    def _filled_measure(self, *, market: str, order_params: dict[str, Any], response: dict[str, Any]) -> float:
+        if market == "spot" and "quoteOrderQty" in order_params:
+            return self._safe_float(response.get("cummulativeQuoteQty"))
+        if market == "spot" and self._exchange_id() == "bitget" and "size" in order_params and str(order_params.get("side", "")).upper() == "BUY":
+            return self._safe_float(
+                response.get("filledAmount", response.get("dealMoney", response.get("filledQuoteQty")))
+            )
+        return self._safe_float(
+            response.get(
+                "executedQty",
+                response.get(
+                    "filledQty",
+                    response.get("baseVolume", response.get("dealSize", response.get("size"))),
+                ),
+            )
+        )
+
+    def _fill_ratio(
+        self,
+        *,
+        market: str,
+        order_params: dict[str, Any],
+        response: dict[str, Any],
+        accepted: bool,
+    ) -> float:
+        if not accepted:
+            return 0.0
+        requested = self._requested_fill_measure(market=market, order_params=order_params)
+        filled = self._filled_measure(market=market, order_params=order_params, response=response)
+        if requested > 0.0 and filled > 0.0:
+            return max(0.0, min(filled / requested, 1.0))
+        return 1.0
+
+    def _avg_fill_price(
+        self,
+        *,
+        response: dict[str, Any],
+    ) -> float:
+        price = self._safe_float(
+            response.get(
+                "avgPrice",
+                response.get(
+                    "priceAvg",
+                    response.get("fillPrice", response.get("dealAvgPrice")),
+                ),
+            )
+        )
+        if price > 0.0:
+            return price
+        executed_qty = self._safe_float(response.get("executedQty"))
+        quote_qty = self._safe_float(response.get("cummulativeQuoteQty"))
+        if executed_qty > 0.0 and quote_qty > 0.0:
+            return quote_qty / executed_qty
+        return self._safe_float(response.get("price"))
+
+    def _slippage_bps(
+        self,
+        *,
+        decision: DecisionIntent,
+        fill_price: float,
+        reference_price: float,
+    ) -> float:
+        if fill_price <= 0.0 or reference_price <= 0.0:
+            return 0.0
+        if decision.side == "short":
+            adverse_move = max(reference_price - fill_price, 0.0)
+        else:
+            adverse_move = max(fill_price - reference_price, 0.0)
+        return adverse_move / reference_price * 10000.0
+
+    def _fill_status(
+        self,
+        *,
+        response: dict[str, Any],
+        accepted: bool,
+        fill_ratio: float,
+    ) -> str:
+        if not accepted:
+            return "rejected"
+        status = str(response.get("status", "")).upper()
+        if "PARTIAL" in status or fill_ratio < 0.999:
+            return "partial_fill"
+        return "filled"
+
     def _protection_prices(
         self,
         *,
@@ -360,8 +465,6 @@ class DecisionLiveOrderAdapter:
         reference_price: float,
         quantity: float,
     ) -> tuple[dict[str, Any], ...]:
-        if self._exchange_id() == "bitget" and decision.final_mode == "futures":
-            return ()
         if self._exchange_id() != "bitget":
             return ()
         payloads = self._build_bitget_protection_payloads(
@@ -508,8 +611,22 @@ class DecisionLiveOrderAdapter:
                 break
             else:
                 raise retry_error
-        quantity = float(order_params.get("quantity", order_params.get("size", 0.0)))
+        quantity = self._requested_fill_measure(market=market, order_params=order_params)
         accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
+        fill_ratio = self._fill_ratio(
+            market=market,
+            order_params=order_params,
+            response=response,
+            accepted=accepted,
+        )
+        fill_status = self._fill_status(response=response, accepted=accepted, fill_ratio=fill_ratio)
+        avg_fill_price = self._avg_fill_price(response=response)
+        slippage_bps = self._slippage_bps(
+            decision=decision,
+            fill_price=avg_fill_price,
+            reference_price=reference_price,
+        )
+        realized_edge_bps = max((decision.net_expected_edge_bps * fill_ratio) - slippage_bps, -10000.0)
         protection_orders = ()
         protection_error = ""
         if accepted:
@@ -526,7 +643,13 @@ class DecisionLiveOrderAdapter:
             market=market,
             side=order_params["side"],
             quantity=quantity,
+            filled_quantity=round(quantity * fill_ratio, 8),
+            fill_ratio=round(fill_ratio, 6),
+            fill_status=fill_status,
             accepted=accepted,
+            avg_fill_price=round(avg_fill_price, 8),
+            slippage_bps=round(slippage_bps, 6),
+            realized_edge_bps=round(realized_edge_bps, 6),
             response=response,
             protection_orders=protection_orders,
             protection_error=protection_error,

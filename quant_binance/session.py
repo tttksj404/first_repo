@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from quant_binance.data.market_store import MissingMarketStateError
+from quant_binance.execution_quality import ExecutionQualityState
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter, OrderTestResult
 from quant_binance.learning import OnlineEdgeLearner
@@ -161,6 +162,7 @@ class LivePaperSession:
     learner: OnlineEdgeLearner | None = None
     learner_output_path: str | Path | None = None
     log_store: JsonlLogStore | None = None
+    execution_quality_state_path: str | Path | None = None
     verbose: bool = False
     sync_interval_seconds: int = 60
     flush_interval_seconds: int = 15
@@ -210,10 +212,22 @@ class LivePaperSession:
     minimum_live_decision_timestamp: datetime | None = None
     _last_sync_at: datetime | None = None
     _last_flush_at: datetime | None = None
+    _execution_quality_state: ExecutionQualityState = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.max_portfolio_capacity_usd is None:
             self.max_portfolio_capacity_usd = self.remaining_portfolio_capacity_usd
+        self._execution_quality_state = ExecutionQualityState(self._default_execution_quality_state_path())
+
+    def _default_execution_quality_state_path(self) -> str | Path | None:
+        if self.execution_quality_state_path is not None:
+            return self.execution_quality_state_path
+        if self.learner_output_path is None:
+            return None
+        learner_path = Path(self.learner_output_path)
+        if len(learner_path.parents) >= 4 and learner_path.parents[2].name == "output":
+            return learner_path.parents[3] / "execution_quality_state.json"
+        return None
 
     def process_payload(self, payload: dict[str, Any], *, now: datetime | None = None) -> DecisionIntent | None:
         timestamp = now or datetime.now(tz=timezone.utc)
@@ -379,6 +393,7 @@ class LivePaperSession:
             self_healing=self_healing_status,
         )
         summary["macro_runtime"] = macro_runtime
+        summary["execution_quality"] = self._execution_quality_snapshot()
         write_runtime_summary(summary_path, summary)
         write_runtime_state(
             state_path,
@@ -404,6 +419,7 @@ class LivePaperSession:
                 "futures_missing_on_exchange_counts": dict(sorted(self.futures_missing_on_exchange_counts.items())),
                 "self_healing": self_healing_status,
                 "macro_runtime": macro_runtime,
+                "execution_quality": summary["execution_quality"],
                 "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
             },
@@ -425,6 +441,7 @@ class LivePaperSession:
                 "capital_report": self.capital_report,
                 "self_healing": self_healing_status,
                 "macro_runtime": macro_runtime,
+                "execution_quality": summary["execution_quality"],
                 "kill_switch": self.runtime.kill_switch.status(),
             },
         )
@@ -485,6 +502,32 @@ class LivePaperSession:
                 f"{decision.order_intent_notional_usd:.2f}",
                 f"{decision.predictability_score:.2f}",
             ]
+        )
+
+    def _execution_quality_snapshot(self) -> dict[str, object]:
+        return self._execution_quality_state.snapshot()
+
+    def _is_timeout_error(self, message: str) -> bool:
+        normalized = message.lower()
+        return "timed out" in normalized or "timeout" in normalized
+
+    def _record_execution_quality_outcome(
+        self,
+        *,
+        symbol: str,
+        outcome: str,
+        fill_ratio: float,
+        slippage_bps: float | None,
+        realized_edge_bps: float | None,
+        timestamp: datetime,
+    ) -> None:
+        self._execution_quality_state.record(
+            symbol=symbol,
+            outcome=outcome,
+            fill_ratio=fill_ratio,
+            slippage_bps=slippage_bps,
+            realized_edge_bps=realized_edge_bps,
+            timestamp=timestamp,
         )
 
     def _market_capital_allowed(self, decision: DecisionIntent) -> bool:
@@ -3917,6 +3960,7 @@ class LivePaperSession:
         if last_recorded == decision.timestamp:
             return
         managed_decision = self._apply_loss_combo_downgrade(decision=decision)
+        managed_decision = self._execution_quality_state.apply_overlay(managed_decision)
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
         self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp
@@ -4005,25 +4049,34 @@ class LivePaperSession:
                         reference_price=state.last_trade_price,
                     )
                 except Exception as exc:
+                    error_text = repr(exc)
                     payload = {
                         "timestamp": timestamp,
                         "symbol": executable_decision.symbol,
                         "market": executable_decision.final_mode,
                         "stage": "live_order",
-                        "error": repr(exc),
+                        "error": error_text,
                     }
                     if self.verbose:
                         print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
+                    self._record_execution_quality_outcome(
+                        symbol=executable_decision.symbol,
+                        outcome="timeout" if self._is_timeout_error(error_text) else "reject",
+                        fill_ratio=0.0,
+                        slippage_bps=None,
+                        realized_edge_bps=0.0,
+                        timestamp=timestamp,
+                    )
                     self._apply_order_error_cooldown(
                         symbol=executable_decision.symbol,
-                        error_message=repr(exc),
+                        error_message=error_text,
                         timestamp=timestamp,
                         stage="live_order",
                         exchange_id=self.live_order_executor._exchange_id(),
                     )
                     if (
                         self.live_order_executor._exchange_id() == "bitget"
-                        and self._parse_order_error_code(repr(exc)) == "40762"
+                        and self._parse_order_error_code(error_text) == "40762"
                     ):
                         self._refresh_account_state_after_live_order_activity(
                             symbol=executable_decision.symbol,
@@ -4036,21 +4089,47 @@ class LivePaperSession:
                 else:
                     if live_result is not None:
                         self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                        filled_quantity = float(getattr(live_result, "filled_quantity", live_result.quantity))
+                        fill_ratio = float(getattr(live_result, "fill_ratio", 1.0 if live_result.accepted else 0.0))
+                        fill_status = str(
+                            getattr(
+                                live_result,
+                                "fill_status",
+                                "filled" if live_result.accepted else "rejected",
+                            )
+                        )
+                        avg_fill_price = float(getattr(live_result, "avg_fill_price", 0.0))
+                        slippage_bps = float(getattr(live_result, "slippage_bps", 0.0))
+                        realized_edge_bps = float(getattr(live_result, "realized_edge_bps", 0.0))
                         payload = {
                             "timestamp": timestamp,
                             "symbol": live_result.symbol,
                             "market": live_result.market,
                             "side": live_result.side,
                             "quantity": live_result.quantity,
+                            "filled_quantity": filled_quantity,
+                            "fill_ratio": fill_ratio,
+                            "fill_status": fill_status,
                             "accepted": live_result.accepted,
                             "order_id": str(live_result.response.get("orderId", "")),
                             "client_oid": str(live_result.response.get("clientOid", executable_decision.decision_id)),
                             "reference_price": state.last_trade_price,
+                            "avg_fill_price": avg_fill_price,
+                            "slippage_bps": slippage_bps,
+                            "realized_edge_bps": realized_edge_bps,
                             "estimated_round_trip_cost_bps": executable_decision.estimated_round_trip_cost_bps,
                             "protection_orders": list(live_result.protection_orders),
                             "protection_error": live_result.protection_error,
                             "response": live_result.response,
                         }
+                        self._record_execution_quality_outcome(
+                            symbol=live_result.symbol,
+                            outcome="reject" if not live_result.accepted else fill_status,
+                            fill_ratio=fill_ratio,
+                            slippage_bps=slippage_bps if fill_ratio > 0.0 else None,
+                            realized_edge_bps=realized_edge_bps,
+                            timestamp=timestamp,
+                        )
                         self.live_orders.append(payload)
                         if self.verbose:
                             print(
@@ -4109,6 +4188,14 @@ class LivePaperSession:
                                     "message",
                                     reason or "preflight_rejected",
                                 )
+                            )
+                            self._record_execution_quality_outcome(
+                                symbol=symbol,
+                                outcome="reject",
+                                fill_ratio=0.0,
+                                slippage_bps=None,
+                                realized_edge_bps=0.0,
+                                timestamp=timestamp,
                             )
                             if reason in {"BITGET_MAX_OPEN_ZERO", "BITGET_MAX_OPEN_BELOW_MIN_QTY"}:
                                 self._apply_order_error_cooldown(
