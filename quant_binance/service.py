@@ -20,11 +20,16 @@ from quant_binance.strategy.regime import evaluate_snapshot
 
 
 class PaperTradingService:
-    def __init__(self, settings: Settings, router: ExecutionRouter | None = None) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        router: ExecutionRouter | None = None,
+        feature_extractor: MarketFeatureExtractor | None = None,
+    ) -> None:
         self.settings = settings
         self.snapshot_builder = SnapshotBuilder(settings)
         self.router = router or ExecutionRouter()
-        self.feature_extractor = MarketFeatureExtractor(settings)
+        self.feature_extractor = feature_extractor or MarketFeatureExtractor(settings)
 
     def run_cycle(
         self,
@@ -61,5 +66,5 @@ class PaperTradingService:
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             cash_reserve_fraction=cash_reserve_fraction,
         )
-        self.router.route(decision)
+        self.router.route(decision, reference_price=state.last_trade_price)
         return decision

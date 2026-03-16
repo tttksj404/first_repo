@@ -1,0 +1,1 @@
+{"self_healing": {"status": "active", "active_guards": [{"type": "global_live_order_cooldown", "until": "2026-03-13T04:15:00+00:00"}], "recent_events": [{"category": "bitget_live_order_compatibility", "automatic_action": "pause_live_orders_and_reuse_test_order_path", "action_status": "applied"}]}}

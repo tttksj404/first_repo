@@ -22,6 +22,8 @@ def compute_predictability_score(features: FeatureVector, settings: Settings) ->
         + weights.inverse_volatility_penalty * (1.0 - features.volatility_penalty)
         + weights.inverse_overheat_penalty * (1.0 - features.overheat_penalty)
     )
+    if features.intraday_trend_direction != 0 and features.intraday_trend_direction == features.trend_direction:
+        score += 8.0 * features.intraday_trend_strength
     return round(score, 6)
 
 
@@ -31,15 +33,16 @@ def estimate_round_trip_cost_bps(
     expected_entry_slippage_bps: float,
     expected_exit_slippage_bps: float,
     expected_funding_drag_bps: float = 0.0,
+    empirical_fee_bps: float = 0.0,
 ) -> float:
     fees = settings.fees
     if mode == "futures":
-        entry_fee_bps = fees.futures_taker_fee_bps
-        exit_fee_bps = fees.futures_taker_fee_bps
+        entry_fee_bps = max(fees.futures_taker_fee_bps, empirical_fee_bps)
+        exit_fee_bps = max(fees.futures_taker_fee_bps, empirical_fee_bps)
         funding_drag_bps = expected_funding_drag_bps
     elif mode == "spot":
-        entry_fee_bps = fees.spot_taker_fee_bps
-        exit_fee_bps = fees.spot_taker_fee_bps
+        entry_fee_bps = max(fees.spot_taker_fee_bps, empirical_fee_bps)
+        exit_fee_bps = max(fees.spot_taker_fee_bps, empirical_fee_bps)
         funding_drag_bps = 0.0
     else:
         return 0.0
@@ -101,6 +104,7 @@ def estimate_live_fallback_edge_bps(
             quality_base
             + 2.0 * features.breakout_norm
             + 10.0 * directional_flow_alignment
+            + 6.0 * features.intraday_trend_strength
             + 8.0 * max(features.macro_liquidity_support_score - 0.5, 0.0)
             - risk_penalty
         )
@@ -157,11 +161,13 @@ def apply_score_and_costs(
         if expected_entry_slippage_bps is not None
         else features.probe_slippage_bps_norm * settings.feature_thresholds.slippage_bps_ceiling
     )
+    entry_slippage = max(entry_slippage, features.empirical_entry_slippage_bps)
     exit_slippage = (
         expected_exit_slippage_bps
         if expected_exit_slippage_bps is not None
         else entry_slippage
     )
+    exit_slippage = max(exit_slippage, features.empirical_exit_slippage_bps)
     score = compute_predictability_score(features, settings)
     round_trip_cost = estimate_round_trip_cost_bps(
         mode=mode,
@@ -169,6 +175,7 @@ def apply_score_and_costs(
         expected_entry_slippage_bps=entry_slippage,
         expected_exit_slippage_bps=exit_slippage,
         expected_funding_drag_bps=expected_funding_drag_bps,
+        empirical_fee_bps=features.empirical_fee_bps,
     )
     return replace(
         features,

@@ -216,7 +216,9 @@ class BinanceRestClient:
         amount: float,
         source_market: str,
         target_market: str,
+        client_oid: str | None = None,
     ) -> dict[str, Any]:
+        del client_oid
         transfer_type_map = {
             ("spot", "futures"): "MAIN_UMFUTURE",
             ("futures", "spot"): "UMFUTURE_MAIN",

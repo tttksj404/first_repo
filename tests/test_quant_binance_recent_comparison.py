@@ -6,11 +6,14 @@ import unittest
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+from quant_binance.backtest.comparison import compare_strategies
 from quant_binance.backtest.paper_live_fixtures import load_paper_live_cycles
 from quant_binance.backtest.recent_comparison import (
+    build_recent_comparison_services,
     prepare_recent_comparison_fixture,
     select_best_recent_source,
 )
+from quant_binance.settings import Settings
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,14 +47,29 @@ def make_closed_5m_event(*, symbol: str, start_time: datetime, open_price: float
 
 def make_decision(*, symbol: str, timestamp: datetime, index: int) -> dict[str, object]:
     return {
+        "candidate_mode": "futures",
+        "config_version": "2026-03-13.test",
+        "decision_hash": f"hash-{index}",
+        "decision_id": f"decision-{index}",
+        "final_mode": "futures",
+        "side": "long",
+        "snapshot_id": f"snapshot-{index}",
         "symbol": symbol,
         "timestamp": timestamp.isoformat(),
         "estimated_round_trip_cost_bps": 8.5 + (index % 3),
         "gross_expected_edge_bps": 18.0 + (index * 0.05),
         "liquidity_score": 0.58,
+        "linked_order_ids": [],
+        "net_expected_edge_bps": 12.0 + (index * 0.05),
+        "order_intent_notional_usd": 25.0,
         "volume_confirmation": 0.63,
         "overheat_penalty": 0.22,
+        "predictability_score": 72.0,
+        "rejection_reasons": [],
+        "stop_distance_bps": 45.0,
         "trend_direction": 1 if index % 2 == 0 else -1,
+        "trend_strength": 0.74,
+        "volatility_penalty": 0.28,
     }
 
 
@@ -174,6 +192,29 @@ class QuantBinanceRecentComparisonTests(unittest.TestCase):
         prep_payload = json.loads(self.prep_path.read_text(encoding="utf-8"))
         self.assertEqual(prep_payload["source"]["convertible_decision_count"], 9)
         self.assertIn("dense trade tape per decision", prep_payload["missing_inputs"])
+
+    def test_recorded_decision_service_keeps_current_strategy_active(self) -> None:
+        prepared = prepare_recent_comparison_fixture(
+            config_path=CONFIG_PATH,
+            base_dir=self.base_dir,
+            fixture_path=self.fixture_path,
+            preparation_report_path=self.prep_path,
+        )
+        settings = Settings.load(CONFIG_PATH)
+        services = build_recent_comparison_services(
+            settings=settings,
+            decisions_path=prepared.source.decisions_path,
+        )
+        report = compare_strategies(
+            config_path=CONFIG_PATH,
+            fixture_path=self.fixture_path,
+            equity_usd=prepared.equity_usd,
+            capacity_usd=prepared.capacity_usd,
+            services=services,
+        )
+        current = next(item for item in report.strategies if item.strategy_name == "current_strategy")
+        self.assertGreater(current.decision_count, 0)
+        self.assertGreater(current.trade_count, 0)
 
 
 if __name__ == "__main__":
