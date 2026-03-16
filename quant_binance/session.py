@@ -311,6 +311,7 @@ class LivePaperSession:
             "spot_available_balance_usd": report.spot_available_balance_usd,
             "spot_recognized_balance_usd": report.spot_recognized_balance_usd,
             "spot_funding_assets": [item.__dict__ for item in report.spot_funding_assets],
+            "futures_funding_assets": [item.__dict__ for item in report.futures_funding_assets],
             "spot_execution_routes": [item.__dict__ for item in report.spot_execution_routes],
             "capital_transfer_routes": [item.__dict__ for item in report.capital_transfer_routes],
             "futures_available_balance_usd": report.futures_available_balance_usd,
@@ -583,10 +584,30 @@ class LivePaperSession:
             candidate_routes,
             key=lambda item: (
                 float(item.get("free_balance_usd", 0.0)) * (1.0 - reserve_fraction) >= decision.order_intent_notional_usd,
+                not bool(item.get("requires_wallet_transfer", False)),
                 float(item.get("free_balance_usd", 0.0)) * (1.0 - reserve_fraction),
                 item.get("route_type") == "direct",
             ),
         )
+
+    def _spot_route_available_balance_usd(
+        self,
+        *,
+        route: dict[str, Any],
+        extra_spot_available_balance_usd: float,
+        extra_spot_transfer_asset: str,
+    ) -> float:
+        funding_asset = str(route.get("funding_asset", "")).upper()
+        source_market = str(route.get("funding_source_market", "spot"))
+        requires_wallet_transfer = bool(route.get("requires_wallet_transfer", False))
+        if not requires_wallet_transfer and source_market == "spot":
+            available = float(route.get("free_balance_usd", 0.0) or 0.0)
+            if funding_asset == "USDT":
+                available += max(extra_spot_available_balance_usd, 0.0)
+            return available
+        if extra_spot_transfer_asset == funding_asset:
+            return max(extra_spot_available_balance_usd, 0.0)
+        return 0.0
 
     def _cap_live_order_decision(
         self,
@@ -594,7 +615,9 @@ class LivePaperSession:
         *,
         reference_price: float | None = None,
         extra_spot_available_balance_usd: float = 0.0,
+        extra_spot_transfer_asset: str = "",
         extra_futures_execution_balance_usd: float = 0.0,
+        allow_transfer_hints: bool = True,
     ) -> DecisionIntent:
         if not self.capital_report:
             return decision
@@ -625,9 +648,11 @@ class LivePaperSession:
         if decision.final_mode == "spot":
             selected_route = self._select_spot_execution_route(decision, reserve_fraction=reserve_fraction)
             if selected_route is not None:
-                available = float(selected_route.get("free_balance_usd", 0.0))
-                if str(selected_route.get("funding_asset", "")).upper() == "USDT":
-                    available += max(extra_spot_available_balance_usd, 0.0)
+                available = self._spot_route_available_balance_usd(
+                    route=selected_route,
+                    extra_spot_available_balance_usd=extra_spot_available_balance_usd,
+                    extra_spot_transfer_asset=extra_spot_transfer_asset,
+                )
                 min_notional = float(selected_route.get("min_notional_usd", min_notional))
                 min_quantity = float(selected_route.get("min_quantity", min_quantity))
                 decision = replace(
@@ -746,9 +771,15 @@ class LivePaperSession:
             meaningful_notional_floor = max(meaningful_notional_floor, major_strong_entry_floor)
         if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
             rejection_reasons = list(decision.rejection_reasons + (rejection_code,))
-            if decision.final_mode == "futures" and float(self.capital_report.get("max_spot_to_futures_transfer_usd", 0.0) or 0.0) > 0.0:
+            if allow_transfer_hints and decision.final_mode == "futures" and self._preferred_transfer_route_for_decision(
+                decision=decision,
+                reference_price=reference_price,
+            ) is not None:
                 rejection_reasons.append("TRANSFER_REQUIRED_SPOT_TO_FUTURES")
-            if decision.final_mode == "spot" and float(self.capital_report.get("max_futures_to_spot_transfer_usd", 0.0) or 0.0) > 0.0:
+            if allow_transfer_hints and decision.final_mode == "spot" and self._preferred_transfer_route_for_decision(
+                decision=decision,
+                reference_price=reference_price,
+            ) is not None:
                 rejection_reasons.append("TRANSFER_REQUIRED_FUTURES_TO_SPOT")
             return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(rejection_reasons))))
         if decision.order_intent_notional_usd < major_medium_entry_floor:
@@ -815,20 +846,47 @@ class LivePaperSession:
                 )
         return candidate
 
-    def _transfer_route_for_markets(self, *, source_market: str, target_market: str) -> dict[str, Any] | None:
+    def _transfer_route_for_markets(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str | None = None,
+    ) -> dict[str, Any] | None:
         raw_routes = self.capital_report.get("capital_transfer_routes", [])
         if not isinstance(raw_routes, list):
             return None
+        requested_asset = (asset or "").upper()
+        matching_routes: list[dict[str, Any]] = []
         for item in raw_routes:
             if not isinstance(item, dict):
                 continue
             if (
                 str(item.get("source_market", "")) == source_market
                 and str(item.get("target_market", "")) == target_market
-                and str(item.get("asset", "")).upper() == "USDT"
             ):
-                return item
-        return None
+                if requested_asset and str(item.get("asset", "")).upper() != requested_asset:
+                    continue
+                matching_routes.append(item)
+        if not matching_routes:
+            if requested_asset == "USDT":
+                if source_market == "spot" and target_market == "futures":
+                    transferable = float(self.capital_report.get("max_spot_to_futures_transfer_usd", 0.0) or 0.0)
+                elif source_market == "futures" and target_market == "spot":
+                    transferable = float(self.capital_report.get("max_futures_to_spot_transfer_usd", 0.0) or 0.0)
+                else:
+                    transferable = 0.0
+                if transferable > 0.0:
+                    return {
+                        "source_market": source_market,
+                        "target_market": target_market,
+                        "asset": "USDT",
+                        "transferable_usd": transferable,
+                        "route_type": "wallet_transfer",
+                        "note": "Fallback transfer route synthesized from legacy capital report capacity.",
+                    }
+            return None
+        return max(matching_routes, key=lambda item: float(item.get("transferable_usd", 0.0) or 0.0))
 
     def _cap_live_order_decision_with_transfer_buffer(
         self,
@@ -836,6 +894,7 @@ class LivePaperSession:
         decision: DecisionIntent,
         reference_price: float,
         target_market: str,
+        transfer_asset: str,
         extra_balance_usd: float,
     ) -> DecisionIntent:
         if target_market == "futures":
@@ -843,11 +902,14 @@ class LivePaperSession:
                 decision,
                 reference_price=reference_price,
                 extra_futures_execution_balance_usd=extra_balance_usd,
+                allow_transfer_hints=False,
             )
         return self._cap_live_order_decision(
             decision,
             reference_price=reference_price,
             extra_spot_available_balance_usd=extra_balance_usd,
+            extra_spot_transfer_asset=transfer_asset,
+            allow_transfer_hints=False,
         )
 
     def _minimal_transfer_amount_for_decision(
@@ -857,20 +919,16 @@ class LivePaperSession:
         reference_price: float,
         source_market: str,
         target_market: str,
+        transfer_asset: str,
         max_transfer_usd: float,
     ) -> float:
         if max_transfer_usd <= 0.0:
             return 0.0
-        if source_market == "futures" and target_market == "spot":
-            selected_route = self._select_spot_execution_route(decision, reserve_fraction=self._cash_reserve_fraction())
-            if selected_route is not None and str(selected_route.get("funding_asset", "")).upper() != "USDT":
-                return 0.0
-            if selected_route is None and not decision.symbol.endswith("USDT"):
-                return 0.0
         fully_funded = self._cap_live_order_decision_with_transfer_buffer(
             decision=decision,
             reference_price=reference_price,
             target_market=target_market,
+            transfer_asset=transfer_asset,
             extra_balance_usd=max_transfer_usd,
         )
         if fully_funded.final_mode != decision.final_mode or fully_funded.order_intent_notional_usd <= 0.0:
@@ -883,13 +941,63 @@ class LivePaperSession:
                 decision=decision,
                 reference_price=reference_price,
                 target_market=target_market,
+                transfer_asset=transfer_asset,
                 extra_balance_usd=midpoint,
             )
             if candidate.final_mode == decision.final_mode and candidate.order_intent_notional_usd > 0.0:
                 high = midpoint
             else:
                 low = midpoint
-        return round(min(max_transfer_usd, high + 0.01), 8)
+        return round(min(max_transfer_usd, max(high + 0.01, 5.0)), 8)
+
+    def _preferred_transfer_route_for_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float | None,
+    ) -> dict[str, Any] | None:
+        if not self.capital_report:
+            return None
+        if decision.final_mode == "futures":
+            return self._transfer_route_for_markets(
+                source_market="spot",
+                target_market="futures",
+                asset="USDT",
+            )
+        if decision.final_mode != "spot" or decision.side != "long":
+            return None
+        selected_route = self._select_spot_execution_route(decision, reserve_fraction=self._cash_reserve_fraction())
+        if selected_route is None:
+            if decision.symbol.endswith("USDT"):
+                return self._transfer_route_for_markets(
+                    source_market="futures",
+                    target_market="spot",
+                    asset="USDT",
+                )
+            return None
+        if not bool(selected_route.get("requires_wallet_transfer", False)):
+            return None
+        funding_asset = str(selected_route.get("funding_asset", "")).upper()
+        if not funding_asset:
+            return None
+        route = self._transfer_route_for_markets(
+            source_market=str(selected_route.get("funding_source_market", "futures")),
+            target_market="spot",
+            asset=funding_asset,
+        )
+        if route is None:
+            return None
+        if reference_price is None:
+            return route
+        amount = self._minimal_transfer_amount_for_decision(
+            decision=decision,
+            reference_price=reference_price,
+            source_market=str(route.get("source_market", "")),
+            target_market=str(route.get("target_market", "")),
+            transfer_asset=funding_asset,
+            max_transfer_usd=float(route.get("transferable_usd", 0.0) or 0.0),
+        )
+        return route if amount > 0.0 else None
 
     def _prepare_live_execution_decision(
         self,
@@ -918,13 +1026,19 @@ class LivePaperSession:
             target_market = "spot"
         if transfer_reason is None:
             return executable
-        route = self._transfer_route_for_markets(source_market=source_market, target_market=target_market)
+        route = self._preferred_transfer_route_for_decision(
+            decision=decision,
+            reference_price=reference_price,
+        )
         if route is None:
             return executable
+        transfer_asset = str(route.get("asset", "USDT") or "USDT").upper()
+        source_market = str(route.get("source_market", source_market) or source_market)
+        target_market = str(route.get("target_market", target_market) or target_market)
         if self._wallet_transfer_cooldown_active(
             source_market=source_market,
             target_market=target_market,
-            asset="USDT",
+            asset=transfer_asset,
             timestamp=decision.timestamp,
         ):
             return executable
@@ -933,6 +1047,7 @@ class LivePaperSession:
             reference_price=reference_price,
             source_market=source_market,
             target_market=target_market,
+            transfer_asset=transfer_asset,
             max_transfer_usd=float(route.get("transferable_usd", 0.0) or 0.0),
         )
         if amount <= 0.0:
@@ -942,7 +1057,7 @@ class LivePaperSession:
             transfer_response = transfer_method(
                 source_market=source_market,
                 target_market=target_market,
-                asset="USDT",
+                asset=transfer_asset,
                 amount=amount,
                 client_oid=client_oid,
             )
@@ -950,7 +1065,7 @@ class LivePaperSession:
             self._set_wallet_transfer_cooldown(
                 source_market=source_market,
                 target_market=target_market,
-                asset="USDT",
+                asset=transfer_asset,
                 timestamp=decision.timestamp,
             )
             if self.log_store is not None:
@@ -962,6 +1077,8 @@ class LivePaperSession:
                         "status": "failed",
                         "source_market": source_market,
                         "target_market": target_market,
+                        "asset": transfer_asset,
+                        "route_type": route.get("route_type"),
                         "amount_usd": amount,
                         "error": repr(exc),
                     },
@@ -970,7 +1087,7 @@ class LivePaperSession:
         self._set_wallet_transfer_cooldown(
             source_market=source_market,
             target_market=target_market,
-            asset="USDT",
+            asset=transfer_asset,
             timestamp=decision.timestamp,
         )
         if self.log_store is not None:
@@ -982,6 +1099,9 @@ class LivePaperSession:
                     "status": "submitted",
                     "source_market": source_market,
                     "target_market": target_market,
+                    "asset": transfer_asset,
+                    "route_type": route.get("route_type"),
+                    "route_note": route.get("note"),
                     "amount_usd": amount,
                     "client_oid": client_oid,
                     "response": transfer_response,
@@ -993,7 +1113,13 @@ class LivePaperSession:
             stage="capital_transfer",
             reason=transfer_reason,
         )
-        return self._cap_live_order_decision(decision, reference_price=reference_price)
+        return self._cap_live_order_decision(
+            decision,
+            reference_price=reference_price,
+            extra_spot_available_balance_usd=amount if target_market == "spot" else 0.0,
+            extra_spot_transfer_asset=transfer_asset if target_market == "spot" else "",
+            extra_futures_execution_balance_usd=amount if target_market == "futures" and transfer_asset == "USDT" else 0.0,
+        )
 
     def _normalize_live_position_side(self, position: dict[str, Any]) -> str:
         hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()

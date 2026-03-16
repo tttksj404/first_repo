@@ -983,7 +983,7 @@ class QuantBinanceCrossQuoteDirectPairTests(unittest.TestCase):
             reference_price=50000.0,
         )
 
-        self.assertEqual(executable.final_mode, "cash")
+        self.assertEqual(executable.final_mode, "futures")
         self.assertEqual(len(rest_client.transfer_calls), 1)
         self.assertEqual(rest_client.transfer_calls[0]["asset"], "USDT")
         self.assertEqual(rest_client.transfer_calls[0]["source_market"], "spot")
@@ -1343,4 +1343,136 @@ class QuantBinanceCrossQuoteDirectPairTests(unittest.TestCase):
         self.assertEqual(session.rest_client.transfers[0]["asset"], "USDT")
         self.assertEqual(len(session.live_orders), 1)
         self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertIn(("capital_transfer", "auto_transfer_futures_to_spot"), refresh_calls)
+
+    def test_live_session_auto_transfers_futures_btc_into_spot_cross_quote_entry(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        class TransferRestClient:
+            def __init__(self) -> None:
+                self.transfers: list[dict[str, object]] = []
+
+            def transfer_wallet_balance(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfers.append(dict(kwargs))
+                return {"status": "SUCCESS", "transferId": "futures-btc-to-spot-1"}
+
+        class AcceptedLiveExecutor:
+            def _exchange_id(self) -> str:
+                return "binance"
+
+            def execute_decision(self, *, decision, reference_price):  # type: ignore[no-untyped-def]
+                return type(
+                    "LiveOrderResultStub",
+                    (),
+                    {
+                        "symbol": decision.symbol,
+                        "market": decision.final_mode,
+                        "side": decision.side,
+                        "quantity": round(decision.order_intent_notional_usd / reference_price, 8),
+                        "accepted": True,
+                        "response": {"status": "SUCCESS", "orderId": "live-transfer-ethbtc-1"},
+                        "protection_orders": (),
+                        "protection_error": "",
+                    },
+                )()
+
+            def pop_last_preflight_rejection(self):  # type: ignore[no-untyped-def]
+                return None
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        now = datetime(2026, 3, 16, 0, 15, tzinfo=timezone.utc)
+        state = SymbolMarketState(
+            symbol="ETHUSDT",
+            top_of_book=TopOfBook(2999.5, 1.0, 3000.5, 1.2, now),
+            last_trade_price=3000.0,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=3.0,
+            last_update_time=now,
+        )
+        runtime.dispatcher.store.put(state)
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            rest_client=TransferRestClient(),  # type: ignore[arg-type]
+            live_order_executor=AcceptedLiveExecutor(),  # type: ignore[arg-type]
+        )
+        session.order_tester = None
+        session.capital_report = {
+            "spot_available_balance_usd": 0.0,
+            "can_trade_spot_any": False,
+            "max_futures_to_spot_transfer_usd": 500.0,
+            "capital_transfer_routes": [
+                {
+                    "source_market": "futures",
+                    "target_market": "spot",
+                    "asset": "BTC",
+                    "transferable_usd": 500.0,
+                    "route_type": "wallet_transfer",
+                    "note": "Futures BTC can be transferred to spot and used on direct/cross-quote spot routes when the quote asset matches.",
+                }
+            ],
+            "spot_requirements": [{"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+            "spot_execution_routes": [
+                {
+                    "target_symbol": "ETHUSDT",
+                    "execution_symbol": "ETHBTC",
+                    "base_asset": "ETH",
+                    "quote_asset": "BTC",
+                    "funding_asset": "BTC",
+                    "funding_source_market": "futures",
+                    "route_type": "transfer_cross_quote",
+                    "requires_wallet_transfer": True,
+                    "free_balance": 0.01,
+                    "free_balance_usd": 500.0,
+                    "min_notional_usd": 5.0,
+                    "min_quantity": 0.001,
+                }
+            ],
+        }
+        refresh_calls: list[tuple[str, str]] = []
+
+        def fake_refresh(*, symbol, timestamp, stage, reason):  # type: ignore[no-untyped-def]
+            refresh_calls.append((stage, reason))
+
+        session._refresh_account_state_after_live_order_activity = fake_refresh  # type: ignore[method-assign]
+        decision = DecisionIntent(
+            decision_id="d-auto-transfer-spot-btc",
+            decision_hash="hash-auto-transfer-spot-btc",
+            snapshot_id="s-auto-transfer-spot-btc",
+            config_version="2026-03-16.v1",
+            timestamp=now,
+            symbol="ETHUSDT",
+            candidate_mode="spot",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        session._record_decision(decision=decision, state=state, timestamp=now)
+
+        self.assertEqual(len(session.rest_client.transfers), 1)
+        self.assertEqual(session.rest_client.transfers[0]["source_market"], "futures")
+        self.assertEqual(session.rest_client.transfers[0]["target_market"], "spot")
+        self.assertEqual(session.rest_client.transfers[0]["asset"], "BTC")
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["response"]["status"], "SUCCESS")
         self.assertIn(("capital_transfer", "auto_transfer_futures_to_spot"), refresh_calls)

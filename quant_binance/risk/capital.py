@@ -22,6 +22,7 @@ class AccountCapitalInputs:
     futures_available_balance_usd: float
     futures_execution_balance_usd: float
     futures_recognized_balance_usd: float
+    futures_funding_assets: tuple["FuturesFundingAsset", ...]
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,17 @@ class SpotFundingAsset:
     total: float
     free_balance_usd: float
     total_balance_usd: float
+
+
+@dataclass(frozen=True)
+class FuturesFundingAsset:
+    asset: str
+    free: float
+    locked: float
+    total: float
+    free_balance_usd: float
+    total_balance_usd: float
+    margin_available: bool
 
 
 @dataclass(frozen=True)
@@ -49,6 +61,7 @@ class CapitalAdequacyReport:
     spot_available_balance_usd: float
     spot_recognized_balance_usd: float
     spot_funding_assets: tuple[SpotFundingAsset, ...]
+    futures_funding_assets: tuple[FuturesFundingAsset, ...]
     spot_execution_routes: tuple["SpotExecutionRoute", ...]
     capital_transfer_routes: tuple["CapitalTransferRoute", ...]
     futures_available_balance_usd: float
@@ -74,7 +87,9 @@ class SpotExecutionRoute:
     base_asset: str
     quote_asset: str
     funding_asset: str
+    funding_source_market: str
     route_type: str
+    requires_wallet_transfer: bool
     free_balance: float
     free_balance_usd: float
     quote_asset_usd_price: float
@@ -261,6 +276,136 @@ def _spot_funding_assets(
     return tuple(assets)
 
 
+def _exchange_supports_internal_transfer(
+    *,
+    exchange_id: str,
+    source_market: str,
+    target_market: str,
+    asset: str,
+) -> bool:
+    normalized_exchange = exchange_id.strip().lower()
+    normalized_asset = asset.strip().upper()
+    route = (source_market, target_market)
+    if route not in {("spot", "futures"), ("futures", "spot")}:
+        return False
+    if normalized_exchange == "binance":
+        return bool(normalized_asset)
+    if normalized_exchange == "bitget":
+        return normalized_asset == "USDT"
+    return normalized_asset == "USDT"
+
+
+def _futures_asset_total_usd(
+    *,
+    row: dict[str, Any],
+    asset: str,
+    supported_symbols: set[str],
+    rest_client: SupportsCapitalPricing,
+    price_by_symbol: dict[str, float | None],
+) -> float | None:
+    for key in ("usdtEquity", "accountEquity", "equity"):
+        parsed = _optional_float(row.get(key))
+        if parsed is not None and parsed > 0.0:
+            return parsed
+    balance_keys = (
+        row.get("marginBalance"),
+        row.get("walletBalance"),
+        row.get("crossWalletBalance"),
+        row.get("availableBalance"),
+        row.get("maxWithdrawAmount"),
+    )
+    amount = next((parsed for parsed in (_optional_float(value) for value in balance_keys) if parsed is not None and parsed > 0.0), None)
+    if amount is None:
+        return None
+    price = _spot_asset_usd_price(
+        asset=asset,
+        supported_symbols=supported_symbols,
+        rest_client=rest_client,
+        price_by_symbol=price_by_symbol,
+    )
+    if price is None or price <= 0.0:
+        return None
+    return amount * price
+
+
+def _futures_funding_assets(
+    *,
+    futures_account: dict[str, Any],
+    rest_client: SupportsCapitalPricing,
+    spot_exchange_info: dict[str, Any],
+) -> tuple[FuturesFundingAsset, ...]:
+    rows = futures_account.get("assets")
+    if not isinstance(rows, list):
+        rows = futures_account.get("accounts")
+    if not isinstance(rows, list):
+        return ()
+    supported_symbols = {str(item.get("symbol", "")) for item in spot_exchange_info.get("symbols", [])}
+    price_by_symbol: dict[str, float | None] = {}
+    assets: list[FuturesFundingAsset] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        asset = str(row.get("asset") or row.get("marginCoin") or row.get("currency") or "").upper()
+        if not asset:
+            continue
+        free = next(
+            (
+                parsed
+                for parsed in (
+                    _optional_float(row.get("maxWithdrawAmount")),
+                    _optional_float(row.get("availableBalance")),
+                    _optional_float(row.get("available")),
+                    _optional_float(row.get("free")),
+                )
+                if parsed is not None and parsed > 0.0
+            ),
+            0.0,
+        )
+        total = next(
+            (
+                parsed
+                for parsed in (
+                    _optional_float(row.get("walletBalance")),
+                    _optional_float(row.get("marginBalance")),
+                    _optional_float(row.get("equity")),
+                    _optional_float(row.get("balance")),
+                    _optional_float(row.get("crossWalletBalance")),
+                    _optional_float(row.get("availableBalance")),
+                )
+                if parsed is not None and parsed > 0.0
+            ),
+            0.0,
+        )
+        if total <= 0.0 and free > 0.0:
+            total = free
+        if total <= 0.0:
+            continue
+        total_balance_usd = _futures_asset_total_usd(
+            row=row,
+            asset=asset,
+            supported_symbols=supported_symbols,
+            rest_client=rest_client,
+            price_by_symbol=price_by_symbol,
+        )
+        if total_balance_usd is None:
+            continue
+        free_ratio = min(max(free / total, 0.0), 1.0) if total > 0.0 else 0.0
+        free_balance_usd = total_balance_usd * free_ratio
+        assets.append(
+            FuturesFundingAsset(
+                asset=asset,
+                free=round(free, 8),
+                locked=round(max(total - free, 0.0), 8),
+                total=round(total, 8),
+                free_balance_usd=round(free_balance_usd, 6),
+                total_balance_usd=round(total_balance_usd, 6),
+                margin_available=bool(row.get("marginAvailable", asset == "USDT")),
+            )
+        )
+    assets.sort(key=lambda item: (-item.free_balance_usd, item.asset))
+    return tuple(assets)
+
+
 def _recognized_futures_balance_usd(futures_account: dict[str, Any]) -> float:
     top_level_candidates = (
         futures_account.get("totalMarginBalance"),
@@ -323,6 +468,11 @@ def extract_account_capital_inputs(
         rest_client=rest_client,
         spot_exchange_info=spot_exchange_info,
     )
+    futures_funding_assets = _futures_funding_assets(
+        futures_account=futures_account,
+        rest_client=rest_client,
+        spot_exchange_info=spot_exchange_info,
+    )
     return AccountCapitalInputs(
         spot_available_balance_usd=round(spot_available_balance_usd, 6),
         spot_recognized_balance_usd=round(sum(item.total_balance_usd for item in spot_funding_assets), 6),
@@ -330,6 +480,7 @@ def extract_account_capital_inputs(
         futures_available_balance_usd=round(futures_available_balance_usd, 6),
         futures_execution_balance_usd=round(futures_execution_balance_usd, 6),
         futures_recognized_balance_usd=round(_recognized_futures_balance_usd(futures_account), 6),
+        futures_funding_assets=futures_funding_assets,
     )
 
 
@@ -365,6 +516,7 @@ def build_capital_adequacy_report(
     spot_recognized_balance_usd: float | None = None,
     spot_funding_assets: tuple[SpotFundingAsset, ...] = (),
     futures_recognized_balance_usd: float | None = None,
+    futures_funding_assets: tuple[FuturesFundingAsset, ...] = (),
     settings: Settings,
     rest_client: SupportsCapitalPricing,
 ) -> CapitalAdequacyReport:
@@ -392,7 +544,8 @@ def build_capital_adequacy_report(
             )
         )
     funding_assets_by_name = {item.asset: item for item in spot_funding_assets if item.free > 0.0}
-    extra_quote_assets = tuple(funding_assets_by_name)
+    futures_funding_assets_by_name = {item.asset: item for item in futures_funding_assets if item.free > 0.0}
+    extra_quote_assets = tuple(dict.fromkeys([*funding_assets_by_name, *futures_funding_assets_by_name]))
     spot_symbol_assets = {
         str(item.get("symbol", "")): _symbol_assets(
             exchange_info=spot_exchange_info,
@@ -410,67 +563,170 @@ def build_capital_adequacy_report(
         )
         for item in spot_funding_assets
     }
+    for item in futures_funding_assets:
+        if item.asset in asset_usd_price:
+            continue
+        asset_usd_price[item.asset] = (
+            item.free_balance_usd / item.free
+            if item.free > 0.0
+            else (item.total_balance_usd / item.total if item.total > 0.0 else 0.0)
+        )
     asset_usd_price.setdefault("USDT", 1.0)
     spot_execution_routes: list[SpotExecutionRoute] = []
-    for requirement in spot_requirements:
-        base_asset, target_quote_asset = spot_symbol_assets.get(requirement.symbol, ("", ""))
-        if not base_asset:
-            continue
-        for funding_asset in funding_assets_by_name.values():
-            if funding_asset.asset == base_asset or funding_asset.free_balance_usd <= 0.0:
+    exchange_id = str(getattr(rest_client, "exchange_id", "unknown") or "unknown").lower()
+
+    def append_spot_execution_routes(
+        *,
+        funding_assets: dict[str, SpotFundingAsset | FuturesFundingAsset],
+        funding_source_market: str,
+        requires_wallet_transfer: bool,
+    ) -> None:
+        for requirement in spot_requirements:
+            base_asset, target_quote_asset = spot_symbol_assets.get(requirement.symbol, ("", ""))
+            if not base_asset:
                 continue
-            execution_symbol = ""
-            route_type = "cross_quote"
-            if funding_asset.asset == target_quote_asset:
-                execution_symbol = requirement.symbol
-                route_type = "direct"
-            else:
-                execution_symbol = next(
-                    (
-                        symbol
-                        for symbol, assets in spot_symbol_assets.items()
-                        if assets == (base_asset, funding_asset.asset)
-                    ),
-                    "",
+            for funding_asset in funding_assets.values():
+                if funding_asset.asset == base_asset or funding_asset.free_balance_usd <= 0.0:
+                    continue
+                if requires_wallet_transfer and not _exchange_supports_internal_transfer(
+                    exchange_id=exchange_id,
+                    source_market=funding_source_market,
+                    target_market="spot",
+                    asset=funding_asset.asset,
+                ):
+                    continue
+                execution_symbol = ""
+                route_type = "cross_quote"
+                if funding_asset.asset == target_quote_asset:
+                    execution_symbol = requirement.symbol
+                    route_type = "direct"
+                else:
+                    execution_symbol = next(
+                        (
+                            symbol
+                            for symbol, assets in spot_symbol_assets.items()
+                            if assets == (base_asset, funding_asset.asset)
+                        ),
+                        "",
+                    )
+                if not execution_symbol:
+                    continue
+                quote_asset = spot_symbol_assets.get(execution_symbol, ("", ""))[1]
+                quote_asset_usd = asset_usd_price.get(quote_asset, 0.0)
+                if quote_asset_usd <= 0.0:
+                    continue
+                route_name = f"transfer_{route_type}" if requires_wallet_transfer else route_type
+                spot_execution_routes.append(
+                    SpotExecutionRoute(
+                        target_symbol=requirement.symbol,
+                        execution_symbol=execution_symbol,
+                        base_asset=base_asset,
+                        quote_asset=quote_asset,
+                        funding_asset=funding_asset.asset,
+                        funding_source_market=funding_source_market,
+                        route_type=route_name,
+                        requires_wallet_transfer=requires_wallet_transfer,
+                        free_balance=round(funding_asset.free, 8),
+                        free_balance_usd=round(funding_asset.free_balance_usd, 6),
+                        quote_asset_usd_price=round(quote_asset_usd, 6),
+                        min_notional_usd=round(_symbol_min_notional(spot_exchange_info, execution_symbol) * quote_asset_usd, 6),
+                        min_quantity=round(_symbol_min_quantity(spot_exchange_info, execution_symbol), 8),
+                    )
                 )
-            if not execution_symbol:
-                continue
-            quote_asset = spot_symbol_assets.get(execution_symbol, ("", ""))[1]
-            quote_asset_usd = asset_usd_price.get(quote_asset, 0.0)
-            if quote_asset_usd <= 0.0:
-                continue
-            spot_execution_routes.append(
-                SpotExecutionRoute(
-                    target_symbol=requirement.symbol,
-                    execution_symbol=execution_symbol,
-                    base_asset=base_asset,
-                    quote_asset=quote_asset,
-                    funding_asset=funding_asset.asset,
-                    route_type=route_type,
-                    free_balance=round(funding_asset.free, 8),
-                    free_balance_usd=round(funding_asset.free_balance_usd, 6),
-                    quote_asset_usd_price=round(quote_asset_usd, 6),
-                    min_notional_usd=round(_symbol_min_notional(spot_exchange_info, execution_symbol) * quote_asset_usd, 6),
-                    min_quantity=round(_symbol_min_quantity(spot_exchange_info, execution_symbol), 8),
-                )
-            )
+
+    append_spot_execution_routes(
+        funding_assets=funding_assets_by_name,
+        funding_source_market="spot",
+        requires_wallet_transfer=False,
+    )
+    append_spot_execution_routes(
+        funding_assets=futures_funding_assets_by_name,
+        funding_source_market="futures",
+        requires_wallet_transfer=True,
+    )
     capital_transfer_routes: list[CapitalTransferRoute] = []
-    spot_usdt = funding_assets_by_name.get("USDT")
-    if spot_usdt is not None and spot_usdt.free_balance_usd > 0.0:
+    for funding_asset in funding_assets_by_name.values():
+        if not _exchange_supports_internal_transfer(
+            exchange_id=exchange_id,
+            source_market="spot",
+            target_market="futures",
+            asset=funding_asset.asset,
+        ):
+            continue
+        note = (
+            f"Spot {funding_asset.asset} can be moved into futures."
+            if funding_asset.asset == "USDT"
+            else f"Spot {funding_asset.asset} can be transferred into futures, but non-USDT assets may still need manual collateral handling before new futures execution."
+        )
+        capital_transfer_routes.append(
+            CapitalTransferRoute(
+                source_market="spot",
+                target_market="futures",
+                asset=funding_asset.asset,
+                source_free_amount=round(funding_asset.free, 8),
+                transferable_usd=round(funding_asset.free_balance_usd, 6),
+                route_type="wallet_transfer",
+                requires_manual_transfer=funding_asset.asset != "USDT",
+                note=note,
+            )
+        )
+    if (
+        "USDT" not in funding_assets_by_name
+        and spot_available_balance_usd > 0.0
+        and _exchange_supports_internal_transfer(
+            exchange_id=exchange_id,
+            source_market="spot",
+            target_market="futures",
+            asset="USDT",
+        )
+    ):
         capital_transfer_routes.append(
             CapitalTransferRoute(
                 source_market="spot",
                 target_market="futures",
                 asset="USDT",
-                source_free_amount=round(spot_usdt.free, 8),
-                transferable_usd=round(spot_usdt.free_balance_usd, 6),
+                source_free_amount=round(spot_available_balance_usd, 8),
+                transferable_usd=round(spot_available_balance_usd, 6),
                 route_type="wallet_transfer",
-                requires_manual_transfer=True,
-                note="Spot USDT can be transferred to futures margin before opening futures exposure.",
+                requires_manual_transfer=False,
+                note="Spot USDT can be moved into futures.",
             )
         )
-    futures_execution_shortfall = max(futures_recognized_balance_usd if futures_recognized_balance_usd is not None else 0.0, 0.0)
-    if futures_execution_shortfall > 0.0:
+    for funding_asset in futures_funding_assets_by_name.values():
+        if not _exchange_supports_internal_transfer(
+            exchange_id=exchange_id,
+            source_market="futures",
+            target_market="spot",
+            asset=funding_asset.asset,
+        ):
+            continue
+        note = (
+            f"Futures {funding_asset.asset} can be transferred back to spot for spot execution funding."
+            if funding_asset.asset == "USDT"
+            else f"Futures {funding_asset.asset} can be transferred to spot and used on direct/cross-quote spot routes when the quote asset matches."
+        )
+        capital_transfer_routes.append(
+            CapitalTransferRoute(
+                source_market="futures",
+                target_market="spot",
+                asset=funding_asset.asset,
+                source_free_amount=round(funding_asset.free, 8),
+                transferable_usd=round(funding_asset.free_balance_usd, 6),
+                route_type="wallet_transfer",
+                requires_manual_transfer=False,
+                note=note,
+            )
+        )
+    if (
+        "USDT" not in futures_funding_assets_by_name
+        and futures_available_balance_usd > 0.0
+        and _exchange_supports_internal_transfer(
+            exchange_id=exchange_id,
+            source_market="futures",
+            target_market="spot",
+            asset="USDT",
+        )
+    ):
         capital_transfer_routes.append(
             CapitalTransferRoute(
                 source_market="futures",
@@ -479,8 +735,8 @@ def build_capital_adequacy_report(
                 source_free_amount=round(futures_available_balance_usd, 8),
                 transferable_usd=round(futures_available_balance_usd, 6),
                 route_type="wallet_transfer",
-                requires_manual_transfer=True,
-                note="Futures available balance can be transferred back to spot for spot execution funding.",
+                requires_manual_transfer=False,
+                note="Futures available USDT can be transferred back to spot for spot execution funding.",
             )
         )
     max_spot_to_futures_transfer_usd = max((item.transferable_usd for item in capital_transfer_routes if item.source_market == "spot" and item.target_market == "futures"), default=0.0)
@@ -528,10 +784,16 @@ def build_capital_adequacy_report(
         spot_available_balance_usd=round(spot_available_balance_usd, 6),
         spot_recognized_balance_usd=round(spot_recognized, 6),
         spot_funding_assets=tuple(spot_funding_assets),
+        futures_funding_assets=tuple(futures_funding_assets),
         spot_execution_routes=tuple(
             sorted(
                 spot_execution_routes,
-                key=lambda item: (item.target_symbol, 0 if item.route_type == "direct" else 1, -item.free_balance_usd),
+                key=lambda item: (
+                    item.target_symbol,
+                    0 if not item.requires_wallet_transfer else 1,
+                    0 if item.route_type.endswith("direct") else 1,
+                    -item.free_balance_usd,
+                ),
             )
         ),
         capital_transfer_routes=tuple(
