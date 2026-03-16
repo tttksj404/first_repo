@@ -795,3 +795,93 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class QuantBinanceCrossQuoteDirectPairTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.settings = Settings.load(CONFIG_PATH)
+
+    def test_live_order_adapter_sizes_direct_ethbtc_from_quote_usd_price(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        decision = DecisionIntent(
+            decision_id="d-ethbtc-direct",
+            decision_hash="hash-ethbtc-direct",
+            snapshot_id="s-ethbtc-direct",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 0, 0, tzinfo=timezone.utc),
+            symbol="ETHBTC",
+            candidate_mode="spot",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.72,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=68.0,
+            gross_expected_edge_bps=22.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=8.0,
+            order_intent_notional_usd=125.0,
+            stop_distance_bps=50.0,
+            execution_symbol="ETHBTC",
+            spot_base_asset="ETH",
+            spot_quote_asset="BTC",
+            spot_funding_asset="BTC",
+            spot_quote_asset_usd_price=50000.0,
+        )
+        adapter = DecisionLiveOrderAdapter(FakeLiveOrderClient(), self.settings)  # type: ignore[arg-type]
+        built = adapter.build_order_params(decision=decision, reference_price=0.05)
+        assert built is not None
+        _, params = built
+        self.assertEqual(params["symbol"], "ETHBTC")
+        self.assertEqual(params["quantity"], "0.05000000")
+
+    def test_session_rejects_underfunded_futures_entry_with_transfer_hint(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(runtime=runtime, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0)
+        session.capital_report = {
+            "futures_available_balance_usd": 0.0,
+            "futures_execution_balance_usd": 0.0,
+            "can_trade_futures_any": False,
+            "max_spot_to_futures_transfer_usd": 25.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-transfer-hint",
+            decision_hash="hash-transfer-hint",
+            snapshot_id="s-transfer-hint",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 0, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertIn("TRANSFER_REQUIRED_SPOT_TO_FUTURES", capped.rejection_reasons)

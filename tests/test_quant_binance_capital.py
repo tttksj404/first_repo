@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from quant_binance.risk.capital import build_capital_adequacy_report, extract_account_capital_inputs
+from quant_binance.risk.capital import SpotFundingAsset, build_capital_adequacy_report, extract_account_capital_inputs
 from quant_binance.settings import Settings
 
 
@@ -166,6 +166,37 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         self.assertEqual(btc_route.route_type, "cross_quote")
         self.assertEqual(btc_route.min_notional_usd, 5.0)
         self.assertTrue(report.can_trade_spot_any)
+
+
+class QuantBinanceCapitalMobilityTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.settings = Settings.load(CONFIG_PATH)
+
+    def test_capital_report_exposes_transfer_capacity_between_spot_and_futures(self) -> None:
+        report = build_capital_adequacy_report(
+            spot_available_balance_usd=25.0,
+            spot_recognized_balance_usd=25.0,
+            spot_funding_assets=(
+                SpotFundingAsset(
+                    asset="USDT",
+                    free=25.0,
+                    locked=0.0,
+                    total=25.0,
+                    free_balance_usd=25.0,
+                    total_balance_usd=25.0,
+                ),
+            ),
+            futures_available_balance_usd=7.5,
+            futures_recognized_balance_usd=30.0,
+            settings=self.settings,
+            rest_client=FakeRestClient(),  # type: ignore[arg-type]
+        )
+
+        self.assertEqual(report.max_spot_to_futures_transfer_usd, 25.0)
+        self.assertEqual(report.max_futures_to_spot_transfer_usd, 7.5)
+        self.assertTrue(any(item.source_market == "spot" and item.target_market == "futures" for item in report.capital_transfer_routes))
+        self.assertTrue(any(item.source_market == "futures" and item.target_market == "spot" for item in report.capital_transfer_routes))
 
 
 if __name__ == "__main__":
