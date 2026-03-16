@@ -15,7 +15,9 @@ from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gat
 FUTURES_SOFT_RISK_REASONS = {"SCORE_TOO_LOW", "LIQUIDITY_TOO_WEAK", "VOL_TOO_HIGH", "FUTURES_OVERHEAT", "EDGE_BELOW_COST", "SENTIMENT_CAUTION"}
 BTC_ETH_SYMBOLS = frozenset({"BTCUSDT", "ETHUSDT"})
 BTC_ETH_STRONG_SIZE_BOOST_REASON = "BTC_ETH_STRONG_EDGE_SIZE_BOOST"
-BTC_ETH_SOFT_SPOT_MISS_TOLERANCE = 0.08
+BTC_ETH_SOFT_SPOT_MISS_TOLERANCE = 0.12
+BTC_ETH_SECONDARY_SUPPORT_RELAX_TOLERANCE = 0.18
+BTC_ETH_SECONDARY_SENTIMENT_RELAX_TOLERANCE = 0.16
 BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP = 1.15
 BTC_ETH_SIZE_BOOST_ABS_CAP = 0.15
 
@@ -241,8 +243,8 @@ def _btc_eth_futures_sentiment_relaxation_allowed(
         and features.macro_risk_penalty < macro_gates.futures_block_penalty
         and features.predictability_score >= max(futures_score_min, thresholds.futures_score_min)
         and features.trend_direction in {1, -1}
-        and features.trend_strength >= thresholds.futures_trend_strength_min + 0.06
-        and features.volume_confirmation >= max(exposure.strong_volume_confirmation_min - 0.04, 0.68)
+        and features.trend_strength >= thresholds.futures_trend_strength_min + 0.03
+        and features.volume_confirmation >= max(exposure.strong_volume_confirmation_min - 0.08, 0.64)
         and features.liquidity_score >= max(futures_liquidity_min, exposure.soft_liquidity_floor)
         and features.volatility_penalty <= exposure.soft_volatility_penalty_max
         and features.overheat_penalty <= exposure.soft_overheat_penalty_max
@@ -277,9 +279,9 @@ def _btc_eth_spot_relaxation_reasons(
         features.macro_trade_restraint != "halt_high_impact_window"
         and features.macro_risk_penalty < macro_gates.spot_block_penalty
         and features.trend_direction == 1
-        and features.predictability_score >= thresholds.spot_score_min + 4.0
-        and features.trend_strength >= thresholds.spot_trend_strength_min + 0.1
-        and features.volume_confirmation >= 0.68
+        and features.predictability_score >= thresholds.spot_score_min + 3.0
+        and features.trend_strength >= thresholds.spot_trend_strength_min + 0.07
+        and features.volume_confirmation >= 0.64
         and features.liquidity_score >= thresholds.spot_liquidity_min
         and features.resistance_penalty <= resistance_penalty_max
         and passes_cost_gate(features, settings)
@@ -290,13 +292,13 @@ def _btc_eth_spot_relaxation_reasons(
     relaxed_reasons: list[str] = []
     if (
         features.support_alignment < support_alignment_min
-        and features.support_alignment >= max(support_alignment_min - BTC_ETH_SOFT_SPOT_MISS_TOLERANCE, 0.0)
-        and features.breakout_norm >= 0.65
+        and features.support_alignment >= max(support_alignment_min - BTC_ETH_SECONDARY_SUPPORT_RELAX_TOLERANCE, 0.0)
+        and features.breakout_norm >= 0.6
     ):
         relaxed_reasons.append("SUPPORT_NOT_CONFIRMED")
     if (
         features.sentiment_support_score < sentiment_support_min
-        and features.sentiment_support_score >= max(sentiment_support_min - BTC_ETH_SOFT_SPOT_MISS_TOLERANCE, 0.0)
+        and features.sentiment_support_score >= max(sentiment_support_min - BTC_ETH_SECONDARY_SENTIMENT_RELAX_TOLERANCE, 0.0)
     ):
         relaxed_reasons.append("SENTIMENT_TOO_WEAK")
     return tuple(relaxed_reasons)
