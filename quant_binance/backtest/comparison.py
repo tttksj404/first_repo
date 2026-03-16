@@ -555,12 +555,14 @@ def compare_strategies(
     fixture_path: str | Path,
     equity_usd: float,
     capacity_usd: float,
+    services: tuple[ComparisonService, ...] | None = None,
 ) -> StrategyComparisonReport:
     settings = Settings.load(config_path)
     cycles = sorted(
         load_paper_live_cycles(fixture_path),
         key=lambda cycle: (cycle.decision_time, cycle.symbol),
     )
+    selected_services = services or default_comparison_services(settings)
     strategies = tuple(
         _evaluate_strategy(
             strategy_service=service,
@@ -568,7 +570,7 @@ def compare_strategies(
             equity_usd=equity_usd,
             capacity_usd=capacity_usd,
         )
-        for service in default_comparison_services(settings)
+        for service in selected_services
     )
     return StrategyComparisonReport(
         config_path=str(Path(config_path)),

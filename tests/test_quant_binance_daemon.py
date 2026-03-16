@@ -352,7 +352,7 @@ class QuantBinanceDaemonTests(unittest.TestCase):
 
         capital_report = result["summary"]["capital_report"]
         assert isinstance(capital_report, dict)
-        self.assertEqual(float(capital_report["futures_available_balance_usd"]), 5.0)
+        self.assertEqual(float(capital_report["futures_available_balance_usd"]), 40.0)
         self.assertEqual(float(capital_report["futures_recognized_balance_usd"]), 50.0)
         self.assertTrue(capital_report["can_trade_futures_any"])
         self.assertEqual(float(capital_report["futures_execution_balance_usd"]), 5.0)

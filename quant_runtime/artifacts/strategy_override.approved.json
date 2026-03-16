@@ -1,0 +1,50 @@
+{
+  "futures_exposure": {
+    "priority_symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "DOGEUSDT",
+      "TRXUSDT"
+    ],
+    "pyramid_enabled": true,
+    "pyramid_major_only": false,
+    "pyramid_min_roe_percent": 0.75,
+    "pyramid_max_adds_per_symbol": 2,
+    "pyramid_size_multiplier": 0.35
+  },
+  "live_position_risk": {
+    "disable_standard_stop_loss_exits": true,
+    "portfolio_full_exit_only": true,
+    "portfolio_full_exit_profit_ratio": 0.15,
+    "major_drawdown_grace_enabled": true,
+    "major_drawdown_grace_minutes": 360,
+    "major_drawdown_abort_roe_percent": -35.0,
+    "major_drawdown_predictability_min": 48.0,
+    "major_drawdown_net_edge_min_bps": -2.0,
+    "major_drawdown_liquidity_min": 0.25,
+    "major_drawdown_signal_max_age_minutes": 120,
+    "major_low_signal_max_holding_minutes": 0,
+    "major_low_signal_min_unrealized_usd": 0.0,
+    "major_low_signal_min_roe_percent": 0.0,
+    "major_reentry_cooldown_minutes": 90,
+    "major_reversal_confirmation_cycles": 8,
+    "major_reversal_min_holding_minutes": 240,
+    "major_loss_reentry_cooldown_minutes": 240,
+    "major_loss_reentry_trigger_usd": 2.0
+  },
+  "loss_combo_downgrade": {
+    "enabled": true,
+    "lookback_hours": 24,
+    "time_bucket_minutes": 240,
+    "prune_loss_usd": 1.5,
+    "observe_only_loss_usd": 2.5,
+    "cooldown_loss_usd": 4.0,
+    "cooldown_minutes": 360
+  },
+  "universe": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ]
+}

@@ -46,6 +46,8 @@ class PrimitiveInputs:
     open_interest_ema: float
     basis_bps: float
     gross_expected_edge_bps: float
+    intraday_trend_direction: int = 0
+    intraday_trend_strength: float = 0.0
 
 
 def _safe_mean(values: tuple[float, ...]) -> float:
@@ -103,17 +105,33 @@ def build_feature_vector_from_primitives(
     oi_surge_value = max(inputs.open_interest / max(inputs.open_interest_ema, 1e-9) - 1.0, 0.0)
     oi_surge_percentile = midpoint_percentile_rank(oi_surge_value, history.oi_surge)
     basis_stretch_percentile = midpoint_percentile_rank(abs(inputs.basis_bps), history.basis_abs)
-    regime_alignment = 1.0 if inputs.trend_direction != 0 and inputs.ema_stack_score == 1.0 else 0.5 if inputs.trend_direction != 0 else 0.0
+    intraday_alignment = (
+        1.0
+        if inputs.trend_direction != 0 and inputs.intraday_trend_direction == inputs.trend_direction
+        else 0.0
+        if inputs.intraday_trend_direction != 0 and inputs.intraday_trend_direction != inputs.trend_direction
+        else 0.5
+    )
+    regime_alignment = clamp(
+        (
+            1.0 if inputs.trend_direction != 0 and inputs.ema_stack_score == 1.0 else 0.5 if inputs.trend_direction != 0 else 0.0
+        ) * 0.75
+        + intraday_alignment * max(inputs.intraday_trend_strength, 0.0) * 0.25
+    )
 
     trend_strength = round(
-        0.35 * ret_rank_1h
-        + 0.35 * ret_rank_4h
+        0.30 * ret_rank_1h
+        + 0.25 * ret_rank_4h
         + 0.15 * breakout_norm
-        + 0.15 * inputs.ema_stack_score,
+        + 0.15 * inputs.ema_stack_score
+        + 0.15 * inputs.intraday_trend_strength,
         6,
     )
     volume_confirmation = round(
-        0.40 * vol_z_5m_norm + 0.35 * vol_z_1h_norm + 0.25 * taker_imbalance_norm,
+        0.36 * vol_z_5m_norm
+        + 0.31 * vol_z_1h_norm
+        + 0.23 * taker_imbalance_norm
+        + 0.10 * max(inputs.intraday_trend_strength, 0.0),
         6,
     )
     liquidity_score = round(
@@ -161,5 +179,7 @@ def build_feature_vector_from_primitives(
         liquidity_score=liquidity_score,
         volatility_penalty=volatility_penalty,
         overheat_penalty=overheat_penalty,
+        intraday_trend_direction=inputs.intraday_trend_direction,
+        intraday_trend_strength=inputs.intraday_trend_strength,
         gross_expected_edge_bps=inputs.gross_expected_edge_bps,
     )

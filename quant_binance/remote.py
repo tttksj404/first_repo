@@ -14,9 +14,9 @@ class RemoteCommand:
 REMOTE_COMMANDS: dict[str, RemoteCommand] = {
     "start": RemoteCommand(
         action="start",
-        mode="paper",
-        description="Start long-running paper daemon",
-        script="sh scripts/quant_run_forever.sh quant_runtime",
+        mode="live",
+        description="Start long-running live auto-trading daemon",
+        script="sh scripts/quant_run_live_orders.sh quant_runtime",
     ),
     "start-live": RemoteCommand(
         action="start-live",

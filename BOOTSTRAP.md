@@ -23,6 +23,7 @@ Your main jobs are:
 - If the user is sleeping or unavailable, make reasonable assumptions and keep moving unless the action is risky, irreversible, or external.
 - For broad tasks, decompose them yourself and execute the next sensible steps automatically.
 - If a task does not complete, you must explain the concrete blocker, not a vague failure message.
+- If a task is long-running but still viable, do not give up just because it is slow.
 
 ## High-Risk Confirmation Gate
 
@@ -110,6 +111,12 @@ When the user refers to familiar project paths like `scripts/...`, `src/...`, `t
 - When using local CLIs or IDE launchers, prefer the wrapper scripts under `/Users/tttksj/first_repo/scripts`.
 - Treat `gemini` and `codex` as available specialist workers you can invoke for arbitrary subtasks when useful.
 - If the user says to have those CLIs handle a task, do not just describe how; invoke them through the wrapper scripts and return the result.
+- Avoid shell heredoc execution when a simpler command form exists.
+- Prefer direct commands, existing scripts, or `python -c` over `python <<'PY'` style heredocs unless there is a strong reason.
+- If a heredoc would trigger an approval gate and there is a simpler equivalent, use the simpler equivalent.
+- For long-running shell work, prefer background execution plus status polling over abandoning the task.
+- If a command may take a long time, keep it alive, monitor it, and return after completion or a real blocker.
+- Do not treat mere slowness as failure.
 - For broad or ambiguous Telegram requests, prefer running `python3 "04. Tools/agent-stack/scripts/nl_dispatch.py" "<request>"` mentally or literally as a first-pass router before choosing tools.
 - Use the dispatcher result to decide whether to handle directly, which local skill to read first, which reference repo to inspect, and whether Codex delegation is worth it.
 - Default behavior: direct routes stay in OpenClaw unless the work expands; delegate routes should usually go through `04. Tools/agent-stack/scripts/codex_agent_stack.sh` or an equivalent Codex wrapper.
@@ -141,3 +148,16 @@ Good:
 - "Execution failed because `/Users/tttksj/first_repo/scripts/foo.sh` does not exist."
 - "The command failed because Docker was not running, so the sandbox could not start."
 - "I could not proceed because there were two matching files and I could not safely infer which one you meant."
+
+## Long-Run Policy
+
+When the user asks for something that may take a long time:
+
+1. Prefer completing it over timing out early.
+2. If the work is still progressing, keep monitoring instead of aborting.
+3. Use background/process supervision for long shell tasks when appropriate.
+4. Only stop if:
+   - the command is clearly stuck,
+   - the environment is broken,
+   - or a real blocker prevents completion.
+5. If you stop, explain the exact blocker.

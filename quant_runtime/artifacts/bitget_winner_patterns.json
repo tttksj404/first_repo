@@ -1,0 +1,27 @@
+{
+  "average_hold_minutes": 1026.124017,
+  "average_net_profit_usd": 23.080412,
+  "generated_at": "2026-03-14T20:30:37.473969+09:00",
+  "median_hold_minutes": 1026.124017,
+  "median_net_profit_usd": 23.080412,
+  "sides": [
+    {
+      "count": 2,
+      "hold_side": "long"
+    }
+  ],
+  "summary": [
+    "\ucd5c\uadfc +$20.0 \uc774\uc0c1 \uc2e4\ud604 \uc218\uc775\uc740 ETHUSDT\uc5d0 \uac00\uc7a5 \uc9d1\uc911\ub428",
+    "\uc2b9\ub9ac \ubc29\ud5a5\uc740 long \ucabd\uc774 \uc6b0\uc138",
+    "\uc911\uc559\uac12 \ubcf4\uc720 \uc2dc\uac04\uc740 \uc57d 1026.1\ubd84",
+    "\uc2b9\ub9ac \uac70\ub798 \ud3c9\uade0 \uc21c\uc774\uc775\uc740 \uc57d $23.08"
+  ],
+  "symbols": [
+    {
+      "average_net_profit_usd": 23.080412,
+      "count": 2,
+      "symbol": "ETHUSDT"
+    }
+  ],
+  "winner_count": 2
+}

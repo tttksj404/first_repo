@@ -10,6 +10,10 @@ from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
 
+from quant_binance.telegram_reports import (
+    format_execution_quality_report,
+    format_weekly_validation_report,
+)
 from quant_binance.telegram_intent import help_message_ko, parse_telegram_intent
 
 ROOT = Path('/Users/tttksj/first_repo')
@@ -64,6 +68,22 @@ def send_message(chat_id: int, text: str) -> None:
 def run_local_command(action: str) -> str:
     if action == 'help':
         return help_message_ko()
+    if action == 'weekly-validation-report':
+        return format_weekly_validation_report(ROOT / 'quant_runtime')
+    if action == 'execution-quality-report':
+        return format_execution_quality_report(ROOT / 'quant_runtime')
+    if action == 'advisor-report':
+        proc = subprocess.run(
+            ['sh', 'scripts/quant_strategy_advisor.sh', 'codex', 'quant_runtime', 'advisor'],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            timeout=900,
+        )
+        output = (proc.stdout or '') + ('\n' + proc.stderr if proc.stderr else '')
+        return output.strip() or f'command finished with exit={proc.returncode}'
     if action == 'strategy-report':
         proc = subprocess.run(
             ['sh', 'scripts/quant_strategy_promotion.sh', 'report', 'quant_runtime'],
@@ -180,6 +200,14 @@ def explain_latest_runtime() -> str:
             "futures 불일치: "
             f"missing_in_paper={details.get('missing_in_paper') or []}, "
             f"missing_on_exchange={details.get('missing_on_exchange') or []}"
+        )
+    self_healing = summary.get('self_healing') or {}
+    recent_events = self_healing.get('recent_events') or []
+    if recent_events:
+        latest = recent_events[-1]
+        lines.append(
+            "self-healing: "
+            f"{latest.get('category')} action={latest.get('action')} status={latest.get('status')}"
         )
     lines.append(f"last_decision_timestamp={state.get('last_decision_timestamp')}")
     return '\\n'.join(lines)

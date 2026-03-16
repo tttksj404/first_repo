@@ -5,6 +5,12 @@ from datetime import datetime
 from quant_binance.data.state import KlineBar, SpotTrade, SymbolMarketState, TopOfBook
 
 
+class MissingMarketStateError(KeyError):
+    def __init__(self, *, symbol: str) -> None:
+        self.symbol = symbol
+        super().__init__(f"missing market state for symbol={symbol}")
+
+
 class MarketStateStore:
     def __init__(self) -> None:
         self._states: dict[str, SymbolMarketState] = {}
@@ -73,5 +79,5 @@ class MarketStateStore:
 
     def _require_state(self, symbol: str) -> SymbolMarketState:
         if symbol not in self._states:
-            raise KeyError(f"missing market state for symbol={symbol}")
+            raise MissingMarketStateError(symbol=symbol)
         return self._states[symbol]
