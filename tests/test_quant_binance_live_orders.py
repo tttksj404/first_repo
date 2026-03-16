@@ -1038,6 +1038,114 @@ class QuantBinanceCrossQuoteDirectPairTests(unittest.TestCase):
         self.assertEqual(capped.final_mode, "cash")
         self.assertIn("TRANSFER_REQUIRED_SPOT_TO_FUTURES", capped.rejection_reasons)
 
+    def test_session_rejects_underfunded_futures_entry_with_manual_non_usdt_hint(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(runtime=runtime, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0)
+        session.capital_report = {
+            "futures_available_balance_usd": 0.0,
+            "futures_execution_balance_usd": 0.0,
+            "futures_manual_handling_balance_usd": 500.0,
+            "can_trade_futures_any": True,
+            "capital_transfer_routes": [
+                {
+                    "source_market": "spot",
+                    "target_market": "futures",
+                    "asset": "BTC",
+                    "transferable_usd": 500.0,
+                    "requires_manual_transfer": True,
+                    "capacity_effect": "manual_conversion",
+                    "auto_transfer_supported": False,
+                }
+            ],
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-transfer-manual",
+            decision_hash="hash-transfer-manual",
+            snapshot_id="s-transfer-manual",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 0, 7, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertIn("MANUAL_FUTURES_CONVERSION_REQUIRED", capped.rejection_reasons)
+        self.assertNotIn("TRANSFER_REQUIRED_SPOT_TO_FUTURES", capped.rejection_reasons)
+
+    def test_session_rejects_underfunded_futures_entry_with_collateral_only_hint(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(runtime=runtime, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0)
+        session.capital_report = {
+            "futures_available_balance_usd": 0.0,
+            "futures_execution_balance_usd": 0.0,
+            "futures_collateral_candidate_balance_usd": 120.0,
+            "can_trade_futures_any": True,
+            "capital_transfer_routes": [],
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-collateral-only",
+            decision_hash="hash-collateral-only",
+            snapshot_id="s-collateral-only",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 0, 8, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertIn("FUTURES_COLLATERAL_AVAILABLE", capped.rejection_reasons)
+        self.assertNotIn("TRANSFER_REQUIRED_SPOT_TO_FUTURES", capped.rejection_reasons)
+
     def test_bitget_preflight_rejects_max_open_below_min_quantity(self) -> None:
         from quant_binance.models import DecisionIntent
 
@@ -1220,6 +1328,93 @@ class QuantBinanceCrossQuoteDirectPairTests(unittest.TestCase):
         self.assertEqual(len(session.live_orders), 1)
         self.assertIn("BTCUSDT", session.paper_positions)
         self.assertIn(("capital_transfer", "auto_transfer_spot_to_futures"), refresh_calls)
+
+    def test_session_does_not_auto_transfer_manual_non_usdt_route_into_futures(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        class TransferCapableRestClient:
+            def __init__(self) -> None:
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def transfer_wallet_balance(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append(dict(kwargs))
+                return {"status": "SUCCESS"}
+
+            def get_account(self, *, market):  # type: ignore[no-untyped-def]
+                return {}
+
+            def get_open_orders(self, *, market, symbol=None):  # type: ignore[no-untyped-def]
+                return {}
+
+            def build_capital_report(self):  # type: ignore[no-untyped-def]
+                raise NotImplementedError
+
+            def get_positions(self):  # type: ignore[no-untyped-def]
+                return {}
+
+            def cancel_order(self, *, market, symbol, order_id):  # type: ignore[no-untyped-def]
+                return {}
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        rest_client = TransferCapableRestClient()
+        session = LivePaperSession(runtime=runtime, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0, rest_client=rest_client)  # type: ignore[arg-type]
+        session.capital_report = {
+            "futures_available_balance_usd": 0.0,
+            "futures_execution_balance_usd": 0.0,
+            "futures_manual_handling_balance_usd": 500.0,
+            "can_trade_futures_any": True,
+            "capital_transfer_routes": [
+                {
+                    "source_market": "spot",
+                    "target_market": "futures",
+                    "asset": "BTC",
+                    "transferable_usd": 500.0,
+                    "requires_manual_transfer": True,
+                    "capacity_effect": "manual_conversion",
+                    "auto_transfer_supported": False,
+                }
+            ],
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session._refresh_account_state_after_live_order_activity = lambda **kwargs: None  # type: ignore[method-assign]
+        decision = DecisionIntent(
+            decision_id="d-transfer-non-usdt",
+            decision_hash="hash-transfer-non-usdt",
+            snapshot_id="s-transfer-non-usdt",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 0, 17, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        executable = session._prepare_live_execution_decision(
+            decision=decision,
+            reference_price=50000.0,
+        )
+
+        self.assertEqual(executable.final_mode, "cash")
+        self.assertIn("MANUAL_FUTURES_CONVERSION_REQUIRED", executable.rejection_reasons)
+        self.assertEqual(rest_client.transfer_calls, [])
 
     def test_live_session_auto_transfers_futures_usdt_into_spot_before_entry(self) -> None:
         from quant_binance.models import DecisionIntent

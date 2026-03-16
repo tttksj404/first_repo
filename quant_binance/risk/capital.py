@@ -65,7 +65,12 @@ class CapitalAdequacyReport:
     spot_execution_routes: tuple["SpotExecutionRoute", ...]
     capital_transfer_routes: tuple["CapitalTransferRoute", ...]
     futures_available_balance_usd: float
+    futures_execution_balance_usd: float
     futures_recognized_balance_usd: float
+    futures_transferable_execution_balance_usd: float
+    futures_collateral_candidate_balance_usd: float
+    futures_manual_handling_balance_usd: float
+    futures_total_reusable_balance_usd: float
     minimum_operational_balance_usd: float
     minimum_full_universe_balance_usd: float
     recommended_balance_usd: float
@@ -106,7 +111,18 @@ class CapitalTransferRoute:
     transferable_usd: float
     route_type: str
     requires_manual_transfer: bool
+    capacity_effect: str
+    auto_transfer_supported: bool
     note: str
+
+
+def _transfer_capacity_effect_priority(capacity_effect: str) -> int:
+    return {
+        "direct_execution": 0,
+        "collateral_candidate": 1,
+        "manual_conversion": 2,
+        "spot_execution": 0,
+    }.get(capacity_effect, 3)
 
 
 def _symbol_min_notional(exchange_info: dict[str, Any], symbol: str) -> float:
@@ -513,6 +529,7 @@ def build_capital_adequacy_report(
     *,
     spot_available_balance_usd: float,
     futures_available_balance_usd: float,
+    futures_execution_balance_usd: float | None = None,
     spot_recognized_balance_usd: float | None = None,
     spot_funding_assets: tuple[SpotFundingAsset, ...] = (),
     futures_recognized_balance_usd: float | None = None,
@@ -645,6 +662,23 @@ def build_capital_adequacy_report(
         requires_wallet_transfer=True,
     )
     capital_transfer_routes: list[CapitalTransferRoute] = []
+    futures_execution_balance = max(
+        0.0,
+        futures_available_balance_usd if futures_execution_balance_usd is None else futures_execution_balance_usd,
+    )
+    existing_futures_collateral_candidate_balance_usd = sum(
+        item.free_balance_usd
+        for item in futures_funding_assets
+        if item.asset != "USDT" and item.margin_available and item.free_balance_usd > 0.0
+    )
+    existing_futures_manual_handling_balance_usd = sum(
+        item.free_balance_usd
+        for item in futures_funding_assets
+        if item.asset != "USDT" and not item.margin_available and item.free_balance_usd > 0.0
+    )
+    futures_collateral_candidate_balance_usd = existing_futures_collateral_candidate_balance_usd
+    futures_manual_handling_balance_usd = existing_futures_manual_handling_balance_usd
+    futures_transferable_execution_balance_usd = 0.0
     for funding_asset in funding_assets_by_name.values():
         if not _exchange_supports_internal_transfer(
             exchange_id=exchange_id,
@@ -653,11 +687,24 @@ def build_capital_adequacy_report(
             asset=funding_asset.asset,
         ):
             continue
-        note = (
-            f"Spot {funding_asset.asset} can be moved into futures."
-            if funding_asset.asset == "USDT"
-            else f"Spot {funding_asset.asset} can be transferred into futures, but non-USDT assets may still need manual collateral handling before new futures execution."
-        )
+        capacity_effect = "direct_execution"
+        auto_transfer_supported = True
+        note = f"Spot {funding_asset.asset} can be moved into futures as immediate execution balance."
+        existing_futures_asset = futures_funding_assets_by_name.get(funding_asset.asset)
+        if funding_asset.asset != "USDT":
+            auto_transfer_supported = False
+            if existing_futures_asset is not None and existing_futures_asset.margin_available:
+                capacity_effect = "collateral_candidate"
+                note = (
+                    f"Spot {funding_asset.asset} can be transferred into futures and is recognized as "
+                    "collateral in the current account mode, but it does not become immediate execution cash."
+                )
+            else:
+                capacity_effect = "manual_conversion"
+                note = (
+                    f"Spot {funding_asset.asset} can be transferred into futures, but non-USDT assets still "
+                    "require conversion or manual collateral handling before new futures execution."
+                )
         capital_transfer_routes.append(
             CapitalTransferRoute(
                 source_market="spot",
@@ -666,10 +713,18 @@ def build_capital_adequacy_report(
                 source_free_amount=round(funding_asset.free, 8),
                 transferable_usd=round(funding_asset.free_balance_usd, 6),
                 route_type="wallet_transfer",
-                requires_manual_transfer=funding_asset.asset != "USDT",
+                requires_manual_transfer=capacity_effect != "direct_execution",
+                capacity_effect=capacity_effect,
+                auto_transfer_supported=auto_transfer_supported,
                 note=note,
             )
         )
+        if capacity_effect == "direct_execution":
+            futures_transferable_execution_balance_usd += funding_asset.free_balance_usd
+        elif capacity_effect == "collateral_candidate":
+            futures_collateral_candidate_balance_usd += funding_asset.free_balance_usd
+        else:
+            futures_manual_handling_balance_usd += funding_asset.free_balance_usd
     if (
         "USDT" not in funding_assets_by_name
         and spot_available_balance_usd > 0.0
@@ -689,9 +744,12 @@ def build_capital_adequacy_report(
                 transferable_usd=round(spot_available_balance_usd, 6),
                 route_type="wallet_transfer",
                 requires_manual_transfer=False,
-                note="Spot USDT can be moved into futures.",
+                capacity_effect="direct_execution",
+                auto_transfer_supported=True,
+                note="Spot USDT can be moved into futures as immediate execution balance.",
             )
         )
+        futures_transferable_execution_balance_usd += spot_available_balance_usd
     for funding_asset in futures_funding_assets_by_name.values():
         if not _exchange_supports_internal_transfer(
             exchange_id=exchange_id,
@@ -714,6 +772,8 @@ def build_capital_adequacy_report(
                 transferable_usd=round(funding_asset.free_balance_usd, 6),
                 route_type="wallet_transfer",
                 requires_manual_transfer=False,
+                capacity_effect="spot_execution",
+                auto_transfer_supported=True,
                 note=note,
             )
         )
@@ -736,6 +796,8 @@ def build_capital_adequacy_report(
                 transferable_usd=round(futures_available_balance_usd, 6),
                 route_type="wallet_transfer",
                 requires_manual_transfer=False,
+                capacity_effect="spot_execution",
+                auto_transfer_supported=True,
                 note="Futures available USDT can be transferred back to spot for spot execution funding.",
             )
         )
@@ -763,6 +825,12 @@ def build_capital_adequacy_report(
     futures_recognized = (
         futures_available_balance_usd if futures_recognized_balance_usd is None else futures_recognized_balance_usd
     )
+    futures_total_reusable_balance_usd = (
+        futures_recognized
+        + futures_transferable_execution_balance_usd
+        + max(futures_collateral_candidate_balance_usd - existing_futures_collateral_candidate_balance_usd, 0.0)
+        + max(futures_manual_handling_balance_usd - existing_futures_manual_handling_balance_usd, 0.0)
+    )
     if spot_funding_assets:
         can_trade_spot_any = any(
             route.target_symbol == requirement.symbol and route.free_balance_usd >= requirement.buffered_min_equity_usd
@@ -772,7 +840,7 @@ def build_capital_adequacy_report(
     else:
         can_trade_spot_any = any(spot_recognized >= item.buffered_min_equity_usd for item in spot_requirements)
     can_trade_futures_any = any(
-        futures_recognized >= item.buffered_min_equity_usd for item in futures_requirements
+        futures_total_reusable_balance_usd >= item.buffered_min_equity_usd for item in futures_requirements
     )
     can_trade_any = can_trade_spot_any or can_trade_futures_any
     note = (
@@ -799,11 +867,21 @@ def build_capital_adequacy_report(
         capital_transfer_routes=tuple(
             sorted(
                 capital_transfer_routes,
-                key=lambda item: (item.source_market, item.target_market, -item.transferable_usd),
+                key=lambda item: (
+                    item.source_market,
+                    item.target_market,
+                    _transfer_capacity_effect_priority(item.capacity_effect),
+                    -item.transferable_usd,
+                ),
             )
         ),
         futures_available_balance_usd=round(futures_available_balance_usd, 6),
+        futures_execution_balance_usd=round(futures_execution_balance, 6),
         futures_recognized_balance_usd=round(futures_recognized, 6),
+        futures_transferable_execution_balance_usd=round(futures_transferable_execution_balance_usd, 6),
+        futures_collateral_candidate_balance_usd=round(futures_collateral_candidate_balance_usd, 6),
+        futures_manual_handling_balance_usd=round(futures_manual_handling_balance_usd, 6),
+        futures_total_reusable_balance_usd=round(futures_total_reusable_balance_usd, 6),
         minimum_operational_balance_usd=round(minimum_operational, 6),
         minimum_full_universe_balance_usd=round(minimum_full_universe, 6),
         recommended_balance_usd=recommended,
