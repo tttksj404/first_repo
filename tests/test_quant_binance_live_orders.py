@@ -71,6 +71,7 @@ class FakeLiveOrderClient:
         self.calls = 0
         self.leverage_calls: list[tuple[str, int]] = []
         self.protection_calls: list[tuple[str, dict[str, object]]] = []
+        self.max_openable_quantity: float | None = None
 
     def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
         self.leverage_calls.append((symbol, leverage))
@@ -87,6 +88,23 @@ class FakeLiveOrderClient:
     def place_spot_plan_order(self, *, order_params):  # type: ignore[no-untyped-def]
         self.protection_calls.append(("spot", order_params))
         return {"status": "SUCCESS", "orderId": "spot-plan"}
+
+    def get_max_openable_quantity(self, *, symbol, pos_side, order_type):  # type: ignore[no-untyped-def]
+        return self.max_openable_quantity
+
+    def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
+        return {
+            "symbols": [
+                {
+                    "symbol": "BTCUSDT",
+                    "raw": {
+                        "minTradeNum": "0.001",
+                        "sizeMultiplier": "0.001",
+                        "volumePlace": "3",
+                    },
+                }
+            ]
+        }
 
 
 class RaisingLiveOrderClient(FakeLiveOrderClient):
@@ -256,6 +274,45 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         adapter.execute_decision(decision=decision, reference_price=50000.0)
 
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 4)])
+
+    def test_live_order_adapter_rejects_bitget_futures_order_below_min_quantity_after_max_open_cap(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        decision = DecisionIntent(
+            decision_id="d-min-qty",
+            decision_hash="hash-min-qty",
+            snapshot_id="s-min-qty",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 1, 0, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.85,
+            volume_confirmation=0.78,
+            liquidity_score=0.88,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=84.0,
+            gross_expected_edge_bps=26.0,
+            net_expected_edge_bps=16.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=200.0,
+            stop_distance_bps=45.0,
+        )
+        live_client = FakeLiveOrderClient()
+        live_client.exchange_id = "bitget"
+        live_client.max_openable_quantity = 0.000001
+        adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        built = adapter.build_order_params(decision=decision, reference_price=50000.0)
+
+        self.assertIsNone(built)
+        rejection = adapter.pop_last_preflight_rejection()
+        self.assertIsNotNone(rejection)
+        assert rejection is not None
+        self.assertEqual(rejection["reason"], "BITGET_MAX_OPEN_BELOW_MIN_QTY")
 
     def test_live_order_adapter_uses_quote_order_qty_for_spot_market_buy(self) -> None:
         from quant_binance.models import DecisionIntent
@@ -838,6 +895,98 @@ class QuantBinanceCrossQuoteDirectPairTests(unittest.TestCase):
         _, params = built
         self.assertEqual(params["symbol"], "ETHBTC")
         self.assertEqual(params["quantity"], "0.05000000")
+
+    def test_session_attempts_wallet_transfer_for_underfunded_futures_entry(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        class TransferCapableRestClient:
+            def __init__(self) -> None:
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def transfer_wallet_balance(self, *, asset, amount, source_market, target_market):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append({
+                    "asset": asset,
+                    "amount": amount,
+                    "source_market": source_market,
+                    "target_market": target_market,
+                })
+                return {"status": "success"}
+
+            def get_account(self, *, market):  # type: ignore[no-untyped-def]
+                return {}
+
+            def get_open_orders(self, *, market, symbol=None):  # type: ignore[no-untyped-def]
+                return {}
+
+            def build_capital_report(self):  # type: ignore[no-untyped-def]
+                raise NotImplementedError
+
+            def get_positions(self):  # type: ignore[no-untyped-def]
+                return {}
+
+            def cancel_order(self, *, market, symbol, order_id):  # type: ignore[no-untyped-def]
+                return {}
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        rest_client = TransferCapableRestClient()
+        session = LivePaperSession(runtime=runtime, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0, rest_client=rest_client)  # type: ignore[arg-type]
+        session.capital_report = {
+            "futures_available_balance_usd": 0.0,
+            "futures_execution_balance_usd": 0.0,
+            "spot_available_balance_usd": 0.0,
+            "max_spot_to_futures_transfer_usd": 25.0,
+            "capital_transfer_routes": [
+                {
+                    "source_market": "spot",
+                    "target_market": "futures",
+                    "asset": "USDT",
+                    "transferable_usd": 25.0,
+                }
+            ],
+        }
+        session._refresh_account_state = lambda evaluate_live_positions=False: None  # type: ignore[method-assign]
+        decision = DecisionIntent(
+            decision_id="d-transfer-auto",
+            decision_hash="hash-transfer-auto",
+            snapshot_id="s-transfer-auto",
+            config_version="2026-03-16.v1",
+            timestamp=datetime(2026, 3, 16, 0, 15, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+            rejection_reasons=("INSUFFICIENT_EXECUTION_BALANCE", "TRANSFER_REQUIRED_SPOT_TO_FUTURES"),
+        )
+
+        transferred = session._attempt_wallet_transfer_for_decision(
+            decision=decision,
+            timestamp=datetime(2026, 3, 16, 0, 16, tzinfo=timezone.utc),
+        )
+
+        self.assertTrue(transferred)
+        self.assertEqual(len(rest_client.transfer_calls), 1)
+        self.assertEqual(rest_client.transfer_calls[0]["asset"], "USDT")
+        self.assertEqual(rest_client.transfer_calls[0]["source_market"], "spot")
+        self.assertEqual(rest_client.transfer_calls[0]["target_market"], "futures")
+        self.assertGreater(float(rest_client.transfer_calls[0]["amount"]), 0.0)
 
     def test_session_rejects_underfunded_futures_entry_with_transfer_hint(self) -> None:
         from quant_binance.models import DecisionIntent

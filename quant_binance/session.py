@@ -42,6 +42,27 @@ class SupportsAccountSync(Protocol):
     def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, Any]:
         ...
 
+    def transfer_asset(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str,
+        amount: float,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        ...
+
+    def transfer_wallet_balance(
+        self,
+        *,
+        asset: str,
+        amount: float,
+        source_market: str,
+        target_market: str,
+    ) -> dict[str, Any]:
+        ...
+
 
 @dataclass
 class PaperPosition:
@@ -178,6 +199,7 @@ class LivePaperSession:
     futures_missing_in_paper_counts: dict[str, int] = field(default_factory=dict)
     futures_missing_on_exchange_counts: dict[str, int] = field(default_factory=dict)
     futures_reallocation_cooldown_until: datetime | None = None
+    wallet_transfer_cooldowns: dict[str, datetime] = field(default_factory=dict)
     self_healing: RuntimeSelfHealing = field(default_factory=RuntimeSelfHealing)
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
@@ -506,6 +528,7 @@ class LivePaperSession:
         decision: DecisionIntent,
         *,
         reference_price: float | None = None,
+        extra_spot_available_balance_usd: float = 0.0,
         extra_futures_execution_balance_usd: float = 0.0,
     ) -> DecisionIntent:
         if not self.capital_report:
@@ -538,6 +561,8 @@ class LivePaperSession:
             selected_route = self._select_spot_execution_route(decision, reserve_fraction=reserve_fraction)
             if selected_route is not None:
                 available = float(selected_route.get("free_balance_usd", 0.0))
+                if str(selected_route.get("funding_asset", "")).upper() == "USDT":
+                    available += max(extra_spot_available_balance_usd, 0.0)
                 min_notional = float(selected_route.get("min_notional_usd", min_notional))
                 min_quantity = float(selected_route.get("min_quantity", min_quantity))
                 decision = replace(
@@ -549,7 +574,10 @@ class LivePaperSession:
                     spot_quote_asset_usd_price=float(selected_route.get("quote_asset_usd_price", 0.0) or 0.0),
                 )
             else:
-                available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
+                available = float(self.capital_report.get("spot_available_balance_usd", 0.0)) + max(
+                    extra_spot_available_balance_usd,
+                    0.0,
+                )
                 decision = replace(
                     decision,
                     execution_symbol=decision.symbol,
@@ -721,6 +749,162 @@ class LivePaperSession:
                     rejection_reasons=tuple(sorted(set(candidate.rejection_reasons + ("MIN_ORDER_QUANTITY",)))),
                 )
         return candidate
+
+    def _transfer_route_for_markets(self, *, source_market: str, target_market: str) -> dict[str, Any] | None:
+        raw_routes = self.capital_report.get("capital_transfer_routes", [])
+        if not isinstance(raw_routes, list):
+            return None
+        for item in raw_routes:
+            if not isinstance(item, dict):
+                continue
+            if (
+                str(item.get("source_market", "")) == source_market
+                and str(item.get("target_market", "")) == target_market
+                and str(item.get("asset", "")).upper() == "USDT"
+            ):
+                return item
+        return None
+
+    def _cap_live_order_decision_with_transfer_buffer(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        target_market: str,
+        extra_balance_usd: float,
+    ) -> DecisionIntent:
+        if target_market == "futures":
+            return self._cap_live_order_decision(
+                decision,
+                reference_price=reference_price,
+                extra_futures_execution_balance_usd=extra_balance_usd,
+            )
+        return self._cap_live_order_decision(
+            decision,
+            reference_price=reference_price,
+            extra_spot_available_balance_usd=extra_balance_usd,
+        )
+
+    def _minimal_transfer_amount_for_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        source_market: str,
+        target_market: str,
+        max_transfer_usd: float,
+    ) -> float:
+        if max_transfer_usd <= 0.0:
+            return 0.0
+        if source_market == "futures" and target_market == "spot":
+            selected_route = self._select_spot_execution_route(decision, reserve_fraction=self._cash_reserve_fraction())
+            if selected_route is not None and str(selected_route.get("funding_asset", "")).upper() != "USDT":
+                return 0.0
+            if selected_route is None and not decision.symbol.endswith("USDT"):
+                return 0.0
+        fully_funded = self._cap_live_order_decision_with_transfer_buffer(
+            decision=decision,
+            reference_price=reference_price,
+            target_market=target_market,
+            extra_balance_usd=max_transfer_usd,
+        )
+        if fully_funded.final_mode != decision.final_mode or fully_funded.order_intent_notional_usd <= 0.0:
+            return 0.0
+        low = 0.0
+        high = max_transfer_usd
+        for _ in range(18):
+            midpoint = (low + high) / 2.0
+            candidate = self._cap_live_order_decision_with_transfer_buffer(
+                decision=decision,
+                reference_price=reference_price,
+                target_market=target_market,
+                extra_balance_usd=midpoint,
+            )
+            if candidate.final_mode == decision.final_mode and candidate.order_intent_notional_usd > 0.0:
+                high = midpoint
+            else:
+                low = midpoint
+        return round(min(max_transfer_usd, high + 0.01), 8)
+
+    def _prepare_live_execution_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+    ) -> DecisionIntent:
+        executable = self._cap_live_order_decision(decision, reference_price=reference_price)
+        if self.rest_client is None or not hasattr(self.rest_client, "transfer_asset"):
+            return executable
+        transfer_reason = None
+        source_market = ""
+        target_market = ""
+        if "TRANSFER_REQUIRED_SPOT_TO_FUTURES" in executable.rejection_reasons:
+            transfer_reason = "auto_transfer_spot_to_futures"
+            source_market = "spot"
+            target_market = "futures"
+        elif "TRANSFER_REQUIRED_FUTURES_TO_SPOT" in executable.rejection_reasons:
+            transfer_reason = "auto_transfer_futures_to_spot"
+            source_market = "futures"
+            target_market = "spot"
+        if transfer_reason is None:
+            return executable
+        route = self._transfer_route_for_markets(source_market=source_market, target_market=target_market)
+        if route is None:
+            return executable
+        amount = self._minimal_transfer_amount_for_decision(
+            decision=decision,
+            reference_price=reference_price,
+            source_market=source_market,
+            target_market=target_market,
+            max_transfer_usd=float(route.get("transferable_usd", 0.0) or 0.0),
+        )
+        if amount <= 0.0:
+            return executable
+        client_oid = f"{decision.decision_id}:{source_market}:{target_market}"
+        try:
+            transfer_response = self.rest_client.transfer_asset(
+                source_market=source_market,
+                target_market=target_market,
+                asset="USDT",
+                amount=amount,
+                client_oid=client_oid,
+            )
+        except Exception as exc:
+            if self.log_store is not None:
+                self.log_store.append(
+                    "capital_transfers",
+                    {
+                        "timestamp": decision.timestamp,
+                        "symbol": decision.symbol,
+                        "status": "failed",
+                        "source_market": source_market,
+                        "target_market": target_market,
+                        "amount_usd": amount,
+                        "error": repr(exc),
+                    },
+                )
+            return executable
+        if self.log_store is not None:
+            self.log_store.append(
+                "capital_transfers",
+                {
+                    "timestamp": decision.timestamp,
+                    "symbol": decision.symbol,
+                    "status": "submitted",
+                    "source_market": source_market,
+                    "target_market": target_market,
+                    "amount_usd": amount,
+                    "client_oid": client_oid,
+                    "response": transfer_response,
+                },
+            )
+        self._refresh_account_state_after_live_order_activity(
+            symbol=decision.symbol,
+            timestamp=decision.timestamp,
+            stage="capital_transfer",
+            reason=transfer_reason,
+        )
+        return self._cap_live_order_decision(decision, reference_price=reference_price)
 
     def _normalize_live_position_side(self, position: dict[str, Any]) -> str:
         hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()
@@ -1279,6 +1463,136 @@ class LivePaperSession:
         current = self.manual_symbol_cooldowns.get(symbol)
         if current is None or until > current:
             self.manual_symbol_cooldowns[symbol] = until
+
+    def _wallet_transfer_cooldown_key(self, *, source_market: str, target_market: str, asset: str) -> str:
+        return f"{source_market}->{target_market}:{asset.upper()}"
+
+    def _wallet_transfer_cooldown_active(self, *, source_market: str, target_market: str, asset: str, timestamp: datetime) -> bool:
+        key = self._wallet_transfer_cooldown_key(source_market=source_market, target_market=target_market, asset=asset)
+        until = self.wallet_transfer_cooldowns.get(key)
+        return until is not None and timestamp < until
+
+    def _set_wallet_transfer_cooldown(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str,
+        timestamp: datetime,
+        seconds: int = 300,
+    ) -> None:
+        key = self._wallet_transfer_cooldown_key(source_market=source_market, target_market=target_market, asset=asset)
+        self.wallet_transfer_cooldowns[key] = timestamp + timedelta(seconds=max(seconds, 60))
+
+    def _attempt_wallet_transfer_for_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        timestamp: datetime,
+    ) -> bool:
+        if self.rest_client is None:
+            return False
+        transfer_method = getattr(self.rest_client, "transfer_wallet_balance", None)
+        if not callable(transfer_method):
+            return False
+        if "INSUFFICIENT_EXECUTION_BALANCE" not in decision.rejection_reasons:
+            return False
+        if decision.final_mode not in {"spot", "futures"}:
+            return False
+        source_market = "spot" if decision.final_mode == "futures" else "futures"
+        target_market = decision.final_mode
+        routes = self.capital_report.get("capital_transfer_routes", []) if isinstance(self.capital_report, dict) else []
+        selected_route = None
+        for route in routes:
+            if str(route.get("source_market", "")).lower() != source_market:
+                continue
+            if str(route.get("target_market", "")).lower() != target_market:
+                continue
+            if str(route.get("asset", "")).upper() != "USDT":
+                continue
+            if float(route.get("transferable_usd", 0.0) or 0.0) <= 0.0:
+                continue
+            selected_route = route
+            break
+        if selected_route is None:
+            return False
+        asset = str(selected_route.get("asset", "USDT")).upper()
+        if self._wallet_transfer_cooldown_active(source_market=source_market, target_market=target_market, asset=asset, timestamp=timestamp):
+            return False
+        reserve_fraction = self._cash_reserve_fraction()
+        safe_reserve_denominator = max(1.0 - reserve_fraction, 0.05)
+        if decision.final_mode == "futures":
+            available = float(
+                self.capital_report.get(
+                    "futures_execution_balance_usd",
+                    self.capital_report.get("futures_available_balance_usd", 0.0),
+                )
+            )
+            leverage = max(
+                select_futures_leverage(
+                    predictability_score=decision.predictability_score,
+                    trend_strength=decision.trend_strength,
+                    volume_confirmation=decision.volume_confirmation,
+                    liquidity_score=decision.liquidity_score,
+                    volatility_penalty=decision.volatility_penalty,
+                    overheat_penalty=decision.overheat_penalty,
+                    net_expected_edge_bps=decision.net_expected_edge_bps,
+                    estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+                    settings=self.runtime.paper_service.settings,
+                ),
+                1,
+            )
+            required_available = decision.order_intent_notional_usd / (float(leverage) * safe_reserve_denominator)
+        else:
+            selected_route_for_spot = self._select_spot_execution_route(decision, reserve_fraction=reserve_fraction)
+            available = float(selected_route_for_spot.get("free_balance_usd", 0.0)) if selected_route_for_spot is not None else float(self.capital_report.get("spot_available_balance_usd", 0.0))
+            required_available = decision.order_intent_notional_usd / safe_reserve_denominator
+        deficit_usd = max(required_available - available, 0.0)
+        transferable_usd = float(selected_route.get("transferable_usd", 0.0) or 0.0)
+        if deficit_usd <= 0.0 or transferable_usd <= 0.0:
+            return False
+        amount = min(transferable_usd, deficit_usd)
+        if amount <= 0.0:
+            return False
+        try:
+            result = transfer_method(
+                asset=asset,
+                amount=round(amount, 8),
+                source_market=source_market,
+                target_market=target_market,
+            )
+        except Exception as exc:
+            self._set_wallet_transfer_cooldown(source_market=source_market, target_market=target_market, asset=asset, timestamp=timestamp, seconds=300)
+            if self.log_store is not None:
+                self.log_store.append(
+                    "wallet_transfers",
+                    {
+                        "timestamp": timestamp,
+                        "asset": asset,
+                        "source_market": source_market,
+                        "target_market": target_market,
+                        "amount": round(amount, 8),
+                        "status": "error",
+                        "error": repr(exc),
+                    },
+                )
+            return False
+        self._set_wallet_transfer_cooldown(source_market=source_market, target_market=target_market, asset=asset, timestamp=timestamp, seconds=300)
+        if self.log_store is not None:
+            self.log_store.append(
+                "wallet_transfers",
+                {
+                    "timestamp": timestamp,
+                    "asset": asset,
+                    "source_market": source_market,
+                    "target_market": target_market,
+                    "amount": round(amount, 8),
+                    "status": "submitted",
+                    "response": result,
+                },
+            )
+        self._refresh_account_state(evaluate_live_positions=False)
+        return True
 
     def _futures_reallocation_cooldown_window(self) -> timedelta:
         seconds = max(60, self.runtime.decision_interval_minutes * 120)
@@ -3746,6 +4060,8 @@ class LivePaperSession:
             and self._market_capital_allowed(managed_decision)
         ):
             executable_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
+            if self._attempt_wallet_transfer_for_decision(decision=executable_decision, timestamp=timestamp):
+                executable_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if executable_decision.final_mode not in {"spot", "futures"} or executable_decision.order_intent_notional_usd <= 0:
