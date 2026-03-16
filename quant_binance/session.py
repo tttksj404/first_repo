@@ -99,6 +99,20 @@ class PaperPosition:
     exchange_synced: bool = False
     confirmation_pending: bool = False
     confirmation_pending_since: datetime | None = None
+    origin: str = "strategy"
+    adoption_source: str = ""
+    adopted_at: datetime | None = None
+    adoption_grace_until: datetime | None = None
+
+    def is_adopted(self) -> bool:
+        origin = self.origin.strip().lower()
+        return origin == "adopted" or self.adopted_at is not None or bool(self.adoption_source)
+
+    def adoption_grace_active(self, *, now: datetime | None = None) -> bool:
+        if not self.is_adopted() or self.adoption_grace_until is None:
+            return False
+        current = now or datetime.now(tz=timezone.utc)
+        return current < self.adoption_grace_until
 
     def unrealized_pnl_usd_estimate(self) -> float:
         if self.side == "short":
@@ -147,6 +161,11 @@ class PaperPosition:
             "exchange_synced": self.exchange_synced,
             "confirmation_pending": self.confirmation_pending,
             "confirmation_pending_since": self.confirmation_pending_since,
+            "origin": self.origin,
+            "adoption_source": self.adoption_source,
+            "adopted_at": self.adopted_at,
+            "adoption_grace_until": self.adoption_grace_until,
+            "adoption_grace_active": self.adoption_grace_active(),
         }
 
 
@@ -414,8 +433,12 @@ class LivePaperSession:
                 "open_futures_position_count": len(open_futures_positions),
                 "paper_open_futures_position_count": summary["paper_open_futures_position_count"],
                 "paper_open_futures_positions": summary["paper_open_futures_positions"],
+                "adopted_futures_position_count": summary["adopted_futures_position_count"],
+                "adopted_futures_positions": summary["adopted_futures_positions"],
                 "exchange_live_futures_position_count": summary["exchange_live_futures_position_count"],
                 "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
+                "pending_external_futures_position_count": summary["pending_external_futures_position_count"],
+                "pending_external_futures_positions": summary["pending_external_futures_positions"],
                 "futures_position_mismatch": summary["futures_position_mismatch"],
                 "futures_position_mismatch_details": summary["futures_position_mismatch_details"],
                 "futures_missing_in_paper_counts": dict(sorted(self.futures_missing_in_paper_counts.items())),
@@ -441,6 +464,10 @@ class LivePaperSession:
                 "tested_order_count": len(self.tested_orders),
                 "exchange_live_futures_position_count": summary["exchange_live_futures_position_count"],
                 "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
+                "adopted_futures_position_count": summary["adopted_futures_position_count"],
+                "adopted_futures_positions": summary["adopted_futures_positions"],
+                "pending_external_futures_position_count": summary["pending_external_futures_position_count"],
+                "pending_external_futures_positions": summary["pending_external_futures_positions"],
                 "capital_report": self.capital_report,
                 "self_healing": self_healing_status,
                 "macro_runtime": macro_runtime,
@@ -1389,6 +1416,8 @@ class LivePaperSession:
             "partial_exit": quantity_closed < position.quantity_opened,
             "loss_combo_key": loss_combo_key,
             "loss_combo_time_bucket_utc": loss_combo_bucket_start.strftime("%H:%M"),
+            "position_origin": position.origin,
+            "position_adoption_source": position.adoption_source,
         }
         self.closed_trades.append(trade)
         self._update_loss_combo_downgrade_state(
@@ -1924,6 +1953,22 @@ class LivePaperSession:
                 return max(threshold, major_threshold)
         return threshold
 
+    def _manual_position_adoption_grace_until(self, *, adopted_at: datetime) -> datetime | None:
+        minutes = max(
+            int(
+                getattr(
+                    self.runtime.paper_service.settings.live_position_risk,
+                    "manual_position_adoption_grace_minutes",
+                    30,
+                )
+                or 0
+            ),
+            0,
+        )
+        if minutes <= 0:
+            return adopted_at
+        return adopted_at + timedelta(minutes=minutes)
+
     def _update_consecutive_mismatch_counts(self, *, counts: dict[str, int], active_symbols: set[str]) -> None:
         for symbol in list(counts):
             if symbol not in active_symbols:
@@ -2073,6 +2118,21 @@ class LivePaperSession:
             return None
         return position
 
+    def _live_position_management_context(
+        self,
+        *,
+        position: dict[str, Any],
+        now: datetime,
+    ) -> tuple[PaperPosition | None, str]:
+        paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
+        if paper_position is None:
+            return None, "pending_external_adoption"
+        if paper_position.is_adopted():
+            if paper_position.adoption_grace_active(now=now):
+                return paper_position, "adopted_grace"
+            return paper_position, "adopted"
+        return paper_position, "strategy"
+
     def _live_turnaround_grace_applies(
         self,
         *,
@@ -2175,6 +2235,7 @@ class LivePaperSession:
         side = self._normalize_live_position_side(position)
         leverage = max(int(float(position.get("leverage") or 1.0)), 1)
         entry_time = self._parse_live_position_timestamp(position) or datetime.now(tz=timezone.utc)
+        adopted_at = datetime.now(tz=timezone.utc)
         best_price = max(entry_price, current_price)
         worst_price = min(entry_price, current_price)
         return PaperPosition(
@@ -2200,6 +2261,10 @@ class LivePaperSession:
             latest_net_expected_edge_bps=0.0,
             latest_estimated_round_trip_cost_bps=0.0,
             exchange_synced=True,
+            origin="adopted",
+            adoption_source="manual_exchange_external",
+            adopted_at=adopted_at,
+            adoption_grace_until=self._manual_position_adoption_grace_until(adopted_at=adopted_at),
         )
 
     def _reserve_capacity_for_reconciled_position(self, position: PaperPosition) -> None:
@@ -2207,6 +2272,35 @@ class LivePaperSession:
             0.0,
             self.remaining_portfolio_capacity_usd - position.current_notional_usd_estimate(),
         )
+
+    @staticmethod
+    def _runtime_payload_has_explicit_adoption_metadata(payload: dict[str, Any]) -> bool:
+        return (
+            str(payload.get("origin") or "").strip().lower() == "adopted"
+            or bool(str(payload.get("adoption_source") or "").strip())
+            or payload.get("adopted_at") is not None
+            or payload.get("adoption_grace_until") is not None
+        )
+
+    @staticmethod
+    def _runtime_payload_uses_legacy_exchange_placeholder_shape(payload: dict[str, Any]) -> bool:
+        return (
+            float(payload.get("stop_distance_bps") or 0.0) <= 0.0
+            and float(payload.get("entry_predictability_score") or 0.0) == 0.0
+            and float(payload.get("entry_liquidity_score") or 0.0) == 0.0
+            and float(payload.get("entry_net_expected_edge_bps") or 0.0) == 0.0
+            and float(payload.get("entry_estimated_round_trip_cost_bps") or 0.0) == 0.0
+        )
+
+    @classmethod
+    def _runtime_payload_uses_legacy_adopted_shape(cls, payload: dict[str, Any], *, exchange_synced: bool) -> bool:
+        if cls._runtime_payload_has_explicit_adoption_metadata(payload):
+            return False
+        if not exchange_synced or str(payload.get("origin") or "").strip():
+            return False
+        if payload.get("latest_decision_time") is not None:
+            return False
+        return cls._runtime_payload_uses_legacy_exchange_placeholder_shape(payload)
 
     def _paper_position_from_runtime_payload(self, payload: dict[str, Any]) -> PaperPosition | None:
         symbol = str(payload.get("symbol", ""))
@@ -2221,14 +2315,24 @@ class LivePaperSession:
             return None
         quantity_opened = max(float(payload.get("quantity_opened") or quantity_remaining), quantity_remaining)
         exchange_synced = bool(payload.get("exchange_synced", False))
-        if not exchange_synced:
-            exchange_synced = (
-                float(payload.get("stop_distance_bps") or 0.0) <= 0.0
-                and float(payload.get("entry_predictability_score") or 0.0) == 0.0
-                and float(payload.get("entry_liquidity_score") or 0.0) == 0.0
-                and float(payload.get("entry_net_expected_edge_bps") or 0.0) == 0.0
-                and float(payload.get("entry_estimated_round_trip_cost_bps") or 0.0) == 0.0
-            )
+        legacy_exchange_placeholder = self._runtime_payload_uses_legacy_exchange_placeholder_shape(payload)
+        if not exchange_synced and legacy_exchange_placeholder:
+            exchange_synced = True
+        raw_origin = str(payload.get("origin") or "").strip().lower()
+        legacy_adopted_shape = self._runtime_payload_uses_legacy_adopted_shape(
+            payload,
+            exchange_synced=exchange_synced,
+        )
+        origin = raw_origin or ("adopted" if legacy_adopted_shape else "strategy")
+        adoption_source = str(payload.get("adoption_source") or "").strip()
+        if origin == "adopted" and not adoption_source and raw_origin == "":
+            adoption_source = "runtime_restore_legacy"
+        adopted_at = self._parse_runtime_datetime(payload.get("adopted_at"))
+        if origin == "adopted" and adopted_at is None:
+            adopted_at = datetime.now(tz=timezone.utc)
+        adoption_grace_until = self._parse_runtime_datetime(payload.get("adoption_grace_until"))
+        if origin == "adopted" and adoption_grace_until is None and adopted_at is not None:
+            adoption_grace_until = self._manual_position_adoption_grace_until(adopted_at=adopted_at)
         r_multiple_partial_take_profit_taken = bool(payload.get("r_multiple_partial_take_profit_taken", False))
         profit_protection_retrace_taken = bool(payload.get("profit_protection_retrace_taken", False))
         proactive_take_profit_thresholds_hit = tuple(
@@ -2289,6 +2393,10 @@ class LivePaperSession:
             exchange_synced=exchange_synced,
             confirmation_pending=bool(payload.get("confirmation_pending", False)),
             confirmation_pending_since=self._parse_runtime_datetime(payload.get("confirmation_pending_since")),
+            origin=origin,
+            adoption_source=adoption_source,
+            adopted_at=adopted_at,
+            adoption_grace_until=adoption_grace_until,
         )
 
     def restore_futures_state_from_runtime(
@@ -2361,13 +2469,17 @@ class LivePaperSession:
                 {
                     "timestamp": datetime.now(tz=timezone.utc),
                     "symbol": paper_position.symbol,
-                    "action": "SYNC_MISSING_IN_PAPER",
+                    "action": "ADOPT_EXTERNAL_MANUAL_POSITION",
                     "persisted_cycles": persisted_cycles,
                     "side": paper_position.side,
                     "entry_price": paper_position.entry_price,
                     "current_price": paper_position.current_price,
                     "quantity_remaining": paper_position.quantity_remaining,
                     "entry_planned_leverage": paper_position.entry_planned_leverage,
+                    "origin": paper_position.origin,
+                    "adoption_source": paper_position.adoption_source,
+                    "adopted_at": paper_position.adopted_at,
+                    "adoption_grace_until": paper_position.adoption_grace_until,
                 },
             )
 
@@ -2618,10 +2730,13 @@ class LivePaperSession:
         return not self.runtime.paper_service.settings.live_position_risk.disable_standard_stop_loss_exits
 
     def _select_live_portfolio_profit_lock_target(self) -> dict[str, Any] | None:
+        now = datetime.now(tz=timezone.utc)
         profitable_positions = [
             position
             for position in self.live_positions_snapshot
-            if self._position_unrealized_pnl_usd(position) > 0.0 and self._live_position_quantity(position) > 0.0
+            if self._position_unrealized_pnl_usd(position) > 0.0
+            and self._live_position_quantity(position) > 0.0
+            and self._live_position_management_context(position=position, now=now)[1] == "strategy"
         ]
         if not profitable_positions:
             return None
@@ -2907,6 +3022,11 @@ class LivePaperSession:
             return
         proactive_fraction = self._futures_proactive_take_profit_fraction()
         now = datetime.now(tz=timezone.utc)
+        strategy_managed_live_positions = [
+            position
+            for position in self.live_positions_snapshot
+            if self._live_position_management_context(position=position, now=now)[1] == "strategy"
+        ]
         portfolio_unrealized_ratio = self._live_portfolio_unrealized_ratio()
         portfolio_profit_ratio = self._live_portfolio_profit_ratio()
         self.live_portfolio_peak_unrealized_ratio = max(
@@ -2920,14 +3040,16 @@ class LivePaperSession:
             cfg.portfolio_full_exit_only
             and cfg.portfolio_full_exit_profit_ratio > 0.0
             and portfolio_profit_ratio >= cfg.portfolio_full_exit_profit_ratio
+            and strategy_managed_live_positions
             and not self.live_portfolio_full_exit_taken
         ):
             self.live_portfolio_full_exit_taken = True
-            for position in list(self.live_positions_snapshot):
+            for position in list(strategy_managed_live_positions):
                 self._close_live_position(position=position, reason="LIVE_PORTFOLIO_FULL_EXIT", fraction=1.0)
             return
         for position in self.live_positions_snapshot:
             symbol = str(position.get("symbol", ""))
+            _, management_mode = self._live_position_management_context(position=position, now=now)
             in_core_universe = symbol in set(self.runtime.paper_service.settings.universe)
             is_major_symbol = self._is_major_futures_symbol(symbol)
             hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()
@@ -2951,6 +3073,8 @@ class LivePaperSession:
                 continue
             if margin_ratio >= cfg.margin_ratio_emergency:
                 self._close_live_position(position=position, reason="LIVE_POSITION_MARGIN_RISK")
+                continue
+            if management_mode != "strategy":
                 continue
             if not in_core_universe:
                 if self._standard_stop_loss_exits_enabled() and roe <= cfg.non_core_soft_stop_roe_percent:
@@ -3107,6 +3231,19 @@ class LivePaperSession:
 
     def _current_unrealized_total(self) -> float:
         return round(sum(position.unrealized_pnl_usd_estimate() for position in self.paper_positions.values()), 6)
+
+    def _refresh_observed_paper_position(
+        self,
+        *,
+        position: PaperPosition,
+        price: float,
+    ) -> None:
+        position.current_price = price
+        position.best_price = max(position.best_price, price)
+        position.worst_price = min(position.worst_price, price)
+        reward_bps = self._reward_bps(position=position, price=price)
+        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
+        position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
 
     def _paper_portfolio_profit_ratio(self) -> float:
         return (self._realized_pnl_total() + self._current_unrealized_total()) / max(self.equity_usd, 1e-9)
@@ -3560,6 +3697,9 @@ class LivePaperSession:
         price = self._market_price(state=state, fallback=fallback_price)
         if position is None:
             return self._open_paper_position(decision=decision, price=price), False
+        if position.is_adopted():
+            self._refresh_observed_paper_position(position=position, price=price)
+            return False, False
         self._update_paper_position(position=position, decision=decision, price=price, timestamp=timestamp)
         pyramid_requested = self._should_pyramid_futures_position(
             position=position,
@@ -4180,12 +4320,19 @@ class LivePaperSession:
         manual_symbol_cooldown_active = self._is_manual_symbol_cooldown_active(managed_decision.symbol, timestamp)
         live_orders_allowed = not self.self_healing.is_live_order_cooldown_active(now=timestamp)
         existing_paper_position = self.paper_positions.get(managed_decision.symbol)
+        pending_external_live_position = (
+            managed_decision.final_mode == "futures"
+            and existing_paper_position is None
+            and self._find_live_futures_position(managed_decision.symbol) is not None
+        )
         allow_new_submission = False
         pyramid_requested = False
         can_open_new_paper_position = True
         if (
             existing_paper_position is None
             and (
+                pending_external_live_position
+                or
                 order_cooldown_active
                 or manual_symbol_cooldown_active
                 or (self.live_order_executor is not None and not live_orders_allowed)
