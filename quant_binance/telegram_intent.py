@@ -24,6 +24,17 @@ LOCAL_COMMAND_ALIASES = {
     "strategy-report": {"/strategyreport", "전략 보고", "전략 제안 보고", "전략 보고서", "보고서 보내", "전략 승격 보고"},
     "strategy-approve": {"/approve", "승인", "오케이", "ok", "전략 승인", "적용해"},
     "strategy-reject": {"/reject", "거절", "보류", "전략 거절", "적용하지마"},
+    "weekly-validation-report": {"/weeklyreport", "주간 검증 보고", "주간 검증 리포트", "주간 리포트", "주간 성과 보고"},
+    "execution-quality-report": {"/executionreport", "실행 품질 보고", "실행 품질 리포트", "주문 품질 보고", "체결 품질 보고"},
+    "advisor-report": {
+        "/advisorreport",
+        "전략 자문 리포트",
+        "거시 전략 리포트",
+        "거시 리포트",
+        "전략 자문",
+        "시장 자문 리포트",
+        "gpt 전략 리포트",
+    },
 }
 
 CODEX_TASK_ALIASES = {
@@ -135,6 +146,9 @@ def help_message_ko() -> str:
         "- /strategyreport 또는 '전략 보고서'\n"
         "- /approve 또는 '전략 승인'\n"
         "- /reject 또는 '전략 거절'\n"
+        "- /weeklyreport 또는 '주간 검증 리포트'\n"
+        "- /executionreport 또는 '실행 품질 리포트'\n"
+        "- /advisorreport 또는 '거시 전략 리포트'\n"
         "- /codex status-check\n"
         "- /codex capital-report\n"
         "- /codex latest-run-review\n"

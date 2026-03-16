@@ -65,6 +65,8 @@ Rules:
 - If the user explicitly asks to have Codex CLI or Gemini CLI do the task, use the delegate scripts.
 - For broad tasks, you may delegate all or part of the work to those CLIs, then integrate or summarize the result.
 - If any wrapper, CLI, IDE launch, or delegated tool fails, report the exact failing command and the concrete error cause.
+- Minimize heredoc-based shell execution because it can trigger obfuscated-command approval gates.
+- Prefer repo scripts or simpler one-line commands whenever possible.
 
 ## Editing Preferences
 

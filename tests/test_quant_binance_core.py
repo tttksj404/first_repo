@@ -23,7 +23,7 @@ CONFIG_PATH = ROOT / "quant_binance" / "config.example.json"
 def make_snapshot(symbol: str, features: FeatureVector) -> MarketSnapshot:
     return MarketSnapshot(
         snapshot_id=f"snapshot-{symbol}",
-        config_version="2026-03-08.v1",
+        config_version="2026-03-10.v1",
         snapshot_schema_version="1.0.0",
         symbol=symbol,
         decision_time=datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc),
@@ -44,7 +44,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         cls.settings = Settings.load(CONFIG_PATH)
 
     def test_settings_load_versions_and_fees(self) -> None:
-        self.assertEqual(self.settings.config_version, "2026-03-08.v1")
+        self.assertEqual(self.settings.config_version, "2026-03-10.v1")
         self.assertEqual(self.settings.snapshot_schema_version, "1.0.0")
         self.assertEqual(self.settings.decision_engine.decision_interval_minutes, 5)
         self.assertEqual(self.settings.fees.futures_taker_fee_bps, 4)
@@ -79,6 +79,40 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         score = compute_predictability_score(features, self.settings)
         self.assertAlmostEqual(score, 82.2, places=6)
+
+    def test_apply_score_and_costs_uses_empirical_cost_overrides(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8,
+            ret_rank_4h=0.78,
+            breakout_norm=0.82,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.7,
+            vol_z_1h_norm=0.72,
+            taker_imbalance_norm=0.69,
+            spread_bps_norm=0.2,
+            probe_slippage_bps_norm=0.05,
+            depth_10bps_norm=0.86,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.3,
+            realized_vol_4h_norm=0.28,
+            vol_shock_norm=0.35,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.74,
+            liquidity_score=0.86,
+            volatility_penalty=0.28,
+            overheat_penalty=0.14,
+            gross_expected_edge_bps=24.0,
+            empirical_fee_bps=5.0,
+            empirical_entry_slippage_bps=7.5,
+            empirical_exit_slippage_bps=7.5,
+        )
+        adjusted = apply_score_and_costs(features, self.settings, "futures")
+        self.assertGreaterEqual(adjusted.estimated_round_trip_cost_bps, 25.0)
 
     def test_futures_mode_for_high_confidence_long(self) -> None:
         features = FeatureVector(

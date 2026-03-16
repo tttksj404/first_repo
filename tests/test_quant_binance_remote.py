@@ -6,6 +6,11 @@ from quant_binance.remote import REMOTE_COMMANDS, resolve_remote_command
 
 
 class QuantBinanceRemoteTests(unittest.TestCase):
+    def test_start_defaults_to_live_command(self) -> None:
+        command = resolve_remote_command("start")
+        self.assertEqual(command.mode, "live")
+        self.assertIn("quant_run_live_orders.sh", command.script)
+
     def test_resolve_remote_command(self) -> None:
         command = resolve_remote_command("start-live")
         self.assertEqual(command.action, "start-live")

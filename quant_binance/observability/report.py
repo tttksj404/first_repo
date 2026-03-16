@@ -160,6 +160,9 @@ def build_runtime_summary(
             "mode": decision.final_mode,
             "side": decision.side,
             "score": round(decision.predictability_score, 2),
+            "strategy_size_multiplier": round(decision.strategy_size_multiplier, 6),
+            "entry_relaxations": list(decision.entry_relaxation_reasons[:4]),
+            "size_boost_reasons": list(decision.size_boost_reasons[:4]),
             "reasons": list(decision.rejection_reasons[:4]),
         }
         for decision in list(decisions)[-5:]
@@ -176,6 +179,8 @@ def build_runtime_summary(
         "closed_trades": list(closed_trades or []),
         "telegram_alerts": list(telegram_alerts or []),
         "recent_decisions": recent_decisions,
+        "major_entry_relaxation_count": sum(1 for decision in decisions if decision.entry_relaxation_reasons),
+        "major_size_boost_count": sum(1 for decision in decisions if decision.size_boost_reasons),
         "top_rejection_reasons": dict(rejection_counts.most_common(8)),
         "exit_reason_counts": exit_reason_counts,
         "symbol_performance": symbol_performance,
