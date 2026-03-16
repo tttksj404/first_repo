@@ -3,7 +3,12 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from quant_binance.risk.capital import SpotFundingAsset, build_capital_adequacy_report, extract_account_capital_inputs
+from quant_binance.risk.capital import (
+    FuturesFundingAsset,
+    SpotFundingAsset,
+    build_capital_adequacy_report,
+    extract_account_capital_inputs,
+)
 from quant_binance.settings import Settings
 
 
@@ -12,6 +17,8 @@ CONFIG_PATH = ROOT / "quant_binance" / "config.example.json"
 
 
 class FakeRestClient:
+    exchange_id = "binance"
+
     def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
         return {
             "symbols": [
@@ -104,6 +111,22 @@ class QuantBinanceCapitalTests(unittest.TestCase):
             futures_account={
                 "availableBalance": 38.2,
                 "executionAvailableBalance": 4.9,
+                "assets": [
+                    {
+                        "asset": "USDT",
+                        "walletBalance": "42.422432895899",
+                        "availableBalance": "4.9",
+                        "maxWithdrawAmount": "4.9",
+                        "usdtEquity": "42.422432895899",
+                    },
+                    {
+                        "asset": "BTC",
+                        "walletBalance": "0.00035",
+                        "availableBalance": "0.0001",
+                        "maxWithdrawAmount": "0.0001",
+                        "usdtEquity": "17.5",
+                    },
+                ],
                 "accounts": [
                     {"marginCoin": "USDT", "usdtEquity": "42.422432895899"},
                     {"marginCoin": "BTC", "usdtEquity": "17.5"},
@@ -119,6 +142,10 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         self.assertEqual(inputs.futures_available_balance_usd, 38.2)
         self.assertEqual(inputs.futures_execution_balance_usd, 4.9)
         self.assertEqual(inputs.futures_recognized_balance_usd, 59.922433)
+        funding_assets = {item.asset: item for item in inputs.futures_funding_assets}
+        self.assertEqual(set(funding_assets), {"BTC", "USDT"})
+        self.assertEqual(funding_assets["BTC"].free_balance_usd, 5.0)
+        self.assertEqual(funding_assets["USDT"].free_balance_usd, 4.9)
 
     def test_capital_report_uses_recognized_balances_for_adequacy_checks(self) -> None:
         report = build_capital_adequacy_report(
@@ -197,6 +224,43 @@ class QuantBinanceCapitalMobilityTests(unittest.TestCase):
         self.assertEqual(report.max_futures_to_spot_transfer_usd, 7.5)
         self.assertTrue(any(item.source_market == "spot" and item.target_market == "futures" for item in report.capital_transfer_routes))
         self.assertTrue(any(item.source_market == "futures" and item.target_market == "spot" for item in report.capital_transfer_routes))
+
+    def test_capital_report_exposes_futures_asset_routes_for_spot_reinvestment(self) -> None:
+        report = build_capital_adequacy_report(
+            spot_available_balance_usd=0.0,
+            spot_recognized_balance_usd=0.0,
+            spot_funding_assets=(),
+            futures_available_balance_usd=0.0,
+            futures_recognized_balance_usd=60.0,
+            futures_funding_assets=(
+                FuturesFundingAsset(
+                    asset="BTC",
+                    free=0.01,
+                    locked=0.0,
+                    total=0.01,
+                    free_balance_usd=500.0,
+                    total_balance_usd=500.0,
+                    margin_available=False,
+                ),
+            ),
+            settings=self.settings,
+            rest_client=FakeRestClient(),  # type: ignore[arg-type]
+        )
+
+        transfer_route = next(
+            item
+            for item in report.capital_transfer_routes
+            if item.source_market == "futures" and item.target_market == "spot" and item.asset == "BTC"
+        )
+        self.assertEqual(transfer_route.transferable_usd, 500.0)
+        execution_route = next(
+            item
+            for item in report.spot_execution_routes
+            if item.target_symbol == "ETHUSDT" and item.execution_symbol == "ETHBTC"
+        )
+        self.assertEqual(execution_route.funding_asset, "BTC")
+        self.assertEqual(execution_route.funding_source_market, "futures")
+        self.assertTrue(execution_route.requires_wallet_transfer)
 
 
 if __name__ == "__main__":
