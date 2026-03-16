@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from decimal import Decimal, ROUND_HALF_UP
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -24,6 +25,16 @@ class SupportsLiveOrder(Protocol):
     def place_spot_plan_order(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
         ...
 
+    def get_max_openable_quantity(
+        self,
+        *,
+        symbol: str,
+        pos_side: str,
+        order_type: str = "market",
+        open_amount: float | None = None,
+    ) -> float | None:
+        ...
+
 
 @dataclass(frozen=True)
 class LiveOrderResult:
@@ -41,9 +52,27 @@ class DecisionLiveOrderAdapter:
     def __init__(self, client: SupportsLiveOrder, settings: Settings | None = None) -> None:
         self.client = client
         self.settings = settings
+        self._exchange_info_cache: dict[str, dict[str, dict[str, Any]]] = {}
+        self._last_preflight_rejection: dict[str, Any] | None = None
 
     def _exchange_id(self) -> str:
         return getattr(self.client, "exchange_id", "binance")
+
+    def _execution_symbol(self, decision: DecisionIntent) -> str:
+        return decision.execution_symbol or decision.symbol
+
+    def _uses_spot_quote_notional(self, decision: DecisionIntent) -> bool:
+        return (
+            decision.final_mode == "spot"
+            and decision.side == "long"
+            and (decision.spot_quote_asset or "USDT") == "USDT"
+            and self._execution_symbol(decision).endswith("USDT")
+        )
+
+    def pop_last_preflight_rejection(self) -> dict[str, Any] | None:
+        payload = self._last_preflight_rejection
+        self._last_preflight_rejection = None
+        return payload
 
     def _target_futures_leverage(self, decision: DecisionIntent) -> int:
         if self.settings is None:
@@ -126,8 +155,105 @@ class DecisionLiveOrderAdapter:
 
         return tuple(alternates)
 
-    def _format_price(self, value: float) -> str:
-        return f"{max(value, 0.0):.8f}"
+    def _bitget_symbol_metadata(self, *, market: str, symbol: str) -> dict[str, Any]:
+        cache = self._exchange_info_cache.setdefault(market, {})
+        if symbol in cache:
+            return cache[symbol]
+        getter = getattr(self.client, "get_exchange_info", None)
+        if not callable(getter):
+            cache[symbol] = {}
+            return cache[symbol]
+        try:
+            info = getter(market=market)
+        except Exception:
+            cache[symbol] = {}
+            return cache[symbol]
+        for row in info.get("symbols", []):
+            row_symbol = str(row.get("symbol", ""))
+            if not row_symbol:
+                continue
+            cache[row_symbol] = dict(row.get("raw") or {})
+        cache.setdefault(symbol, {})
+        return cache[symbol]
+
+    def _bitget_price_decimals(self, *, market: str, symbol: str) -> int | None:
+        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
+        for key in ("pricePlace", "priceScale"):
+            value = metadata.get(key)
+            if value not in (None, ""):
+                try:
+                    return max(int(value), 0)
+                except (TypeError, ValueError):
+                    continue
+        tick_size = metadata.get("tickSize")
+        if tick_size in (None, ""):
+            return None
+        text = str(tick_size).strip()
+        if not text or "." not in text:
+            return 0 if text else None
+        return max(len(text.rstrip("0").split(".", 1)[1]), 0)
+
+    def _bitget_min_quantity(self, *, market: str, symbol: str) -> float:
+        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
+        for key in ("minTradeNum", "minQty"):
+            value = metadata.get(key)
+            if value not in (None, ""):
+                try:
+                    return max(float(value), 0.0)
+                except (TypeError, ValueError):
+                    continue
+        return 0.0
+
+    def _bitget_quantity_step(self, *, market: str, symbol: str) -> float:
+        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
+        for key in ("sizeMultiplier", "stepSize"):
+            value = metadata.get(key)
+            if value not in (None, ""):
+                try:
+                    return max(float(value), 0.0)
+                except (TypeError, ValueError):
+                    continue
+        return 0.0
+
+    def normalize_quantity(self, *, market: str, symbol: str, quantity: float) -> float:
+        safe_quantity = max(float(quantity), 0.0)
+        if self._exchange_id() != "bitget":
+            return round(safe_quantity, 8)
+        step = self._bitget_quantity_step(market=market, symbol=symbol)
+        if step <= 0.0:
+            return round(safe_quantity, 8)
+        step_dec = Decimal(str(step))
+        qty_dec = Decimal(str(safe_quantity))
+        normalized = (qty_dec // step_dec) * step_dec
+        return float(normalized)
+
+    def format_quantity(self, *, market: str, symbol: str, quantity: float) -> str:
+        normalized = self.normalize_quantity(market=market, symbol=symbol, quantity=quantity)
+        if self._exchange_id() != "bitget":
+            return f"{normalized:.8f}"
+        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
+        decimals = metadata.get("volumePlace")
+        try:
+            precision = max(int(decimals), 0)
+        except (TypeError, ValueError):
+            step = self._bitget_quantity_step(market=market, symbol=symbol)
+            if step <= 0.0:
+                precision = 8
+            else:
+                step_text = str(step).rstrip("0")
+                precision = len(step_text.split(".", 1)[1]) if "." in step_text else 0
+        return format(Decimal(str(normalized)), f".{precision}f")
+
+    def format_trigger_price(self, *, value: float, market: str, symbol: str) -> str:
+        safe_value = max(value, 0.0)
+        if self._exchange_id() != "bitget":
+            return f"{safe_value:.8f}"
+        decimals = self._bitget_price_decimals(market=market, symbol=symbol)
+        if decimals is None:
+            return f"{safe_value:.8f}"
+        quantum = Decimal("1").scaleb(-decimals)
+        rounded = Decimal(str(safe_value)).quantize(quantum, rounding=ROUND_HALF_UP)
+        return format(rounded, f".{decimals}f")
 
     def _protection_prices(
         self,
@@ -159,7 +285,7 @@ class DecisionLiveOrderAdapter:
             reference_price=reference_price,
         )
         if decision.final_mode == "futures":
-            hold_side = "buy" if decision.side == "long" else "sell"
+            hold_side = "long" if decision.side == "long" else "short"
             return (
                 (
                     "futures",
@@ -167,12 +293,18 @@ class DecisionLiveOrderAdapter:
                         "marginCoin": "USDT",
                         "productType": "USDT-FUTURES",
                         "symbol": decision.symbol,
-                        "stopSurplusTriggerPrice": self._format_price(take_profit),
+                        "stopSurplusTriggerPrice": self.format_trigger_price(
+                            value=take_profit,
+                            market="futures",
+                            symbol=decision.symbol,
+                        ),
                         "stopSurplusTriggerType": "mark_price",
-                        "stopSurplusExecutePrice": "0",
-                        "stopLossTriggerPrice": self._format_price(stop_loss),
+                        "stopLossTriggerPrice": self.format_trigger_price(
+                            value=stop_loss,
+                            market="futures",
+                            symbol=decision.symbol,
+                        ),
                         "stopLossTriggerType": "mark_price",
-                        "stopLossExecutePrice": "0",
                         "holdSide": hold_side,
                         "stopSurplusClientOid": f"{decision.decision_id}-tp",
                         "stopLossClientOid": f"{decision.decision_id}-sl",
@@ -180,14 +312,20 @@ class DecisionLiveOrderAdapter:
                 ),
             )
         if decision.final_mode == "spot" and decision.side == "long":
+            if not self._uses_spot_quote_notional(decision):
+                return ()
             size = f"{quantity:.8f}"
             return (
                 (
                     "spot",
                     {
-                        "symbol": decision.symbol,
+                        "symbol": self._execution_symbol(decision),
                         "side": "sell",
-                        "triggerPrice": self._format_price(take_profit),
+                        "triggerPrice": self.format_trigger_price(
+                            value=take_profit,
+                            market="spot",
+                            symbol=self._execution_symbol(decision),
+                        ),
                         "triggerType": "market_price",
                         "orderType": "market",
                         "planType": "amount",
@@ -198,9 +336,13 @@ class DecisionLiveOrderAdapter:
                 (
                     "spot",
                     {
-                        "symbol": decision.symbol,
+                        "symbol": self._execution_symbol(decision),
                         "side": "sell",
-                        "triggerPrice": self._format_price(stop_loss),
+                        "triggerPrice": self.format_trigger_price(
+                            value=stop_loss,
+                            market="spot",
+                            symbol=self._execution_symbol(decision),
+                        ),
                         "triggerType": "market_price",
                         "orderType": "market",
                         "planType": "amount",
@@ -218,6 +360,8 @@ class DecisionLiveOrderAdapter:
         reference_price: float,
         quantity: float,
     ) -> tuple[dict[str, Any], ...]:
+        if self._exchange_id() == "bitget" and decision.final_mode == "futures":
+            return ()
         if self._exchange_id() != "bitget":
             return ()
         payloads = self._build_bitget_protection_payloads(
@@ -246,19 +390,36 @@ class DecisionLiveOrderAdapter:
         decision: DecisionIntent,
         reference_price: float,
     ) -> tuple[str, dict[str, Any]] | None:
+        self._last_preflight_rejection = None
         if decision.final_mode not in {"spot", "futures"}:
             return None
         quantity = quantity_from_notional(decision.order_intent_notional_usd, reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
         side = "BUY" if decision.side == "long" else "SELL"
+        if market == "futures" and self._exchange_id() == "bitget" and hasattr(self.client, "get_max_openable_quantity"):
+            max_open = self.client.get_max_openable_quantity(
+                symbol=decision.symbol,
+                pos_side="long" if decision.side == "long" else "short",
+                order_type="market",
+            )
+            if max_open is not None:
+                if max_open <= 0.0:
+                    self._last_preflight_rejection = {
+                        "symbol": decision.symbol,
+                        "market": "futures",
+                        "reason": "BITGET_MAX_OPEN_ZERO",
+                        "message": "Bitget preflight rejected order because max openable quantity is 0.",
+                    }
+                    return None
+                quantity = min(quantity, max_open)
         if self._exchange_id() == "bitget":
             params = {
-                "symbol": decision.symbol,
+                "symbol": self._execution_symbol(decision),
                 "side": side.lower(),
                 "orderType": "market",
                 "clientOid": decision.decision_id,
             }
-            if market == "spot" and side == "BUY":
+            if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
                 params["size"] = f"{decision.order_intent_notional_usd:.2f}"
             else:
                 params["size"] = f"{quantity:.8f}"
@@ -267,14 +428,29 @@ class DecisionLiveOrderAdapter:
                 params["marginCoin"] = "USDT"
                 params["marginMode"] = "crossed"
                 params["tradeSide"] = "close" if decision.side == "flat" else "open"
+                if decision.side in {"long", "short"}:
+                    take_profit, stop_loss = self._protection_prices(
+                        decision=decision,
+                        reference_price=reference_price,
+                    )
+                    params["presetStopSurplusPrice"] = self.format_trigger_price(
+                        value=take_profit,
+                        market="futures",
+                        symbol=decision.symbol,
+                    )
+                    params["presetStopLossPrice"] = self.format_trigger_price(
+                        value=stop_loss,
+                        market="futures",
+                        symbol=decision.symbol,
+                    )
             return market, params
         params = {
-            "symbol": decision.symbol,
+            "symbol": self._execution_symbol(decision),
             "side": side,
             "type": "MARKET",
             "newOrderRespType": "RESULT",
         }
-        if market == "spot" and side == "BUY":
+        if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
             params["quoteOrderQty"] = f"{decision.order_intent_notional_usd:.2f}"
         else:
             params["quantity"] = f"{quantity:.8f}"
