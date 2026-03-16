@@ -45,10 +45,15 @@ class FeatureVector:
     alt_fundamental_score: float = 0.5
     alt_smart_money_score: float = 0.5
     alt_rotation_penalty: float = 0.0
+    intraday_trend_direction: int = 0
+    intraday_trend_strength: float = 0.0
     predictability_score: float = 0.0
     gross_expected_edge_bps: float = 0.0
     net_expected_edge_bps: float = 0.0
     estimated_round_trip_cost_bps: float = 0.0
+    empirical_fee_bps: float = 0.0
+    empirical_entry_slippage_bps: float = 0.0
+    empirical_exit_slippage_bps: float = 0.0
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -103,6 +108,10 @@ class DecisionIntent:
     rejection_reasons: tuple[str, ...] = field(default_factory=tuple)
     exit_reason_code: str = ""
     divergence_code: str = ""
+    execution_symbol: str = ""
+    spot_base_asset: str = ""
+    spot_quote_asset: str = ""
+    spot_funding_asset: str = ""
 
     def as_dict(self) -> dict[str, Any]:
         data = asdict(self)

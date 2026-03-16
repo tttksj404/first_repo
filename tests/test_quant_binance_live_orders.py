@@ -116,6 +116,40 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
             else:
                 os.environ["STRATEGY_PROFILE"] = previous
 
+    def test_live_ultra_aggressive_uses_target_leverage_for_merely_strong_setup(self) -> None:
+        settings = self._load_settings_for_profile("live-ultra-aggressive")
+
+        leverage = select_futures_leverage(
+            predictability_score=66.7,
+            trend_strength=0.72,
+            volume_confirmation=0.62,
+            liquidity_score=0.9,
+            volatility_penalty=0.25,
+            overheat_penalty=0.2,
+            net_expected_edge_bps=25.8,
+            estimated_round_trip_cost_bps=8.0,
+            settings=settings,
+        )
+
+        self.assertEqual(leverage, 8)
+
+    def test_live_ultra_aggressive_reserves_max_leverage_for_exceptional_setup(self) -> None:
+        settings = self._load_settings_for_profile("live-ultra-aggressive")
+
+        leverage = select_futures_leverage(
+            predictability_score=78.0,
+            trend_strength=0.88,
+            volume_confirmation=0.82,
+            liquidity_score=0.95,
+            volatility_penalty=0.18,
+            overheat_penalty=0.12,
+            net_expected_edge_bps=34.0,
+            estimated_round_trip_cost_bps=8.0,
+            settings=settings,
+        )
+
+        self.assertEqual(leverage, 15)
+
     def test_live_order_adapter_executes_market_order(self) -> None:
         from quant_binance.models import DecisionIntent
 
@@ -257,6 +291,46 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertEqual(params["side"], "BUY")
         self.assertEqual(params["quoteOrderQty"], "2400.00")
         self.assertNotIn("quantity", params)
+
+    def test_live_order_adapter_uses_base_quantity_for_routed_spot_market_buy(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        decision = DecisionIntent(
+            decision_id="d2-routed",
+            decision_hash="hash-2-routed",
+            snapshot_id="s2-routed",
+            config_version="2026-03-10.v1",
+            timestamp=datetime(2026, 3, 10, 0, 35, tzinfo=timezone.utc),
+            symbol="ETHUSDT",
+            candidate_mode="spot",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=66.0,
+            gross_expected_edge_bps=30.0,
+            net_expected_edge_bps=18.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=125.0,
+            stop_distance_bps=80.0,
+            execution_symbol="ETHBTC",
+            spot_base_asset="ETH",
+            spot_quote_asset="BTC",
+            spot_funding_asset="BTC",
+        )
+        adapter = DecisionLiveOrderAdapter(FakeLiveOrderClient(), self.settings)  # type: ignore[arg-type]
+        built = adapter.build_order_params(decision=decision, reference_price=2500.0)
+        assert built is not None
+        market, params = built
+        self.assertEqual(market, "spot")
+        self.assertEqual(params["symbol"], "ETHBTC")
+        self.assertEqual(params["side"], "BUY")
+        self.assertEqual(params["quantity"], "0.05000000")
+        self.assertNotIn("quoteOrderQty", params)
 
     def test_session_caps_futures_notional_to_execution_balance(self) -> None:
         from quant_binance.models import DecisionIntent
@@ -427,6 +501,86 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         expected = round(10.0 * (1.0 - self.settings.cash_reserve.when_futures_disabled), 6)
         self.assertEqual(capped.order_intent_notional_usd, expected)
         self.assertLess(capped.order_intent_notional_usd, decision.order_intent_notional_usd)
+
+    def test_session_routes_spot_buy_to_btc_quote_when_usdt_route_cannot_cover_order(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(
+            runtime=runtime,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+        session.capital_report = {
+            "spot_available_balance_usd": 10.0,
+            "spot_recognized_balance_usd": 510.0,
+            "can_trade_spot_any": True,
+            "futures_requirements": [],
+            "spot_requirements": [{"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+            "spot_execution_routes": [
+                {
+                    "target_symbol": "ETHUSDT",
+                    "execution_symbol": "ETHUSDT",
+                    "base_asset": "ETH",
+                    "quote_asset": "USDT",
+                    "funding_asset": "USDT",
+                    "route_type": "direct",
+                    "free_balance": 10.0,
+                    "free_balance_usd": 10.0,
+                    "min_notional_usd": 5.0,
+                    "min_quantity": 0.001,
+                },
+                {
+                    "target_symbol": "ETHUSDT",
+                    "execution_symbol": "ETHBTC",
+                    "base_asset": "ETH",
+                    "quote_asset": "BTC",
+                    "funding_asset": "BTC",
+                    "route_type": "cross_quote",
+                    "free_balance": 0.01,
+                    "free_balance_usd": 500.0,
+                    "min_notional_usd": 5.0,
+                    "min_quantity": 0.001,
+                },
+            ],
+        }
+        decision = DecisionIntent(
+            decision_id="d-spot-route",
+            decision_hash="hash-spot-route",
+            snapshot_id="s-spot-route",
+            config_version="2026-03-12.v1",
+            timestamp=now,
+            symbol="ETHUSDT",
+            candidate_mode="spot",
+            final_mode="spot",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=70.0,
+            gross_expected_edge_bps=20.0,
+            net_expected_edge_bps=12.0,
+            estimated_round_trip_cost_bps=8.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=2500.0)
+
+        self.assertEqual(capped.execution_symbol, "ETHBTC")
+        self.assertEqual(capped.spot_funding_asset, "BTC")
+        self.assertEqual(capped.spot_quote_asset, "BTC")
+        self.assertEqual(capped.order_intent_notional_usd, decision.order_intent_notional_usd)
 
     def test_session_blocks_new_futures_entry_when_live_position_already_exists(self) -> None:
         from quant_binance.models import DecisionIntent
