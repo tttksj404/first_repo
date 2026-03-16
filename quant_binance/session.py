@@ -4003,6 +4003,58 @@ class LivePaperSession:
             payload["incremental_pnl_usd_estimate"] = round(incremental_pnl_usd_estimate, 6)
         self.log_store.append("futures_reallocation", payload)
 
+    def _log_execution_preflight(
+        self,
+        *,
+        timestamp: datetime,
+        managed_decision: DecisionIntent,
+        prepared_decision: DecisionIntent,
+        allow_new_submission: bool,
+        live_orders_allowed: bool,
+        order_cooldown_active: bool,
+        manual_symbol_cooldown_active: bool,
+        pending_external_live_position: bool,
+    ) -> None:
+        if self.log_store is None:
+            return
+        changed = (
+            managed_decision.final_mode != prepared_decision.final_mode
+            or managed_decision.side != prepared_decision.side
+            or round(managed_decision.order_intent_notional_usd, 6)
+            != round(prepared_decision.order_intent_notional_usd, 6)
+            or tuple(managed_decision.rejection_reasons) != tuple(prepared_decision.rejection_reasons)
+            or managed_decision.execution_symbol != prepared_decision.execution_symbol
+        )
+        if not changed and allow_new_submission and prepared_decision.final_mode in {"spot", "futures"} and prepared_decision.order_intent_notional_usd > 0:
+            return
+        payload = {
+            "timestamp": timestamp,
+            "symbol": managed_decision.symbol,
+            "allow_new_submission": allow_new_submission,
+            "live_orders_allowed": live_orders_allowed,
+            "order_cooldown_active": order_cooldown_active,
+            "manual_symbol_cooldown_active": manual_symbol_cooldown_active,
+            "pending_external_live_position": pending_external_live_position,
+            "managed": {
+                "final_mode": managed_decision.final_mode,
+                "side": managed_decision.side,
+                "order_intent_notional_usd": round(managed_decision.order_intent_notional_usd, 6),
+                "rejection_reasons": list(managed_decision.rejection_reasons),
+                "entry_relaxation_reasons": list(managed_decision.entry_relaxation_reasons),
+                "size_boost_reasons": list(managed_decision.size_boost_reasons),
+            },
+            "prepared": {
+                "final_mode": prepared_decision.final_mode,
+                "side": prepared_decision.side,
+                "order_intent_notional_usd": round(prepared_decision.order_intent_notional_usd, 6),
+                "rejection_reasons": list(prepared_decision.rejection_reasons),
+                "execution_symbol": prepared_decision.execution_symbol,
+            },
+        }
+        if changed:
+            payload["cap_changed"] = True
+        self.log_store.append("execution_preflight", payload)
+
     def _max_futures_reallocation_replacements(self) -> int:
         return 2
 
@@ -4365,6 +4417,17 @@ class LivePaperSession:
                 )
                 if self.live_order_executor is not None
                 else self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
+            )
+        if state is not None:
+            self._log_execution_preflight(
+                timestamp=timestamp,
+                managed_decision=managed_decision,
+                prepared_decision=prepared_execution_decision,
+                allow_new_submission=allow_new_submission,
+                live_orders_allowed=live_orders_allowed,
+                order_cooldown_active=order_cooldown_active,
+                manual_symbol_cooldown_active=manual_symbol_cooldown_active,
+                pending_external_live_position=pending_external_live_position,
             )
         if (
             self.live_order_executor is not None
