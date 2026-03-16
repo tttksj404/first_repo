@@ -276,6 +276,7 @@ class LivePaperSession:
             "spot_recognized_balance_usd": report.spot_recognized_balance_usd,
             "spot_funding_assets": [item.__dict__ for item in report.spot_funding_assets],
             "spot_execution_routes": [item.__dict__ for item in report.spot_execution_routes],
+            "capital_transfer_routes": [item.__dict__ for item in report.capital_transfer_routes],
             "futures_available_balance_usd": report.futures_available_balance_usd,
             "futures_recognized_balance_usd": report.futures_recognized_balance_usd,
             "futures_execution_balance_usd": float(
@@ -287,6 +288,8 @@ class LivePaperSession:
             "can_trade_any": report.can_trade_any,
             "can_trade_spot_any": report.can_trade_spot_any,
             "can_trade_futures_any": report.can_trade_futures_any,
+            "max_spot_to_futures_transfer_usd": report.max_spot_to_futures_transfer_usd,
+            "max_futures_to_spot_transfer_usd": report.max_futures_to_spot_transfer_usd,
             "spot_requirements": [r.__dict__ for r in report.spot_requirements],
             "futures_requirements": [r.__dict__ for r in report.futures_requirements],
             "pending_symbols": list(report.pending_symbols),
@@ -543,6 +546,7 @@ class LivePaperSession:
                     spot_base_asset=str(selected_route.get("base_asset", "")),
                     spot_quote_asset=str(selected_route.get("quote_asset", "")),
                     spot_funding_asset=str(selected_route.get("funding_asset", "")),
+                    spot_quote_asset_usd_price=float(selected_route.get("quote_asset_usd_price", 0.0) or 0.0),
                 )
             else:
                 available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
@@ -551,6 +555,7 @@ class LivePaperSession:
                     execution_symbol=decision.symbol,
                     spot_quote_asset="USDT" if decision.symbol.endswith("USDT") else "",
                     spot_funding_asset="USDT" if decision.symbol.endswith("USDT") else "",
+                    spot_quote_asset_usd_price=1.0 if decision.symbol.endswith("USDT") else 0.0,
                 )
             max_notional = max(0.0, available * (1.0 - reserve_fraction))
         elif decision.final_mode == "futures":
@@ -647,7 +652,12 @@ class LivePaperSession:
             )
             meaningful_notional_floor = max(meaningful_notional_floor, major_strong_entry_floor)
         if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
-            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (rejection_code,)))))
+            rejection_reasons = list(decision.rejection_reasons + (rejection_code,))
+            if decision.final_mode == "futures" and float(self.capital_report.get("max_spot_to_futures_transfer_usd", 0.0) or 0.0) > 0.0:
+                rejection_reasons.append("TRANSFER_REQUIRED_SPOT_TO_FUTURES")
+            if decision.final_mode == "spot" and float(self.capital_report.get("max_futures_to_spot_transfer_usd", 0.0) or 0.0) > 0.0:
+                rejection_reasons.append("TRANSFER_REQUIRED_FUTURES_TO_SPOT")
+            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(rejection_reasons))))
         if decision.order_intent_notional_usd < major_medium_entry_floor:
             if max_notional < major_medium_entry_floor:
                 return replace(
@@ -695,7 +705,12 @@ class LivePaperSession:
             floored_notional = round(max_notional, 6)
             candidate = replace(decision, order_intent_notional_usd=floored_notional)
         if reference_price is not None and min_quantity > 0.0:
-            quantity = quantity_from_notional(candidate.order_intent_notional_usd, reference_price)
+            quantity_reference_price = reference_price
+            if candidate.final_mode == "spot" and (candidate.spot_quote_asset or "USDT") != "USDT":
+                quote_asset_usd_price = float(candidate.spot_quote_asset_usd_price or 0.0)
+                if quote_asset_usd_price > 0.0:
+                    quantity_reference_price = reference_price * quote_asset_usd_price
+            quantity = quantity_from_notional(candidate.order_intent_notional_usd, quantity_reference_price)
             if quantity < min_quantity:
                 return replace(
                     candidate,

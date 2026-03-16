@@ -112,6 +112,7 @@ class DecisionIntent:
     spot_base_asset: str = ""
     spot_quote_asset: str = ""
     spot_funding_asset: str = ""
+    spot_quote_asset_usd_price: float = 0.0
 
     def as_dict(self) -> dict[str, Any]:
         data = asdict(self)

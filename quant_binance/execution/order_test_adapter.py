@@ -42,6 +42,14 @@ class DecisionOrderTestAdapter:
             and self._execution_symbol(decision).endswith("USDT")
         )
 
+    def _spot_quantity_reference_price(self, decision: DecisionIntent, reference_price: float) -> float:
+        if (decision.spot_quote_asset or "USDT") == "USDT":
+            return reference_price
+        quote_asset_usd_price = float(decision.spot_quote_asset_usd_price or 0.0)
+        if quote_asset_usd_price <= 0.0:
+            return reference_price
+        return reference_price * quote_asset_usd_price
+
     def build_order_params(
         self,
         *,
@@ -50,7 +58,7 @@ class DecisionOrderTestAdapter:
     ) -> tuple[str, dict[str, Any]] | None:
         if decision.final_mode not in {"spot", "futures"}:
             return None
-        quantity = quantity_from_notional(decision.order_intent_notional_usd, reference_price)
+        quantity = quantity_from_notional(decision.order_intent_notional_usd, self._spot_quantity_reference_price(decision, reference_price) if decision.final_mode == "spot" else reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
         side = "BUY" if decision.side == "long" else "SELL"
         if self._exchange_id() == "bitget":
