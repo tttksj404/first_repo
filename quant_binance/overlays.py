@@ -4,6 +4,7 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from quant_binance.models import FeatureVector
 from quant_binance.strategy.normalize import clamp
@@ -67,17 +68,49 @@ def _load_env_file_value(name: str) -> str:
     return ""
 
 
+_MACRO_CACHE_KEY: tuple[str, str, int | None] | None = None
+_MACRO_CACHE_VALUE: MacroInputs | None = None
+_ALT_CACHE_KEY: tuple[str, str, int | None] | None = None
+_ALT_CACHE_VALUE: AltcoinInputs | None = None
+
+
+def _cache_signature(path_value: str, json_value: str) -> tuple[str, str, int | None]:
+    if json_value:
+        return ("json", json_value, None)
+    if path_value:
+        path = Path(path_value)
+        try:
+            mtime_ns = path.stat().st_mtime_ns
+        except FileNotFoundError:
+            mtime_ns = None
+        return ("path", str(path.resolve()), mtime_ns)
+    return ("empty", "", None)
+
+
+def _load_json_payload(path_value: str, json_value: str) -> dict[str, Any] | None:
+    if json_value:
+        return json.loads(json_value)
+    if path_value:
+        return json.loads(Path(path_value).read_text(encoding="utf-8"))
+    return None
+
+
 def load_macro_inputs() -> MacroInputs | None:
+    global _MACRO_CACHE_KEY, _MACRO_CACHE_VALUE
     path_value = _load_env_file_value("MACRO_INPUTS_PATH")
     json_value = _load_env_file_value("MACRO_INPUTS_JSON")
-    payload = None
-    if json_value:
-        payload = json.loads(json_value)
-    elif path_value:
-        payload = json.loads(Path(path_value).read_text(encoding="utf-8"))
+    signature = _cache_signature(path_value, json_value)
+    if signature == _MACRO_CACHE_KEY:
+        return _MACRO_CACHE_VALUE
+    payload = _load_json_payload(path_value, json_value)
     if payload is None:
+        _MACRO_CACHE_KEY = signature
+        _MACRO_CACHE_VALUE = None
         return None
-    return MacroInputs(**payload)
+    macro = MacroInputs(**payload)
+    _MACRO_CACHE_KEY = signature
+    _MACRO_CACHE_VALUE = macro
+    return macro
 
 
 def is_alt_symbol(symbol: str) -> bool:
@@ -85,14 +118,16 @@ def is_alt_symbol(symbol: str) -> bool:
 
 
 def load_altcoin_inputs() -> AltcoinInputs | None:
+    global _ALT_CACHE_KEY, _ALT_CACHE_VALUE
     path_value = _load_env_file_value("ALTCOIN_INPUTS_PATH")
     json_value = _load_env_file_value("ALTCOIN_INPUTS_JSON")
-    payload = None
-    if json_value:
-        payload = json.loads(json_value)
-    elif path_value:
-        payload = json.loads(Path(path_value).read_text(encoding="utf-8"))
+    signature = _cache_signature(path_value, json_value)
+    if signature == _ALT_CACHE_KEY:
+        return _ALT_CACHE_VALUE
+    payload = _load_json_payload(path_value, json_value)
     if payload is None:
+        _ALT_CACHE_KEY = signature
+        _ALT_CACHE_VALUE = None
         return None
 
     global_inputs = AltcoinGlobalInputs(**payload.get("global", {}))
@@ -101,7 +136,10 @@ def load_altcoin_inputs() -> AltcoinInputs | None:
         symbol.upper(): AltcoinSymbolInputs(**values)
         for symbol, values in raw_symbols.items()
     }
-    return AltcoinInputs(global_inputs=global_inputs, symbols=symbols)
+    alt_inputs = AltcoinInputs(global_inputs=global_inputs, symbols=symbols)
+    _ALT_CACHE_KEY = signature
+    _ALT_CACHE_VALUE = alt_inputs
+    return alt_inputs
 
 
 def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | None) -> FeatureVector:
@@ -110,6 +148,7 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
 
     risk = 0.0
     support = 0.0
+    event_risk = clamp(macro_inputs.event_risk_score, 0.0, 1.0)
     if macro_inputs.us10y_yield >= 4.7:
         risk += 0.25
     if macro_inputs.oil_momentum_pct >= 12.0:
@@ -118,7 +157,7 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
         risk += 0.20
     if macro_inputs.labor_stress_score >= 0.7:
         risk += 0.15
-    risk += 0.35 * clamp(macro_inputs.event_risk_score, 0.0, 1.0)
+    risk += 0.35 * event_risk
     if macro_inputs.tga_drain_score >= 0.6:
         support += 0.20
     if macro_inputs.fed_balance_sheet_30d_pct > 0:
@@ -136,13 +175,40 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
     penalty = clamp(risk - support, 0.0, 1.0)
     support_score = clamp(support, 0.0, 1.0)
     regime = "high_risk" if penalty >= 0.65 else "supportive" if penalty <= 0.25 else "neutral"
+    if event_risk >= 0.85:
+        trade_restraint = "halt_high_impact_window"
+    elif event_risk >= 0.6:
+        trade_restraint = "pre_event_reduce"
+    elif penalty >= 0.55:
+        trade_restraint = "risk_off_reduce"
+    else:
+        trade_restraint = "none"
+    size_multiplier = 1.0
+    if trade_restraint == "halt_high_impact_window":
+        size_multiplier = 0.0
+    elif trade_restraint == "pre_event_reduce":
+        size_multiplier = 0.5
+    elif trade_restraint == "risk_off_reduce":
+        size_multiplier = 0.7
+    leverage_cap = 0
+    if trade_restraint == "halt_high_impact_window":
+        leverage_cap = 1
+    elif trade_restraint == "pre_event_reduce":
+        leverage_cap = 2
+    elif trade_restraint == "risk_off_reduce":
+        leverage_cap = 3
+    symbol_bias = "majors_only" if (event_risk >= 0.6 or penalty >= 0.55) else "neutral"
     return FeatureVector(
         **{
             **features.as_dict(),
             "macro_regime": regime,
             "macro_risk_penalty": round(penalty, 6),
             "macro_liquidity_support_score": round(support_score, 6),
-            "macro_event_risk_score": round(clamp(macro_inputs.event_risk_score, 0.0, 1.0), 6),
+            "macro_event_risk_score": round(event_risk, 6),
+            "macro_trade_restraint": trade_restraint,
+            "macro_size_multiplier": round(size_multiplier, 6),
+            "macro_leverage_cap": leverage_cap,
+            "macro_symbol_bias": symbol_bias,
         }
     )
 
