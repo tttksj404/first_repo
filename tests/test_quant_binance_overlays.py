@@ -65,6 +65,9 @@ class QuantBinanceOverlayTests(unittest.TestCase):
         enriched = apply_macro_overlay(features, macro)
         self.assertEqual(enriched.macro_regime, "high_risk")
         self.assertGreaterEqual(enriched.macro_risk_penalty, 0.65)
+        self.assertEqual(enriched.macro_trade_restraint, "halt_high_impact_window")
+        self.assertEqual(enriched.macro_symbol_bias, "majors_only")
+        self.assertEqual(enriched.macro_leverage_cap, 1)
 
     def test_macro_overlay_marks_supportive_when_dollar_and_rates_fall(self) -> None:
         features = FeatureVector(
@@ -96,6 +99,8 @@ class QuantBinanceOverlayTests(unittest.TestCase):
         enriched = apply_macro_overlay(features, macro)
         self.assertEqual(enriched.macro_regime, "supportive")
         self.assertGreater(enriched.macro_liquidity_support_score, 0.7)
+        self.assertEqual(enriched.macro_trade_restraint, "none")
+        self.assertEqual(enriched.macro_symbol_bias, "neutral")
 
     def test_sentiment_overlay_marks_bottoming(self) -> None:
         features = FeatureVector(

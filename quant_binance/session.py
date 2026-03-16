@@ -354,6 +354,14 @@ class LivePaperSession:
             mismatch_active=mismatch_active,
             mismatch_details=mismatch_details,
         )
+        recent_decisions = self.decisions[-20:]
+        macro_runtime = {
+            "regime": recent_decisions[-1].macro_regime if recent_decisions else "neutral",
+            "trade_restraint": recent_decisions[-1].macro_trade_restraint if recent_decisions else "none",
+            "symbol_bias": recent_decisions[-1].macro_symbol_bias if recent_decisions else "neutral",
+            "active_symbols": sorted({decision.symbol for decision in recent_decisions if decision.final_mode != "cash"}),
+            "cash_rejections": sum(1 for decision in recent_decisions if "MACRO_EVENT_WINDOW" in decision.rejection_reasons or "MACRO_MAJORS_ONLY" in decision.rejection_reasons),
+        }
         summary = build_runtime_summary(
             decisions=self.decisions,
             tested_orders=self.tested_orders,
@@ -370,6 +378,7 @@ class LivePaperSession:
             live_positions=self.live_positions_snapshot,
             self_healing=self_healing_status,
         )
+        summary["macro_runtime"] = macro_runtime
         write_runtime_summary(summary_path, summary)
         write_runtime_state(
             state_path,
@@ -394,6 +403,7 @@ class LivePaperSession:
                 "futures_missing_in_paper_counts": dict(sorted(self.futures_missing_in_paper_counts.items())),
                 "futures_missing_on_exchange_counts": dict(sorted(self.futures_missing_on_exchange_counts.items())),
                 "self_healing": self_healing_status,
+                "macro_runtime": macro_runtime,
                 "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
             },
@@ -414,6 +424,7 @@ class LivePaperSession:
                 "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
                 "capital_report": self.capital_report,
                 "self_healing": self_healing_status,
+                "macro_runtime": macro_runtime,
                 "kill_switch": self.runtime.kill_switch.status(),
             },
         )
@@ -833,7 +844,12 @@ class LivePaperSession:
         reference_price: float,
     ) -> DecisionIntent:
         executable = self._cap_live_order_decision(decision, reference_price=reference_price)
-        if self.rest_client is None or not hasattr(self.rest_client, "transfer_asset"):
+        if self.rest_client is None:
+            return executable
+        transfer_method = getattr(self.rest_client, "transfer_wallet_balance", None)
+        if not callable(transfer_method):
+            transfer_method = getattr(self.rest_client, "transfer_asset", None)
+        if not callable(transfer_method):
             return executable
         transfer_reason = None
         source_market = ""
@@ -851,6 +867,13 @@ class LivePaperSession:
         route = self._transfer_route_for_markets(source_market=source_market, target_market=target_market)
         if route is None:
             return executable
+        if self._wallet_transfer_cooldown_active(
+            source_market=source_market,
+            target_market=target_market,
+            asset="USDT",
+            timestamp=decision.timestamp,
+        ):
+            return executable
         amount = self._minimal_transfer_amount_for_decision(
             decision=decision,
             reference_price=reference_price,
@@ -862,7 +885,7 @@ class LivePaperSession:
             return executable
         client_oid = f"{decision.decision_id}:{source_market}:{target_market}"
         try:
-            transfer_response = self.rest_client.transfer_asset(
+            transfer_response = transfer_method(
                 source_market=source_market,
                 target_market=target_market,
                 asset="USDT",
@@ -870,9 +893,15 @@ class LivePaperSession:
                 client_oid=client_oid,
             )
         except Exception as exc:
+            self._set_wallet_transfer_cooldown(
+                source_market=source_market,
+                target_market=target_market,
+                asset="USDT",
+                timestamp=decision.timestamp,
+            )
             if self.log_store is not None:
                 self.log_store.append(
-                    "capital_transfers",
+                    "wallet_transfers",
                     {
                         "timestamp": decision.timestamp,
                         "symbol": decision.symbol,
@@ -884,9 +913,15 @@ class LivePaperSession:
                     },
                 )
             return executable
+        self._set_wallet_transfer_cooldown(
+            source_market=source_market,
+            target_market=target_market,
+            asset="USDT",
+            timestamp=decision.timestamp,
+        )
         if self.log_store is not None:
             self.log_store.append(
-                "capital_transfers",
+                "wallet_transfers",
                 {
                     "timestamp": decision.timestamp,
                     "symbol": decision.symbol,
@@ -1483,116 +1518,6 @@ class LivePaperSession:
     ) -> None:
         key = self._wallet_transfer_cooldown_key(source_market=source_market, target_market=target_market, asset=asset)
         self.wallet_transfer_cooldowns[key] = timestamp + timedelta(seconds=max(seconds, 60))
-
-    def _attempt_wallet_transfer_for_decision(
-        self,
-        *,
-        decision: DecisionIntent,
-        timestamp: datetime,
-    ) -> bool:
-        if self.rest_client is None:
-            return False
-        transfer_method = getattr(self.rest_client, "transfer_wallet_balance", None)
-        if not callable(transfer_method):
-            return False
-        if "INSUFFICIENT_EXECUTION_BALANCE" not in decision.rejection_reasons:
-            return False
-        if decision.final_mode not in {"spot", "futures"}:
-            return False
-        source_market = "spot" if decision.final_mode == "futures" else "futures"
-        target_market = decision.final_mode
-        routes = self.capital_report.get("capital_transfer_routes", []) if isinstance(self.capital_report, dict) else []
-        selected_route = None
-        for route in routes:
-            if str(route.get("source_market", "")).lower() != source_market:
-                continue
-            if str(route.get("target_market", "")).lower() != target_market:
-                continue
-            if str(route.get("asset", "")).upper() != "USDT":
-                continue
-            if float(route.get("transferable_usd", 0.0) or 0.0) <= 0.0:
-                continue
-            selected_route = route
-            break
-        if selected_route is None:
-            return False
-        asset = str(selected_route.get("asset", "USDT")).upper()
-        if self._wallet_transfer_cooldown_active(source_market=source_market, target_market=target_market, asset=asset, timestamp=timestamp):
-            return False
-        reserve_fraction = self._cash_reserve_fraction()
-        safe_reserve_denominator = max(1.0 - reserve_fraction, 0.05)
-        if decision.final_mode == "futures":
-            available = float(
-                self.capital_report.get(
-                    "futures_execution_balance_usd",
-                    self.capital_report.get("futures_available_balance_usd", 0.0),
-                )
-            )
-            leverage = max(
-                select_futures_leverage(
-                    predictability_score=decision.predictability_score,
-                    trend_strength=decision.trend_strength,
-                    volume_confirmation=decision.volume_confirmation,
-                    liquidity_score=decision.liquidity_score,
-                    volatility_penalty=decision.volatility_penalty,
-                    overheat_penalty=decision.overheat_penalty,
-                    net_expected_edge_bps=decision.net_expected_edge_bps,
-                    estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
-                    settings=self.runtime.paper_service.settings,
-                ),
-                1,
-            )
-            required_available = decision.order_intent_notional_usd / (float(leverage) * safe_reserve_denominator)
-        else:
-            selected_route_for_spot = self._select_spot_execution_route(decision, reserve_fraction=reserve_fraction)
-            available = float(selected_route_for_spot.get("free_balance_usd", 0.0)) if selected_route_for_spot is not None else float(self.capital_report.get("spot_available_balance_usd", 0.0))
-            required_available = decision.order_intent_notional_usd / safe_reserve_denominator
-        deficit_usd = max(required_available - available, 0.0)
-        transferable_usd = float(selected_route.get("transferable_usd", 0.0) or 0.0)
-        if deficit_usd <= 0.0 or transferable_usd <= 0.0:
-            return False
-        amount = min(transferable_usd, deficit_usd)
-        if amount <= 0.0:
-            return False
-        try:
-            result = transfer_method(
-                asset=asset,
-                amount=round(amount, 8),
-                source_market=source_market,
-                target_market=target_market,
-            )
-        except Exception as exc:
-            self._set_wallet_transfer_cooldown(source_market=source_market, target_market=target_market, asset=asset, timestamp=timestamp, seconds=300)
-            if self.log_store is not None:
-                self.log_store.append(
-                    "wallet_transfers",
-                    {
-                        "timestamp": timestamp,
-                        "asset": asset,
-                        "source_market": source_market,
-                        "target_market": target_market,
-                        "amount": round(amount, 8),
-                        "status": "error",
-                        "error": repr(exc),
-                    },
-                )
-            return False
-        self._set_wallet_transfer_cooldown(source_market=source_market, target_market=target_market, asset=asset, timestamp=timestamp, seconds=300)
-        if self.log_store is not None:
-            self.log_store.append(
-                "wallet_transfers",
-                {
-                    "timestamp": timestamp,
-                    "asset": asset,
-                    "source_market": source_market,
-                    "target_market": target_market,
-                    "amount": round(amount, 8),
-                    "status": "submitted",
-                    "response": result,
-                },
-            )
-        self._refresh_account_state(evaluate_live_positions=False)
-        return True
 
     def _futures_reallocation_cooldown_window(self) -> timedelta:
         seconds = max(60, self.runtime.decision_interval_minutes * 120)
@@ -4052,16 +3977,23 @@ class LivePaperSession:
             allow_new_submission = False
         if manual_symbol_cooldown_active:
             allow_new_submission = False
+        prepared_execution_decision = managed_decision
+        if state is not None and allow_new_submission:
+            prepared_execution_decision = (
+                self._prepare_live_execution_decision(
+                    decision=managed_decision,
+                    reference_price=state.last_trade_price,
+                )
+                if self.live_order_executor is not None
+                else self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
+            )
         if (
             self.live_order_executor is not None
             and state is not None
             and allow_new_submission
             and live_orders_allowed
-            and self._market_capital_allowed(managed_decision)
         ):
-            executable_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
-            if self._attempt_wallet_transfer_for_decision(decision=executable_decision, timestamp=timestamp):
-                executable_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
+            executable_decision = prepared_execution_decision
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if executable_decision.final_mode not in {"spot", "futures"} or executable_decision.order_intent_notional_usd <= 0:
@@ -4171,13 +4103,29 @@ class LivePaperSession:
                         preflight_rejection = self.live_order_executor.pop_last_preflight_rejection()
                         if preflight_rejection is not None:
                             symbol = str(preflight_rejection.get("symbol", executable_decision.symbol))
+                            reason = str(preflight_rejection.get("reason", "")).upper()
                             message = str(
                                 preflight_rejection.get(
                                     "message",
-                                    preflight_rejection.get("reason", "preflight_rejected"),
+                                    reason or "preflight_rejected",
                                 )
                             )
-                            self._apply_preflight_symbol_cooldown(symbol=symbol, timestamp=timestamp)
+                            if reason in {"BITGET_MAX_OPEN_ZERO", "BITGET_MAX_OPEN_BELOW_MIN_QTY"}:
+                                self._apply_order_error_cooldown(
+                                    symbol=symbol,
+                                    error_message=reason or message,
+                                    timestamp=timestamp,
+                                    stage="live_order_preflight",
+                                    exchange_id=self.live_order_executor._exchange_id(),
+                                )
+                                self._refresh_account_state_after_live_order_activity(
+                                    symbol=symbol,
+                                    timestamp=timestamp,
+                                    stage="live_order_preflight",
+                                    reason="preflight_capacity",
+                                )
+                            else:
+                                self._apply_preflight_symbol_cooldown(symbol=symbol, timestamp=timestamp)
                             self.self_healing.record_runtime_error(
                                 now=timestamp,
                                 symbol=symbol,
@@ -4194,7 +4142,7 @@ class LivePaperSession:
                                         "market": str(preflight_rejection.get("market", executable_decision.final_mode)),
                                         "stage": "live_order_preflight",
                                         "error": message,
-                                        "reason": str(preflight_rejection.get("reason", "")),
+                                        "reason": reason,
                                     },
                                 )
                         elif existing_paper_position is None and self._find_live_futures_position(executable_decision.symbol) is None:
@@ -4211,13 +4159,13 @@ class LivePaperSession:
                 and self._find_live_futures_position(executable_decision.symbol) is None
             ):
                 self._note_live_entry_starvation(
-                    symbol=executable_decision.symbol,
-                    timestamp=timestamp,
-                    reason="STALE_FINGERPRINT_SUPPRESSION",
-                    fingerprint=fingerprint,
-                )
-        if self.order_tester is not None and state is not None and allow_new_submission and self._market_capital_allowed(managed_decision):
-            test_decision = self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
+                                symbol=executable_decision.symbol,
+                                timestamp=timestamp,
+                                reason="STALE_FINGERPRINT_SUPPRESSION",
+                                fingerprint=fingerprint,
+                            )
+        if self.order_tester is not None and state is not None and allow_new_submission:
+            test_decision = prepared_execution_decision
             if test_decision.final_mode in {"spot", "futures"} and test_decision.order_intent_notional_usd > 0:
                 try:
                     test_result = self.order_tester.test_decision(
