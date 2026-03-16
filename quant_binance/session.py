@@ -315,10 +315,12 @@ class LivePaperSession:
             "spot_execution_routes": [item.__dict__ for item in report.spot_execution_routes],
             "capital_transfer_routes": [item.__dict__ for item in report.capital_transfer_routes],
             "futures_available_balance_usd": report.futures_available_balance_usd,
+            "futures_execution_balance_usd": report.futures_execution_balance_usd,
             "futures_recognized_balance_usd": report.futures_recognized_balance_usd,
-            "futures_execution_balance_usd": float(
-                self.account_snapshot.get("executionAvailableBalance", report.futures_available_balance_usd)
-            ),
+            "futures_transferable_execution_balance_usd": report.futures_transferable_execution_balance_usd,
+            "futures_collateral_candidate_balance_usd": report.futures_collateral_candidate_balance_usd,
+            "futures_manual_handling_balance_usd": report.futures_manual_handling_balance_usd,
+            "futures_total_reusable_balance_usd": report.futures_total_reusable_balance_usd,
             "minimum_operational_balance_usd": report.minimum_operational_balance_usd,
             "minimum_full_universe_balance_usd": report.minimum_full_universe_balance_usd,
             "recommended_balance_usd": report.recommended_balance_usd,
@@ -771,11 +773,24 @@ class LivePaperSession:
             meaningful_notional_floor = max(meaningful_notional_floor, major_strong_entry_floor)
         if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
             rejection_reasons = list(decision.rejection_reasons + (rejection_code,))
-            if allow_transfer_hints and decision.final_mode == "futures" and self._preferred_transfer_route_for_decision(
-                decision=decision,
-                reference_price=reference_price,
-            ) is not None:
-                rejection_reasons.append("TRANSFER_REQUIRED_SPOT_TO_FUTURES")
+            if allow_transfer_hints and decision.final_mode == "futures":
+                futures_route = self._preferred_transfer_route_for_decision(
+                    decision=decision,
+                    reference_price=reference_price,
+                    allow_non_immediate=True,
+                )
+                if futures_route is not None:
+                    capacity_effect = self._transfer_route_capacity_effect(futures_route)
+                    if capacity_effect == "direct_execution":
+                        rejection_reasons.append("TRANSFER_REQUIRED_SPOT_TO_FUTURES")
+                    elif capacity_effect == "collateral_candidate":
+                        rejection_reasons.append("FUTURES_COLLATERAL_AVAILABLE")
+                    else:
+                        rejection_reasons.append("MANUAL_FUTURES_CONVERSION_REQUIRED")
+                elif float(self.capital_report.get("futures_collateral_candidate_balance_usd", 0.0) or 0.0) > 0.0:
+                    rejection_reasons.append("FUTURES_COLLATERAL_AVAILABLE")
+                elif float(self.capital_report.get("futures_manual_handling_balance_usd", 0.0) or 0.0) > 0.0:
+                    rejection_reasons.append("MANUAL_FUTURES_CONVERSION_REQUIRED")
             if allow_transfer_hints and decision.final_mode == "spot" and self._preferred_transfer_route_for_decision(
                 decision=decision,
                 reference_price=reference_price,
@@ -869,7 +884,7 @@ class LivePaperSession:
                     continue
                 matching_routes.append(item)
         if not matching_routes:
-            if requested_asset == "USDT":
+            if requested_asset in {"", "USDT"}:
                 if source_market == "spot" and target_market == "futures":
                     transferable = float(self.capital_report.get("max_spot_to_futures_transfer_usd", 0.0) or 0.0)
                 elif source_market == "futures" and target_market == "spot":
@@ -883,10 +898,38 @@ class LivePaperSession:
                         "asset": "USDT",
                         "transferable_usd": transferable,
                         "route_type": "wallet_transfer",
+                        "capacity_effect": "direct_execution" if target_market == "futures" else "spot_execution",
+                        "auto_transfer_supported": True,
                         "note": "Fallback transfer route synthesized from legacy capital report capacity.",
                     }
             return None
-        return max(matching_routes, key=lambda item: float(item.get("transferable_usd", 0.0) or 0.0))
+        return min(
+            matching_routes,
+            key=lambda item: (
+                self._transfer_route_capacity_priority(item),
+                -float(item.get("transferable_usd", 0.0) or 0.0),
+            ),
+        )
+
+    def _transfer_route_capacity_effect(self, route: dict[str, Any]) -> str:
+        capacity_effect = str(route.get("capacity_effect", "") or "").strip().lower()
+        if capacity_effect:
+            return capacity_effect
+        if str(route.get("target_market", "")).lower() != "futures":
+            return "spot_execution"
+        if str(route.get("asset", "")).upper() == "USDT":
+            return "direct_execution"
+        if bool(route.get("requires_manual_transfer", False)):
+            return "manual_conversion"
+        return "collateral_candidate"
+
+    def _transfer_route_capacity_priority(self, route: dict[str, Any]) -> int:
+        return {
+            "direct_execution": 0,
+            "collateral_candidate": 1,
+            "manual_conversion": 2,
+            "spot_execution": 0,
+        }.get(self._transfer_route_capacity_effect(route), 3)
 
     def _cap_live_order_decision_with_transfer_buffer(
         self,
@@ -955,15 +998,20 @@ class LivePaperSession:
         *,
         decision: DecisionIntent,
         reference_price: float | None,
+        allow_non_immediate: bool = False,
     ) -> dict[str, Any] | None:
         if not self.capital_report:
             return None
         if decision.final_mode == "futures":
-            return self._transfer_route_for_markets(
+            route = self._transfer_route_for_markets(
                 source_market="spot",
                 target_market="futures",
-                asset="USDT",
             )
+            if route is None:
+                return None
+            if not allow_non_immediate and self._transfer_route_capacity_effect(route) != "direct_execution":
+                return None
+            return route
         if decision.final_mode != "spot" or decision.side != "long":
             return None
         selected_route = self._select_spot_execution_route(decision, reserve_fraction=self._cash_reserve_fraction())
