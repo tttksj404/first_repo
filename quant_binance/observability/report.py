@@ -28,6 +28,13 @@ def _futures_position_sync_payload(
 ) -> dict[str, object]:
     paper_open_futures_positions = list(open_futures_positions or [])
     exchange_live_futures_positions = _active_exchange_futures_positions(live_positions)
+    adopted_futures_positions = [
+        dict(position)
+        for position in paper_open_futures_positions
+        if str(position.get("origin", "")).strip().lower() == "adopted"
+        or bool(position.get("adopted_at"))
+        or bool(position.get("adoption_source"))
+    ]
     paper_symbols = {
         str(position.get("symbol", ""))
         for position in paper_open_futures_positions
@@ -44,11 +51,20 @@ def _futures_position_sync_payload(
         "missing_in_paper": missing_in_paper,
         "missing_on_exchange": missing_on_exchange,
     }
+    pending_external_futures_positions = [
+        dict(position)
+        for position in exchange_live_futures_positions
+        if str(position.get("symbol", "")) in set(missing_in_paper)
+    ]
     return {
         "paper_open_futures_positions": paper_open_futures_positions,
         "paper_open_futures_position_count": len(paper_open_futures_positions),
+        "adopted_futures_positions": adopted_futures_positions,
+        "adopted_futures_position_count": len(adopted_futures_positions),
         "exchange_live_futures_positions": exchange_live_futures_positions,
         "exchange_live_futures_position_count": len(exchange_live_futures_positions),
+        "pending_external_futures_positions": pending_external_futures_positions,
+        "pending_external_futures_position_count": len(pending_external_futures_positions),
         "futures_position_mismatch": bool(missing_in_paper or missing_on_exchange),
         "futures_position_mismatch_details": mismatch_details,
     }
