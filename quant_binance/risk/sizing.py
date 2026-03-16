@@ -29,8 +29,11 @@ def select_futures_leverage(
     risk = settings.risk
     target_leverage = max(1, min(int(math.ceil(risk.target_futures_leverage)), int(math.ceil(risk.max_futures_leverage))))
     max_leverage = max(target_leverage, int(math.ceil(risk.max_futures_leverage)))
-    if settings.strategy_profile == "live-ultra-aggressive" and symbol in {"BTCUSDT", "ETHUSDT"}:
-        target_leverage = min(target_leverage + 2, max_leverage)
+    if settings.strategy_profile == "live-ultra-aggressive":
+        if symbol == "ETHUSDT":
+            target_leverage = min(target_leverage + 2, max_leverage)
+        elif symbol == "BTCUSDT":
+            target_leverage = min(target_leverage + 1, max_leverage)
     soft_leverage = max(1, target_leverage - 1)
     edge_to_cost_multiple = _edge_to_cost_multiple(
         net_expected_edge_bps=net_expected_edge_bps,

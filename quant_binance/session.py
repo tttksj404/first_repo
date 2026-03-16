@@ -3498,6 +3498,16 @@ class LivePaperSession:
             self.remaining_portfolio_capacity_usd + max(0.0, exit_notional_usd),
         )
 
+    def _liquidity_drop_reentry_cooldown_until(self, *, symbol: str, timestamp: datetime) -> datetime:
+        base_minutes = max(int(self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes), 1)
+        if symbol == "BTCUSDT":
+            minutes = base_minutes * 2
+        elif symbol == "ETHUSDT":
+            minutes = int(base_minutes * 1.25)
+        else:
+            minutes = base_minutes
+        return timestamp + timedelta(minutes=max(minutes, 1))
+
     def _close_position(self, *, position: PaperPosition, exit_price: float, timestamp: datetime, exit_reason: str) -> None:
         self._record_closed_trade(
             position=position,
@@ -3509,12 +3519,15 @@ class LivePaperSession:
         if (
             position.market == "futures"
             and self._is_major_futures_symbol(position.symbol)
-            and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT", "ENTRY_CONFIRMATION_FAILED"}
+            and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT", "ENTRY_CONFIRMATION_FAILED", "LIQUIDITY_DROP_EXIT"}
             and self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes > 0
         ):
-            cooldown_until = timestamp + timedelta(
-                minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
-            )
+            if exit_reason == "LIQUIDITY_DROP_EXIT":
+                cooldown_until = self._liquidity_drop_reentry_cooldown_until(symbol=position.symbol, timestamp=timestamp)
+            else:
+                cooldown_until = timestamp + timedelta(
+                    minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
+                )
             current = self.manual_symbol_cooldowns.get(position.symbol)
             if current is None or cooldown_until > current:
                 self.manual_symbol_cooldowns[position.symbol] = cooldown_until
