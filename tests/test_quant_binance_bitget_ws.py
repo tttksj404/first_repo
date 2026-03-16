@@ -197,8 +197,9 @@ class QuantBinanceBitgetWebSocketTests(unittest.TestCase):
         kwargs = client._connect_kwargs(ssl_context=None)
 
         self.assertEqual(kwargs["ssl"], None)
-        self.assertEqual(kwargs["ping_interval"], 20)
+        self.assertIsNone(kwargs["ping_interval"])
         self.assertIsNone(kwargs["ping_timeout"])
+        self.assertEqual(kwargs["close_timeout"], 1)
 
     def test_client_splits_large_subscribe_payloads_into_safe_batches(self) -> None:
         symbols = tuple(f"SYM{index}USDT" for index in range(12))
