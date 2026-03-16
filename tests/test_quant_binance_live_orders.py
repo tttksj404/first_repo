@@ -167,7 +167,7 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
             settings=settings,
         )
 
-        self.assertEqual(leverage, 10)
+        self.assertEqual(leverage, 9)
 
     def test_live_ultra_aggressive_keeps_alt_target_leverage_unchanged(self) -> None:
         settings = self._load_settings_for_profile("live-ultra-aggressive")
@@ -186,6 +186,24 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         )
 
         self.assertEqual(leverage, 8)
+
+    def test_live_ultra_aggressive_uses_higher_target_leverage_for_eth(self) -> None:
+        settings = self._load_settings_for_profile("live-ultra-aggressive")
+
+        leverage = select_futures_leverage(
+            symbol="ETHUSDT",
+            predictability_score=66.7,
+            trend_strength=0.72,
+            volume_confirmation=0.62,
+            liquidity_score=0.9,
+            volatility_penalty=0.25,
+            overheat_penalty=0.2,
+            net_expected_edge_bps=25.8,
+            estimated_round_trip_cost_bps=8.0,
+            settings=settings,
+        )
+
+        self.assertEqual(leverage, 10)
 
     def test_live_ultra_aggressive_reserves_max_leverage_for_exceptional_setup(self) -> None:
         settings = self._load_settings_for_profile("live-ultra-aggressive")
