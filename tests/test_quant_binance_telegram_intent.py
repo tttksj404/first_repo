@@ -26,6 +26,21 @@ class QuantBinanceTelegramIntentTests(unittest.TestCase):
         self.assertIn("지금 상태 알려줘", message)
         self.assertIn("전략 검토해줘", message)
 
+    def test_weekly_report_phrase(self) -> None:
+        intent = parse_telegram_intent("주간 검증 리포트")
+        self.assertEqual(intent.kind, "local")
+        self.assertEqual(intent.value, "weekly-validation-report")
+
+    def test_execution_report_phrase(self) -> None:
+        intent = parse_telegram_intent("실행 품질 리포트")
+        self.assertEqual(intent.kind, "local")
+        self.assertEqual(intent.value, "execution-quality-report")
+
+    def test_advisor_report_phrase(self) -> None:
+        intent = parse_telegram_intent("거시 전략 리포트")
+        self.assertEqual(intent.kind, "local")
+        self.assertEqual(intent.value, "advisor-report")
+
 
 if __name__ == "__main__":
     unittest.main()

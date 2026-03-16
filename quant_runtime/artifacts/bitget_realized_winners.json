@@ -1,0 +1,31 @@
+{
+  "end_time": "2026-03-14T11:16:41.690186+00:00",
+  "generated_at": "2026-03-14T11:16:41.873543+00:00",
+  "min_realized_pnl_usd": 20.0,
+  "start_time": "2026-02-12T11:16:41.690186+00:00",
+  "winner_count": 2,
+  "winners": [
+    {
+      "close_avg_price": 2130.29,
+      "close_time": "2026-03-13T00:26:14.866000+00:00",
+      "hold_side": "long",
+      "net_profit_usd": 24.805041,
+      "open_avg_price": 2061.51,
+      "open_time": "2026-03-12T21:51:48.856000+00:00",
+      "position_id": "1416107710448545793",
+      "realized_pnl_usd": 25.4469,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "close_avg_price": 2077.59,
+      "close_time": "2026-03-12T14:13:08.481000+00:00",
+      "hold_side": "long",
+      "net_profit_usd": 21.355783,
+      "open_avg_price": 2034.02,
+      "open_time": "2026-03-11T06:35:19.609000+00:00",
+      "position_id": "1415514680964296705",
+      "realized_pnl_usd": 22.2171,
+      "symbol": "ETHUSDT"
+    }
+  ]
+}

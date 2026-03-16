@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from statistics import mean, median, pstdev
+from pathlib import Path
 
+from quant_binance.cost_calibration import CostCalibration, load_cost_calibration
 from quant_binance.data.state import KlineBar, SymbolMarketState
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.models import FeatureVector
 from quant_binance.settings import Settings
 from quant_binance.strategy.scorer import compute_predictability_score
 from quant_binance.strategy.edge import ConditionalEdgeLookup
+from quant_binance.strategy.normalize import clamp
 
 
 def _pct_returns(bars: list[KlineBar]) -> list[float]:
@@ -47,14 +50,56 @@ def _recent_closed_bars(state: SymbolMarketState, interval: str, limit: int) -> 
     return bars[-limit:]
 
 
+def _intraday_trend_signal(
+    *,
+    bars_5m: list[KlineBar],
+    bars_1m: list[KlineBar],
+) -> tuple[int, float]:
+    components: list[tuple[int, float]] = []
+    closes_5m = [bar.close_price for bar in bars_5m]
+    if len(closes_5m) >= 8:
+        ema_fast_5m = _ema(closes_5m[-3:], min(3, len(closes_5m[-3:])))
+        ema_slow_5m = _ema(closes_5m[-8:], min(8, len(closes_5m[-8:])))
+        ret_5m = (closes_5m[-1] / closes_5m[-4] - 1.0) if closes_5m[-4] > 0 else 0.0
+        if ema_fast_5m > ema_slow_5m and ret_5m > 0:
+            components.append((1, clamp(abs(ret_5m) * 1800.0 + 0.35)))
+        elif ema_fast_5m < ema_slow_5m and ret_5m < 0:
+            components.append((-1, clamp(abs(ret_5m) * 1800.0 + 0.35)))
+
+    closes_1m = [bar.close_price for bar in bars_1m]
+    if len(closes_1m) >= 12:
+        ema_fast_1m = _ema(closes_1m[-5:], min(5, len(closes_1m[-5:])))
+        ema_slow_1m = _ema(closes_1m[-12:], min(12, len(closes_1m[-12:])))
+        ret_1m = (closes_1m[-1] / closes_1m[-6] - 1.0) if closes_1m[-6] > 0 else 0.0
+        if ema_fast_1m > ema_slow_1m and ret_1m > 0:
+            components.append((1, clamp(abs(ret_1m) * 3200.0 + 0.25)))
+        elif ema_fast_1m < ema_slow_1m and ret_1m < 0:
+            components.append((-1, clamp(abs(ret_1m) * 3200.0 + 0.25)))
+
+    if not components:
+        return 0, 0.0
+    signed_strength = sum(direction * strength for direction, strength in components)
+    if signed_strength > 0:
+        return 1, round(min(abs(signed_strength), 1.0), 6)
+    if signed_strength < 0:
+        return -1, round(min(abs(signed_strength), 1.0), 6)
+    return 0, 0.0
+
+
 class MarketFeatureExtractor:
     def __init__(
         self,
         settings: Settings,
         edge_lookup: ConditionalEdgeLookup | None = None,
+        cost_calibration: CostCalibration | None = None,
     ) -> None:
         self.settings = settings
         self.edge_lookup = edge_lookup
+        if cost_calibration is not None:
+            self.cost_calibration = cost_calibration
+        else:
+            calibration_path = Path(__file__).resolve().parents[2] / "quant_runtime" / "artifacts" / "cost_calibration.json"
+            self.cost_calibration = load_cost_calibration(calibration_path)
 
     def build_history_context(self, state: SymbolMarketState) -> FeatureHistoryContext:
         bars_1h = _recent_closed_bars(state, "1h", 120)
@@ -88,6 +133,7 @@ class MarketFeatureExtractor:
         bars_1h = _recent_closed_bars(state, "1h", 120)
         bars_4h = _recent_closed_bars(state, "4h", 120)
         bars_5m = _recent_closed_bars(state, "5m", 40)
+        bars_1m = _recent_closed_bars(state, "1m", 80)
         if len(bars_1h) < 21:
             raise ValueError("at least 21 closed 1h bars are required for primitive extraction")
         if len(bars_4h) < 2 or len(bars_5m) < 2:
@@ -112,6 +158,19 @@ class MarketFeatureExtractor:
         else:
             trend_direction = 0
             ema_stack_score = 0.0
+
+        intraday_bias, intraday_strength = _intraday_trend_signal(
+            bars_5m=bars_5m,
+            bars_1m=bars_1m,
+        )
+        if trend_direction == 0 and intraday_bias != 0:
+            trend_direction = intraday_bias
+            ema_stack_score = max(ema_stack_score, round(0.4 + 0.35 * intraday_strength, 6))
+        elif intraday_bias != 0 and intraday_bias == trend_direction:
+            ema_stack_score = min(1.0, round(ema_stack_score + 0.25 * intraday_strength, 6))
+        elif intraday_bias != 0 and intraday_bias != trend_direction and intraday_strength >= 0.45:
+            trend_direction = intraday_bias
+            ema_stack_score = max(0.6, round(0.5 + 0.3 * intraday_strength, 6))
 
         lookback = bars_1h[-21:-1]
         breakout_reference_price = (
@@ -177,6 +236,8 @@ class MarketFeatureExtractor:
             open_interest_ema=open_interest_ema,
             basis_bps=state.basis_bps,
             gross_expected_edge_bps=gross_expected_edge_bps,
+            intraday_trend_direction=intraday_bias,
+            intraday_trend_strength=intraday_strength,
         )
 
     def enrich_feature_vector(self, *, state: SymbolMarketState, features: FeatureVector) -> FeatureVector:
@@ -211,5 +272,15 @@ class MarketFeatureExtractor:
                 "resistance_penalty": round(resistance_penalty, 6),
             }
         )
+        if self.cost_calibration is not None:
+            calibration = self.cost_calibration.for_symbol(state.symbol)
+            enriched = FeatureVector(
+                **{
+                    **enriched.as_dict(),
+                    "empirical_fee_bps": calibration.empirical_fee_bps,
+                    "empirical_entry_slippage_bps": calibration.empirical_entry_slippage_bps,
+                    "empirical_exit_slippage_bps": calibration.empirical_exit_slippage_bps,
+                }
+            )
         score = compute_predictability_score(enriched, self.settings)
         return FeatureVector(**{**enriched.as_dict(), "predictability_score": score})

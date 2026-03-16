@@ -84,6 +84,23 @@ class QuantBinanceExchangeIntegrationTests(unittest.TestCase):
                     is_closed=True,
                 )
             )
+        for idx in range(90):
+            close_time = now - timedelta(minutes=90 - idx)
+            state.klines.setdefault("1m", []).append(
+                KlineBar(
+                    symbol="BTCUSDT",
+                    interval="1m",
+                    start_time=close_time - timedelta(minutes=1),
+                    close_time=close_time,
+                    open_price=49980.0 + idx * 0.6,
+                    high_price=50010.0 + idx * 0.6,
+                    low_price=49960.0 + idx * 0.6,
+                    close_price=49990.0 + idx * 0.6,
+                    volume=0.5 + idx * 0.02,
+                    quote_volume=15000 + idx * 120,
+                    is_closed=True,
+                )
+            )
         for idx in range(40):
             trade_time = now - timedelta(minutes=40 - idx)
             state.trades.append(
@@ -118,6 +135,73 @@ class QuantBinanceExchangeIntegrationTests(unittest.TestCase):
         self.assertEqual(primitive.trend_direction, 1)
         self.assertGreater(primitive.gross_expected_edge_bps, 0.0)
         self.assertGreater(primitive.open_interest_ema, 0.0)
+
+    def test_market_feature_extractor_uses_intraday_bias_when_hourly_stack_is_ambiguous(self) -> None:
+        state = self._build_state()
+        now = datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc)
+        state.klines["1h"] = []
+        for idx in range(130):
+            close_time = now - timedelta(hours=130 - idx)
+            price = 50000.0
+            state.klines["1h"].append(
+                KlineBar(
+                    symbol="BTCUSDT",
+                    interval="1h",
+                    start_time=close_time - timedelta(hours=1),
+                    close_time=close_time,
+                    open_price=price,
+                    high_price=price + 20.0,
+                    low_price=price - 20.0,
+                    close_price=price,
+                    volume=10 + idx,
+                    quote_volume=500000 + idx * 1000,
+                    is_closed=True,
+                )
+            )
+        state.klines["5m"] = []
+        for idx in range(50):
+            close_time = now - timedelta(minutes=5 * (50 - idx))
+            price = 50000.0 - idx * 8.0
+            state.klines["5m"].append(
+                KlineBar(
+                    symbol="BTCUSDT",
+                    interval="5m",
+                    start_time=close_time - timedelta(minutes=5),
+                    close_time=close_time,
+                    open_price=price + 5.0,
+                    high_price=price + 8.0,
+                    low_price=price - 6.0,
+                    close_price=price,
+                    volume=3 + idx * 0.1,
+                    quote_volume=120000 + idx * 400,
+                    is_closed=True,
+                )
+            )
+        state.klines["1m"] = []
+        for idx in range(90):
+            close_time = now - timedelta(minutes=90 - idx)
+            price = 49800.0 - idx * 1.5
+            state.klines["1m"].append(
+                KlineBar(
+                    symbol="BTCUSDT",
+                    interval="1m",
+                    start_time=close_time - timedelta(minutes=1),
+                    close_time=close_time,
+                    open_price=price + 1.0,
+                    high_price=price + 2.0,
+                    low_price=price - 2.0,
+                    close_price=price,
+                    volume=1.0 + idx * 0.01,
+                    quote_volume=10000 + idx * 80,
+                    is_closed=True,
+                )
+            )
+
+        extractor = MarketFeatureExtractor(self.settings)
+        primitive = extractor.build_primitive_inputs(state)
+
+        self.assertEqual(primitive.trend_direction, -1)
+        self.assertGreaterEqual(primitive.ema_stack_score, 0.35)
 
     def test_rest_client_builds_account_open_orders_and_test_order_requests(self) -> None:
         client = BinanceRestClient(

@@ -1,0 +1,103 @@
+{
+  "closed_trade_count": 0,
+  "pruning_recommendations": [
+    {
+      "avg_net_edge_bps": -45.193846,
+      "cash_count": 31,
+      "decision_count": 36,
+      "edge_too_thin_count": 36,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "repeated weak-liquidity or thin-edge rejections without positive edge",
+      "recommendation": "prune",
+      "symbol": "SOLUSDT",
+      "trade_count": 0
+    },
+    {
+      "avg_net_edge_bps": 20.271913,
+      "cash_count": 2,
+      "decision_count": 36,
+      "edge_too_thin_count": 1,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "trade_count": 0
+    },
+    {
+      "avg_net_edge_bps": 30.506346,
+      "cash_count": 0,
+      "decision_count": 36,
+      "edge_too_thin_count": 0,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "BTCUSDT",
+      "trade_count": 0
+    }
+  ],
+  "realized_pnl_usd": 0.0,
+  "regime_performance": [
+    {
+      "avg_cost_bps": 76.347077,
+      "avg_net_edge_bps": -45.761237,
+      "avg_score": 55.822295,
+      "decision_count": 33,
+      "mode": "cash"
+    },
+    {
+      "avg_cost_bps": 18.434629,
+      "avg_net_edge_bps": 26.336423,
+      "avg_score": 75.813809,
+      "decision_count": 70,
+      "mode": "futures"
+    },
+    {
+      "avg_cost_bps": 79.213884,
+      "avg_net_edge_bps": -26.477986,
+      "avg_score": 69.715594,
+      "decision_count": 5,
+      "mode": "spot"
+    }
+  ],
+  "run_dir": "quant_runtime/output/paper-live-shell/20260315-134921",
+  "summary_path": "quant_runtime/output/paper-live-shell/20260315-134921/summary.json",
+  "symbol_expectancy": [],
+  "walk_forward": [
+    {
+      "avg_net_edge_bps": -4.936746,
+      "avg_score": 64.780855,
+      "cash_count": 13,
+      "decision_count": 36,
+      "end": "2026-03-15T13:50:00+00:00",
+      "futures_count": 23,
+      "spot_count": 0,
+      "start": "2026-03-15T13:50:00+00:00",
+      "window_index": 1
+    },
+    {
+      "avg_net_edge_bps": 3.980472,
+      "avg_score": 70.566762,
+      "cash_count": 11,
+      "decision_count": 36,
+      "end": "2026-03-15T13:55:00+00:00",
+      "futures_count": 23,
+      "spot_count": 2,
+      "start": "2026-03-15T13:55:00+00:00",
+      "window_index": 2
+    },
+    {
+      "avg_net_edge_bps": 6.540687,
+      "avg_score": 72.921282,
+      "cash_count": 9,
+      "decision_count": 36,
+      "end": "2026-03-15T14:05:00+00:00",
+      "futures_count": 24,
+      "spot_count": 3,
+      "start": "2026-03-15T14:00:00+00:00",
+      "window_index": 3
+    }
+  ]
+}

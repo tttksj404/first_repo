@@ -3,7 +3,11 @@ from __future__ import annotations
 import unittest
 from datetime import datetime, timezone
 
-from quant_binance.data.bitget_ws import BitgetWebSocketClient, translate_bitget_ws_payload
+from quant_binance.data.bitget_ws import (
+    BITGET_MAX_CHANNELS_PER_SUBSCRIBE,
+    BitgetWebSocketClient,
+    translate_bitget_ws_payload,
+)
 
 
 class QuantBinanceBitgetWebSocketTests(unittest.TestCase):
@@ -182,6 +186,32 @@ class QuantBinanceBitgetWebSocketTests(unittest.TestCase):
 
         self.assertEqual(len(first), 1)
         self.assertEqual(second, [])
+
+    def test_client_uses_stall_watchdog_friendly_connect_kwargs(self) -> None:
+        client = BitgetWebSocketClient(
+            market="spot",
+            symbols=("BTCUSDT",),
+            intervals=("5m",),
+        )
+
+        kwargs = client._connect_kwargs(ssl_context=None)
+
+        self.assertEqual(kwargs["ssl"], None)
+        self.assertEqual(kwargs["ping_interval"], 20)
+        self.assertIsNone(kwargs["ping_timeout"])
+
+    def test_client_splits_large_subscribe_payloads_into_safe_batches(self) -> None:
+        symbols = tuple(f"SYM{index}USDT" for index in range(12))
+        client = BitgetWebSocketClient(
+            market="spot",
+            symbols=symbols,
+            intervals=("5m", "1h", "4h"),
+        )
+
+        messages = client.build_subscribe_messages()
+
+        self.assertGreater(len(messages), 1)
+        self.assertTrue(all(len(message["args"]) <= BITGET_MAX_CHANNELS_PER_SUBSCRIBE for message in messages))
 
 
 if __name__ == "__main__":

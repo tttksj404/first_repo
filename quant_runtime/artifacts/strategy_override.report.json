@@ -1,0 +1,44 @@
+{
+  "candidate_name": "active-baseline",
+  "gates": {
+    "auto_pruned_symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "best_comparison_strategy": "current_strategy",
+    "best_comparison_total_pnl_usd": 5.343042,
+    "performance_report_present": true,
+    "recent_comparison_present": true,
+    "risky_symbols": [
+      "SIGNUSDT",
+      "WLDUSDT",
+      "ADAUSDT",
+      "BCHUSDT"
+    ]
+  },
+  "generated_at": "2026-03-14T07:35:01.480019+00:00",
+  "objective_score": 19.076678,
+  "overrides": {
+    "futures_exposure": {
+      "priority_symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "DOGEUSDT",
+        "TRXUSDT"
+      ]
+    },
+    "universe": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT"
+    ]
+  },
+  "status": "proposal_ready",
+  "supporting_artifacts": {
+    "optimization_latest": "/Users/tttksj/first_repo/quant_runtime/artifacts/optimization/latest.json",
+    "performance_report": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260314-065940/performance_report.json",
+    "recent_comparison": "/Users/tttksj/first_repo/quant_runtime/output/strategy-comparison-recent/20260314-073458/comparison.json"
+  }
+}

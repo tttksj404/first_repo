@@ -1,0 +1,125 @@
+{
+  "capital_report": {
+    "can_trade_any": true,
+    "can_trade_futures_any": true,
+    "can_trade_spot_any": false,
+    "futures_available_balance_usd": 129.365908,
+    "futures_execution_balance_usd": 129.36590769,
+    "futures_recognized_balance_usd": 129.365908,
+    "futures_requirements": [
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.0001,
+        "symbol": "BTCUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.01,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.1,
+        "symbol": "SOLUSDT"
+      }
+    ],
+    "minimum_full_universe_balance_usd": 18.382353,
+    "minimum_operational_balance_usd": 3.676471,
+    "note": "5% \uc218\uc775 \ubcf4\uc7a5\uc740 \ubd88\uac00\ud558\uba70, \uc544\ub798 \uae08\uc561\uc740 \ud604\uc7ac \uc124\uc815\uacfc \ucd5c\uc18c \uc8fc\ubb38 \uc870\uac74 \uae30\uc900\uc758 \uc6b4\uc601 \uac00\ub2a5 \uc790\uae08 \ucd94\uc815\uce58\uc785\ub2c8\ub2e4.",
+    "pending_symbols": [],
+    "recommended_balance_usd": 29.411765,
+    "spot_available_balance_usd": 0.221456,
+    "spot_recognized_balance_usd": 2.370235,
+    "spot_requirements": [
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "BTCUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "SOLUSDT"
+      }
+    ]
+  },
+  "closed_trade_count": 0,
+  "decision_count": 3,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_missing_in_paper_counts": {},
+  "futures_missing_on_exchange_counts": {},
+  "futures_position_mismatch": false,
+  "futures_position_mismatch_details": {
+    "missing_in_paper": [],
+    "missing_on_exchange": []
+  },
+  "heartbeat_count": 9351,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-03-15T21:43:34.525196+00:00",
+  "last_decision_timestamp": "2026-03-15T21:45:00+00:00",
+  "last_event_timestamp": "2026-03-15T21:43:49.773281+00:00",
+  "live_decision_loop": {
+    "closed_decision_kline_count": 2994,
+    "dropped_closed_decision_kline_reasons": {},
+    "emitted_decision_count": 2994,
+    "last_closed_decision_kline_symbol": "SOLUSDT",
+    "last_closed_decision_time": "2026-03-15T21:40:00+00:00",
+    "last_drop_decision_time": null,
+    "last_drop_reason": null,
+    "last_drop_symbol": null,
+    "last_emitted_decision_time": "2026-03-15T21:40:00+00:00",
+    "last_emitted_symbol": "SOLUSDT"
+  },
+  "live_order_count": 0,
+  "open_futures_position_count": 0,
+  "open_spot_position_count": 0,
+  "paper_open_futures_position_count": 0,
+  "paper_open_futures_positions": [],
+  "self_healing": {
+    "active_guards": {
+      "live_order_cooldown_until": null,
+      "manual_symbol_cooldowns": [],
+      "mismatch_active": false,
+      "mismatch_details": {
+        "missing_in_paper": [],
+        "missing_on_exchange": []
+      },
+      "missing_market_state_symbols": [],
+      "stall_restart_budget_remaining": 2,
+      "symbol_order_cooldowns": []
+    },
+    "issue_counts": {},
+    "recent_events": [],
+    "recovery_counts": {},
+    "status": "healthy"
+  },
+  "tested_order_count": 0,
+  "updated_at": "2026-03-15T21:43:49.775862+00:00"
+}

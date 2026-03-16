@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-03-15T21:53:59.178878+00:00",
+  "global_empirical_entry_slippage_bps": 5.353776,
+  "global_empirical_exit_slippage_bps": 5.353776,
+  "global_empirical_fee_bps": 4.0,
+  "lookback_hours": 72,
+  "symbol_calibrations": [
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 1,
+      "slippage_sample_count": 0,
+      "symbol": "ADAUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 1,
+      "slippage_sample_count": 0,
+      "symbol": "AGLDUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 4,
+      "slippage_sample_count": 0,
+      "symbol": "BCHUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 5.353776,
+      "empirical_exit_slippage_bps": 5.353776,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 27,
+      "slippage_sample_count": 1,
+      "symbol": "BTCUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 7,
+      "slippage_sample_count": 0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 13,
+      "slippage_sample_count": 0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 1,
+      "slippage_sample_count": 0,
+      "symbol": "SIGNUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 37,
+      "slippage_sample_count": 0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 9,
+      "slippage_sample_count": 0,
+      "symbol": "TRXUSDT"
+    }
+  ]
+}

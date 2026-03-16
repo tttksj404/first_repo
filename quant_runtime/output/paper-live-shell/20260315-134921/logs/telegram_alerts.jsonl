@@ -1,0 +1,3 @@
+{"key": "live-entry:1417075683967512577:2026-03-15 13:58:11.343357+00:00", "result": {"reason": "report_only_mode", "sent": false}, "text": "[LIVE_ENTRY] BTCUSDT\nmarket=futures\nside=BUY\nquantity=0.00012461\nreference_price=71538.3000\norder_id=1417075683967512577"}
+{"key": "live-position-close:BTCUSDT:1773590406816:LIVE_POSITION_MAJOR_LOW_SIGNAL_EXIT:1.0000", "result": {"reason": "report_only_mode", "sent": false}, "text": "[LIVE_POSITION_MAJOR_LOW_SIGNAL_EXIT] BTCUSDT\nroe_percent=-3.09\nunrealized_pl=-3.84"}
+{"key": "manual-close:BTCUSDT:2026-03-15T16:29:07.436520+00:00", "result": {"reason": "report_only_mode", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] BTCUSDT\nreentry_block_until=2026-03-15T16:34:07.436520+00:00"}

@@ -1,0 +1,96 @@
+{
+  "closed_trade_count": 0,
+  "pruning_recommendations": [
+    {
+      "avg_net_edge_bps": -25.472129,
+      "cash_count": 1,
+      "decision_count": 1,
+      "edge_too_thin_count": 1,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "SOLUSDT",
+      "trade_count": 0
+    },
+    {
+      "avg_net_edge_bps": 17.617076,
+      "cash_count": 0,
+      "decision_count": 1,
+      "edge_too_thin_count": 0,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "BTCUSDT",
+      "trade_count": 0
+    },
+    {
+      "avg_net_edge_bps": 20.409594,
+      "cash_count": 0,
+      "decision_count": 1,
+      "edge_too_thin_count": 0,
+      "expectancy_usd": 0.0,
+      "liquidity_too_weak_count": 0,
+      "reason": "no clear downgrade signal",
+      "recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "trade_count": 0
+    }
+  ],
+  "realized_pnl_usd": 0.0,
+  "regime_performance": [
+    {
+      "avg_cost_bps": 79.213884,
+      "avg_net_edge_bps": -25.472129,
+      "avg_score": 81.270945,
+      "decision_count": 1,
+      "mode": "cash"
+    },
+    {
+      "avg_cost_bps": 19.309561,
+      "avg_net_edge_bps": 19.013335,
+      "avg_score": 74.335148,
+      "decision_count": 2,
+      "mode": "futures"
+    }
+  ],
+  "run_dir": "quant_runtime/output/paper-live-shell/20260315-214331",
+  "summary_path": "quant_runtime/output/paper-live-shell/20260315-214331/summary.json",
+  "symbol_expectancy": [],
+  "walk_forward": [
+    {
+      "avg_net_edge_bps": 4.184847,
+      "avg_score": 76.64708,
+      "cash_count": 1,
+      "decision_count": 3,
+      "end": "2026-03-15T21:45:00+00:00",
+      "futures_count": 2,
+      "spot_count": 0,
+      "start": "2026-03-15T21:45:00+00:00",
+      "window_index": 1
+    },
+    {
+      "avg_net_edge_bps": 4.184847,
+      "avg_score": 76.64708,
+      "cash_count": 1,
+      "decision_count": 3,
+      "end": "2026-03-15T21:45:00+00:00",
+      "futures_count": 2,
+      "spot_count": 0,
+      "start": "2026-03-15T21:45:00+00:00",
+      "window_index": 2
+    },
+    {
+      "avg_net_edge_bps": 4.184847,
+      "avg_score": 76.64708,
+      "cash_count": 1,
+      "decision_count": 3,
+      "end": "2026-03-15T21:45:00+00:00",
+      "futures_count": 2,
+      "spot_count": 0,
+      "start": "2026-03-15T21:45:00+00:00",
+      "window_index": 3
+    }
+  ]
+}

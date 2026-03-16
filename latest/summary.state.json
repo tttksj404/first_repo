@@ -1,0 +1,126 @@
+{
+  "adopted_futures_position_count": 0,
+  "adopted_futures_positions": [],
+  "capital_report": {},
+  "closed_trade_count": 0,
+  "decision_count": 1,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "execution_quality": {
+    "active_overlays": {},
+    "contexts": {},
+    "decay_half_life_days": 14.0,
+    "degraded_keys": [],
+    "degraded_overlays": {},
+    "minimum_sample_size": 3,
+    "symbols": {},
+    "updated_at": "2026-03-16T11:28:02.602505+00:00"
+  },
+  "futures_missing_in_paper_counts": {},
+  "futures_missing_on_exchange_counts": {},
+  "futures_position_mismatch": true,
+  "futures_position_mismatch_details": {
+    "missing_in_paper": [],
+    "missing_on_exchange": [
+      "BTCUSDT"
+    ]
+  },
+  "heartbeat_count": 1,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-03-16T11:28:02.602414+00:00",
+  "last_decision_timestamp": "2026-03-08T12:05:00+00:00",
+  "last_event_timestamp": "2026-03-08T12:05:00+00:00",
+  "live_decision_loop": {
+    "closed_decision_kline_count": 1,
+    "dropped_closed_decision_kline_reasons": {},
+    "emitted_decision_count": 1,
+    "last_closed_decision_kline_symbol": "BTCUSDT",
+    "last_closed_decision_time": "2026-03-08T12:05:00+00:00",
+    "last_drop_decision_time": null,
+    "last_drop_reason": null,
+    "last_drop_symbol": null,
+    "last_emitted_decision_time": "2026-03-08T12:05:00+00:00",
+    "last_emitted_symbol": "BTCUSDT"
+  },
+  "live_order_count": 0,
+  "macro_runtime": {
+    "active_symbols": [
+      "BTCUSDT"
+    ],
+    "cash_rejections": 0,
+    "regime": "neutral",
+    "symbol_bias": "neutral",
+    "trade_restraint": "none"
+  },
+  "open_futures_position_count": 1,
+  "open_spot_position_count": 0,
+  "paper_open_futures_position_count": 1,
+  "paper_open_futures_positions": [
+    {
+      "active_stop_price": 49775.0,
+      "adopted_at": null,
+      "adoption_grace_active": false,
+      "adoption_grace_until": null,
+      "adoption_source": "",
+      "best_price": 50000.0,
+      "confirmation_pending": true,
+      "confirmation_pending_since": "2026-03-08T12:05:00+00:00",
+      "current_notional_usd_estimate": 2000.0,
+      "current_price": 50000.0,
+      "entry_estimated_round_trip_cost_bps": 14.0,
+      "entry_liquidity_score": 0.879762,
+      "entry_net_expected_edge_bps": 16.0,
+      "entry_planned_leverage": 1,
+      "entry_predictability_score": 81.21524,
+      "entry_price": 50000.0,
+      "entry_time": "2026-03-08T12:05:00+00:00",
+      "exchange_synced": false,
+      "exit_confirmation_count": 0,
+      "last_exit_signal_reason": "",
+      "latest_decision_time": "2026-03-08T12:05:00+00:00",
+      "latest_estimated_round_trip_cost_bps": 14.0,
+      "latest_liquidity_score": 0.879762,
+      "latest_net_expected_edge_bps": 16.0,
+      "latest_predictability_score": 81.21524,
+      "market": "futures",
+      "origin": "strategy",
+      "partial_take_profit_taken": false,
+      "peak_roe_percent": 0.0,
+      "proactive_take_profit_thresholds_hit": [],
+      "profit_protection_retrace_taken": false,
+      "quantity_opened": 0.04,
+      "quantity_remaining": 0.04,
+      "r_multiple_partial_take_profit_taken": false,
+      "side": "long",
+      "stop_distance_bps": 45.0,
+      "symbol": "BTCUSDT",
+      "unrealized_pnl_usd_estimate": 0.0,
+      "worst_price": 50000.0
+    }
+  ],
+  "pending_external_futures_position_count": 0,
+  "pending_external_futures_positions": [],
+  "self_healing": {
+    "active_guards": {
+      "live_order_cooldown_until": null,
+      "manual_symbol_cooldowns": [],
+      "mismatch_active": false,
+      "mismatch_details": {
+        "missing_in_paper": [],
+        "missing_on_exchange": []
+      },
+      "missing_market_state_symbols": [],
+      "stall_restart_budget_remaining": 2,
+      "symbol_order_cooldowns": []
+    },
+    "issue_counts": {},
+    "recent_events": [],
+    "recovery_counts": {},
+    "status": "healthy"
+  },
+  "tested_order_count": 1,
+  "updated_at": "2026-03-16T11:28:02.603103+00:00"
+}
