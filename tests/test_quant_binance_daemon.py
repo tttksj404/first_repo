@@ -2,14 +2,19 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 import json
 
-from quant_binance.daemon import _build_live_ws_client, run_live_paper_daemon
+from quant_binance.daemon import _bootstrap_decision_time, _build_live_ws_client, run_live_paper_daemon
+from quant_binance.data.market_store import MarketStateStore
+from quant_binance.data.state import KlineBar, SymbolMarketState, TopOfBook
 from quant_binance.data.bitget_ws import BitgetWebSocketClient
 from quant_binance.data.rest_seed import seed_market_store_from_rest
+from quant_binance.observability.report import write_runtime_summary
+from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.settings import Settings
 
 
@@ -23,9 +28,30 @@ class FakeRestClient:
     def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
         return {
             "symbols": [
-                {"symbol": "BTCUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "100"}]},
-                {"symbol": "ETHUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "20"}]},
-                {"symbol": "SOLUSDT", "filters": [{"filterType": "MIN_NOTIONAL", "notional": "5"}]},
+                {
+                    "symbol": "BTCUSDT",
+                    "baseAsset": "BTC",
+                    "quoteAsset": "USDT",
+                    "filters": [{"filterType": "MIN_NOTIONAL", "notional": "100"}],
+                },
+                {
+                    "symbol": "ETHUSDT",
+                    "baseAsset": "ETH",
+                    "quoteAsset": "USDT",
+                    "filters": [{"filterType": "MIN_NOTIONAL", "notional": "20"}],
+                },
+                {
+                    "symbol": "ETHBTC",
+                    "baseAsset": "ETH",
+                    "quoteAsset": "BTC",
+                    "filters": [{"filterType": "MIN_NOTIONAL", "notional": "0.0001"}],
+                },
+                {
+                    "symbol": "SOLUSDT",
+                    "baseAsset": "SOL",
+                    "quoteAsset": "USDT",
+                    "filters": [{"filterType": "MIN_NOTIONAL", "notional": "5"}],
+                },
             ]
         }
 
@@ -39,7 +65,7 @@ class FakeRestClient:
         return {"openInterest": "1080000.0"}
 
     def get_klines(self, *, market, symbol, interval, limit):  # type: ignore[no-untyped-def]
-        base = 1700000000000
+        base = int(datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc).timestamp() * 1000)
         rows = []
         for idx in range(limit):
             open_time = base + idx * 300000
@@ -57,6 +83,35 @@ class FakeRestClient:
                 ]
             )
         return rows
+
+
+class BootstrapTimingRestClient(FakeRestClient):
+    supports_private_reads = False
+
+    def get_klines(self, *, market, symbol, interval, limit):  # type: ignore[no-untyped-def]
+        if interval == "5m":
+            close_times = (
+                datetime(2026, 3, 14, 0, 10, tzinfo=timezone.utc),
+                datetime(2026, 3, 14, 0, 15, tzinfo=timezone.utc),
+                datetime(2026, 3, 14, 0, 20, tzinfo=timezone.utc),
+            )
+            rows = []
+            for close_time in close_times:
+                open_time = int((close_time.timestamp() - 300) * 1000)
+                rows.append(
+                    [
+                        open_time,
+                        "50000.0",
+                        "50100.0",
+                        "49900.0",
+                        "50050.0",
+                        "10.0",
+                        int(close_time.timestamp() * 1000) - 1,
+                        "500000.0",
+                    ]
+                )
+            return rows
+        return super().get_klines(market=market, symbol=symbol, interval=interval, limit=limit)
 
 
 class FakeBitgetDaemonClient(FakeRestClient):
@@ -101,6 +156,11 @@ class FakePrivateDaemonClient(FakeRestClient):
         return {"market": market, "orders": []}
 
 
+class FailingSeedClient(FakeBitgetDaemonClient):
+    def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
+        raise RuntimeError("seed boom")
+
+
 class FakeShell:
     def __init__(self, *, ws_client_factory, session, backoff_policy, summary_path, state_path):  # type: ignore[no-untyped-def]
         self.ws_client_factory = ws_client_factory
@@ -140,6 +200,52 @@ class CapitalReportShell(FakeShell):
         }
 
 
+class BootstrapContinuationShell(FakeShell):
+    async def run(self) -> dict[str, object]:
+        open_time = datetime(2026, 3, 14, 0, 20, tzinfo=timezone.utc)
+        close_time = datetime(2026, 3, 14, 0, 25, tzinfo=timezone.utc)
+        self.session.process_payload(
+            {
+                "stream": "btcusdt@kline_5m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "5m",
+                        "t": int(open_time.timestamp() * 1000),
+                        "T": int(close_time.timestamp() * 1000) - 1,
+                        "o": "50000",
+                        "h": "50100",
+                        "l": "49950",
+                        "c": "50080",
+                        "v": "18",
+                        "q": "900000",
+                        "x": True,
+                    },
+                },
+            },
+            now=datetime(2026, 3, 14, 0, 25, 1, tzinfo=timezone.utc),
+        )
+        self.session.flush(summary_path=self.summary_path, state_path=self.state_path)
+        return {
+            "decision_count": len(self.session.decisions),
+            "decision_timestamps": [decision.timestamp.isoformat() for decision in self.session.decisions],
+            "btc_decision_timestamps": [
+                decision.timestamp.isoformat()
+                for decision in self.session.decisions
+                if decision.symbol == "BTCUSDT"
+            ],
+        }
+
+
+class FixedSeedNow(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        instant = cls(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc)
+        if tz is None:
+            return instant.replace(tzinfo=None)
+        return instant.astimezone(tz)
+
+
 class QuantBinanceDaemonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -168,6 +274,18 @@ class QuantBinanceDaemonTests(unittest.TestCase):
         self.assertEqual(len(client.clients), 2)
         self.assertTrue(all(isinstance(item, BitgetWebSocketClient) for item in client.clients))
         self.assertEqual(client.clients[0].subscription_args()[0], {"instType": "SPOT", "channel": "trade", "instId": "BTCUSDT"})
+
+    def test_build_live_ws_client_shards_bitget_connections_for_large_symbol_sets(self) -> None:
+        client = _build_live_ws_client(
+            exchange_id="bitget",
+            symbols=tuple(f"SYM{index}USDT" for index in range(20)),
+            allow_insecure_ssl=True,
+        )
+
+        self.assertGreater(len(client.clients), 2)
+        self.assertTrue(all(isinstance(item, BitgetWebSocketClient) for item in client.clients))
+        for child in client.clients:
+            self.assertLessEqual(len(child.subscription_args()), 40)
 
     def test_run_live_paper_daemon_starts_bitget_without_private_credentials(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
@@ -255,6 +373,113 @@ class QuantBinanceDaemonTests(unittest.TestCase):
                     )
 
         self.assertEqual(result["summary"]["subscription_inst_ids"], ["BTCUSDT"])
+
+    def test_bootstrap_decision_time_uses_latest_seeded_closed_decision_kline(self) -> None:
+        state = SymbolMarketState(
+            symbol="BTCUSDT",
+            top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc)),
+            last_trade_price=50000.0,
+            funding_rate=0.0001,
+            open_interest=1080000.0,
+            basis_bps=3.0,
+            last_update_time=datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc),
+            klines={
+                "5m": [
+                    KlineBar(
+                        symbol="BTCUSDT",
+                        interval="5m",
+                        start_time=datetime(2026, 3, 14, 0, 15, tzinfo=timezone.utc),
+                        close_time=datetime(2026, 3, 14, 0, 20, tzinfo=timezone.utc),
+                        open_price=50000.0,
+                        high_price=50100.0,
+                        low_price=49900.0,
+                        close_price=50050.0,
+                        volume=10.0,
+                        quote_volume=500000.0,
+                        is_closed=True,
+                    )
+                ]
+            },
+        )
+        store = MarketStateStore()
+        store.put(state)
+
+        bootstrap_time = _bootstrap_decision_time(store=store, interval_minutes=5)
+
+        self.assertEqual(bootstrap_time.isoformat(), "2026-03-14T00:20:00+00:00")
+
+    def test_run_live_paper_daemon_keeps_first_live_close_after_bootstrap(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            config_path = Path(output_dir) / "config.json"
+            config_payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            config_payload["universe"] = ["BTCUSDT"]
+            config_path.write_text(json.dumps(config_payload), encoding="utf-8")
+            with patch("quant_binance.data.rest_seed.datetime", FixedSeedNow):
+                with patch("quant_binance.daemon.build_exchange_rest_client", return_value=BootstrapTimingRestClient()):
+                    with patch("quant_binance.daemon.LivePaperShell", BootstrapContinuationShell):
+                        result = run_live_paper_daemon(
+                            config_path=config_path,
+                            output_base_dir=output_dir,
+                            exchange="binance",
+                            max_retries=1,
+                        )
+
+        self.assertEqual(
+            result["summary"]["btc_decision_timestamps"],
+            ["2026-03-14T00:20:00+00:00", "2026-03-14T00:25:00+00:00"],
+        )
+
+    def test_run_live_paper_daemon_persists_startup_failure_state(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FailingSeedClient()):
+                with self.assertRaisesRegex(RuntimeError, "seed boom"):
+                    run_live_paper_daemon(
+                        config_path=CONFIG_PATH,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+
+            latest_root = Path(output_dir) / "output" / "paper-live-shell" / "latest"
+            summary = json.loads((latest_root / "summary.json").read_text(encoding="utf-8"))
+            state = json.loads((latest_root / "summary.state.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(summary["status"], "startup_failed")
+        self.assertIn("seed boom", summary["error"])
+        self.assertEqual(summary["self_healing"]["status"], "startup_failed")
+        self.assertEqual(state["status"], "startup_failed")
+        self.assertIn("seed boom", state["error"])
+        self.assertEqual(state["decision_count"], 0)
+        self.assertEqual(state["heartbeat_count"], 0)
+
+    def test_run_live_paper_daemon_keeps_previous_runs_when_startup_fails_before_first_flush(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            config_path = Path(output_dir) / "config.json"
+            config_payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            config_payload["housekeeping"]["keep_recent_runs"] = 1
+            config_path.write_text(json.dumps(config_payload), encoding="utf-8")
+
+            mode_root = Path(output_dir) / "output" / "paper-live-shell"
+            older_run = mode_root / "20260313-older"
+            newer_run = mode_root / "20260313-newer"
+            older_run.mkdir(parents=True, exist_ok=True)
+            newer_run.mkdir(parents=True, exist_ok=True)
+            write_runtime_summary(older_run / "summary.json", {"status": "older"})
+            write_runtime_state(older_run / "summary.state.json", {"heartbeat_count": 1})
+            write_runtime_summary(newer_run / "summary.json", {"status": "newer"})
+            write_runtime_state(newer_run / "summary.state.json", {"heartbeat_count": 2})
+
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FailingSeedClient()):
+                with self.assertRaisesRegex(RuntimeError, "seed boom"):
+                    run_live_paper_daemon(
+                        config_path=config_path,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+
+            self.assertTrue(older_run.exists())
+            self.assertTrue(newer_run.exists())
 
 
 if __name__ == "__main__":
