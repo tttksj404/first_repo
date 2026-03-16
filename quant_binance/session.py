@@ -520,6 +520,8 @@ class LivePaperSession:
         slippage_bps: float | None,
         realized_edge_bps: float | None,
         timestamp: datetime,
+        market: str | None = None,
+        exchange_id: str | None = None,
     ) -> None:
         self._execution_quality_state.record(
             symbol=symbol,
@@ -528,7 +530,16 @@ class LivePaperSession:
             slippage_bps=slippage_bps,
             realized_edge_bps=realized_edge_bps,
             timestamp=timestamp,
+            market=market,
+            exchange_id=exchange_id,
         )
+
+    def _execution_quality_exchange_id(self) -> str | None:
+        if self.live_order_executor is not None:
+            return self.live_order_executor._exchange_id()
+        if self.order_tester is not None:
+            return str(getattr(self.order_tester.client, "exchange_id", "") or "")
+        return str(getattr(self.rest_client, "exchange_id", "") or "")
 
     def _market_capital_allowed(self, decision: DecisionIntent) -> bool:
         if not self.capital_report:
@@ -3960,7 +3971,10 @@ class LivePaperSession:
         if last_recorded == decision.timestamp:
             return
         managed_decision = self._apply_loss_combo_downgrade(decision=decision)
-        managed_decision = self._execution_quality_state.apply_overlay(managed_decision)
+        managed_decision = self._execution_quality_state.apply_overlay(
+            managed_decision,
+            exchange_id=self._execution_quality_exchange_id(),
+        )
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
         self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp
@@ -4066,6 +4080,8 @@ class LivePaperSession:
                         slippage_bps=None,
                         realized_edge_bps=0.0,
                         timestamp=timestamp,
+                        market=executable_decision.final_mode,
+                        exchange_id=self.live_order_executor._exchange_id(),
                     )
                     self._apply_order_error_cooldown(
                         symbol=executable_decision.symbol,
@@ -4129,6 +4145,8 @@ class LivePaperSession:
                             slippage_bps=slippage_bps if fill_ratio > 0.0 else None,
                             realized_edge_bps=realized_edge_bps,
                             timestamp=timestamp,
+                            market=live_result.market,
+                            exchange_id=self.live_order_executor._exchange_id(),
                         )
                         self.live_orders.append(payload)
                         if self.verbose:
@@ -4196,6 +4214,8 @@ class LivePaperSession:
                                 slippage_bps=None,
                                 realized_edge_bps=0.0,
                                 timestamp=timestamp,
+                                market=str(preflight_rejection.get("market", executable_decision.final_mode)),
+                                exchange_id=self.live_order_executor._exchange_id(),
                             )
                             if reason in {"BITGET_MAX_OPEN_ZERO", "BITGET_MAX_OPEN_BELOW_MIN_QTY"}:
                                 self._apply_order_error_cooldown(
