@@ -4,12 +4,13 @@ import base64
 import hashlib
 import hmac
 import json
+import socket
 import ssl
 import time
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from quant_binance.exchange import ExchangeCredentials
@@ -18,6 +19,15 @@ from quant_binance.exchange import ExchangeCredentials
 BITGET_REST_URL = "https://api.bitget.com"
 BITGET_DEFAULT_PRODUCT_TYPE = "USDT-FUTURES"
 BITGET_DEFAULT_MARGIN_COIN = "USDT"
+
+
+def _transport_error_message(*, request: Request, exc: URLError) -> str:
+    reason = exc.reason
+    target = request.full_url
+    host = getattr(getattr(request, "host", None), "strip", lambda: "")() or "unknown-host"
+    if isinstance(reason, socket.gaierror):
+        return f"Bitget transport error for {target} (host={host}): DNS resolution failed: {reason}"
+    return f"Bitget transport error for {target} (host={host}): {reason}"
 
 
 def _optional_float(value: Any) -> float | None:
@@ -209,6 +219,74 @@ class BitgetRestClient:
             },
         )
 
+    def build_futures_order_history_request(
+        self,
+        *,
+        symbol: str | None = None,
+        start_time_ms: int | None = None,
+        end_time_ms: int | None = None,
+        id_less_than: str | None = None,
+        limit: int = 100,
+    ) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/order/orders-history",
+            method="GET",
+            params={
+                "productType": self.contract_config.product_type,
+                "symbol": symbol,
+                "startTime": start_time_ms,
+                "endTime": end_time_ms,
+                "idLessThan": id_less_than,
+                "limit": limit,
+            },
+        )
+
+    def build_futures_fill_history_request(
+        self,
+        *,
+        symbol: str | None = None,
+        order_id: str | None = None,
+        start_time_ms: int | None = None,
+        end_time_ms: int | None = None,
+        id_less_than: str | None = None,
+        limit: int = 100,
+    ) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/order/fill-history",
+            method="GET",
+            params={
+                "productType": self.contract_config.product_type,
+                "symbol": symbol,
+                "orderId": order_id,
+                "startTime": start_time_ms,
+                "endTime": end_time_ms,
+                "idLessThan": id_less_than,
+                "limit": limit,
+            },
+        )
+
+    def build_futures_position_history_request(
+        self,
+        *,
+        symbol: str | None = None,
+        start_time_ms: int | None = None,
+        end_time_ms: int | None = None,
+        id_less_than: str | None = None,
+        limit: int = 100,
+    ) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/position/history-position",
+            method="GET",
+            params={
+                "productType": self.contract_config.product_type,
+                "symbol": symbol,
+                "startTime": start_time_ms,
+                "endTime": end_time_ms,
+                "idLessThan": id_less_than,
+                "limit": limit,
+            },
+        )
+
     def build_live_order_request(self, *, market: str, order_params: dict[str, Any]) -> Request:
         if market == "futures":
             return self.build_signed_request(
@@ -227,6 +305,45 @@ class BitgetRestClient:
             path="/api/v2/mix/order/place-pos-tpsl",
             method="POST",
             body_params=order_params,
+        )
+
+    def build_futures_pending_plan_orders_request(
+        self,
+        *,
+        symbol: str | None = None,
+        plan_type: str = "profit_loss",
+        order_id: str | None = None,
+        client_oid: str | None = None,
+    ) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/order/orders-plan-pending",
+            method="GET",
+            params={
+                "productType": self.contract_config.product_type,
+                "symbol": symbol,
+                "planType": plan_type,
+                "orderId": order_id,
+                "clientOid": client_oid,
+            },
+        )
+
+    def build_cancel_futures_plan_order_request(
+        self,
+        *,
+        symbol: str,
+        order_id_list: list[dict[str, str]],
+        plan_type: str | None = None,
+    ) -> Request:
+        return self.build_signed_request(
+            path="/api/v2/mix/order/cancel-plan-order",
+            method="POST",
+            body_params={
+                "symbol": symbol,
+                "productType": self.contract_config.product_type,
+                "marginCoin": self.contract_config.margin_coin,
+                "planType": plan_type,
+                "orderIdList": order_id_list,
+            },
         )
 
     def build_cancel_order_request(self, *, market: str, symbol: str, order_id: str) -> Request:
@@ -254,6 +371,36 @@ class BitgetRestClient:
             body_params=order_params,
         )
 
+    def build_wallet_transfer_request(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str,
+        amount: float,
+        client_oid: str | None = None,
+    ) -> Request:
+        type_map = {
+            ("spot", "futures"): ("spot", "usdt_futures"),
+            ("futures", "spot"): ("usdt_futures", "spot"),
+        }
+        from_type, to_type = type_map.get((source_market, target_market), ("", ""))
+        if not from_type or not to_type:
+            raise ValueError(f"unsupported Bitget transfer route {source_market!r}->{target_market!r}")
+        body_params: dict[str, Any] = {
+            "fromType": from_type,
+            "toType": to_type,
+            "coin": asset.upper(),
+            "amount": f"{float(amount):.8f}",
+        }
+        if client_oid:
+            body_params["clientOid"] = client_oid
+        return self.build_signed_request(
+            path="/api/v2/spot/wallet/transfer",
+            method="POST",
+            body_params=body_params,
+        )
+
     def build_order_params(
         self,
         *,
@@ -279,6 +426,18 @@ class BitgetRestClient:
             if client_oid:
                 payload["clientOid"] = client_oid
             return payload
+        raw: dict[str, Any] = {}
+        try:
+            exchange_info = self.get_exchange_info(market="futures")
+        except Exception:
+            exchange_info = {"symbols": []}
+        symbol_row = next((item for item in exchange_info.get("symbols", []) if item.get("symbol") == symbol), None)
+        raw = dict(symbol_row.get("raw") or {}) if isinstance(symbol_row, dict) else {}
+        volume_place = raw.get("volumePlace")
+        try:
+            precision = max(int(volume_place), 0)
+        except (TypeError, ValueError):
+            precision = 8
         payload = {
             "symbol": symbol,
             "productType": self.contract_config.product_type,
@@ -287,7 +446,7 @@ class BitgetRestClient:
             "side": _bitget_futures_side(side=side, reduce_only=reduce_only),
             "tradeSide": "close" if reduce_only else "open",
             "orderType": order_type.lower(),
-            "size": f"{quantity:.8f}",
+            "size": f"{quantity:.{precision}f}",
         }
         if client_oid:
             payload["clientOid"] = client_oid
@@ -328,6 +487,50 @@ class BitgetRestClient:
             normalized.update(data)
         return normalized
 
+    def get_futures_pending_plan_orders(
+        self,
+        *,
+        symbol: str | None = None,
+        plan_type: str = "profit_loss",
+        order_id: str | None = None,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        payload = self.send(
+            self.build_futures_pending_plan_orders_request(
+                symbol=symbol,
+                plan_type=plan_type,
+                order_id=order_id,
+                client_oid=client_oid,
+            )
+        )
+        rows, end_id = self._extract_paged_rows(payload)
+        return {"orders": rows, "endId": end_id, "raw": payload}
+
+    def cancel_futures_plan_orders(
+        self,
+        *,
+        symbol: str,
+        order_id_list: list[dict[str, str]],
+        plan_type: str | None = None,
+    ) -> dict[str, Any]:
+        payload = self.send(
+            self.build_cancel_futures_plan_order_request(
+                symbol=symbol,
+                order_id_list=order_id_list,
+                plan_type=plan_type,
+            )
+        )
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
+            "exchange": self.exchange_id,
+            "market": "futures",
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
+
     def place_spot_plan_order(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
         payload = self.send(self.build_spot_plan_order_request(order_params=order_params))
         data = payload.get("data")
@@ -340,6 +543,51 @@ class BitgetRestClient:
         if isinstance(data, dict):
             normalized.update(data)
         return normalized
+
+    def transfer_asset(
+        self,
+        *,
+        source_market: str,
+        target_market: str,
+        asset: str,
+        amount: float,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        payload = self.send(
+            self.build_wallet_transfer_request(
+                source_market=source_market,
+                target_market=target_market,
+                asset=asset,
+                amount=amount,
+                client_oid=client_oid,
+            )
+        )
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
+            "exchange": self.exchange_id,
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
+
+    def transfer_wallet_balance(
+        self,
+        *,
+        asset: str,
+        amount: float,
+        source_market: str,
+        target_market: str,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        return self.transfer_asset(
+            source_market=source_market,
+            target_market=target_market,
+            asset=asset,
+            amount=amount,
+            client_oid=client_oid,
+        )
 
     def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, Any]:
         payload = self.send(self.build_cancel_order_request(market=market, symbol=symbol, order_id=order_id))
@@ -354,6 +602,103 @@ class BitgetRestClient:
         if isinstance(data, dict):
             normalized.update(data)
         return normalized
+
+    def _extract_paged_rows(self, payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
+        data = payload.get("data")
+        if isinstance(data, list):
+            return [row for row in data if isinstance(row, dict)], None
+        if not isinstance(data, dict):
+            return [], None
+        for key in ("entrustedList", "fillList", "positionList", "list"):
+            rows = data.get(key)
+            if isinstance(rows, list):
+                end_id = data.get("endId")
+                return [row for row in rows if isinstance(row, dict)], str(end_id) if end_id not in (None, "") else None
+        end_id = data.get("endId")
+        return [], str(end_id) if end_id not in (None, "") else None
+
+    def get_futures_order_history(
+        self,
+        *,
+        symbol: str | None = None,
+        start_time_ms: int | None = None,
+        end_time_ms: int | None = None,
+        limit: int = 100,
+        max_pages: int = 10,
+    ) -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        cursor: str | None = None
+        for _ in range(max_pages):
+            payload = self.send(
+                self.build_futures_order_history_request(
+                    symbol=symbol,
+                    start_time_ms=start_time_ms,
+                    end_time_ms=end_time_ms,
+                    id_less_than=cursor,
+                    limit=limit,
+                )
+            )
+            page_rows, cursor = self._extract_paged_rows(payload)
+            rows.extend(page_rows)
+            if not cursor or not page_rows:
+                break
+        return {"orders": rows}
+
+    def get_futures_fill_history(
+        self,
+        *,
+        symbol: str | None = None,
+        order_id: str | None = None,
+        start_time_ms: int | None = None,
+        end_time_ms: int | None = None,
+        limit: int = 100,
+        max_pages: int = 10,
+    ) -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        cursor: str | None = None
+        for _ in range(max_pages):
+            payload = self.send(
+                self.build_futures_fill_history_request(
+                    symbol=symbol,
+                    order_id=order_id,
+                    start_time_ms=start_time_ms,
+                    end_time_ms=end_time_ms,
+                    id_less_than=cursor,
+                    limit=limit,
+                )
+            )
+            page_rows, cursor = self._extract_paged_rows(payload)
+            rows.extend(page_rows)
+            if not cursor or not page_rows:
+                break
+        return {"fills": rows}
+
+    def get_futures_position_history(
+        self,
+        *,
+        symbol: str | None = None,
+        start_time_ms: int | None = None,
+        end_time_ms: int | None = None,
+        limit: int = 100,
+        max_pages: int = 10,
+    ) -> dict[str, Any]:
+        rows: list[dict[str, Any]] = []
+        cursor: str | None = None
+        for _ in range(max_pages):
+            payload = self.send(
+                self.build_futures_position_history_request(
+                    symbol=symbol,
+                    start_time_ms=start_time_ms,
+                    end_time_ms=end_time_ms,
+                    id_less_than=cursor,
+                    limit=limit,
+                )
+            )
+            page_rows, cursor = self._extract_paged_rows(payload)
+            rows.extend(page_rows)
+            if not cursor or not page_rows:
+                break
+        return {"positions": rows}
 
     def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
         payload = self.send(
@@ -378,6 +723,38 @@ class BitgetRestClient:
             normalized.update(data)
         return normalized
 
+    def get_max_openable_quantity(
+        self,
+        *,
+        symbol: str,
+        pos_side: str,
+        order_type: str = "market",
+        open_amount: float | None = None,
+    ) -> float | None:
+        if open_amount is None:
+            account = self.get_account(market="futures")
+            open_amount = _optional_float(
+                account.get("executionAvailableBalance", account.get("availableBalance"))
+            )
+        if open_amount is None or open_amount <= 0.0:
+            return None
+        payload = self.send(
+            self.build_signed_request(
+                path="/api/v2/mix/account/max-open",
+                method="GET",
+                params={
+                    "symbol": symbol,
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                    "posSide": pos_side,
+                    "orderType": order_type,
+                    "openAmount": f"{open_amount:.8f}",
+                },
+            )
+        )
+        data = payload.get("data") or {}
+        return _optional_float(data.get("maxOpen"))
+
     def get_account(self, *, market: str) -> dict[str, Any]:
         payload = self.send(self.build_account_request(market=market))
         rows = payload.get("data", [])
@@ -394,6 +771,8 @@ class BitgetRestClient:
                     break
             if crossed_max_available is not None and crossed_max_available > 0:
                 execution_available = crossed_max_available
+            elif union_available is not None and union_available > 0:
+                execution_available = min(available, union_available) if available is not None and available > 0 else union_available
             elif available is not None and available > 0:
                 execution_available = available
             else:
@@ -540,3 +919,5 @@ class BitgetRestClient:
         except HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
+        except URLError as exc:
+            raise RuntimeError(_transport_error_message(request=request, exc=exc)) from exc
