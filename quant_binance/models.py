@@ -37,6 +37,10 @@ class FeatureVector:
     macro_risk_penalty: float = 0.0
     macro_liquidity_support_score: float = 0.5
     macro_event_risk_score: float = 0.0
+    macro_trade_restraint: str = "none"
+    macro_size_multiplier: float = 1.0
+    macro_leverage_cap: int = 0
+    macro_symbol_bias: str = "neutral"
     sentiment_regime: str = "neutral"
     sentiment_support_score: float = 0.5
     alt_market_regime: str = "neutral"
@@ -104,6 +108,11 @@ class DecisionIntent:
     estimated_round_trip_cost_bps: float
     order_intent_notional_usd: float
     stop_distance_bps: float
+    macro_regime: str = "neutral"
+    macro_trade_restraint: str = "none"
+    macro_size_multiplier: float = 1.0
+    macro_leverage_cap: int = 0
+    macro_symbol_bias: str = "neutral"
     linked_order_ids: tuple[str, ...] = field(default_factory=tuple)
     rejection_reasons: tuple[str, ...] = field(default_factory=tuple)
     exit_reason_code: str = ""
