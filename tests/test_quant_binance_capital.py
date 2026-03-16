@@ -96,7 +96,8 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         )
         self.assertTrue(report.can_trade_any)
         self.assertTrue(report.can_trade_spot_any)
-        self.assertFalse(report.can_trade_futures_any)
+        self.assertTrue(report.can_trade_futures_any)
+        self.assertEqual(report.futures_transferable_execution_balance_usd, 33.8524)
 
     def test_account_capital_inputs_value_non_usdt_spot_assets_and_futures_equity(self) -> None:
         inputs = extract_account_capital_inputs(
@@ -164,6 +165,45 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         self.assertEqual(report.spot_recognized_balance_usd, 40.0)
         self.assertEqual(report.futures_available_balance_usd, 0.0)
         self.assertEqual(report.futures_recognized_balance_usd, 700.0)
+        self.assertEqual(report.futures_execution_balance_usd, 0.0)
+        self.assertEqual(report.futures_total_reusable_balance_usd, 700.0)
+
+    def test_capital_report_distinguishes_existing_futures_collateral_from_execution_balance(self) -> None:
+        inputs = extract_account_capital_inputs(
+            spot_account={"balances": []},
+            futures_account={
+                "availableBalance": 0.0,
+                "executionAvailableBalance": 0.0,
+                "assets": [
+                    {
+                        "asset": "BTC",
+                        "walletBalance": "0.0002",
+                        "availableBalance": "0.0002",
+                        "maxWithdrawAmount": "0.0002",
+                        "usdtEquity": "10.0",
+                        "marginAvailable": True,
+                    }
+                ],
+                "accounts": [{"marginCoin": "BTC", "usdtEquity": "10.0"}],
+            },
+            rest_client=FakeRestClient(),  # type: ignore[arg-type]
+        )
+
+        report = build_capital_adequacy_report(
+            spot_available_balance_usd=0.0,
+            spot_recognized_balance_usd=0.0,
+            futures_available_balance_usd=inputs.futures_available_balance_usd,
+            futures_execution_balance_usd=inputs.futures_execution_balance_usd,
+            futures_recognized_balance_usd=inputs.futures_recognized_balance_usd,
+            futures_funding_assets=inputs.futures_funding_assets,
+            settings=self.settings,
+            rest_client=FakeRestClient(),  # type: ignore[arg-type]
+        )
+
+        self.assertEqual(report.futures_execution_balance_usd, 0.0)
+        self.assertEqual(report.futures_recognized_balance_usd, 10.0)
+        self.assertEqual(report.futures_collateral_candidate_balance_usd, 10.0)
+        self.assertEqual(report.futures_manual_handling_balance_usd, 0.0)
 
     def test_capital_report_builds_cross_quote_spot_routes_for_held_btc(self) -> None:
         inputs = extract_account_capital_inputs(
@@ -215,6 +255,7 @@ class QuantBinanceCapitalMobilityTests(unittest.TestCase):
                 ),
             ),
             futures_available_balance_usd=7.5,
+            futures_execution_balance_usd=7.5,
             futures_recognized_balance_usd=30.0,
             settings=self.settings,
             rest_client=FakeRestClient(),  # type: ignore[arg-type]
@@ -222,8 +263,74 @@ class QuantBinanceCapitalMobilityTests(unittest.TestCase):
 
         self.assertEqual(report.max_spot_to_futures_transfer_usd, 25.0)
         self.assertEqual(report.max_futures_to_spot_transfer_usd, 7.5)
+        self.assertEqual(report.futures_transferable_execution_balance_usd, 25.0)
         self.assertTrue(any(item.source_market == "spot" and item.target_market == "futures" for item in report.capital_transfer_routes))
         self.assertTrue(any(item.source_market == "futures" and item.target_market == "spot" for item in report.capital_transfer_routes))
+
+    def test_capital_report_classifies_spot_non_usdt_futures_route_as_manual(self) -> None:
+        report = build_capital_adequacy_report(
+            spot_available_balance_usd=0.0,
+            spot_recognized_balance_usd=500.0,
+            spot_funding_assets=(
+                SpotFundingAsset(
+                    asset="BTC",
+                    free=0.01,
+                    locked=0.0,
+                    total=0.01,
+                    free_balance_usd=500.0,
+                    total_balance_usd=500.0,
+                ),
+            ),
+            futures_available_balance_usd=0.0,
+            futures_execution_balance_usd=0.0,
+            futures_recognized_balance_usd=0.0,
+            settings=self.settings,
+            rest_client=FakeRestClient(),  # type: ignore[arg-type]
+        )
+
+        transfer_route = next(
+            item
+            for item in report.capital_transfer_routes
+            if item.source_market == "spot" and item.target_market == "futures" and item.asset == "BTC"
+        )
+        self.assertTrue(transfer_route.requires_manual_transfer)
+        self.assertEqual(transfer_route.capacity_effect, "manual_conversion")
+        self.assertFalse(transfer_route.auto_transfer_supported)
+        self.assertEqual(report.futures_transferable_execution_balance_usd, 0.0)
+        self.assertEqual(report.futures_manual_handling_balance_usd, 500.0)
+
+    def test_capital_report_separates_spot_usdt_execution_from_non_usdt_manual_capacity(self) -> None:
+        report = build_capital_adequacy_report(
+            spot_available_balance_usd=15.0,
+            spot_recognized_balance_usd=515.0,
+            spot_funding_assets=(
+                SpotFundingAsset(
+                    asset="USDT",
+                    free=15.0,
+                    locked=0.0,
+                    total=15.0,
+                    free_balance_usd=15.0,
+                    total_balance_usd=15.0,
+                ),
+                SpotFundingAsset(
+                    asset="BTC",
+                    free=0.01,
+                    locked=0.0,
+                    total=0.01,
+                    free_balance_usd=500.0,
+                    total_balance_usd=500.0,
+                ),
+            ),
+            futures_available_balance_usd=0.0,
+            futures_execution_balance_usd=0.0,
+            futures_recognized_balance_usd=0.0,
+            settings=self.settings,
+            rest_client=FakeRestClient(),  # type: ignore[arg-type]
+        )
+
+        self.assertEqual(report.futures_transferable_execution_balance_usd, 15.0)
+        self.assertEqual(report.futures_manual_handling_balance_usd, 500.0)
+        self.assertEqual(report.futures_total_reusable_balance_usd, 515.0)
 
     def test_capital_report_exposes_futures_asset_routes_for_spot_reinvestment(self) -> None:
         report = build_capital_adequacy_report(
@@ -231,6 +338,7 @@ class QuantBinanceCapitalMobilityTests(unittest.TestCase):
             spot_recognized_balance_usd=0.0,
             spot_funding_assets=(),
             futures_available_balance_usd=0.0,
+            futures_execution_balance_usd=0.0,
             futures_recognized_balance_usd=60.0,
             futures_funding_assets=(
                 FuturesFundingAsset(
