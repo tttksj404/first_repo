@@ -161,12 +161,14 @@ class BitgetWebSocketClient:
 
     def _connect_kwargs(self, *, ssl_context: ssl.SSLContext | None) -> dict[str, Any]:
         # Let the runtime stall watchdog own reconnect decisions instead of the
-        # websockets client's ping timeout, which has been causing false-positive
-        # disconnects on long-lived Bitget sessions.
+        # websockets client's ping/pong lifecycle, which has been causing
+        # false-positive disconnects and unclean close errors on long-lived
+        # Bitget sessions.
         return {
             "ssl": ssl_context,
-            "ping_interval": 20,
+            "ping_interval": None,
             "ping_timeout": None,
+            "close_timeout": 1,
         }
 
     async def run(self, handler: MessageHandler) -> None:
