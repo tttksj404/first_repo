@@ -108,6 +108,9 @@ class DecisionIntent:
     estimated_round_trip_cost_bps: float
     order_intent_notional_usd: float
     stop_distance_bps: float
+    strategy_size_multiplier: float = 1.0
+    entry_relaxation_reasons: tuple[str, ...] = field(default_factory=tuple)
+    size_boost_reasons: tuple[str, ...] = field(default_factory=tuple)
     macro_regime: str = "neutral"
     macro_trade_restraint: str = "none"
     macro_size_multiplier: float = 1.0
