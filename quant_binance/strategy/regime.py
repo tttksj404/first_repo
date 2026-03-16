@@ -20,8 +20,10 @@ BTC_ETH_SECONDARY_SUPPORT_RELAX_TOLERANCE = 0.18
 BTC_ETH_SECONDARY_SENTIMENT_RELAX_TOLERANCE = 0.16
 BTC_ETH_CONFIRMATION_INTRADAY_STRENGTH_MIN = 0.0
 BTC_ETH_CONFIRMATION_SPOT_INTRADAY_STRENGTH_MIN = 0.0
-BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP = 1.2
-BTC_ETH_SIZE_BOOST_ABS_CAP = 0.2
+BTC_SIZE_BOOST_MULTIPLIER_CAP = 1.18
+BTC_SIZE_BOOST_ABS_CAP = 0.18
+ETH_SIZE_BOOST_MULTIPLIER_CAP = 1.25
+ETH_SIZE_BOOST_ABS_CAP = 0.25
 
 
 def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
@@ -366,9 +368,11 @@ def _btc_eth_strong_size_boost_multiplier(
         and _edge_to_cost_multiple(features) >= max(exposure.strong_edge_to_cost_multiple_min, 1.6)
     ):
         return base_size_multiplier
+    multiplier_cap = BTC_SIZE_BOOST_MULTIPLIER_CAP if symbol == "BTCUSDT" else ETH_SIZE_BOOST_MULTIPLIER_CAP
+    abs_cap = BTC_SIZE_BOOST_ABS_CAP if symbol == "BTCUSDT" else ETH_SIZE_BOOST_ABS_CAP
     boosted_multiplier = min(
-        base_size_multiplier * min(max(exposure.major_size_boost_multiplier, 1.0), BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP),
-        base_size_multiplier + BTC_ETH_SIZE_BOOST_ABS_CAP,
+        base_size_multiplier * min(max(exposure.major_size_boost_multiplier, 1.0), multiplier_cap),
+        base_size_multiplier + abs_cap,
     )
     return round(max(base_size_multiplier, boosted_multiplier), 6)
 

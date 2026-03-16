@@ -460,6 +460,29 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.paper_positions, {})
         self.assertEqual(session.tested_orders, [])
 
+    def test_execute_recorded_bootstrap_decision_runs_submission_path(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        bootstrap_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+
+        recorded = session.run_bootstrap_cycle(
+            state=state,
+            primitive_inputs=make_primitive(),
+            history=make_history(),
+            decision_time=bootstrap_time,
+        )
+
+        session._execute_recorded_decision(
+            managed_decision=recorded,
+            state=state,
+            timestamp=bootstrap_time,
+        )
+
+        self.assertEqual(len(session.decisions), 1)
+        self.assertEqual(len(session.tested_orders), 1)
+        self.assertEqual(session.tested_orders[0]["symbol"], "BTCUSDT")
+
     def test_session_runs_scheduled_decision_boundary_without_closed_kline(self) -> None:
         session = self._build_session()
         state = session.runtime.dispatcher.store.get("BTCUSDT")
@@ -1246,6 +1269,133 @@ class QuantBinanceSessionTests(unittest.TestCase):
         capped = session._cap_live_order_decision(decision, reference_price=100.0)
         self.assertEqual(capped.final_mode, "cash")
         self.assertIn("EXPECTED_PROFIT_TOO_SMALL", capped.rejection_reasons)
+
+    def test_cap_live_order_decision_relaxes_expected_profit_floor_for_live_ultra_aggressive_btc_eth(self) -> None:
+        settings = replace(
+            self.settings,
+            strategy_profile="live-ultra-aggressive",
+            risk=replace(
+                self.settings.risk,
+                min_meaningful_futures_notional_usd=0.0,
+                min_expected_profit_usd_per_trade=6.0,
+                max_futures_leverage=8.0,
+                target_futures_leverage=8.0,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 130.0,
+            "futures_available_balance_usd": 130.0,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                {"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.01},
+                {"symbol": "SOLUSDT", "min_notional_usd": 5.0, "min_quantity": 0.1},
+            ],
+        }
+        btc = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            order_intent_notional_usd=72.5,
+            net_expected_edge_bps=34.0,
+        )
+        eth = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="ETHUSDT",
+            order_intent_notional_usd=72.5,
+            net_expected_edge_bps=34.0,
+        )
+        sol = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="SOLUSDT",
+            order_intent_notional_usd=72.5,
+            net_expected_edge_bps=34.0,
+        )
+
+        capped_btc = session._cap_live_order_decision(btc, reference_price=50000.0)
+        capped_eth = session._cap_live_order_decision(eth, reference_price=2000.0)
+        capped_sol = session._cap_live_order_decision(sol, reference_price=100.0)
+
+        self.assertEqual(capped_btc.final_mode, "futures")
+        self.assertEqual(capped_eth.final_mode, "futures")
+        self.assertEqual(capped_sol.final_mode, "cash")
+        self.assertNotIn("EXPECTED_PROFIT_TOO_SMALL", capped_btc.rejection_reasons)
+        self.assertNotIn("EXPECTED_PROFIT_TOO_SMALL", capped_eth.rejection_reasons)
+        self.assertIn("EXPECTED_PROFIT_TOO_SMALL", capped_sol.rejection_reasons)
+
+    def test_cap_live_order_decision_relaxes_major_entry_floor_for_live_ultra_aggressive_btc_eth(self) -> None:
+        settings = replace(
+            self.settings,
+            strategy_profile="live-ultra-aggressive",
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                major_symbols=("BTCUSDT", "ETHUSDT", "SOLUSDT"),
+                major_min_meaningful_notional_usd=120.0,
+                major_medium_min_entry_notional_usd=140.0,
+                major_strong_min_entry_notional_usd=180.0,
+                pyramid_min_predictability_score=58.0,
+                strong_score_buffer=0.5,
+                strong_trend_strength_min=0.6,
+                strong_volume_confirmation_min=0.5,
+                strong_liquidity_min=0.42,
+                strong_volatility_penalty_max=0.55,
+                strong_overheat_penalty_max=0.45,
+                strong_edge_to_cost_multiple_min=1.0,
+            ),
+            risk=replace(
+                self.settings.risk,
+                min_meaningful_futures_notional_usd=40.0,
+                min_expected_profit_usd_per_trade=0.0,
+                max_futures_leverage=8.0,
+                target_futures_leverage=8.0,
+            ),
+            mode_thresholds=replace(
+                self.settings.mode_thresholds,
+                futures_score_min=42.0,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 8.2,
+            "futures_available_balance_usd": 8.2,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                {"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.01},
+                {"symbol": "SOLUSDT", "min_notional_usd": 5.0, "min_quantity": 0.1},
+            ],
+        }
+        btc = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            predictability_score=83.0,
+            order_intent_notional_usd=4500.0,
+            net_expected_edge_bps=42.0,
+            estimated_round_trip_cost_bps=8.0,
+        )
+        eth = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="ETHUSDT",
+            predictability_score=79.0,
+            order_intent_notional_usd=3177.0,
+            net_expected_edge_bps=34.0,
+            estimated_round_trip_cost_bps=8.0,
+        )
+        sol = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="SOLUSDT",
+            predictability_score=80.0,
+            order_intent_notional_usd=2285.0,
+            net_expected_edge_bps=34.0,
+            estimated_round_trip_cost_bps=8.0,
+        )
+
+        capped_btc = session._cap_live_order_decision(btc, reference_price=50000.0)
+        capped_eth = session._cap_live_order_decision(eth, reference_price=2000.0)
+        self.assertEqual(capped_btc.final_mode, "futures")
+        self.assertEqual(capped_eth.final_mode, "futures")
+        self.assertGreater(capped_btc.order_intent_notional_usd, 0.0)
+        self.assertGreater(capped_eth.order_intent_notional_usd, 0.0)
 
     def test_cap_live_order_decision_raises_major_strong_entry_to_minimum_notional(self) -> None:
         settings = replace(
@@ -4431,6 +4581,56 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(
             session.manual_symbol_cooldowns["BTCUSDT"],
             now + timedelta(minutes=20),
+        )
+
+    def test_major_futures_liquidity_drop_exit_applies_symbol_specific_reentry_cooldown(self) -> None:
+        settings = replace(
+            self.settings,
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                major_symbols=("BTCUSDT", "ETHUSDT", "SOLUSDT"),
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                major_reentry_cooldown_minutes=20,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        position = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+            symbol="BTCUSDT",
+            market="futures",
+            side="long",
+            entry_time=now - timedelta(minutes=30),
+            entry_price=100.0,
+            current_price=99.0,
+            quantity_opened=1.0,
+            quantity_remaining=1.0,
+            stop_distance_bps=500.0,
+            active_stop_price=95.0,
+            best_price=101.0,
+            worst_price=98.0,
+            entry_predictability_score=70.0,
+            entry_liquidity_score=0.7,
+            latest_predictability_score=55.0,
+            latest_liquidity_score=0.45,
+            latest_net_expected_edge_bps=2.0,
+            latest_decision_time=now,
+            entry_net_expected_edge_bps=8.0,
+            entry_estimated_round_trip_cost_bps=6.0,
+            entry_planned_leverage=5,
+        )
+
+        session._close_position(
+            position=position,
+            exit_price=99.0,
+            timestamp=now,
+            exit_reason="LIQUIDITY_DROP_EXIT",
+        )
+
+        self.assertEqual(
+            session.manual_symbol_cooldowns["BTCUSDT"],
+            now + timedelta(minutes=40),
         )
 
     def test_major_reversal_exit_requires_more_confirmation_cycles(self) -> None:
