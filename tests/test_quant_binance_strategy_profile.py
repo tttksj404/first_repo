@@ -1073,5 +1073,408 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertEqual(alt_decision.final_mode, "cash")
         self.assertIn("MACRO_MAJORS_ONLY", alt_decision.rejection_reasons)
 
+    def test_btc_eth_spot_can_relax_slight_support_and_sentiment_miss(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.62,
+            ret_rank_4h=0.6,
+            breakout_norm=0.72,
+            ema_stack_score=0.95,
+            vol_z_5m_norm=0.62,
+            vol_z_1h_norm=0.6,
+            taker_imbalance_norm=0.58,
+            spread_bps_norm=0.16,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.82,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.24,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.14,
+            funding_abs_percentile=0.12,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.14,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.64,
+            volume_confirmation=0.76,
+            liquidity_score=0.72,
+            volatility_penalty=0.22,
+            overheat_penalty=0.16,
+            support_alignment=0.29,
+            resistance_penalty=0.14,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.21,
+            gross_expected_edge_bps=24.0,
+            estimated_round_trip_cost_bps=10.0,
+            net_expected_edge_bps=14.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-eth-spot-relax",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="ETHUSDT",
+            decision_time=datetime(2026, 3, 16, 13, 0, tzinfo=timezone.utc),
+            last_trade_price=3000.0,
+            best_bid=2999.5,
+            best_ask=3000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=3.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "spot")
+        self.assertEqual(
+            decision.entry_relaxation_reasons,
+            ("SUPPORT_NOT_CONFIRMED", "SENTIMENT_TOO_WEAK"),
+        )
+
+    def test_alt_spot_does_not_get_btc_eth_relaxation(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.62,
+            ret_rank_4h=0.6,
+            breakout_norm=0.72,
+            ema_stack_score=0.95,
+            vol_z_5m_norm=0.62,
+            vol_z_1h_norm=0.6,
+            taker_imbalance_norm=0.58,
+            spread_bps_norm=0.16,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.82,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.24,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.14,
+            funding_abs_percentile=0.12,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.14,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.64,
+            volume_confirmation=0.76,
+            liquidity_score=0.72,
+            volatility_penalty=0.22,
+            overheat_penalty=0.16,
+            support_alignment=0.29,
+            resistance_penalty=0.14,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.21,
+            alt_market_regime="neutral",
+            alt_breadth_score=0.62,
+            alt_liquidity_support_score=0.82,
+            alt_fundamental_score=0.58,
+            alt_smart_money_score=0.58,
+            alt_rotation_penalty=0.08,
+            gross_expected_edge_bps=24.0,
+            estimated_round_trip_cost_bps=10.0,
+            net_expected_edge_bps=14.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-doge-spot-relax",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="DOGEUSDT",
+            decision_time=datetime(2026, 3, 16, 13, 1, tzinfo=timezone.utc),
+            last_trade_price=0.25,
+            best_bid=0.2499,
+            best_ask=0.2501,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=3.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertNotEqual(decision.final_mode, "spot")
+        self.assertEqual(decision.entry_relaxation_reasons, ())
+        self.assertIn("SUPPORT_NOT_CONFIRMED", decision.rejection_reasons)
+        self.assertIn("SENTIMENT_TOO_WEAK", decision.rejection_reasons)
+
+    def test_btc_futures_can_relax_caution_when_trend_and_edge_are_strong(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.74,
+            ret_rank_4h=0.72,
+            breakout_norm=0.84,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.72,
+            vol_z_1h_norm=0.7,
+            taker_imbalance_norm=0.64,
+            spread_bps_norm=0.16,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.88,
+            book_stability_norm=0.92,
+            realized_vol_1h_norm=0.24,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.14,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.12,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.86,
+            volume_confirmation=0.82,
+            liquidity_score=0.84,
+            volatility_penalty=0.22,
+            overheat_penalty=0.18,
+            support_alignment=0.2,
+            resistance_penalty=0.12,
+            sentiment_regime="caution",
+            sentiment_support_score=0.18,
+            gross_expected_edge_bps=36.0,
+            estimated_round_trip_cost_bps=12.0,
+            net_expected_edge_bps=24.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-btc-futures-caution-relax",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 16, 13, 2, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.entry_relaxation_reasons, ("SENTIMENT_CAUTION",))
+
+    def test_btc_eth_relaxation_does_not_override_hard_guards(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.62,
+            ret_rank_4h=0.6,
+            breakout_norm=0.62,
+            ema_stack_score=0.95,
+            vol_z_5m_norm=0.62,
+            vol_z_1h_norm=0.6,
+            taker_imbalance_norm=0.58,
+            spread_bps_norm=0.16,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.82,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.24,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.14,
+            funding_abs_percentile=0.12,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.14,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.62,
+            volume_confirmation=0.72,
+            liquidity_score=0.68,
+            volatility_penalty=0.22,
+            overheat_penalty=0.16,
+            support_alignment=0.29,
+            resistance_penalty=0.72,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.21,
+            gross_expected_edge_bps=22.0,
+            estimated_round_trip_cost_bps=10.0,
+            net_expected_edge_bps=12.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-eth-hard-guard",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="ETHUSDT",
+            decision_time=datetime(2026, 3, 16, 13, 3, tzinfo=timezone.utc),
+            last_trade_price=3000.0,
+            best_bid=2999.5,
+            best_ask=3000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=3.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "cash")
+        self.assertIn("BUYING_INTO_RESISTANCE", decision.rejection_reasons)
+
+    def test_btc_strong_futures_gets_capped_size_boost_but_alt_does_not(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.76,
+            ret_rank_4h=0.74,
+            breakout_norm=0.86,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.72,
+            vol_z_1h_norm=0.7,
+            taker_imbalance_norm=0.66,
+            spread_bps_norm=0.16,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.9,
+            book_stability_norm=0.94,
+            realized_vol_1h_norm=0.22,
+            realized_vol_4h_norm=0.2,
+            vol_shock_norm=0.12,
+            funding_abs_percentile=0.12,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.12,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.88,
+            volume_confirmation=0.84,
+            liquidity_score=0.86,
+            volatility_penalty=0.2,
+            overheat_penalty=0.16,
+            support_alignment=0.24,
+            resistance_penalty=0.12,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.3,
+            alt_market_regime="neutral",
+            alt_breadth_score=0.7,
+            alt_liquidity_support_score=0.9,
+            alt_fundamental_score=0.64,
+            alt_smart_money_score=0.64,
+            alt_rotation_penalty=0.08,
+            gross_expected_edge_bps=40.0,
+            estimated_round_trip_cost_bps=12.0,
+            net_expected_edge_bps=28.0,
+        )
+
+        def make(symbol: str) -> MarketSnapshot:
+            return MarketSnapshot(
+                snapshot_id=f"snap-{symbol}-boost",
+                config_version=settings.config_version,
+                snapshot_schema_version=settings.snapshot_schema_version,
+                symbol=symbol,
+                decision_time=datetime(2026, 3, 16, 13, 4, tzinfo=timezone.utc),
+                last_trade_price=50000.0 if symbol == "BTCUSDT" else 120.0,
+                best_bid=49999.5 if symbol == "BTCUSDT" else 119.95,
+                best_ask=50000.5 if symbol == "BTCUSDT" else 120.05,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=4.0,
+                data_freshness_ms=100,
+                feature_values=features,
+            )
+
+        btc_decision = evaluate_snapshot(
+            make("BTCUSDT"),
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+        sol_decision = evaluate_snapshot(
+            make("SOLUSDT"),
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(btc_decision.final_mode, "futures")
+        self.assertEqual(sol_decision.final_mode, "futures")
+        self.assertEqual(btc_decision.size_boost_reasons, ("BTC_ETH_STRONG_EDGE_SIZE_BOOST",))
+        self.assertEqual(sol_decision.size_boost_reasons, ())
+        self.assertGreater(btc_decision.strategy_size_multiplier, sol_decision.strategy_size_multiplier)
+        self.assertGreater(btc_decision.order_intent_notional_usd, sol_decision.order_intent_notional_usd)
+
+    def test_fee_thin_btc_futures_setup_does_not_get_size_boost(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.76,
+            ret_rank_4h=0.74,
+            breakout_norm=0.86,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.72,
+            vol_z_1h_norm=0.7,
+            taker_imbalance_norm=0.66,
+            spread_bps_norm=0.16,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.9,
+            book_stability_norm=0.94,
+            realized_vol_1h_norm=0.22,
+            realized_vol_4h_norm=0.2,
+            vol_shock_norm=0.12,
+            funding_abs_percentile=0.12,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.12,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.88,
+            volume_confirmation=0.84,
+            liquidity_score=0.86,
+            volatility_penalty=0.2,
+            overheat_penalty=0.16,
+            support_alignment=0.24,
+            resistance_penalty=0.12,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.3,
+            gross_expected_edge_bps=24.0,
+            estimated_round_trip_cost_bps=16.0,
+            net_expected_edge_bps=8.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-btc-no-boost",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 16, 13, 5, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.size_boost_reasons, ())
+        self.assertEqual(decision.strategy_size_multiplier, 1.0)
+
 if __name__ == "__main__":
     unittest.main()
