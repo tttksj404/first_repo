@@ -51,6 +51,46 @@ def _edge_to_cost_multiple(features: FeatureVector) -> float:
     return features.gross_expected_edge_bps / features.estimated_round_trip_cost_bps
 
 
+def _macro_risk_off(features: FeatureVector) -> bool:
+    return features.macro_event_risk_score >= 0.6 or features.macro_risk_penalty >= 0.55 or features.macro_regime == "high_risk"
+
+
+def _macro_event_halt(features: FeatureVector) -> bool:
+    return features.macro_trade_restraint == "halt_high_impact_window" or features.macro_event_risk_score >= 0.85
+
+
+def _macro_symbol_bias_reasons(features: FeatureVector, *, symbol: str) -> list[str]:
+    if not is_alt_symbol(symbol):
+        return []
+    if _macro_event_halt(features):
+        return ["MACRO_EVENT_WINDOW", "MACRO_MAJORS_ONLY"]
+    if _macro_risk_off(features):
+        return ["MACRO_MAJORS_ONLY"]
+    return []
+
+
+def _macro_futures_risk_controls(features: FeatureVector, *, symbol: str) -> tuple[bool, list[str], float, int]:
+    reasons = _macro_symbol_bias_reasons(features, symbol=symbol)
+    size_multiplier = max(features.macro_size_multiplier, 0.0)
+    leverage_cap = max(int(features.macro_leverage_cap), 0)
+    if _macro_event_halt(features):
+        if is_alt_symbol(symbol):
+            return False, reasons, 0.0, max(leverage_cap, 1)
+        return True, [], min(size_multiplier if size_multiplier > 0.0 else 0.35, 0.35), max(leverage_cap, 1)
+    if _macro_risk_off(features):
+        if is_alt_symbol(symbol):
+            return False, reasons, 0.0, max(leverage_cap, 2)
+        return True, [], min(size_multiplier if size_multiplier > 0.0 else 0.7, 0.7), max(leverage_cap, 2)
+    return True, [], size_multiplier if size_multiplier > 0.0 else 1.0, leverage_cap
+
+
+def _macro_spot_risk_reasons(features: FeatureVector, *, symbol: str) -> list[str]:
+    reasons = _macro_symbol_bias_reasons(features, symbol=symbol)
+    if _macro_event_halt(features) and symbol not in {"BTCUSDT", "ETHUSDT"}:
+        return reasons or ["MACRO_EVENT_WINDOW"]
+    return reasons
+
+
 def _is_objectively_strong_futures_setup(
     features: FeatureVector,
     settings: Settings,
@@ -70,6 +110,75 @@ def _is_objectively_strong_futures_setup(
     )
 
 
+def _is_objectively_medium_major_futures_setup(
+    features: FeatureVector,
+    settings: Settings,
+    *,
+    symbol: str,
+) -> bool:
+    exposure = settings.futures_exposure
+    if symbol not in set(exposure.major_symbols):
+        return False
+    if _is_objectively_strong_futures_setup(features, settings):
+        return False
+    return (
+        features.predictability_score >= exposure.pyramid_min_predictability_score
+        and features.trend_strength >= exposure.pyramid_min_trend_strength
+        and features.volume_confirmation >= exposure.pyramid_min_volume_confirmation
+        and features.liquidity_score >= exposure.soft_liquidity_floor
+        and features.net_expected_edge_bps >= max(exposure.min_entry_net_edge_bps, exposure.pyramid_min_net_edge_bps - 2.0)
+        and _edge_to_cost_multiple(features) >= max(exposure.priority_edge_to_cost_multiple_min, 1.0)
+    )
+
+
+def _strong_futures_size_multiplier(
+    features: FeatureVector,
+    settings: Settings,
+) -> float:
+    thresholds = settings.mode_thresholds
+    exposure = settings.futures_exposure
+
+    def _normalized(value: float, floor: float, span: float) -> float:
+        if span <= 0:
+            return 1.0
+        return max(0.0, min((value - floor) / span, 1.0))
+
+    score_strength = _normalized(
+        features.predictability_score,
+        thresholds.futures_score_min + exposure.strong_score_buffer,
+        18.0,
+    )
+    trend_strength = _normalized(
+        features.trend_strength,
+        exposure.strong_trend_strength_min,
+        0.25,
+    )
+    volume_strength = _normalized(
+        features.volume_confirmation,
+        exposure.strong_volume_confirmation_min,
+        0.3,
+    )
+    liquidity_strength = _normalized(
+        features.liquidity_score,
+        exposure.strong_liquidity_min,
+        0.35,
+    )
+    edge_strength = _normalized(
+        _edge_to_cost_multiple(features),
+        exposure.strong_edge_to_cost_multiple_min,
+        1.5,
+    )
+    composite = (
+        score_strength
+        + trend_strength
+        + volume_strength
+        + liquidity_strength
+        + edge_strength
+    ) / 5.0
+    strong_ceiling = max(float(exposure.strong_size_multiplier), 1.0)
+    return round(1.0 + ((strong_ceiling - 1.0) * composite), 6)
+
+
 def _futures_soft_entry_allowed(
     features: FeatureVector,
     settings: Settings,
@@ -80,9 +189,10 @@ def _futures_soft_entry_allowed(
 ) -> bool:
     thresholds = settings.mode_thresholds
     exposure = settings.futures_exposure
-    soft_score_floor = max(futures_score_min - 2.0, thresholds.spot_score_min)
+    bearish_relief = 3.0 if features.trend_direction < 0 else 0.0
+    soft_score_floor = max(futures_score_min - 2.0 - bearish_relief, thresholds.spot_score_min - bearish_relief)
     soft_trend_floor = max(
-        thresholds.futures_trend_strength_min - 0.04,
+        thresholds.futures_trend_strength_min - (0.08 if features.trend_direction < 0 else 0.04),
         thresholds.spot_trend_strength_min,
     )
     edge_to_cost_multiple_min = exposure.macro_edge_to_cost_multiple_min
@@ -95,11 +205,11 @@ def _futures_soft_entry_allowed(
         features.predictability_score >= soft_score_floor
         and features.trend_direction in {1, -1}
         and features.trend_strength >= soft_trend_floor
-        and features.volume_confirmation >= 0.35
-        and features.liquidity_score >= exposure.soft_liquidity_floor
+        and features.volume_confirmation >= (0.28 if features.trend_direction < 0 else 0.35)
+        and features.liquidity_score >= (exposure.soft_liquidity_floor - (0.05 if features.trend_direction < 0 else 0.0))
         and features.volatility_penalty <= (exposure.soft_volatility_penalty_max + 0.05)
         and features.overheat_penalty <= (exposure.soft_overheat_penalty_max + 0.05)
-        and features.net_expected_edge_bps >= exposure.reduced_entry_net_edge_bps
+        and features.net_expected_edge_bps >= (exposure.reduced_entry_net_edge_bps - (1.0 if features.trend_direction < 0 else 0.0))
         and _edge_to_cost_multiple(features) >= edge_to_cost_multiple_min
     )
 
@@ -116,25 +226,47 @@ def _futures_entry_plan(
     size_multiplier = 1.0
     reduced_size = False
     priority_symbol = symbol in set(exposure.priority_symbols)
+    major_symbol = symbol in set(exposure.major_symbols)
+    alt_symbol = is_alt_symbol(symbol)
     supportive_macro = (
         features.macro_liquidity_support_score >= exposure.macro_support_min
         and features.macro_event_risk_score <= 0.45
         and features.macro_risk_penalty < macro_gates.futures_block_penalty
     )
+    macro_allowed, macro_reasons, macro_size_multiplier, _macro_leverage_cap = _macro_futures_risk_controls(features, symbol=symbol)
+    if not macro_allowed:
+        return False, macro_reasons, 0.0
+    if macro_reasons:
+        reasons.extend(macro_reasons)
+        return False, reasons, 0.0
+    size_multiplier = min(size_multiplier, macro_size_multiplier) if macro_size_multiplier > 0.0 else size_multiplier
+    bearish_trend = features.trend_direction < 0
     futures_score_min = thresholds.futures_score_min - (
         exposure.macro_score_relaxation if supportive_macro else 0.0
     )
+    if alt_symbol and not supportive_macro:
+        futures_score_min += exposure.alt_score_penalty_without_macro
+    if bearish_trend:
+        futures_score_min -= 3.0
     if priority_symbol and supportive_macro:
         futures_score_min -= exposure.priority_score_relaxation
     futures_liquidity_min = thresholds.futures_liquidity_min - (
         exposure.macro_liquidity_relaxation if supportive_macro else 0.0
     )
+    if alt_symbol and not supportive_macro:
+        futures_liquidity_min += exposure.alt_liquidity_penalty_without_macro
+    if bearish_trend:
+        futures_liquidity_min -= 0.06
     futures_overheat_penalty_max = thresholds.futures_overheat_penalty_max + (
         exposure.macro_overheat_relaxation if supportive_macro else 0.0
     )
+    if bearish_trend:
+        futures_overheat_penalty_max += 0.05
     futures_volatility_penalty_max = thresholds.futures_volatility_penalty_max + (
         exposure.macro_volatility_relaxation if supportive_macro else 0.0
     )
+    if bearish_trend:
+        futures_volatility_penalty_max += 0.06
     if priority_symbol and supportive_macro:
         futures_volatility_penalty_max += exposure.priority_volatility_relaxation
     soft_entry_allowed = _futures_soft_entry_allowed(
@@ -148,7 +280,7 @@ def _futures_entry_plan(
         reasons.append("SCORE_TOO_LOW")
     if abs(features.trend_direction) != 1:
         reasons.append("DIRECTION_CONFLICT")
-    if features.trend_strength < thresholds.futures_trend_strength_min:
+    if features.trend_strength < thresholds.futures_trend_strength_min - (0.06 if bearish_trend else 0.0):
         reasons.append("SCORE_TOO_LOW")
     if features.liquidity_score < futures_liquidity_min:
         if features.liquidity_score < exposure.soft_liquidity_floor:
@@ -223,8 +355,17 @@ def _futures_entry_plan(
     min_entry_net_edge_bps = (
         exposure.macro_min_entry_net_edge_bps if supportive_macro else exposure.min_entry_net_edge_bps
     )
+    if alt_symbol and not supportive_macro:
+        min_entry_net_edge_bps += exposure.alt_min_entry_net_edge_bps_without_macro
     if priority_symbol and supportive_macro:
         min_entry_net_edge_bps = min(min_entry_net_edge_bps, exposure.priority_min_entry_net_edge_bps)
+    if (
+        alt_symbol
+        and not supportive_macro
+        and features.liquidity_score < futures_liquidity_min
+        and features.net_expected_edge_bps <= (min_entry_net_edge_bps + 1.0)
+    ):
+        reasons.append("ALT_FUTURES_NOT_READY")
     if features.net_expected_edge_bps < min_entry_net_edge_bps:
         if soft_entry_allowed:
             reduced_size = True
@@ -235,8 +376,20 @@ def _futures_entry_plan(
         return False, reasons, 0.0
     if reduced_size and features.net_expected_edge_bps < exposure.reduced_entry_net_edge_bps:
         return False, ["EDGE_TOO_THIN"], 0.0
-    if not reduced_size and _is_objectively_strong_futures_setup(features, settings):
-        size_multiplier = max(size_multiplier, exposure.strong_size_multiplier)
+    if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
+        size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
+    strong_setup = _is_objectively_strong_futures_setup(features, settings)
+    if not reduced_size and strong_setup:
+        size_multiplier = max(size_multiplier, _strong_futures_size_multiplier(features, settings))
+    if (
+        major_symbol
+        and not reduced_size
+        and not strong_setup
+        and _is_objectively_medium_major_futures_setup(features, settings, symbol=symbol)
+    ):
+        size_multiplier = max(size_multiplier, exposure.major_medium_size_boost_multiplier)
+    if major_symbol and size_multiplier > 1.0:
+        size_multiplier = round(size_multiplier * max(exposure.major_size_boost_multiplier, 1.0), 6)
     return True, reasons, size_multiplier
 
 
@@ -251,6 +404,10 @@ def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tu
     resistance_penalty_max = support_cfg.priority_resistance_penalty_max if priority_symbol else support_cfg.resistance_penalty_max
     sentiment_support_min = support_cfg.priority_sentiment_support_min if priority_symbol else support_cfg.sentiment_support_min
     liquidity_relaxation = support_cfg.priority_liquidity_relaxation if priority_symbol else support_cfg.liquidity_relaxation
+
+    macro_reasons = _macro_spot_risk_reasons(features, symbol=symbol)
+    if macro_reasons:
+        reasons.extend(macro_reasons)
 
     can_bottom_fish = (
         mode_behavior.spot_allow_bottoming_reversal
@@ -335,6 +492,7 @@ def evaluate_snapshot(
     expected_funding_drag_bps: float = 0.0,
     cash_reserve_fraction: float = 0.0,
 ) -> DecisionIntent:
+    thresholds = settings.mode_thresholds
     futures_features = apply_score_and_costs(
         snapshot.feature_values,
         settings=settings,
@@ -382,6 +540,11 @@ def evaluate_snapshot(
             estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
             order_intent_notional_usd=0.0,
             stop_distance_bps=0.0,
+            macro_regime=spot_features.macro_regime,
+            macro_trade_restraint=spot_features.macro_trade_restraint,
+            macro_size_multiplier=spot_features.macro_size_multiplier,
+            macro_leverage_cap=spot_features.macro_leverage_cap,
+            macro_symbol_bias=spot_features.macro_symbol_bias,
             rejection_reasons=cash_reasons,
         )
 
@@ -402,6 +565,8 @@ def evaluate_snapshot(
             estimated_round_trip_cost_bps=futures_features.estimated_round_trip_cost_bps,
             settings=settings,
         )
+        if futures_features.macro_leverage_cap > 0:
+            planned_leverage = min(planned_leverage, futures_features.macro_leverage_cap)
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
             atr_14_1h_bps=snapshot.feature_values.realized_vol_1h_norm * 100.0,
@@ -422,6 +587,14 @@ def evaluate_snapshot(
             "side": "long" if futures_features.trend_direction > 0 else "short",
             "predictability_score": futures_features.predictability_score,
         }
+        confirmation_required = (
+            futures_size_multiplier < 1.0
+            or futures_features.intraday_trend_strength < 0.5
+            or (
+                futures_features.intraday_trend_direction != 0
+                and futures_features.intraday_trend_direction != futures_features.trend_direction
+            )
+        )
         return DecisionIntent(
             decision_id=str(uuid4()),
             decision_hash=hash_decision_payload(payload),
@@ -444,6 +617,12 @@ def evaluate_snapshot(
             estimated_round_trip_cost_bps=futures_features.estimated_round_trip_cost_bps,
             order_intent_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
+            macro_regime=futures_features.macro_regime,
+            macro_trade_restraint=futures_features.macro_trade_restraint,
+            macro_size_multiplier=futures_features.macro_size_multiplier,
+            macro_leverage_cap=futures_features.macro_leverage_cap,
+            macro_symbol_bias=futures_features.macro_symbol_bias,
+            divergence_code="ENTRY_CONFIRMATION_REQUIRED" if confirmation_required else "",
         )
 
     spot_ok, spot_reasons = _spot_passes(spot_features, settings, snapshot.symbol)
@@ -466,6 +645,12 @@ def evaluate_snapshot(
             "side": "long",
             "predictability_score": spot_features.predictability_score,
         }
+        confirmation_required = (
+            spot_features.support_alignment < 0.25
+            or spot_features.resistance_penalty > 0.3
+            or spot_features.liquidity_score < thresholds.spot_liquidity_min
+            or spot_features.intraday_trend_strength < 0.45
+        )
         return DecisionIntent(
             decision_id=str(uuid4()),
             decision_hash=hash_decision_payload(payload),
@@ -488,7 +673,13 @@ def evaluate_snapshot(
             estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
             order_intent_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
+            macro_regime=spot_features.macro_regime,
+            macro_trade_restraint=spot_features.macro_trade_restraint,
+            macro_size_multiplier=spot_features.macro_size_multiplier,
+            macro_leverage_cap=spot_features.macro_leverage_cap,
+            macro_symbol_bias=spot_features.macro_symbol_bias,
             rejection_reasons=tuple(sorted(set(futures_reasons))),
+            divergence_code="ENTRY_CONFIRMATION_REQUIRED" if confirmation_required else "",
         )
 
     cash_reasons = tuple(sorted(set(futures_reasons + spot_reasons))) or ("SCORE_TOO_LOW",)
@@ -522,5 +713,10 @@ def evaluate_snapshot(
         estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
         order_intent_notional_usd=0.0,
         stop_distance_bps=0.0,
+        macro_regime=spot_features.macro_regime,
+        macro_trade_restraint=spot_features.macro_trade_restraint,
+        macro_size_multiplier=spot_features.macro_size_multiplier,
+        macro_leverage_cap=spot_features.macro_leverage_cap,
+        macro_symbol_bias=spot_features.macro_symbol_bias,
         rejection_reasons=cash_reasons,
     )
