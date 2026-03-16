@@ -50,6 +50,7 @@ class CapitalAdequacyReport:
     spot_recognized_balance_usd: float
     spot_funding_assets: tuple[SpotFundingAsset, ...]
     spot_execution_routes: tuple["SpotExecutionRoute", ...]
+    capital_transfer_routes: tuple["CapitalTransferRoute", ...]
     futures_available_balance_usd: float
     futures_recognized_balance_usd: float
     minimum_operational_balance_usd: float
@@ -58,6 +59,8 @@ class CapitalAdequacyReport:
     can_trade_any: bool
     can_trade_spot_any: bool
     can_trade_futures_any: bool
+    max_spot_to_futures_transfer_usd: float
+    max_futures_to_spot_transfer_usd: float
     spot_requirements: tuple[CapitalRequirement, ...]
     futures_requirements: tuple[CapitalRequirement, ...]
     pending_symbols: tuple[str, ...]
@@ -74,8 +77,21 @@ class SpotExecutionRoute:
     route_type: str
     free_balance: float
     free_balance_usd: float
+    quote_asset_usd_price: float
     min_notional_usd: float
     min_quantity: float
+
+
+@dataclass(frozen=True)
+class CapitalTransferRoute:
+    source_market: str
+    target_market: str
+    asset: str
+    source_free_amount: float
+    transferable_usd: float
+    route_type: str
+    requires_manual_transfer: bool
+    note: str
 
 
 def _symbol_min_notional(exchange_info: dict[str, Any], symbol: str) -> float:
@@ -433,10 +449,42 @@ def build_capital_adequacy_report(
                     route_type=route_type,
                     free_balance=round(funding_asset.free, 8),
                     free_balance_usd=round(funding_asset.free_balance_usd, 6),
+                    quote_asset_usd_price=round(quote_asset_usd, 6),
                     min_notional_usd=round(_symbol_min_notional(spot_exchange_info, execution_symbol) * quote_asset_usd, 6),
                     min_quantity=round(_symbol_min_quantity(spot_exchange_info, execution_symbol), 8),
                 )
             )
+    capital_transfer_routes: list[CapitalTransferRoute] = []
+    spot_usdt = funding_assets_by_name.get("USDT")
+    if spot_usdt is not None and spot_usdt.free_balance_usd > 0.0:
+        capital_transfer_routes.append(
+            CapitalTransferRoute(
+                source_market="spot",
+                target_market="futures",
+                asset="USDT",
+                source_free_amount=round(spot_usdt.free, 8),
+                transferable_usd=round(spot_usdt.free_balance_usd, 6),
+                route_type="wallet_transfer",
+                requires_manual_transfer=True,
+                note="Spot USDT can be transferred to futures margin before opening futures exposure.",
+            )
+        )
+    futures_execution_shortfall = max(futures_recognized_balance_usd if futures_recognized_balance_usd is not None else 0.0, 0.0)
+    if futures_execution_shortfall > 0.0:
+        capital_transfer_routes.append(
+            CapitalTransferRoute(
+                source_market="futures",
+                target_market="spot",
+                asset="USDT",
+                source_free_amount=round(futures_available_balance_usd, 8),
+                transferable_usd=round(futures_available_balance_usd, 6),
+                route_type="wallet_transfer",
+                requires_manual_transfer=True,
+                note="Futures available balance can be transferred back to spot for spot execution funding.",
+            )
+        )
+    max_spot_to_futures_transfer_usd = max((item.transferable_usd for item in capital_transfer_routes if item.source_market == "spot" and item.target_market == "futures"), default=0.0)
+    max_futures_to_spot_transfer_usd = max((item.transferable_usd for item in capital_transfer_routes if item.source_market == "futures" and item.target_market == "spot"), default=0.0)
     for symbol in futures_symbols:
         min_notional = _symbol_min_notional(futures_exchange_info, symbol)
         min_equity = min_notional / cap_fraction
@@ -486,6 +534,12 @@ def build_capital_adequacy_report(
                 key=lambda item: (item.target_symbol, 0 if item.route_type == "direct" else 1, -item.free_balance_usd),
             )
         ),
+        capital_transfer_routes=tuple(
+            sorted(
+                capital_transfer_routes,
+                key=lambda item: (item.source_market, item.target_market, -item.transferable_usd),
+            )
+        ),
         futures_available_balance_usd=round(futures_available_balance_usd, 6),
         futures_recognized_balance_usd=round(futures_recognized, 6),
         minimum_operational_balance_usd=round(minimum_operational, 6),
@@ -494,6 +548,8 @@ def build_capital_adequacy_report(
         can_trade_any=can_trade_any,
         can_trade_spot_any=can_trade_spot_any,
         can_trade_futures_any=can_trade_futures_any,
+        max_spot_to_futures_transfer_usd=round(max_spot_to_futures_transfer_usd, 6),
+        max_futures_to_spot_transfer_usd=round(max_futures_to_spot_transfer_usd, 6),
         spot_requirements=tuple(spot_requirements),
         futures_requirements=tuple(futures_requirements),
         pending_symbols=tuple(pending_symbols),
