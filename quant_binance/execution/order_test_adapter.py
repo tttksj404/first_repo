@@ -31,6 +31,17 @@ class DecisionOrderTestAdapter:
     def _exchange_id(self) -> str:
         return getattr(self.client, "exchange_id", "binance")
 
+    def _execution_symbol(self, decision: DecisionIntent) -> str:
+        return decision.execution_symbol or decision.symbol
+
+    def _uses_spot_quote_notional(self, decision: DecisionIntent) -> bool:
+        return (
+            decision.final_mode == "spot"
+            and decision.side == "long"
+            and (decision.spot_quote_asset or "USDT") == "USDT"
+            and self._execution_symbol(decision).endswith("USDT")
+        )
+
     def build_order_params(
         self,
         *,
@@ -44,12 +55,12 @@ class DecisionOrderTestAdapter:
         side = "BUY" if decision.side == "long" else "SELL"
         if self._exchange_id() == "bitget":
             order_params = {
-                "symbol": decision.symbol,
+                "symbol": self._execution_symbol(decision),
                 "side": side.lower(),
                 "orderType": "market",
                 "clientOid": decision.decision_id,
             }
-            if market == "spot" and side == "BUY":
+            if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
                 order_params["size"] = f"{decision.order_intent_notional_usd:.2f}"
             else:
                 order_params["size"] = f"{quantity:.8f}"
@@ -60,11 +71,11 @@ class DecisionOrderTestAdapter:
                 order_params["reduceOnly"] = "NO"
             return market, order_params
         order_params = {
-            "symbol": decision.symbol,
+            "symbol": self._execution_symbol(decision),
             "side": side,
             "type": "MARKET",
         }
-        if market == "spot" and side == "BUY":
+        if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
             order_params["quoteOrderQty"] = f"{decision.order_intent_notional_usd:.2f}"
         else:
             order_params["quantity"] = f"{quantity:.8f}"

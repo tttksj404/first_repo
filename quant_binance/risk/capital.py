@@ -1,10 +1,37 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
 
-from quant_binance.execution.binance_rest import BinanceRestClient
 from quant_binance.settings import Settings
+
+
+class SupportsCapitalPricing(Protocol):
+    def get_exchange_info(self, *, market: str) -> dict[str, Any]:
+        ...
+
+    def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, Any]:
+        ...
+
+
+@dataclass(frozen=True)
+class AccountCapitalInputs:
+    spot_available_balance_usd: float
+    spot_recognized_balance_usd: float
+    spot_funding_assets: tuple["SpotFundingAsset", ...]
+    futures_available_balance_usd: float
+    futures_execution_balance_usd: float
+    futures_recognized_balance_usd: float
+
+
+@dataclass(frozen=True)
+class SpotFundingAsset:
+    asset: str
+    free: float
+    locked: float
+    total: float
+    free_balance_usd: float
+    total_balance_usd: float
 
 
 @dataclass(frozen=True)
@@ -12,6 +39,7 @@ class CapitalRequirement:
     symbol: str
     market: str
     min_notional_usd: float
+    min_quantity: float
     min_equity_usd: float
     buffered_min_equity_usd: float
 
@@ -19,7 +47,11 @@ class CapitalRequirement:
 @dataclass(frozen=True)
 class CapitalAdequacyReport:
     spot_available_balance_usd: float
+    spot_recognized_balance_usd: float
+    spot_funding_assets: tuple[SpotFundingAsset, ...]
+    spot_execution_routes: tuple["SpotExecutionRoute", ...]
     futures_available_balance_usd: float
+    futures_recognized_balance_usd: float
     minimum_operational_balance_usd: float
     minimum_full_universe_balance_usd: float
     recommended_balance_usd: float
@@ -30,6 +62,20 @@ class CapitalAdequacyReport:
     futures_requirements: tuple[CapitalRequirement, ...]
     pending_symbols: tuple[str, ...]
     note: str
+
+
+@dataclass(frozen=True)
+class SpotExecutionRoute:
+    target_symbol: str
+    execution_symbol: str
+    base_asset: str
+    quote_asset: str
+    funding_asset: str
+    route_type: str
+    free_balance: float
+    free_balance_usd: float
+    min_notional_usd: float
+    min_quantity: float
 
 
 def _symbol_min_notional(exchange_info: dict[str, Any], symbol: str) -> float:
@@ -43,10 +89,238 @@ def _symbol_min_notional(exchange_info: dict[str, Any], symbol: str) -> float:
     raise KeyError(f"min notional not found for {symbol}")
 
 
+def _symbol_min_quantity(exchange_info: dict[str, Any], symbol: str) -> float:
+    for item in exchange_info["symbols"]:
+        if item["symbol"] != symbol:
+            continue
+        for filt in item["filters"]:
+            if filt["filterType"] == "LOT_SIZE":
+                value = filt.get("minQty") or filt.get("stepSize")
+                return float(value)
+        raw = item.get("raw", {})
+        if isinstance(raw, dict):
+            value = raw.get("minTradeNum") or raw.get("minTradeAmount") or raw.get("sizeMultiplier")
+            if value is not None:
+                return float(value)
+    return 0.0
+
+
+def _optional_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _recognized_spot_balance_usd(
+    *,
+    spot_account: dict[str, Any],
+    rest_client: SupportsCapitalPricing,
+    spot_exchange_info: dict[str, Any],
+) -> float:
+    return round(
+        sum(item.total_balance_usd for item in _spot_funding_assets(spot_account=spot_account, rest_client=rest_client, spot_exchange_info=spot_exchange_info)),
+        6,
+    )
+
+
+def _symbol_assets(
+    *,
+    exchange_info: dict[str, Any],
+    symbol: str,
+    extra_quote_assets: tuple[str, ...] = (),
+) -> tuple[str, str]:
+    for item in exchange_info.get("symbols", []):
+        if item.get("symbol") != symbol:
+            continue
+        raw = item.get("raw") if isinstance(item.get("raw"), dict) else {}
+        base_asset = (
+            item.get("baseAsset")
+            or item.get("baseCoin")
+            or raw.get("baseAsset")
+            or raw.get("baseCoin")
+            or ""
+        )
+        quote_asset = (
+            item.get("quoteAsset")
+            or item.get("quoteCoin")
+            or raw.get("quoteAsset")
+            or raw.get("quoteCoin")
+            or ""
+        )
+        if base_asset and quote_asset:
+            return str(base_asset).upper(), str(quote_asset).upper()
+        break
+    quote_assets = tuple(
+        dict.fromkeys(
+            [
+                *extra_quote_assets,
+                "USDT",
+                "USDC",
+                "FDUSD",
+                "TUSD",
+                "BTC",
+                "ETH",
+                "BNB",
+            ]
+        )
+    )
+    for quote_asset in sorted(quote_assets, key=len, reverse=True):
+        if symbol.endswith(quote_asset) and len(symbol) > len(quote_asset):
+            return symbol[: -len(quote_asset)].upper(), quote_asset.upper()
+    return "", ""
+
+
+def _spot_asset_usd_price(
+    *,
+    asset: str,
+    supported_symbols: set[str],
+    rest_client: SupportsCapitalPricing,
+    price_by_symbol: dict[str, float | None],
+) -> float | None:
+    if asset == "USDT":
+        return 1.0
+    price_symbol = f"{asset}USDT"
+    if price_symbol not in supported_symbols:
+        return None
+    if price_symbol not in price_by_symbol:
+        try:
+            ticker = rest_client.get_book_ticker(market="spot", symbol=price_symbol)
+        except Exception:
+            price_by_symbol[price_symbol] = None
+            return None
+        bid_price = _optional_float(ticker.get("bidPrice"))
+        ask_price = _optional_float(ticker.get("askPrice"))
+        price_by_symbol[price_symbol] = bid_price if bid_price is not None and bid_price > 0 else ask_price
+    price = price_by_symbol[price_symbol]
+    if price is None or price <= 0.0:
+        return None
+    return price
+
+
+def _spot_funding_assets(
+    *,
+    spot_account: dict[str, Any],
+    rest_client: SupportsCapitalPricing,
+    spot_exchange_info: dict[str, Any],
+) -> tuple[SpotFundingAsset, ...]:
+    balances = spot_account.get("balances", [])
+    if not isinstance(balances, list):
+        return ()
+    supported_symbols = {str(item.get("symbol", "")) for item in spot_exchange_info.get("symbols", [])}
+    price_by_symbol: dict[str, float | None] = {}
+    assets: list[SpotFundingAsset] = []
+    for item in balances:
+        if not isinstance(item, dict):
+            continue
+        asset = str(item.get("asset", "")).upper()
+        if not asset:
+            continue
+        free = _optional_float(item.get("free")) or 0.0
+        locked = _optional_float(item.get("locked")) or 0.0
+        total = free + locked
+        if total <= 0.0:
+            continue
+        price = _spot_asset_usd_price(
+            asset=asset,
+            supported_symbols=supported_symbols,
+            rest_client=rest_client,
+            price_by_symbol=price_by_symbol,
+        )
+        free_balance_usd = free * price if price is not None else 0.0
+        total_balance_usd = total * price if price is not None else 0.0
+        assets.append(
+            SpotFundingAsset(
+                asset=asset,
+                free=round(free, 8),
+                locked=round(locked, 8),
+                total=round(total, 8),
+                free_balance_usd=round(free_balance_usd, 6),
+                total_balance_usd=round(total_balance_usd, 6),
+            )
+        )
+    assets.sort(key=lambda item: (-item.free_balance_usd, item.asset))
+    return tuple(assets)
+
+
+def _recognized_futures_balance_usd(futures_account: dict[str, Any]) -> float:
+    top_level_candidates = (
+        futures_account.get("totalMarginBalance"),
+        futures_account.get("totalWalletBalance"),
+        futures_account.get("totalCrossWalletBalance"),
+        futures_account.get("usdtEquity"),
+        futures_account.get("accountEquity"),
+        futures_account.get("equity"),
+    )
+    for value in top_level_candidates:
+        parsed = _optional_float(value)
+        if parsed is not None:
+            return parsed
+    for row_key in ("accounts", "assets"):
+        rows = futures_account.get(row_key)
+        if not isinstance(rows, list):
+            continue
+        recognized_total = 0.0
+        found = False
+        for item in rows:
+            if not isinstance(item, dict):
+                continue
+            for key in ("usdtEquity", "accountEquity", "equity", "marginBalance", "walletBalance"):
+                parsed = _optional_float(item.get(key))
+                if parsed is not None:
+                    recognized_total += parsed
+                    found = True
+                    break
+        if found:
+            return recognized_total
+    return _optional_float(
+        futures_account.get("executionAvailableBalance", futures_account.get("availableBalance"))
+    ) or 0.0
+
+
+def extract_account_capital_inputs(
+    *,
+    spot_account: dict[str, Any],
+    futures_account: dict[str, Any],
+    rest_client: SupportsCapitalPricing,
+) -> AccountCapitalInputs:
+    spot_exchange_info = rest_client.get_exchange_info(market="spot")
+    balances = spot_account.get("balances", [])
+    spot_available_balance_usd = 0.0
+    if isinstance(balances, list):
+        spot_available_balance_usd = next(
+            (
+                _optional_float(item.get("free")) or 0.0
+                for item in balances
+                if isinstance(item, dict) and str(item.get("asset", "")).upper() == "USDT"
+            ),
+            0.0,
+        )
+    futures_available_balance_usd = _optional_float(futures_account.get("availableBalance")) or 0.0
+    futures_execution_balance_usd = _optional_float(
+        futures_account.get("executionAvailableBalance", futures_available_balance_usd)
+    ) or futures_available_balance_usd
+    spot_funding_assets = _spot_funding_assets(
+        spot_account=spot_account,
+        rest_client=rest_client,
+        spot_exchange_info=spot_exchange_info,
+    )
+    return AccountCapitalInputs(
+        spot_available_balance_usd=round(spot_available_balance_usd, 6),
+        spot_recognized_balance_usd=round(sum(item.total_balance_usd for item in spot_funding_assets), 6),
+        spot_funding_assets=spot_funding_assets,
+        futures_available_balance_usd=round(futures_available_balance_usd, 6),
+        futures_execution_balance_usd=round(futures_execution_balance_usd, 6),
+        futures_recognized_balance_usd=round(_recognized_futures_balance_usd(futures_account), 6),
+    )
+
+
 def split_supported_symbols(
     *,
     symbols: tuple[str, ...],
-    rest_client: BinanceRestClient,
+    rest_client: SupportsCapitalPricing,
 ) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
     spot_info = rest_client.get_exchange_info(market="spot")
     futures_info = rest_client.get_exchange_info(market="futures")
@@ -72,8 +346,11 @@ def build_capital_adequacy_report(
     *,
     spot_available_balance_usd: float,
     futures_available_balance_usd: float,
+    spot_recognized_balance_usd: float | None = None,
+    spot_funding_assets: tuple[SpotFundingAsset, ...] = (),
+    futures_recognized_balance_usd: float | None = None,
     settings: Settings,
-    rest_client: BinanceRestClient,
+    rest_client: SupportsCapitalPricing,
 ) -> CapitalAdequacyReport:
     spot_exchange_info = rest_client.get_exchange_info(market="spot")
     futures_exchange_info = rest_client.get_exchange_info(market="futures")
@@ -93,10 +370,73 @@ def build_capital_adequacy_report(
                 symbol=symbol,
                 market="spot",
                 min_notional_usd=min_notional,
+                min_quantity=round(_symbol_min_quantity(spot_exchange_info, symbol), 8),
                 min_equity_usd=round(min_equity, 6),
                 buffered_min_equity_usd=round(buffered, 6),
             )
         )
+    funding_assets_by_name = {item.asset: item for item in spot_funding_assets if item.free > 0.0}
+    extra_quote_assets = tuple(funding_assets_by_name)
+    spot_symbol_assets = {
+        str(item.get("symbol", "")): _symbol_assets(
+            exchange_info=spot_exchange_info,
+            symbol=str(item.get("symbol", "")),
+            extra_quote_assets=extra_quote_assets,
+        )
+        for item in spot_exchange_info.get("symbols", [])
+        if str(item.get("symbol", ""))
+    }
+    asset_usd_price = {
+        item.asset: (
+            item.free_balance_usd / item.free
+            if item.free > 0.0
+            else (item.total_balance_usd / item.total if item.total > 0.0 else 0.0)
+        )
+        for item in spot_funding_assets
+    }
+    asset_usd_price.setdefault("USDT", 1.0)
+    spot_execution_routes: list[SpotExecutionRoute] = []
+    for requirement in spot_requirements:
+        base_asset, target_quote_asset = spot_symbol_assets.get(requirement.symbol, ("", ""))
+        if not base_asset:
+            continue
+        for funding_asset in funding_assets_by_name.values():
+            if funding_asset.asset == base_asset or funding_asset.free_balance_usd <= 0.0:
+                continue
+            execution_symbol = ""
+            route_type = "cross_quote"
+            if funding_asset.asset == target_quote_asset:
+                execution_symbol = requirement.symbol
+                route_type = "direct"
+            else:
+                execution_symbol = next(
+                    (
+                        symbol
+                        for symbol, assets in spot_symbol_assets.items()
+                        if assets == (base_asset, funding_asset.asset)
+                    ),
+                    "",
+                )
+            if not execution_symbol:
+                continue
+            quote_asset = spot_symbol_assets.get(execution_symbol, ("", ""))[1]
+            quote_asset_usd = asset_usd_price.get(quote_asset, 0.0)
+            if quote_asset_usd <= 0.0:
+                continue
+            spot_execution_routes.append(
+                SpotExecutionRoute(
+                    target_symbol=requirement.symbol,
+                    execution_symbol=execution_symbol,
+                    base_asset=base_asset,
+                    quote_asset=quote_asset,
+                    funding_asset=funding_asset.asset,
+                    route_type=route_type,
+                    free_balance=round(funding_asset.free, 8),
+                    free_balance_usd=round(funding_asset.free_balance_usd, 6),
+                    min_notional_usd=round(_symbol_min_notional(spot_exchange_info, execution_symbol) * quote_asset_usd, 6),
+                    min_quantity=round(_symbol_min_quantity(spot_exchange_info, execution_symbol), 8),
+                )
+            )
     for symbol in futures_symbols:
         min_notional = _symbol_min_notional(futures_exchange_info, symbol)
         min_equity = min_notional / cap_fraction
@@ -106,6 +446,7 @@ def build_capital_adequacy_report(
                 symbol=symbol,
                 market="futures",
                 min_notional_usd=min_notional,
+                min_quantity=round(_symbol_min_quantity(futures_exchange_info, symbol), 8),
                 min_equity_usd=round(min_equity, 6),
                 buffered_min_equity_usd=round(buffered, 6),
             )
@@ -114,11 +455,20 @@ def build_capital_adequacy_report(
     minimum_operational = min(item.buffered_min_equity_usd for item in all_requirements)
     minimum_full_universe = max(item.buffered_min_equity_usd for item in all_requirements)
     recommended = round(minimum_full_universe * 1.6, 6)
-    can_trade_spot_any = any(
-        spot_available_balance_usd >= item.buffered_min_equity_usd for item in spot_requirements
+    spot_recognized = spot_available_balance_usd if spot_recognized_balance_usd is None else spot_recognized_balance_usd
+    futures_recognized = (
+        futures_available_balance_usd if futures_recognized_balance_usd is None else futures_recognized_balance_usd
     )
+    if spot_funding_assets:
+        can_trade_spot_any = any(
+            route.target_symbol == requirement.symbol and route.free_balance_usd >= requirement.buffered_min_equity_usd
+            for requirement in spot_requirements
+            for route in spot_execution_routes
+        )
+    else:
+        can_trade_spot_any = any(spot_recognized >= item.buffered_min_equity_usd for item in spot_requirements)
     can_trade_futures_any = any(
-        futures_available_balance_usd >= item.buffered_min_equity_usd for item in futures_requirements
+        futures_recognized >= item.buffered_min_equity_usd for item in futures_requirements
     )
     can_trade_any = can_trade_spot_any or can_trade_futures_any
     note = (
@@ -127,8 +477,17 @@ def build_capital_adequacy_report(
     if pending_symbols:
         note += f" Pending symbols excluded from capital check: {', '.join(pending_symbols)}."
     return CapitalAdequacyReport(
-        spot_available_balance_usd=spot_available_balance_usd,
-        futures_available_balance_usd=futures_available_balance_usd,
+        spot_available_balance_usd=round(spot_available_balance_usd, 6),
+        spot_recognized_balance_usd=round(spot_recognized, 6),
+        spot_funding_assets=tuple(spot_funding_assets),
+        spot_execution_routes=tuple(
+            sorted(
+                spot_execution_routes,
+                key=lambda item: (item.target_symbol, 0 if item.route_type == "direct" else 1, -item.free_balance_usd),
+            )
+        ),
+        futures_available_balance_usd=round(futures_available_balance_usd, 6),
+        futures_recognized_balance_usd=round(futures_recognized, 6),
         minimum_operational_balance_usd=round(minimum_operational, 6),
         minimum_full_universe_balance_usd=round(minimum_full_universe, 6),
         recommended_balance_usd=recommended,

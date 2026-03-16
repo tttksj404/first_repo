@@ -46,6 +46,9 @@ class FakeBitgetLiveClient:
         self.protection_orders.append(("spot", order_params))
         return {"status": "SUCCESS", "orderId": "bitget-plan-1"}
 
+    def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
+        return None
+
 
 class QuantBitgetMigrationTests(unittest.TestCase):
     @classmethod
@@ -237,10 +240,47 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(live_client.orders[0][1]["productType"], "USDT-FUTURES")
         self.assertEqual(live_client.orders[0][1]["side"], "buy")
         self.assertEqual(live_client.orders[0][1]["tradeSide"], "open")
+        self.assertIn("presetStopSurplusPrice", live_client.orders[0][1])
+        self.assertIn("presetStopLossPrice", live_client.orders[0][1])
         self.assertNotIn("holdSide", live_client.orders[0][1])
-        self.assertEqual(live_client.protection_orders[0][0], "futures")
-        self.assertIn("stopLossTriggerPrice", live_client.protection_orders[0][1])
-        self.assertIn("stopSurplusTriggerPrice", live_client.protection_orders[0][1])
+        self.assertEqual(live_client.protection_orders, [])
+
+    def test_bitget_order_adapters_use_base_quantity_for_routed_spot_buy(self) -> None:
+        decision = DecisionIntent(
+            **{
+                **self._decision(final_mode="spot").as_dict(),
+                "timestamp": self._decision(final_mode="spot").timestamp,
+                "symbol": "ETHUSDT",
+                "order_intent_notional_usd": 125.0,
+                "execution_symbol": "ETHBTC",
+                "spot_base_asset": "ETH",
+                "spot_quote_asset": "BTC",
+                "spot_funding_asset": "BTC",
+            }
+        )
+        preview_client = BitgetRestClient(credentials=None)
+        test_adapter = DecisionOrderTestAdapter(preview_client)
+        built_preview = test_adapter.build_order_params(decision=decision, reference_price=2500.0)
+        self.assertIsNotNone(built_preview)
+        assert built_preview is not None
+        market, params = built_preview
+        self.assertEqual(market, "spot")
+        self.assertEqual(params["symbol"], "ETHBTC")
+        self.assertEqual(params["side"], "buy")
+        self.assertEqual(params["size"], "0.05000000")
+
+        live_client = FakeBitgetLiveClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+        result = live_adapter.execute_decision(
+            decision=decision,
+            reference_price=2500.0,
+        )
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result.market, "spot")
+        self.assertEqual(live_client.orders[0][1]["symbol"], "ETHBTC")
+        self.assertEqual(live_client.orders[0][1]["size"], "0.05000000")
+        self.assertEqual(live_client.protection_orders, [])
 
     def test_bitget_live_order_ignores_margin_leverage_update_error(self) -> None:
         class FlakyLeverageClient(FakeBitgetLiveClient):
@@ -280,7 +320,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertTrue(result.accepted)
         self.assertEqual(result.market, "futures")
         self.assertEqual(len(live_client.orders), 1)
-        self.assertIn("40774", result.protection_error)
+        self.assertEqual(result.protection_error, "")
 
     def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40762(self) -> None:
         class RetryClient(FakeBitgetLiveClient):
@@ -368,6 +408,44 @@ class QuantBitgetMigrationTests(unittest.TestCase):
 
         self.assertEqual(len(live_client.orders), 1)
 
+    def test_bitget_live_order_caps_quantity_with_exchange_max_open_hint(self) -> None:
+        class MaxOpenClient(FakeBitgetLiveClient):
+            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
+                return 25.0
+
+        live_client = MaxOpenClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=0.25,
+        )
+
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.quantity, 25.0)
+        self.assertEqual(live_client.orders[0][1]["size"], "25.00000000")
+
+    def test_bitget_live_order_skips_when_exchange_reports_zero_max_open(self) -> None:
+        class ZeroOpenClient(FakeBitgetLiveClient):
+            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
+                return 0.0
+
+        live_client = ZeroOpenClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=0.25,
+        )
+
+        self.assertIsNone(result)
+        self.assertEqual(live_client.orders, [])
+        rejection = live_adapter.pop_last_preflight_rejection()
+        self.assertIsNotNone(rejection)
+        assert rejection is not None
+        self.assertEqual(rejection["reason"], "BITGET_MAX_OPEN_ZERO")
+
     def test_bitget_exchange_info_exposes_min_quantity(self) -> None:
         client = BitgetRestClient(credentials=None)
         with patch.object(
@@ -400,6 +478,29 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         )
         request = client.build_positions_request()
         self.assertIn("/api/v2/mix/position/all-position", request.full_url)
+
+    def test_bitget_history_request_builders_follow_expected_paths(self) -> None:
+        client = BitgetRestClient(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        order_request = client.build_futures_order_history_request(symbol="BTCUSDT", limit=50)
+        fill_request = client.build_futures_fill_history_request(symbol="BTCUSDT", limit=50)
+        position_request = client.build_futures_position_history_request(symbol="BTCUSDT", limit=50)
+        pending_plan_request = client.build_futures_pending_plan_orders_request(symbol="BTCUSDT", plan_type="profit_loss")
+        cancel_plan_request = client.build_cancel_futures_plan_order_request(
+            symbol="BTCUSDT",
+            order_id_list=[{"orderId": "1", "clientOid": "cid-1"}],
+        )
+        self.assertIn("/api/v2/mix/order/orders-history", order_request.full_url)
+        self.assertIn("/api/v2/mix/order/fill-history", fill_request.full_url)
+        self.assertIn("/api/v2/mix/position/history-position", position_request.full_url)
+        self.assertIn("/api/v2/mix/order/orders-plan-pending", pending_plan_request.full_url)
+        self.assertIn("/api/v2/mix/order/cancel-plan-order", cancel_plan_request.full_url)
 
     def test_bitget_futures_order_params_follow_one_way_mode_contract(self) -> None:
         client = BitgetRestClient(credentials=None)
@@ -462,7 +563,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(float(account["crossedMaxAvailable"]), 4.93305789)
 
 
-    def test_bitget_futures_account_falls_back_to_available_when_crossed_executable_balance_is_zero(self) -> None:
+    def test_bitget_futures_account_prefers_union_available_when_crossed_executable_balance_is_zero(self) -> None:
         client = BitgetRestClient(
             credentials=ExchangeCredentials(
                 exchange_id="bitget",
@@ -490,7 +591,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
             account = client.get_account(market="futures")
 
         self.assertEqual(float(account["availableBalance"]), 147.50760642)
-        self.assertEqual(float(account["executionAvailableBalance"]), 147.50760642)
+        self.assertEqual(float(account["executionAvailableBalance"]), 18.17050274)
         self.assertEqual(float(account["unionAvailable"]), 18.17050274)
 
     def test_crossed_executable_balance_assumption_reduces_bitget_futures_payload_size(self) -> None:
