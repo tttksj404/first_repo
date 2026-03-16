@@ -319,8 +319,8 @@ class LivePaperSession:
             remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
             cash_reserve_fraction=self._cash_reserve_fraction(),
         )
-        self._record_decision(decision=decision, state=state, timestamp=decision_time, bootstrap=True)
-        return decision
+        recorded = self._record_decision(decision=decision, state=state, timestamp=decision_time, bootstrap=True)
+        return recorded or decision
 
     def _build_capital_report_snapshot(self) -> None:
         if self.rest_client is None or not hasattr(self.rest_client, "build_capital_report"):
@@ -585,6 +585,27 @@ class LivePaperSession:
             return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
         return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
+    def _min_expected_profit_usd_threshold(self, decision: DecisionIntent) -> float:
+        base_threshold = float(self.runtime.paper_service.settings.risk.min_expected_profit_usd_per_trade)
+        if base_threshold <= 0.0:
+            return 0.0
+        if (
+            self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
+            and decision.final_mode == "futures"
+            and decision.symbol in {"BTCUSDT", "ETHUSDT"}
+        ):
+            return min(base_threshold, 0.1)
+        return base_threshold
+
+    def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float) -> float:
+        floor = max(float(configured_floor), 0.0)
+        if (
+            self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
+            and symbol in {"BTCUSDT", "ETHUSDT"}
+        ):
+            return min(floor, 60.0) if floor > 0.0 else 60.0
+        return floor
+
     def _market_min_quantity(self, *, market: str, symbol: str) -> float:
         if not self.capital_report:
             return 0.0
@@ -714,6 +735,7 @@ class LivePaperSession:
             )
             available += max(extra_futures_execution_balance_usd, 0.0)
             leverage = select_futures_leverage(
+                symbol=decision.symbol,
                 predictability_score=decision.predictability_score,
                 trend_strength=decision.trend_strength,
                 volume_confirmation=decision.volume_confirmation,
@@ -784,18 +806,21 @@ class LivePaperSession:
         ):
             meaningful_notional_floor = max(
                 meaningful_notional_floor,
-                self.runtime.paper_service.settings.futures_exposure.major_min_meaningful_notional_usd,
+                self._major_futures_entry_floor(
+                    symbol=decision.symbol,
+                    configured_floor=self.runtime.paper_service.settings.futures_exposure.major_min_meaningful_notional_usd,
+                ),
             )
         if is_major_medium_futures_decision:
-            major_medium_entry_floor = max(
-                0.0,
-                self.runtime.paper_service.settings.futures_exposure.major_medium_min_entry_notional_usd,
+            major_medium_entry_floor = self._major_futures_entry_floor(
+                symbol=decision.symbol,
+                configured_floor=self.runtime.paper_service.settings.futures_exposure.major_medium_min_entry_notional_usd,
             )
             meaningful_notional_floor = max(meaningful_notional_floor, major_medium_entry_floor)
         if is_major_strong_futures_decision:
-            major_strong_entry_floor = max(
-                0.0,
-                self.runtime.paper_service.settings.futures_exposure.major_strong_min_entry_notional_usd,
+            major_strong_entry_floor = self._major_futures_entry_floor(
+                symbol=decision.symbol,
+                configured_floor=self.runtime.paper_service.settings.futures_exposure.major_strong_min_entry_notional_usd,
             )
             meaningful_notional_floor = max(meaningful_notional_floor, major_strong_entry_floor)
         if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
@@ -856,7 +881,7 @@ class LivePaperSession:
                 stop_distance_bps=0.0,
                 rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MIN_MEANINGFUL_NOTIONAL",)))),
             )
-        if expected_profit_usd < self.runtime.paper_service.settings.risk.min_expected_profit_usd_per_trade:
+        if expected_profit_usd < self._min_expected_profit_usd_threshold(decision):
             return replace(
                 decision,
                 final_mode="cash",
@@ -3417,6 +3442,7 @@ class LivePaperSession:
         leverage = 1
         if decision.final_mode == "futures":
             leverage = select_futures_leverage(
+                symbol=decision.symbol,
                 predictability_score=decision.predictability_score,
                 trend_strength=decision.trend_strength,
                 volume_confirmation=decision.volume_confirmation,
@@ -3782,6 +3808,7 @@ class LivePaperSession:
             return 0.0
         settings = self.runtime.paper_service.settings
         leverage = select_futures_leverage(
+            symbol=decision.symbol,
             predictability_score=decision.predictability_score,
             trend_strength=decision.trend_strength,
             volume_confirmation=decision.volume_confirmation,
@@ -4026,6 +4053,44 @@ class LivePaperSession:
             or managed_decision.execution_symbol != prepared_decision.execution_symbol
         )
         if not changed and allow_new_submission and prepared_decision.final_mode in {"spot", "futures"} and prepared_decision.order_intent_notional_usd > 0:
+            payload = {
+                "timestamp": timestamp,
+                "symbol": managed_decision.symbol,
+                "allow_new_submission": allow_new_submission,
+                "live_orders_allowed": live_orders_allowed,
+                "order_cooldown_active": order_cooldown_active,
+                "manual_symbol_cooldown_active": manual_symbol_cooldown_active,
+                "pending_external_live_position": pending_external_live_position,
+                "managed": {
+                    "final_mode": managed_decision.final_mode,
+                    "side": managed_decision.side,
+                    "order_intent_notional_usd": round(managed_decision.order_intent_notional_usd, 6),
+                    "rejection_reasons": list(managed_decision.rejection_reasons),
+                    "entry_relaxation_reasons": list(managed_decision.entry_relaxation_reasons),
+                    "size_boost_reasons": list(managed_decision.size_boost_reasons),
+                },
+                "prepared": {
+                    "final_mode": prepared_decision.final_mode,
+                    "side": prepared_decision.side,
+                    "order_intent_notional_usd": round(prepared_decision.order_intent_notional_usd, 6),
+                    "rejection_reasons": list(prepared_decision.rejection_reasons),
+                    "execution_symbol": prepared_decision.execution_symbol,
+                },
+                "cap_changed": False,
+            }
+            if self.verbose:
+                managed_mode = managed_decision.final_mode
+                prepared_mode = prepared_decision.final_mode
+                managed_notional = round(managed_decision.order_intent_notional_usd, 6)
+                prepared_notional = round(prepared_decision.order_intent_notional_usd, 6)
+                prepared_reasons = ",".join(prepared_decision.rejection_reasons) or "none"
+                print(
+                    f"[EXEC_PREFLIGHT] {managed_decision.symbol} allow={allow_new_submission} live_allowed={live_orders_allowed} "
+                    f"managed={managed_mode}:{managed_notional:.2f} prepared={prepared_mode}:{prepared_notional:.2f} "
+                    f"reasons={prepared_reasons}",
+                    flush=True,
+                )
+            self.log_store.append("execution_preflight", payload)
             return
         payload = {
             "timestamp": timestamp,
@@ -4053,6 +4118,18 @@ class LivePaperSession:
         }
         if changed:
             payload["cap_changed"] = True
+        if self.verbose:
+            managed_mode = managed_decision.final_mode
+            prepared_mode = prepared_decision.final_mode
+            managed_notional = round(managed_decision.order_intent_notional_usd, 6)
+            prepared_notional = round(prepared_decision.order_intent_notional_usd, 6)
+            prepared_reasons = ",".join(prepared_decision.rejection_reasons) or "none"
+            print(
+                f"[EXEC_PREFLIGHT] {managed_decision.symbol} allow={allow_new_submission} live_allowed={live_orders_allowed} "
+                f"managed={managed_mode}:{managed_notional:.2f} prepared={prepared_mode}:{prepared_notional:.2f} "
+                f"reasons={prepared_reasons}",
+                flush=True,
+            )
         self.log_store.append("execution_preflight", payload)
 
     def _max_futures_reallocation_replacements(self) -> int:
@@ -4361,7 +4438,21 @@ class LivePaperSession:
         if self.log_store is not None:
             self.log_store.append("decisions", managed_decision.as_dict())
         if bootstrap:
-            return
+            return managed_decision
+        self._execute_recorded_decision(
+            managed_decision=managed_decision,
+            state=state,
+            timestamp=timestamp,
+        )
+        return managed_decision
+
+    def _execute_recorded_decision(
+        self,
+        *,
+        managed_decision: DecisionIntent,
+        state: Any,
+        timestamp: datetime,
+    ) -> None:
         if state is not None:
             managed_decision = self._maybe_reallocate_futures_entry(
                 decision=managed_decision,
@@ -4408,6 +4499,13 @@ class LivePaperSession:
             allow_new_submission = False
         if manual_symbol_cooldown_active:
             allow_new_submission = False
+        if self.verbose:
+            print(
+                f"[SUBMISSION_GATE] {managed_decision.symbol} allow={allow_new_submission} can_open={can_open_new_paper_position} "
+                f"existing={'yes' if existing_paper_position is not None else 'no'} pending_external={pending_external_live_position} "
+                f"order_cooldown={order_cooldown_active} manual_cooldown={manual_symbol_cooldown_active} live_allowed={live_orders_allowed}",
+                flush=True,
+            )
         prepared_execution_decision = managed_decision
         if state is not None and allow_new_submission:
             prepared_execution_decision = (

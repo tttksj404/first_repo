@@ -18,8 +18,10 @@ BTC_ETH_STRONG_SIZE_BOOST_REASON = "BTC_ETH_STRONG_EDGE_SIZE_BOOST"
 BTC_ETH_SOFT_SPOT_MISS_TOLERANCE = 0.12
 BTC_ETH_SECONDARY_SUPPORT_RELAX_TOLERANCE = 0.18
 BTC_ETH_SECONDARY_SENTIMENT_RELAX_TOLERANCE = 0.16
-BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP = 1.15
-BTC_ETH_SIZE_BOOST_ABS_CAP = 0.15
+BTC_ETH_CONFIRMATION_INTRADAY_STRENGTH_MIN = 0.0
+BTC_ETH_CONFIRMATION_SPOT_INTRADAY_STRENGTH_MIN = 0.0
+BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP = 1.2
+BTC_ETH_SIZE_BOOST_ABS_CAP = 0.2
 
 
 def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
@@ -222,6 +224,34 @@ def _futures_soft_entry_allowed(
         and features.overheat_penalty <= (exposure.soft_overheat_penalty_max + 0.05)
         and features.net_expected_edge_bps >= (exposure.reduced_entry_net_edge_bps - (1.0 if features.trend_direction < 0 else 0.0))
         and _edge_to_cost_multiple(features) >= edge_to_cost_multiple_min
+    )
+
+
+def _btc_eth_confirmation_relaxation_allowed(features: FeatureVector, settings: Settings, *, symbol: str) -> bool:
+    return (
+        _is_btc_eth_symbol(symbol)
+        and features.macro_trade_restraint == "none"
+        and features.macro_event_risk_score < 0.55
+        and passes_cost_gate(features, settings)
+        and features.net_expected_edge_bps >= max(settings.futures_exposure.min_entry_net_edge_bps + 1.0, 8.0)
+        and _edge_to_cost_multiple(features) >= max(settings.cost_gate.edge_to_cost_multiple_min, 1.2)
+    )
+
+
+def _reduced_size_futures_confirmation_required(*, symbol: str, futures_size_multiplier: float) -> bool:
+    if futures_size_multiplier >= 1.0:
+        return False
+    return not _is_btc_eth_symbol(symbol)
+
+
+def _btc_eth_spot_confirmation_relaxation_allowed(features: FeatureVector, settings: Settings, *, symbol: str) -> bool:
+    return (
+        _is_btc_eth_symbol(symbol)
+        and features.macro_trade_restraint == "none"
+        and features.macro_event_risk_score < 0.55
+        and passes_cost_gate(features, settings)
+        and features.net_expected_edge_bps >= 6.0
+        and _edge_to_cost_multiple(features) >= max(settings.cost_gate.edge_to_cost_multiple_min, 1.15)
     )
 
 
@@ -703,6 +733,7 @@ def evaluate_snapshot(
     )
     if futures_ok:
         planned_leverage = select_futures_leverage(
+            symbol=snapshot.symbol,
             predictability_score=futures_features.predictability_score,
             trend_strength=futures_features.trend_strength,
             volume_confirmation=futures_features.volume_confirmation,
@@ -735,14 +766,25 @@ def evaluate_snapshot(
             "side": "long" if futures_features.trend_direction > 0 else "short",
             "predictability_score": futures_features.predictability_score,
         }
-        confirmation_required = (
-            futures_size_multiplier < 1.0
-            or futures_features.intraday_trend_strength < 0.5
+        confirmation_intraday_strength_min = 0.5
+        allow_btc_eth_confirmation_relaxation = _btc_eth_confirmation_relaxation_allowed(
+            futures_features,
+            settings,
+            symbol=snapshot.symbol,
+        )
+        if allow_btc_eth_confirmation_relaxation:
+            confirmation_intraday_strength_min = BTC_ETH_CONFIRMATION_INTRADAY_STRENGTH_MIN
+        size_confirmation_required = _reduced_size_futures_confirmation_required(
+            symbol=snapshot.symbol,
+            futures_size_multiplier=futures_size_multiplier,
+        )
+        confirmation_required = size_confirmation_required or ((
+            futures_features.intraday_trend_strength < confirmation_intraday_strength_min
             or (
                 futures_features.intraday_trend_direction != 0
                 and futures_features.intraday_trend_direction != futures_features.trend_direction
             )
-        )
+        ) and not allow_btc_eth_confirmation_relaxation)
         return DecisionIntent(
             decision_id=str(uuid4()),
             decision_hash=hash_decision_payload(payload),
@@ -796,11 +838,18 @@ def evaluate_snapshot(
             "side": "long",
             "predictability_score": spot_features.predictability_score,
         }
+        confirmation_support_min = 0.25
+        confirmation_resistance_max = 0.3
+        confirmation_intraday_strength_min = 0.45
+        if _btc_eth_spot_confirmation_relaxation_allowed(spot_features, settings, symbol=snapshot.symbol):
+            confirmation_support_min = 0.18
+            confirmation_resistance_max = 0.38
+            confirmation_intraday_strength_min = BTC_ETH_CONFIRMATION_SPOT_INTRADAY_STRENGTH_MIN
         confirmation_required = (
-            spot_features.support_alignment < 0.25
-            or spot_features.resistance_penalty > 0.3
+            spot_features.support_alignment < confirmation_support_min
+            or spot_features.resistance_penalty > confirmation_resistance_max
             or spot_features.liquidity_score < thresholds.spot_liquidity_min
-            or spot_features.intraday_trend_strength < 0.45
+            or spot_features.intraday_trend_strength < confirmation_intraday_strength_min
         )
         return DecisionIntent(
             decision_id=str(uuid4()),

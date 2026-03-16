@@ -84,6 +84,7 @@ class DecisionLiveOrderAdapter:
         if self.settings is None:
             return 1
         return select_futures_leverage(
+            symbol=decision.symbol,
             predictability_score=decision.predictability_score,
             trend_strength=decision.trend_strength,
             volume_confirmation=decision.volume_confirmation,
