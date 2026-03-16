@@ -13,6 +13,11 @@ from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gat
 
 
 FUTURES_SOFT_RISK_REASONS = {"SCORE_TOO_LOW", "LIQUIDITY_TOO_WEAK", "VOL_TOO_HIGH", "FUTURES_OVERHEAT", "EDGE_BELOW_COST", "SENTIMENT_CAUTION"}
+BTC_ETH_SYMBOLS = frozenset({"BTCUSDT", "ETHUSDT"})
+BTC_ETH_STRONG_SIZE_BOOST_REASON = "BTC_ETH_STRONG_EDGE_SIZE_BOOST"
+BTC_ETH_SOFT_SPOT_MISS_TOLERANCE = 0.08
+BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP = 1.15
+BTC_ETH_SIZE_BOOST_ABS_CAP = 0.15
 
 
 def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
@@ -21,6 +26,10 @@ def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
     if features.predictability_score >= settings.mode_thresholds.spot_score_min:
         return "spot"
     return "cash"
+
+
+def _is_btc_eth_symbol(symbol: str) -> bool:
+    return symbol in BTC_ETH_SYMBOLS
 
 
 def _observe_only_reasons(features: FeatureVector, settings: Settings, symbol: str) -> tuple[bool, list[str]]:
@@ -214,19 +223,138 @@ def _futures_soft_entry_allowed(
     )
 
 
+def _btc_eth_futures_sentiment_relaxation_allowed(
+    features: FeatureVector,
+    settings: Settings,
+    *,
+    symbol: str,
+    futures_score_min: float,
+    futures_liquidity_min: float,
+) -> bool:
+    exposure = settings.futures_exposure
+    thresholds = settings.mode_thresholds
+    macro_gates = settings.macro_gates
+    return (
+        _is_btc_eth_symbol(symbol)
+        and features.macro_trade_restraint == "none"
+        and features.macro_event_risk_score < 0.45
+        and features.macro_risk_penalty < macro_gates.futures_block_penalty
+        and features.predictability_score >= max(futures_score_min, thresholds.futures_score_min)
+        and features.trend_direction in {1, -1}
+        and features.trend_strength >= thresholds.futures_trend_strength_min + 0.06
+        and features.volume_confirmation >= max(exposure.strong_volume_confirmation_min - 0.04, 0.68)
+        and features.liquidity_score >= max(futures_liquidity_min, exposure.soft_liquidity_floor)
+        and features.volatility_penalty <= exposure.soft_volatility_penalty_max
+        and features.overheat_penalty <= exposure.soft_overheat_penalty_max
+        and features.net_expected_edge_bps >= max(
+            exposure.min_entry_net_edge_bps + 2.0,
+            exposure.reduced_entry_net_edge_bps,
+            8.0,
+        )
+        and passes_cost_gate(features, settings)
+        and _edge_to_cost_multiple(features) >= max(
+            settings.cost_gate.edge_to_cost_multiple_min + 0.1,
+            min(exposure.strong_edge_to_cost_multiple_min, 1.6),
+            1.35,
+        )
+    )
+
+
+def _btc_eth_spot_relaxation_reasons(
+    features: FeatureVector,
+    settings: Settings,
+    *,
+    symbol: str,
+    support_alignment_min: float,
+    sentiment_support_min: float,
+    resistance_penalty_max: float,
+) -> tuple[str, ...]:
+    thresholds = settings.mode_thresholds
+    macro_gates = settings.macro_gates
+    if not _is_btc_eth_symbol(symbol):
+        return ()
+    strong_context = (
+        features.macro_trade_restraint != "halt_high_impact_window"
+        and features.macro_risk_penalty < macro_gates.spot_block_penalty
+        and features.trend_direction == 1
+        and features.predictability_score >= thresholds.spot_score_min + 4.0
+        and features.trend_strength >= thresholds.spot_trend_strength_min + 0.1
+        and features.volume_confirmation >= 0.68
+        and features.liquidity_score >= thresholds.spot_liquidity_min
+        and features.resistance_penalty <= resistance_penalty_max
+        and passes_cost_gate(features, settings)
+        and features.net_expected_edge_bps >= max(4.0, features.estimated_round_trip_cost_bps * 0.25)
+    )
+    if not strong_context:
+        return ()
+    relaxed_reasons: list[str] = []
+    if (
+        features.support_alignment < support_alignment_min
+        and features.support_alignment >= max(support_alignment_min - BTC_ETH_SOFT_SPOT_MISS_TOLERANCE, 0.0)
+        and features.breakout_norm >= 0.65
+    ):
+        relaxed_reasons.append("SUPPORT_NOT_CONFIRMED")
+    if (
+        features.sentiment_support_score < sentiment_support_min
+        and features.sentiment_support_score >= max(sentiment_support_min - BTC_ETH_SOFT_SPOT_MISS_TOLERANCE, 0.0)
+    ):
+        relaxed_reasons.append("SENTIMENT_TOO_WEAK")
+    return tuple(relaxed_reasons)
+
+
+def _btc_eth_strong_size_boost_multiplier(
+    features: FeatureVector,
+    settings: Settings,
+    *,
+    symbol: str,
+    base_size_multiplier: float,
+    strong_setup: bool,
+) -> float:
+    exposure = settings.futures_exposure
+    macro_gates = settings.macro_gates
+    if not (_is_btc_eth_symbol(symbol) and strong_setup):
+        return base_size_multiplier
+    execution_quality_ok = (
+        features.spread_bps_norm <= 0.3
+        and features.probe_slippage_bps_norm <= 0.35
+        and features.book_stability_norm >= 0.65
+        and features.depth_10bps_norm >= 0.6
+    )
+    if not (
+        execution_quality_ok
+        and features.macro_trade_restraint == "none"
+        and features.macro_event_risk_score < 0.45
+        and features.macro_risk_penalty < macro_gates.futures_block_penalty
+        and features.estimated_round_trip_cost_bps <= 14.0
+        and features.net_expected_edge_bps >= max(
+            exposure.min_entry_net_edge_bps + 4.0,
+            exposure.reduced_entry_net_edge_bps + 2.0,
+            10.0,
+        )
+        and _edge_to_cost_multiple(features) >= max(exposure.strong_edge_to_cost_multiple_min, 1.6)
+    ):
+        return base_size_multiplier
+    boosted_multiplier = min(
+        base_size_multiplier * min(max(exposure.major_size_boost_multiplier, 1.0), BTC_ETH_SIZE_BOOST_MULTIPLIER_CAP),
+        base_size_multiplier + BTC_ETH_SIZE_BOOST_ABS_CAP,
+    )
+    return round(max(base_size_multiplier, boosted_multiplier), 6)
+
+
 def _futures_entry_plan(
     features: FeatureVector,
     settings: Settings,
     symbol: str,
-) -> tuple[bool, list[str], float]:
+) -> tuple[bool, list[str], float, tuple[str, ...], tuple[str, ...]]:
     thresholds = settings.mode_thresholds
     macro_gates = settings.macro_gates
     exposure = settings.futures_exposure
     reasons: list[str] = []
+    relaxed_reasons: list[str] = []
+    size_boost_reasons: list[str] = []
     size_multiplier = 1.0
     reduced_size = False
     priority_symbol = symbol in set(exposure.priority_symbols)
-    major_symbol = symbol in set(exposure.major_symbols)
     alt_symbol = is_alt_symbol(symbol)
     supportive_macro = (
         features.macro_liquidity_support_score >= exposure.macro_support_min
@@ -235,10 +363,10 @@ def _futures_entry_plan(
     )
     macro_allowed, macro_reasons, macro_size_multiplier, _macro_leverage_cap = _macro_futures_risk_controls(features, symbol=symbol)
     if not macro_allowed:
-        return False, macro_reasons, 0.0
+        return False, macro_reasons, 0.0, (), ()
     if macro_reasons:
         reasons.extend(macro_reasons)
-        return False, reasons, 0.0
+        return False, reasons, 0.0, (), ()
     size_multiplier = min(size_multiplier, macro_size_multiplier) if macro_size_multiplier > 0.0 else size_multiplier
     bearish_trend = features.trend_direction < 0
     futures_score_min = thresholds.futures_score_min - (
@@ -326,7 +454,15 @@ def _futures_entry_plan(
         or priority_caution_override
         or bearish_caution_override
     ):
-        if soft_entry_allowed:
+        if _btc_eth_futures_sentiment_relaxation_allowed(
+            features,
+            settings,
+            symbol=symbol,
+            futures_score_min=futures_score_min,
+            futures_liquidity_min=futures_liquidity_min,
+        ):
+            relaxed_reasons.append("SENTIMENT_CAUTION")
+        elif soft_entry_allowed:
             reduced_size = True
             size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
         else:
@@ -373,27 +509,28 @@ def _futures_entry_plan(
         else:
             reasons.append("EDGE_TOO_THIN")
     if reasons:
-        return False, reasons, 0.0
+        return False, reasons, 0.0, (), ()
     if reduced_size and features.net_expected_edge_bps < exposure.reduced_entry_net_edge_bps:
-        return False, ["EDGE_TOO_THIN"], 0.0
+        return False, ["EDGE_TOO_THIN"], 0.0, (), ()
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
     strong_setup = _is_objectively_strong_futures_setup(features, settings)
     if not reduced_size and strong_setup:
         size_multiplier = max(size_multiplier, _strong_futures_size_multiplier(features, settings))
-    if (
-        major_symbol
-        and not reduced_size
-        and not strong_setup
-        and _is_objectively_medium_major_futures_setup(features, settings, symbol=symbol)
-    ):
-        size_multiplier = max(size_multiplier, exposure.major_medium_size_boost_multiplier)
-    if major_symbol and size_multiplier > 1.0:
-        size_multiplier = round(size_multiplier * max(exposure.major_size_boost_multiplier, 1.0), 6)
-    return True, reasons, size_multiplier
+    boosted_size_multiplier = _btc_eth_strong_size_boost_multiplier(
+        features,
+        settings,
+        symbol=symbol,
+        base_size_multiplier=size_multiplier,
+        strong_setup=strong_setup and not reduced_size,
+    )
+    if boosted_size_multiplier > size_multiplier:
+        size_multiplier = boosted_size_multiplier
+        size_boost_reasons.append(BTC_ETH_STRONG_SIZE_BOOST_REASON)
+    return True, reasons, size_multiplier, tuple(relaxed_reasons), tuple(size_boost_reasons)
 
 
-def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tuple[bool, list[str]]:
+def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tuple[bool, list[str], tuple[str, ...]]:
     thresholds = settings.mode_thresholds
     macro_gates = settings.macro_gates
     support_cfg = settings.spot_support
@@ -404,6 +541,15 @@ def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tu
     resistance_penalty_max = support_cfg.priority_resistance_penalty_max if priority_symbol else support_cfg.resistance_penalty_max
     sentiment_support_min = support_cfg.priority_sentiment_support_min if priority_symbol else support_cfg.sentiment_support_min
     liquidity_relaxation = support_cfg.priority_liquidity_relaxation if priority_symbol else support_cfg.liquidity_relaxation
+
+    relaxed_reasons = _btc_eth_spot_relaxation_reasons(
+        features,
+        settings,
+        symbol=symbol,
+        support_alignment_min=support_alignment_min,
+        sentiment_support_min=sentiment_support_min,
+        resistance_penalty_max=resistance_penalty_max,
+    )
 
     macro_reasons = _macro_spot_risk_reasons(features, symbol=symbol)
     if macro_reasons:
@@ -444,7 +590,7 @@ def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tu
         reasons.append("LIQUIDITY_TOO_WEAK")
     if features.volatility_penalty > thresholds.spot_volatility_penalty_max:
         reasons.append("VOL_TOO_HIGH")
-    if features.support_alignment < support_alignment_min:
+    if features.support_alignment < support_alignment_min and "SUPPORT_NOT_CONFIRMED" not in relaxed_reasons:
         reasons.append("SUPPORT_NOT_CONFIRMED")
     resistance_override = (
         features.breakout_norm >= support_cfg.breakout_resistance_override_min
@@ -460,7 +606,7 @@ def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tu
         reasons.append("BUYING_INTO_RESISTANCE")
     if features.macro_risk_penalty >= macro_gates.spot_block_penalty:
         reasons.append("MACRO_RISK_HIGH")
-    if features.sentiment_support_score < sentiment_support_min:
+    if features.sentiment_support_score < sentiment_support_min and "SENTIMENT_TOO_WEAK" not in relaxed_reasons:
         reasons.append("SENTIMENT_TOO_WEAK")
     if is_alt_symbol(symbol):
         if features.alt_market_regime == "defensive":
@@ -481,7 +627,7 @@ def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tu
     )
     if edge_gate_failed and not spot_accumulation_override:
         reasons.append("EDGE_BELOW_COST")
-    return not reasons, reasons
+    return not reasons, reasons, relaxed_reasons
 
 
 def evaluate_snapshot(
@@ -548,7 +694,7 @@ def evaluate_snapshot(
             rejection_reasons=cash_reasons,
         )
 
-    futures_ok, futures_reasons, futures_size_multiplier = _futures_entry_plan(
+    futures_ok, futures_reasons, futures_size_multiplier, futures_relaxed_reasons, futures_size_boost_reasons = _futures_entry_plan(
         futures_features,
         settings,
         snapshot.symbol,
@@ -617,6 +763,9 @@ def evaluate_snapshot(
             estimated_round_trip_cost_bps=futures_features.estimated_round_trip_cost_bps,
             order_intent_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
+            strategy_size_multiplier=futures_size_multiplier,
+            entry_relaxation_reasons=futures_relaxed_reasons,
+            size_boost_reasons=futures_size_boost_reasons,
             macro_regime=futures_features.macro_regime,
             macro_trade_restraint=futures_features.macro_trade_restraint,
             macro_size_multiplier=futures_features.macro_size_multiplier,
@@ -625,7 +774,7 @@ def evaluate_snapshot(
             divergence_code="ENTRY_CONFIRMATION_REQUIRED" if confirmation_required else "",
         )
 
-    spot_ok, spot_reasons = _spot_passes(spot_features, settings, snapshot.symbol)
+    spot_ok, spot_reasons, spot_relaxed_reasons = _spot_passes(spot_features, settings, snapshot.symbol)
     if spot_ok:
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
@@ -673,6 +822,7 @@ def evaluate_snapshot(
             estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
             order_intent_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
+            entry_relaxation_reasons=spot_relaxed_reasons,
             macro_regime=spot_features.macro_regime,
             macro_trade_restraint=spot_features.macro_trade_restraint,
             macro_size_multiplier=spot_features.macro_size_multiplier,
