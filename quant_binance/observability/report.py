@@ -127,6 +127,9 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
             "avg_slippage_bps": 0.0,
             "avg_realized_edge_bps": 0.0,
             "avg_expected_edge_bps": 0.0,
+            "avg_edge_retention_ratio": 0.0,
+            "protection_degraded_count": 0,
+            "protection_degraded_rate": 0.0,
             "realized_vs_expected_edge_gap_bps": 0.0,
             "execution_audit_by_symbol": [],
         }
@@ -138,6 +141,8 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
     slippage_values: list[float] = []
     realized_edge_values: list[float] = []
     expected_edge_values: list[float] = []
+    retention_values: list[float] = []
+    protection_degraded_count = 0
     by_symbol: dict[str, dict[str, float | int | str]] = defaultdict(
         lambda: {
             "symbol": "",
@@ -148,6 +153,9 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
             "avg_slippage_bps": 0.0,
             "avg_realized_edge_bps": 0.0,
             "avg_expected_edge_bps": 0.0,
+            "avg_edge_retention_ratio": 0.0,
+            "protection_degraded_count": 0,
+            "protection_degraded_rate": 0.0,
             "realized_vs_expected_edge_gap_bps": 0.0,
         }
     )
@@ -157,6 +165,8 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
     realized_sums: dict[str, float] = defaultdict(float)
     realized_counts: dict[str, int] = defaultdict(int)
     expected_sums: dict[str, float] = defaultdict(float)
+    retention_sums: dict[str, float] = defaultdict(float)
+    retention_counts: dict[str, int] = defaultdict(int)
 
     for order in orders:
         status = str(order.get("fill_status") or ("accepted" if order.get("accepted") else "reject") or "unknown")
@@ -195,6 +205,14 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
         expected = float(order.get("expected_net_edge_bps", order.get("net_expected_edge_bps", 0.0)) or 0.0)
         expected_edge_values.append(expected)
         expected_sums[symbol] += expected
+        if expected > 0.0 and realized is not None:
+            retention = max(min(float(realized or 0.0) / expected, 2.0), -2.0)
+            retention_values.append(retention)
+            retention_sums[symbol] += retention
+            retention_counts[symbol] += 1
+        if order.get("protection_error"):
+            protection_degraded_count += 1
+            row["protection_degraded_count"] = int(row["protection_degraded_count"]) + 1
 
     rows: list[dict[str, object]] = []
     for symbol, row in by_symbol.items():
@@ -205,6 +223,7 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
         row["avg_slippage_bps"] = round(slip_sums[symbol] / slip_counts[symbol], 6) if slip_counts[symbol] else 0.0
         row["avg_realized_edge_bps"] = round(realized_avg, 6)
         row["avg_expected_edge_bps"] = round(expected_avg, 6)
+        row["avg_edge_retention_ratio"] = round(retention_sums[symbol] / retention_counts[symbol], 6) if retention_counts[symbol] else 0.0
         row["realized_vs_expected_edge_gap_bps"] = round(realized_avg - expected_avg, 6)
         rows.append(dict(row))
     rows.sort(key=lambda item: (float(item["realized_vs_expected_edge_gap_bps"]), float(item["avg_realized_edge_bps"])), reverse=True)
@@ -219,6 +238,9 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
         "avg_slippage_bps": round(sum(slippage_values) / len(slippage_values), 6) if slippage_values else 0.0,
         "avg_realized_edge_bps": round(avg_realized, 6),
         "avg_expected_edge_bps": round(avg_expected, 6),
+        "avg_edge_retention_ratio": round(sum(retention_values) / len(retention_values), 6) if retention_values else 0.0,
+        "protection_degraded_count": protection_degraded_count,
+        "protection_degraded_rate": round(protection_degraded_count / len(orders), 6),
         "realized_vs_expected_edge_gap_bps": round(avg_realized - avg_expected, 6),
         "execution_audit_by_symbol": rows,
     }
