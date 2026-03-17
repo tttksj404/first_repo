@@ -133,6 +133,47 @@ class StrategyPrediction:
 
 
 @dataclass(frozen=True)
+class PortfolioIntent:
+    intent_id: str
+    prediction_id: str
+    snapshot_id: str
+    config_version: str
+    timestamp: datetime
+    symbol: str
+    candidate_mode: str
+    selected_mode: str
+    side: str
+    target_notional_usd: float
+    stop_distance_bps: float
+    target_leverage: float = 0.0
+    strategy_size_multiplier: float = 1.0
+    entry_relaxation_reasons: tuple[str, ...] = field(default_factory=tuple)
+    size_boost_reasons: tuple[str, ...] = field(default_factory=tuple)
+    rejection_reasons: tuple[str, ...] = field(default_factory=tuple)
+    divergence_code: str = ""
+    predictability_score: float = 0.0
+    gross_expected_edge_bps: float = 0.0
+    net_expected_edge_bps: float = 0.0
+    estimated_round_trip_cost_bps: float = 0.0
+    trend_direction: int = 0
+    trend_strength: float = 0.0
+    volume_confirmation: float = 0.0
+    liquidity_score: float = 0.0
+    volatility_penalty: float = 0.0
+    overheat_penalty: float = 0.0
+    macro_regime: str = "neutral"
+    macro_trade_restraint: str = "none"
+    macro_size_multiplier: float = 1.0
+    macro_leverage_cap: int = 0
+    macro_symbol_bias: str = "neutral"
+
+    def as_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        data["timestamp"] = self.timestamp.isoformat()
+        return data
+
+
+@dataclass(frozen=True)
 class DecisionIntent:
     decision_id: str
     decision_hash: str
