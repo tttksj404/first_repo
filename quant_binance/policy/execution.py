@@ -40,3 +40,38 @@ def build_execution_intent(
 
 def decision_from_execution_intent(*, intent: ExecutionIntent) -> DecisionIntent:
     return intent
+
+
+def is_major_futures_symbol(symbol: str, *, major_symbols: tuple[str, ...]) -> bool:
+    return symbol in set(major_symbols)
+
+
+def is_major_strong_futures_decision(*, decision: DecisionIntent, major_symbols: tuple[str, ...], exposure: object, thresholds: object) -> bool:
+    if decision.final_mode != "futures" or not is_major_futures_symbol(decision.symbol, major_symbols=major_symbols):
+        return False
+    edge_to_cost_multiple = float("inf") if decision.estimated_round_trip_cost_bps <= 0.0 else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
+    return (
+        decision.predictability_score >= thresholds.futures_score_min + exposure.strong_score_buffer
+        and decision.trend_strength >= exposure.strong_trend_strength_min
+        and decision.volume_confirmation >= exposure.strong_volume_confirmation_min
+        and decision.liquidity_score >= exposure.strong_liquidity_min
+        and decision.volatility_penalty <= exposure.strong_volatility_penalty_max
+        and decision.overheat_penalty <= exposure.strong_overheat_penalty_max
+        and edge_to_cost_multiple >= exposure.strong_edge_to_cost_multiple_min
+    )
+
+
+def is_major_medium_futures_decision(*, decision: DecisionIntent, major_symbols: tuple[str, ...], exposure: object, thresholds: object) -> bool:
+    if decision.final_mode != "futures" or not is_major_futures_symbol(decision.symbol, major_symbols=major_symbols):
+        return False
+    if is_major_strong_futures_decision(decision=decision, major_symbols=major_symbols, exposure=exposure, thresholds=thresholds):
+        return False
+    edge_to_cost_multiple = float("inf") if decision.estimated_round_trip_cost_bps <= 0.0 else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
+    return (
+        decision.predictability_score >= exposure.pyramid_min_predictability_score
+        and decision.trend_strength >= exposure.pyramid_min_trend_strength
+        and decision.volume_confirmation >= exposure.pyramid_min_volume_confirmation
+        and decision.liquidity_score >= exposure.soft_liquidity_floor
+        and decision.net_expected_edge_bps >= max(exposure.min_entry_net_edge_bps, exposure.pyramid_min_net_edge_bps - 2.0)
+        and edge_to_cost_multiple >= max(exposure.priority_edge_to_cost_multiple_min, 1.0)
+    )

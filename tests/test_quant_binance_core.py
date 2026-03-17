@@ -334,6 +334,42 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("gross_expected_edge_bps", report)
         self.assertIn("linked_order_ids", report)
 
+    def test_major_candidate_mode_prefers_futures_for_btc_eth_edge_advantage(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.7,
+            ret_rank_4h=0.68,
+            breakout_norm=0.75,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.65,
+            vol_z_1h_norm=0.66,
+            taker_imbalance_norm=0.63,
+            spread_bps_norm=0.22,
+            probe_slippage_bps_norm=0.24,
+            depth_10bps_norm=0.84,
+            book_stability_norm=0.87,
+            realized_vol_1h_norm=0.29,
+            realized_vol_4h_norm=0.27,
+            vol_shock_norm=0.24,
+            funding_abs_percentile=0.12,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.16,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.76,
+            volume_confirmation=0.71,
+            liquidity_score=0.83,
+            volatility_penalty=0.26,
+            overheat_penalty=0.16,
+            gross_expected_edge_bps=16.0,
+            estimated_round_trip_cost_bps=8.0,
+            macro_regime="supportive",
+            macro_trade_restraint="none",
+            macro_symbol_bias="majors_only",
+        )
+        prediction = build_strategy_prediction(make_snapshot("ETHUSDT", features), self.settings, expected_funding_drag_bps=2.0)
+        self.assertEqual(prediction.candidate_mode, "futures")
+        self.assertEqual(prediction.selected_mode_hint, "futures")
+
     def test_major_prediction_bias_prefers_btc_eth_when_macro_is_majors_only(self) -> None:
         major_features = FeatureVector(
             ret_rank_1h=0.74,

@@ -95,6 +95,19 @@ def _apply_major_prediction_bias(*, symbol: str, prediction: ModePrediction) -> 
         net_expected_edge_bps=round(prediction.net_expected_edge_bps + edge_boost, 6),
     )
 
+
+
+def _select_major_candidate_mode(*, symbol: str, candidate_mode: str, spot_prediction: ModePrediction, futures_prediction: ModePrediction, settings: Settings) -> str:
+    if symbol not in BTC_ETH_SYMBOLS:
+        return candidate_mode
+    if futures_prediction.side == "flat":
+        return candidate_mode
+    if futures_prediction.macro_trade_restraint not in {"none", "pre_event_reduce"}:
+        return candidate_mode
+    if futures_prediction.predictability_score >= settings.mode_thresholds.futures_score_min - 1.0 and futures_prediction.net_expected_edge_bps >= max(spot_prediction.net_expected_edge_bps + 1.0, 8.0):
+        return "futures"
+    return candidate_mode
+
 def build_strategy_prediction(
     snapshot: MarketSnapshot,
     settings: Settings,
@@ -113,11 +126,18 @@ def build_strategy_prediction(
         mode="spot",
     )
     candidate_mode = _candidate_mode(futures_features, settings)
+    spot_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="spot", features=spot_features))
+    futures_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="futures", features=futures_features))
+    candidate_mode = _select_major_candidate_mode(
+        symbol=snapshot.symbol,
+        candidate_mode=candidate_mode,
+        spot_prediction=spot_prediction,
+        futures_prediction=futures_prediction,
+        settings=settings,
+    )
     selected_mode_hint = candidate_mode
     if candidate_mode == "cash" and spot_features.predictability_score >= settings.mode_thresholds.spot_score_min:
         selected_mode_hint = "spot"
-    spot_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="spot", features=spot_features))
-    futures_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="futures", features=futures_features))
     return StrategyPrediction(
         prediction_id=str(uuid4()),
         snapshot_id=snapshot.snapshot_id,

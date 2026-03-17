@@ -17,7 +17,13 @@ from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter,
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import LivePaperRuntime
 from quant_binance.models import DecisionIntent
-from quant_binance.policy.execution import build_execution_intent, decision_from_execution_intent
+from quant_binance.policy.execution import (
+    build_execution_intent,
+    decision_from_execution_intent,
+    is_major_futures_symbol,
+    is_major_medium_futures_decision,
+    is_major_strong_futures_decision,
+)
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
 from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
@@ -1274,7 +1280,10 @@ class LivePaperSession:
         }
 
     def _is_major_futures_symbol(self, symbol: str) -> bool:
-        return symbol in set(self.runtime.paper_service.settings.futures_exposure.major_symbols)
+        return is_major_futures_symbol(
+            symbol,
+            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+        )
 
     def _is_btc_eth_symbol(self, symbol: str) -> bool:
         return symbol in {"BTCUSDT", "ETHUSDT"}
@@ -1333,43 +1342,19 @@ class LivePaperSession:
         return closed_symbols, bool(closed_symbols)
 
     def _is_major_strong_futures_decision(self, decision: DecisionIntent) -> bool:
-        if decision.final_mode != "futures" or not self._is_major_futures_symbol(decision.symbol):
-            return False
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        thresholds = self.runtime.paper_service.settings.mode_thresholds
-        edge_to_cost_multiple = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        return (
-            decision.predictability_score >= thresholds.futures_score_min + exposure.strong_score_buffer
-            and decision.trend_strength >= exposure.strong_trend_strength_min
-            and decision.volume_confirmation >= exposure.strong_volume_confirmation_min
-            and decision.liquidity_score >= exposure.strong_liquidity_min
-            and decision.volatility_penalty <= exposure.strong_volatility_penalty_max
-            and decision.overheat_penalty <= exposure.strong_overheat_penalty_max
-            and edge_to_cost_multiple >= exposure.strong_edge_to_cost_multiple_min
+        return is_major_strong_futures_decision(
+            decision=decision,
+            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+            exposure=self.runtime.paper_service.settings.futures_exposure,
+            thresholds=self.runtime.paper_service.settings.mode_thresholds,
         )
 
     def _is_major_medium_futures_decision(self, decision: DecisionIntent) -> bool:
-        if decision.final_mode != "futures" or not self._is_major_futures_symbol(decision.symbol):
-            return False
-        if self._is_major_strong_futures_decision(decision):
-            return False
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        edge_to_cost_multiple = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        return (
-            decision.predictability_score >= exposure.pyramid_min_predictability_score
-            and decision.trend_strength >= exposure.pyramid_min_trend_strength
-            and decision.volume_confirmation >= exposure.pyramid_min_volume_confirmation
-            and decision.liquidity_score >= exposure.soft_liquidity_floor
-            and decision.net_expected_edge_bps >= max(exposure.min_entry_net_edge_bps, exposure.pyramid_min_net_edge_bps - 2.0)
-            and edge_to_cost_multiple >= max(exposure.priority_edge_to_cost_multiple_min, 1.0)
+        return is_major_medium_futures_decision(
+            decision=decision,
+            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+            exposure=self.runtime.paper_service.settings.futures_exposure,
+            thresholds=self.runtime.paper_service.settings.mode_thresholds,
         )
 
     def _open_positions_for_market(self, market: str) -> list[dict[str, object]]:

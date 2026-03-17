@@ -17,7 +17,12 @@ from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.models import DecisionIntent
-from quant_binance.policy.execution import build_execution_intent, decision_from_execution_intent
+from quant_binance.policy.execution import (
+    build_execution_intent,
+    decision_from_execution_intent,
+    is_major_medium_futures_decision,
+    is_major_strong_futures_decision,
+)
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
@@ -181,6 +186,30 @@ class StalledThenHealthyFactory:
 
 
 class QuantBinanceSessionTests(unittest.TestCase):
+    def test_execution_policy_major_strength_classifier(self) -> None:
+        decision = replace(
+            make_decision(
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                final_mode="futures",
+                symbol="BTCUSDT",
+                side="long",
+                predictability_score=86.0,
+                liquidity_score=0.9,
+                gross_expected_edge_bps=30.0,
+                estimated_round_trip_cost_bps=10.0,
+                net_expected_edge_bps=20.0,
+            ),
+            trend_strength=0.9,
+            volume_confirmation=0.85,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+        )
+        session = self._build_session()
+        exposure = session.runtime.paper_service.settings.futures_exposure
+        thresholds = session.runtime.paper_service.settings.mode_thresholds
+        self.assertTrue(is_major_strong_futures_decision(decision=decision, major_symbols=exposure.major_symbols, exposure=exposure, thresholds=thresholds))
+        self.assertFalse(is_major_medium_futures_decision(decision=decision, major_symbols=exposure.major_symbols, exposure=exposure, thresholds=thresholds))
+
     def test_execution_intent_compiles_back_to_decision(self) -> None:
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
         decision = make_decision(timestamp=now, final_mode="spot", side="long", order_intent_notional_usd=432.1)
