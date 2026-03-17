@@ -243,7 +243,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertIn("presetStopSurplusPrice", live_client.orders[0][1])
         self.assertIn("presetStopLossPrice", live_client.orders[0][1])
         self.assertNotIn("holdSide", live_client.orders[0][1])
-        self.assertEqual(live_client.protection_orders, [])
+        self.assertGreaterEqual(len(live_client.protection_orders), 1)
 
     def test_bitget_order_adapters_use_base_quantity_for_routed_spot_buy(self) -> None:
         decision = DecisionIntent(
@@ -321,6 +321,33 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(result.market, "futures")
         self.assertEqual(len(live_client.orders), 1)
         self.assertEqual(result.protection_error, "")
+
+    def test_bitget_live_order_retries_transient_protection_order_failure(self) -> None:
+        class RetryProtectionClient(FakeBitgetLiveClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.protection_calls = 0
+
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                self.protection_calls += 1
+                if self.protection_calls == 1:
+                    raise RuntimeError('Bitget HTTP 400: {"code":"43059","msg":"Request failed, please try again","requestTime":1773732903078,"data":null}')
+                return {"status": "SUCCESS", "planId": f"retry-{self.protection_calls}"}
+
+        live_client = RetryProtectionClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=50000.0,
+        )
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.protection_error, "")
+        self.assertGreaterEqual(live_client.protection_calls, 2)
+        self.assertGreaterEqual(len(result.protection_orders), 1)
 
     def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40762(self) -> None:
         class RetryClient(FakeBitgetLiveClient):
