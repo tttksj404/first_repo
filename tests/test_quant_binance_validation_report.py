@@ -150,8 +150,15 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertGreater(artifact["runner_positive_walk_forward_ratio"], 0.0)
             self.assertEqual(artifact["validation_path"]["candidate_positive_walk_forward_ratio"], 1.0)
             self.assertTrue(artifact["candidate_replay_summary"]["top_symbols"])
+            self.assertEqual(artifact["counterfactual_replay_path"]["mode"], "counterfactual_current_vs_candidate_policy")
+            self.assertEqual(artifact["counterfactual_replay_path"]["candidate_policy"]["replay_summary"]["micro_live_gate"]["status"], "pass")
+            self.assertTrue(artifact["counterfactual_replay_path"]["current_policy"]["evidence_available"])
             self.assertTrue(any(row["metric"] == "runner_positive_walk_forward_ratio" for row in artifact["evidence"]["metric_comparisons"]))
             self.assertEqual(artifact["evidence"]["candidate_replay_summary"]["micro_live_gate"]["status"], "pass")
+            self.assertEqual(
+                artifact["evidence"]["counterfactual_replay_path"]["candidate_policy"]["policy_score"],
+                artifact["candidate_policy_score"],
+            )
 
     def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
