@@ -125,6 +125,15 @@ class DecisionLiveOrderAdapter:
             return ""
         return match.group(1)
 
+    def _bitget_retryable_protection_error(self, message: str) -> bool:
+        code = self._bitget_error_code(message)
+        normalized = message.lower()
+        return code == "43059" or "request failed, please try again" in normalized
+
+    def _bitget_ignorable_protection_error(self, message: str) -> bool:
+        code = self._bitget_error_code(message)
+        return code == "40774" or self._is_bitget_unilateral_error(message)
+
     def _bitget_reduce_only_value(self, order_params: dict[str, Any]) -> str:
         existing = str(order_params.get("reduceOnly", "")).strip().upper()
         if existing in {"YES", "NO"}:
@@ -475,10 +484,17 @@ class DecisionLiveOrderAdapter:
         )
         results: list[dict[str, Any]] = []
         for market, order_params in payloads:
-            if market == "futures":
-                result = self.client.place_futures_position_tpsl(order_params=order_params)
-            else:
-                result = self.client.place_spot_plan_order(order_params=order_params)
+            submit = self.client.place_futures_position_tpsl if market == "futures" else self.client.place_spot_plan_order
+            try:
+                result = submit(order_params=order_params)
+            except Exception as exc:
+                message = str(exc)
+                if self._bitget_ignorable_protection_error(message):
+                    continue
+                if self._bitget_retryable_protection_error(message):
+                    result = submit(order_params=order_params)
+                else:
+                    raise
             results.append(
                 {
                     "market": market,
