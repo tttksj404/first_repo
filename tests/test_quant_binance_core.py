@@ -590,6 +590,42 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("realized_vs_expected_edge_gap_bps", summary)
         self.assertEqual(len(summary["execution_audit_by_symbol"]), 2)
 
+    def test_runtime_summary_operational_verdict_holds_for_small_sample(self) -> None:
+        decision = evaluate_snapshot(
+            make_snapshot("BTCUSDT", FeatureVector(
+                ret_rank_1h=0.8, ret_rank_4h=0.78, breakout_norm=0.82, ema_stack_score=1.0,
+                vol_z_5m_norm=0.7, vol_z_1h_norm=0.72, taker_imbalance_norm=0.69, spread_bps_norm=0.2, probe_slippage_bps_norm=0.25,
+                depth_10bps_norm=0.86, book_stability_norm=0.9, realized_vol_1h_norm=0.3, realized_vol_4h_norm=0.28, vol_shock_norm=0.35,
+                funding_abs_percentile=0.14, oi_surge_percentile=0.1, basis_stretch_percentile=0.18, regime_alignment=1.0,
+                trend_direction=1, trend_strength=0.82, volume_confirmation=0.74, liquidity_score=0.86, volatility_penalty=0.28, overheat_penalty=0.14,
+                gross_expected_edge_bps=24.0, estimated_round_trip_cost_bps=10.0,
+            )),
+            self.settings, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0, expected_funding_drag_bps=2.0,
+        )
+        summary = build_runtime_summary(
+            decisions=[decision],
+            live_orders=[
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 1.0, "expected_net_edge_bps": 18.0, "realized_edge_bps": 15.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 1.0, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.0},
+            ],
+        )
+        self.assertEqual(summary["operational_verdict"]["status"], "hold")
+        self.assertIn("INSUFFICIENT_SAMPLE", summary["operational_verdict"]["reasons"])
+
+    def test_runtime_summary_operational_verdict_stops_on_retention_failure(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            live_orders=[
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 20.0, "realized_edge_bps": 3.0},
+                {"symbol": "ETHUSDT", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 12.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.8, "expected_net_edge_bps": 18.0, "realized_edge_bps": 4.0},
+                {"symbol": "ETHUSDT", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 10.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.8, "expected_net_edge_bps": 16.0, "realized_edge_bps": 2.0},
+            ],
+        )
+        self.assertEqual(summary["operational_verdict"]["status"], "stop")
+        self.assertIn("EDGE_RETENTION_TOO_LOW", summary["operational_verdict"]["reasons"])
+
     def test_runtime_summary_lists_observe_only_symbols(self) -> None:
         features = FeatureVector(
             ret_rank_1h=0.5,
