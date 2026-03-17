@@ -390,10 +390,41 @@ def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[s
 
 
 
-def build_policy_validation(candidate_policy: dict[str, object], promotion_verdict: dict[str, object], operational_verdict: dict[str, object]) -> dict[str, object]:
+
+
+def _replay_like_validation_evidence(attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...]) -> dict[str, object]:
+    rows = list(attribution_rows)
+    if not rows:
+        return {
+            "sample_count": 0,
+            "avg_retention": 0.0,
+            "avg_realized_edge_bps": 0.0,
+            "max_reject_rate": 1.0,
+            "max_protection_degraded_rate": 1.0,
+            "replay_like_drawdown_ratio": 1.0,
+            "shadow_alignment_score": 0.0,
+        }
+    avg_retention = sum(float(row.get("avg_edge_retention_ratio", 0.0) or 0.0) for row in rows) / len(rows)
+    avg_realized = sum(float(row.get("avg_realized_edge_bps", 0.0) or 0.0) for row in rows) / len(rows)
+    max_reject_rate = max(float(row.get("reject_rate", 0.0) or 0.0) for row in rows)
+    max_degraded_rate = max(float(row.get("protection_degraded_rate", 0.0) or 0.0) for row in rows)
+    replay_like_drawdown_ratio = max(0.0, 1.0 - max(avg_retention, 0.0))
+    shadow_alignment_score = max(0.0, min(1.0, avg_retention * (1.0 - max_reject_rate)))
+    return {
+        "sample_count": len(rows),
+        "avg_retention": round(avg_retention, 6),
+        "avg_realized_edge_bps": round(avg_realized, 6),
+        "max_reject_rate": round(max_reject_rate, 6),
+        "max_protection_degraded_rate": round(max_degraded_rate, 6),
+        "replay_like_drawdown_ratio": round(replay_like_drawdown_ratio, 6),
+        "shadow_alignment_score": round(shadow_alignment_score, 6),
+    }
+
+def build_policy_validation(candidate_policy: dict[str, object], promotion_verdict: dict[str, object], operational_verdict: dict[str, object], attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...] = ()) -> dict[str, object]:
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     verdict_status = str(promotion_verdict.get("status", "keep"))
     operational_status = str(operational_verdict.get("status", "hold"))
+    evidence = _replay_like_validation_evidence(attribution_rows)
     reasons: list[str] = []
     status = "fail"
     if not candidate_adjustments:
@@ -410,7 +441,13 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("PROMOTION_PATH_VALIDATED")
     else:
         reasons.append("NO_PROMOTION_ACTION")
-    return {"status": status, "reasons": reasons}
+    if evidence["replay_like_drawdown_ratio"] > 0.45:
+        status = "fail"
+        reasons.append("REPLAY_DRAWDOWN_TOO_HIGH")
+    if evidence["shadow_alignment_score"] < 0.45:
+        status = "fail"
+        reasons.append("SHADOW_ALIGNMENT_TOO_LOW")
+    return {"status": status, "reasons": reasons, "evidence": evidence}
 
 
 def build_persisted_policy_state(
@@ -645,7 +682,7 @@ def build_runtime_summary(
     promotion_verdict = build_promotion_verdict(candidate_policy)
     policy_state = build_policy_state(candidate_policy, promotion_verdict)
     operational_verdict = build_operational_verdict(execution_outcomes)
-    policy_validation = build_policy_validation(candidate_policy, promotion_verdict, operational_verdict)
+    policy_validation = build_policy_validation(candidate_policy, promotion_verdict, operational_verdict, performance_attribution)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
