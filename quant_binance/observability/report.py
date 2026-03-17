@@ -1047,13 +1047,178 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     return {"status": status, "reasons": reasons, "evidence": evidence}
 
 
-def _retention_monitor(previous_active: dict[str, object], validation_evidence: dict[str, object], operational_verdict: dict[str, object]) -> dict[str, object]:
+def _coerce_float(value: object) -> float:
+    try:
+        return float(value or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _coerce_int(value: object) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _recent_drawdown_ratio(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    cumulative = 0.0
+    peak = 0.0
+    max_drawdown = 0.0
+    for value in values:
+        cumulative += value
+        peak = max(peak, cumulative)
+        max_drawdown = max(max_drawdown, peak - cumulative)
+    return round(max_drawdown / max(abs(sum(values)), 1.0), 6)
+
+
+def _recent_retention_window(
+    *,
+    previous_state: dict[str, object],
+    validation_evidence: dict[str, object],
+) -> dict[str, object]:
+    validation_runs = list(validation_evidence.get("validation_runs", []) or [])
+    walk_forward_windows = list(validation_evidence.get("walk_forward_windows", []) or [])
+    recent_runs = validation_runs[-3:]
+    recent_windows = walk_forward_windows[-3:]
+    recent_live_order_count = sum(_coerce_int(item.get("live_order_count")) for item in recent_runs)
+    recent_rejected_live_order_count = sum(_coerce_int(item.get("rejected_live_order_count")) for item in recent_runs)
+    recent_accepted_live_order_count = sum(_coerce_int(item.get("accepted_live_order_count")) for item in recent_runs)
+    recent_closed_trade_count = sum(_coerce_int(item.get("closed_trade_count")) for item in recent_runs)
+    retention_weight = float(max(recent_live_order_count, 0))
+    slippage_weight = float(max(recent_accepted_live_order_count, 0))
+    recent_retention = (
+        round(
+            sum(_coerce_float(item.get("avg_edge_retention_ratio")) * _coerce_int(item.get("live_order_count")) for item in recent_runs)
+            / retention_weight,
+            6,
+        )
+        if retention_weight > 0.0
+        else 0.0
+    )
+    recent_reject_rate = round(recent_rejected_live_order_count / max(recent_live_order_count, 1), 6) if recent_live_order_count > 0 else 0.0
+    recent_slippage = (
+        round(
+            sum(_coerce_float(item.get("avg_slippage_bps")) * _coerce_int(item.get("accepted_live_order_count")) for item in recent_runs)
+            / slippage_weight,
+            6,
+        )
+        if slippage_weight > 0.0
+        else 0.0
+    )
+    recent_pnl_series = [_coerce_float(item.get("realized_pnl_usd")) for item in recent_runs]
+    recent_positive_walk_forward_count = sum(
+        1
+        for item in recent_windows
+        if _coerce_float(item.get("avg_net_edge_bps")) > 0.0 and _coerce_float(item.get("avg_score")) >= 0.0
+    )
+    recent_positive_walk_forward_ratio = (
+        round(recent_positive_walk_forward_count / len(recent_windows), 6) if recent_windows else 0.0
+    )
+    previous_metrics = dict(dict(previous_state.get("retention_monitor", {}) or {}).get("metrics", {}) or {})
+    previous_recent = dict(previous_metrics.get("recent_window", {}) or {})
+    micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
+    return {
+        "available": bool(recent_runs or recent_windows),
+        "run_count": len(recent_runs),
+        "walk_forward_window_count": len(recent_windows),
+        "live_order_count": recent_live_order_count,
+        "accepted_live_order_count": recent_accepted_live_order_count,
+        "rejected_live_order_count": recent_rejected_live_order_count,
+        "closed_trade_count": recent_closed_trade_count,
+        "avg_edge_retention_ratio": recent_retention,
+        "drawdown_to_pnl_ratio": _recent_drawdown_ratio(recent_pnl_series),
+        "reject_rate": recent_reject_rate,
+        "avg_slippage_bps": recent_slippage,
+        "positive_walk_forward_ratio": recent_positive_walk_forward_ratio,
+        "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
+        "retention_delta": round(recent_retention - _coerce_float(previous_recent.get("avg_edge_retention_ratio", recent_retention)), 6),
+        "drawdown_delta": round(_recent_drawdown_ratio(recent_pnl_series) - _coerce_float(previous_recent.get("drawdown_to_pnl_ratio", _recent_drawdown_ratio(recent_pnl_series))), 6),
+        "reject_rate_delta": round(recent_reject_rate - _coerce_float(previous_recent.get("reject_rate", recent_reject_rate)), 6),
+    }
+
+
+def _rollout_execution_phase_rank(phase: str) -> int:
+    return {
+        "baseline": 0,
+        "partial": 1,
+        "broad": 2,
+        "full": 3,
+    }.get(phase, 0)
+
+
+def _rollout_execution_phase(
+    *,
+    previous_progress: dict[str, object],
+    rollout_status: str,
+    active_status: str,
+    requested_status: str,
+    retention_monitor_status: str,
+    live_order_count: int,
+    closed_trade_count: int,
+    required_live_order_count: int,
+    required_closed_trade_count: int,
+    walk_forward_window_count: int,
+    positive_walk_forward_ratio: float,
+    avg_edge_retention_ratio: float,
+    drawdown_ratio: float,
+    reject_rate: float,
+) -> tuple[str, str]:
+    if retention_monitor_status == "rollback":
+        return "rollback", "POST_PROMOTION_RETENTION_DEGRADED"
+    if retention_monitor_status == "demote":
+        return "watch", "POST_PROMOTION_RETENTION_WEAKENED"
+    if active_status not in {"promote", "promote_aggressive"} and requested_status not in {"promote", "promote_aggressive"} and rollout_status != "micro_live_pending":
+        return "baseline", "NO_ACTIVE_ROLLOUT"
+    phase = "baseline"
+    reason = "ROLLOUT_NOT_STARTED"
+    if live_order_count > 0 or closed_trade_count > 0 or rollout_status == "micro_live_pending":
+        phase = "partial"
+        reason = "MICRO_LIVE_EVIDENCE_ACCUMULATING"
+    if (
+        live_order_count >= max(required_live_order_count * 2, 4)
+        and closed_trade_count >= max(required_closed_trade_count, 1)
+        and walk_forward_window_count >= 2
+        and positive_walk_forward_ratio >= 0.5
+        and avg_edge_retention_ratio >= 0.65
+        and drawdown_ratio <= 0.45
+        and reject_rate <= 0.08
+    ):
+        phase = "broad"
+        reason = "ROLLOUT_BROADENING_WITH_STABLE_EVIDENCE"
+    if (
+        live_order_count >= max(required_live_order_count * 4, 8)
+        and closed_trade_count >= max(required_closed_trade_count * 2, 2)
+        and walk_forward_window_count >= 3
+        and positive_walk_forward_ratio >= 0.75
+        and avg_edge_retention_ratio >= 0.75
+        and drawdown_ratio <= 0.35
+        and reject_rate <= 0.05
+    ):
+        phase = "full"
+        reason = "ROLLOUT_READY_FOR_FULL_COVERAGE"
+    previous_phase = str(previous_progress.get("execution_phase", "baseline") or "baseline")
+    if _rollout_execution_phase_rank(previous_phase) > _rollout_execution_phase_rank(phase):
+        phase = previous_phase
+        reason = str(previous_progress.get("execution_phase_reason", reason) or reason)
+    return phase, reason
+
+
+def _retention_monitor(
+    previous_state: dict[str, object],
+    previous_active: dict[str, object],
+    validation_evidence: dict[str, object],
+    operational_verdict: dict[str, object],
+) -> dict[str, object]:
     active_status = str(previous_active.get("status", "") or "")
     if active_status not in {"promote", "promote_aggressive"}:
         return {"status": "inactive", "reasons": []}
     runner_quality = _runner_quality_evidence(validation_evidence)
     if not bool(runner_quality.get("available")):
         return {"status": "inactive", "reasons": []}
+    recent_window = _recent_retention_window(previous_state=previous_state, validation_evidence=validation_evidence)
     reasons: list[str] = []
     retention = float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0)
     realized = float(runner_quality.get("realized_pnl_usd", 0.0) or 0.0)
@@ -1083,7 +1248,17 @@ def _retention_monitor(previous_active: dict[str, object], validation_evidence: 
         "avg_slippage_bps": round(slippage, 6),
         "walk_forward_window_count": walk_forward_window_count,
         "positive_walk_forward_ratio": round(positive_walk_forward_ratio, 6),
+        "recent_window": recent_window,
     }
+    if bool(recent_window.get("available")):
+        if float(recent_window.get("avg_edge_retention_ratio", 0.0) or 0.0) < 0.35 and int(recent_window.get("live_order_count", 0) or 0) >= 2:
+            reasons.append("RETENTION_MONITOR_RECENT_WINDOW_EDGE_COLLAPSE")
+        if float(recent_window.get("drawdown_to_pnl_ratio", 0.0) or 0.0) > 0.85 and int(recent_window.get("closed_trade_count", 0) or 0) >= 1:
+            reasons.append("RETENTION_MONITOR_RECENT_DRAWDOWN_SPIKE")
+        if float(recent_window.get("reject_rate", 0.0) or 0.0) > 0.2 and int(recent_window.get("live_order_count", 0) or 0) >= 3:
+            reasons.append("RETENTION_MONITOR_RECENT_REJECT_SURGE")
+        if int(recent_window.get("walk_forward_window_count", 0) or 0) >= 2 and float(recent_window.get("positive_walk_forward_ratio", 0.0) or 0.0) < 0.25:
+            reasons.append("RETENTION_MONITOR_RECENT_WALK_FORWARD_FAIL")
     if reasons:
         return {"status": "rollback", "reasons": reasons, "metrics": metrics}
     moderate_reasons: list[str] = []
@@ -1099,6 +1274,17 @@ def _retention_monitor(previous_active: dict[str, object], validation_evidence: 
         moderate_reasons.append("RETENTION_MONITOR_SLIPPAGE_ELEVATED")
     if walk_forward_window_count >= 2 and positive_walk_forward_ratio < 0.5:
         moderate_reasons.append("RETENTION_MONITOR_WALK_FORWARD_WEAK")
+    if bool(recent_window.get("available")):
+        if float(recent_window.get("avg_edge_retention_ratio", 0.0) or 0.0) < 0.58 and int(recent_window.get("live_order_count", 0) or 0) >= 2:
+            moderate_reasons.append("RETENTION_MONITOR_RECENT_WINDOW_EDGE_WEAK")
+        if float(recent_window.get("drawdown_to_pnl_ratio", 0.0) or 0.0) > 0.45 and int(recent_window.get("closed_trade_count", 0) or 0) >= 1:
+            moderate_reasons.append("RETENTION_MONITOR_RECENT_DRAWDOWN_ELEVATED")
+        if float(recent_window.get("reject_rate", 0.0) or 0.0) > 0.1 and int(recent_window.get("live_order_count", 0) or 0) >= 3:
+            moderate_reasons.append("RETENTION_MONITOR_RECENT_REJECT_ELEVATED")
+        if int(recent_window.get("walk_forward_window_count", 0) or 0) >= 2 and float(recent_window.get("positive_walk_forward_ratio", 0.0) or 0.0) < 0.5:
+            moderate_reasons.append("RETENTION_MONITOR_RECENT_WALK_FORWARD_WEAK")
+        if float(recent_window.get("retention_delta", 0.0) or 0.0) < -0.12:
+            moderate_reasons.append("RETENTION_MONITOR_RETENTION_TREND_NEGATIVE")
     if moderate_reasons:
         return {"status": "demote", "reasons": moderate_reasons, "metrics": metrics}
     return {"status": "stable", "reasons": [], "metrics": metrics}
@@ -1164,6 +1350,9 @@ def _rollout_progression_signal(
     required_closed_trade_count = int(micro_live_gate.get("required_closed_trade_count", 1) or 1)
     walk_forward_window_count = int(runner_quality.get("walk_forward_window_count", 0) or 0)
     positive_walk_forward_ratio = float(runner_quality.get("positive_walk_forward_ratio", 0.0) or 0.0)
+    avg_edge_retention_ratio = float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0)
+    drawdown_ratio = float(runner_quality.get("drawdown_ratio", 0.0) or 0.0)
+    reject_rate = float(runner_quality.get("reject_rate", 0.0) or 0.0)
     progression_phase = "baseline"
     progression_status = rollout_status or "baseline"
     progression_reason = rollout_reason or "NO_ACTIVE_POLICY"
@@ -1234,11 +1423,29 @@ def _rollout_progression_signal(
         progression_phase = "disabled"
         progression_status = "disabled"
         progression_reason = rollout_reason or "CANDIDATE_DISABLED"
+    execution_phase, execution_phase_reason = _rollout_execution_phase(
+        previous_progress=previous_progress,
+        rollout_status=rollout_status,
+        active_status=active_status,
+        requested_status=requested_status,
+        retention_monitor_status=str(retention_monitor.get("status", "inactive") or "inactive"),
+        live_order_count=live_order_count,
+        closed_trade_count=closed_trade_count,
+        required_live_order_count=required_live_order_count,
+        required_closed_trade_count=required_closed_trade_count,
+        walk_forward_window_count=walk_forward_window_count,
+        positive_walk_forward_ratio=positive_walk_forward_ratio,
+        avg_edge_retention_ratio=avg_edge_retention_ratio,
+        drawdown_ratio=drawdown_ratio,
+        reject_rate=reject_rate,
+    )
     return {
         "phase": progression_phase,
         "status": progression_status,
         "reason": progression_reason,
         "previous_status": previous_status,
+        "execution_phase": execution_phase,
+        "execution_phase_reason": execution_phase_reason,
         "evidence": {
             "live_order_count": live_order_count,
             "closed_trade_count": closed_trade_count,
@@ -1247,9 +1454,9 @@ def _rollout_progression_signal(
             "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
             "walk_forward_window_count": walk_forward_window_count,
             "positive_walk_forward_ratio": round(positive_walk_forward_ratio, 6),
-            "avg_edge_retention_ratio": round(float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0), 6),
-            "drawdown_ratio": round(float(runner_quality.get("drawdown_ratio", 0.0) or 0.0), 6),
-            "reject_rate": round(float(runner_quality.get("reject_rate", 0.0) or 0.0), 6),
+            "avg_edge_retention_ratio": round(avg_edge_retention_ratio, 6),
+            "drawdown_ratio": round(drawdown_ratio, 6),
+            "reject_rate": round(reject_rate, 6),
         },
     }
 
@@ -1273,7 +1480,7 @@ def build_persisted_policy_state(
     micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
     rollout_status = "steady"
     rollout_reason = "UNCHANGED"
-    retention_monitor = _retention_monitor(previous_active, validation_evidence, operational_verdict)
+    retention_monitor = _retention_monitor(previous_state, previous_active, validation_evidence, operational_verdict)
     verdict_reasons = list(promotion_verdict.get("reasons", []) or [])
     staged_micro_live_block = (
         verdict_status == "keep"

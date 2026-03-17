@@ -153,6 +153,18 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(artifact["counterfactual_replay_path"]["mode"], "counterfactual_current_vs_candidate_policy")
             self.assertEqual(artifact["counterfactual_replay_path"]["candidate_policy"]["replay_summary"]["micro_live_gate"]["status"], "pass")
             self.assertTrue(artifact["counterfactual_replay_path"]["current_policy"]["evidence_available"])
+            self.assertEqual(
+                artifact["counterfactual_replay_path"]["execution_style_comparison"]["candidate_path"]["policy_score"],
+                artifact["candidate_policy_score"],
+            )
+            self.assertEqual(
+                artifact["counterfactual_replay_path"]["execution_style_comparison"]["current_path"]["policy_score"],
+                artifact["current_policy_score"],
+            )
+            self.assertEqual(
+                artifact["counterfactual_replay_path"]["execution_style_comparison"]["comparison_summary"]["candidate_micro_live_status"],
+                "pass",
+            )
             self.assertTrue(any(row["metric"] == "runner_positive_walk_forward_ratio" for row in artifact["evidence"]["metric_comparisons"]))
             self.assertEqual(artifact["evidence"]["candidate_replay_summary"]["micro_live_gate"]["status"], "pass")
             self.assertEqual(
