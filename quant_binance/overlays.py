@@ -29,6 +29,7 @@ class MacroInputs:
     news_bearish_score: float = 0.0
     news_uncertainty_score: float = 0.0
     news_majors_only_bias: float = 0.0
+    official_high_impact_window: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -183,7 +184,8 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
     penalty = clamp(risk - support, 0.0, 1.0)
     support_score = clamp(support, 0.0, 1.0)
     regime = "high_risk" if penalty >= 0.65 else "supportive" if penalty <= 0.25 else "neutral"
-    if event_risk >= 0.85:
+    official_high_impact = clamp(macro_inputs.official_high_impact_window, 0.0, 1.0) >= 0.5
+    if official_high_impact and event_risk >= 0.85:
         trade_restraint = "halt_high_impact_window"
     elif event_risk >= 0.6:
         trade_restraint = "pre_event_reduce"

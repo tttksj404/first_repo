@@ -391,6 +391,7 @@ def build_signal(
         entry_policy_bias = "neutral"
 
     macro_inputs = {
+        "official_high_impact_window": 1.0 if high_impact_window else 0.0,
         "truflation_yoy": 2.9 if bearish_score >= 0.72 and "macro" in event_types else 2.2,
         "us10y_yield": 4.8 if bearish_score >= 0.72 and "macro" in event_types else 4.25,
         "oil_momentum_pct": 13.0 if "geopolitics" in event_types and bearish_score >= bullish_score else 3.0,
