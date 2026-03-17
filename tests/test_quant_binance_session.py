@@ -810,6 +810,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(payload["status"], "staged_rollout")
             self.assertEqual(payload["rollout_status"], "micro_live_pending")
             self.assertEqual(payload["rollout_progression"]["status"], "collecting_micro_live_outcomes")
+            self.assertEqual(payload["rollout_progression"]["execution_phase"], "partial")
             history_entries = [json.loads(line) for line in history_path.read_text(encoding="utf-8").splitlines() if line.strip()]
             self.assertEqual(history_entries[-1]["status"], "staged_rollout")
             self.assertEqual(summary["promotion_verdict"]["status"], "keep")
@@ -880,6 +881,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(payload["active_policy"]["status"], "promote")
             self.assertEqual(payload["rollout_status"], "ready")
             self.assertEqual(payload["rollout_progression"]["status"], "post_promotion_monitoring")
+            self.assertEqual(payload["rollout_progression"]["execution_phase"], "partial")
 
     def test_session_flush_rolls_back_after_post_promotion_retention_degrades(self) -> None:
         session = self._build_session()
@@ -901,6 +903,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(payload["rollout_reason"], "POST_PROMOTION_RETENTION_DEGRADED")
             self.assertEqual(payload["retention_monitor"]["status"], "rollback")
             self.assertEqual(payload["rollout_progression"]["status"], "rollback_triggered")
+            self.assertEqual(payload["rollout_progression"]["execution_phase"], "rollback")
 
     def test_session_flush_recomputes_candidate_policy_from_validation_report_decomposition(self) -> None:
         session = self._build_session()

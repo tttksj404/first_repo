@@ -495,6 +495,43 @@ def _replay_summary_available(summary: dict[str, Any]) -> bool:
     )
 
 
+def _execution_style_path_entry(
+    *,
+    policy_label: str,
+    source: str,
+    policy_score: float,
+    replay_summary: dict[str, object],
+    evidence: dict[str, Any],
+    evidence_available: bool,
+) -> dict[str, object]:
+    payload = dict(evidence or {})
+    return {
+        "policy_label": policy_label,
+        "source": source,
+        "policy_score": round(policy_score, 6),
+        "evidence_available": evidence_available,
+        "micro_live_gate": dict(payload.get("micro_live_gate", {}) or {}),
+        "runner_metrics": {
+            "total_realized_pnl_usd": round(_safe_float(payload.get("runner_total_realized_pnl_usd")), 6),
+            "drawdown_to_pnl_ratio": round(_safe_float(payload.get("runner_drawdown_to_pnl_ratio")), 6),
+            "reject_rate": round(_safe_float(payload.get("runner_reject_rate")), 6),
+            "avg_slippage_bps": round(_safe_float(payload.get("runner_avg_slippage_bps")), 6),
+            "avg_realized_edge_bps": round(_safe_float(payload.get("runner_avg_realized_edge_bps")), 6),
+            "avg_edge_retention_ratio": round(_safe_float(payload.get("runner_avg_edge_retention_ratio")), 6),
+            "positive_walk_forward_ratio": round(_safe_float(payload.get("runner_positive_walk_forward_ratio")), 6),
+        },
+        "replay_summary": dict(replay_summary or {}),
+    }
+
+
+def _policy_score_verdict(delta: float) -> str:
+    if delta > 0.1:
+        return "candidate_better"
+    if delta < -0.1:
+        return "candidate_worse"
+    return "keep"
+
+
 def _counterfactual_replay_path(
     *,
     validation_mode: str,
@@ -502,27 +539,47 @@ def _counterfactual_replay_path(
     current_policy_score: float,
     candidate_replay_summary: dict[str, object],
     current_replay_summary: dict[str, object],
+    candidate_evidence: dict[str, Any],
+    current_evidence: dict[str, Any],
     current_evidence_available: bool,
 ) -> dict[str, object]:
     candidate_summary = dict(candidate_replay_summary or {})
     current_summary = dict(current_replay_summary or {})
+    score_delta = round(candidate_policy_score - current_policy_score, 6)
+    candidate_entry = _execution_style_path_entry(
+        policy_label="candidate_policy",
+        source="policy_validation_runner_artifact",
+        policy_score=candidate_policy_score,
+        replay_summary=candidate_summary,
+        evidence=candidate_evidence,
+        evidence_available=_replay_summary_available(candidate_summary),
+    )
+    current_entry = _execution_style_path_entry(
+        policy_label="current_policy",
+        source="persisted_policy_validation_evidence",
+        policy_score=current_policy_score,
+        replay_summary=current_summary,
+        evidence=current_evidence,
+        evidence_available=current_evidence_available and _replay_summary_available(current_summary),
+    )
     return {
         "mode": "counterfactual_current_vs_candidate_policy",
         "validation_mode": validation_mode,
-        "candidate_policy": {
-            "policy_label": "candidate_policy",
-            "source": "policy_validation_runner_artifact",
-            "policy_score": round(candidate_policy_score, 6),
-            "evidence_available": _replay_summary_available(candidate_summary),
-            "replay_summary": candidate_summary,
+        "execution_style_comparison": {
+            "format": "separated_execution_paths",
+            "policy_score_delta": score_delta,
+            "score_verdict": _policy_score_verdict(score_delta),
+            "candidate_path": candidate_entry,
+            "current_path": current_entry,
+            "comparison_summary": {
+                "candidate_evidence_available": bool(candidate_entry.get("evidence_available")),
+                "current_evidence_available": bool(current_entry.get("evidence_available")),
+                "candidate_micro_live_status": str(candidate_entry["micro_live_gate"].get("status", "not_available") or "not_available"),
+                "current_micro_live_status": str(current_entry["micro_live_gate"].get("status", "not_available") or "not_available"),
+            },
         },
-        "current_policy": {
-            "policy_label": "current_policy",
-            "source": "persisted_policy_validation_evidence",
-            "policy_score": round(current_policy_score, 6),
-            "evidence_available": current_evidence_available and _replay_summary_available(current_summary),
-            "replay_summary": current_summary,
-        },
+        "candidate_policy": candidate_entry,
+        "current_policy": current_entry,
     }
 
 
@@ -576,6 +633,8 @@ def build_policy_comparison_validation_artifact(*,
         current_policy_score=current_score,
         candidate_replay_summary=candidate_replay_summary,
         current_replay_summary=current_replay_summary,
+        candidate_evidence=runner_evidence,
+        current_evidence=current_policy_evidence,
         current_evidence_available=bool(runtime_comparison.get("runtime_evidence_available")),
     )
     evidence = {
