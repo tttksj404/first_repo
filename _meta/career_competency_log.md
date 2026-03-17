@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-03-18 - Quant relearning rollout and retention evidence refinement
+- Summary: Tightened the relearning engine’s policy-comparison, rollout progression, and retention-demotion layers so promotion decisions use clearer separated evidence paths and stronger recent-window monitoring.
+- What was done: Refined current-vs-candidate replay comparison artifacts into separated execution-style paths, added persisted rollout execution phases beyond staged rollout, strengthened recent-window retention/drawdown/reject/walk-forward monitoring using existing runner artifacts, and verified the changes with focused quant runtime unit tests.
+- Competency mapping: Data analysis and optimization, data pipeline/system integration development, logical data structuring, technical communication
+- Skill sharpened next: Improve promotion-state evidence so rollout expansion and rollback decisions can incorporate richer cross-run trend signals without increasing operational noise.
+
 ### 2026-03-18 - Macro-aware profitability advisory from strategy context
 - Summary: Produced a suggestion-only crypto strategy advisory from the latest strategy advisor context with profitability, execution quality, and macro timing as the primary filters.
 - What was done: Read the latest advisor context artifact, compared realized PnL, symbol-level validation, rejection-pressure patterns, approved overrides, current live positions, official GDP/PCE schedule, and local reference strategy materials, then translated the evidence into time-bounded major-coin-first guidance with explicit uncertainty and pending-override ideas only.

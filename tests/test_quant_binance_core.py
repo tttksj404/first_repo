@@ -710,6 +710,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(state["retention_monitor"]["status"], "armed")
         self.assertEqual(state["rollout_progression"]["phase"], "staged_rollout")
         self.assertEqual(state["rollout_progression"]["status"], "collecting_micro_live_outcomes")
+        self.assertEqual(state["rollout_progression"]["execution_phase"], "partial")
 
     def test_build_persisted_policy_state_rolls_back_after_post_promotion_retention_degrades(self) -> None:
         previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
@@ -725,6 +726,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(state["retention_monitor"]["status"], "rollback")
         self.assertEqual(state["active_policy"]["status"], "baseline")
         self.assertEqual(state["rollout_progression"]["status"], "rollback_triggered")
+        self.assertEqual(state["rollout_progression"]["execution_phase"], "rollback")
 
     def test_build_persisted_policy_state_demotes_on_walk_forward_weakness(self) -> None:
         previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
@@ -750,6 +752,82 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(state["retention_monitor"]["status"], "demote")
         self.assertIn("RETENTION_MONITOR_WALK_FORWARD_WEAK", state["retention_monitor"]["reasons"])
         self.assertEqual(state["rollout_progression"]["status"], "demotion_watch")
+        self.assertEqual(state["rollout_progression"]["execution_phase"], "watch")
+
+    def test_build_persisted_policy_state_promotes_rollout_phase_to_full_when_evidence_is_broad(self) -> None:
+        previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
+        state = build_persisted_policy_state(
+            {
+                "version": 3,
+                "rollout_status": "ready",
+                "active_policy": previous_active,
+                "rollout_progression": {"execution_phase": "partial"},
+            },
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "keep", "size_multiplier": 1.0}]},
+            {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "evidence": {
+                    "runner_total_realized_pnl_usd": 9.0,
+                    "runner_avg_edge_retention_ratio": 0.82,
+                    "runner_drawdown_to_pnl_ratio": 0.22,
+                    "runner_reject_rate": 0.02,
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 9, "closed_trade_count": 3, "required_live_order_count": 2, "required_closed_trade_count": 1},
+                    "runner_walk_forward_window_count": 3,
+                    "runner_positive_walk_forward_ratio": 1.0,
+                },
+            },
+        )
+        self.assertEqual(state["status"], "kept")
+        self.assertEqual(state["rollout_progression"]["execution_phase"], "full")
+        self.assertEqual(state["rollout_progression"]["execution_phase_reason"], "ROLLOUT_READY_FOR_FULL_COVERAGE")
+
+    def test_build_persisted_policy_state_demotes_on_recent_windowed_retention_weakness(self) -> None:
+        previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
+        state = build_persisted_policy_state(
+            {
+                "version": 3,
+                "rollout_status": "ready",
+                "active_policy": previous_active,
+                "retention_monitor": {
+                    "status": "stable",
+                    "metrics": {"recent_window": {"avg_edge_retention_ratio": 0.78, "drawdown_to_pnl_ratio": 0.18, "reject_rate": 0.02}},
+                },
+                "rollout_progression": {"execution_phase": "broad"},
+            },
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "keep", "size_multiplier": 1.0}]},
+            {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]},
+            {"status": "fail", "reasons": []},
+            {
+                "status": "fail",
+                "evidence": {
+                    "runner_total_realized_pnl_usd": 6.0,
+                    "runner_avg_edge_retention_ratio": 0.72,
+                    "runner_drawdown_to_pnl_ratio": 0.25,
+                    "runner_reject_rate": 0.03,
+                    "runner_avg_slippage_bps": 4.0,
+                    "runner_walk_forward_window_count": 3,
+                    "runner_positive_walk_forward_ratio": 0.67,
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 9, "closed_trade_count": 3, "required_live_order_count": 2, "required_closed_trade_count": 1},
+                    "validation_runs": [
+                        {"realized_pnl_usd": 2.0, "live_order_count": 3, "accepted_live_order_count": 3, "rejected_live_order_count": 0, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.84, "avg_slippage_bps": 3.5},
+                        {"realized_pnl_usd": 2.0, "live_order_count": 3, "accepted_live_order_count": 3, "rejected_live_order_count": 0, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.39, "avg_slippage_bps": 4.2},
+                        {"realized_pnl_usd": 1.0, "live_order_count": 3, "accepted_live_order_count": 2, "rejected_live_order_count": 1, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.49, "avg_slippage_bps": 4.4},
+                    ],
+                    "walk_forward_windows": [
+                        {"avg_net_edge_bps": 4.0, "avg_score": 60.0},
+                        {"avg_net_edge_bps": -1.0, "avg_score": 45.0},
+                        {"avg_net_edge_bps": 0.5, "avg_score": 47.0},
+                    ],
+                },
+            },
+        )
+        self.assertEqual(state["status"], "retention_demoted")
+        self.assertIn("RETENTION_MONITOR_RECENT_WINDOW_EDGE_WEAK", state["retention_monitor"]["reasons"])
+        self.assertIn("RETENTION_MONITOR_RETENTION_TREND_NEGATIVE", state["retention_monitor"]["reasons"])
+        self.assertEqual(state["retention_monitor"]["metrics"]["recent_window"]["run_count"], 3)
+        self.assertEqual(state["rollout_progression"]["execution_phase"], "watch")
 
     def test_build_persisted_policy_state_rolls_back_on_candidate_underperformance(self) -> None:
         previous_active = {
