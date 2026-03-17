@@ -606,6 +606,8 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(summary["candidate_policy"]["status"], "candidate_ready")
         actions = {item["symbol"] + ":" + item["action"] for item in summary["candidate_policy"]["adjustments"]}
         self.assertIn("BTCUSDT:promote", actions)
+        promoted = next(item for item in summary["candidate_policy"]["adjustments"] if item["symbol"] == "BTCUSDT")
+        self.assertEqual(promoted["symbol_bias"], "majors_only")
         self.assertIn("ETHUSDT:demote", actions)
         self.assertEqual(summary["promotion_verdict"]["status"], "keep")
         self.assertEqual(summary["policy_state"]["status"], "keep")
