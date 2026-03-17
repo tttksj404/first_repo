@@ -9,6 +9,7 @@ from quant_binance.execution.paper_broker import PaperBroker
 from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report, render_prediction_report
 from quant_binance.observability.manifest import build_manifest_entry, write_manifest
 from quant_binance.observability.report import build_runtime_summary
+from quant_binance.policy.portfolio import build_portfolio_intent, decision_from_portfolio_intent
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
 from quant_binance.settings import Settings
@@ -521,6 +522,52 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIsNotNone(order)
         self.assertEqual(order.symbol, "BTCUSDT")
         self.assertEqual(order.decision_hash, decision.decision_hash)
+
+    def test_portfolio_intent_compiles_back_to_decision(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8,
+            ret_rank_4h=0.78,
+            breakout_norm=0.82,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.7,
+            vol_z_1h_norm=0.72,
+            taker_imbalance_norm=0.69,
+            spread_bps_norm=0.2,
+            probe_slippage_bps_norm=0.25,
+            depth_10bps_norm=0.86,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.3,
+            realized_vol_4h_norm=0.28,
+            vol_shock_norm=0.35,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.74,
+            liquidity_score=0.86,
+            volatility_penalty=0.28,
+            overheat_penalty=0.14,
+            gross_expected_edge_bps=24.0,
+            estimated_round_trip_cost_bps=10.0,
+        )
+        prediction = build_strategy_prediction(make_snapshot("BTCUSDT", features), self.settings, expected_funding_drag_bps=2.0)
+        intent = build_portfolio_intent(
+            prediction=prediction,
+            selected_mode="futures",
+            side="long",
+            target_notional_usd=1234.0,
+            stop_distance_bps=45.0,
+            target_leverage=4.0,
+            strategy_size_multiplier=1.2,
+        )
+        decision = decision_from_portfolio_intent(intent=intent)
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.side, "long")
+        self.assertEqual(decision.order_intent_notional_usd, 1234.0)
+        self.assertEqual(decision.stop_distance_bps, 45.0)
+        self.assertEqual(decision.candidate_mode, prediction.candidate_mode)
 
     def test_manifest_writer_produces_machine_readable_output(self) -> None:
         sample = ROOT / "quant_binance" / "config.example.json"

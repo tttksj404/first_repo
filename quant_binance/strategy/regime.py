@@ -5,7 +5,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from quant_binance.models import DecisionIntent, FeatureVector, MarketSnapshot, ModePrediction, StrategyPrediction
-from quant_binance.observability.decision_log import hash_decision_payload
+from quant_binance.policy.portfolio import build_portfolio_intent, decision_from_portfolio_intent
 from quant_binance.risk.sizing import position_notional_and_stop_bps, select_futures_leverage
 from quant_binance.overlays import is_alt_symbol
 from quant_binance.settings import Settings
@@ -771,43 +771,15 @@ def evaluate_snapshot(
     observe_only, observe_reasons = _observe_only_reasons(spot_features, settings, snapshot.symbol)
     if observe_only:
         cash_reasons = tuple(sorted(set(observe_reasons)))
-        payload = {
-            "snapshot_id": snapshot.snapshot_id,
-            "config_version": settings.config_version,
-            "final_mode": "cash",
-            "side": "flat",
-            "predictability_score": spot_prediction.predictability_score,
-            "reasons": cash_reasons,
-        }
-        return DecisionIntent(
-            decision_id=str(uuid4()),
-            decision_hash=hash_decision_payload(payload),
-            snapshot_id=snapshot.snapshot_id,
-            config_version=settings.config_version,
-            timestamp=now,
-            symbol=snapshot.symbol,
-            candidate_mode=candidate_mode,
-            final_mode="cash",
+        intent = build_portfolio_intent(
+            prediction=prediction,
+            selected_mode="cash",
             side="flat",
-            trend_direction=spot_features.trend_direction,
-            trend_strength=spot_features.trend_strength,
-            volume_confirmation=spot_features.volume_confirmation,
-            liquidity_score=spot_features.liquidity_score,
-            volatility_penalty=spot_features.volatility_penalty,
-            overheat_penalty=spot_features.overheat_penalty,
-            predictability_score=spot_features.predictability_score,
-            gross_expected_edge_bps=spot_features.gross_expected_edge_bps,
-            net_expected_edge_bps=spot_features.net_expected_edge_bps,
-            estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
-            order_intent_notional_usd=0.0,
+            target_notional_usd=0.0,
             stop_distance_bps=0.0,
-            macro_regime=spot_features.macro_regime,
-            macro_trade_restraint=spot_features.macro_trade_restraint,
-            macro_size_multiplier=spot_features.macro_size_multiplier,
-            macro_leverage_cap=spot_features.macro_leverage_cap,
-            macro_symbol_bias=spot_features.macro_symbol_bias,
             rejection_reasons=cash_reasons,
         )
+        return decision_from_portfolio_intent(intent=intent)
 
     futures_ok, futures_reasons, futures_size_multiplier, futures_relaxed_reasons, futures_size_boost_reasons = _futures_entry_plan(
         futures_features,
@@ -842,13 +814,6 @@ def evaluate_snapshot(
         if equity_usd > 0 and (equity_usd - required_margin_usd) / equity_usd < cash_reserve_fraction:
             futures_ok = False
             futures_reasons.append("CASH_RESERVE_BLOCK")
-        payload = {
-            "snapshot_id": snapshot.snapshot_id,
-            "config_version": settings.config_version,
-            "final_mode": "futures",
-            "side": "long" if futures_features.trend_direction > 0 else "short",
-            "predictability_score": futures_prediction.predictability_score,
-        }
         confirmation_intraday_strength_min = 0.5
         allow_btc_eth_confirmation_relaxation = _btc_eth_confirmation_relaxation_allowed(
             futures_features,
@@ -868,38 +833,19 @@ def evaluate_snapshot(
                 and futures_features.intraday_trend_direction != futures_features.trend_direction
             )
         ) and not allow_btc_eth_confirmation_relaxation)
-        return DecisionIntent(
-            decision_id=str(uuid4()),
-            decision_hash=hash_decision_payload(payload),
-            snapshot_id=snapshot.snapshot_id,
-            config_version=settings.config_version,
-            timestamp=now,
-            symbol=snapshot.symbol,
-            candidate_mode=candidate_mode,
-            final_mode="futures",
+        intent = build_portfolio_intent(
+            prediction=prediction,
+            selected_mode="futures",
             side="long" if futures_features.trend_direction > 0 else "short",
-            trend_direction=futures_features.trend_direction,
-            trend_strength=futures_features.trend_strength,
-            volume_confirmation=futures_features.volume_confirmation,
-            liquidity_score=futures_features.liquidity_score,
-            volatility_penalty=futures_features.volatility_penalty,
-            overheat_penalty=futures_features.overheat_penalty,
-            predictability_score=futures_features.predictability_score,
-            gross_expected_edge_bps=futures_features.gross_expected_edge_bps,
-            net_expected_edge_bps=futures_features.net_expected_edge_bps,
-            estimated_round_trip_cost_bps=futures_features.estimated_round_trip_cost_bps,
-            order_intent_notional_usd=notional,
+            target_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
+            target_leverage=planned_leverage,
             strategy_size_multiplier=futures_size_multiplier,
             entry_relaxation_reasons=futures_relaxed_reasons,
             size_boost_reasons=futures_size_boost_reasons,
-            macro_regime=futures_features.macro_regime,
-            macro_trade_restraint=futures_features.macro_trade_restraint,
-            macro_size_multiplier=futures_features.macro_size_multiplier,
-            macro_leverage_cap=futures_features.macro_leverage_cap,
-            macro_symbol_bias=futures_features.macro_symbol_bias,
             divergence_code="ENTRY_CONFIRMATION_REQUIRED" if confirmation_required else "",
         )
+        return decision_from_portfolio_intent(intent=intent)
 
     spot_ok, spot_reasons, spot_relaxed_reasons = _spot_passes(spot_features, settings, snapshot.symbol)
     if spot_ok:
@@ -914,13 +860,6 @@ def evaluate_snapshot(
             spot_ok = False
             spot_reasons.append("CASH_RESERVE_BLOCK")
     if spot_ok:
-        payload = {
-            "snapshot_id": snapshot.snapshot_id,
-            "config_version": settings.config_version,
-            "final_mode": "spot",
-            "side": "long",
-            "predictability_score": spot_prediction.predictability_score,
-        }
         confirmation_support_min = 0.25
         confirmation_resistance_max = 0.3
         confirmation_intraday_strength_min = 0.45
@@ -934,73 +873,25 @@ def evaluate_snapshot(
             or spot_features.liquidity_score < thresholds.spot_liquidity_min
             or spot_features.intraday_trend_strength < confirmation_intraday_strength_min
         )
-        return DecisionIntent(
-            decision_id=str(uuid4()),
-            decision_hash=hash_decision_payload(payload),
-            snapshot_id=snapshot.snapshot_id,
-            config_version=settings.config_version,
-            timestamp=now,
-            symbol=snapshot.symbol,
-            candidate_mode=candidate_mode,
-            final_mode="spot",
+        intent = build_portfolio_intent(
+            prediction=prediction,
+            selected_mode="spot",
             side="long",
-            trend_direction=spot_features.trend_direction,
-            trend_strength=spot_features.trend_strength,
-            volume_confirmation=spot_features.volume_confirmation,
-            liquidity_score=spot_features.liquidity_score,
-            volatility_penalty=spot_features.volatility_penalty,
-            overheat_penalty=spot_features.overheat_penalty,
-            predictability_score=spot_features.predictability_score,
-            gross_expected_edge_bps=spot_features.gross_expected_edge_bps,
-            net_expected_edge_bps=spot_features.net_expected_edge_bps,
-            estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
-            order_intent_notional_usd=notional,
+            target_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
             entry_relaxation_reasons=spot_relaxed_reasons,
-            macro_regime=spot_features.macro_regime,
-            macro_trade_restraint=spot_features.macro_trade_restraint,
-            macro_size_multiplier=spot_features.macro_size_multiplier,
-            macro_leverage_cap=spot_features.macro_leverage_cap,
-            macro_symbol_bias=spot_features.macro_symbol_bias,
             rejection_reasons=tuple(sorted(set(futures_reasons))),
             divergence_code="ENTRY_CONFIRMATION_REQUIRED" if confirmation_required else "",
         )
+        return decision_from_portfolio_intent(intent=intent)
 
     cash_reasons = tuple(sorted(set(futures_reasons + spot_reasons))) or ("SCORE_TOO_LOW",)
-    payload = {
-        "snapshot_id": snapshot.snapshot_id,
-        "config_version": settings.config_version,
-        "final_mode": "cash",
-        "side": "flat",
-        "predictability_score": spot_prediction.predictability_score,
-        "reasons": cash_reasons,
-    }
-    return DecisionIntent(
-        decision_id=str(uuid4()),
-        decision_hash=hash_decision_payload(payload),
-        snapshot_id=snapshot.snapshot_id,
-        config_version=settings.config_version,
-        timestamp=now,
-        symbol=snapshot.symbol,
-        candidate_mode=candidate_mode,
-        final_mode="cash",
+    intent = build_portfolio_intent(
+        prediction=prediction,
+        selected_mode="cash",
         side="flat",
-        trend_direction=spot_features.trend_direction,
-        trend_strength=spot_features.trend_strength,
-        volume_confirmation=spot_features.volume_confirmation,
-        liquidity_score=spot_features.liquidity_score,
-        volatility_penalty=spot_features.volatility_penalty,
-        overheat_penalty=spot_features.overheat_penalty,
-        predictability_score=spot_features.predictability_score,
-        gross_expected_edge_bps=spot_features.gross_expected_edge_bps,
-        net_expected_edge_bps=spot_features.net_expected_edge_bps,
-        estimated_round_trip_cost_bps=spot_features.estimated_round_trip_cost_bps,
-        order_intent_notional_usd=0.0,
+        target_notional_usd=0.0,
         stop_distance_bps=0.0,
-        macro_regime=spot_features.macro_regime,
-        macro_trade_restraint=spot_features.macro_trade_restraint,
-        macro_size_multiplier=spot_features.macro_size_multiplier,
-        macro_leverage_cap=spot_features.macro_leverage_cap,
-        macro_symbol_bias=spot_features.macro_symbol_bias,
         rejection_reasons=cash_reasons,
     )
+    return decision_from_portfolio_intent(intent=intent)
