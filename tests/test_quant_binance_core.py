@@ -9,7 +9,7 @@ from quant_binance.models import FeatureVector, MarketSnapshot
 from quant_binance.execution.paper_broker import PaperBroker
 from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report, render_outcome_audit_report, render_prediction_report
 from quant_binance.observability.manifest import build_manifest_entry, write_manifest
-from quant_binance.observability.report import build_runtime_summary
+from quant_binance.observability.report import build_persisted_policy_state, build_promotion_verdict, build_runtime_summary
 from quant_binance.policy.portfolio import build_portfolio_intent, decision_from_portfolio_intent
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
@@ -612,6 +612,76 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(summary["promotion_verdict"]["status"], "keep")
         self.assertEqual(summary["policy_state"]["status"], "keep")
         self.assertIn(summary["policy_validation"]["status"], {"pass", "fail"})
+
+    def test_build_promotion_verdict_blocks_promotion_when_candidate_underperforms_current(self) -> None:
+        verdict = build_promotion_verdict(
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "promote"},
+                ]
+            },
+            {
+                "comparison_verdict": "candidate_worse",
+                "candidate_vs_current_score_delta": -0.35,
+            },
+        )
+        self.assertEqual(verdict["status"], "keep")
+        self.assertIn("PROMOTION_BLOCKED_BY_POLICY_COMPARISON", verdict["reasons"])
+        self.assertEqual(verdict["comparison_verdict"], "candidate_worse")
+
+    def test_build_persisted_policy_state_persists_disable_verdict(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 2,
+                "active_policy": {
+                    "status": "promote",
+                    "adjustments": [{"symbol": "ETHUSDT", "action": "promote", "size_multiplier": 1.1}],
+                },
+            },
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "demote", "size_multiplier": 0.75, "leverage_multiplier": 0.75},
+                ],
+            },
+            {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]},
+            {"status": "hold", "reasons": []},
+            {"status": "pass", "evidence": {"comparison_verdict": "keep"}},
+        )
+        self.assertEqual(state["status"], "disabled")
+        self.assertEqual(state["version"], 3)
+        self.assertEqual(state["active_policy"]["status"], "disabled")
+        self.assertEqual(state["active_policy"]["adjustments"][0]["action"], "disabled")
+        self.assertEqual(state["active_policy"]["adjustments"][0]["size_multiplier"], 0.0)
+
+    def test_build_persisted_policy_state_rolls_back_on_candidate_underperformance(self) -> None:
+        previous_active = {
+            "status": "promote_aggressive",
+            "adjustments": [{"symbol": "ETHUSDT", "action": "aggressive_promote", "size_multiplier": 1.25}],
+        }
+        state = build_persisted_policy_state(
+            {
+                "version": 4,
+                "active_policy": previous_active,
+            },
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1, "leverage_multiplier": 1.1},
+                ],
+            },
+            {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "fail",
+                "evidence": {
+                    "comparison_verdict": "candidate_worse",
+                    "candidate_vs_current_score_delta": -0.25,
+                    "replay_like_drawdown_ratio": 0.1,
+                },
+            },
+        )
+        self.assertEqual(state["status"], "rolled_back")
+        self.assertEqual(state["version"], 5)
+        self.assertEqual(state["active_policy"], previous_active)
 
     def test_load_validation_runner_evidence_reads_report_metrics(self) -> None:
         import json
