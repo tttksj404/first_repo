@@ -225,6 +225,74 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
 
 
 
+
+
+def _policy_adjustment_score(policy: dict[str, Any]) -> float:
+    adjustments = list(dict(policy or {}).get("adjustments", []) or [])
+    score = 0.0
+    for item in adjustments:
+        score += float(item.get("size_multiplier", 1.0) or 1.0) - 1.0
+        score += float(item.get("leverage_multiplier", 1.0) or 1.0) - 1.0
+        score -= float(item.get("entry_threshold_bps", 0.0) or 0.0) / 10.0
+        score -= float(item.get("expected_profit_floor_bps", 0.0) or 0.0) / 10.0
+    return round(score, 6)
+
+
+def build_policy_comparison_validation_artifact(*,
+    current_policy_state: dict[str, Any] | None,
+    candidate_policy: dict[str, Any],
+    base_dir: str | Path = "quant_runtime",
+    lookback_days: int = 7,
+) -> dict[str, object]:
+    runner = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
+    current_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
+    current_score = _policy_adjustment_score(current_policy)
+    candidate_score = _policy_adjustment_score(candidate_policy)
+    delta = round(candidate_score - current_score, 6)
+    verdict = "keep"
+    if delta > 0.1:
+        verdict = "candidate_better"
+    elif delta < -0.1:
+        verdict = "candidate_worse"
+    return {
+        "generated_at": runner.get("generated_at"),
+        "comparison_verdict": verdict,
+        "candidate_policy_score": candidate_score,
+        "current_policy_score": current_score,
+        "candidate_vs_current_score_delta": delta,
+        "runner_total_return_pct": runner.get("runner_total_return_pct", 0.0),
+        "runner_max_drawdown_pct": runner.get("runner_max_drawdown_pct", 0.0),
+        "runner_shadow_alignment_score": runner.get("runner_shadow_alignment_score", 0.0),
+        "evidence": {
+            "comparison_verdict": verdict,
+            "candidate_policy_score": candidate_score,
+            "current_policy_score": current_score,
+            "candidate_vs_current_score_delta": delta,
+            "runner_total_return_pct": runner.get("runner_total_return_pct", 0.0),
+            "runner_max_drawdown_pct": runner.get("runner_max_drawdown_pct", 0.0),
+            "runner_shadow_alignment_score": runner.get("runner_shadow_alignment_score", 0.0),
+        },
+    }
+
+
+def write_policy_comparison_validation_artifact(*,
+    current_policy_state: dict[str, Any] | None,
+    candidate_policy: dict[str, Any],
+    base_dir: str | Path = "quant_runtime",
+    output_path: str | Path,
+    lookback_days: int = 7,
+) -> Path:
+    artifact = build_policy_comparison_validation_artifact(
+        current_policy_state=current_policy_state,
+        candidate_policy=candidate_policy,
+        base_dir=base_dir,
+        lookback_days=lookback_days,
+    )
+    target = Path(output_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(artifact, indent=2, sort_keys=True), encoding="utf-8")
+    return target
+
 def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> dict[str, object]:
     report = build_weekly_validation_report(base_dir=base_dir, lookback_days=lookback_days)
     symbol_rows = list(report.symbol_summary)
