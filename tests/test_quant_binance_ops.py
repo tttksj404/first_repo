@@ -97,6 +97,28 @@ class QuantBinanceOpsTests(unittest.TestCase):
         kill_switch.clear()
         self.assertFalse(kill_switch.armed)
 
+    def test_runtime_summary_writes_execution_audit_metrics(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            live_orders=[
+                {
+                    "symbol": "BTCUSDT",
+                    "accepted": True,
+                    "fill_status": "filled",
+                    "fill_ratio": 0.8,
+                    "slippage_bps": 1.5,
+                    "expected_net_edge_bps": 14.0,
+                    "realized_edge_bps": 9.0,
+                }
+            ],
+        )
+        write_runtime_summary(self.summary_path, summary)
+        payload = json.loads(self.summary_path.read_text(encoding="utf-8"))
+        self.assertEqual(payload["accepted_live_order_count"], 1)
+        self.assertEqual(payload["avg_realized_edge_bps"], 9.0)
+        self.assertEqual(payload["avg_expected_edge_bps"], 14.0)
+        self.assertEqual(payload["realized_vs_expected_edge_gap_bps"], -5.0)
+
     def test_runtime_summary_and_state_write(self) -> None:
         summary = build_runtime_summary(
             decisions=[],

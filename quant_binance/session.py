@@ -4786,6 +4786,8 @@ class LivePaperSession:
                             "avg_fill_price": avg_fill_price,
                             "slippage_bps": slippage_bps,
                             "realized_edge_bps": realized_edge_bps,
+                            "expected_net_edge_bps": executable_decision.net_expected_edge_bps,
+                            "expected_gross_edge_bps": executable_decision.gross_expected_edge_bps,
                             "estimated_round_trip_cost_bps": executable_decision.estimated_round_trip_cost_bps,
                             "protection_orders": list(live_result.protection_orders),
                             "protection_error": live_result.protection_error,
