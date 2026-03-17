@@ -3566,7 +3566,13 @@ class LivePaperSession:
         reward_bps = self._reward_bps(position=position, price=price)
         current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
         position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
-        if position.exchange_synced:
+        if position.exchange_synced and not (
+            position.is_adopted()
+            and position.symbol == "BTCUSDT"
+            and decision.final_mode == position.market
+            and decision.side in {"long", "short"}
+            and decision.side != position.side
+        ):
             position.exit_confirmation_count = 0
             position.last_exit_signal_reason = ""
             return
@@ -3722,6 +3728,20 @@ class LivePaperSession:
         position.exit_confirmation_count = 0
         position.last_exit_signal_reason = ""
 
+    def _should_manage_adopted_position_with_strategy(
+        self,
+        *,
+        position: PaperPosition,
+        decision: DecisionIntent,
+    ) -> bool:
+        return (
+            position.symbol == "BTCUSDT"
+            and position.market == "futures"
+            and decision.final_mode == position.market
+            and decision.side in {"long", "short"}
+            and decision.side != position.side
+        )
+
     def _apply_paper_trade_management(
         self,
         *,
@@ -3736,7 +3756,7 @@ class LivePaperSession:
         price = self._market_price(state=state, fallback=fallback_price)
         if position is None:
             return self._open_paper_position(decision=decision, price=price), False
-        if position.is_adopted():
+        if position.is_adopted() and not self._should_manage_adopted_position_with_strategy(position=position, decision=decision):
             self._refresh_observed_paper_position(position=position, price=price)
             return False, False
         self._update_paper_position(position=position, decision=decision, price=price, timestamp=timestamp)
