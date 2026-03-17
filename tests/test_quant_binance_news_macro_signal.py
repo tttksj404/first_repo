@@ -131,6 +131,32 @@ class QuantBinanceNewsMacroSignalTests(unittest.TestCase):
         self.assertEqual(signal.leverage_cap, 0)
 
 
+    def test_build_signal_separates_directional_bearish_from_execution_risk(self) -> None:
+        now = datetime(2026, 3, 17, 6, 30, tzinfo=UTC)
+        headlines = (
+            NewsHeadline(
+                title="ETF outflow and hawkish Fed pressure bitcoin",
+                published_at=now.isoformat(),
+                source="Example",
+                query_label="macro",
+                categories=("macro", "etf_flow"),
+                bullish_score=0.0,
+                bearish_score=2.1,
+                uncertainty_score=0.05,
+            ),
+        )
+        signal = build_signal(
+            now=now,
+            refresh_reason="scheduled_window",
+            trigger_reasons=("SCHEDULED_WINDOW",),
+            next_scheduled_refresh_at=now,
+            headlines=headlines,
+            official_events=(),
+        )
+        self.assertGreaterEqual(signal.macro_inputs["directional_bearish_score"], 0.3)
+        self.assertLess(signal.macro_inputs["execution_risk_score"], signal.macro_inputs["directional_bearish_score"])
+
+
 
 if __name__ == "__main__":
     unittest.main()

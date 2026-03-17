@@ -41,6 +41,8 @@ class FeatureVector:
     macro_size_multiplier: float = 1.0
     macro_leverage_cap: int = 0
     macro_symbol_bias: str = "neutral"
+    macro_directional_bearish_score: float = 0.0
+    macro_execution_risk_score: float = 0.0
     sentiment_regime: str = "neutral"
     sentiment_support_score: float = 0.5
     alt_market_regime: str = "neutral"
