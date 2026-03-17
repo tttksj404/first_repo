@@ -674,6 +674,16 @@ class LivePaperSession:
         is_major_strong_futures_decision = self._is_major_strong_futures_decision(decision)
         is_major_medium_futures_decision = self._is_major_medium_futures_decision(decision)
         if decision.final_mode == "futures":
+            major_cross_conflict_symbol = self._major_cross_symbol_side_conflict(decision)
+            if major_cross_conflict_symbol is not None:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (f"MAJOR_SIDE_CONFLICT:{major_cross_conflict_symbol}", "MAJOR_CROSS_SYMBOL_SIDE_CONFLICT")))),
+                )
             live_position = self._find_live_futures_position(decision.symbol)
             if live_position is not None:
                 live_side = self._normalize_live_position_side(live_position)
@@ -1264,6 +1274,27 @@ class LivePaperSession:
 
     def _is_major_futures_symbol(self, symbol: str) -> bool:
         return symbol in set(self.runtime.paper_service.settings.futures_exposure.major_symbols)
+
+    def _is_btc_eth_symbol(self, symbol: str) -> bool:
+        return symbol in {"BTCUSDT", "ETHUSDT"}
+
+    def _major_cross_symbol_side_conflict(self, decision: DecisionIntent) -> str | None:
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"} or not self._is_btc_eth_symbol(decision.symbol):
+            return None
+        for symbol, position in self.paper_positions.items():
+            if symbol == decision.symbol or not self._is_btc_eth_symbol(symbol):
+                continue
+            if position.market != "futures" or position.quantity_remaining <= 0.0:
+                continue
+            if position.side in {"long", "short"} and position.side != decision.side:
+                return symbol
+        for symbol, live_position in self._active_live_futures_positions_by_symbol().items():
+            if symbol == decision.symbol or not self._is_btc_eth_symbol(symbol):
+                continue
+            live_side = self._normalize_live_position_side(live_position)
+            if live_side in {"long", "short"} and live_side != decision.side:
+                return symbol
+        return None
 
     def _is_major_strong_futures_decision(self, decision: DecisionIntent) -> bool:
         if decision.final_mode != "futures" or not self._is_major_futures_symbol(decision.symbol):
