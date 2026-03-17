@@ -17,6 +17,7 @@ from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.models import DecisionIntent
+from quant_binance.policy.execution import build_execution_intent, decision_from_execution_intent
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
@@ -180,6 +181,23 @@ class StalledThenHealthyFactory:
 
 
 class QuantBinanceSessionTests(unittest.TestCase):
+    def test_execution_intent_compiles_back_to_decision(self) -> None:
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        decision = make_decision(timestamp=now, final_mode="spot", side="long", order_intent_notional_usd=432.1)
+        intent = build_execution_intent(
+            decision=decision,
+            execution_symbol="BTCUSDC",
+            spot_base_asset="BTC",
+            spot_quote_asset="USDC",
+            spot_funding_asset="USDC",
+            spot_quote_asset_usd_price=1.0,
+        )
+        compiled = decision_from_execution_intent(intent=intent)
+        self.assertEqual(compiled.decision_id, decision.decision_id)
+        self.assertEqual(compiled.execution_symbol, "BTCUSDC")
+        self.assertEqual(compiled.spot_quote_asset, "USDC")
+        self.assertEqual(compiled.order_intent_notional_usd, 432.1)
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.settings = Settings.load(CONFIG_PATH)
