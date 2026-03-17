@@ -338,6 +338,33 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertFalse(pyramid)
         self.assertNotIn("BTCUSDT", session.paper_positions)
 
+    def test_cap_live_order_decision_blocks_alt_when_persisted_policy_is_majors_only(self) -> None:
+        import tempfile
+        session = self._build_session()
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 1000.0,
+            "futures_available_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "SOLUSDT", "min_notional_usd": 5.0, "min_quantity": 0.1}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            policy_state = {
+                "active_policy": {
+                    "status": "promote",
+                    "adjustments": [{
+                        "symbol": "SOLUSDT", "action": "promote", "size_multiplier": 1.1, "leverage_multiplier": 1.1, "entry_threshold_bps": 0.0, "expected_profit_floor_bps": 0.0, "symbol_bias": "majors_only"
+                    }]
+                }
+            }
+            summary_path.with_name("policy_state.json").write_text(json.dumps(policy_state), encoding="utf-8")
+            decision = make_decision(timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc), symbol="SOLUSDT", final_mode="futures", order_intent_notional_usd=100.0, net_expected_edge_bps=30.0)
+            capped = session._cap_live_order_decision(decision, reference_price=100.0)
+            self.assertEqual(capped.final_mode, "cash")
+            self.assertIn("ACTIVE_POLICY_MAJORS_ONLY", capped.rejection_reasons)
+
     def test_cap_live_order_decision_uses_persisted_policy_to_relax_expected_profit_floor(self) -> None:
         import tempfile
         session = self._build_session(settings=replace(
