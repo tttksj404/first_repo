@@ -17,6 +17,7 @@ from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter,
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import LivePaperRuntime
 from quant_binance.models import DecisionIntent
+from quant_binance.policy.execution import build_execution_intent, decision_from_execution_intent
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
 from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
@@ -4665,6 +4666,7 @@ class LivePaperSession:
                 flush=True,
             )
         prepared_execution_decision = managed_decision
+        prepared_execution_intent = build_execution_intent(decision=managed_decision)
         if state is not None and allow_new_submission:
             prepared_execution_decision = (
                 self._prepare_live_execution_decision(
@@ -4674,6 +4676,7 @@ class LivePaperSession:
                 if self.live_order_executor is not None
                 else self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
             )
+            prepared_execution_intent = build_execution_intent(decision=prepared_execution_decision)
         if state is not None:
             self._log_position_management_gate(
                 timestamp=timestamp,
@@ -4701,7 +4704,7 @@ class LivePaperSession:
             and allow_new_submission
             and live_orders_allowed
         ):
-            executable_decision = prepared_execution_decision
+            executable_decision = decision_from_execution_intent(intent=prepared_execution_intent)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
             if executable_decision.final_mode not in {"spot", "futures"} or executable_decision.order_intent_notional_usd <= 0:
