@@ -5,10 +5,19 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from quant_binance.validation_report import build_policy_validation_runner_artifact, build_weekly_validation_report, write_policy_validation_runner_artifact
+from quant_binance.validation_report import build_policy_comparison_validation_artifact, build_policy_validation_runner_artifact, build_weekly_validation_report, write_policy_validation_runner_artifact
 
 
 class QuantBinanceValidationReportTests(unittest.TestCase):
+    def test_build_policy_comparison_validation_artifact_scores_candidate_vs_current(self) -> None:
+        candidate_policy = {"adjustments": [{"symbol": "BTCUSDT", "size_multiplier": 1.1, "leverage_multiplier": 1.1, "entry_threshold_bps": -0.5, "expected_profit_floor_bps": -1.0}]}
+        current_policy_state = {"active_policy": {"adjustments": [{"symbol": "BTCUSDT", "size_multiplier": 1.0, "leverage_multiplier": 1.0, "entry_threshold_bps": 0.0, "expected_profit_floor_bps": 0.0}]}}
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            artifact = build_policy_comparison_validation_artifact(current_policy_state=current_policy_state, candidate_policy=candidate_policy, base_dir=base, lookback_days=7)
+            self.assertEqual(artifact["comparison_verdict"], "candidate_better")
+            self.assertGreater(artifact["candidate_vs_current_score_delta"], 0.0)
+
     def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"

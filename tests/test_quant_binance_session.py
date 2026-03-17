@@ -718,12 +718,15 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertTrue(state_path.exists())
             policy_state_path = summary_path.with_name("policy_state.json")
             policy_history_path = summary_path.with_name("policy_history.jsonl")
+            comparison_report_path = summary_path.with_name("policy_comparison.json")
             self.assertTrue(policy_state_path.exists())
             self.assertTrue(policy_history_path.exists())
+            self.assertTrue(comparison_report_path.exists())
             policy_payload = json.loads(policy_state_path.read_text(encoding="utf-8"))
             self.assertIn("active_policy", policy_payload)
             self.assertIn("policy_validation", policy_payload)
             self.assertIn("runner_max_drawdown_pct", policy_payload["policy_validation"]["evidence"])
+            self.assertIn("candidate_vs_current_score_delta", policy_payload["policy_validation"]["evidence"])
             state_payload = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertEqual(state_payload["live_decision_loop"]["closed_decision_kline_count"], 1)
             self.assertEqual(state_payload["live_decision_loop"]["emitted_decision_count"], 1)
@@ -738,10 +741,13 @@ class QuantBinanceSessionTests(unittest.TestCase):
             if policy_state_path.exists():
                 policy_state_path.unlink()
             validation_report_path = summary_path.with_name("validation_report.json")
+            comparison_report_path = summary_path.with_name("policy_comparison.json")
             if policy_history_path.exists():
                 policy_history_path.unlink()
             if validation_report_path.exists():
                 validation_report_path.unlink()
+            if comparison_report_path.exists():
+                comparison_report_path.unlink()
 
     def test_session_continues_emitting_after_bootstrap(self) -> None:
         session = self._build_session()
