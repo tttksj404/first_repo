@@ -2260,7 +2260,7 @@ class LivePaperSession:
         side = self._normalize_live_position_side(position)
         leverage = max(int(float(position.get("leverage") or 1.0)), 1)
         entry_time = self._parse_live_position_timestamp(position) or datetime.now(tz=timezone.utc)
-        adopted_at = datetime.now(tz=timezone.utc)
+        adopted_at = entry_time
         best_price = max(entry_price, current_price)
         worst_price = min(entry_price, current_price)
         return PaperPosition(
