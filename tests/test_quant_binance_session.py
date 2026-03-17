@@ -357,6 +357,28 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertAlmostEqual(capped.order_intent_notional_usd, 500.0, places=6)
         self.assertIn("OPERATIONAL_HOLD_SCALE", capped.size_boost_reasons)
 
+    def test_cap_live_order_decision_scales_up_on_operational_strong_pass(self) -> None:
+        session = self._build_session()
+        session.capital_report = {
+            "futures_execution_balance_usd": 10000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.0},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 14.0, "realized_edge_bps": 12.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.6},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 15.0, "realized_edge_bps": 12.5},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 17.0, "realized_edge_bps": 14.4},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 13.0, "realized_edge_bps": 11.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 18.0, "realized_edge_bps": 15.0},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.4},
+        ]
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        capped = session._cap_live_order_decision(make_decision(timestamp=now, order_intent_notional_usd=1000.0), reference_price=50000.0)
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertAlmostEqual(capped.order_intent_notional_usd, 1150.0, places=6)
+        self.assertIn("OPERATIONAL_STRONG_PASS_SCALE", capped.size_boost_reasons)
+
     def test_cap_live_order_decision_blocks_new_entries_on_operational_stop(self) -> None:
         session = self._build_session()
         session.capital_report = {
