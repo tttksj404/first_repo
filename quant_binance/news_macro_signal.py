@@ -368,6 +368,10 @@ def build_signal(
         dominant_bias = "neutral"
 
     event_types = tuple(sorted(category for category, count in category_counts.items() if count > 0))
+    execution_risk_categories = {"exchange_risk", "geopolitics"}
+    directional_bearish_categories = {"macro", "etf_flow", "regulation", "liquidity"}
+    execution_risk_score = min(1.0, (0.45 * uncertainty_score) + (0.3 if high_impact_window else 0.0) + (0.25 if execution_risk_categories.intersection(event_types) else 0.0))
+    directional_bearish_score = min(1.0, max(0.0, bearish_score - (0.35 * uncertainty_score)) + (0.15 if directional_bearish_categories.intersection(event_types) else 0.0))
     majors_bias = "majors_only" if (uncertainty_score >= 0.55 or bearish_score >= 0.6) else "neutral"
     if uncertainty_score >= 0.82:
         leverage_cap = 1
@@ -409,6 +413,8 @@ def build_signal(
         "news_bearish_score": bearish_score,
         "news_uncertainty_score": uncertainty_score,
         "news_majors_only_bias": 1.0 if majors_bias == "majors_only" else 0.0,
+        "directional_bearish_score": round(directional_bearish_score, 6),
+        "execution_risk_score": round(execution_risk_score, 6),
     }
 
     return NewsMacroSignal(

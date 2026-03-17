@@ -392,11 +392,18 @@ def _futures_entry_plan(
     reduced_size = False
     priority_symbol = symbol in set(exposure.priority_symbols)
     alt_symbol = is_alt_symbol(symbol)
+    directional_bearish_macro = (
+        _is_btc_eth_symbol(symbol)
+        and features.trend_direction < 0
+        and features.macro_directional_bearish_score >= 0.6
+        and features.macro_execution_risk_score < 0.75
+        and features.macro_trade_restraint != "halt_high_impact_window"
+    )
     supportive_macro = (
         features.macro_liquidity_support_score >= exposure.macro_support_min
         and features.macro_event_risk_score <= 0.45
         and features.macro_risk_penalty < macro_gates.futures_block_penalty
-    )
+    ) or directional_bearish_macro
     macro_allowed, macro_reasons, macro_size_multiplier, _macro_leverage_cap = _macro_futures_risk_controls(features, symbol=symbol)
     if not macro_allowed:
         return False, macro_reasons, 0.0, (), ()
