@@ -590,6 +590,25 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("realized_vs_expected_edge_gap_bps", summary)
         self.assertEqual(len(summary["execution_audit_by_symbol"]), 2)
 
+    def test_runtime_summary_includes_attribution_candidate_policy_and_promotion_verdict(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            live_orders=[
+                {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.0},
+                {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.2},
+                {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 15.0, "realized_edge_bps": 12.0},
+                {"symbol": "ETHUSDT", "side": "short", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 12.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+                {"symbol": "ETHUSDT", "side": "short", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 11.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+                {"symbol": "ETHUSDT", "side": "short", "accepted": True, "fill_status": "filled", "fill_ratio": 0.7, "expected_net_edge_bps": 10.0, "realized_edge_bps": 2.0, "protection_error": "timeout"},
+            ],
+        )
+        self.assertTrue(summary["performance_attribution"])
+        self.assertEqual(summary["candidate_policy"]["status"], "candidate_ready")
+        actions = {item["symbol"] + ":" + item["action"] for item in summary["candidate_policy"]["adjustments"]}
+        self.assertIn("BTCUSDT:promote", actions)
+        self.assertIn("ETHUSDT:demote", actions)
+        self.assertEqual(summary["promotion_verdict"]["status"], "keep")
+
     def test_runtime_summary_operational_verdict_can_emit_strong_pass(self) -> None:
         summary = build_runtime_summary(
             decisions=[],
