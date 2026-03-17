@@ -223,6 +223,39 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
     )
 
 
+
+
+def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> dict[str, object]:
+    report = build_weekly_validation_report(base_dir=base_dir, lookback_days=lookback_days)
+    symbol_rows = list(report.symbol_summary)
+    promote_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "promote")
+    prune_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "prune")
+    total_symbols = max(len(symbol_rows), 1)
+    shadow_alignment_score = max(0.0, min(1.0, (promote_count - prune_count + total_symbols) / (2 * total_symbols)))
+    total_return_pct = round(report.total_realized_pnl_usd, 6)
+    max_drawdown_pct = round(max(0.0, -min(report.total_realized_pnl_usd, 0.0)), 6)
+    return {
+        "generated_at": report.generated_at,
+        "lookback_days": report.lookback_days,
+        "run_count": report.run_count,
+        "runner_total_return_pct": total_return_pct,
+        "runner_max_drawdown_pct": max_drawdown_pct,
+        "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
+        "evidence": {
+            "runner_total_return_pct": total_return_pct,
+            "runner_max_drawdown_pct": max_drawdown_pct,
+            "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
+        },
+    }
+
+
+def write_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_runtime", output_path: str | Path, lookback_days: int = 7) -> Path:
+    artifact = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
+    target = Path(output_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(artifact, indent=2, sort_keys=True), encoding="utf-8")
+    return target
+
 def write_weekly_validation_report(*, report: WeeklyValidationReport, output_path: str | Path) -> Path:
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
