@@ -754,6 +754,11 @@ class LivePaperSession:
         threshold_bps = float(adjustment.get("expected_profit_floor_bps", 0.0) or 0.0)
         return decision.order_intent_notional_usd * threshold_bps / 10000.0
 
+
+    def _policy_symbol_bias_for_decision(self, decision: DecisionIntent) -> str:
+        adjustment = self._policy_adjustment_for_decision(decision)
+        return str(adjustment.get("symbol_bias", "neutral") or "neutral")
+
     def _policy_multiplier_for_decision(self, decision: DecisionIntent) -> float:
         adjustment = self._policy_adjustment_for_decision(decision)
         action = str(adjustment.get("action", ""))
@@ -767,6 +772,16 @@ class LivePaperSession:
         verdict = self._current_operational_verdict()
         status = str(verdict.get("status", "hold"))
         policy_multiplier = self._policy_multiplier_for_decision(decision)
+        policy_symbol_bias = self._policy_symbol_bias_for_decision(decision)
+        if policy_symbol_bias == "majors_only" and decision.symbol not in {"BTCUSDT", "ETHUSDT"}:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("ACTIVE_POLICY_MAJORS_ONLY",)))),
+            )
         if status == "stop":
             return replace(
                 decision,

@@ -347,6 +347,7 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
         leverage_multiplier = round(min(max(size_multiplier, 0.0), 1.2), 6)
         entry_threshold_bps = -1.5 if action == "aggressive_promote" else (-0.5 if action == "promote" else (1.5 if action == "demote" else 0.0))
         expected_profit_floor_bps = -2.0 if action == "aggressive_promote" else (-1.0 if action == "promote" else (2.0 if action == "demote" else 0.0))
+        symbol_bias = "majors_only" if action in {"aggressive_promote", "promote"} and str(row.get("regime", "")) == "major" else "neutral"
         adjustments.append({
             "symbol": row.get("symbol", ""),
             "regime": row.get("regime", ""),
@@ -359,6 +360,7 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
             "leverage_multiplier": leverage_multiplier,
             "entry_threshold_bps": entry_threshold_bps,
             "expected_profit_floor_bps": expected_profit_floor_bps,
+            "symbol_bias": symbol_bias,
             "reason": reason,
         })
     policy_status = "insufficient_data" if not adjustments else "candidate_ready"
@@ -467,7 +469,10 @@ def build_persisted_policy_state(
         active_policy["status"] = verdict_status
         lifecycle = "promoted" if verdict_status.startswith("promote") else "demoted"
         version = previous_version + 1
-    elif str(operational_verdict.get("status", "")) == "stop" and previous_active:
+    elif (
+        str(operational_verdict.get("status", "")) == "stop"
+        or float(dict(validation.get("evidence", {}) or {}).get("replay_like_drawdown_ratio", 0.0) or 0.0) > 0.5
+    ) and previous_active:
         active_policy = previous_active
         lifecycle = "rolled_back"
         version = previous_version + 1
