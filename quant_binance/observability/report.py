@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
+import json
+from pathlib import Path
 from datetime import datetime, timezone
 from pathlib import Path
 import shutil
@@ -394,6 +396,64 @@ def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[s
 
 
 
+
+
+def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, object]:
+    if base_path is None:
+        return {}
+    root = Path(base_path)
+    candidate_paths = [
+        root,
+        root / "policy_validation.json",
+        root / "validation_report.json",
+        root / "performance_report.json",
+        root / "summary.json",
+    ]
+    seen: set[Path] = set()
+    for candidate in candidate_paths:
+        path = candidate
+        if path in seen:
+            continue
+        seen.add(path)
+        if path.is_dir():
+            continue
+        if not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        if "policy_validation" in payload and isinstance(payload.get("policy_validation"), dict):
+            payload = dict(payload["policy_validation"])
+        evidence = dict(payload.get("evidence", {}) or {})
+        if "max_drawdown_pct" in payload and "runner_max_drawdown_pct" not in evidence:
+            evidence["runner_max_drawdown_pct"] = float(payload.get("max_drawdown_pct", 0.0) or 0.0)
+        if "total_return_pct" in payload and "runner_total_return_pct" not in evidence:
+            evidence["runner_total_return_pct"] = float(payload.get("total_return_pct", 0.0) or 0.0)
+        if "shadow_alignment_score" in payload and "runner_shadow_alignment_score" not in evidence:
+            evidence["runner_shadow_alignment_score"] = float(payload.get("shadow_alignment_score", 0.0) or 0.0)
+        if evidence:
+            return evidence
+    return {}
+
+
+def merge_policy_validation_evidence(
+    attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...],
+    runner_evidence: dict[str, object] | None = None,
+) -> dict[str, object]:
+    evidence = _replay_like_validation_evidence(attribution_rows)
+    for key, value in dict(runner_evidence or {}).items():
+        evidence[key] = value
+    runner_max_drawdown_pct = float(evidence.get("runner_max_drawdown_pct", 0.0) or 0.0)
+    if runner_max_drawdown_pct > 0.0:
+        evidence["replay_like_drawdown_ratio"] = round(max(float(evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0), runner_max_drawdown_pct / 100.0), 6)
+    runner_shadow_alignment_score = float(evidence.get("runner_shadow_alignment_score", 0.0) or 0.0)
+    if runner_shadow_alignment_score > 0.0:
+        evidence["shadow_alignment_score"] = round(min(max(float(evidence.get("shadow_alignment_score", 0.0) or 0.0), runner_shadow_alignment_score), 1.0), 6)
+    return evidence
+
 def _replay_like_validation_evidence(attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...]) -> dict[str, object]:
     rows = list(attribution_rows)
     if not rows:
@@ -422,11 +482,11 @@ def _replay_like_validation_evidence(attribution_rows: list[dict[str, object]] |
         "shadow_alignment_score": round(shadow_alignment_score, 6),
     }
 
-def build_policy_validation(candidate_policy: dict[str, object], promotion_verdict: dict[str, object], operational_verdict: dict[str, object], attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...] = ()) -> dict[str, object]:
+def build_policy_validation(candidate_policy: dict[str, object], promotion_verdict: dict[str, object], operational_verdict: dict[str, object], attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...] = (), runner_evidence: dict[str, object] | None = None) -> dict[str, object]:
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     verdict_status = str(promotion_verdict.get("status", "keep"))
     operational_status = str(operational_verdict.get("status", "hold"))
-    evidence = _replay_like_validation_evidence(attribution_rows)
+    evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
     reasons: list[str] = []
     status = "fail"
     if not candidate_adjustments:
@@ -687,7 +747,8 @@ def build_runtime_summary(
     promotion_verdict = build_promotion_verdict(candidate_policy)
     policy_state = build_policy_state(candidate_policy, promotion_verdict)
     operational_verdict = build_operational_verdict(execution_outcomes)
-    policy_validation = build_policy_validation(candidate_policy, promotion_verdict, operational_verdict, performance_attribution)
+    runner_evidence = load_validation_runner_evidence(None)
+    policy_validation = build_policy_validation(candidate_policy, promotion_verdict, operational_verdict, performance_attribution, runner_evidence)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
