@@ -335,6 +335,10 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
             action = "demote"
             size_multiplier = 0.75
             reason = "WEAK_ATTRIBUTION"
+        elif retention >= 0.95 and realized > 0.0 and reject_rate <= 0.01 and degraded_rate <= 0.01 and str(row.get("regime", "")) == "major":
+            action = "aggressive_promote"
+            size_multiplier = 1.25
+            reason = "ELITE_ATTRIBUTION"
         elif retention >= 0.8 and realized > 0.0 and reject_rate <= 0.03 and degraded_rate <= 0.03:
             action = "promote"
             size_multiplier = 1.1
@@ -358,10 +362,13 @@ def build_promotion_verdict(candidate_policy: dict[str, object]) -> dict[str, ob
     adjustments = list(candidate_policy.get("adjustments", []))
     if not adjustments:
         return {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
-    promote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "promote")
+    aggressive_count = sum(1 for item in adjustments if str(item.get("action", "")) == "aggressive_promote")
+    promote_count = sum(1 for item in adjustments if str(item.get("action", "")) in {"promote", "aggressive_promote"})
     demote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "demote")
     if demote_count > 0 and promote_count == 0:
         return {"status": "demote", "reasons": ["CANDIDATE_POLICY_WEAK"]}
+    if aggressive_count > 0 and demote_count == 0:
+        return {"status": "promote_aggressive", "reasons": ["CANDIDATE_POLICY_ELITE"]}
     if promote_count > 0 and demote_count == 0:
         return {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]}
     if demote_count >= promote_count + 2:
@@ -371,6 +378,30 @@ def build_promotion_verdict(candidate_policy: dict[str, object]) -> dict[str, ob
 def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     return [row for row in rows if str(row.get("symbol", "")) in {"BTCUSDT", "ETHUSDT"}]
 
+
+
+
+def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: dict[str, object]) -> dict[str, object]:
+    candidate_adjustments = list(candidate_policy.get("adjustments", []))
+    verdict_status = str(promotion_verdict.get("status", "keep"))
+    if verdict_status == "disable":
+        active_adjustments = [dict(item, action="disabled", size_multiplier=0.0) for item in candidate_adjustments]
+        active_status = "disabled"
+    elif verdict_status in {"promote", "promote_aggressive", "demote"}:
+        active_adjustments = candidate_adjustments
+        active_status = verdict_status
+    else:
+        active_adjustments = [dict(item, action="keep", size_multiplier=1.0, reason="ACTIVE_POLICY_UNCHANGED") for item in candidate_adjustments]
+        active_status = "keep"
+    return {
+        "status": active_status,
+        "active_policy": {
+            "status": active_status,
+            "adjustments": active_adjustments,
+        },
+        "candidate_policy": candidate_policy,
+        "promotion_verdict": promotion_verdict,
+    }
 
 def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str, object]:
     live_order_count = int(execution_outcomes.get("accepted_live_order_count", 0)) + int(execution_outcomes.get("rejected_live_order_count", 0))
@@ -400,6 +431,15 @@ def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str
     reasons: list[str] = []
     status = "pass"
 
+    aggressive_pass = (
+        live_order_count >= 10
+        and retention >= 0.95
+        and realized > 0.0
+        and gap >= -1.5
+        and protection_degraded_rate <= 0.01
+        and reject_rate <= 0.01
+        and avg_fill_ratio >= 0.97
+    )
     strong_pass = (
         live_order_count >= 8
         and retention >= 0.80
@@ -414,10 +454,12 @@ def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str
         status = "stop"
     elif retention < 0.65 or gap <= -8.0 or protection_degraded_rate > 0.05 or reject_rate > 0.05 or avg_fill_ratio < 0.85:
         status = "hold"
+    elif aggressive_pass:
+        status = "aggressive_pass"
     elif strong_pass:
         status = "strong_pass"
 
-    if live_order_count < 5 and status in {"pass", "strong_pass"}:
+    if live_order_count < 5 and status in {"pass", "strong_pass", "aggressive_pass"}:
         status = "hold"
         reasons.append("INSUFFICIENT_SAMPLE")
 
@@ -448,11 +490,16 @@ def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str
             if status in {"pass", "strong_pass"}:
                 status = "hold"
             reasons.append("MAJOR_SYMBOL_AUDIT_WEAK")
+        elif status == "aggressive_pass" and len(strong_major_rows) < len(major_rows):
+            status = "strong_pass"
+            reasons.append("MAJOR_SYMBOL_AGGRESSIVE_CONFIRMATION_INCOMPLETE")
         elif status == "strong_pass" and not strong_major_rows:
             status = "pass"
             reasons.append("MAJOR_SYMBOL_CONFIRMATION_INCOMPLETE")
 
-    if status == "strong_pass":
+    if status == "aggressive_pass":
+        reasons.append("OPERATING_WITH_ELITE_EDGE")
+    elif status == "strong_pass":
         reasons.append("OPERATING_WITH_STRONG_EDGE")
     elif not reasons:
         reasons.append("OPERATING_WITHIN_THRESHOLDS")
@@ -512,6 +559,7 @@ def build_runtime_summary(
     performance_attribution = build_performance_attribution(live_orders)
     candidate_policy = build_auto_tune_policy(performance_attribution)
     promotion_verdict = build_promotion_verdict(candidate_policy)
+    policy_state = build_policy_state(candidate_policy, promotion_verdict)
     operational_verdict = build_operational_verdict(execution_outcomes)
     rejection_counts = Counter()
     for decision in decisions:
@@ -564,6 +612,7 @@ def build_runtime_summary(
         "performance_attribution": performance_attribution,
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
+        "policy_state": policy_state,
         "operational_verdict": operational_verdict,
         "account_snapshot": account_snapshot or {},
         "open_orders_snapshot": open_orders_snapshot or {},

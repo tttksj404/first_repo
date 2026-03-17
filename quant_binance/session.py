@@ -26,7 +26,7 @@ from quant_binance.policy.execution import (
 )
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_operational_verdict, build_runtime_summary, write_runtime_summary
+from quant_binance.observability.report import build_operational_verdict, build_policy_state, build_runtime_summary, write_runtime_summary
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
@@ -669,11 +669,27 @@ class LivePaperSession:
     def _current_operational_verdict(self) -> dict[str, object]:
         return build_operational_verdict(build_runtime_summary(decisions=[], live_orders=self.live_orders))
 
+    def _current_policy_state(self) -> dict[str, object]:
+        summary = build_runtime_summary(decisions=[], live_orders=self.live_orders)
+        return build_policy_state(summary.get("candidate_policy", {}), summary.get("promotion_verdict", {}))
+
+    def _policy_multiplier_for_decision(self, decision: DecisionIntent) -> float:
+        if len(self.live_orders) < 5:
+            return 1.0
+        policy_state = self._current_policy_state()
+        for adjustment in list(policy_state.get("active_policy", {}).get("adjustments", [])):
+            if str(adjustment.get("symbol", "")) == decision.symbol:
+                action = str(adjustment.get("action", ""))
+                if action in {"promote", "aggressive_promote", "demote", "disabled"}:
+                    return float(adjustment.get("size_multiplier", 1.0) or 1.0)
+        return 1.0
+
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
         if len(self.live_orders) < 5:
             return decision
         verdict = self._current_operational_verdict()
         status = str(verdict.get("status", "hold"))
+        policy_multiplier = self._policy_multiplier_for_decision(decision)
         if status == "stop":
             return replace(
                 decision,
@@ -683,17 +699,42 @@ class LivePaperSession:
                 stop_distance_bps=0.0,
                 rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_STOP",)))),
             )
-        if status == "strong_pass":
-            boosted_notional = round(decision.order_intent_notional_usd * 1.15, 6)
+        if status == "aggressive_pass":
+            boosted_notional = round(decision.order_intent_notional_usd * 1.3 * policy_multiplier, 6)
             return replace(
                 decision,
                 order_intent_notional_usd=boosted_notional,
-                strategy_size_multiplier=round(decision.strategy_size_multiplier * 1.15, 6),
+                strategy_size_multiplier=round(decision.strategy_size_multiplier * 1.3 * policy_multiplier, 6),
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_AGGRESSIVE_PASS_SCALE",)))),
+            )
+        if status == "strong_pass":
+            boosted_notional = round(decision.order_intent_notional_usd * 1.15 * policy_multiplier, 6)
+            return replace(
+                decision,
+                order_intent_notional_usd=boosted_notional,
+                strategy_size_multiplier=round(decision.strategy_size_multiplier * 1.15 * policy_multiplier, 6),
                 size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_STRONG_PASS_SCALE",)))),
+            )
+        if status == "pass" and policy_multiplier != 1.0:
+            adjusted_notional = round(decision.order_intent_notional_usd * policy_multiplier, 6)
+            if policy_multiplier <= 0.0:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("ACTIVE_POLICY_DISABLED",)))),
+                )
+            return replace(
+                decision,
+                order_intent_notional_usd=adjusted_notional,
+                strategy_size_multiplier=round(decision.strategy_size_multiplier * policy_multiplier, 6),
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (("ACTIVE_POLICY_PROMOTE",) if policy_multiplier > 1.0 else ("ACTIVE_POLICY_DEMOTE",))))),
             )
         if status != "hold":
             return decision
-        scaled_notional = round(decision.order_intent_notional_usd * 0.5, 6)
+        scaled_notional = round(decision.order_intent_notional_usd * 0.5 * policy_multiplier, 6)
         if scaled_notional <= 0.0:
             return replace(
                 decision,
@@ -706,7 +747,7 @@ class LivePaperSession:
         return replace(
             decision,
             order_intent_notional_usd=scaled_notional,
-            strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5, 6),
+            strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5 * policy_multiplier, 6),
             size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_HOLD_SCALE",)))),
         )
 
