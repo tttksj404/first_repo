@@ -245,6 +245,92 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
         "execution_audit_by_symbol": rows,
     }
 
+def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    return [row for row in rows if str(row.get("symbol", "")) in {"BTCUSDT", "ETHUSDT"}]
+
+
+def _build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str, object]:
+    live_order_count = int(execution_outcomes.get("accepted_live_order_count", 0)) + int(execution_outcomes.get("rejected_live_order_count", 0))
+    if live_order_count <= 0:
+        return {
+            "status": "hold",
+            "reasons": ["INSUFFICIENT_LIVE_ORDERS"],
+            "metrics": {
+                "live_order_count": 0,
+                "reject_rate": 0.0,
+                "protection_degraded_rate": 0.0,
+                "avg_fill_ratio": 0.0,
+                "avg_edge_retention_ratio": 0.0,
+                "avg_realized_edge_bps": 0.0,
+                "realized_vs_expected_edge_gap_bps": 0.0,
+            },
+        }
+
+    reject_rate = int(execution_outcomes.get("rejected_live_order_count", 0)) / live_order_count
+    protection_degraded_rate = float(execution_outcomes.get("protection_degraded_rate", 0.0) or 0.0)
+    avg_fill_ratio = float(execution_outcomes.get("avg_fill_ratio", 0.0) or 0.0)
+    retention = float(execution_outcomes.get("avg_edge_retention_ratio", 0.0) or 0.0)
+    realized = float(execution_outcomes.get("avg_realized_edge_bps", 0.0) or 0.0)
+    gap = float(execution_outcomes.get("realized_vs_expected_edge_gap_bps", 0.0) or 0.0)
+    major_rows = _major_symbol_operational_rows(list(execution_outcomes.get("execution_audit_by_symbol", [])))
+
+    reasons: list[str] = []
+    status = "pass"
+
+    if retention < 0.40 or realized <= 0.0 or protection_degraded_rate > 0.15 or reject_rate > 0.15:
+        status = "stop"
+    elif retention < 0.65 or gap <= -8.0 or protection_degraded_rate > 0.05 or reject_rate > 0.05 or avg_fill_ratio < 0.85:
+        status = "hold"
+
+    if live_order_count < 5 and status == "pass":
+        status = "hold"
+        reasons.append("INSUFFICIENT_SAMPLE")
+
+    if retention < 0.40:
+        reasons.append("EDGE_RETENTION_TOO_LOW")
+    elif retention < 0.65:
+        reasons.append("EDGE_RETENTION_BELOW_PASS")
+
+    if realized <= 0.0:
+        reasons.append("REALIZED_EDGE_NOT_POSITIVE")
+    if gap <= -8.0:
+        reasons.append("EDGE_GAP_TOO_NEGATIVE")
+    if protection_degraded_rate > 0.15:
+        reasons.append("PROTECTION_DEGRADED_TOO_HIGH")
+    elif protection_degraded_rate > 0.05:
+        reasons.append("PROTECTION_DEGRADED_ABOVE_PASS")
+    if reject_rate > 0.15:
+        reasons.append("REJECT_RATE_TOO_HIGH")
+    elif reject_rate > 0.05:
+        reasons.append("REJECT_RATE_ABOVE_PASS")
+    if avg_fill_ratio < 0.85:
+        reasons.append("FILL_RATIO_TOO_LOW")
+
+    if major_rows:
+        weak_major_rows = [row for row in major_rows if float(row.get("realized_vs_expected_edge_gap_bps", 0.0) or 0.0) <= -8.0 or float(row.get("avg_realized_edge_bps", 0.0) or 0.0) <= 0.0]
+        if weak_major_rows:
+            if status == "pass":
+                status = "hold"
+            reasons.append("MAJOR_SYMBOL_AUDIT_WEAK")
+
+    if not reasons:
+        reasons.append("OPERATING_WITHIN_THRESHOLDS")
+
+    return {
+        "status": status,
+        "reasons": reasons,
+        "metrics": {
+            "live_order_count": live_order_count,
+            "reject_rate": round(reject_rate, 6),
+            "protection_degraded_rate": round(protection_degraded_rate, 6),
+            "avg_fill_ratio": round(avg_fill_ratio, 6),
+            "avg_edge_retention_ratio": round(retention, 6),
+            "avg_realized_edge_bps": round(realized, 6),
+            "realized_vs_expected_edge_gap_bps": round(gap, 6),
+        },
+    }
+
+
 def build_runtime_summary(
     *,
     decisions: list[DecisionIntent] | tuple[DecisionIntent, ...],
@@ -282,6 +368,7 @@ def build_runtime_summary(
         live_positions=live_positions,
     )
     execution_outcomes = _aggregate_live_order_outcomes(live_orders)
+    operational_verdict = _build_operational_verdict(execution_outcomes)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
@@ -330,6 +417,7 @@ def build_runtime_summary(
         "live_order_count": len(live_orders or []),
         "live_orders": live_orders or [],
         **execution_outcomes,
+        "operational_verdict": operational_verdict,
         "account_snapshot": account_snapshot or {},
         "open_orders_snapshot": open_orders_snapshot or {},
         "capital_report": capital_report or {},

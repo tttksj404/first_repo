@@ -121,6 +121,20 @@ class QuantBinanceOpsTests(unittest.TestCase):
         self.assertEqual(payload["protection_degraded_count"], 0)
         self.assertEqual(payload["realized_vs_expected_edge_gap_bps"], -5.0)
 
+    def test_runtime_summary_writes_operational_verdict(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            live_orders=[
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 15.0, "realized_edge_bps": 12.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.94, "expected_net_edge_bps": 14.0, "realized_edge_bps": 11.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 13.0, "realized_edge_bps": 10.5},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 17.0, "realized_edge_bps": 13.5},
+            ],
+        )
+        self.assertEqual(summary["operational_verdict"]["status"], "pass")
+        self.assertIn("metrics", summary["operational_verdict"])
+
     def test_runtime_summary_and_state_write(self) -> None:
         summary = build_runtime_summary(
             decisions=[],
