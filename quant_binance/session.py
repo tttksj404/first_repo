@@ -1296,6 +1296,41 @@ class LivePaperSession:
                 return symbol
         return None
 
+    def _major_cross_symbol_alignment_targets(self, decision: DecisionIntent) -> list[PaperPosition]:
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"} or not self._is_btc_eth_symbol(decision.symbol):
+            return []
+        targets: list[PaperPosition] = []
+        for symbol, position in self.paper_positions.items():
+            if symbol == decision.symbol or not self._is_btc_eth_symbol(symbol):
+                continue
+            if position.market != "futures" or position.quantity_remaining <= 0.0:
+                continue
+            if position.side in {"long", "short"} and position.side != decision.side and not position.exchange_synced:
+                targets.append(position)
+        return targets
+
+    def _should_force_major_reversal_alignment(self, *, position: PaperPosition, decision: DecisionIntent, holding_minutes: float) -> bool:
+        if position.market != "futures" or decision.final_mode != "futures":
+            return False
+        if not self._is_major_futures_symbol(position.symbol) or not self._is_major_futures_symbol(decision.symbol):
+            return False
+        if position.side == decision.side or decision.side not in {"long", "short"}:
+            return False
+        if decision.net_expected_edge_bps <= max(position.entry_net_expected_edge_bps * 0.5, 8.0):
+            return False
+        if decision.predictability_score < max(position.entry_predictability_score - 6.0, 60.0):
+            return False
+        return holding_minutes >= max(self.runtime.paper_service.settings.live_position_risk.major_reversal_min_holding_minutes * 0.5, 3.0)
+
+    def _align_major_cross_symbol_positions(self, *, decision: DecisionIntent, price_map: dict[str, float], timestamp: datetime) -> tuple[list[str], bool]:
+        closed_symbols: list[str] = []
+        for position in self._major_cross_symbol_alignment_targets(decision):
+            exit_price = price_map.get(position.symbol, position.current_price if position.current_price > 0 else position.entry_price)
+            self._close_position(position=position, exit_price=exit_price, timestamp=timestamp, exit_reason="MAJOR_CROSS_SYMBOL_REALIGN")
+            self.manual_symbol_cooldowns.pop(decision.symbol, None)
+            closed_symbols.append(position.symbol)
+        return closed_symbols, bool(closed_symbols)
+
     def _is_major_strong_futures_decision(self, decision: DecisionIntent) -> bool:
         if decision.final_mode != "futures" or not self._is_major_futures_symbol(decision.symbol):
             return False
@@ -3552,6 +3587,7 @@ class LivePaperSession:
             and self._is_major_futures_symbol(position.symbol)
             and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT", "ENTRY_CONFIRMATION_FAILED", "LIQUIDITY_DROP_EXIT"}
             and self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes > 0
+            and exit_reason != "MAJOR_CROSS_SYMBOL_REALIGN"
         ):
             if exit_reason == "LIQUIDITY_DROP_EXIT":
                 cooldown_until = self._liquidity_drop_reentry_cooldown_until(symbol=position.symbol, timestamp=timestamp)
@@ -3741,11 +3777,12 @@ class LivePaperSession:
                 and self._is_major_futures_symbol(position.symbol)
                 and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT"}
             ):
-                if holding_minutes < self.runtime.paper_service.settings.live_position_risk.major_reversal_min_holding_minutes:
+                force_alignment = self._should_force_major_reversal_alignment(position=position, decision=decision, holding_minutes=holding_minutes)
+                if holding_minutes < self.runtime.paper_service.settings.live_position_risk.major_reversal_min_holding_minutes and not force_alignment:
                     return
                 required_confirmation_cycles = max(
                     required_confirmation_cycles,
-                    self.runtime.paper_service.settings.live_position_risk.major_reversal_confirmation_cycles,
+                    1 if force_alignment else self.runtime.paper_service.settings.live_position_risk.major_reversal_confirmation_cycles,
                 )
             if position.last_exit_signal_reason == exit_reason:
                 position.exit_confirmation_count += 1
@@ -4577,6 +4614,12 @@ class LivePaperSession:
         order_cooldown_active = self._is_order_cooldown_active(managed_decision.symbol, timestamp)
         manual_symbol_cooldown_active = self._is_manual_symbol_cooldown_active(managed_decision.symbol, timestamp)
         live_orders_allowed = not self.self_healing.is_live_order_cooldown_active(now=timestamp)
+        if state is not None:
+            self._align_major_cross_symbol_positions(
+                decision=managed_decision,
+                price_map={state.symbol: state.last_trade_price},
+                timestamp=timestamp,
+            )
         existing_paper_position = self.paper_positions.get(managed_decision.symbol)
         pending_external_live_position = (
             managed_decision.final_mode == "futures"
