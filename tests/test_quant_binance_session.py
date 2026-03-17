@@ -709,9 +709,8 @@ class QuantBinanceSessionTests(unittest.TestCase):
         summary_path = ROOT / "tests" / "tmp_session_summary.json"
         state_path = ROOT / "tests" / "tmp_session_state.json"
         try:
-            validation_report_path = summary_path.with_name("validation_report.json")
-            validation_report_path.write_text(json.dumps({"max_drawdown_pct": 7.5, "shadow_alignment_score": 0.91, "total_return_pct": 3.5}), encoding="utf-8")
             summary = session.flush(summary_path=summary_path, state_path=state_path)
+            validation_report_path = summary_path.with_name("validation_report.json")
             self.assertEqual(summary["decision_count"], 1)
             self.assertEqual(summary["tested_order_count"], 1)
             self.assertEqual(summary["observe_only_symbols"], ["SIGNUSDT"])
