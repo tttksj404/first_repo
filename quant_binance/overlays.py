@@ -30,6 +30,8 @@ class MacroInputs:
     news_uncertainty_score: float = 0.0
     news_majors_only_bias: float = 0.0
     official_high_impact_window: float = 0.0
+    directional_bearish_score: float = 0.0
+    execution_risk_score: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -219,6 +221,8 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
             "macro_size_multiplier": round(size_multiplier, 6),
             "macro_leverage_cap": leverage_cap,
             "macro_symbol_bias": symbol_bias,
+            "macro_directional_bearish_score": round(clamp(macro_inputs.directional_bearish_score, 0.0, 1.0), 6),
+            "macro_execution_risk_score": round(clamp(macro_inputs.execution_risk_score, 0.0, 1.0), 6),
         }
     )
 

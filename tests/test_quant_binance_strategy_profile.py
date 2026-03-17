@@ -8,7 +8,7 @@ from pathlib import Path
 
 from quant_binance.models import FeatureVector, MarketSnapshot
 from quant_binance.settings import Settings
-from quant_binance.strategy.regime import evaluate_snapshot
+from quant_binance.strategy.regime import _reduced_size_futures_confirmation_required, evaluate_snapshot
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -1208,6 +1208,32 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertIn("SUPPORT_NOT_CONFIRMED", decision.rejection_reasons)
         self.assertIn("SENTIMENT_TOO_WEAK", decision.rejection_reasons)
 
+    def test_reduced_size_futures_confirmation_exempts_only_btc_and_eth(self) -> None:
+        self.assertFalse(
+            _reduced_size_futures_confirmation_required(
+                symbol="BTCUSDT",
+                futures_size_multiplier=0.75,
+            )
+        )
+        self.assertFalse(
+            _reduced_size_futures_confirmation_required(
+                symbol="ETHUSDT",
+                futures_size_multiplier=0.75,
+            )
+        )
+        self.assertTrue(
+            _reduced_size_futures_confirmation_required(
+                symbol="DOGEUSDT",
+                futures_size_multiplier=0.75,
+            )
+        )
+        self.assertFalse(
+            _reduced_size_futures_confirmation_required(
+                symbol="DOGEUSDT",
+                futures_size_multiplier=1.0,
+            )
+        )
+
     def test_btc_futures_can_relax_caution_when_trend_and_edge_are_strong(self) -> None:
         settings = Settings.load(CONFIG_PATH)
         features = FeatureVector(
@@ -1620,6 +1646,207 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
         self.assertEqual(sol_decision.final_mode, "cash")
         self.assertEqual(sol_decision.entry_relaxation_reasons, ())
         self.assertIn("ALT_REGIME_DEFENSIVE", sol_decision.rejection_reasons)
+
+
+    def test_btc_eth_futures_confirmation_relaxation_clears_divergence_code(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.78,
+            ret_rank_4h=0.76,
+            breakout_norm=0.88,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.66,
+            vol_z_1h_norm=0.64,
+            taker_imbalance_norm=0.62,
+            spread_bps_norm=0.14,
+            probe_slippage_bps_norm=0.16,
+            depth_10bps_norm=0.84,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.24,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.14,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.1,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            intraday_trend_direction=-1,
+            intraday_trend_strength=0.38,
+            volume_confirmation=0.66,
+            liquidity_score=0.74,
+            volatility_penalty=0.24,
+            overheat_penalty=0.18,
+            support_alignment=0.16,
+            resistance_penalty=0.14,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.16,
+            gross_expected_edge_bps=30.0,
+            estimated_round_trip_cost_bps=10.0,
+            net_expected_edge_bps=20.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-btc-confirmation-relax",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 17, 1, 15, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.side, "long")
+        self.assertEqual(decision.strategy_size_multiplier, 1.0)
+        self.assertEqual(decision.divergence_code, "")
+
+    def test_alt_futures_confirmation_still_requires_divergence_clearance(self) -> None:
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.78,
+            ret_rank_4h=0.76,
+            breakout_norm=0.88,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.66,
+            vol_z_1h_norm=0.64,
+            taker_imbalance_norm=0.62,
+            spread_bps_norm=0.14,
+            probe_slippage_bps_norm=0.16,
+            depth_10bps_norm=0.84,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.24,
+            realized_vol_4h_norm=0.22,
+            vol_shock_norm=0.14,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.12,
+            basis_stretch_percentile=0.1,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            intraday_trend_direction=-1,
+            intraday_trend_strength=0.38,
+            volume_confirmation=0.66,
+            liquidity_score=0.74,
+            volatility_penalty=0.24,
+            overheat_penalty=0.18,
+            support_alignment=0.16,
+            resistance_penalty=0.14,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.16,
+            alt_market_regime="neutral",
+            alt_breadth_score=0.7,
+            alt_liquidity_support_score=0.8,
+            alt_fundamental_score=0.58,
+            alt_smart_money_score=0.6,
+            alt_rotation_penalty=0.08,
+            gross_expected_edge_bps=30.0,
+            estimated_round_trip_cost_bps=10.0,
+            net_expected_edge_bps=20.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-sol-confirmation-still-blocked",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="SOLUSDT",
+            decision_time=datetime(2026, 3, 17, 1, 16, tzinfo=timezone.utc),
+            last_trade_price=120.0,
+            best_bid=119.95,
+            best_ask=120.05,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+
+        decision = evaluate_snapshot(
+            snapshot,
+            settings,
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+            cash_reserve_fraction=settings.cash_reserve.when_futures_enabled,
+        )
+
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.divergence_code, "ENTRY_CONFIRMATION_REQUIRED")
+    def test_directional_bearish_news_supports_major_short_without_execution_halt(self) -> None:
+        os.environ["STRATEGY_PROFILE"] = "live-ultra-aggressive"
+        settings = Settings.load(CONFIG_PATH)
+        features = FeatureVector(
+            ret_rank_1h=0.18,
+            ret_rank_4h=0.16,
+            breakout_norm=0.82,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.72,
+            vol_z_1h_norm=0.7,
+            taker_imbalance_norm=0.16,
+            spread_bps_norm=0.18,
+            probe_slippage_bps_norm=0.18,
+            depth_10bps_norm=0.82,
+            book_stability_norm=0.84,
+            realized_vol_1h_norm=0.36,
+            realized_vol_4h_norm=0.34,
+            vol_shock_norm=0.22,
+            funding_abs_percentile=0.2,
+            oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=-1,
+            trend_strength=0.68,
+            volume_confirmation=0.63,
+            liquidity_score=0.66,
+            volatility_penalty=0.46,
+            overheat_penalty=0.28,
+            macro_regime="neutral",
+            macro_risk_penalty=0.46,
+            macro_liquidity_support_score=0.48,
+            macro_event_risk_score=0.38,
+            macro_trade_restraint="none",
+            macro_size_multiplier=1.0,
+            macro_leverage_cap=0,
+            macro_symbol_bias="majors_only",
+            macro_directional_bearish_score=0.82,
+            macro_execution_risk_score=0.22,
+            sentiment_regime="neutral",
+            sentiment_support_score=0.35,
+            gross_expected_edge_bps=26.0,
+            estimated_round_trip_cost_bps=14.0,
+            net_expected_edge_bps=12.0,
+        )
+        snapshot = MarketSnapshot(
+            snapshot_id="snap-directional-bearish-major-short",
+            config_version=settings.config_version,
+            snapshot_schema_version=settings.snapshot_schema_version,
+            symbol="BTCUSDT",
+            decision_time=datetime(2026, 3, 17, 7, 0, tzinfo=timezone.utc),
+            last_trade_price=50000.0,
+            best_bid=49999.5,
+            best_ask=50000.5,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=4.0,
+            data_freshness_ms=100,
+            feature_values=features,
+        )
+        decision = evaluate_snapshot(snapshot, settings, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0, cash_reserve_fraction=settings.cash_reserve.when_futures_enabled)
+        self.assertEqual(decision.final_mode, "futures")
+        self.assertEqual(decision.side, "short")
+
+
 
 if __name__ == "__main__":
     unittest.main()
