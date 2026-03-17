@@ -383,7 +383,7 @@ def build_signal(
         entry_policy_bias = "risk_off_reduce"
     elif bullish_score > bearish_score + 0.18 and uncertainty_score <= 0.42:
         leverage_cap = 0
-        size_multiplier = 1.08
+        size_multiplier = 1.15
         entry_policy_bias = "supportive_majors"
     else:
         leverage_cap = 0
