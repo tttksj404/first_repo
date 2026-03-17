@@ -228,3 +228,6 @@ class DecisionIntent:
         data = asdict(self)
         data["timestamp"] = self.timestamp.isoformat()
         return data
+
+
+ExecutionIntent = DecisionIntent
