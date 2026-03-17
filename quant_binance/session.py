@@ -28,7 +28,7 @@ from quant_binance.policy.execution import (
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
 from quant_binance.observability.report import build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
-from quant_binance.validation_report import write_policy_validation_runner_artifact
+from quant_binance.validation_report import write_policy_comparison_validation_artifact, write_policy_validation_runner_artifact
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
@@ -432,6 +432,14 @@ class LivePaperSession:
         validation_report_path = run_dir / "validation_report.json"
         if not validation_report_path.exists():
             write_policy_validation_runner_artifact(base_dir=base_dir, output_path=validation_report_path)
+        previous_policy_state = self._read_persisted_policy_state()
+        comparison_report_path = run_dir / "policy_comparison.json"
+        write_policy_comparison_validation_artifact(
+            current_policy_state=previous_policy_state,
+            candidate_policy=summary.get("candidate_policy", {}),
+            base_dir=base_dir,
+            output_path=comparison_report_path,
+        )
         runner_evidence = load_validation_runner_evidence(run_dir)
         summary["policy_validation"] = build_policy_validation(
             summary.get("candidate_policy", {}),
@@ -440,7 +448,6 @@ class LivePaperSession:
             summary.get("performance_attribution", []),
             runner_evidence,
         )
-        previous_policy_state = self._read_persisted_policy_state()
         persisted_policy_state = build_persisted_policy_state(
             previous_policy_state,
             summary.get("candidate_policy", {}),
