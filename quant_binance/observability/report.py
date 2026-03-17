@@ -345,6 +345,8 @@ def _policy_adjustment_shape(
     action: str,
     reason: str,
     signal_source: str,
+    score_delta: float = 0.0,
+    signal_context: dict[str, object] | None = None,
 ) -> dict[str, object]:
     size_multiplier = 1.0
     if action == "demote":
@@ -357,7 +359,7 @@ def _policy_adjustment_shape(
     entry_threshold_bps = -1.5 if action == "aggressive_promote" else (-0.5 if action == "promote" else (1.5 if action == "demote" else 0.0))
     expected_profit_floor_bps = -2.0 if action == "aggressive_promote" else (-1.0 if action == "promote" else (2.0 if action == "demote" else 0.0))
     symbol_bias = "majors_only" if action in {"aggressive_promote", "promote"} and regime == "major" else "neutral"
-    return {
+    adjustment = {
         "symbol": symbol,
         "regime": regime,
         "setup_class": setup_class,
@@ -371,8 +373,15 @@ def _policy_adjustment_shape(
         "expected_profit_floor_bps": expected_profit_floor_bps,
         "symbol_bias": symbol_bias,
         "reason": reason,
+        "score_delta": round(float(score_delta or 0.0), 6),
         "signal_sources": [signal_source],
+        "signal_contexts": ({signal_source: dict(signal_context or {})} if signal_context else {}),
     }
+    return adjustment
+
+
+def _bounded_score(value: float, *, lower: float, upper: float) -> float:
+    return round(min(upper, max(lower, value)), 6)
 
 
 def _live_attribution_adjustments(
@@ -409,38 +418,110 @@ def _live_attribution_adjustments(
                 action=action,
                 reason=reason,
                 signal_source="live_attribution",
+                signal_context={
+                    "avg_edge_retention_ratio": round(retention, 6),
+                    "avg_realized_edge_bps": round(realized, 6),
+                    "reject_rate": round(reject_rate, 6),
+                    "protection_degraded_rate": round(degraded_rate, 6),
+                },
             )
         )
     return adjustments
 
 
-def _runtime_regime_support(runtime_evidence: dict[str, object] | None) -> tuple[bool, bool]:
+def _runtime_regime_breakdown(runtime_evidence: dict[str, object] | None) -> dict[str, object]:
     payload = dict(runtime_evidence or {})
-    futures_row = next(
-        (row for row in list(payload.get("regime_summary", []) or []) if str(row.get("mode", "")) == "futures"),
-        None,
-    )
-    if futures_row is None:
-        return False, False
-    decision_count = int(futures_row.get("decision_count", 0) or 0)
-    avg_score = float(futures_row.get("avg_score", 0.0) or 0.0)
-    avg_net_edge_bps = float(futures_row.get("avg_net_edge_bps", 0.0) or 0.0)
-    supportive = decision_count >= 3 and avg_net_edge_bps > 0.0 and avg_score >= 0.0
-    elite = decision_count >= 6 and avg_net_edge_bps >= 8.0 and avg_score >= 55.0
-    return supportive, elite
+    regime_rows = [dict(row) for row in list(payload.get("regime_summary", []) or []) if isinstance(row, dict)]
+    futures_row = next((row for row in regime_rows if str(row.get("mode", "")) == "futures"), None)
+    supportive_modes: list[str] = []
+    elite_modes: list[str] = []
+    mode_scores: dict[str, float] = {}
+    dominant_mode = ""
+    dominant_value = float("-inf")
+    for row in regime_rows:
+        mode = str(row.get("mode", "") or "")
+        if not mode:
+            continue
+        decision_count = int(row.get("decision_count", 0) or 0)
+        avg_score = float(row.get("avg_score", 0.0) or 0.0)
+        avg_net_edge_bps = float(row.get("avg_net_edge_bps", 0.0) or 0.0)
+        support_score = _bounded_score((avg_net_edge_bps / 20.0) + ((avg_score - 50.0) / 100.0), lower=-0.35, upper=0.35)
+        mode_scores[mode] = support_score
+        if decision_count >= 3 and avg_net_edge_bps > 0.0 and avg_score >= 0.0:
+            supportive_modes.append(mode)
+        if decision_count >= 6 and avg_net_edge_bps >= 8.0 and avg_score >= 55.0:
+            elite_modes.append(mode)
+        candidate_dominance = avg_net_edge_bps + (avg_score / 100.0)
+        if dominant_mode == "" or candidate_dominance > dominant_value:
+            dominant_mode = mode
+            dominant_value = candidate_dominance
+    return {
+        "regime_rows": regime_rows,
+        "supportive_modes": sorted(supportive_modes),
+        "elite_modes": sorted(elite_modes),
+        "mode_scores": mode_scores,
+        "dominant_mode": dominant_mode,
+        "futures_supportive": futures_row is not None and "futures" in supportive_modes,
+        "futures_elite": futures_row is not None and "futures" in elite_modes,
+    }
+
+
+def _runtime_regime_support(runtime_evidence: dict[str, object] | None) -> tuple[bool, bool]:
+    breakdown = _runtime_regime_breakdown(runtime_evidence)
+    return bool(breakdown.get("futures_supportive")), bool(breakdown.get("futures_elite"))
+
+
+def _runtime_symbol_score_delta(
+    *,
+    recommendation: str,
+    trade_count: int,
+    expectancy: float,
+    regime: str,
+    regime_breakdown: dict[str, object],
+) -> float:
+    base_score = min(0.32, abs(expectancy) / 10.0) + min(0.12, trade_count / 25.0)
+    regime_bonus = 0.0
+    if regime == "major":
+        if bool(regime_breakdown.get("futures_elite")):
+            regime_bonus = 0.16
+        elif bool(regime_breakdown.get("futures_supportive")):
+            regime_bonus = 0.09
+    elif str(regime_breakdown.get("dominant_mode", "")) == "cash":
+        regime_bonus = -0.04
+    score = base_score + regime_bonus
+    return round(score if recommendation == "promote" else -score, 6)
+
+
+def _runtime_pruning_score_delta(
+    *,
+    recommendation: str,
+    trade_count: int,
+    decision_count: int,
+    avg_net_edge_bps: float,
+) -> float:
+    sample_count = max(trade_count, decision_count)
+    severity = min(0.28, abs(avg_net_edge_bps) / 10.0) + min(0.12, sample_count / 30.0)
+    if recommendation == "observe_only":
+        severity += 0.04
+    return round(-severity, 6)
 
 
 def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | None) -> list[dict[str, object]]:
     payload = dict(runtime_evidence or {})
     if not payload:
         return []
-    futures_supportive, futures_elite = _runtime_regime_support(payload)
+    regime_breakdown = _runtime_regime_breakdown(payload)
+    futures_supportive = bool(regime_breakdown.get("futures_supportive"))
+    futures_elite = bool(regime_breakdown.get("futures_elite"))
     adjustments: list[dict[str, object]] = []
     for row in list(payload.get("pruning_recommendations", []) or []):
         symbol = str(row.get("symbol", "") or "")
         recommendation = str(row.get("recommendation", "") or "")
         if not symbol or recommendation not in {"prune", "demote", "observe_only"}:
             continue
+        trade_count = int(row.get("trade_count", 0) or 0)
+        decision_count = int(row.get("decision_count", 0) or 0)
+        avg_net_edge_bps = float(row.get("avg_net_edge_bps", 0.0) or 0.0)
         adjustments.append(
             _policy_adjustment_shape(
                 symbol=symbol,
@@ -448,10 +529,22 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                 setup_class="runtime_decomposition",
                 side="both",
                 execution_quality_state="runtime_review",
-                sample_count=max(int(row.get("trade_count", 0) or 0), int(row.get("decision_count", 0) or 0)),
+                sample_count=max(trade_count, decision_count),
                 action="demote",
                 reason=f"RUNTIME_{recommendation.upper()}_RECOMMENDATION",
                 signal_source="runtime_pruning_recommendation",
+                score_delta=_runtime_pruning_score_delta(
+                    recommendation=recommendation,
+                    trade_count=trade_count,
+                    decision_count=decision_count,
+                    avg_net_edge_bps=avg_net_edge_bps,
+                ),
+                signal_context={
+                    "recommendation": recommendation,
+                    "trade_count": trade_count,
+                    "decision_count": decision_count,
+                    "avg_net_edge_bps": round(avg_net_edge_bps, 6),
+                },
             )
         )
     for row in list(payload.get("symbol_summary", []) or []):
@@ -477,6 +570,19 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                     action=action,
                     reason="RUNTIME_SYMBOL_PROMOTE",
                     signal_source="runtime_symbol_summary",
+                    score_delta=_runtime_symbol_score_delta(
+                        recommendation=recommendation,
+                        trade_count=trade_count,
+                        expectancy=expectancy,
+                        regime=regime,
+                        regime_breakdown=regime_breakdown,
+                    ),
+                    signal_context={
+                        "recommendation": recommendation,
+                        "trade_count": trade_count,
+                        "expectancy_usd": round(expectancy, 6),
+                        "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
+                    },
                 )
             )
         elif recommendation == "prune":
@@ -491,6 +597,19 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                     action="demote",
                     reason="RUNTIME_SYMBOL_PRUNE",
                     signal_source="runtime_symbol_summary",
+                    score_delta=_runtime_symbol_score_delta(
+                        recommendation=recommendation,
+                        trade_count=trade_count,
+                        expectancy=expectancy,
+                        regime=regime,
+                        regime_breakdown=regime_breakdown,
+                    ),
+                    signal_context={
+                        "recommendation": recommendation,
+                        "trade_count": trade_count,
+                        "expectancy_usd": round(expectancy, 6),
+                        "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
+                    },
                 )
             )
     return adjustments
@@ -509,6 +628,7 @@ def _merge_policy_adjustments(existing: dict[str, object] | None, incoming: dict
         preferred = incoming if incoming_strength > existing_strength else existing
     merged = dict(preferred)
     merged["sample_count"] = max(int(existing.get("sample_count", 0) or 0), int(incoming.get("sample_count", 0) or 0))
+    merged["score_delta"] = round(float(existing.get("score_delta", 0.0) or 0.0) + float(incoming.get("score_delta", 0.0) or 0.0), 6)
     merged["signal_sources"] = sorted(
         {
             str(source)
@@ -516,7 +636,38 @@ def _merge_policy_adjustments(existing: dict[str, object] | None, incoming: dict
             if str(source)
         }
     )
+    signal_contexts = dict(existing.get("signal_contexts", {}) or {})
+    signal_contexts.update(dict(incoming.get("signal_contexts", {}) or {}))
+    if signal_contexts:
+        merged["signal_contexts"] = signal_contexts
     return merged
+
+
+def _candidate_generation_summary(
+    *,
+    runtime_evidence: dict[str, object] | None,
+    adjustments: list[dict[str, object]],
+) -> dict[str, object]:
+    payload = dict(runtime_evidence or {})
+    regime_breakdown = _runtime_regime_breakdown(payload)
+    adjustment_rows = [
+        {
+            "symbol": str(item.get("symbol", "") or ""),
+            "action": str(item.get("action", "") or ""),
+            "score_delta": round(float(item.get("score_delta", 0.0) or 0.0), 6),
+            "signal_sources": list(item.get("signal_sources", []) or []),
+        }
+        for item in adjustments[:6]
+    ]
+    return {
+        "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
+        "supportive_regime_modes": list(regime_breakdown.get("supportive_modes", []) or []),
+        "elite_regime_modes": list(regime_breakdown.get("elite_modes", []) or []),
+        "runtime_symbol_recommendation_count": len(list(payload.get("symbol_summary", []) or [])),
+        "runtime_pruning_recommendation_count": len(list(payload.get("pruning_recommendations", []) or [])),
+        "score_delta_total": round(sum(float(item.get("score_delta", 0.0) or 0.0) for item in adjustments), 6),
+        "candidate_adjustment_rows": adjustment_rows,
+    }
 
 
 def build_auto_tune_policy(
@@ -544,7 +695,15 @@ def build_auto_tune_policy(
             if str(source)
         }
     )
-    return {"status": policy_status, "adjustments": adjustments, "signal_sources": signal_sources}
+    return {
+        "status": policy_status,
+        "adjustments": adjustments,
+        "signal_sources": signal_sources,
+        "decomposition_summary": _candidate_generation_summary(
+            runtime_evidence=runtime_evidence,
+            adjustments=adjustments,
+        ),
+    }
 
 
 def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, float]:
@@ -746,11 +905,15 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "validation_path_mode",
             "runner_walk_forward_window_count",
             "runner_positive_walk_forward_window_count",
+            "runner_positive_walk_forward_ratio",
             "walk_forward_windows",
             "validation_runs",
             "symbol_summary",
             "regime_summary",
             "pruning_recommendations",
+            "metric_comparisons",
+            "candidate_replay_summary",
+            "current_replay_summary",
         ):
             if key in payload and key not in evidence:
                 evidence[key] = payload[key]
@@ -1017,12 +1180,6 @@ def build_persisted_policy_state(
         rollout_status = "reverted"
         rollout_reason = "POST_PROMOTION_RETENTION_DEGRADED"
         version = previous_version + 1
-    elif previous_active and retention_monitor.get("status") == "demote":
-        active_policy = _demoted_active_policy(previous_active)
-        lifecycle = "retention_demoted"
-        rollout_status = "retention_demoted"
-        rollout_reason = "POST_PROMOTION_RETENTION_WEAKENED"
-        version = previous_version + 1
     elif (comparison_underperforms or str(operational_verdict.get("status", "")) == "stop" or float(validation_evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0) > 0.5) and previous_active:
         active_policy = {"status": "baseline", "adjustments": []}
         lifecycle = "rolled_back"
@@ -1033,6 +1190,12 @@ def build_persisted_policy_state(
             rollout_reason = "OPERATIONAL_STOP_ACTIVE"
         else:
             rollout_reason = "REPLAY_DRAWDOWN_TOO_HIGH"
+        version = previous_version + 1
+    elif previous_active and retention_monitor.get("status") == "demote":
+        active_policy = _demoted_active_policy(previous_active)
+        lifecycle = "retention_demoted"
+        rollout_status = "retention_demoted"
+        rollout_reason = "POST_PROMOTION_RETENTION_WEAKENED"
         version = previous_version + 1
     elif previous_active:
         active_policy = previous_active

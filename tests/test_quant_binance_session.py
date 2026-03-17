@@ -814,6 +814,71 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(summary["promotion_verdict"]["status"], "keep")
             self.assertIn("PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE", summary["promotion_verdict"]["reasons"])
 
+    def test_session_flush_promotes_resumed_staged_candidate_after_micro_live_pass(self) -> None:
+        session = self._build_session()
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.5},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 15.5, "realized_edge_bps": 14.0},
+        ]
+        session.closed_trades = [
+            {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0},
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_dir / "logs"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 71.0, "net_expected_edge_bps": 12.5, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:05:00+00:00"}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "status": "staged_rollout",
+                        "rollout_status": "micro_live_pending",
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "candidate_policy": {
+                            "status": "candidate_ready",
+                            "adjustments": [
+                                {
+                                    "symbol": "BTCUSDT",
+                                    "action": "promote",
+                                    "size_multiplier": 1.1,
+                                    "leverage_multiplier": 1.1,
+                                    "entry_threshold_bps": -0.5,
+                                    "expected_profit_floor_bps": -1.0,
+                                    "signal_sources": ["runtime_symbol_summary"],
+                                }
+                            ],
+                            "signal_sources": ["runtime_symbol_summary"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            payload = json.loads(summary_path.with_name("policy_state.json").read_text(encoding="utf-8"))
+            self.assertTrue(summary["candidate_policy"]["decomposition_summary"]["resumed_from_staged_rollout"])
+            self.assertEqual(summary["promotion_verdict"]["status"], "promote")
+            self.assertEqual(payload["status"], "promoted")
+            self.assertEqual(payload["active_policy"]["status"], "promote")
+            self.assertEqual(payload["rollout_status"], "ready")
+
     def test_session_flush_rolls_back_after_post_promotion_retention_degrades(self) -> None:
         session = self._build_session()
         session.live_orders = [
