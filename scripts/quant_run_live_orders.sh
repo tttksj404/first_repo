@@ -21,17 +21,23 @@ mkdir -p "$LOG_DIR"
 export EXCHANGE="bitget"
 export STRATEGY_PROFILE="${STRATEGY_PROFILE:-live-ultra-aggressive}"
 export STRATEGY_OVERRIDE_PATH="${STRATEGY_OVERRIDE_PATH:-$OUTPUT_BASE/artifacts/strategy_override.approved.json}"
+export MACRO_INPUTS_PATH="${MACRO_INPUTS_PATH:-$OUTPUT_BASE/artifacts/news_macro_inputs.json}"
 export TELEGRAM_REPORT_ONLY="${TELEGRAM_REPORT_ONLY:-1}"
 
 cd "$(dirname "$0")/.."
 
 CHILD_PID=""
 REPORT_PID=""
+NEWS_PID=""
 
 cleanup() {
   if [ -n "${REPORT_PID:-}" ] && kill -0 "$REPORT_PID" 2>/dev/null; then
     kill "$REPORT_PID" 2>/dev/null || true
     wait "$REPORT_PID" 2>/dev/null || true
+  fi
+  if [ -n "${NEWS_PID:-}" ] && kill -0 "$NEWS_PID" 2>/dev/null; then
+    kill "$NEWS_PID" 2>/dev/null || true
+    wait "$NEWS_PID" 2>/dev/null || true
   fi
   if [ -n "${CHILD_PID:-}" ] && kill -0 "$CHILD_PID" 2>/dev/null; then
     python3 scripts/quant_notify_runtime_event.py stopped "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
@@ -60,6 +66,12 @@ start_report_loop() {
   run_report_loop &
   REPORT_PID=$!
   printf '[SUPERVISOR] started report loop pid=%s interval=%ss at %s\n' "$REPORT_PID" "$REPORT_INTERVAL_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+}
+
+start_news_loop() {
+  sh scripts/quant_news_macro_signal_cycle.sh "$OUTPUT_BASE" 900 >>"$SUPERVISOR_LOG" 2>&1 &
+  NEWS_PID=$!
+  printf '[SUPERVISOR] started news macro loop pid=%s at %s\n' "$NEWS_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 }
 
 run_child() {
@@ -146,6 +158,7 @@ PY
 }
 
 start_report_loop
+start_news_loop
 
 while :; do
   run_child
