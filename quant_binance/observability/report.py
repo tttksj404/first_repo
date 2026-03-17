@@ -277,12 +277,24 @@ def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str
     reasons: list[str] = []
     status = "pass"
 
+    strong_pass = (
+        live_order_count >= 8
+        and retention >= 0.80
+        and realized > 0.0
+        and gap > -3.0
+        and protection_degraded_rate <= 0.02
+        and reject_rate <= 0.02
+        and avg_fill_ratio >= 0.92
+    )
+
     if retention < 0.40 or realized <= 0.0 or protection_degraded_rate > 0.15 or reject_rate > 0.15:
         status = "stop"
     elif retention < 0.65 or gap <= -8.0 or protection_degraded_rate > 0.05 or reject_rate > 0.05 or avg_fill_ratio < 0.85:
         status = "hold"
+    elif strong_pass:
+        status = "strong_pass"
 
-    if live_order_count < 5 and status == "pass":
+    if live_order_count < 5 and status in {"pass", "strong_pass"}:
         status = "hold"
         reasons.append("INSUFFICIENT_SAMPLE")
 
@@ -308,12 +320,18 @@ def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str
 
     if major_rows:
         weak_major_rows = [row for row in major_rows if float(row.get("realized_vs_expected_edge_gap_bps", 0.0) or 0.0) <= -8.0 or float(row.get("avg_realized_edge_bps", 0.0) or 0.0) <= 0.0]
+        strong_major_rows = [row for row in major_rows if float(row.get("avg_edge_retention_ratio", 0.0) or 0.0) >= 0.8 and float(row.get("avg_realized_edge_bps", 0.0) or 0.0) > 0.0]
         if weak_major_rows:
-            if status == "pass":
+            if status in {"pass", "strong_pass"}:
                 status = "hold"
             reasons.append("MAJOR_SYMBOL_AUDIT_WEAK")
+        elif status == "strong_pass" and not strong_major_rows:
+            status = "pass"
+            reasons.append("MAJOR_SYMBOL_CONFIRMATION_INCOMPLETE")
 
-    if not reasons:
+    if status == "strong_pass":
+        reasons.append("OPERATING_WITH_STRONG_EDGE")
+    elif not reasons:
         reasons.append("OPERATING_WITHIN_THRESHOLDS")
 
     return {

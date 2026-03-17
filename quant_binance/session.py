@@ -683,6 +683,14 @@ class LivePaperSession:
                 stop_distance_bps=0.0,
                 rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_STOP",)))),
             )
+        if status == "strong_pass":
+            boosted_notional = round(decision.order_intent_notional_usd * 1.15, 6)
+            return replace(
+                decision,
+                order_intent_notional_usd=boosted_notional,
+                strategy_size_multiplier=round(decision.strategy_size_multiplier * 1.15, 6),
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_STRONG_PASS_SCALE",)))),
+            )
         if status != "hold":
             return decision
         scaled_notional = round(decision.order_intent_notional_usd * 0.5, 6)
