@@ -338,6 +338,65 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertFalse(pyramid)
         self.assertNotIn("BTCUSDT", session.paper_positions)
 
+    def test_cap_live_order_decision_uses_persisted_policy_to_relax_expected_profit_floor(self) -> None:
+        import tempfile
+        session = self._build_session(settings=replace(
+            self.settings,
+            risk=replace(self.settings.risk, min_meaningful_futures_notional_usd=0.0, min_expected_profit_usd_per_trade=6.0),
+        ))
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 120.0,
+            "futures_available_balance_usd": 120.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            policy_state = {
+                "active_policy": {
+                    "status": "promote_aggressive",
+                    "adjustments": [{
+                        "symbol": "BTCUSDT", "action": "aggressive_promote", "size_multiplier": 1.25, "leverage_multiplier": 1.2, "entry_threshold_bps": -1.5, "expected_profit_floor_bps": -500.0
+                    }]
+                }
+            }
+            summary_path.with_name("policy_state.json").write_text(json.dumps(policy_state), encoding="utf-8")
+            decision = make_decision(timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc), symbol="BTCUSDT", order_intent_notional_usd=100.0, net_expected_edge_bps=100.0)
+            capped = session._cap_live_order_decision(decision, reference_price=100.0)
+            self.assertEqual(capped.final_mode, "futures")
+
+    def test_cap_live_order_decision_uses_persisted_policy_to_raise_major_entry_floor(self) -> None:
+        import tempfile
+        session = self._build_session(settings=replace(
+            self.settings,
+            futures_exposure=replace(self.settings.futures_exposure, major_medium_min_entry_notional_usd=100.0),
+        ))
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 1000.0,
+            "futures_available_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 18.0, "realized_edge_bps": 12.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            policy_state = {
+                "active_policy": {
+                    "status": "demote",
+                    "adjustments": [{
+                        "symbol": "BTCUSDT", "action": "demote", "size_multiplier": 0.75, "leverage_multiplier": 0.75, "entry_threshold_bps": 5000.0, "expected_profit_floor_bps": 0.0
+                    }]
+                }
+            }
+            summary_path.with_name("policy_state.json").write_text(json.dumps(policy_state), encoding="utf-8")
+            decision = make_decision(timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc), symbol="BTCUSDT", final_mode="futures", order_intent_notional_usd=120.0, predictability_score=90.0, net_expected_edge_bps=30.0)
+            capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+            self.assertEqual(capped.final_mode, "cash")
+            self.assertIn("MIN_MEANINGFUL_NOTIONAL", capped.rejection_reasons)
+
     def test_cap_live_order_decision_scales_size_on_operational_hold(self) -> None:
         session = self._build_session()
         session.capital_report = {
