@@ -4043,6 +4043,58 @@ class LivePaperSession:
             payload["incremental_pnl_usd_estimate"] = round(incremental_pnl_usd_estimate, 6)
         self.log_store.append("futures_reallocation", payload)
 
+    def _log_position_management_gate(
+        self,
+        *,
+        timestamp: datetime,
+        decision: DecisionIntent,
+        existing_paper_position: PaperPosition | None,
+        allow_new_submission: bool,
+        pyramid_requested: bool,
+        live_orders_allowed: bool,
+        order_cooldown_active: bool,
+        manual_symbol_cooldown_active: bool,
+    ) -> None:
+        if self.log_store is None or existing_paper_position is None:
+            return
+        reasons: list[str] = []
+        if existing_paper_position.is_adopted():
+            reasons.append("ADOPTED_POSITION_OBSERVE_ONLY")
+        if existing_paper_position.side != decision.side and decision.side in {"long", "short"}:
+            reasons.append("EXISTING_SIDE_CONFLICT")
+        if order_cooldown_active:
+            reasons.append("ORDER_COOLDOWN_ACTIVE")
+        if manual_symbol_cooldown_active:
+            reasons.append("MANUAL_SYMBOL_COOLDOWN_ACTIVE")
+        if not live_orders_allowed:
+            reasons.append("LIVE_ORDER_COOLDOWN_ACTIVE")
+        if allow_new_submission and pyramid_requested:
+            reasons.append("PYRAMID_REQUESTED")
+        if not reasons:
+            reasons.append("HOLD_EXISTING_POSITION")
+        self.log_store.append(
+            "position_management_gate",
+            {
+                "timestamp": timestamp,
+                "symbol": decision.symbol,
+                "decision_side": decision.side,
+                "decision_mode": decision.final_mode,
+                "allow_new_submission": allow_new_submission,
+                "pyramid_requested": pyramid_requested,
+                "existing_position": {
+                    "symbol": existing_paper_position.symbol,
+                    "side": existing_paper_position.side,
+                    "market": existing_paper_position.market,
+                    "origin": existing_paper_position.origin,
+                    "exchange_synced": existing_paper_position.exchange_synced,
+                    "adoption_source": existing_paper_position.adoption_source,
+                    "quantity_remaining": round(existing_paper_position.quantity_remaining, 8),
+                    "last_exit_signal_reason": existing_paper_position.last_exit_signal_reason,
+                },
+                "reasons": reasons,
+            },
+        )
+
     def _log_execution_preflight(
         self,
         *,
@@ -4530,6 +4582,16 @@ class LivePaperSession:
                 else self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
             )
         if state is not None:
+            self._log_position_management_gate(
+                timestamp=timestamp,
+                decision=managed_decision,
+                existing_paper_position=existing_paper_position,
+                allow_new_submission=allow_new_submission,
+                pyramid_requested=pyramid_requested,
+                live_orders_allowed=live_orders_allowed,
+                order_cooldown_active=order_cooldown_active,
+                manual_symbol_cooldown_active=manual_symbol_cooldown_active,
+            )
             self._log_execution_preflight(
                 timestamp=timestamp,
                 managed_decision=managed_decision,
