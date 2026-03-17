@@ -4,7 +4,7 @@ from dataclasses import replace
 from datetime import datetime
 from uuid import uuid4
 
-from quant_binance.models import DecisionIntent, FeatureVector, MarketSnapshot
+from quant_binance.models import DecisionIntent, FeatureVector, MarketSnapshot, ModePrediction, StrategyPrediction
 from quant_binance.observability.decision_log import hash_decision_payload
 from quant_binance.risk.sizing import position_notional_and_stop_bps, select_futures_leverage
 from quant_binance.overlays import is_alt_symbol
@@ -32,6 +32,71 @@ def _candidate_mode(features: FeatureVector, settings: Settings) -> str:
     if features.predictability_score >= settings.mode_thresholds.spot_score_min:
         return "spot"
     return "cash"
+
+
+def _mode_prediction_from_features(*, mode: str, features: FeatureVector) -> ModePrediction:
+    if mode == "spot":
+        side = "long" if features.trend_direction > 0 else "flat"
+    else:
+        if features.trend_direction > 0:
+            side = "long"
+        elif features.trend_direction < 0:
+            side = "short"
+        else:
+            side = "flat"
+    return ModePrediction(
+        mode=mode,
+        side=side,
+        predictability_score=features.predictability_score,
+        gross_expected_edge_bps=features.gross_expected_edge_bps,
+        net_expected_edge_bps=features.net_expected_edge_bps,
+        estimated_round_trip_cost_bps=features.estimated_round_trip_cost_bps,
+        trend_direction=features.trend_direction,
+        trend_strength=features.trend_strength,
+        volume_confirmation=features.volume_confirmation,
+        liquidity_score=features.liquidity_score,
+        volatility_penalty=features.volatility_penalty,
+        overheat_penalty=features.overheat_penalty,
+        macro_regime=features.macro_regime,
+        macro_trade_restraint=features.macro_trade_restraint,
+        macro_size_multiplier=features.macro_size_multiplier,
+        macro_leverage_cap=features.macro_leverage_cap,
+        macro_symbol_bias=features.macro_symbol_bias,
+    )
+
+
+def build_strategy_prediction(
+    snapshot: MarketSnapshot,
+    settings: Settings,
+    *,
+    expected_funding_drag_bps: float = 0.0,
+) -> StrategyPrediction:
+    futures_features = apply_score_and_costs(
+        snapshot.feature_values,
+        settings=settings,
+        mode="futures",
+        expected_funding_drag_bps=expected_funding_drag_bps,
+    )
+    spot_features = apply_score_and_costs(
+        snapshot.feature_values,
+        settings=settings,
+        mode="spot",
+    )
+    candidate_mode = _candidate_mode(futures_features, settings)
+    selected_mode_hint = candidate_mode
+    if candidate_mode == "cash" and spot_features.predictability_score >= settings.mode_thresholds.spot_score_min:
+        selected_mode_hint = "spot"
+    return StrategyPrediction(
+        prediction_id=str(uuid4()),
+        snapshot_id=snapshot.snapshot_id,
+        config_version=settings.config_version,
+        timestamp=snapshot.decision_time,
+        symbol=snapshot.symbol,
+        candidate_mode=candidate_mode,
+        spot=_mode_prediction_from_features(mode="spot", features=spot_features),
+        futures=_mode_prediction_from_features(mode="futures", features=futures_features),
+        selected_mode_hint=selected_mode_hint,
+    )
 
 
 def _is_btc_eth_symbol(symbol: str) -> bool:
@@ -682,6 +747,13 @@ def evaluate_snapshot(
     cash_reserve_fraction: float = 0.0,
 ) -> DecisionIntent:
     thresholds = settings.mode_thresholds
+    prediction = build_strategy_prediction(
+        snapshot,
+        settings,
+        expected_funding_drag_bps=expected_funding_drag_bps,
+    )
+    futures_prediction = prediction.futures
+    spot_prediction = prediction.spot
     futures_features = apply_score_and_costs(
         snapshot.feature_values,
         settings=settings,
@@ -693,7 +765,7 @@ def evaluate_snapshot(
         settings=settings,
         mode="spot",
     )
-    candidate_mode = _candidate_mode(futures_features, settings)
+    candidate_mode = prediction.candidate_mode
     now = snapshot.decision_time
 
     observe_only, observe_reasons = _observe_only_reasons(spot_features, settings, snapshot.symbol)
@@ -704,7 +776,7 @@ def evaluate_snapshot(
             "config_version": settings.config_version,
             "final_mode": "cash",
             "side": "flat",
-            "predictability_score": spot_features.predictability_score,
+            "predictability_score": spot_prediction.predictability_score,
             "reasons": cash_reasons,
         }
         return DecisionIntent(
@@ -775,7 +847,7 @@ def evaluate_snapshot(
             "config_version": settings.config_version,
             "final_mode": "futures",
             "side": "long" if futures_features.trend_direction > 0 else "short",
-            "predictability_score": futures_features.predictability_score,
+            "predictability_score": futures_prediction.predictability_score,
         }
         confirmation_intraday_strength_min = 0.5
         allow_btc_eth_confirmation_relaxation = _btc_eth_confirmation_relaxation_allowed(
@@ -847,7 +919,7 @@ def evaluate_snapshot(
             "config_version": settings.config_version,
             "final_mode": "spot",
             "side": "long",
-            "predictability_score": spot_features.predictability_score,
+            "predictability_score": spot_prediction.predictability_score,
         }
         confirmation_support_min = 0.25
         confirmation_resistance_max = 0.3
@@ -900,7 +972,7 @@ def evaluate_snapshot(
         "config_version": settings.config_version,
         "final_mode": "cash",
         "side": "flat",
-        "predictability_score": spot_features.predictability_score,
+        "predictability_score": spot_prediction.predictability_score,
         "reasons": cash_reasons,
     }
     return DecisionIntent(
