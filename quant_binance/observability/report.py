@@ -321,7 +321,63 @@ def build_performance_attribution(live_orders: list[dict[str, object]] | tuple[d
     return rows
 
 
-def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...]) -> dict[str, object]:
+_ACTION_STRENGTH = {
+    "disabled": -3,
+    "demote": -2,
+    "keep": 0,
+    "promote": 1,
+    "aggressive_promote": 2,
+}
+
+
+def _policy_action_strength(action: str) -> int:
+    return _ACTION_STRENGTH.get(action, 0)
+
+
+def _policy_adjustment_shape(
+    *,
+    symbol: str,
+    regime: str,
+    setup_class: str,
+    side: str,
+    execution_quality_state: str,
+    sample_count: int,
+    action: str,
+    reason: str,
+    signal_source: str,
+) -> dict[str, object]:
+    size_multiplier = 1.0
+    if action == "demote":
+        size_multiplier = 0.75
+    elif action == "promote":
+        size_multiplier = 1.1
+    elif action == "aggressive_promote":
+        size_multiplier = 1.25
+    leverage_multiplier = 0.0 if action == "disabled" else round(min(max(size_multiplier, 0.0), 1.2), 6)
+    entry_threshold_bps = -1.5 if action == "aggressive_promote" else (-0.5 if action == "promote" else (1.5 if action == "demote" else 0.0))
+    expected_profit_floor_bps = -2.0 if action == "aggressive_promote" else (-1.0 if action == "promote" else (2.0 if action == "demote" else 0.0))
+    symbol_bias = "majors_only" if action in {"aggressive_promote", "promote"} and regime == "major" else "neutral"
+    return {
+        "symbol": symbol,
+        "regime": regime,
+        "setup_class": setup_class,
+        "side": side,
+        "execution_quality_state": execution_quality_state,
+        "sample_count": sample_count,
+        "action": action,
+        "size_multiplier": size_multiplier,
+        "leverage_multiplier": leverage_multiplier,
+        "entry_threshold_bps": entry_threshold_bps,
+        "expected_profit_floor_bps": expected_profit_floor_bps,
+        "symbol_bias": symbol_bias,
+        "reason": reason,
+        "signal_sources": [signal_source],
+    }
+
+
+def _live_attribution_adjustments(
+    attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...],
+) -> list[dict[str, object]]:
     adjustments: list[dict[str, object]] = []
     for row in attribution_rows:
         sample_count = int(row.get("sample_count", 0) or 0)
@@ -332,41 +388,163 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
         reject_rate = float(row.get("reject_rate", 0.0) or 0.0)
         degraded_rate = float(row.get("protection_degraded_rate", 0.0) or 0.0)
         action = "keep"
-        size_multiplier = 1.0
         reason = "STABLE"
         if retention < 0.5 or realized <= 0.0 or reject_rate > 0.1 or degraded_rate > 0.1:
             action = "demote"
-            size_multiplier = 0.75
             reason = "WEAK_ATTRIBUTION"
         elif retention >= 0.95 and realized > 0.0 and reject_rate <= 0.01 and degraded_rate <= 0.01 and str(row.get("regime", "")) == "major":
             action = "aggressive_promote"
-            size_multiplier = 1.25
             reason = "ELITE_ATTRIBUTION"
         elif retention >= 0.8 and realized > 0.0 and reject_rate <= 0.03 and degraded_rate <= 0.03:
             action = "promote"
-            size_multiplier = 1.1
             reason = "STRONG_ATTRIBUTION"
-        leverage_multiplier = round(min(max(size_multiplier, 0.0), 1.2), 6)
-        entry_threshold_bps = -1.5 if action == "aggressive_promote" else (-0.5 if action == "promote" else (1.5 if action == "demote" else 0.0))
-        expected_profit_floor_bps = -2.0 if action == "aggressive_promote" else (-1.0 if action == "promote" else (2.0 if action == "demote" else 0.0))
-        symbol_bias = "majors_only" if action in {"aggressive_promote", "promote"} and str(row.get("regime", "")) == "major" else "neutral"
-        adjustments.append({
-            "symbol": row.get("symbol", ""),
-            "regime": row.get("regime", ""),
-            "setup_class": row.get("setup_class", ""),
-            "side": row.get("side", ""),
-            "execution_quality_state": row.get("execution_quality_state", ""),
-            "sample_count": sample_count,
-            "action": action,
-            "size_multiplier": size_multiplier,
-            "leverage_multiplier": leverage_multiplier,
-            "entry_threshold_bps": entry_threshold_bps,
-            "expected_profit_floor_bps": expected_profit_floor_bps,
-            "symbol_bias": symbol_bias,
-            "reason": reason,
-        })
+        adjustments.append(
+            _policy_adjustment_shape(
+                symbol=str(row.get("symbol", "") or ""),
+                regime=str(row.get("regime", "") or ""),
+                setup_class=str(row.get("setup_class", "") or ""),
+                side=str(row.get("side", "") or ""),
+                execution_quality_state=str(row.get("execution_quality_state", "") or ""),
+                sample_count=sample_count,
+                action=action,
+                reason=reason,
+                signal_source="live_attribution",
+            )
+        )
+    return adjustments
+
+
+def _runtime_regime_support(runtime_evidence: dict[str, object] | None) -> tuple[bool, bool]:
+    payload = dict(runtime_evidence or {})
+    futures_row = next(
+        (row for row in list(payload.get("regime_summary", []) or []) if str(row.get("mode", "")) == "futures"),
+        None,
+    )
+    if futures_row is None:
+        return False, False
+    decision_count = int(futures_row.get("decision_count", 0) or 0)
+    avg_score = float(futures_row.get("avg_score", 0.0) or 0.0)
+    avg_net_edge_bps = float(futures_row.get("avg_net_edge_bps", 0.0) or 0.0)
+    supportive = decision_count >= 3 and avg_net_edge_bps > 0.0 and avg_score >= 0.0
+    elite = decision_count >= 6 and avg_net_edge_bps >= 8.0 and avg_score >= 55.0
+    return supportive, elite
+
+
+def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | None) -> list[dict[str, object]]:
+    payload = dict(runtime_evidence or {})
+    if not payload:
+        return []
+    futures_supportive, futures_elite = _runtime_regime_support(payload)
+    adjustments: list[dict[str, object]] = []
+    for row in list(payload.get("pruning_recommendations", []) or []):
+        symbol = str(row.get("symbol", "") or "")
+        recommendation = str(row.get("recommendation", "") or "")
+        if not symbol or recommendation not in {"prune", "demote", "observe_only"}:
+            continue
+        adjustments.append(
+            _policy_adjustment_shape(
+                symbol=symbol,
+                regime="major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt",
+                setup_class="runtime_decomposition",
+                side="both",
+                execution_quality_state="runtime_review",
+                sample_count=max(int(row.get("trade_count", 0) or 0), int(row.get("decision_count", 0) or 0)),
+                action="demote",
+                reason=f"RUNTIME_{recommendation.upper()}_RECOMMENDATION",
+                signal_source="runtime_pruning_recommendation",
+            )
+        )
+    for row in list(payload.get("symbol_summary", []) or []):
+        symbol = str(row.get("symbol", "") or "")
+        recommendation = str(row.get("recommendation", "") or "")
+        trade_count = int(row.get("trade_count", 0) or 0)
+        expectancy = float(row.get("expectancy_usd", 0.0) or 0.0)
+        if not symbol or trade_count < 3 or recommendation not in {"promote", "prune"}:
+            continue
+        regime = "major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt"
+        if recommendation == "promote" and expectancy > 0.0:
+            action = "aggressive_promote" if regime == "major" and futures_elite else "promote"
+            if action == "aggressive_promote" and not futures_supportive:
+                action = "promote"
+            adjustments.append(
+                _policy_adjustment_shape(
+                    symbol=symbol,
+                    regime=regime,
+                    setup_class="runtime_symbol_expectancy",
+                    side="both",
+                    execution_quality_state="runtime_review",
+                    sample_count=trade_count,
+                    action=action,
+                    reason="RUNTIME_SYMBOL_PROMOTE",
+                    signal_source="runtime_symbol_summary",
+                )
+            )
+        elif recommendation == "prune":
+            adjustments.append(
+                _policy_adjustment_shape(
+                    symbol=symbol,
+                    regime=regime,
+                    setup_class="runtime_symbol_expectancy",
+                    side="both",
+                    execution_quality_state="runtime_review",
+                    sample_count=trade_count,
+                    action="demote",
+                    reason="RUNTIME_SYMBOL_PRUNE",
+                    signal_source="runtime_symbol_summary",
+                )
+            )
+    return adjustments
+
+
+def _merge_policy_adjustments(existing: dict[str, object] | None, incoming: dict[str, object]) -> dict[str, object]:
+    if existing is None:
+        return dict(incoming)
+    existing_action = str(existing.get("action", "keep") or "keep")
+    incoming_action = str(incoming.get("action", "keep") or "keep")
+    existing_strength = _policy_action_strength(existing_action)
+    incoming_strength = _policy_action_strength(incoming_action)
+    if existing_strength < 0 or incoming_strength < 0:
+        preferred = incoming if incoming_strength < existing_strength else existing
+    else:
+        preferred = incoming if incoming_strength > existing_strength else existing
+    merged = dict(preferred)
+    merged["sample_count"] = max(int(existing.get("sample_count", 0) or 0), int(incoming.get("sample_count", 0) or 0))
+    merged["signal_sources"] = sorted(
+        {
+            str(source)
+            for source in list(existing.get("signal_sources", []) or []) + list(incoming.get("signal_sources", []) or [])
+            if str(source)
+        }
+    )
+    return merged
+
+
+def build_auto_tune_policy(
+    attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...],
+    runtime_evidence: dict[str, object] | None = None,
+) -> dict[str, object]:
+    adjustments_by_symbol: dict[str, dict[str, object]] = {}
+    for adjustment in _live_attribution_adjustments(attribution_rows):
+        symbol = str(adjustment.get("symbol", "") or "")
+        if not symbol:
+            continue
+        adjustments_by_symbol[symbol] = _merge_policy_adjustments(adjustments_by_symbol.get(symbol), adjustment)
+    for adjustment in _runtime_decomposition_adjustments(runtime_evidence):
+        symbol = str(adjustment.get("symbol", "") or "")
+        if not symbol:
+            continue
+        adjustments_by_symbol[symbol] = _merge_policy_adjustments(adjustments_by_symbol.get(symbol), adjustment)
+    adjustments = sorted(adjustments_by_symbol.values(), key=lambda item: str(item.get("symbol", "")))
     policy_status = "insufficient_data" if not adjustments else "candidate_ready"
-    return {"status": policy_status, "adjustments": adjustments}
+    signal_sources = sorted(
+        {
+            str(source)
+            for item in adjustments
+            for source in list(item.get("signal_sources", []) or [])
+            if str(source)
+        }
+    )
+    return {"status": policy_status, "adjustments": adjustments, "signal_sources": signal_sources}
 
 
 def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, float]:
@@ -405,27 +583,63 @@ def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, ob
     }
 
 
+def _candidate_policy_requested_verdict(adjustments: list[dict[str, object]]) -> dict[str, object]:
+    if not adjustments:
+        return {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
+    aggressive_count = sum(1 for item in adjustments if str(item.get("action", "")) == "aggressive_promote")
+    promote_count = sum(1 for item in adjustments if str(item.get("action", "")) in {"promote", "aggressive_promote"})
+    demote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "demote")
+    if demote_count > 0 and promote_count == 0:
+        return {"status": "demote", "reasons": ["CANDIDATE_POLICY_WEAK"]}
+    if aggressive_count > 0 and demote_count == 0:
+        return {"status": "promote_aggressive", "reasons": ["CANDIDATE_POLICY_ELITE"]}
+    if promote_count > 0 and demote_count == 0:
+        return {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]}
+    if demote_count >= promote_count + 2:
+        return {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]}
+    return {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
+
+
+def _promotion_rollout_signal(
+    *,
+    requested_status: str,
+    effective_status: str,
+    reasons: list[str],
+    comparison_evidence: dict[str, object] | None,
+) -> dict[str, object]:
+    runner_quality = _runner_quality_evidence(comparison_evidence)
+    micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+    micro_live_readiness = str(micro_live_gate.get("status", "not_available") or "not_available") if micro_live_gate else "not_available"
+    if requested_status in {"promote", "promote_aggressive"}:
+        if bool(micro_live_gate.get("available")) and micro_live_readiness != "pass":
+            rollout_stage = "staged_rollout"
+        elif effective_status in {"promote", "promote_aggressive"}:
+            rollout_stage = "promotion_active"
+        else:
+            rollout_stage = "promotion_blocked"
+    elif effective_status == "demote":
+        rollout_stage = "demotion_active"
+    elif effective_status == "disable":
+        rollout_stage = "disabled"
+    else:
+        rollout_stage = "baseline"
+    return {
+        "requested_status": requested_status,
+        "effective_status": effective_status,
+        "rollout_stage": rollout_stage,
+        "micro_live_readiness": micro_live_readiness,
+        "micro_live_gate": micro_live_gate,
+        "blocked_reasons": [reason for reason in reasons if reason.startswith("PROMOTION_BLOCKED_BY_")],
+    }
+
+
 def build_promotion_verdict(
     candidate_policy: dict[str, object],
     comparison_evidence: dict[str, object] | None = None,
 ) -> dict[str, object]:
     adjustments = list(candidate_policy.get("adjustments", []))
-    if not adjustments:
-        verdict = {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
-    else:
-        aggressive_count = sum(1 for item in adjustments if str(item.get("action", "")) == "aggressive_promote")
-        promote_count = sum(1 for item in adjustments if str(item.get("action", "")) in {"promote", "aggressive_promote"})
-        demote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "demote")
-        if demote_count > 0 and promote_count == 0:
-            verdict = {"status": "demote", "reasons": ["CANDIDATE_POLICY_WEAK"]}
-        elif aggressive_count > 0 and demote_count == 0:
-            verdict = {"status": "promote_aggressive", "reasons": ["CANDIDATE_POLICY_ELITE"]}
-        elif promote_count > 0 and demote_count == 0:
-            verdict = {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]}
-        elif demote_count >= promote_count + 2:
-            verdict = {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]}
-        else:
-            verdict = {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
+    verdict = _candidate_policy_requested_verdict(adjustments)
+    requested_status = str(verdict.get("status", "keep") or "keep")
     comparison_verdict, comparison_delta = _policy_comparison_signal(comparison_evidence)
     runner_quality = _runner_quality_evidence(comparison_evidence)
     if comparison_verdict == "candidate_worse":
@@ -444,7 +658,10 @@ def build_promotion_verdict(
         }
     if verdict["status"] in {"promote", "promote_aggressive"} and bool(runner_quality.get("available")):
         reasons = list(verdict["reasons"])
-        if float(runner_quality["realized_pnl_usd"]) <= 0.0:
+        micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+        if bool(micro_live_gate.get("available")) and str(micro_live_gate.get("status", "")) == "pending":
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE"]}
+        elif float(runner_quality["realized_pnl_usd"]) <= 0.0:
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_NON_POSITIVE_REALIZED_PNL"]}
         elif float(runner_quality["drawdown_ratio"]) > 0.75:
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_DRAWDOWN"]}
@@ -454,20 +671,26 @@ def build_promotion_verdict(
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_SLIPPAGE"]}
         elif float(runner_quality["avg_edge_retention_ratio"]) < 0.55:
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_EDGE_RETENTION"]}
-        else:
-            micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
-            if bool(micro_live_gate.get("available")) and str(micro_live_gate.get("status", "")) != "pass":
-                verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE"]}
-            elif verdict["status"] == "promote_aggressive" and (
-                float(runner_quality["drawdown_ratio"]) > 0.35
-                or float(runner_quality["reject_rate"]) > 0.03
-                or float(runner_quality["avg_slippage_bps"]) > 8.0
-                or float(runner_quality["avg_edge_retention_ratio"]) < 0.75
-            ):
-                verdict = {"status": "promote", "reasons": reasons + ["AGGRESSIVE_PROMOTION_DOWNGRADED_BY_RUNTIME_EVIDENCE"]}
+        elif bool(micro_live_gate.get("available")) and str(micro_live_gate.get("status", "")) != "pass":
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE"]}
+        elif verdict["status"] == "promote_aggressive" and (
+            float(runner_quality["drawdown_ratio"]) > 0.35
+            or float(runner_quality["reject_rate"]) > 0.03
+            or float(runner_quality["avg_slippage_bps"]) > 8.0
+            or float(runner_quality["avg_edge_retention_ratio"]) < 0.75
+        ):
+            verdict = {"status": "promote", "reasons": reasons + ["AGGRESSIVE_PROMOTION_DOWNGRADED_BY_RUNTIME_EVIDENCE"]}
     if comparison_verdict != "keep" or comparison_delta != 0.0:
         verdict["comparison_verdict"] = comparison_verdict
         verdict["candidate_vs_current_score_delta"] = comparison_delta
+    verdict.update(
+        _promotion_rollout_signal(
+            requested_status=requested_status,
+            effective_status=str(verdict.get("status", "keep") or "keep"),
+            reasons=list(verdict.get("reasons", [])),
+            comparison_evidence=comparison_evidence,
+        )
+    )
     return verdict
 
 def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -519,6 +742,18 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             evidence["runner_total_return_pct"] = float(payload.get("total_return_pct", 0.0) or 0.0)
         if "shadow_alignment_score" in payload and "runner_shadow_alignment_score" not in evidence:
             evidence["runner_shadow_alignment_score"] = float(payload.get("shadow_alignment_score", 0.0) or 0.0)
+        for key in (
+            "validation_path_mode",
+            "runner_walk_forward_window_count",
+            "runner_positive_walk_forward_window_count",
+            "walk_forward_windows",
+            "validation_runs",
+            "symbol_summary",
+            "regime_summary",
+            "pruning_recommendations",
+        ):
+            if key in payload and key not in evidence:
+                evidence[key] = payload[key]
         if evidence:
             return evidence
     return {}
@@ -575,6 +810,7 @@ def _replay_like_validation_evidence(attribution_rows: list[dict[str, object]] |
 def build_policy_validation(candidate_policy: dict[str, object], promotion_verdict: dict[str, object], operational_verdict: dict[str, object], attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...] = (), runner_evidence: dict[str, object] | None = None) -> dict[str, object]:
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     verdict_status = str(promotion_verdict.get("status", "keep"))
+    requested_status = str(promotion_verdict.get("requested_status", verdict_status) or verdict_status)
     operational_status = str(operational_verdict.get("status", "hold"))
     evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
     runner_quality = _runner_quality_evidence(evidence)
@@ -590,6 +826,8 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("OPERATIONAL_STOP_ACTIVE")
     elif operational_status == "hold" and verdict_status in {"promote", "promote_aggressive"}:
         reasons.append("PROMOTION_BLOCKED_BY_HOLD")
+    elif requested_status in {"promote", "promote_aggressive"} and str(promotion_verdict.get("rollout_stage", "")) == "staged_rollout":
+        reasons.append("PROMOTION_STAGED_PENDING_MICRO_LIVE")
     elif verdict_status in {"promote", "promote_aggressive", "demote"}:
         reasons.append("PROMOTION_PATH_VALIDATED")
     else:
@@ -606,7 +844,8 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     elif float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0) > 0.1:
         reasons.append("CANDIDATE_OUTPERFORMS_CURRENT_POLICY")
     if bool(runner_quality.get("available")):
-        if float(runner_quality["realized_pnl_usd"]) <= 0.0:
+        micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+        if float(runner_quality["realized_pnl_usd"]) <= 0.0 and str(micro_live_gate.get("status", "")) != "pending":
             status = "fail"
             reasons.append("RUNNER_REALIZED_PNL_NOT_POSITIVE")
         if float(runner_quality["drawdown_ratio"]) > 0.75:
@@ -632,6 +871,92 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     return {"status": status, "reasons": reasons, "evidence": evidence}
 
 
+def _retention_monitor(previous_active: dict[str, object], validation_evidence: dict[str, object], operational_verdict: dict[str, object]) -> dict[str, object]:
+    active_status = str(previous_active.get("status", "") or "")
+    if active_status not in {"promote", "promote_aggressive"}:
+        return {"status": "inactive", "reasons": []}
+    runner_quality = _runner_quality_evidence(validation_evidence)
+    if not bool(runner_quality.get("available")):
+        return {"status": "inactive", "reasons": []}
+    reasons: list[str] = []
+    retention = float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0)
+    realized = float(runner_quality.get("realized_pnl_usd", 0.0) or 0.0)
+    drawdown_ratio = float(runner_quality.get("drawdown_ratio", 0.0) or 0.0)
+    reject_rate = float(runner_quality.get("reject_rate", 0.0) or 0.0)
+    slippage = float(runner_quality.get("avg_slippage_bps", 0.0) or 0.0)
+    operational_status = str(operational_verdict.get("status", "hold") or "hold")
+    if operational_status == "stop":
+        reasons.append("RETENTION_MONITOR_OPERATIONAL_STOP")
+    if retention < 0.40:
+        reasons.append("RETENTION_MONITOR_EDGE_TOO_LOW")
+    if realized <= 0.0:
+        reasons.append("RETENTION_MONITOR_REALIZED_PNL_NON_POSITIVE")
+    if drawdown_ratio > 0.75:
+        reasons.append("RETENTION_MONITOR_DRAWDOWN_TOO_HIGH")
+    if reject_rate > 0.15:
+        reasons.append("RETENTION_MONITOR_REJECT_RATE_TOO_HIGH")
+    metrics = {
+        "avg_edge_retention_ratio": round(retention, 6),
+        "realized_pnl_usd": round(realized, 6),
+        "drawdown_ratio": round(drawdown_ratio, 6),
+        "reject_rate": round(reject_rate, 6),
+        "avg_slippage_bps": round(slippage, 6),
+    }
+    if reasons:
+        return {"status": "rollback", "reasons": reasons, "metrics": metrics}
+    moderate_reasons: list[str] = []
+    if operational_status == "hold":
+        moderate_reasons.append("RETENTION_MONITOR_OPERATIONAL_HOLD")
+    if retention < 0.65:
+        moderate_reasons.append("RETENTION_MONITOR_EDGE_BELOW_PASS")
+    if drawdown_ratio > 0.45:
+        moderate_reasons.append("RETENTION_MONITOR_DRAWDOWN_ELEVATED")
+    if reject_rate > 0.08:
+        moderate_reasons.append("RETENTION_MONITOR_REJECT_RATE_ELEVATED")
+    if slippage > 10.0:
+        moderate_reasons.append("RETENTION_MONITOR_SLIPPAGE_ELEVATED")
+    if moderate_reasons:
+        return {"status": "demote", "reasons": moderate_reasons, "metrics": metrics}
+    return {"status": "stable", "reasons": [], "metrics": metrics}
+
+
+def _demoted_active_policy(previous_active: dict[str, object]) -> dict[str, object]:
+    demoted_adjustments: list[dict[str, object]] = []
+    for item in list(previous_active.get("adjustments", []) or []):
+        base_size = float(item.get("size_multiplier", 1.0) or 1.0)
+        size_multiplier = round(min(base_size, 1.0) * 0.85, 6)
+        if size_multiplier >= 1.0:
+            size_multiplier = 0.9
+        leverage_multiplier = round(min(float(item.get("leverage_multiplier", size_multiplier) or size_multiplier), 1.0), 6)
+        demoted_adjustments.append(
+            dict(
+                item,
+                action="demote",
+                size_multiplier=size_multiplier,
+                leverage_multiplier=leverage_multiplier,
+                entry_threshold_bps=max(float(item.get("entry_threshold_bps", 0.0) or 0.0), 1.0),
+                expected_profit_floor_bps=max(float(item.get("expected_profit_floor_bps", 0.0) or 0.0), 1.0),
+                reason="RETENTION_MONITOR_DEMOTE",
+            )
+        )
+    return {"status": "demote", "adjustments": demoted_adjustments}
+
+
+def _annotate_active_policy(
+    active_policy: dict[str, object],
+    promotion_verdict: dict[str, object],
+    retention_monitor: dict[str, object],
+) -> dict[str, object]:
+    annotated = dict(active_policy)
+    annotated["lifecycle_stage"] = str(promotion_verdict.get("rollout_stage", "baseline") or "baseline")
+    annotated["requested_status"] = str(promotion_verdict.get("requested_status", promotion_verdict.get("status", "keep")) or "keep")
+    annotated["effective_status"] = str(promotion_verdict.get("effective_status", promotion_verdict.get("status", "keep")) or "keep")
+    annotated["micro_live_readiness"] = str(promotion_verdict.get("micro_live_readiness", "not_available") or "not_available")
+    annotated["micro_live_gate"] = dict(promotion_verdict.get("micro_live_gate", {}) or {})
+    annotated["retention_monitor_status"] = str(retention_monitor.get("status", "inactive") or "inactive")
+    return annotated
+
+
 def build_persisted_policy_state(
     previous_state: dict[str, object] | None,
     candidate_policy: dict[str, object],
@@ -648,10 +973,34 @@ def build_persisted_policy_state(
     comparison_verdict, _ = _policy_comparison_signal(validation_evidence)
     comparison_underperforms = comparison_verdict == "candidate_worse"
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
-    if validation_status == "pass" and verdict_status in {"promote", "promote_aggressive", "demote"}:
-        active_policy = dict(candidate_policy)
-        active_policy["status"] = verdict_status
-        lifecycle = "promoted" if verdict_status.startswith("promote") else "demoted"
+    micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
+    rollout_status = "steady"
+    rollout_reason = "UNCHANGED"
+    retention_monitor = _retention_monitor(previous_active, validation_evidence, operational_verdict)
+    verdict_reasons = list(promotion_verdict.get("reasons", []) or [])
+    staged_micro_live_block = (
+        verdict_status == "keep"
+        and "PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE" in verdict_reasons
+        and any(str(item.get("action", "")) in {"promote", "aggressive_promote"} for item in candidate_adjustments)
+    )
+    if validation_status == "pass" and (verdict_status in {"promote", "promote_aggressive", "demote"} or staged_micro_live_block):
+        if staged_micro_live_block:
+            active_policy = previous_active or {"status": "baseline", "adjustments": []}
+        else:
+            active_policy = dict(candidate_policy)
+            active_policy["status"] = verdict_status
+        if (verdict_status.startswith("promote") or staged_micro_live_block) and bool(micro_live_gate.get("available")) and str(micro_live_gate.get("status", "")) != "pass":
+            lifecycle = "staged_rollout"
+            rollout_status = "micro_live_pending"
+            rollout_reason = str(micro_live_gate.get("reason", "MICRO_LIVE_PENDING") or "MICRO_LIVE_PENDING")
+            if retention_monitor["status"] == "inactive":
+                retention_monitor = {"status": "armed", "reasons": ["AWAITING_MICRO_LIVE_PASS"], "metrics": {}}
+        else:
+            lifecycle = "promoted" if verdict_status.startswith("promote") else "demoted"
+            rollout_status = "ready" if verdict_status.startswith("promote") else "demoted"
+            rollout_reason = "PROMOTION_VALIDATED" if verdict_status.startswith("promote") else "DEMOTION_VALIDATED"
+            if verdict_status.startswith("promote") and retention_monitor["status"] == "inactive":
+                retention_monitor = {"status": "armed", "reasons": ["POST_PROMOTION_MONITORING_ACTIVE"], "metrics": {}}
         version = previous_version + 1
     elif validation_status == "pass" and verdict_status == "disable":
         active_policy = {
@@ -659,26 +1008,50 @@ def build_persisted_policy_state(
             "adjustments": [dict(item, action="disabled", size_multiplier=0.0) for item in candidate_adjustments],
         }
         lifecycle = "disabled"
+        rollout_status = "halted"
+        rollout_reason = "CANDIDATE_DISABLED"
         version = previous_version + 1
-    elif (
-        str(operational_verdict.get("status", "")) == "stop"
-        or float(dict(validation.get("evidence", {}) or {}).get("replay_like_drawdown_ratio", 0.0) or 0.0) > 0.5
-        or comparison_underperforms
-    ) and previous_active:
-        active_policy = previous_active
+    elif previous_active and retention_monitor.get("status") == "rollback":
+        active_policy = {"status": "baseline", "adjustments": []}
         lifecycle = "rolled_back"
+        rollout_status = "reverted"
+        rollout_reason = "POST_PROMOTION_RETENTION_DEGRADED"
+        version = previous_version + 1
+    elif previous_active and retention_monitor.get("status") == "demote":
+        active_policy = _demoted_active_policy(previous_active)
+        lifecycle = "retention_demoted"
+        rollout_status = "retention_demoted"
+        rollout_reason = "POST_PROMOTION_RETENTION_WEAKENED"
+        version = previous_version + 1
+    elif (comparison_underperforms or str(operational_verdict.get("status", "")) == "stop" or float(validation_evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0) > 0.5) and previous_active:
+        active_policy = {"status": "baseline", "adjustments": []}
+        lifecycle = "rolled_back"
+        rollout_status = "reverted"
+        if comparison_underperforms:
+            rollout_reason = "CANDIDATE_UNDERPERFORMS_CURRENT_POLICY"
+        elif str(operational_verdict.get("status", "")) == "stop":
+            rollout_reason = "OPERATIONAL_STOP_ACTIVE"
+        else:
+            rollout_reason = "REPLAY_DRAWDOWN_TOO_HIGH"
         version = previous_version + 1
     elif previous_active:
         active_policy = previous_active
         lifecycle = "kept"
+        rollout_status = previous_state.get("rollout_status", "steady") or "steady"
+        rollout_reason = "ACTIVE_POLICY_UNCHANGED"
         version = previous_version
     else:
         active_policy = {"status": "baseline", "adjustments": []}
         lifecycle = "baseline"
+        rollout_status = "baseline"
+        rollout_reason = "NO_ACTIVE_POLICY"
         version = previous_version
     return {
         "version": version,
         "status": lifecycle,
+        "rollout_status": rollout_status,
+        "rollout_reason": rollout_reason,
+        "retention_monitor": retention_monitor,
         "active_policy": active_policy,
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
@@ -693,15 +1066,20 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "updated_at": policy_state.get("updated_at"),
         "version": policy_state.get("version", 0),
         "status": policy_state.get("status", "unknown"),
+        "rollout_status": policy_state.get("rollout_status", "unknown"),
+        "rollout_reason": policy_state.get("rollout_reason", "unknown"),
+        "retention_monitor": dict(policy_state.get("retention_monitor", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
         "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
         "active_policy_status": str(dict(policy_state.get("active_policy", {}) or {}).get("status", "unknown")),
         "active_adjustment_count": len(list(dict(policy_state.get("active_policy", {}) or {}).get("adjustments", []))),
+        "micro_live_readiness": str(dict(policy_state.get("active_policy", {}) or {}).get("micro_live_readiness", "not_available")),
     }
 
 def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: dict[str, object]) -> dict[str, object]:
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     verdict_status = str(promotion_verdict.get("status", "keep"))
+    rollout_stage = str(promotion_verdict.get("rollout_stage", "baseline") or "baseline")
     if verdict_status == "disable":
         active_adjustments = [dict(item, action="disabled", size_multiplier=0.0) for item in candidate_adjustments]
         active_status = "disabled"
@@ -710,12 +1088,15 @@ def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: d
         active_status = verdict_status
     else:
         active_adjustments = [dict(item, action="keep", size_multiplier=1.0, reason="ACTIVE_POLICY_UNCHANGED") for item in candidate_adjustments]
-        active_status = "keep"
+        active_status = "baseline" if rollout_stage == "staged_rollout" else "keep"
     return {
-        "status": active_status,
+        "status": "staged_rollout" if rollout_stage == "staged_rollout" else active_status,
         "active_policy": {
             "status": active_status,
             "adjustments": active_adjustments,
+            "lifecycle_stage": rollout_stage,
+            "micro_live_readiness": str(promotion_verdict.get("micro_live_readiness", "not_available") or "not_available"),
+            "micro_live_gate": dict(promotion_verdict.get("micro_live_gate", {}) or {}),
         },
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
