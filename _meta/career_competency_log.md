@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-03-18 - Macro-aware profitability advisory from strategy context
+- Summary: Produced a suggestion-only crypto strategy advisory from the latest strategy advisor context with profitability, execution quality, and macro timing as the primary filters.
+- What was done: Read the latest advisor context artifact, compared realized PnL, symbol-level validation, rejection-pressure patterns, approved overrides, current live positions, official GDP/PCE schedule, and local reference strategy materials, then translated the evidence into time-bounded major-coin-first guidance with explicit uncertainty and pending-override ideas only.
+- Competency mapping: Data analysis and optimization, broader data support through trading insight generation, logical data structuring, technical communication
+- Skill sharpened next: Tighten the link between macro-event windows, rejection-reason clusters, and symbol-level realized expectancy so advisory confidence becomes more evidence-weighted.
+
 ### 2026-03-17 - Quant runtime strategy advisory from live context
 - Summary: Produced a profitability-first advisory report from the latest quant runtime context without modifying the live trading engine.
 - What was done: Read the strategy advisor context artifact, compared runtime health, decision quality, execution quality, approved overrides, and official macro-event windows, checked locally available reference strategy documents, and translated the evidence into time-bounded coin-priority and override-idea recommendations with explicit uncertainty.
@@ -424,3 +430,6 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Built a Google News RSS + official macro-event artifact generator, mapped headlines into bullish/bearish/uncertainty scores plus event categories, emitted reusable `news_macro_signal.json` and `news_macro_inputs.json` artifacts, extended the existing macro overlay to consume news risk/support fields, wired the live supervisors to refresh artifacts automatically, and verified behavior with focused unit tests.
 - Competency mapping: Data pipeline/system integration development, data analysis and optimization, logical data structuring, generative AI/automation architecture understanding, technical communication
 - Skill sharpened next: Improve event-trigger quality so high-impact macro windows and noisy headline bursts are separated more cleanly before they touch live sizing and restraint logic.
+
+- 2026-03-18 | Profitability-first advisor timing refresh | Re-read the latest strategy advisor context, weighed current BTC/ETH/SOL expectancy against macro risk, liquidity-rate inputs, execution quality, adopted live positions, and the referenced Naver BTC/macro cues, then converted that into a Korean suggestion-only report with explicit time windows and uncertainty notes. | Competencies: data analysis and planning, data analysis and optimization, logical data structuring, technical communication. | Next skill: reconcile symbol profitability, live-position state, and macro headline bias into one consistently ranked watchlist so future advisor outputs are less affected by report mismatches.
+- 2026-03-18 | Quant relearning policy lifecycle wiring | Wired candidate-vs-current policy comparison evidence into promotion verdicting and persisted policy lifecycle handling so underperforming candidates are blocked or rolled back and disable verdicts persist explicitly, then verified the flush path with focused regression tests. | Competencies: data pipeline/system integration development, data analysis and optimization, logical data structuring, evidence-based verification, technical communication. | Next skill: replace heuristic policy scoring with replay-derived policy deltas so promotion and rollback decisions depend on realized policy outcomes, not just adjustment shape.
