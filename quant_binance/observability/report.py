@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 import shutil
 
@@ -343,6 +344,9 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
             action = "promote"
             size_multiplier = 1.1
             reason = "STRONG_ATTRIBUTION"
+        leverage_multiplier = round(min(max(size_multiplier, 0.0), 1.2), 6)
+        entry_threshold_bps = -1.5 if action == "aggressive_promote" else (-0.5 if action == "promote" else (1.5 if action == "demote" else 0.0))
+        expected_profit_floor_bps = -2.0 if action == "aggressive_promote" else (-1.0 if action == "promote" else (2.0 if action == "demote" else 0.0))
         adjustments.append({
             "symbol": row.get("symbol", ""),
             "regime": row.get("regime", ""),
@@ -352,6 +356,9 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
             "sample_count": sample_count,
             "action": action,
             "size_multiplier": size_multiplier,
+            "leverage_multiplier": leverage_multiplier,
+            "entry_threshold_bps": entry_threshold_bps,
+            "expected_profit_floor_bps": expected_profit_floor_bps,
             "reason": reason,
         })
     policy_status = "insufficient_data" if not adjustments else "candidate_ready"
@@ -380,6 +387,83 @@ def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[s
 
 
 
+
+
+
+def build_policy_validation(candidate_policy: dict[str, object], promotion_verdict: dict[str, object], operational_verdict: dict[str, object]) -> dict[str, object]:
+    candidate_adjustments = list(candidate_policy.get("adjustments", []))
+    verdict_status = str(promotion_verdict.get("status", "keep"))
+    operational_status = str(operational_verdict.get("status", "hold"))
+    reasons: list[str] = []
+    status = "fail"
+    if not candidate_adjustments:
+        reasons.append("NO_CANDIDATE_ADJUSTMENTS")
+    else:
+        status = "pass"
+        reasons.append("CANDIDATE_DATA_AVAILABLE")
+    if operational_status == "stop":
+        status = "fail"
+        reasons.append("OPERATIONAL_STOP_ACTIVE")
+    elif operational_status == "hold" and verdict_status in {"promote", "promote_aggressive"}:
+        reasons.append("PROMOTION_BLOCKED_BY_HOLD")
+    elif verdict_status in {"promote", "promote_aggressive", "demote"}:
+        reasons.append("PROMOTION_PATH_VALIDATED")
+    else:
+        reasons.append("NO_PROMOTION_ACTION")
+    return {"status": status, "reasons": reasons}
+
+
+def build_persisted_policy_state(
+    previous_state: dict[str, object] | None,
+    candidate_policy: dict[str, object],
+    promotion_verdict: dict[str, object],
+    operational_verdict: dict[str, object],
+    validation: dict[str, object],
+) -> dict[str, object]:
+    previous_state = dict(previous_state or {})
+    previous_active = dict(previous_state.get("active_policy", {}) or {})
+    previous_version = int(previous_state.get("version", 0) or 0)
+    verdict_status = str(promotion_verdict.get("status", "keep"))
+    validation_status = str(validation.get("status", "fail"))
+    if validation_status == "pass" and verdict_status in {"promote", "promote_aggressive", "demote"}:
+        active_policy = dict(candidate_policy)
+        active_policy["status"] = verdict_status
+        lifecycle = "promoted" if verdict_status.startswith("promote") else "demoted"
+        version = previous_version + 1
+    elif str(operational_verdict.get("status", "")) == "stop" and previous_active:
+        active_policy = previous_active
+        lifecycle = "rolled_back"
+        version = previous_version + 1
+    elif previous_active:
+        active_policy = previous_active
+        lifecycle = "kept"
+        version = previous_version
+    else:
+        active_policy = {"status": "baseline", "adjustments": []}
+        lifecycle = "baseline"
+        version = previous_version
+    return {
+        "version": version,
+        "status": lifecycle,
+        "active_policy": active_policy,
+        "candidate_policy": candidate_policy,
+        "promotion_verdict": promotion_verdict,
+        "operational_verdict": operational_verdict,
+        "policy_validation": validation,
+        "updated_at": datetime.now(tz=timezone.utc).isoformat(),
+    }
+
+
+def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, object]:
+    return {
+        "updated_at": policy_state.get("updated_at"),
+        "version": policy_state.get("version", 0),
+        "status": policy_state.get("status", "unknown"),
+        "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
+        "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
+        "active_policy_status": str(dict(policy_state.get("active_policy", {}) or {}).get("status", "unknown")),
+        "active_adjustment_count": len(list(dict(policy_state.get("active_policy", {}) or {}).get("adjustments", []))),
+    }
 
 def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: dict[str, object]) -> dict[str, object]:
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
@@ -561,6 +645,7 @@ def build_runtime_summary(
     promotion_verdict = build_promotion_verdict(candidate_policy)
     policy_state = build_policy_state(candidate_policy, promotion_verdict)
     operational_verdict = build_operational_verdict(execution_outcomes)
+    policy_validation = build_policy_validation(candidate_policy, promotion_verdict, operational_verdict)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
@@ -613,6 +698,7 @@ def build_runtime_summary(
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
         "policy_state": policy_state,
+        "policy_validation": policy_validation,
         "operational_verdict": operational_verdict,
         "account_snapshot": account_snapshot or {},
         "open_orders_snapshot": open_orders_snapshot or {},

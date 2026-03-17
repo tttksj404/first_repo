@@ -629,14 +629,28 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(summary["observe_only_symbols"], ["SIGNUSDT"])
             self.assertTrue(summary_path.exists())
             self.assertTrue(state_path.exists())
+            policy_state_path = summary_path.with_name("policy_state.json")
+            policy_history_path = summary_path.with_name("policy_history.jsonl")
+            self.assertTrue(policy_state_path.exists())
+            self.assertTrue(policy_history_path.exists())
+            policy_payload = json.loads(policy_state_path.read_text(encoding="utf-8"))
+            self.assertIn("active_policy", policy_payload)
+            self.assertIn("policy_validation", policy_payload)
             state_payload = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertEqual(state_payload["live_decision_loop"]["closed_decision_kline_count"], 1)
             self.assertEqual(state_payload["live_decision_loop"]["emitted_decision_count"], 1)
+            self.assertIn("policy_state", state_payload)
         finally:
             if summary_path.exists():
                 summary_path.unlink()
             if state_path.exists():
                 state_path.unlink()
+            policy_state_path = summary_path.with_name("policy_state.json")
+            policy_history_path = summary_path.with_name("policy_history.jsonl")
+            if policy_state_path.exists():
+                policy_state_path.unlink()
+            if policy_history_path.exists():
+                policy_history_path.unlink()
 
     def test_session_continues_emitting_after_bootstrap(self) -> None:
         session = self._build_session()

@@ -609,6 +609,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("ETHUSDT:demote", actions)
         self.assertEqual(summary["promotion_verdict"]["status"], "keep")
         self.assertEqual(summary["policy_state"]["status"], "keep")
+        self.assertIn(summary["policy_validation"]["status"], {"pass", "fail"})
 
     def test_runtime_summary_operational_verdict_can_emit_aggressive_pass(self) -> None:
         summary = build_runtime_summary(
@@ -629,6 +630,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(summary["operational_verdict"]["status"], "aggressive_pass")
         self.assertIn("OPERATING_WITH_ELITE_EDGE", summary["operational_verdict"]["reasons"])
         self.assertEqual(summary["promotion_verdict"]["status"], "promote_aggressive")
+        self.assertEqual(summary["policy_validation"]["status"], "pass")
 
     def test_runtime_summary_operational_verdict_can_emit_strong_pass(self) -> None:
         summary = build_runtime_summary(
