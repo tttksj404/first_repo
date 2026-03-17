@@ -3739,7 +3739,6 @@ class LivePaperSession:
             and position.market == "futures"
             and decision.final_mode == position.market
             and decision.side in {"long", "short"}
-            and decision.side != position.side
         )
 
     def _apply_paper_trade_management(
