@@ -6,7 +6,7 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 
-from quant_binance.models import DecisionIntent
+from quant_binance.models import DecisionIntent, StrategyPrediction
 
 
 def hash_decision_payload(payload: dict[str, Any]) -> str:
@@ -18,6 +18,31 @@ def serialize_decision(decision: DecisionIntent) -> dict[str, Any]:
     data = asdict(decision)
     data["timestamp"] = decision.timestamp.isoformat()
     return data
+
+
+def serialize_prediction(prediction: StrategyPrediction) -> dict[str, Any]:
+    data = asdict(prediction)
+    data["timestamp"] = prediction.timestamp.isoformat()
+    return data
+
+
+def render_prediction_report(prediction: StrategyPrediction) -> str:
+    data = serialize_prediction(prediction)
+    futures = data["futures"]
+    spot = data["spot"]
+    lines = [
+        f"# Strategy Prediction: {prediction.prediction_id}",
+        "",
+        f"- timestamp: {data['timestamp']}",
+        f"- symbol: {prediction.symbol}",
+        f"- candidate_mode: {prediction.candidate_mode}",
+        f"- selected_mode_hint: {prediction.selected_mode_hint}",
+        f"- futures_net_expected_edge_bps: {futures['net_expected_edge_bps']}",
+        f"- futures_predictability_score: {futures['predictability_score']}",
+        f"- spot_net_expected_edge_bps: {spot['net_expected_edge_bps']}",
+        f"- spot_predictability_score: {spot['predictability_score']}",
+    ]
+    return "\n".join(lines)
 
 
 def render_audit_report(decision: DecisionIntent) -> str:

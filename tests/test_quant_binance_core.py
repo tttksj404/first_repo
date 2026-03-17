@@ -6,13 +6,13 @@ from pathlib import Path
 
 from quant_binance.models import FeatureVector, MarketSnapshot
 from quant_binance.execution.paper_broker import PaperBroker
-from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report
+from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report, render_prediction_report
 from quant_binance.observability.manifest import build_manifest_entry, write_manifest
 from quant_binance.observability.report import build_runtime_summary
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
 from quant_binance.settings import Settings
-from quant_binance.strategy.regime import evaluate_snapshot
+from quant_binance.strategy.regime import build_strategy_prediction, evaluate_snapshot
 from quant_binance.strategy.scorer import apply_score_and_costs, compute_predictability_score
 
 
@@ -332,6 +332,82 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("gross_expected_edge_bps", report)
         self.assertIn("linked_order_ids", report)
 
+    def test_strategy_prediction_builds_per_mode_view(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8,
+            ret_rank_4h=0.78,
+            breakout_norm=0.82,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.7,
+            vol_z_1h_norm=0.72,
+            taker_imbalance_norm=0.69,
+            spread_bps_norm=0.2,
+            probe_slippage_bps_norm=0.25,
+            depth_10bps_norm=0.86,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.3,
+            realized_vol_4h_norm=0.28,
+            vol_shock_norm=0.35,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.74,
+            liquidity_score=0.86,
+            volatility_penalty=0.28,
+            overheat_penalty=0.14,
+            gross_expected_edge_bps=24.0,
+            estimated_round_trip_cost_bps=10.0,
+        )
+        prediction = build_strategy_prediction(
+            make_snapshot("BTCUSDT", features),
+            self.settings,
+            expected_funding_drag_bps=2.0,
+        )
+        self.assertEqual(prediction.symbol, "BTCUSDT")
+        self.assertEqual(prediction.candidate_mode, "futures")
+        self.assertEqual(prediction.futures.mode, "futures")
+        self.assertEqual(prediction.spot.mode, "spot")
+        self.assertGreaterEqual(prediction.futures.predictability_score, prediction.spot.predictability_score)
+        self.assertEqual(prediction.futures.side, "long")
+        self.assertEqual(prediction.spot.side, "long")
+
+    def test_render_prediction_report_includes_mode_edges(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8,
+            ret_rank_4h=0.78,
+            breakout_norm=0.82,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.7,
+            vol_z_1h_norm=0.72,
+            taker_imbalance_norm=0.69,
+            spread_bps_norm=0.2,
+            probe_slippage_bps_norm=0.25,
+            depth_10bps_norm=0.86,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.3,
+            realized_vol_4h_norm=0.28,
+            vol_shock_norm=0.35,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.74,
+            liquidity_score=0.86,
+            volatility_penalty=0.28,
+            overheat_penalty=0.14,
+            gross_expected_edge_bps=24.0,
+            estimated_round_trip_cost_bps=10.0,
+        )
+        prediction = build_strategy_prediction(make_snapshot("BTCUSDT", features), self.settings, expected_funding_drag_bps=2.0)
+        report = render_prediction_report(prediction)
+        self.assertIn("futures_net_expected_edge_bps", report)
+        self.assertIn("spot_net_expected_edge_bps", report)
+
     def test_runtime_summary_lists_observe_only_symbols(self) -> None:
         features = FeatureVector(
             ret_rank_1h=0.5,
@@ -370,6 +446,8 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         summary = build_runtime_summary(decisions=[decision])
         self.assertEqual(summary["observe_only_symbols"], ["SIGNUSDT"])
+        self.assertIn("candidate_mode", summary["recent_decisions"][0])
+        self.assertIn("net_expected_edge_bps", summary["recent_decisions"][0])
 
     def test_snapshot_validator_accepts_fixed_schema(self) -> None:
         features = FeatureVector(
