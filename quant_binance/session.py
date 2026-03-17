@@ -27,7 +27,7 @@ from quant_binance.policy.execution import (
 )
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
+from quant_binance.observability.report import build_auto_tune_policy, build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
 from quant_binance.validation_report import write_policy_comparison_validation_artifact, write_policy_validation_runner_artifact
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
@@ -72,6 +72,53 @@ class SupportsAccountSync(Protocol):
         target_market: str,
     ) -> dict[str, Any]:
         ...
+
+
+def _resume_staged_candidate_policy(
+    previous_policy_state: dict[str, Any] | None,
+    candidate_policy: dict[str, object],
+    runner_evidence: dict[str, object] | None,
+) -> dict[str, object]:
+    previous_state = dict(previous_policy_state or {})
+    if str(previous_state.get("status", "") or "") != "staged_rollout":
+        return candidate_policy
+    if str(previous_state.get("rollout_status", "") or "") != "micro_live_pending":
+        return candidate_policy
+    if list(dict(candidate_policy or {}).get("adjustments", []) or []):
+        return candidate_policy
+    staged_candidate = dict(previous_state.get("candidate_policy", {}) or {})
+    staged_adjustments = list(staged_candidate.get("adjustments", []) or [])
+    if not staged_adjustments:
+        return candidate_policy
+    if not any(str(item.get("action", "") or "") in {"promote", "aggressive_promote"} for item in staged_adjustments):
+        return candidate_policy
+    resumed_adjustments: list[dict[str, object]] = []
+    for item in staged_adjustments:
+        adjustment = dict(item)
+        adjustment["signal_sources"] = sorted(
+            {
+                str(source)
+                for source in list(adjustment.get("signal_sources", []) or []) + ["staged_rollout_resume"]
+                if str(source)
+            }
+        )
+        resumed_adjustments.append(adjustment)
+    resumed = dict(staged_candidate)
+    decomposition_summary = dict(resumed.get("decomposition_summary", {}) or {})
+    micro_live_gate = dict(dict(runner_evidence or {}).get("micro_live_gate", {}) or {})
+    decomposition_summary["resumed_from_staged_rollout"] = True
+    decomposition_summary["staged_rollout_micro_live_status"] = str(micro_live_gate.get("status", "not_available") or "not_available")
+    resumed["status"] = "candidate_ready"
+    resumed["adjustments"] = resumed_adjustments
+    resumed["signal_sources"] = sorted(
+        {
+            str(source)
+            for source in list(resumed.get("signal_sources", []) or []) + ["staged_rollout_resume"]
+            if str(source)
+        }
+    )
+    resumed["decomposition_summary"] = decomposition_summary
+    return resumed
 
 
 @dataclass
@@ -433,6 +480,12 @@ class LivePaperSession:
         validation_report_path = run_dir / "validation_report.json"
         write_policy_validation_runner_artifact(base_dir=base_dir, output_path=validation_report_path)
         previous_policy_state = self._read_persisted_policy_state()
+        validation_runner_context = load_validation_runner_evidence(validation_report_path)
+        summary["candidate_policy"] = _resume_staged_candidate_policy(
+            previous_policy_state,
+            build_auto_tune_policy(summary.get("performance_attribution", []), validation_runner_context),
+            validation_runner_context,
+        )
         comparison_report_path = run_dir / "policy_comparison.json"
         write_policy_comparison_validation_artifact(
             current_policy_state=previous_policy_state,
@@ -440,14 +493,14 @@ class LivePaperSession:
             base_dir=base_dir,
             output_path=comparison_report_path,
         )
-        runner_evidence = load_validation_runner_evidence(run_dir)
-        summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), runner_evidence)
+        comparison_evidence = load_validation_runner_evidence(comparison_report_path)
+        summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), comparison_evidence)
         summary["policy_validation"] = build_policy_validation(
             summary.get("candidate_policy", {}),
             summary.get("promotion_verdict", {}),
             summary.get("operational_verdict", {}),
             summary.get("performance_attribution", []),
-            runner_evidence,
+            comparison_evidence,
         )
         persisted_policy_state = build_persisted_policy_state(
             previous_policy_state,

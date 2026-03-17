@@ -767,6 +767,10 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(adjustments["XRPUSDT"]["action"], "promote")
         self.assertIn("runtime_symbol_summary", adjustments["BTCUSDT"]["signal_sources"])
         self.assertIn("runtime_pruning_recommendation", adjustments["SOLUSDT"]["signal_sources"])
+        self.assertGreater(adjustments["BTCUSDT"]["score_delta"], adjustments["XRPUSDT"]["score_delta"])
+        self.assertEqual(adjustments["BTCUSDT"]["signal_contexts"]["runtime_symbol_summary"]["dominant_regime_mode"], "futures")
+        self.assertEqual(policy["decomposition_summary"]["dominant_regime_mode"], "futures")
+        self.assertNotEqual(policy["decomposition_summary"]["score_delta_total"], 0.0)
 
     def test_load_validation_runner_evidence_reads_report_metrics(self) -> None:
         import json
