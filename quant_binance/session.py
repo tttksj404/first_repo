@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import time
 import asyncio
@@ -26,7 +27,7 @@ from quant_binance.policy.execution import (
 )
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_operational_verdict, build_policy_state, build_runtime_summary, write_runtime_summary
+from quant_binance.observability.report import build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_runtime_summary, write_runtime_summary
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
@@ -387,6 +388,8 @@ class LivePaperSession:
         self._refresh_account_state(evaluate_live_positions=True)
 
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
+        self.summary_path = summary_path
+        self.state_path = state_path
         open_spot_positions = self._open_positions_for_market("spot")
         open_futures_positions = self._open_positions_for_market("futures")
         mismatch_active, mismatch_details = self._self_healing_mismatch_snapshot()
@@ -423,7 +426,17 @@ class LivePaperSession:
         )
         summary["macro_runtime"] = macro_runtime
         summary["execution_quality"] = self._execution_quality_snapshot()
+        previous_policy_state = self._read_persisted_policy_state()
+        persisted_policy_state = build_persisted_policy_state(
+            previous_policy_state,
+            summary.get("candidate_policy", {}),
+            summary.get("promotion_verdict", {}),
+            summary.get("operational_verdict", {}),
+            summary.get("policy_validation", {}),
+        )
+        summary["policy_state"] = persisted_policy_state
         write_runtime_summary(summary_path, summary)
+        self._write_persisted_policy_state(persisted_policy_state)
         write_runtime_state(
             state_path,
             {
@@ -455,6 +468,7 @@ class LivePaperSession:
                 "execution_quality": summary["execution_quality"],
                 "closed_trade_count": len(self.closed_trades),
                 "kill_switch": self.runtime.kill_switch.status(),
+                "policy_state": persisted_policy_state,
             },
         )
         overview_path = Path(summary_path).with_name("overview.json")
@@ -666,10 +680,42 @@ class LivePaperSession:
             return max(extra_spot_available_balance_usd, 0.0)
         return 0.0
 
+
+    def _policy_state_path(self) -> Path | None:
+        summary_path = getattr(self, "summary_path", None)
+        if summary_path is None:
+            return None
+        return Path(summary_path).with_name("policy_state.json")
+
+    def _policy_history_path(self) -> Path | None:
+        summary_path = getattr(self, "summary_path", None)
+        if summary_path is None:
+            return None
+        return Path(summary_path).with_name("policy_history.jsonl")
+
+    def _read_persisted_policy_state(self) -> dict[str, object]:
+        path = self._policy_state_path()
+        if path is None or not path.exists():
+            return {}
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def _write_persisted_policy_state(self, policy_state: dict[str, object]) -> None:
+        path = self._policy_state_path()
+        history_path = self._policy_history_path()
+        if path is None or history_path is None:
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(policy_state, indent=2, sort_keys=True), encoding="utf-8")
+        with history_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(build_policy_history_entry(policy_state), sort_keys=True) + "\n")
+
     def _current_operational_verdict(self) -> dict[str, object]:
         return build_operational_verdict(build_runtime_summary(decisions=[], live_orders=self.live_orders))
 
     def _current_policy_state(self) -> dict[str, object]:
+        persisted = self._read_persisted_policy_state()
+        if persisted:
+            return persisted
         summary = build_runtime_summary(decisions=[], live_orders=self.live_orders)
         return build_policy_state(summary.get("candidate_policy", {}), summary.get("promotion_verdict", {}))
 
