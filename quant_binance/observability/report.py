@@ -369,22 +369,58 @@ def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dic
     return {"status": policy_status, "adjustments": adjustments}
 
 
-def build_promotion_verdict(candidate_policy: dict[str, object]) -> dict[str, object]:
+def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, float]:
+    payload = dict(evidence or {})
+    delta = round(float(payload.get("candidate_vs_current_score_delta", 0.0) or 0.0), 6)
+    verdict = str(payload.get("comparison_verdict", "keep") or "keep")
+    if verdict == "keep":
+        if delta > 0.1:
+            verdict = "candidate_better"
+        elif delta < -0.1:
+            verdict = "candidate_worse"
+    return verdict, delta
+
+
+def build_promotion_verdict(
+    candidate_policy: dict[str, object],
+    comparison_evidence: dict[str, object] | None = None,
+) -> dict[str, object]:
     adjustments = list(candidate_policy.get("adjustments", []))
     if not adjustments:
-        return {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
-    aggressive_count = sum(1 for item in adjustments if str(item.get("action", "")) == "aggressive_promote")
-    promote_count = sum(1 for item in adjustments if str(item.get("action", "")) in {"promote", "aggressive_promote"})
-    demote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "demote")
-    if demote_count > 0 and promote_count == 0:
-        return {"status": "demote", "reasons": ["CANDIDATE_POLICY_WEAK"]}
-    if aggressive_count > 0 and demote_count == 0:
-        return {"status": "promote_aggressive", "reasons": ["CANDIDATE_POLICY_ELITE"]}
-    if promote_count > 0 and demote_count == 0:
-        return {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]}
-    if demote_count >= promote_count + 2:
-        return {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]}
-    return {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
+        verdict = {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
+    else:
+        aggressive_count = sum(1 for item in adjustments if str(item.get("action", "")) == "aggressive_promote")
+        promote_count = sum(1 for item in adjustments if str(item.get("action", "")) in {"promote", "aggressive_promote"})
+        demote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "demote")
+        if demote_count > 0 and promote_count == 0:
+            verdict = {"status": "demote", "reasons": ["CANDIDATE_POLICY_WEAK"]}
+        elif aggressive_count > 0 and demote_count == 0:
+            verdict = {"status": "promote_aggressive", "reasons": ["CANDIDATE_POLICY_ELITE"]}
+        elif promote_count > 0 and demote_count == 0:
+            verdict = {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]}
+        elif demote_count >= promote_count + 2:
+            verdict = {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]}
+        else:
+            verdict = {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
+    comparison_verdict, comparison_delta = _policy_comparison_signal(comparison_evidence)
+    if comparison_verdict == "candidate_worse":
+        reasons = list(verdict["reasons"])
+        reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
+        if verdict["status"] in {"promote", "promote_aggressive"}:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_POLICY_COMPARISON"]}
+        elif verdict["status"] == "demote":
+            verdict = {"status": "disable", "reasons": reasons + ["DEMOTION_ESCALATED_BY_POLICY_COMPARISON"]}
+        else:
+            verdict = {"status": verdict["status"], "reasons": reasons}
+    elif comparison_verdict == "candidate_better":
+        verdict = {
+            "status": verdict["status"],
+            "reasons": list(verdict["reasons"]) + ["CANDIDATE_OUTPERFORMS_CURRENT_POLICY"],
+        }
+    if comparison_verdict != "keep" or comparison_delta != 0.0:
+        verdict["comparison_verdict"] = comparison_verdict
+        verdict["candidate_vs_current_score_delta"] = comparison_delta
+    return verdict
 
 def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     return [row for row in rows if str(row.get("symbol", "")) in {"BTCUSDT", "ETHUSDT"}]
@@ -535,14 +571,26 @@ def build_persisted_policy_state(
     previous_version = int(previous_state.get("version", 0) or 0)
     verdict_status = str(promotion_verdict.get("status", "keep"))
     validation_status = str(validation.get("status", "fail"))
+    validation_evidence = dict(validation.get("evidence", {}) or {})
+    comparison_verdict, _ = _policy_comparison_signal(validation_evidence)
+    comparison_underperforms = comparison_verdict == "candidate_worse"
+    candidate_adjustments = list(candidate_policy.get("adjustments", []))
     if validation_status == "pass" and verdict_status in {"promote", "promote_aggressive", "demote"}:
         active_policy = dict(candidate_policy)
         active_policy["status"] = verdict_status
         lifecycle = "promoted" if verdict_status.startswith("promote") else "demoted"
         version = previous_version + 1
+    elif validation_status == "pass" and verdict_status == "disable":
+        active_policy = {
+            "status": "disabled",
+            "adjustments": [dict(item, action="disabled", size_multiplier=0.0) for item in candidate_adjustments],
+        }
+        lifecycle = "disabled"
+        version = previous_version + 1
     elif (
         str(operational_verdict.get("status", "")) == "stop"
         or float(dict(validation.get("evidence", {}) or {}).get("replay_like_drawdown_ratio", 0.0) or 0.0) > 0.5
+        or comparison_underperforms
     ) and previous_active:
         active_policy = previous_active
         lifecycle = "rolled_back"

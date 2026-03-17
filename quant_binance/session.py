@@ -27,7 +27,7 @@ from quant_binance.policy.execution import (
 )
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
+from quant_binance.observability.report import build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
 from quant_binance.validation_report import write_policy_comparison_validation_artifact, write_policy_validation_runner_artifact
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
@@ -441,6 +441,7 @@ class LivePaperSession:
             output_path=comparison_report_path,
         )
         runner_evidence = load_validation_runner_evidence(run_dir)
+        summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), runner_evidence)
         summary["policy_validation"] = build_policy_validation(
             summary.get("candidate_policy", {}),
             summary.get("promotion_verdict", {}),

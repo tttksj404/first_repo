@@ -749,6 +749,47 @@ class QuantBinanceSessionTests(unittest.TestCase):
             if comparison_report_path.exists():
                 comparison_report_path.unlink()
 
+    def test_session_flush_recomputes_promotion_verdict_from_policy_comparison(self) -> None:
+        session = self._build_session()
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.0},
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.2},
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 15.0, "realized_edge_bps": 12.0},
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "active_policy": {
+                            "status": "promote_aggressive",
+                            "adjustments": [
+                                {
+                                    "symbol": "BTCUSDT",
+                                    "action": "aggressive_promote",
+                                    "size_multiplier": 1.25,
+                                    "leverage_multiplier": 1.2,
+                                    "entry_threshold_bps": -1.5,
+                                    "expected_profit_floor_bps": -2.0,
+                                }
+                            ],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            policy_payload = json.loads(summary_path.with_name("policy_state.json").read_text(encoding="utf-8"))
+            self.assertEqual(summary["promotion_verdict"]["status"], "keep")
+            self.assertEqual(summary["promotion_verdict"]["comparison_verdict"], "candidate_worse")
+            self.assertEqual(policy_payload["status"], "rolled_back")
+            self.assertEqual(policy_payload["active_policy"]["status"], "promote_aggressive")
+
     def test_session_continues_emitting_after_bootstrap(self) -> None:
         session = self._build_session()
         bootstrap_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
