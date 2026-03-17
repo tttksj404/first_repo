@@ -25,6 +25,10 @@ class MacroInputs:
     policy_easing_score: float = 0.5
     event_risk_score: float = 0.0
     btc_safe_haven_score: float = 0.5
+    news_bullish_score: float = 0.0
+    news_bearish_score: float = 0.0
+    news_uncertainty_score: float = 0.0
+    news_majors_only_bias: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -171,6 +175,10 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
     support += 0.20 * clamp(macro_inputs.fed_liquidity_score, 0.0, 1.0)
     support += 0.15 * clamp(macro_inputs.policy_easing_score, 0.0, 1.0)
     support += 0.10 * clamp(macro_inputs.btc_safe_haven_score, 0.0, 1.0)
+    support += 0.18 * clamp(macro_inputs.news_bullish_score, 0.0, 1.0)
+    risk += 0.18 * clamp(macro_inputs.news_bearish_score, 0.0, 1.0)
+    event_risk = clamp(event_risk + 0.7 * clamp(macro_inputs.news_uncertainty_score, 0.0, 1.0), 0.0, 1.0)
+    risk += 0.15 * clamp(macro_inputs.news_uncertainty_score, 0.0, 1.0)
 
     penalty = clamp(risk - support, 0.0, 1.0)
     support_score = clamp(support, 0.0, 1.0)
@@ -197,7 +205,7 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
         leverage_cap = 2
     elif trade_restraint == "risk_off_reduce":
         leverage_cap = 3
-    symbol_bias = "majors_only" if (event_risk >= 0.6 or penalty >= 0.55) else "neutral"
+    symbol_bias = "majors_only" if (event_risk >= 0.6 or penalty >= 0.55 or macro_inputs.news_majors_only_bias >= 0.5) else "neutral"
     return FeatureVector(
         **{
             **features.as_dict(),

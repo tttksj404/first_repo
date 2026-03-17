@@ -141,6 +141,38 @@ class QuantBinanceOverlayTests(unittest.TestCase):
         )
         self.assertNotEqual(decision.final_mode, "futures")
 
+    def test_macro_overlay_respects_news_risk_inputs(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8, ret_rank_4h=0.8, breakout_norm=0.8, ema_stack_score=1.0,
+            vol_z_5m_norm=0.7, vol_z_1h_norm=0.7, taker_imbalance_norm=0.7,
+            spread_bps_norm=0.2, probe_slippage_bps_norm=0.2, depth_10bps_norm=0.8,
+            book_stability_norm=0.8, realized_vol_1h_norm=0.3, realized_vol_4h_norm=0.3,
+            vol_shock_norm=0.3, funding_abs_percentile=0.2, oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.2, regime_alignment=1.0, trend_direction=1,
+            trend_strength=0.8, volume_confirmation=0.7, liquidity_score=0.8,
+            volatility_penalty=0.3, overheat_penalty=0.2, gross_expected_edge_bps=30.0,
+            estimated_round_trip_cost_bps=10.0
+        )
+        macro = MacroInputs(
+            truflation_yoy=2.2,
+            us10y_yield=4.2,
+            oil_momentum_pct=2.0,
+            tga_drain_score=0.4,
+            fed_balance_sheet_30d_pct=0.1,
+            mmf_30d_pct=-0.05,
+            labor_stress_score=0.35,
+            event_risk_score=0.15,
+            btc_safe_haven_score=0.35,
+            news_bullish_score=0.1,
+            news_bearish_score=0.82,
+            news_uncertainty_score=0.78,
+            news_majors_only_bias=1.0,
+        )
+        enriched = apply_macro_overlay(features, macro)
+        self.assertGreaterEqual(enriched.macro_event_risk_score, 0.4)
+        self.assertEqual(enriched.macro_symbol_bias, "majors_only")
+        self.assertIn(enriched.macro_trade_restraint, {"risk_off_reduce", "halt_high_impact_window", "pre_event_reduce"})
+
 
 if __name__ == "__main__":
     unittest.main()
