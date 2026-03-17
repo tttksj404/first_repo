@@ -790,6 +790,24 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(policy_payload["status"], "rolled_back")
             self.assertEqual(policy_payload["active_policy"]["status"], "promote_aggressive")
 
+    def test_session_flush_rewrites_validation_report_even_when_stale_file_exists(self) -> None:
+        session = self._build_session()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            validation_report_path = run_dir / "validation_report.json"
+            validation_report_path.write_text(
+                json.dumps({"runner_total_return_pct": -999.0, "evidence": {"runner_total_return_pct": -999.0}}),
+                encoding="utf-8",
+            )
+            session.flush(summary_path=summary_path, state_path=state_path)
+            validation_payload = json.loads(validation_report_path.read_text(encoding="utf-8"))
+            self.assertNotEqual(validation_payload["runner_total_return_pct"], -999.0)
+            self.assertEqual(validation_payload["validation_path_mode"], "paper_live_walk_forward_artifacts")
+
     def test_session_continues_emitting_after_bootstrap(self) -> None:
         session = self._build_session()
         bootstrap_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
