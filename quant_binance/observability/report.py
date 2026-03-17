@@ -405,6 +405,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
     candidate_paths = [
         root,
         root / "policy_validation.json",
+        root / "policy_comparison.json",
         root / "validation_report.json",
         root / "performance_report.json",
         root / "summary.json",
@@ -452,6 +453,11 @@ def merge_policy_validation_evidence(
     runner_shadow_alignment_score = float(evidence.get("runner_shadow_alignment_score", 0.0) or 0.0)
     if runner_shadow_alignment_score > 0.0:
         evidence["shadow_alignment_score"] = round(min(max(float(evidence.get("shadow_alignment_score", 0.0) or 0.0), runner_shadow_alignment_score), 1.0), 6)
+    candidate_delta = float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0)
+    if candidate_delta > 0.1:
+        evidence["comparison_alignment_score"] = round(min(1.0, 0.5 + candidate_delta), 6)
+    elif candidate_delta < -0.1:
+        evidence["comparison_alignment_score"] = round(max(0.0, 0.5 + candidate_delta), 6)
     return evidence
 
 def _replay_like_validation_evidence(attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...]) -> dict[str, object]:
@@ -509,6 +515,11 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     if evidence["shadow_alignment_score"] < 0.45:
         status = "fail"
         reasons.append("SHADOW_ALIGNMENT_TOO_LOW")
+    if float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0) < -0.1:
+        status = "fail"
+        reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
+    elif float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0) > 0.1:
+        reasons.append("CANDIDATE_OUTPERFORMS_CURRENT_POLICY")
     return {"status": status, "reasons": reasons, "evidence": evidence}
 
 
