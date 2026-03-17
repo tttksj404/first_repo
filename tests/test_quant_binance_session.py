@@ -215,6 +215,38 @@ class QuantBinanceSessionTests(unittest.TestCase):
             sync_interval_seconds=1,
         )
 
+    def test_cap_live_order_decision_blocks_opposite_btc_eth_major_positions(self) -> None:
+        session = self._build_session()
+        session.capital_report = {
+            "futures_execution_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        session.paper_positions["ETHUSDT"] = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+            symbol="ETHUSDT",
+            market="futures",
+            side="short",
+            entry_time=now,
+            entry_price=2500.0,
+            current_price=2450.0,
+            quantity_opened=0.5,
+            quantity_remaining=0.5,
+            stop_distance_bps=500.0,
+            active_stop_price=2550.0,
+            best_price=2450.0,
+            worst_price=2500.0,
+            entry_predictability_score=82.0,
+            entry_liquidity_score=0.8,
+            entry_net_expected_edge_bps=18.0,
+            entry_estimated_round_trip_cost_bps=10.0,
+            entry_planned_leverage=3,
+        )
+        capped = session._cap_live_order_decision(make_decision(timestamp=now, symbol="BTCUSDT", side="long"), reference_price=50000.0)
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertEqual(capped.side, "flat")
+        self.assertIn("MAJOR_CROSS_SYMBOL_SIDE_CONFLICT", capped.rejection_reasons)
+        self.assertIn("MAJOR_SIDE_CONFLICT:ETHUSDT", capped.rejection_reasons)
+
     def _focus_settings(self, *, futures_top_n: int) -> Settings:
         return replace(
             self.settings,
