@@ -199,14 +199,14 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
     if trade_restraint == "halt_high_impact_window":
         size_multiplier = 0.0
     elif trade_restraint == "pre_event_reduce":
-        size_multiplier = 0.5
+        size_multiplier = 0.65
     elif trade_restraint == "risk_off_reduce":
         size_multiplier = 0.7
     leverage_cap = 0
     if trade_restraint == "halt_high_impact_window":
         leverage_cap = 1
     elif trade_restraint == "pre_event_reduce":
-        leverage_cap = 2
+        leverage_cap = 3
     elif trade_restraint == "risk_off_reduce":
         leverage_cap = 3
     symbol_bias = "majors_only" if (event_risk >= 0.6 or penalty >= 0.55 or macro_inputs.news_majors_only_bias >= 0.5) else "neutral"

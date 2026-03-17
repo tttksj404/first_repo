@@ -215,6 +215,82 @@ class QuantBinanceSessionTests(unittest.TestCase):
             sync_interval_seconds=1,
         )
 
+    def test_major_cross_symbol_alignment_closes_opposite_paper_major_before_new_entry(self) -> None:
+        session = self._build_session()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        session.paper_positions["ETHUSDT"] = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+            symbol="ETHUSDT",
+            market="futures",
+            side="short",
+            entry_time=now - timedelta(minutes=20),
+            entry_price=2500.0,
+            current_price=2450.0,
+            quantity_opened=0.5,
+            quantity_remaining=0.5,
+            stop_distance_bps=500.0,
+            active_stop_price=2550.0,
+            best_price=2450.0,
+            worst_price=2500.0,
+            entry_predictability_score=82.0,
+            entry_liquidity_score=0.8,
+            entry_net_expected_edge_bps=18.0,
+            entry_estimated_round_trip_cost_bps=10.0,
+            entry_planned_leverage=3,
+        )
+        closed, changed = session._align_major_cross_symbol_positions(
+            decision=make_decision(timestamp=now, symbol="BTCUSDT", side="long", predictability_score=84.0, net_expected_edge_bps=19.0),
+            price_map={"BTCUSDT": 50000.0},
+            timestamp=now,
+        )
+        self.assertTrue(changed)
+        self.assertEqual(closed, ["ETHUSDT"])
+        self.assertNotIn("ETHUSDT", session.paper_positions)
+
+    def test_force_major_reversal_alignment_reduces_confirmation_requirement(self) -> None:
+        session = self._build_session()
+        now = datetime(2026, 3, 8, 12, 30, tzinfo=timezone.utc)
+        position = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+            symbol="BTCUSDT",
+            market="futures",
+            side="long",
+            entry_time=now - timedelta(minutes=15),
+            entry_price=50000.0,
+            current_price=49750.0,
+            quantity_opened=0.01,
+            quantity_remaining=0.01,
+            stop_distance_bps=500.0,
+            active_stop_price=49750.0,
+            best_price=50100.0,
+            worst_price=49750.0,
+            entry_predictability_score=80.0,
+            entry_liquidity_score=0.8,
+            entry_net_expected_edge_bps=15.0,
+            entry_estimated_round_trip_cost_bps=10.0,
+            entry_planned_leverage=3,
+        )
+        session.paper_positions["BTCUSDT"] = position
+        decision = make_decision(
+            timestamp=now,
+            symbol="BTCUSDT",
+            side="short",
+            predictability_score=78.0,
+            net_expected_edge_bps=16.0,
+            estimated_round_trip_cost_bps=10.0,
+        )
+        state = SymbolMarketState(
+            symbol="BTCUSDT",
+            top_of_book=TopOfBook(49749.5, 1.0, 49750.5, 1.0, now),
+            last_trade_price=49750.0,
+            funding_rate=0.0001,
+            open_interest=1000000.0,
+            basis_bps=3.0,
+            last_update_time=now,
+        )
+        allow, pyramid = session._apply_paper_trade_management(decision=decision, state=state, timestamp=now)
+        self.assertFalse(allow)
+        self.assertFalse(pyramid)
+        self.assertNotIn("BTCUSDT", session.paper_positions)
+
     def test_cap_live_order_decision_blocks_opposite_btc_eth_major_positions(self) -> None:
         session = self._build_session()
         session.capital_report = {
