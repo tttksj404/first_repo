@@ -5,10 +5,25 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from quant_binance.validation_report import build_weekly_validation_report
+from quant_binance.validation_report import build_policy_validation_runner_artifact, build_weekly_validation_report, write_policy_validation_runner_artifact
 
 
 class QuantBinanceValidationReportTests(unittest.TestCase):
+    def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(json.dumps({"live_order_count": 1, "tested_order_count": 1}), encoding="utf-8")
+            (run_a / "logs" / "closed_trades.jsonl").write_text(json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 5.0, "realized_return_bps_estimate": 10.0}) + "\n", encoding="utf-8")
+            (run_a / "logs" / "decisions.jsonl").write_text(json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}) + "\n", encoding="utf-8")
+            artifact = build_policy_validation_runner_artifact(base_dir=base, lookback_days=7)
+            self.assertIn("runner_total_return_pct", artifact)
+            output = run_a / "validation_report.json"
+            write_policy_validation_runner_artifact(base_dir=base, output_path=output, lookback_days=7)
+            self.assertTrue(output.exists())
+
     def test_build_weekly_validation_report_aggregates_recent_runs(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"
