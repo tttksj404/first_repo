@@ -590,6 +590,23 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("realized_vs_expected_edge_gap_bps", summary)
         self.assertEqual(len(summary["execution_audit_by_symbol"]), 2)
 
+    def test_runtime_summary_operational_verdict_can_emit_strong_pass(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            live_orders=[
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 14.0, "realized_edge_bps": 12.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.6},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 15.0, "realized_edge_bps": 12.5},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 17.0, "realized_edge_bps": 14.4},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 13.0, "realized_edge_bps": 11.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 18.0, "realized_edge_bps": 15.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.4},
+            ],
+        )
+        self.assertEqual(summary["operational_verdict"]["status"], "strong_pass")
+        self.assertIn("OPERATING_WITH_STRONG_EDGE", summary["operational_verdict"]["reasons"])
+
     def test_runtime_summary_operational_verdict_holds_for_small_sample(self) -> None:
         decision = evaluate_snapshot(
             make_snapshot("BTCUSDT", FeatureVector(
