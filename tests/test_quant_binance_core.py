@@ -608,6 +608,27 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("BTCUSDT:promote", actions)
         self.assertIn("ETHUSDT:demote", actions)
         self.assertEqual(summary["promotion_verdict"]["status"], "keep")
+        self.assertEqual(summary["policy_state"]["status"], "keep")
+
+    def test_runtime_summary_operational_verdict_can_emit_aggressive_pass(self) -> None:
+        summary = build_runtime_summary(
+            decisions=[],
+            live_orders=[
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 15.0, "realized_edge_bps": 15.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 16.0, "realized_edge_bps": 16.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 17.0, "realized_edge_bps": 17.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 18.0, "realized_edge_bps": 18.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 19.0, "realized_edge_bps": 19.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 21.0, "realized_edge_bps": 21.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 22.0, "realized_edge_bps": 22.0},
+                {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 23.0, "realized_edge_bps": 23.0},
+                {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 24.0, "realized_edge_bps": 24.0},
+            ],
+        )
+        self.assertEqual(summary["operational_verdict"]["status"], "aggressive_pass")
+        self.assertIn("OPERATING_WITH_ELITE_EDGE", summary["operational_verdict"]["reasons"])
+        self.assertEqual(summary["promotion_verdict"]["status"], "promote_aggressive")
 
     def test_runtime_summary_operational_verdict_can_emit_strong_pass(self) -> None:
         summary = build_runtime_summary(
