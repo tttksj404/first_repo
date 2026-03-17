@@ -114,6 +114,115 @@ def _aggregate_closed_trades(closed_trades: list[dict[str, object]] | tuple[dict
     return rows, dict(sorted(exit_reasons.items())), round(total_realized, 6)
 
 
+
+
+def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[dict[str, object], ...] | None) -> dict[str, object]:
+    orders = list(live_orders or [])
+    if not orders:
+        return {
+            "execution_outcome_counts": {},
+            "accepted_live_order_count": 0,
+            "rejected_live_order_count": 0,
+            "avg_fill_ratio": 0.0,
+            "avg_slippage_bps": 0.0,
+            "avg_realized_edge_bps": 0.0,
+            "avg_expected_edge_bps": 0.0,
+            "realized_vs_expected_edge_gap_bps": 0.0,
+            "execution_audit_by_symbol": [],
+        }
+
+    counts = Counter()
+    accepted = 0
+    rejected = 0
+    fill_ratio_sum = 0.0
+    slippage_values: list[float] = []
+    realized_edge_values: list[float] = []
+    expected_edge_values: list[float] = []
+    by_symbol: dict[str, dict[str, float | int | str]] = defaultdict(
+        lambda: {
+            "symbol": "",
+            "live_order_count": 0,
+            "accepted_count": 0,
+            "rejected_count": 0,
+            "avg_fill_ratio": 0.0,
+            "avg_slippage_bps": 0.0,
+            "avg_realized_edge_bps": 0.0,
+            "avg_expected_edge_bps": 0.0,
+            "realized_vs_expected_edge_gap_bps": 0.0,
+        }
+    )
+    fill_sums: dict[str, float] = defaultdict(float)
+    slip_sums: dict[str, float] = defaultdict(float)
+    slip_counts: dict[str, int] = defaultdict(int)
+    realized_sums: dict[str, float] = defaultdict(float)
+    realized_counts: dict[str, int] = defaultdict(int)
+    expected_sums: dict[str, float] = defaultdict(float)
+
+    for order in orders:
+        status = str(order.get("fill_status") or ("accepted" if order.get("accepted") else "reject") or "unknown")
+        symbol = str(order.get("symbol", ""))
+        counts[status] += 1
+        row = by_symbol[symbol]
+        row["symbol"] = symbol
+        row["live_order_count"] = int(row["live_order_count"]) + 1
+
+        accepted_flag = bool(order.get("accepted", False))
+        if accepted_flag:
+            accepted += 1
+            row["accepted_count"] = int(row["accepted_count"]) + 1
+        else:
+            rejected += 1
+            row["rejected_count"] = int(row["rejected_count"]) + 1
+
+        fill_ratio = float(order.get("fill_ratio", 0.0) or 0.0)
+        fill_ratio_sum += fill_ratio
+        fill_sums[symbol] += fill_ratio
+
+        slippage = order.get("slippage_bps")
+        if slippage is not None:
+            slip = float(slippage or 0.0)
+            slippage_values.append(slip)
+            slip_sums[symbol] += slip
+            slip_counts[symbol] += 1
+
+        realized = order.get("realized_edge_bps")
+        if realized is not None:
+            realized_value = float(realized or 0.0)
+            realized_edge_values.append(realized_value)
+            realized_sums[symbol] += realized_value
+            realized_counts[symbol] += 1
+
+        expected = float(order.get("expected_net_edge_bps", order.get("net_expected_edge_bps", 0.0)) or 0.0)
+        expected_edge_values.append(expected)
+        expected_sums[symbol] += expected
+
+    rows: list[dict[str, object]] = []
+    for symbol, row in by_symbol.items():
+        count = int(row["live_order_count"])
+        expected_avg = expected_sums[symbol] / count if count else 0.0
+        realized_avg = realized_sums[symbol] / realized_counts[symbol] if realized_counts[symbol] else 0.0
+        row["avg_fill_ratio"] = round(fill_sums[symbol] / count, 6) if count else 0.0
+        row["avg_slippage_bps"] = round(slip_sums[symbol] / slip_counts[symbol], 6) if slip_counts[symbol] else 0.0
+        row["avg_realized_edge_bps"] = round(realized_avg, 6)
+        row["avg_expected_edge_bps"] = round(expected_avg, 6)
+        row["realized_vs_expected_edge_gap_bps"] = round(realized_avg - expected_avg, 6)
+        rows.append(dict(row))
+    rows.sort(key=lambda item: (float(item["realized_vs_expected_edge_gap_bps"]), float(item["avg_realized_edge_bps"])), reverse=True)
+
+    avg_expected = sum(expected_edge_values) / len(expected_edge_values) if expected_edge_values else 0.0
+    avg_realized = sum(realized_edge_values) / len(realized_edge_values) if realized_edge_values else 0.0
+    return {
+        "execution_outcome_counts": dict(sorted(counts.items())),
+        "accepted_live_order_count": accepted,
+        "rejected_live_order_count": rejected,
+        "avg_fill_ratio": round(fill_ratio_sum / len(orders), 6),
+        "avg_slippage_bps": round(sum(slippage_values) / len(slippage_values), 6) if slippage_values else 0.0,
+        "avg_realized_edge_bps": round(avg_realized, 6),
+        "avg_expected_edge_bps": round(avg_expected, 6),
+        "realized_vs_expected_edge_gap_bps": round(avg_realized - avg_expected, 6),
+        "execution_audit_by_symbol": rows,
+    }
+
 def build_runtime_summary(
     *,
     decisions: list[DecisionIntent] | tuple[DecisionIntent, ...],
@@ -150,6 +259,7 @@ def build_runtime_summary(
         open_futures_positions=open_futures_positions,
         live_positions=live_positions,
     )
+    execution_outcomes = _aggregate_live_order_outcomes(live_orders)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
@@ -197,6 +307,7 @@ def build_runtime_summary(
         "tested_orders": tested_orders or [],
         "live_order_count": len(live_orders or []),
         "live_orders": live_orders or [],
+        **execution_outcomes,
         "account_snapshot": account_snapshot or {},
         "open_orders_snapshot": open_orders_snapshot or {},
         "capital_report": capital_report or {},
