@@ -130,6 +130,13 @@ def _weighted_metric(numerator: float, denominator: float) -> float:
     return round(numerator / denominator, 6)
 
 
+def _safe_ratio(numerator: Any, denominator: Any) -> float:
+    denom = _safe_float(denominator)
+    if denom <= 0.0:
+        return 0.0
+    return round(_safe_float(numerator) / denom, 6)
+
+
 def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
     report = build_runtime_performance_report(run_dir=run_dir)
     summary = _load_summary(run_dir)
@@ -169,6 +176,7 @@ def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
         "reject_rate": round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0,
         "protection_degraded_rate": round(_safe_float(summary.get("protection_degraded_rate")), 6),
         "walk_forward": walk_forward,
+        "pruning_recommendations": [dict(item) for item in report.pruning_recommendations],
     }
 
 
@@ -215,6 +223,40 @@ def _runtime_metric_signal(*, candidate: float | None, current: float | None, hi
     return ((1.0 if delta > 0.0 else -1.0) if higher_is_better else (-1.0 if delta > 0.0 else 1.0)), delta
 
 
+def _aggregate_pruning_recommendations(
+    run_snapshots: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    severity = {"prune": 0, "demote": 1, "observe_only": 2, "keep": 3}
+    merged: dict[str, dict[str, object]] = {}
+    for snapshot in run_snapshots:
+        for item in list(snapshot.get("pruning_recommendations", []) or []):
+            symbol = str(item.get("symbol", "") or "")
+            if not symbol:
+                continue
+            candidate = dict(item)
+            existing = merged.get(symbol)
+            if existing is None:
+                merged[symbol] = candidate
+                continue
+            existing_rank = severity.get(str(existing.get("recommendation", "keep")), 99)
+            candidate_rank = severity.get(str(candidate.get("recommendation", "keep")), 99)
+            if candidate_rank < existing_rank:
+                merged[symbol] = candidate
+                continue
+            if candidate_rank == existing_rank:
+                existing_decisions = _safe_int(existing.get("decision_count"))
+                candidate_decisions = _safe_int(candidate.get("decision_count"))
+                if candidate_decisions >= existing_decisions:
+                    merged[symbol] = candidate
+    return sorted(
+        merged.values(),
+        key=lambda item: (
+            severity.get(str(item.get("recommendation", "keep")), 99),
+            str(item.get("symbol", "")),
+        ),
+    )
+
+
 def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evidence: dict[str, Any]) -> dict[str, object]:
     current_present = bool(current_evidence)
     metric_rows = (
@@ -224,9 +266,12 @@ def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evi
         ("runner_avg_slippage_bps", False, 0.5),
         ("runner_avg_realized_edge_bps", True, 0.25),
         ("runner_avg_edge_retention_ratio", True, 0.02),
+        ("runner_shadow_alignment_score", True, 0.03),
+        ("runner_positive_walk_forward_ratio", True, 0.05),
     )
     metric_deltas: dict[str, float] = {}
     compared_metrics: list[str] = []
+    metric_comparisons: list[dict[str, object]] = []
     runtime_score = 0.0
     for metric_name, higher_is_better, tolerance in metric_rows:
         candidate_value = candidate_evidence.get(metric_name)
@@ -242,6 +287,19 @@ def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evi
         compared_metrics.append(metric_name)
         metric_deltas[f"{metric_name}_delta"] = delta
         runtime_score += signal
+        metric_comparisons.append(
+            {
+                "metric": metric_name,
+                "candidate_value": round(_safe_float(candidate_value), 6),
+                "current_value": round(_safe_float(current_value), 6),
+                "delta": delta,
+                "verdict": (
+                    "candidate_better"
+                    if signal > 0.0
+                    else ("candidate_worse" if signal < 0.0 else "keep")
+                ),
+            }
+        )
     verdict = "keep"
     if runtime_score >= 1.0:
         verdict = "candidate_better"
@@ -252,6 +310,7 @@ def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evi
         "runtime_comparison_verdict": verdict,
         "candidate_vs_current_runtime_score": round(runtime_score, 6),
         "compared_metrics": compared_metrics,
+        "metric_comparisons": metric_comparisons,
         **metric_deltas,
     }
 
@@ -392,7 +451,37 @@ def _policy_adjustment_score(policy: dict[str, Any]) -> float:
         score += float(item.get("leverage_multiplier", 1.0) or 1.0) - 1.0
         score -= float(item.get("entry_threshold_bps", 0.0) or 0.0) / 10.0
         score -= float(item.get("expected_profit_floor_bps", 0.0) or 0.0) / 10.0
+        score += float(item.get("score_delta", 0.0) or 0.0)
     return round(score, 6)
+
+
+def _replay_summary_from_evidence(
+    evidence: dict[str, Any],
+    *,
+    run_count: int | None = None,
+) -> dict[str, object]:
+    payload = dict(evidence or {})
+    symbol_summary = list(payload.get("symbol_summary", []) or [])
+    regime_summary = list(payload.get("regime_summary", []) or [])
+    walk_forward_window_count = _safe_int(payload.get("runner_walk_forward_window_count"))
+    positive_walk_forward_window_count = _safe_int(payload.get("runner_positive_walk_forward_window_count"))
+    return {
+        "run_count": _safe_int(run_count if run_count is not None else payload.get("run_count")),
+        "walk_forward_window_count": walk_forward_window_count,
+        "positive_walk_forward_window_count": positive_walk_forward_window_count,
+        "positive_walk_forward_ratio": round(
+            _safe_float(
+                payload.get(
+                    "runner_positive_walk_forward_ratio",
+                    _safe_ratio(positive_walk_forward_window_count, walk_forward_window_count),
+                )
+            ),
+            6,
+        ),
+        "micro_live_gate": dict(payload.get("micro_live_gate", {}) or {}),
+        "top_symbols": symbol_summary[:3],
+        "top_regimes": regime_summary[:3],
+    }
 
 
 def build_policy_comparison_validation_artifact(*,
@@ -402,6 +491,7 @@ def build_policy_comparison_validation_artifact(*,
     lookback_days: int = 7,
 ) -> dict[str, object]:
     runner = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
+    runner_evidence = dict(runner.get("evidence", {}) or {})
     current_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
     current_policy_evidence = dict(dict(dict(current_policy_state or {}).get("policy_validation", {}) or {}).get("evidence", {}) or {})
     current_score = _policy_adjustment_score(current_policy)
@@ -413,16 +503,29 @@ def build_policy_comparison_validation_artifact(*,
     elif delta < -0.1:
         structural_verdict = "candidate_worse"
     runtime_comparison = _compare_runtime_evidence(
-        candidate_evidence=dict(runner.get("evidence", {}) or {}),
+        candidate_evidence=runner_evidence,
         current_evidence=current_policy_evidence,
     )
     runtime_verdict = str(runtime_comparison.get("runtime_comparison_verdict", "keep"))
     verdict = runtime_verdict if runtime_verdict != "keep" else structural_verdict
+    candidate_replay_summary = _replay_summary_from_evidence(
+        {
+            **runner_evidence,
+            "symbol_summary": runner.get("symbol_summary", []),
+            "regime_summary": runner.get("regime_summary", []),
+            "micro_live_gate": runner.get("micro_live_gate", {}),
+        },
+        run_count=_safe_int(runner.get("run_count")),
+    )
+    current_replay_summary = _replay_summary_from_evidence(current_policy_evidence)
     validation_path = {
         "mode": str(runner.get("validation_path_mode", "artifact_walk_forward")),
         "candidate_run_count": _safe_int(runner.get("run_count")),
         "candidate_walk_forward_window_count": _safe_int(runner.get("runner_walk_forward_window_count")),
+        "candidate_positive_walk_forward_ratio": round(_safe_float(runner.get("runner_positive_walk_forward_ratio")), 6),
         "current_evidence_available": bool(runtime_comparison.get("runtime_evidence_available")),
+        "current_walk_forward_window_count": _safe_int(current_policy_evidence.get("runner_walk_forward_window_count")),
+        "current_positive_walk_forward_ratio": round(_safe_float(current_policy_evidence.get("runner_positive_walk_forward_ratio")), 6),
         "compared_metrics": list(runtime_comparison.get("compared_metrics", [])),
     }
     evidence = {
@@ -442,8 +545,16 @@ def build_policy_comparison_validation_artifact(*,
         "runner_avg_slippage_bps": runner.get("runner_avg_slippage_bps", 0.0),
         "runner_avg_realized_edge_bps": runner.get("runner_avg_realized_edge_bps", 0.0),
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
+        "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
         "micro_live_gate": runner.get("micro_live_gate", {}),
         "candidate_vs_current_validation_path": validation_path,
+        "candidate_replay_summary": candidate_replay_summary,
+        "current_replay_summary": current_replay_summary,
+        "symbol_summary": runner.get("symbol_summary", []),
+        "regime_summary": runner.get("regime_summary", []),
+        "pruning_recommendations": runner.get("pruning_recommendations", []),
+        "walk_forward_windows": runner.get("walk_forward_windows", []),
+        "validation_runs": runner.get("validation_runs", []),
         **runtime_comparison,
     }
     return {
@@ -462,6 +573,9 @@ def build_policy_comparison_validation_artifact(*,
         "runner_avg_slippage_bps": runner.get("runner_avg_slippage_bps", 0.0),
         "runner_avg_realized_edge_bps": runner.get("runner_avg_realized_edge_bps", 0.0),
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
+        "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
+        "candidate_replay_summary": candidate_replay_summary,
+        "current_replay_summary": current_replay_summary,
         "validation_path": validation_path,
         "evidence": evidence,
     }
@@ -490,6 +604,8 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
     runs = _resolve_recent_runs(base_dir=Path(base_dir), lookback_days=lookback_days)
     run_snapshots = [_run_validation_snapshot(run_dir=run_dir) for run_dir in runs]
     symbol_rows = list(report.symbol_summary)
+    regime_rows = list(report.regime_summary)
+    pruning_recommendations = _aggregate_pruning_recommendations(run_snapshots)
     promote_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "promote")
     prune_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "prune")
     total_symbols = max(len(symbol_rows), 1)
@@ -552,6 +668,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
         "runner_walk_forward_window_count": len(walk_forward_windows),
         "runner_positive_walk_forward_window_count": positive_walk_forward_count,
+        "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
         "micro_live_gate": micro_live_gate,
     }
     return {
@@ -571,8 +688,12 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
         "runner_walk_forward_window_count": len(walk_forward_windows),
         "runner_positive_walk_forward_window_count": positive_walk_forward_count,
+        "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
         "validation_runs": run_snapshots,
         "walk_forward_windows": walk_forward_windows,
+        "symbol_summary": symbol_rows,
+        "regime_summary": regime_rows,
+        "pruning_recommendations": pruning_recommendations,
         "micro_live_gate": micro_live_gate,
         "evidence": evidence,
     }
