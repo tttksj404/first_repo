@@ -381,6 +381,30 @@ def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, 
     return verdict, delta
 
 
+def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, object]:
+    payload = dict(evidence or {})
+    return {
+        "available": any(
+            key in payload
+            for key in (
+                "runner_total_realized_pnl_usd",
+                "runner_total_return_pct",
+                "runner_reject_rate",
+                "runner_avg_slippage_bps",
+                "runner_avg_edge_retention_ratio",
+                "micro_live_gate",
+            )
+        ),
+        "realized_pnl_usd": float(payload.get("runner_total_realized_pnl_usd", payload.get("runner_total_return_pct", 0.0)) or 0.0),
+        "drawdown_ratio": float(payload.get("runner_drawdown_to_pnl_ratio", payload.get("replay_like_drawdown_ratio", 0.0)) or 0.0),
+        "reject_rate": float(payload.get("runner_reject_rate", payload.get("max_reject_rate", 0.0)) or 0.0),
+        "avg_slippage_bps": float(payload.get("runner_avg_slippage_bps", 0.0) or 0.0),
+        "avg_realized_edge_bps": float(payload.get("runner_avg_realized_edge_bps", payload.get("avg_realized_edge_bps", 0.0)) or 0.0),
+        "avg_edge_retention_ratio": float(payload.get("runner_avg_edge_retention_ratio", payload.get("avg_retention", 0.0)) or 0.0),
+        "micro_live_gate": dict(payload.get("micro_live_gate", {}) or {}),
+    }
+
+
 def build_promotion_verdict(
     candidate_policy: dict[str, object],
     comparison_evidence: dict[str, object] | None = None,
@@ -403,6 +427,7 @@ def build_promotion_verdict(
         else:
             verdict = {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
     comparison_verdict, comparison_delta = _policy_comparison_signal(comparison_evidence)
+    runner_quality = _runner_quality_evidence(comparison_evidence)
     if comparison_verdict == "candidate_worse":
         reasons = list(verdict["reasons"])
         reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
@@ -417,6 +442,29 @@ def build_promotion_verdict(
             "status": verdict["status"],
             "reasons": list(verdict["reasons"]) + ["CANDIDATE_OUTPERFORMS_CURRENT_POLICY"],
         }
+    if verdict["status"] in {"promote", "promote_aggressive"} and bool(runner_quality.get("available")):
+        reasons = list(verdict["reasons"])
+        if float(runner_quality["realized_pnl_usd"]) <= 0.0:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_NON_POSITIVE_REALIZED_PNL"]}
+        elif float(runner_quality["drawdown_ratio"]) > 0.75:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_DRAWDOWN"]}
+        elif float(runner_quality["reject_rate"]) > 0.12:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_REJECT_RATE"]}
+        elif float(runner_quality["avg_slippage_bps"]) > 12.0:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_SLIPPAGE"]}
+        elif float(runner_quality["avg_edge_retention_ratio"]) < 0.55:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_EDGE_RETENTION"]}
+        else:
+            micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+            if bool(micro_live_gate.get("available")) and str(micro_live_gate.get("status", "")) != "pass":
+                verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE"]}
+            elif verdict["status"] == "promote_aggressive" and (
+                float(runner_quality["drawdown_ratio"]) > 0.35
+                or float(runner_quality["reject_rate"]) > 0.03
+                or float(runner_quality["avg_slippage_bps"]) > 8.0
+                or float(runner_quality["avg_edge_retention_ratio"]) < 0.75
+            ):
+                verdict = {"status": "promote", "reasons": reasons + ["AGGRESSIVE_PROMOTION_DOWNGRADED_BY_RUNTIME_EVIDENCE"]}
     if comparison_verdict != "keep" or comparison_delta != 0.0:
         verdict["comparison_verdict"] = comparison_verdict
         verdict["candidate_vs_current_score_delta"] = comparison_delta
@@ -529,6 +577,7 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     verdict_status = str(promotion_verdict.get("status", "keep"))
     operational_status = str(operational_verdict.get("status", "hold"))
     evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
+    runner_quality = _runner_quality_evidence(evidence)
     reasons: list[str] = []
     status = "fail"
     if not candidate_adjustments:
@@ -556,6 +605,30 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
     elif float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0) > 0.1:
         reasons.append("CANDIDATE_OUTPERFORMS_CURRENT_POLICY")
+    if bool(runner_quality.get("available")):
+        if float(runner_quality["realized_pnl_usd"]) <= 0.0:
+            status = "fail"
+            reasons.append("RUNNER_REALIZED_PNL_NOT_POSITIVE")
+        if float(runner_quality["drawdown_ratio"]) > 0.75:
+            status = "fail"
+            reasons.append("RUNNER_DRAWDOWN_ABOVE_LIMIT")
+        if float(runner_quality["reject_rate"]) > 0.12:
+            status = "fail"
+            reasons.append("RUNNER_REJECT_RATE_ABOVE_LIMIT")
+        if float(runner_quality["avg_slippage_bps"]) > 12.0:
+            status = "fail"
+            reasons.append("RUNNER_SLIPPAGE_ABOVE_LIMIT")
+        if float(runner_quality["avg_edge_retention_ratio"]) < 0.55:
+            status = "fail"
+            reasons.append("RUNNER_EDGE_RETENTION_BELOW_LIMIT")
+        micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+        if (
+            verdict_status in {"promote", "promote_aggressive"}
+            and bool(micro_live_gate.get("available"))
+            and str(micro_live_gate.get("status", "")) != "pass"
+        ):
+            status = "fail"
+            reasons.append("MICRO_LIVE_GATE_NOT_PASSED")
     return {"status": status, "reasons": reasons, "evidence": evidence}
 
 

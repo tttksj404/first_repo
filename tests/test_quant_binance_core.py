@@ -629,6 +629,27 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("PROMOTION_BLOCKED_BY_POLICY_COMPARISON", verdict["reasons"])
         self.assertEqual(verdict["comparison_verdict"], "candidate_worse")
 
+    def test_build_promotion_verdict_blocks_promotion_when_micro_live_gate_is_pending(self) -> None:
+        verdict = build_promotion_verdict(
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "promote"},
+                ]
+            },
+            {
+                "comparison_verdict": "candidate_better",
+                "candidate_vs_current_score_delta": 0.2,
+                "runner_total_realized_pnl_usd": 5.0,
+                "runner_drawdown_to_pnl_ratio": 0.2,
+                "runner_reject_rate": 0.01,
+                "runner_avg_slippage_bps": 2.0,
+                "runner_avg_edge_retention_ratio": 0.8,
+                "micro_live_gate": {"available": True, "status": "pending"},
+            },
+        )
+        self.assertEqual(verdict["status"], "keep")
+        self.assertIn("PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE", verdict["reasons"])
+
     def test_build_persisted_policy_state_persists_disable_verdict(self) -> None:
         state = build_persisted_policy_state(
             {
