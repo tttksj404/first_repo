@@ -26,7 +26,7 @@ from quant_binance.policy.execution import (
 )
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
+from quant_binance.observability.report import build_operational_verdict, build_runtime_summary, write_runtime_summary
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
@@ -666,6 +666,42 @@ class LivePaperSession:
             return max(extra_spot_available_balance_usd, 0.0)
         return 0.0
 
+    def _current_operational_verdict(self) -> dict[str, object]:
+        return build_operational_verdict(build_runtime_summary(decisions=[], live_orders=self.live_orders))
+
+    def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
+        if len(self.live_orders) < 5:
+            return decision
+        verdict = self._current_operational_verdict()
+        status = str(verdict.get("status", "hold"))
+        if status == "stop":
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_STOP",)))),
+            )
+        if status != "hold":
+            return decision
+        scaled_notional = round(decision.order_intent_notional_usd * 0.5, 6)
+        if scaled_notional <= 0.0:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_HOLD",)))),
+            )
+        return replace(
+            decision,
+            order_intent_notional_usd=scaled_notional,
+            strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5, 6),
+            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_HOLD_SCALE",)))),
+        )
+
     def _cap_live_order_decision(
         self,
         decision: DecisionIntent,
@@ -676,6 +712,7 @@ class LivePaperSession:
         extra_futures_execution_balance_usd: float = 0.0,
         allow_transfer_hints: bool = True,
     ) -> DecisionIntent:
+        decision = self._apply_operational_self_correction(decision)
         if not self.capital_report:
             return decision
         is_major_strong_futures_decision = self._is_major_strong_futures_decision(decision)

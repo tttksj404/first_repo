@@ -338,6 +338,44 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertFalse(pyramid)
         self.assertNotIn("BTCUSDT", session.paper_positions)
 
+    def test_cap_live_order_decision_scales_size_on_operational_hold(self) -> None:
+        session = self._build_session()
+        session.capital_report = {
+            "futures_execution_balance_usd": 5000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 18.0, "realized_edge_bps": 10.8},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 16.0, "realized_edge_bps": 9.6},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 17.0, "realized_edge_bps": 10.2},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 15.0, "realized_edge_bps": 9.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 14.0, "realized_edge_bps": 8.4},
+        ]
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        capped = session._cap_live_order_decision(make_decision(timestamp=now, order_intent_notional_usd=1000.0), reference_price=50000.0)
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertAlmostEqual(capped.order_intent_notional_usd, 500.0, places=6)
+        self.assertIn("OPERATIONAL_HOLD_SCALE", capped.size_boost_reasons)
+
+    def test_cap_live_order_decision_blocks_new_entries_on_operational_stop(self) -> None:
+        session = self._build_session()
+        session.capital_report = {
+            "futures_execution_balance_usd": 5000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.8, "expected_net_edge_bps": 20.0, "realized_edge_bps": 2.0},
+            {"symbol": "ETHUSDT", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 12.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.8, "expected_net_edge_bps": 18.0, "realized_edge_bps": 3.0},
+            {"symbol": "ETHUSDT", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 10.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.8, "expected_net_edge_bps": 16.0, "realized_edge_bps": 2.0},
+        ]
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        capped = session._cap_live_order_decision(make_decision(timestamp=now, order_intent_notional_usd=1000.0), reference_price=50000.0)
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertEqual(capped.side, "flat")
+        self.assertIn("OPERATIONAL_STOP", capped.rejection_reasons)
+
     def test_cap_live_order_decision_blocks_opposite_btc_eth_major_positions(self) -> None:
         session = self._build_session()
         session.capital_report = {
