@@ -45,6 +45,38 @@ def render_prediction_report(prediction: StrategyPrediction) -> str:
     return "\n".join(lines)
 
 
+
+
+def serialize_execution_outcome(outcome: dict[str, Any]) -> dict[str, Any]:
+    payload = dict(outcome)
+    timestamp = payload.get("timestamp")
+    if hasattr(timestamp, "isoformat"):
+        payload["timestamp"] = timestamp.isoformat()
+    return payload
+
+
+def render_outcome_audit_report(outcome: dict[str, Any]) -> str:
+    data = serialize_execution_outcome(outcome)
+    expected_edge = float(data.get("expected_net_edge_bps", data.get("net_expected_edge_bps", 0.0)) or 0.0)
+    realized_edge = float(data.get("realized_edge_bps", 0.0) or 0.0)
+    lines = [
+        f"# Execution Outcome Audit: {data.get('order_id') or data.get('client_oid') or data.get('symbol', 'unknown')}",
+        "",
+        f"- timestamp: {data.get('timestamp', '')}",
+        f"- symbol: {data.get('symbol', '')}",
+        f"- market: {data.get('market', '')}",
+        f"- side: {data.get('side', '')}",
+        f"- accepted: {data.get('accepted', False)}",
+        f"- fill_ratio: {data.get('fill_ratio', 0.0)}",
+        f"- fill_status: {data.get('fill_status', '')}",
+        f"- avg_fill_price: {data.get('avg_fill_price', 0.0)}",
+        f"- slippage_bps: {data.get('slippage_bps', 0.0)}",
+        f"- expected_net_edge_bps: {expected_edge}",
+        f"- realized_edge_bps: {realized_edge}",
+        f"- realized_vs_expected_edge_gap_bps: {round(realized_edge - expected_edge, 6)}",
+    ]
+    return "\n".join(lines)
+
 def render_audit_report(decision: DecisionIntent) -> str:
     data = serialize_decision(decision)
     lines = [
