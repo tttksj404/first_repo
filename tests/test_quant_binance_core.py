@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -332,6 +333,44 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("decision_hash", report)
         self.assertIn("gross_expected_edge_bps", report)
         self.assertIn("linked_order_ids", report)
+
+    def test_major_prediction_bias_prefers_btc_eth_when_macro_is_majors_only(self) -> None:
+        major_features = FeatureVector(
+            ret_rank_1h=0.74,
+            ret_rank_4h=0.72,
+            breakout_norm=0.76,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.68,
+            vol_z_1h_norm=0.7,
+            taker_imbalance_norm=0.66,
+            spread_bps_norm=0.2,
+            probe_slippage_bps_norm=0.22,
+            depth_10bps_norm=0.84,
+            book_stability_norm=0.88,
+            realized_vol_1h_norm=0.3,
+            realized_vol_4h_norm=0.28,
+            vol_shock_norm=0.24,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.78,
+            volume_confirmation=0.72,
+            liquidity_score=0.82,
+            volatility_penalty=0.28,
+            overheat_penalty=0.18,
+            gross_expected_edge_bps=20.0,
+            estimated_round_trip_cost_bps=8.0,
+            macro_regime="supportive",
+            macro_trade_restraint="none",
+            macro_symbol_bias="majors_only",
+        )
+        alt_features = replace(major_features)
+        major_prediction = build_strategy_prediction(make_snapshot("BTCUSDT", major_features), self.settings, expected_funding_drag_bps=2.0)
+        alt_prediction = build_strategy_prediction(make_snapshot("SOLUSDT", alt_features), self.settings, expected_funding_drag_bps=2.0)
+        self.assertGreater(major_prediction.futures.predictability_score, alt_prediction.futures.predictability_score)
+        self.assertGreater(major_prediction.futures.net_expected_edge_bps, alt_prediction.futures.net_expected_edge_bps)
 
     def test_strategy_prediction_builds_per_mode_view(self) -> None:
         features = FeatureVector(
