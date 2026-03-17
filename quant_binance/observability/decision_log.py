@@ -73,6 +73,8 @@ def render_outcome_audit_report(outcome: dict[str, Any]) -> str:
         f"- slippage_bps: {data.get('slippage_bps', 0.0)}",
         f"- expected_net_edge_bps: {expected_edge}",
         f"- realized_edge_bps: {realized_edge}",
+        f"- edge_retention_ratio: {round((realized_edge / expected_edge), 6) if expected_edge > 0 else 0.0}",
+        f"- protection_degraded: {bool(data.get('protection_error'))}",
         f"- realized_vs_expected_edge_gap_bps: {round(realized_edge - expected_edge, 6)}",
     ]
     return "\n".join(lines)

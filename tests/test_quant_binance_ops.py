@@ -117,6 +117,8 @@ class QuantBinanceOpsTests(unittest.TestCase):
         self.assertEqual(payload["accepted_live_order_count"], 1)
         self.assertEqual(payload["avg_realized_edge_bps"], 9.0)
         self.assertEqual(payload["avg_expected_edge_bps"], 14.0)
+        self.assertAlmostEqual(payload["avg_edge_retention_ratio"], 9.0 / 14.0, places=6)
+        self.assertEqual(payload["protection_degraded_count"], 0)
         self.assertEqual(payload["realized_vs_expected_edge_gap_bps"], -5.0)
 
     def test_runtime_summary_and_state_write(self) -> None:
