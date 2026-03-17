@@ -613,6 +613,19 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(summary["policy_state"]["status"], "keep")
         self.assertIn(summary["policy_validation"]["status"], {"pass", "fail"})
 
+    def test_load_validation_runner_evidence_reads_report_metrics(self) -> None:
+        import json
+        import tempfile
+        from quant_binance.observability.report import load_validation_runner_evidence, merge_policy_validation_evidence
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "validation_report.json"
+            path.write_text(json.dumps({"max_drawdown_pct": 12.5, "shadow_alignment_score": 0.88, "total_return_pct": 4.2}), encoding="utf-8")
+            evidence = load_validation_runner_evidence(Path(tmpdir))
+            self.assertEqual(evidence["runner_max_drawdown_pct"], 12.5)
+            merged = merge_policy_validation_evidence([], evidence)
+            self.assertEqual(merged["runner_total_return_pct"], 4.2)
+            self.assertEqual(merged["shadow_alignment_score"], 0.88)
+
     def test_runtime_summary_operational_verdict_can_emit_aggressive_pass(self) -> None:
         summary = build_runtime_summary(
             decisions=[],
