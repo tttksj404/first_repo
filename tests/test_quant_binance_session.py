@@ -788,7 +788,98 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(summary["promotion_verdict"]["status"], "keep")
             self.assertEqual(summary["promotion_verdict"]["comparison_verdict"], "candidate_worse")
             self.assertEqual(policy_payload["status"], "rolled_back")
-            self.assertEqual(policy_payload["active_policy"]["status"], "promote_aggressive")
+            self.assertEqual(policy_payload["active_policy"]["status"], "baseline")
+
+    def test_session_flush_persists_pending_micro_live_gate_staging(self) -> None:
+        session = self._build_session()
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 16.0, "realized_edge_bps": 14.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 16.0, "realized_edge_bps": 14.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.5},
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            policy_path = summary_path.with_name("policy_state.json")
+            history_path = summary_path.with_name("policy_history.jsonl")
+            payload = json.loads(policy_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "staged_rollout")
+            self.assertEqual(payload["rollout_status"], "micro_live_pending")
+            history_entries = [json.loads(line) for line in history_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            self.assertEqual(history_entries[-1]["status"], "staged_rollout")
+            self.assertEqual(summary["promotion_verdict"]["status"], "keep")
+            self.assertIn("PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE", summary["promotion_verdict"]["reasons"])
+
+    def test_session_flush_rolls_back_after_post_promotion_retention_degrades(self) -> None:
+        session = self._build_session()
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.9, "expected_net_edge_bps": 12.0, "realized_edge_bps": -1.0},
+            {"symbol": "BTCUSDT", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 10.0, "realized_edge_bps": 0.0},
+            {"symbol": "BTCUSDT", "accepted": False, "fill_status": "reject", "fill_ratio": 0.0, "expected_net_edge_bps": 10.0, "realized_edge_bps": 0.0, "protection_error": "timeout"},
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            summary_path.with_name("policy_state.json").write_text(json.dumps({"version": 2, "active_policy": {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}, "rollout_status": "ready"}), encoding="utf-8")
+            session.flush(summary_path=summary_path, state_path=state_path)
+            payload = json.loads(summary_path.with_name("policy_state.json").read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "rolled_back")
+            self.assertEqual(payload["rollout_reason"], "POST_PROMOTION_RETENTION_DEGRADED")
+            self.assertEqual(payload["retention_monitor"]["status"], "rollback")
+
+    def test_session_flush_recomputes_candidate_policy_from_validation_report_decomposition(self) -> None:
+        session = self._build_session()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            (logs_dir / "closed_trades.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 5.0, "realized_return_bps_estimate": 12.0}),
+                        json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0}),
+                        json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 3.0, "realized_return_bps_estimate": 8.0}),
+                        json.dumps({"symbol": "SOLUSDT", "realized_pnl_usd_estimate": -3.0, "realized_return_bps_estimate": -8.0}),
+                        json.dumps({"symbol": "SOLUSDT", "realized_pnl_usd_estimate": -2.0, "realized_return_bps_estimate": -6.0}),
+                        json.dumps({"symbol": "SOLUSDT", "realized_pnl_usd_estimate": -1.0, "realized_return_bps_estimate": -4.0}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 71.0, "net_expected_edge_bps": 12.5, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:05:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 72.0, "net_expected_edge_bps": 13.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:10:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 73.0, "net_expected_edge_bps": 13.5, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:15:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 74.0, "net_expected_edge_bps": 14.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:20:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 75.0, "net_expected_edge_bps": 14.5, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:25:00+00:00"}),
+                        json.dumps({"symbol": "SOLUSDT", "final_mode": "cash", "predictability_score": 40.0, "net_expected_edge_bps": -1.0, "estimated_round_trip_cost_bps": 10.0, "timestamp": "2026-03-14T00:30:00+00:00", "rejection_reasons": ["LIQUIDITY_TOO_WEAK", "EDGE_TOO_THIN"]}),
+                        json.dumps({"symbol": "SOLUSDT", "final_mode": "cash", "predictability_score": 38.0, "net_expected_edge_bps": -1.5, "estimated_round_trip_cost_bps": 10.0, "timestamp": "2026-03-14T00:35:00+00:00", "rejection_reasons": ["LIQUIDITY_TOO_WEAK", "EDGE_TOO_THIN"]}),
+                        json.dumps({"symbol": "SOLUSDT", "final_mode": "cash", "predictability_score": 39.0, "net_expected_edge_bps": -1.2, "estimated_round_trip_cost_bps": 10.0, "timestamp": "2026-03-14T00:40:00+00:00", "rejection_reasons": ["LIQUIDITY_TOO_WEAK", "EDGE_TOO_THIN"]}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            adjustments = {item["symbol"]: item for item in summary["candidate_policy"]["adjustments"]}
+            self.assertEqual(adjustments["BTCUSDT"]["action"], "aggressive_promote")
+            self.assertEqual(adjustments["SOLUSDT"]["action"], "demote")
+            self.assertIn("runtime_symbol_summary", adjustments["BTCUSDT"]["signal_sources"])
+            self.assertIn("runtime_pruning_recommendation", adjustments["SOLUSDT"]["signal_sources"])
 
     def test_session_flush_rewrites_validation_report_even_when_stale_file_exists(self) -> None:
         session = self._build_session()

@@ -9,7 +9,7 @@ from quant_binance.models import FeatureVector, MarketSnapshot
 from quant_binance.execution.paper_broker import PaperBroker
 from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report, render_outcome_audit_report, render_prediction_report
 from quant_binance.observability.manifest import build_manifest_entry, write_manifest
-from quant_binance.observability.report import build_persisted_policy_state, build_promotion_verdict, build_runtime_summary
+from quant_binance.observability.report import build_auto_tune_policy, build_persisted_policy_state, build_promotion_verdict, build_runtime_summary
 from quant_binance.policy.portfolio import build_portfolio_intent, decision_from_portfolio_intent
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
@@ -674,6 +674,32 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(state["active_policy"]["adjustments"][0]["action"], "disabled")
         self.assertEqual(state["active_policy"]["adjustments"][0]["size_multiplier"], 0.0)
 
+    def test_build_persisted_policy_state_marks_staged_when_micro_live_gate_pending(self) -> None:
+        state = build_persisted_policy_state(
+            {"version": 1, "active_policy": {"status": "baseline", "adjustments": []}},
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]},
+            {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG", "PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE"]},
+            {"status": "pass", "reasons": []},
+            {"status": "pass", "evidence": {"micro_live_gate": {"available": True, "status": "pending", "reason": "MICRO_LIVE_THRESHOLD_NOT_MET"}}},
+        )
+        self.assertEqual(state["status"], "staged_rollout")
+        self.assertEqual(state["rollout_status"], "micro_live_pending")
+        self.assertEqual(state["retention_monitor"]["status"], "armed")
+
+    def test_build_persisted_policy_state_rolls_back_after_post_promotion_retention_degrades(self) -> None:
+        previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
+        state = build_persisted_policy_state(
+            {"version": 3, "active_policy": previous_active, "rollout_status": "ready"},
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "keep", "size_multiplier": 1.0}]},
+            {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]},
+            {"status": "pass", "reasons": []},
+            {"status": "fail", "evidence": {"runner_avg_edge_retention_ratio": 0.3, "runner_drawdown_to_pnl_ratio": 0.9, "runner_reject_rate": 0.25}},
+        )
+        self.assertEqual(state["status"], "rolled_back")
+        self.assertEqual(state["rollout_reason"], "POST_PROMOTION_RETENTION_DEGRADED")
+        self.assertEqual(state["retention_monitor"]["status"], "rollback")
+        self.assertEqual(state["active_policy"]["status"], "baseline")
+
     def test_build_persisted_policy_state_rolls_back_on_candidate_underperformance(self) -> None:
         previous_active = {
             "status": "promote_aggressive",
@@ -702,7 +728,45 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(state["status"], "rolled_back")
         self.assertEqual(state["version"], 5)
-        self.assertEqual(state["active_policy"], previous_active)
+        self.assertEqual(state["active_policy"]["status"], "baseline")
+
+    def test_build_auto_tune_policy_uses_runtime_symbol_and_regime_decomposition(self) -> None:
+        policy = build_auto_tune_policy(
+            [
+                {
+                    "symbol": "XRPUSDT",
+                    "regime": "alt",
+                    "setup_class": "standard_edge",
+                    "side": "long",
+                    "execution_quality_state": "healthy",
+                    "sample_count": 3,
+                    "avg_realized_edge_bps": 6.0,
+                    "avg_edge_retention_ratio": 0.85,
+                    "reject_rate": 0.0,
+                    "protection_degraded_rate": 0.0,
+                }
+            ],
+            {
+                "symbol_summary": [
+                    {"symbol": "BTCUSDT", "trade_count": 3, "expectancy_usd": 4.5, "recommendation": "promote"},
+                    {"symbol": "SOLUSDT", "trade_count": 3, "expectancy_usd": -2.5, "recommendation": "prune"},
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 70.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+                "pruning_recommendations": [
+                    {"symbol": "SOLUSDT", "recommendation": "prune", "decision_count": 4, "trade_count": 3, "avg_net_edge_bps": -1.5, "expectancy_usd": -2.5},
+                ],
+            },
+        )
+        adjustments = {item["symbol"]: item for item in policy["adjustments"]}
+        self.assertEqual(policy["status"], "candidate_ready")
+        self.assertEqual(adjustments["BTCUSDT"]["action"], "aggressive_promote")
+        self.assertEqual(adjustments["BTCUSDT"]["symbol_bias"], "majors_only")
+        self.assertEqual(adjustments["SOLUSDT"]["action"], "demote")
+        self.assertEqual(adjustments["XRPUSDT"]["action"], "promote")
+        self.assertIn("runtime_symbol_summary", adjustments["BTCUSDT"]["signal_sources"])
+        self.assertIn("runtime_pruning_recommendation", adjustments["SOLUSDT"]["signal_sources"])
 
     def test_load_validation_runner_evidence_reads_report_metrics(self) -> None:
         import json
