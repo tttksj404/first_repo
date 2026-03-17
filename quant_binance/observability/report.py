@@ -249,7 +249,7 @@ def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[s
     return [row for row in rows if str(row.get("symbol", "")) in {"BTCUSDT", "ETHUSDT"}]
 
 
-def _build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str, object]:
+def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str, object]:
     live_order_count = int(execution_outcomes.get("accepted_live_order_count", 0)) + int(execution_outcomes.get("rejected_live_order_count", 0))
     if live_order_count <= 0:
         return {
@@ -368,7 +368,7 @@ def build_runtime_summary(
         live_positions=live_positions,
     )
     execution_outcomes = _aggregate_live_order_outcomes(live_orders)
-    operational_verdict = _build_operational_verdict(execution_outcomes)
+    operational_verdict = build_operational_verdict(execution_outcomes)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
