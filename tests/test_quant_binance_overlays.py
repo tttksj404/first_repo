@@ -61,6 +61,7 @@ class QuantBinanceOverlayTests(unittest.TestCase):
             labor_stress_score=0.8,
             event_risk_score=1.0,
             btc_safe_haven_score=0.0,
+            official_high_impact_window=1.0,
         )
         enriched = apply_macro_overlay(features, macro)
         self.assertEqual(enriched.macro_regime, "high_risk")
@@ -68,6 +69,39 @@ class QuantBinanceOverlayTests(unittest.TestCase):
         self.assertEqual(enriched.macro_trade_restraint, "halt_high_impact_window")
         self.assertEqual(enriched.macro_symbol_bias, "majors_only")
         self.assertEqual(enriched.macro_leverage_cap, 1)
+
+    def test_macro_overlay_news_risk_does_not_halt_without_official_high_impact_window(self) -> None:
+        features = FeatureVector(
+            ret_rank_1h=0.8, ret_rank_4h=0.8, breakout_norm=0.8, ema_stack_score=1.0,
+            vol_z_5m_norm=0.7, vol_z_1h_norm=0.7, taker_imbalance_norm=0.7,
+            spread_bps_norm=0.2, probe_slippage_bps_norm=0.2, depth_10bps_norm=0.8,
+            book_stability_norm=0.8, realized_vol_1h_norm=0.3, realized_vol_4h_norm=0.3,
+            vol_shock_norm=0.3, funding_abs_percentile=0.2, oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.2, regime_alignment=1.0, trend_direction=1,
+            trend_strength=0.8, volume_confirmation=0.7, liquidity_score=0.8,
+            volatility_penalty=0.3, overheat_penalty=0.2, gross_expected_edge_bps=30.0,
+            estimated_round_trip_cost_bps=10.0
+        )
+        macro = MacroInputs(
+            truflation_yoy=2.9,
+            us10y_yield=4.8,
+            oil_momentum_pct=13.0,
+            tga_drain_score=0.45,
+            fed_balance_sheet_30d_pct=-0.05,
+            mmf_30d_pct=0.05,
+            labor_stress_score=0.72,
+            event_risk_score=0.65,
+            btc_safe_haven_score=0.95,
+            news_bullish_score=0.95,
+            news_bearish_score=1.0,
+            news_uncertainty_score=0.3125,
+            news_majors_only_bias=1.0,
+            official_high_impact_window=0.0,
+        )
+        enriched = apply_macro_overlay(features, macro)
+        self.assertEqual(enriched.macro_trade_restraint, "pre_event_reduce")
+        self.assertEqual(enriched.macro_size_multiplier, 0.5)
+        self.assertEqual(enriched.macro_leverage_cap, 2)
 
     def test_macro_overlay_marks_supportive_when_dollar_and_rates_fall(self) -> None:
         features = FeatureVector(
