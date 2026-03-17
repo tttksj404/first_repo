@@ -631,6 +631,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("OPERATING_WITH_ELITE_EDGE", summary["operational_verdict"]["reasons"])
         self.assertEqual(summary["promotion_verdict"]["status"], "promote_aggressive")
         self.assertEqual(summary["policy_validation"]["status"], "pass")
+        self.assertIn("evidence", summary["policy_validation"])
 
     def test_runtime_summary_operational_verdict_can_emit_strong_pass(self) -> None:
         summary = build_runtime_summary(

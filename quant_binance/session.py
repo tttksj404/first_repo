@@ -608,6 +608,7 @@ class LivePaperSession:
 
     def _min_expected_profit_usd_threshold(self, decision: DecisionIntent) -> float:
         base_threshold = float(self.runtime.paper_service.settings.risk.min_expected_profit_usd_per_trade)
+        base_threshold = max(0.0, base_threshold + self._policy_expected_profit_floor_adjustment_usd(decision))
         if base_threshold <= 0.0:
             return 0.0
         if (
@@ -620,6 +621,7 @@ class LivePaperSession:
 
     def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float) -> float:
         floor = max(float(configured_floor), 0.0)
+        floor = max(floor + self._policy_entry_floor_adjustment_for_symbol(symbol), 0.0)
         if (
             self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
             and symbol in {"BTCUSDT", "ETHUSDT"}
@@ -719,15 +721,44 @@ class LivePaperSession:
         summary = build_runtime_summary(decisions=[], live_orders=self.live_orders)
         return build_policy_state(summary.get("candidate_policy", {}), summary.get("promotion_verdict", {}))
 
-    def _policy_multiplier_for_decision(self, decision: DecisionIntent) -> float:
+
+    def _policy_adjustment_for_decision(self, decision: DecisionIntent) -> dict[str, object]:
         if len(self.live_orders) < 5:
-            return 1.0
+            return {}
         policy_state = self._current_policy_state()
         for adjustment in list(policy_state.get("active_policy", {}).get("adjustments", [])):
             if str(adjustment.get("symbol", "")) == decision.symbol:
-                action = str(adjustment.get("action", ""))
-                if action in {"promote", "aggressive_promote", "demote", "disabled"}:
-                    return float(adjustment.get("size_multiplier", 1.0) or 1.0)
+                return dict(adjustment)
+        return {}
+
+    def _policy_leverage_multiplier_for_decision(self, decision: DecisionIntent) -> float:
+        adjustment = self._policy_adjustment_for_decision(decision)
+        return float(adjustment.get("leverage_multiplier", 1.0) or 1.0)
+
+
+    def _policy_entry_floor_adjustment_for_symbol(self, symbol: str) -> float:
+        if len(self.live_orders) < 5:
+            return 0.0
+        policy_state = self._current_policy_state()
+        for adjustment in list(policy_state.get("active_policy", {}).get("adjustments", [])):
+            if str(adjustment.get("symbol", "")) == symbol:
+                return float(adjustment.get("entry_threshold_bps", 0.0) or 0.0)
+        return 0.0
+
+    def _policy_entry_floor_adjustment_bps(self, decision: DecisionIntent) -> float:
+        adjustment = self._policy_adjustment_for_decision(decision)
+        return float(adjustment.get("entry_threshold_bps", 0.0) or 0.0)
+
+    def _policy_expected_profit_floor_adjustment_usd(self, decision: DecisionIntent) -> float:
+        adjustment = self._policy_adjustment_for_decision(decision)
+        threshold_bps = float(adjustment.get("expected_profit_floor_bps", 0.0) or 0.0)
+        return decision.order_intent_notional_usd * threshold_bps / 10000.0
+
+    def _policy_multiplier_for_decision(self, decision: DecisionIntent) -> float:
+        adjustment = self._policy_adjustment_for_decision(decision)
+        action = str(adjustment.get("action", ""))
+        if action in {"promote", "aggressive_promote", "demote", "disabled"}:
+            return float(adjustment.get("size_multiplier", 1.0) or 1.0)
         return 1.0
 
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
@@ -895,6 +926,7 @@ class LivePaperSession:
                 estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
                 settings=self.runtime.paper_service.settings,
             )
+            leverage = max(1.0, leverage * self._policy_leverage_multiplier_for_decision(decision))
             execution_headroom = max(0.0, available * (1.0 - reserve_fraction))
             max_notional = max(0.0, execution_headroom * leverage)
             current_futures_notional = sum(
