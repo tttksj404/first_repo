@@ -94,6 +94,43 @@ class QuantBinanceNewsMacroSignalTests(unittest.TestCase):
             self.assertIn("event_risk_score", macro_payload)
             self.assertIn("news_bearish_score", macro_payload)
 
+    def test_build_signal_supportive_majors_uses_stronger_boost(self) -> None:
+        now = datetime(2026, 3, 17, 6, 30, tzinfo=UTC)
+        headlines = (
+            NewsHeadline(
+                title="Bitcoin ETF inflow and dovish Fed hopes support crypto market",
+                published_at=now.isoformat(),
+                source="Example",
+                query_label="etf_flow",
+                categories=("etf_flow", "macro"),
+                bullish_score=2.2,
+                bearish_score=0.2,
+                uncertainty_score=0.1,
+            ),
+            NewsHeadline(
+                title="Rate cut optimism boosts bitcoin adoption narrative",
+                published_at=now.isoformat(),
+                source="Example",
+                query_label="macro",
+                categories=("macro", "liquidity"),
+                bullish_score=1.8,
+                bearish_score=0.0,
+                uncertainty_score=0.0,
+            ),
+        )
+        signal = build_signal(
+            now=now,
+            refresh_reason="scheduled_window",
+            trigger_reasons=("SCHEDULED_WINDOW",),
+            next_scheduled_refresh_at=now,
+            headlines=headlines,
+            official_events=(),
+        )
+        self.assertEqual(signal.entry_policy_bias, "supportive_majors")
+        self.assertEqual(signal.size_multiplier, 1.15)
+        self.assertEqual(signal.leverage_cap, 0)
+
+
 
 if __name__ == "__main__":
     unittest.main()
