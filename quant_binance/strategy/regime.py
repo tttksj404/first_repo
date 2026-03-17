@@ -67,6 +67,35 @@ def _mode_prediction_from_features(*, mode: str, features: FeatureVector) -> Mod
 
 
 
+def _major_prediction_specialist_adjustment(*, symbol: str, prediction: ModePrediction) -> ModePrediction:
+    if symbol not in BTC_ETH_SYMBOLS or prediction.mode != "futures" or prediction.side == "flat":
+        return prediction
+
+    score_boost = 0.0
+    edge_boost = 0.0
+    if prediction.trend_strength >= 0.75 and prediction.volume_confirmation >= 0.68:
+        score_boost += 1.5
+        edge_boost += 1.0
+    if prediction.liquidity_score >= 0.8 and prediction.volatility_penalty <= 0.32:
+        score_boost += 1.0
+        edge_boost += 0.75
+    if prediction.estimated_round_trip_cost_bps > 0 and prediction.gross_expected_edge_bps / prediction.estimated_round_trip_cost_bps >= 1.8:
+        score_boost += 1.0
+        edge_boost += 0.75
+    if prediction.macro_symbol_bias == "majors_only" and prediction.macro_regime == "supportive":
+        score_boost += 1.0
+        edge_boost += 0.5
+
+    if score_boost == 0.0 and edge_boost == 0.0:
+        return prediction
+    return replace(
+        prediction,
+        predictability_score=round(min(100.0, prediction.predictability_score + score_boost), 6),
+        gross_expected_edge_bps=round(prediction.gross_expected_edge_bps + edge_boost, 6),
+        net_expected_edge_bps=round(prediction.net_expected_edge_bps + edge_boost, 6),
+    )
+
+
 def _apply_major_prediction_bias(*, symbol: str, prediction: ModePrediction) -> ModePrediction:
     if symbol not in BTC_ETH_SYMBOLS:
         return prediction
@@ -127,7 +156,10 @@ def build_strategy_prediction(
     )
     candidate_mode = _candidate_mode(futures_features, settings)
     spot_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="spot", features=spot_features))
-    futures_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="futures", features=futures_features))
+    futures_prediction = _major_prediction_specialist_adjustment(
+        symbol=snapshot.symbol,
+        prediction=_apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="futures", features=futures_features)),
+    )
     candidate_mode = _select_major_candidate_mode(
         symbol=snapshot.symbol,
         candidate_mode=candidate_mode,
