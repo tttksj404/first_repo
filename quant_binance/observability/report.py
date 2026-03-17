@@ -730,6 +730,7 @@ def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, ob
                 "runner_avg_slippage_bps",
                 "runner_avg_edge_retention_ratio",
                 "micro_live_gate",
+                "runner_positive_walk_forward_ratio",
             )
         ),
         "realized_pnl_usd": float(payload.get("runner_total_realized_pnl_usd", payload.get("runner_total_return_pct", 0.0)) or 0.0),
@@ -738,6 +739,9 @@ def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, ob
         "avg_slippage_bps": float(payload.get("runner_avg_slippage_bps", 0.0) or 0.0),
         "avg_realized_edge_bps": float(payload.get("runner_avg_realized_edge_bps", payload.get("avg_realized_edge_bps", 0.0)) or 0.0),
         "avg_edge_retention_ratio": float(payload.get("runner_avg_edge_retention_ratio", payload.get("avg_retention", 0.0)) or 0.0),
+        "walk_forward_window_count": int(payload.get("runner_walk_forward_window_count", len(list(payload.get("walk_forward_windows", []) or []))) or 0),
+        "positive_walk_forward_window_count": int(payload.get("runner_positive_walk_forward_window_count", 0) or 0),
+        "positive_walk_forward_ratio": float(payload.get("runner_positive_walk_forward_ratio", 0.0) or 0.0),
         "micro_live_gate": dict(payload.get("micro_live_gate", {}) or {}),
     }
 
@@ -830,6 +834,8 @@ def build_promotion_verdict(
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_SLIPPAGE"]}
         elif float(runner_quality["avg_edge_retention_ratio"]) < 0.55:
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_EDGE_RETENTION"]}
+        elif int(runner_quality["walk_forward_window_count"]) >= 2 and float(runner_quality["positive_walk_forward_ratio"]) < 0.5:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_WALK_FORWARD"]}
         elif bool(micro_live_gate.get("available")) and str(micro_live_gate.get("status", "")) != "pass":
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE"]}
         elif verdict["status"] == "promote_aggressive" and (
@@ -837,6 +843,7 @@ def build_promotion_verdict(
             or float(runner_quality["reject_rate"]) > 0.03
             or float(runner_quality["avg_slippage_bps"]) > 8.0
             or float(runner_quality["avg_edge_retention_ratio"]) < 0.75
+            or (int(runner_quality["walk_forward_window_count"]) >= 2 and float(runner_quality["positive_walk_forward_ratio"]) < 0.75)
         ):
             verdict = {"status": "promote", "reasons": reasons + ["AGGRESSIVE_PROMOTION_DOWNGRADED_BY_RUNTIME_EVIDENCE"]}
     if comparison_verdict != "keep" or comparison_delta != 0.0:
@@ -914,6 +921,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "metric_comparisons",
             "candidate_replay_summary",
             "current_replay_summary",
+            "counterfactual_replay_path",
         ):
             if key in payload and key not in evidence:
                 evidence[key] = payload[key]
@@ -1023,6 +1031,11 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         if float(runner_quality["avg_edge_retention_ratio"]) < 0.55:
             status = "fail"
             reasons.append("RUNNER_EDGE_RETENTION_BELOW_LIMIT")
+        if int(runner_quality["walk_forward_window_count"]) >= 2 and float(runner_quality["positive_walk_forward_ratio"]) < 0.5:
+            status = "fail"
+            reasons.append("RUNNER_WALK_FORWARD_SUPPORT_TOO_WEAK")
+        elif int(runner_quality["walk_forward_window_count"]) >= 2 and float(runner_quality["positive_walk_forward_ratio"]) >= 0.75:
+            reasons.append("RUNNER_WALK_FORWARD_SUPPORT_STRONG")
         micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
         if (
             verdict_status in {"promote", "promote_aggressive"}
@@ -1047,6 +1060,8 @@ def _retention_monitor(previous_active: dict[str, object], validation_evidence: 
     drawdown_ratio = float(runner_quality.get("drawdown_ratio", 0.0) or 0.0)
     reject_rate = float(runner_quality.get("reject_rate", 0.0) or 0.0)
     slippage = float(runner_quality.get("avg_slippage_bps", 0.0) or 0.0)
+    walk_forward_window_count = int(runner_quality.get("walk_forward_window_count", 0) or 0)
+    positive_walk_forward_ratio = float(runner_quality.get("positive_walk_forward_ratio", 0.0) or 0.0)
     operational_status = str(operational_verdict.get("status", "hold") or "hold")
     if operational_status == "stop":
         reasons.append("RETENTION_MONITOR_OPERATIONAL_STOP")
@@ -1058,12 +1073,16 @@ def _retention_monitor(previous_active: dict[str, object], validation_evidence: 
         reasons.append("RETENTION_MONITOR_DRAWDOWN_TOO_HIGH")
     if reject_rate > 0.15:
         reasons.append("RETENTION_MONITOR_REJECT_RATE_TOO_HIGH")
+    if walk_forward_window_count >= 3 and positive_walk_forward_ratio < 0.34:
+        reasons.append("RETENTION_MONITOR_WALK_FORWARD_COLLAPSED")
     metrics = {
         "avg_edge_retention_ratio": round(retention, 6),
         "realized_pnl_usd": round(realized, 6),
         "drawdown_ratio": round(drawdown_ratio, 6),
         "reject_rate": round(reject_rate, 6),
         "avg_slippage_bps": round(slippage, 6),
+        "walk_forward_window_count": walk_forward_window_count,
+        "positive_walk_forward_ratio": round(positive_walk_forward_ratio, 6),
     }
     if reasons:
         return {"status": "rollback", "reasons": reasons, "metrics": metrics}
@@ -1078,6 +1097,8 @@ def _retention_monitor(previous_active: dict[str, object], validation_evidence: 
         moderate_reasons.append("RETENTION_MONITOR_REJECT_RATE_ELEVATED")
     if slippage > 10.0:
         moderate_reasons.append("RETENTION_MONITOR_SLIPPAGE_ELEVATED")
+    if walk_forward_window_count >= 2 and positive_walk_forward_ratio < 0.5:
+        moderate_reasons.append("RETENTION_MONITOR_WALK_FORWARD_WEAK")
     if moderate_reasons:
         return {"status": "demote", "reasons": moderate_reasons, "metrics": metrics}
     return {"status": "stable", "reasons": [], "metrics": metrics}
@@ -1118,6 +1139,119 @@ def _annotate_active_policy(
     annotated["micro_live_gate"] = dict(promotion_verdict.get("micro_live_gate", {}) or {})
     annotated["retention_monitor_status"] = str(retention_monitor.get("status", "inactive") or "inactive")
     return annotated
+
+
+def _rollout_progression_signal(
+    *,
+    previous_state: dict[str, object],
+    active_policy: dict[str, object],
+    promotion_verdict: dict[str, object],
+    validation_evidence: dict[str, object],
+    retention_monitor: dict[str, object],
+    rollout_status: str,
+    rollout_reason: str,
+) -> dict[str, object]:
+    previous_progress = dict(previous_state.get("rollout_progression", {}) or {})
+    previous_status = str(previous_progress.get("status", previous_state.get("rollout_status", "baseline")) or "baseline")
+    active_status = str(active_policy.get("status", "baseline") or "baseline")
+    requested_status = str(promotion_verdict.get("requested_status", promotion_verdict.get("status", "keep")) or "keep")
+    effective_status = str(promotion_verdict.get("effective_status", promotion_verdict.get("status", "keep")) or "keep")
+    runner_quality = _runner_quality_evidence(validation_evidence)
+    micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+    live_order_count = int(micro_live_gate.get("live_order_count", 0) or 0)
+    closed_trade_count = int(micro_live_gate.get("closed_trade_count", 0) or 0)
+    required_live_order_count = int(micro_live_gate.get("required_live_order_count", 2) or 2)
+    required_closed_trade_count = int(micro_live_gate.get("required_closed_trade_count", 1) or 1)
+    walk_forward_window_count = int(runner_quality.get("walk_forward_window_count", 0) or 0)
+    positive_walk_forward_ratio = float(runner_quality.get("positive_walk_forward_ratio", 0.0) or 0.0)
+    progression_phase = "baseline"
+    progression_status = rollout_status or "baseline"
+    progression_reason = rollout_reason or "NO_ACTIVE_POLICY"
+    if rollout_status == "micro_live_pending":
+        progression_phase = "staged_rollout"
+        if not bool(micro_live_gate.get("available")) or live_order_count <= 0:
+            progression_status = "awaiting_micro_live_orders"
+            progression_reason = "MICRO_LIVE_ORDERS_REQUIRED"
+        elif live_order_count < required_live_order_count:
+            progression_status = "collecting_micro_live_orders"
+            progression_reason = "MICRO_LIVE_ORDER_SAMPLE_INCOMPLETE"
+        elif closed_trade_count < required_closed_trade_count:
+            progression_status = "collecting_micro_live_outcomes"
+            progression_reason = "MICRO_LIVE_CLOSED_TRADE_REQUIRED"
+        else:
+            progression_status = "micro_live_quality_review"
+            progression_reason = str(micro_live_gate.get("reason", "MICRO_LIVE_THRESHOLD_NOT_MET") or "MICRO_LIVE_THRESHOLD_NOT_MET")
+    elif str(retention_monitor.get("status", "inactive") or "inactive") == "rollback":
+        progression_phase = "post_promotion_monitoring"
+        progression_status = "rollback_triggered"
+        progression_reason = "POST_PROMOTION_MONITOR_TRIGGERED_ROLLBACK"
+    elif str(retention_monitor.get("status", "inactive") or "inactive") == "demote":
+        progression_phase = "post_promotion_monitoring"
+        progression_status = "demotion_watch"
+        progression_reason = "POST_PROMOTION_MONITOR_TRIGGERED_DEMOTION"
+    elif active_status in {"promote", "promote_aggressive"}:
+        progression_phase = "post_promotion_monitoring"
+        if str(retention_monitor.get("status", "inactive") or "inactive") == "armed":
+            progression_status = "post_promotion_monitoring"
+            progression_reason = "POST_PROMOTION_MONITORING_ACTIVE"
+        elif (
+            walk_forward_window_count >= 2
+            and positive_walk_forward_ratio >= 0.75
+            and float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0) >= 0.75
+            and float(runner_quality.get("drawdown_ratio", 0.0) or 0.0) <= 0.35
+            and float(runner_quality.get("reject_rate", 0.0) or 0.0) <= 0.05
+        ):
+            progression_status = "expansion_ready"
+            progression_reason = "POST_PROMOTION_EVIDENCE_STRONG"
+        else:
+            progression_status = "promotion_live"
+            progression_reason = "PROMOTION_ACTIVE_UNDER_MONITORING"
+    elif requested_status in {"promote", "promote_aggressive"} or previous_status == "micro_live_pending":
+        progression_phase = "staged_rollout"
+        if not bool(micro_live_gate.get("available")) or live_order_count <= 0:
+            progression_status = "awaiting_micro_live_orders"
+            progression_reason = "MICRO_LIVE_ORDERS_REQUIRED"
+        elif live_order_count < required_live_order_count:
+            progression_status = "collecting_micro_live_orders"
+            progression_reason = "MICRO_LIVE_ORDER_SAMPLE_INCOMPLETE"
+        elif closed_trade_count < required_closed_trade_count:
+            progression_status = "collecting_micro_live_outcomes"
+            progression_reason = "MICRO_LIVE_CLOSED_TRADE_REQUIRED"
+        elif str(micro_live_gate.get("status", "")) != "pass":
+            progression_status = "micro_live_quality_review"
+            progression_reason = str(micro_live_gate.get("reason", "MICRO_LIVE_THRESHOLD_NOT_MET") or "MICRO_LIVE_THRESHOLD_NOT_MET")
+        elif effective_status in {"promote", "promote_aggressive"}:
+            progression_status = "ready_for_expansion"
+            progression_reason = "MICRO_LIVE_GATE_PASSED"
+        else:
+            progression_status = "promotion_review"
+            progression_reason = "PROMOTION_PENDING_FINAL_DECISION"
+    elif effective_status == "demote":
+        progression_phase = "demotion"
+        progression_status = "demotion_active"
+        progression_reason = rollout_reason or "DEMOTION_VALIDATED"
+    elif effective_status == "disable":
+        progression_phase = "disabled"
+        progression_status = "disabled"
+        progression_reason = rollout_reason or "CANDIDATE_DISABLED"
+    return {
+        "phase": progression_phase,
+        "status": progression_status,
+        "reason": progression_reason,
+        "previous_status": previous_status,
+        "evidence": {
+            "live_order_count": live_order_count,
+            "closed_trade_count": closed_trade_count,
+            "required_live_order_count": required_live_order_count,
+            "required_closed_trade_count": required_closed_trade_count,
+            "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
+            "walk_forward_window_count": walk_forward_window_count,
+            "positive_walk_forward_ratio": round(positive_walk_forward_ratio, 6),
+            "avg_edge_retention_ratio": round(float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0), 6),
+            "drawdown_ratio": round(float(runner_quality.get("drawdown_ratio", 0.0) or 0.0), 6),
+            "reject_rate": round(float(runner_quality.get("reject_rate", 0.0) or 0.0), 6),
+        },
+    }
 
 
 def build_persisted_policy_state(
@@ -1209,11 +1343,23 @@ def build_persisted_policy_state(
         rollout_status = "baseline"
         rollout_reason = "NO_ACTIVE_POLICY"
         version = previous_version
+    rollout_progression = _rollout_progression_signal(
+        previous_state=previous_state,
+        active_policy=active_policy,
+        promotion_verdict=promotion_verdict,
+        validation_evidence=validation_evidence,
+        retention_monitor=retention_monitor,
+        rollout_status=rollout_status,
+        rollout_reason=rollout_reason,
+    )
+    active_policy = _annotate_active_policy(active_policy, promotion_verdict, retention_monitor)
+    active_policy["rollout_progression"] = rollout_progression
     return {
         "version": version,
         "status": lifecycle,
         "rollout_status": rollout_status,
         "rollout_reason": rollout_reason,
+        "rollout_progression": rollout_progression,
         "retention_monitor": retention_monitor,
         "active_policy": active_policy,
         "candidate_policy": candidate_policy,
@@ -1232,6 +1378,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "rollout_status": policy_state.get("rollout_status", "unknown"),
         "rollout_reason": policy_state.get("rollout_reason", "unknown"),
         "retention_monitor": dict(policy_state.get("retention_monitor", {}) or {}),
+        "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
         "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
         "active_policy_status": str(dict(policy_state.get("active_policy", {}) or {}).get("status", "unknown")),
