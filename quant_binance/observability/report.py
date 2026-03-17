@@ -245,6 +245,129 @@ def _aggregate_live_order_outcomes(live_orders: list[dict[str, object]] | tuple[
         "execution_audit_by_symbol": rows,
     }
 
+
+
+def _performance_bucket(order: dict[str, object]) -> tuple[str, str, str, str, str]:
+    symbol = str(order.get("symbol", "") or "UNKNOWN")
+    side = str(order.get("side", "") or "unknown")
+    regime = "major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt"
+    expected = float(order.get("expected_net_edge_bps", order.get("net_expected_edge_bps", 0.0)) or 0.0)
+    fill_ratio = float(order.get("fill_ratio", 0.0) or 0.0)
+    setup_class = "high_edge" if expected >= 15.0 else "standard_edge"
+    execution_quality_state = "degraded" if order.get("protection_error") or fill_ratio < 0.85 or not bool(order.get("accepted", False)) else "healthy"
+    return symbol, regime, setup_class, side, execution_quality_state
+
+
+def build_performance_attribution(live_orders: list[dict[str, object]] | tuple[dict[str, object], ...] | None) -> list[dict[str, object]]:
+    orders = list(live_orders or [])
+    buckets: dict[tuple[str, str, str, str, str], dict[str, float | int | str]] = defaultdict(
+        lambda: {
+            "symbol": "",
+            "regime": "",
+            "setup_class": "",
+            "side": "",
+            "execution_quality_state": "",
+            "sample_count": 0,
+            "accepted_count": 0,
+            "rejected_count": 0,
+            "realized_edge_sum": 0.0,
+            "expected_edge_sum": 0.0,
+            "retention_sum": 0.0,
+            "retention_count": 0,
+            "protection_degraded_count": 0,
+        }
+    )
+    for order in orders:
+        key = _performance_bucket(order)
+        row = buckets[key]
+        row["symbol"], row["regime"], row["setup_class"], row["side"], row["execution_quality_state"] = key
+        row["sample_count"] = int(row["sample_count"]) + 1
+        if bool(order.get("accepted", False)):
+            row["accepted_count"] = int(row["accepted_count"]) + 1
+        else:
+            row["rejected_count"] = int(row["rejected_count"]) + 1
+        expected = float(order.get("expected_net_edge_bps", order.get("net_expected_edge_bps", 0.0)) or 0.0)
+        realized = float(order.get("realized_edge_bps", 0.0) or 0.0)
+        row["expected_edge_sum"] = float(row["expected_edge_sum"]) + expected
+        row["realized_edge_sum"] = float(row["realized_edge_sum"]) + realized
+        if expected > 0.0:
+            row["retention_sum"] = float(row["retention_sum"]) + max(min(realized / expected, 2.0), -2.0)
+            row["retention_count"] = int(row["retention_count"]) + 1
+        if order.get("protection_error"):
+            row["protection_degraded_count"] = int(row["protection_degraded_count"]) + 1
+    rows: list[dict[str, object]] = []
+    for row in buckets.values():
+        sample_count = int(row["sample_count"])
+        accepted_count = int(row["accepted_count"])
+        rejected_count = int(row["rejected_count"])
+        retention_count = int(row["retention_count"])
+        rows.append({
+            "symbol": row["symbol"],
+            "regime": row["regime"],
+            "setup_class": row["setup_class"],
+            "side": row["side"],
+            "execution_quality_state": row["execution_quality_state"],
+            "sample_count": sample_count,
+            "avg_realized_edge_bps": round(float(row["realized_edge_sum"]) / sample_count, 6) if sample_count else 0.0,
+            "avg_expected_edge_bps": round(float(row["expected_edge_sum"]) / sample_count, 6) if sample_count else 0.0,
+            "avg_edge_retention_ratio": round(float(row["retention_sum"]) / retention_count, 6) if retention_count else 0.0,
+            "reject_rate": round(rejected_count / sample_count, 6) if sample_count else 0.0,
+            "protection_degraded_rate": round(int(row["protection_degraded_count"]) / sample_count, 6) if sample_count else 0.0,
+        })
+    rows.sort(key=lambda item: (str(item["symbol"]), str(item["setup_class"]), str(item["side"]), str(item["execution_quality_state"])))
+    return rows
+
+
+def build_auto_tune_policy(attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...]) -> dict[str, object]:
+    adjustments: list[dict[str, object]] = []
+    for row in attribution_rows:
+        sample_count = int(row.get("sample_count", 0) or 0)
+        if sample_count < 3:
+            continue
+        retention = float(row.get("avg_edge_retention_ratio", 0.0) or 0.0)
+        realized = float(row.get("avg_realized_edge_bps", 0.0) or 0.0)
+        reject_rate = float(row.get("reject_rate", 0.0) or 0.0)
+        degraded_rate = float(row.get("protection_degraded_rate", 0.0) or 0.0)
+        action = "keep"
+        size_multiplier = 1.0
+        reason = "STABLE"
+        if retention < 0.5 or realized <= 0.0 or reject_rate > 0.1 or degraded_rate > 0.1:
+            action = "demote"
+            size_multiplier = 0.75
+            reason = "WEAK_ATTRIBUTION"
+        elif retention >= 0.8 and realized > 0.0 and reject_rate <= 0.03 and degraded_rate <= 0.03:
+            action = "promote"
+            size_multiplier = 1.1
+            reason = "STRONG_ATTRIBUTION"
+        adjustments.append({
+            "symbol": row.get("symbol", ""),
+            "regime": row.get("regime", ""),
+            "setup_class": row.get("setup_class", ""),
+            "side": row.get("side", ""),
+            "execution_quality_state": row.get("execution_quality_state", ""),
+            "sample_count": sample_count,
+            "action": action,
+            "size_multiplier": size_multiplier,
+            "reason": reason,
+        })
+    policy_status = "insufficient_data" if not adjustments else "candidate_ready"
+    return {"status": policy_status, "adjustments": adjustments}
+
+
+def build_promotion_verdict(candidate_policy: dict[str, object]) -> dict[str, object]:
+    adjustments = list(candidate_policy.get("adjustments", []))
+    if not adjustments:
+        return {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
+    promote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "promote")
+    demote_count = sum(1 for item in adjustments if str(item.get("action", "")) == "demote")
+    if demote_count > 0 and promote_count == 0:
+        return {"status": "demote", "reasons": ["CANDIDATE_POLICY_WEAK"]}
+    if promote_count > 0 and demote_count == 0:
+        return {"status": "promote", "reasons": ["CANDIDATE_POLICY_STRONG"]}
+    if demote_count >= promote_count + 2:
+        return {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]}
+    return {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
+
 def _major_symbol_operational_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     return [row for row in rows if str(row.get("symbol", "")) in {"BTCUSDT", "ETHUSDT"}]
 
@@ -386,6 +509,9 @@ def build_runtime_summary(
         live_positions=live_positions,
     )
     execution_outcomes = _aggregate_live_order_outcomes(live_orders)
+    performance_attribution = build_performance_attribution(live_orders)
+    candidate_policy = build_auto_tune_policy(performance_attribution)
+    promotion_verdict = build_promotion_verdict(candidate_policy)
     operational_verdict = build_operational_verdict(execution_outcomes)
     rejection_counts = Counter()
     for decision in decisions:
@@ -435,6 +561,9 @@ def build_runtime_summary(
         "live_order_count": len(live_orders or []),
         "live_orders": live_orders or [],
         **execution_outcomes,
+        "performance_attribution": performance_attribution,
+        "candidate_policy": candidate_policy,
+        "promotion_verdict": promotion_verdict,
         "operational_verdict": operational_verdict,
         "account_snapshot": account_snapshot or {},
         "open_orders_snapshot": open_orders_snapshot or {},
