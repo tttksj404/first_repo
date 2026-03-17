@@ -65,6 +65,36 @@ def _mode_prediction_from_features(*, mode: str, features: FeatureVector) -> Mod
     )
 
 
+
+
+def _apply_major_prediction_bias(*, symbol: str, prediction: ModePrediction) -> ModePrediction:
+    if symbol not in BTC_ETH_SYMBOLS:
+        return prediction
+
+    score_boost = 0.0
+    edge_boost = 0.0
+    if prediction.macro_symbol_bias == "majors_only":
+        score_boost += 3.0
+        edge_boost += 2.0
+    if prediction.macro_trade_restraint == "none":
+        score_boost += 1.0
+    if prediction.macro_regime == "supportive":
+        score_boost += 1.5
+        edge_boost += 1.0
+    if prediction.mode == "futures" and prediction.side != "flat":
+        score_boost += 1.0
+        edge_boost += 0.5
+
+    if score_boost == 0.0 and edge_boost == 0.0:
+        return prediction
+
+    return replace(
+        prediction,
+        predictability_score=round(min(100.0, prediction.predictability_score + score_boost), 6),
+        gross_expected_edge_bps=round(prediction.gross_expected_edge_bps + edge_boost, 6),
+        net_expected_edge_bps=round(prediction.net_expected_edge_bps + edge_boost, 6),
+    )
+
 def build_strategy_prediction(
     snapshot: MarketSnapshot,
     settings: Settings,
@@ -86,6 +116,8 @@ def build_strategy_prediction(
     selected_mode_hint = candidate_mode
     if candidate_mode == "cash" and spot_features.predictability_score >= settings.mode_thresholds.spot_score_min:
         selected_mode_hint = "spot"
+    spot_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="spot", features=spot_features))
+    futures_prediction = _apply_major_prediction_bias(symbol=snapshot.symbol, prediction=_mode_prediction_from_features(mode="futures", features=futures_features))
     return StrategyPrediction(
         prediction_id=str(uuid4()),
         snapshot_id=snapshot.snapshot_id,
@@ -93,8 +125,8 @@ def build_strategy_prediction(
         timestamp=snapshot.decision_time,
         symbol=snapshot.symbol,
         candidate_mode=candidate_mode,
-        spot=_mode_prediction_from_features(mode="spot", features=spot_features),
-        futures=_mode_prediction_from_features(mode="futures", features=futures_features),
+        spot=spot_prediction,
+        futures=futures_prediction,
         selected_mode_hint=selected_mode_hint,
     )
 
