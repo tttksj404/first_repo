@@ -429,9 +429,9 @@ class LivePaperSession:
         summary["execution_quality"] = self._execution_quality_snapshot()
         run_dir = Path(summary_path).parent
         base_dir = run_dir.parents[2] if len(run_dir.parents) >= 3 else run_dir
+        write_runtime_summary(summary_path, summary)
         validation_report_path = run_dir / "validation_report.json"
-        if not validation_report_path.exists():
-            write_policy_validation_runner_artifact(base_dir=base_dir, output_path=validation_report_path)
+        write_policy_validation_runner_artifact(base_dir=base_dir, output_path=validation_report_path)
         previous_policy_state = self._read_persisted_policy_state()
         comparison_report_path = run_dir / "policy_comparison.json"
         write_policy_comparison_validation_artifact(
