@@ -100,8 +100,8 @@ class QuantBinanceOverlayTests(unittest.TestCase):
         )
         enriched = apply_macro_overlay(features, macro)
         self.assertEqual(enriched.macro_trade_restraint, "pre_event_reduce")
-        self.assertEqual(enriched.macro_size_multiplier, 0.5)
-        self.assertEqual(enriched.macro_leverage_cap, 2)
+        self.assertEqual(enriched.macro_size_multiplier, 0.65)
+        self.assertEqual(enriched.macro_leverage_cap, 3)
 
     def test_macro_overlay_marks_supportive_when_dollar_and_rates_fall(self) -> None:
         features = FeatureVector(
