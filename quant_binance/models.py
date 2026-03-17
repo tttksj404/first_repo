@@ -88,6 +88,51 @@ class MarketSnapshot:
 
 
 @dataclass(frozen=True)
+class ModePrediction:
+    mode: str
+    side: str
+    predictability_score: float
+    gross_expected_edge_bps: float
+    net_expected_edge_bps: float
+    estimated_round_trip_cost_bps: float
+    trend_direction: int
+    trend_strength: float
+    volume_confirmation: float
+    liquidity_score: float
+    volatility_penalty: float
+    overheat_penalty: float
+    macro_regime: str = "neutral"
+    macro_trade_restraint: str = "none"
+    macro_size_multiplier: float = 1.0
+    macro_leverage_cap: int = 0
+    macro_symbol_bias: str = "neutral"
+    eligibility_reasons: tuple[str, ...] = field(default_factory=tuple)
+    constraint_reasons: tuple[str, ...] = field(default_factory=tuple)
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class StrategyPrediction:
+    prediction_id: str
+    snapshot_id: str
+    config_version: str
+    timestamp: datetime
+    symbol: str
+    candidate_mode: str
+    spot: ModePrediction
+    futures: ModePrediction
+    selected_mode_hint: str = ""
+    prediction_schema_version: str = "1.0.0"
+
+    def as_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        data["timestamp"] = self.timestamp.isoformat()
+        return data
+
+
+@dataclass(frozen=True)
 class DecisionIntent:
     decision_id: str
     decision_hash: str

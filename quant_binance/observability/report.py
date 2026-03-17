@@ -157,9 +157,14 @@ def build_runtime_summary(
     recent_decisions = [
         {
             "symbol": decision.symbol,
+            "candidate_mode": decision.candidate_mode,
             "mode": decision.final_mode,
             "side": decision.side,
             "score": round(decision.predictability_score, 2),
+            "net_expected_edge_bps": round(decision.net_expected_edge_bps, 6),
+            "estimated_round_trip_cost_bps": round(decision.estimated_round_trip_cost_bps, 6),
+            "macro_trade_restraint": decision.macro_trade_restraint,
+            "execution_quality_trade_restraint": decision.execution_quality_trade_restraint,
             "strategy_size_multiplier": round(decision.strategy_size_multiplier, 6),
             "entry_relaxations": list(decision.entry_relaxation_reasons[:4]),
             "size_boost_reasons": list(decision.size_boost_reasons[:4]),
