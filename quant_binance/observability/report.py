@@ -942,12 +942,20 @@ def merge_policy_validation_evidence(
     evidence = _replay_like_validation_evidence(attribution_rows)
     for key, value in dict(runner_evidence or {}).items():
         evidence[key] = value
+    has_attribution_rows = bool(list(attribution_rows))
     runner_max_drawdown_pct = float(evidence.get("runner_max_drawdown_pct", 0.0) or 0.0)
     if runner_max_drawdown_pct > 0.0:
-        evidence["replay_like_drawdown_ratio"] = round(max(float(evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0), runner_max_drawdown_pct / 100.0), 6)
+        runner_drawdown_ratio = runner_max_drawdown_pct / 100.0
+        if has_attribution_rows:
+            evidence["replay_like_drawdown_ratio"] = round(max(float(evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0), runner_drawdown_ratio), 6)
+        else:
+            evidence["replay_like_drawdown_ratio"] = round(runner_drawdown_ratio, 6)
     runner_shadow_alignment_score = float(evidence.get("runner_shadow_alignment_score", 0.0) or 0.0)
     if runner_shadow_alignment_score > 0.0:
-        evidence["shadow_alignment_score"] = round(min(max(float(evidence.get("shadow_alignment_score", 0.0) or 0.0), runner_shadow_alignment_score), 1.0), 6)
+        if has_attribution_rows:
+            evidence["shadow_alignment_score"] = round(min(max(float(evidence.get("shadow_alignment_score", 0.0) or 0.0), runner_shadow_alignment_score), 1.0), 6)
+        else:
+            evidence["shadow_alignment_score"] = round(min(max(runner_shadow_alignment_score, 0.0), 1.0), 6)
     candidate_delta = float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0)
     if candidate_delta > 0.1:
         evidence["comparison_alignment_score"] = round(min(1.0, 0.5 + candidate_delta), 6)
@@ -988,10 +996,12 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     verdict_status = str(promotion_verdict.get("status", "keep"))
     requested_status = str(promotion_verdict.get("requested_status", verdict_status) or verdict_status)
     operational_status = str(operational_verdict.get("status", "hold"))
+    operational_reasons = list(operational_verdict.get("reasons", []) or [])
     evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
     runner_quality = _runner_quality_evidence(evidence)
     reasons: list[str] = []
     status = "fail"
+    pending_due_to_warmup = False
     if not candidate_adjustments:
         reasons.append("NO_CANDIDATE_ADJUSTMENTS")
     else:
@@ -1002,8 +1012,12 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("OPERATIONAL_STOP_ACTIVE")
     elif operational_status == "hold" and verdict_status in {"promote", "promote_aggressive"}:
         reasons.append("PROMOTION_BLOCKED_BY_HOLD")
+        if "INSUFFICIENT_SAMPLE" in operational_reasons:
+            pending_due_to_warmup = True
+            reasons.append("OPERATIONAL_SAMPLE_STILL_WARMING_UP")
     elif requested_status in {"promote", "promote_aggressive"} and str(promotion_verdict.get("rollout_stage", "")) == "staged_rollout":
         reasons.append("PROMOTION_STAGED_PENDING_MICRO_LIVE")
+        pending_due_to_warmup = True
     elif verdict_status in {"promote", "promote_aggressive", "demote"}:
         reasons.append("PROMOTION_PATH_VALIDATED")
     else:
@@ -1021,7 +1035,8 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("CANDIDATE_OUTPERFORMS_CURRENT_POLICY")
     if bool(runner_quality.get("available")):
         micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
-        if float(runner_quality["realized_pnl_usd"]) <= 0.0 and str(micro_live_gate.get("status", "")) != "pending":
+        micro_live_status = str(micro_live_gate.get("status", "") or "")
+        if float(runner_quality["realized_pnl_usd"]) <= 0.0 and micro_live_status != "pending":
             status = "fail"
             reasons.append("RUNNER_REALIZED_PNL_NOT_POSITIVE")
         if float(runner_quality["drawdown_ratio"]) > 0.75:
@@ -1041,14 +1056,19 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
             reasons.append("RUNNER_WALK_FORWARD_SUPPORT_TOO_WEAK")
         elif int(runner_quality["walk_forward_window_count"]) >= 2 and float(runner_quality["positive_walk_forward_ratio"]) >= 0.75:
             reasons.append("RUNNER_WALK_FORWARD_SUPPORT_STRONG")
-        micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
         if (
             verdict_status in {"promote", "promote_aggressive"}
             and bool(micro_live_gate.get("available"))
-            and str(micro_live_gate.get("status", "")) != "pass"
+            and micro_live_status != "pass"
         ):
-            status = "fail"
             reasons.append("MICRO_LIVE_GATE_NOT_PASSED")
+            if micro_live_status == "pending":
+                pending_due_to_warmup = True
+                reasons.append("MICRO_LIVE_EVIDENCE_STILL_ACCUMULATING")
+            else:
+                status = "fail"
+    if status == "pass" and pending_due_to_warmup:
+        status = "pending"
     return {"status": status, "reasons": reasons, "evidence": evidence}
 
 
@@ -1594,7 +1614,7 @@ def build_persisted_policy_state(
         rollout_status = "retention_demoted"
         rollout_reason = "POST_PROMOTION_RETENTION_WEAKENED"
         version = previous_version + 1
-    elif validation_status == "pass" and (verdict_status in {"promote", "promote_aggressive", "demote"} or staged_micro_live_block):
+    elif validation_status in {"pass", "pending"} and (verdict_status in {"promote", "promote_aggressive", "demote"} or staged_micro_live_block):
         if staged_micro_live_block:
             active_policy = previous_active or {"status": "baseline", "adjustments": []}
         else:
