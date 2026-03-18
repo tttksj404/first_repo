@@ -94,6 +94,13 @@ def telegram_report_only_enabled() -> bool:
     return _env_flag_enabled(load_env_value("TELEGRAM_REPORT_ONLY"))
 
 
+def telegram_auto_summary_enabled() -> bool:
+    raw = load_env_value("TELEGRAM_NOTIFY_AUTO_SUMMARY")
+    if not raw:
+        return True
+    return _env_flag_enabled(raw)
+
+
 def _normalize_message_text(text: str) -> str:
     normalized = "\n".join(line.rstrip() for line in text.strip().splitlines())
     while "\n\n\n" in normalized:
@@ -191,7 +198,8 @@ def _prepare_outbound_text(text: str, *, now_ts: float | None = None, state_path
 
     burst = state.get("burst", {}) if isinstance(state.get("burst"), dict) else {}
     outgoing = normalized
-    if len(recent) >= burst_threshold:
+    auto_summary_enabled = telegram_auto_summary_enabled()
+    if len(recent) >= burst_threshold and auto_summary_enabled:
         burst_signature = hashlib.sha256("|".join(str(item.get("signature", "")) for item in recent[-burst_threshold:]).encode("utf-8")).hexdigest()
         last_burst_signature = str(burst.get("signature", ""))
         last_burst_ts = float(burst.get("timestamp", 0.0) or 0.0)
