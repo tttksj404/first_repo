@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from quant_binance.closed_trade_metrics import aggregate_closed_trades
+from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report
 
 
@@ -97,6 +97,19 @@ def _resolve_recent_runs(*, base_dir: Path, lookback_days: int) -> list[Path]:
     return runs
 
 
+def _resolve_latest_run_dir(*, base_dir: Path) -> Path | None:
+    mode_root = base_dir / "output" / "paper-live-shell"
+    latest = mode_root / "latest"
+    if latest.exists():
+        return latest
+    if not mode_root.exists():
+        return None
+    runs = [candidate for candidate in mode_root.iterdir() if candidate.is_dir() and candidate.name != "latest"]
+    if not runs:
+        return None
+    return max(runs, key=lambda candidate: candidate.stat().st_mtime)
+
+
 def _load_summary(run_dir: Path) -> dict[str, Any]:
     summary_path = run_dir / "summary.json"
     if not summary_path.exists():
@@ -118,12 +131,21 @@ def _safe_int(value: Any, default: int = 0) -> int:
         return default
 
 
-def _runtime_summary_closed_trade_metrics(runtime_summary: dict[str, Any] | None) -> tuple[int, float]:
+def _runtime_summary_closed_trade_metrics(
+    runtime_summary: dict[str, Any] | None,
+    *,
+    run_dir: Path | None = None,
+) -> tuple[int, float]:
     payload = dict(runtime_summary or {})
     closed_trades = list(payload.get("closed_trades", []) or [])
     if closed_trades:
         aggregate = aggregate_closed_trades(closed_trades)
         return aggregate.closed_trade_count, aggregate.realized_pnl_usd
+    if run_dir is not None:
+        closed_trade_log = run_dir / "logs" / "closed_trades.jsonl"
+        if closed_trade_log.exists():
+            aggregate = aggregate_closed_trades(load_closed_trades_jsonl(closed_trade_log))
+            return aggregate.closed_trade_count, aggregate.realized_pnl_usd
     return (
         _safe_int(payload.get("closed_trade_count")),
         round(_safe_float(payload.get("realized_pnl_usd_estimate")), 6),
@@ -515,18 +537,20 @@ def _policy_application_pressure(profile: dict[str, object]) -> float:
 
 def _runtime_summary_validation_snapshot(
     runtime_summary: dict[str, Any] | None,
+    *,
+    run_dir: Path | None = None,
 ) -> dict[str, object] | None:
     payload = dict(runtime_summary or {})
     live_order_count = _safe_int(payload.get("live_order_count"))
-    closed_trade_count, realized_pnl_usd = _runtime_summary_closed_trade_metrics(payload)
+    closed_trade_count, realized_pnl_usd = _runtime_summary_closed_trade_metrics(payload, run_dir=run_dir)
     if live_order_count <= 0 and closed_trade_count <= 0:
         return None
     accepted_live_order_count = _safe_int(payload.get("accepted_live_order_count"))
     rejected_live_order_count = _safe_int(payload.get("rejected_live_order_count"))
     generated_at = str(payload.get("generated_at", ""))
     return {
-        "run_id": "current-runtime-summary",
-        "run_dir": "current-runtime-summary",
+        "run_id": run_dir.name if run_dir is not None else "current-runtime-summary",
+        "run_dir": str(run_dir) if run_dir is not None else "current-runtime-summary",
         "generated_at": generated_at,
         "closed_trade_count": closed_trade_count,
         "realized_pnl_usd": realized_pnl_usd,
@@ -542,6 +566,29 @@ def _runtime_summary_validation_snapshot(
         "protection_degraded_rate": round(_safe_float(payload.get("protection_degraded_rate")), 6),
         "walk_forward": [],
     }
+
+
+def _merge_runtime_summary_snapshot(
+    validation_runs: list[dict[str, object]],
+    runtime_summary_snapshot: dict[str, object] | None,
+) -> list[dict[str, object]]:
+    merged = [dict(item) for item in validation_runs]
+    snapshot = dict(runtime_summary_snapshot or {})
+    if not snapshot:
+        return merged
+    snapshot_run_dir = str(snapshot.get("run_dir", "") or "")
+    snapshot_run_id = str(snapshot.get("run_id", "") or "")
+    for index, item in enumerate(merged):
+        item_run_dir = str(item.get("run_dir", "") or "")
+        item_run_id = str(item.get("run_id", "") or "")
+        if snapshot_run_dir and item_run_dir == snapshot_run_dir:
+            merged[index] = snapshot
+            return merged
+        if snapshot_run_id and item_run_id == snapshot_run_id:
+            merged[index] = snapshot
+            return merged
+    merged.append(snapshot)
+    return merged
 
 
 def _project_validation_run(
@@ -697,8 +744,12 @@ def _execution_replay_summary_from_runs(
     baseline_policy_application: dict[str, object],
     source: str,
     runtime_summary: dict[str, Any] | None = None,
+    runtime_summary_run_dir: Path | None = None,
 ) -> dict[str, object]:
-    runtime_summary_closed_trade_count, runtime_summary_realized_pnl_usd = _runtime_summary_closed_trade_metrics(runtime_summary)
+    runtime_summary_closed_trade_count, runtime_summary_realized_pnl_usd = _runtime_summary_closed_trade_metrics(
+        runtime_summary,
+        run_dir=runtime_summary_run_dir,
+    )
     candidate_pressure = _policy_application_pressure(policy_application)
     baseline_pressure = _policy_application_pressure(baseline_policy_application)
     delta_pressure = round(candidate_pressure - baseline_pressure, 6)
@@ -1238,9 +1289,12 @@ def build_policy_comparison_validation_artifact(*,
     )
     runtime_verdict = str(runtime_comparison.get("runtime_comparison_verdict", "keep"))
     shared_validation_runs = [dict(item) for item in list(runner.get("validation_runs", []) or [])]
-    runtime_summary_snapshot = _runtime_summary_validation_snapshot(current_runtime_summary)
-    if runtime_summary_snapshot is not None:
-        shared_validation_runs.append(runtime_summary_snapshot)
+    runtime_summary_run_dir = _resolve_latest_run_dir(base_dir=Path(base_dir)) if current_runtime_summary else None
+    runtime_summary_snapshot = _runtime_summary_validation_snapshot(
+        current_runtime_summary,
+        run_dir=runtime_summary_run_dir,
+    )
+    shared_validation_runs = _merge_runtime_summary_snapshot(shared_validation_runs, runtime_summary_snapshot)
     shared_walk_forward_windows = [dict(item) for item in list(runner.get("walk_forward_windows", []) or [])]
     current_validation_runs = [
         dict(item)
@@ -1263,6 +1317,7 @@ def build_policy_comparison_validation_artifact(*,
         baseline_policy_application=current_policy_application,
         source="projected_candidate_policy_from_runtime_artifacts",
         runtime_summary=current_runtime_summary,
+        runtime_summary_run_dir=runtime_summary_run_dir,
     )
     current_replay_summary = _execution_replay_summary_from_runs(
         validation_runs=current_validation_runs,
@@ -1277,6 +1332,7 @@ def build_policy_comparison_validation_artifact(*,
             else "observed_runtime_artifacts"
         ),
         runtime_summary=current_runtime_summary,
+        runtime_summary_run_dir=runtime_summary_run_dir,
     )
     validation_path = {
         "mode": str(runner.get("validation_path_mode", "artifact_walk_forward")),

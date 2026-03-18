@@ -435,6 +435,59 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(current_path["execution_metrics"]["closed_trade_count"], 2)
             self.assertEqual(current_path["execution_metrics"]["total_realized_pnl_usd"], 7.0)
 
+    def test_build_policy_comparison_validation_artifact_prefers_latest_run_closed_trades_when_summary_has_stale_counters(self) -> None:
+        runtime_summary = {
+            "generated_at": "2026-03-18T00:00:00+00:00",
+            "live_order_count": 3,
+            "accepted_live_order_count": 3,
+            "rejected_live_order_count": 0,
+            "closed_trade_count": 99,
+            "realized_pnl_usd_estimate": 999.0,
+            "avg_slippage_bps": 2.5,
+            "avg_edge_retention_ratio": 0.82,
+            "avg_realized_edge_bps": 6.0,
+            "avg_expected_edge_bps": 7.5,
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps({"closed_trade_count": 1, "realized_pnl_usd_estimate": 1.0}),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0}),
+                        json.dumps({"symbol": "ETHUSDT", "realized_pnl_usd_estimate": -1.5, "realized_return_bps_estimate": -4.0}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"})
+                + "\n",
+                encoding="utf-8",
+            )
+
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state={"active_policy": {"adjustments": []}},
+                candidate_policy={"adjustments": []},
+                base_dir=base,
+                lookback_days=7,
+                current_runtime_summary=runtime_summary,
+            )
+
+            current_path = artifact["counterfactual_replay_path"]["current_policy"]
+            self.assertEqual(current_path["runtime_summary_anchor"]["source"], "current_runtime_summary")
+            self.assertEqual(current_path["runtime_summary_anchor"]["closed_trade_count"], 2)
+            self.assertEqual(current_path["runtime_summary_anchor"]["realized_pnl_usd"], 2.5)
+            self.assertEqual(current_path["execution_metrics"]["closed_trade_count"], 2)
+            self.assertEqual(current_path["execution_metrics"]["total_realized_pnl_usd"], 2.5)
+
     def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"
