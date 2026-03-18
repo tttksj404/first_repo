@@ -879,6 +879,80 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(policy_payload["status"], "rolled_back")
             self.assertEqual(policy_payload["active_policy"]["status"], "baseline")
 
+    def test_session_flush_persists_separated_execution_replay_comparison(self) -> None:
+        session = self._build_session()
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 16.0, "realized_edge_bps": 14.5},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.2},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 13.0, "realized_edge_bps": 11.0},
+        ]
+        session.closed_trades = [
+            {"symbol": "BTCUSDT", "market": "futures", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0},
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}),
+                        json.dumps({"symbol": "ETHUSDT", "final_mode": "futures", "predictability_score": 69.0, "net_expected_edge_bps": 10.5, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:05:00+00:00"}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 2,
+                        "rollout_progression": {"execution_phase": "partial"},
+                        "active_policy": {
+                            "status": "promote",
+                            "adjustments": [
+                                {
+                                    "symbol": "BTCUSDT",
+                                    "action": "promote",
+                                    "size_multiplier": 1.1,
+                                    "leverage_multiplier": 1.05,
+                                    "entry_threshold_bps": -0.5,
+                                    "expected_profit_floor_bps": -1.0,
+                                }
+                            ],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            comparison_payload = json.loads(summary_path.with_name("policy_comparison.json").read_text(encoding="utf-8"))
+            policy_validation_evidence = summary["policy_validation"]["evidence"]
+            self.assertIn("comparison_execution_replay_verdict", comparison_payload)
+            self.assertIn("candidate_vs_current_execution_replay_score_delta", comparison_payload)
+            self.assertEqual(
+                comparison_payload["counterfactual_replay_path"]["current_policy"]["runtime_summary_anchor"]["source"],
+                "current_runtime_summary",
+            )
+            self.assertEqual(
+                comparison_payload["counterfactual_replay_path"]["current_policy"]["source"],
+                "observed_runtime_artifacts",
+            )
+            self.assertIn("execution_path_comparison", policy_validation_evidence)
+            self.assertIn("replay_evidence_comparison", policy_validation_evidence)
+            self.assertIn("execution_replay_metric_delta", policy_validation_evidence)
+            self.assertEqual(
+                policy_validation_evidence["comparison_execution_replay_verdict"],
+                comparison_payload["comparison_execution_replay_verdict"],
+            )
+
     def test_session_flush_persists_pending_micro_live_gate_staging(self) -> None:
         session = self._build_session()
         session.live_orders = [
