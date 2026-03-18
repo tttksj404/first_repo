@@ -161,9 +161,11 @@ class QuantBinanceOpsTests(unittest.TestCase):
         write_runtime_summary(self.summary_path, summary)
         self.assertTrue(self.summary_path.exists())
         self.assertIn("tested_order_count", self.summary_path.read_text(encoding="utf-8"))
+        self.assertEqual(summary["closed_trade_count"], 1)
         self.assertEqual(summary["realized_pnl_usd_estimate"], 12.5)
         self.assertEqual(summary["unrealized_pnl_usd_estimate"], 7.5)
         self.assertEqual(summary["exit_reason_counts"], {"PARTIAL_TAKE_PROFIT": 1})
+        self.assertEqual(summary["symbol_performance"], [{"symbol": "BTCUSDT", "market": "spot", "trade_count": 1, "win_count": 1, "loss_count": 0, "realized_pnl_usd_estimate": 12.5, "average_return_bps_estimate": 50.0}])
 
         write_runtime_state(self.state_path, {"mode": "paper-live"})
         payload = read_runtime_state(self.state_path)

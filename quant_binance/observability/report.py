@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import json
+import shutil
 from collections import Counter, defaultdict
-import json
-from pathlib import Path
 from datetime import datetime, timezone
 from pathlib import Path
-import shutil
 
+from quant_binance.closed_trade_metrics import aggregate_closed_trades as aggregate_closed_trade_metrics
 from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
 
@@ -74,47 +73,8 @@ def _futures_position_sync_payload(
 
 
 def _aggregate_closed_trades(closed_trades: list[dict[str, object]] | tuple[dict[str, object], ...]) -> tuple[list[dict[str, object]], dict[str, int], float]:
-    by_symbol: dict[str, dict[str, float | int | str]] = defaultdict(
-        lambda: {
-            "symbol": "",
-            "market": "",
-            "trade_count": 0,
-            "realized_pnl_usd_estimate": 0.0,
-            "average_return_bps_estimate": 0.0,
-        }
-    )
-    return_sums: dict[str, float] = defaultdict(float)
-    exit_reasons = Counter()
-    total_realized = 0.0
-    for trade in closed_trades:
-        symbol = str(trade.get("symbol", ""))
-        market = str(trade.get("market", ""))
-        pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
-        bps = float(trade.get("realized_return_bps_estimate", 0.0))
-        reason = str(trade.get("exit_reason", ""))
-        row = by_symbol[symbol]
-        row["symbol"] = symbol
-        row["market"] = market
-        row["trade_count"] = int(row["trade_count"]) + 1
-        row["realized_pnl_usd_estimate"] = float(row["realized_pnl_usd_estimate"]) + pnl
-        return_sums[symbol] += bps
-        total_realized += pnl
-        if reason:
-            exit_reasons[reason] += 1
-    rows: list[dict[str, object]] = []
-    for symbol, row in by_symbol.items():
-        count = int(row["trade_count"])
-        rows.append(
-            {
-                "symbol": row["symbol"],
-                "market": row["market"],
-                "trade_count": count,
-                "realized_pnl_usd_estimate": round(float(row["realized_pnl_usd_estimate"]), 6),
-                "average_return_bps_estimate": round(return_sums[symbol] / count, 6) if count else 0.0,
-            }
-        )
-    rows.sort(key=lambda item: (-float(item["realized_pnl_usd_estimate"]), str(item["symbol"])))
-    return rows, dict(sorted(exit_reasons.items())), round(total_realized, 6)
+    aggregate = aggregate_closed_trade_metrics(closed_trades)
+    return aggregate.symbol_performance, aggregate.exit_reason_counts, aggregate.realized_pnl_usd
 
 
 
@@ -1908,7 +1868,10 @@ def build_runtime_summary(
         if "OBSERVE_ONLY_SYMBOL" in decision.rejection_reasons
     }
     combined_observe_only = sorted(set(observe_only_symbols or []).union(derived_observe_only))
-    symbol_performance, exit_reason_counts, realized_total = _aggregate_closed_trades(closed_trades or [])
+    closed_trade_aggregate = aggregate_closed_trade_metrics(closed_trades or [])
+    symbol_performance = closed_trade_aggregate.symbol_performance
+    exit_reason_counts = closed_trade_aggregate.exit_reason_counts
+    realized_total = closed_trade_aggregate.realized_pnl_usd
     unrealized_spot_total = round(
         sum(float(position.get("unrealized_pnl_usd_estimate", 0.0)) for position in (open_spot_positions or [])),
         6,
@@ -1961,6 +1924,7 @@ def build_runtime_summary(
         "live_positions": list(live_positions or []),
         **futures_position_sync,
         "closed_trades": list(closed_trades or []),
+        "closed_trade_count": closed_trade_aggregate.closed_trade_count,
         "telegram_alerts": list(telegram_alerts or []),
         "recent_decisions": recent_decisions,
         "major_entry_relaxation_count": sum(1 for decision in decisions if decision.entry_relaxation_reasons),
