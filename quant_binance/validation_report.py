@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from quant_binance.closed_trade_metrics import aggregate_closed_trades
 from quant_binance.performance_report import build_runtime_performance_report
 
 
@@ -115,6 +116,18 @@ def _safe_int(value: Any, default: int = 0) -> int:
         return int(value or 0)
     except (TypeError, ValueError):
         return default
+
+
+def _runtime_summary_closed_trade_metrics(runtime_summary: dict[str, Any] | None) -> tuple[int, float]:
+    payload = dict(runtime_summary or {})
+    closed_trades = list(payload.get("closed_trades", []) or [])
+    if closed_trades:
+        aggregate = aggregate_closed_trades(closed_trades)
+        return aggregate.closed_trade_count, aggregate.realized_pnl_usd
+    return (
+        _safe_int(payload.get("closed_trade_count")),
+        round(_safe_float(payload.get("realized_pnl_usd_estimate")), 6),
+    )
 
 
 def _max_drawdown(values: list[float]) -> float:
@@ -505,7 +518,7 @@ def _runtime_summary_validation_snapshot(
 ) -> dict[str, object] | None:
     payload = dict(runtime_summary or {})
     live_order_count = _safe_int(payload.get("live_order_count"))
-    closed_trade_count = _safe_int(payload.get("closed_trade_count", len(list(payload.get("closed_trades", []) or []))))
+    closed_trade_count, realized_pnl_usd = _runtime_summary_closed_trade_metrics(payload)
     if live_order_count <= 0 and closed_trade_count <= 0:
         return None
     accepted_live_order_count = _safe_int(payload.get("accepted_live_order_count"))
@@ -516,7 +529,7 @@ def _runtime_summary_validation_snapshot(
         "run_dir": "current-runtime-summary",
         "generated_at": generated_at,
         "closed_trade_count": closed_trade_count,
-        "realized_pnl_usd": round(_safe_float(payload.get("realized_pnl_usd_estimate")), 6),
+        "realized_pnl_usd": realized_pnl_usd,
         "live_order_count": live_order_count,
         "accepted_live_order_count": accepted_live_order_count,
         "rejected_live_order_count": rejected_live_order_count,
@@ -685,6 +698,7 @@ def _execution_replay_summary_from_runs(
     source: str,
     runtime_summary: dict[str, Any] | None = None,
 ) -> dict[str, object]:
+    runtime_summary_closed_trade_count, runtime_summary_realized_pnl_usd = _runtime_summary_closed_trade_metrics(runtime_summary)
     candidate_pressure = _policy_application_pressure(policy_application)
     baseline_pressure = _policy_application_pressure(baseline_policy_application)
     delta_pressure = round(candidate_pressure - baseline_pressure, 6)
@@ -744,12 +758,13 @@ def _execution_replay_summary_from_runs(
     runtime_summary_anchor = {
         "source": "current_runtime_summary" if runtime_summary else "artifact_only",
         "live_order_count": _safe_int(dict(runtime_summary or {}).get("live_order_count")),
-        "closed_trade_count": _safe_int(dict(runtime_summary or {}).get("closed_trade_count")),
+        "closed_trade_count": runtime_summary_closed_trade_count,
         "accepted_live_order_count": _safe_int(dict(runtime_summary or {}).get("accepted_live_order_count")),
         "rejected_live_order_count": _safe_int(dict(runtime_summary or {}).get("rejected_live_order_count")),
         "avg_edge_retention_ratio": round(_safe_float(dict(runtime_summary or {}).get("avg_edge_retention_ratio")), 6),
         "avg_realized_edge_bps": round(_safe_float(dict(runtime_summary or {}).get("avg_realized_edge_bps")), 6),
         "avg_slippage_bps": round(_safe_float(dict(runtime_summary or {}).get("avg_slippage_bps")), 6),
+        "realized_pnl_usd": runtime_summary_realized_pnl_usd,
     }
     return {
         "source": source,

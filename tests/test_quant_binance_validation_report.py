@@ -402,6 +402,39 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 {"candidate_better", "keep"},
             )
 
+    def test_build_policy_comparison_validation_artifact_prefers_runtime_summary_closed_trades_over_stale_counters(self) -> None:
+        runtime_summary = {
+            "generated_at": "2026-03-18T00:00:00+00:00",
+            "live_order_count": 2,
+            "accepted_live_order_count": 2,
+            "rejected_live_order_count": 0,
+            "closed_trade_count": 99,
+            "realized_pnl_usd_estimate": 999.0,
+            "avg_slippage_bps": 2.5,
+            "avg_edge_retention_ratio": 0.82,
+            "avg_realized_edge_bps": 6.0,
+            "avg_expected_edge_bps": 7.5,
+            "closed_trades": [
+                {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 5.0, "realized_return_bps_estimate": 10.0},
+                {"symbol": "ETHUSDT", "realized_pnl_usd_estimate": 2.0, "realized_return_bps_estimate": 6.0},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state={"active_policy": {"adjustments": []}},
+                candidate_policy={"adjustments": []},
+                base_dir=base,
+                lookback_days=7,
+                current_runtime_summary=runtime_summary,
+            )
+            current_path = artifact["counterfactual_replay_path"]["current_policy"]
+            self.assertEqual(current_path["runtime_summary_anchor"]["source"], "current_runtime_summary")
+            self.assertEqual(current_path["runtime_summary_anchor"]["closed_trade_count"], 2)
+            self.assertEqual(current_path["runtime_summary_anchor"]["realized_pnl_usd"], 7.0)
+            self.assertEqual(current_path["execution_metrics"]["closed_trade_count"], 2)
+            self.assertEqual(current_path["execution_metrics"]["total_realized_pnl_usd"], 7.0)
+
     def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"
