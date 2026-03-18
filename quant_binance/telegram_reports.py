@@ -163,6 +163,15 @@ def format_weekly_validation_report(base_dir: str | Path = "quant_runtime") -> s
                 f"closed {sample_progress.get('remaining_closed_trade_count', 0)}, "
                 f"live {sample_progress.get('remaining_live_order_count', 0)}"
             )
+    score_rows = payload.get("score_alignment_summary") or []
+    if score_rows:
+        lines.append("점수-수익 연결:")
+        for row in score_rows[-3:]:
+            lines.append(
+                f"- score {row.get('score_bucket_label')}: trades={row.get('trade_count')} "
+                f"expectancy={float(row.get('expectancy_usd', 0.0)):.4f} "
+                f"hit_rate={float(row.get('hit_rate', 0.0)) * 100:.1f}%"
+            )
     regime_rows = payload.get("regime_summary") or []
     if regime_rows:
         lines.append("레짐별 요약:")

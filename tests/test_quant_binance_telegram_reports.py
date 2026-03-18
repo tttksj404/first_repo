@@ -29,6 +29,10 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
                             "remaining_live_order_count": 3,
                             "ready_for_comparison": False,
                         },
+                        "score_alignment_summary": [
+                            {"score_bucket_label": "60-69", "trade_count": 2, "expectancy_usd": 0.8, "hit_rate": 0.5},
+                            {"score_bucket_label": "70-79", "trade_count": 3, "expectancy_usd": 2.1, "hit_rate": 0.6667}
+                        ],
                         "regime_summary": [
                             {"mode": "futures", "decision_count": 10, "avg_score": 61.2, "avg_net_edge_bps": 8.4}
                         ],
@@ -44,6 +48,8 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
             self.assertIn("[주간 검증 리포트]", text)
             self.assertIn("표본 진행도", text)
             self.assertIn("추가 필요", text)
+            self.assertIn("점수-수익 연결", text)
+            self.assertIn("score 70-79", text)
             self.assertIn("승격 후보", text)
             self.assertIn("제외/관찰 후보", text)
 
