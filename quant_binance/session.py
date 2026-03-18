@@ -492,6 +492,7 @@ class LivePaperSession:
             candidate_policy=summary.get("candidate_policy", {}),
             base_dir=base_dir,
             output_path=comparison_report_path,
+            current_runtime_summary=summary,
         )
         comparison_evidence = load_validation_runner_evidence(comparison_report_path)
         summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), comparison_evidence)
@@ -925,10 +926,11 @@ class LivePaperSession:
 
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
         policy_adjustment = self._policy_adjustment_for_decision(decision)
-        if len(self.live_orders) < 5 and not policy_adjustment:
-            return decision
         verdict = self._current_operational_verdict()
-        status = "pass" if len(self.live_orders) < 5 else str(verdict.get("status", "hold"))
+        verdict_status = str(verdict.get("status", "hold"))
+        if len(self.live_orders) < 5 and not policy_adjustment and verdict_status != "stop":
+            return decision
+        status = "stop" if len(self.live_orders) < 5 and verdict_status == "stop" else ("pass" if len(self.live_orders) < 5 else verdict_status)
         policy_multiplier = float(policy_adjustment.get("size_multiplier", 1.0) or 1.0)
         policy_symbol_bias = str(policy_adjustment.get("symbol_bias", "neutral") or "neutral")
         rollout_phase = str(policy_adjustment.get("rollout_execution_phase", "baseline") or "baseline")
