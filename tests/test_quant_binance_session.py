@@ -24,6 +24,7 @@ from quant_binance.policy.execution import (
     is_major_strong_futures_decision,
 )
 from quant_binance.observability.log_store import JsonlLogStore
+from quant_binance.observability.report import build_persisted_policy_state
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.self_healing import KNOWN_CATEGORY_MISSING_MARKET_STATE, RuntimeSelfHealing
@@ -423,6 +424,94 @@ class QuantBinanceSessionTests(unittest.TestCase):
             capped = session._cap_live_order_decision(decision, reference_price=50000.0)
             self.assertEqual(capped.final_mode, "cash")
             self.assertIn("MIN_MEANINGFUL_NOTIONAL", capped.rejection_reasons)
+
+    def test_policy_rollout_phase_scales_runtime_application_before_five_live_orders(self) -> None:
+        import tempfile
+        session = self._build_session(
+            settings=replace(
+                self.settings,
+                risk=replace(self.settings.risk, min_expected_profit_usd_per_trade=6.0),
+            )
+        )
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 14.0, "realized_edge_bps": 14.0},
+        ]
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        decision = make_decision(timestamp=now, symbol="BTCUSDT", order_intent_notional_usd=100.0, net_expected_edge_bps=100.0)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            policy_state = {
+                "rollout_status": "micro_live_pending",
+                "rollout_progression": {"execution_phase": "partial"},
+                "active_policy": {
+                    "status": "promote",
+                    "adjustments": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "action": "promote",
+                            "size_multiplier": 1.6,
+                            "leverage_multiplier": 1.3,
+                            "entry_threshold_bps": -2.0,
+                            "expected_profit_floor_bps": -200.0,
+                        }
+                    ],
+                },
+            }
+            summary_path.with_name("policy_state.json").write_text(json.dumps(policy_state), encoding="utf-8")
+            partial_corrected = session._apply_operational_self_correction(decision)
+            self.assertAlmostEqual(session._policy_multiplier_for_decision(decision), 1.21, places=6)
+            self.assertAlmostEqual(session._policy_leverage_multiplier_for_decision(decision), 1.105, places=6)
+            self.assertAlmostEqual(session._min_expected_profit_usd_threshold(decision), 5.3, places=6)
+            self.assertAlmostEqual(partial_corrected.order_intent_notional_usd, 121.0, places=6)
+            self.assertIn("ACTIVE_POLICY_PHASE_PARTIAL", partial_corrected.size_boost_reasons)
+
+            policy_state["rollout_progression"]["execution_phase"] = "full"
+            summary_path.with_name("policy_state.json").write_text(json.dumps(policy_state), encoding="utf-8")
+            full_corrected = session._apply_operational_self_correction(decision)
+            self.assertAlmostEqual(session._policy_multiplier_for_decision(decision), 1.6, places=6)
+            self.assertAlmostEqual(session._policy_leverage_multiplier_for_decision(decision), 1.3, places=6)
+            self.assertAlmostEqual(session._min_expected_profit_usd_threshold(decision), 4.0, places=6)
+            self.assertAlmostEqual(full_corrected.order_intent_notional_usd, 160.0, places=6)
+            self.assertIn("ACTIVE_POLICY_PHASE_FULL", full_corrected.size_boost_reasons)
+            self.assertGreater(full_corrected.order_intent_notional_usd, partial_corrected.order_intent_notional_usd)
+
+    def test_staged_rollout_uses_candidate_policy_for_partial_runtime_application(self) -> None:
+        session = self._build_session()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        decision = make_decision(timestamp=now, symbol="BTCUSDT", order_intent_notional_usd=100.0, net_expected_edge_bps=100.0)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "status": "staged_rollout",
+                        "rollout_status": "micro_live_pending",
+                        "rollout_progression": {"execution_phase": "partial"},
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "candidate_policy": {
+                            "adjustments": [
+                                {
+                                    "symbol": "BTCUSDT",
+                                    "action": "promote",
+                                    "size_multiplier": 1.2,
+                                    "leverage_multiplier": 1.2,
+                                    "entry_threshold_bps": -10.0,
+                                    "expected_profit_floor_bps": -100.0,
+                                }
+                            ]
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            adjustment = session._policy_adjustment_for_decision(decision)
+            self.assertEqual(adjustment["rollout_adjustment_source"], "candidate_policy")
+            self.assertEqual(adjustment["rollout_execution_phase"], "partial")
+            self.assertAlmostEqual(session._policy_multiplier_for_decision(decision), 1.07, places=6)
+            self.assertAlmostEqual(session._policy_leverage_multiplier_for_decision(decision), 1.07, places=6)
+            self.assertAlmostEqual(session._policy_entry_floor_adjustment_bps(decision), -3.5, places=6)
 
     def test_cap_live_order_decision_scales_size_on_operational_hold(self) -> None:
         session = self._build_session()
@@ -904,6 +993,50 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(payload["retention_monitor"]["status"], "rollback")
             self.assertEqual(payload["rollout_progression"]["status"], "rollback_triggered")
             self.assertEqual(payload["rollout_progression"]["execution_phase"], "rollback")
+
+    def test_persisted_policy_state_rolls_back_on_cumulative_retention_collapse(self) -> None:
+        payload = build_persisted_policy_state(
+            {
+                "version": 2,
+                "active_policy": {
+                    "status": "promote",
+                    "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1, "leverage_multiplier": 1.1}],
+                },
+                "rollout_status": "ready",
+            },
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1, "leverage_multiplier": 1.1}]},
+            {"status": "promote", "requested_status": "promote", "effective_status": "promote"},
+            {"status": "pass"},
+            {
+                "status": "pass",
+                "evidence": {
+                    "runner_total_realized_pnl_usd": 5.0,
+                    "runner_drawdown_to_pnl_ratio": 0.2,
+                    "runner_reject_rate": 0.02,
+                    "runner_avg_slippage_bps": 3.0,
+                    "runner_avg_realized_edge_bps": 6.0,
+                    "runner_avg_edge_retention_ratio": 0.82,
+                    "runner_walk_forward_window_count": 4,
+                    "runner_positive_walk_forward_ratio": 0.75,
+                    "micro_live_gate": {"available": True, "status": "pass"},
+                    "validation_runs": [
+                        {"run_id": "run-a", "live_order_count": 10, "accepted_live_order_count": 10, "rejected_live_order_count": 0, "closed_trade_count": 2, "avg_edge_retention_ratio": 0.1, "avg_slippage_bps": 2.0, "realized_pnl_usd": -6.0},
+                        {"run_id": "run-b", "live_order_count": 1, "accepted_live_order_count": 1, "rejected_live_order_count": 0, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.9, "avg_slippage_bps": 2.0, "realized_pnl_usd": 4.0},
+                        {"run_id": "run-c", "live_order_count": 1, "accepted_live_order_count": 1, "rejected_live_order_count": 0, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.9, "avg_slippage_bps": 2.0, "realized_pnl_usd": 4.0},
+                        {"run_id": "run-d", "live_order_count": 1, "accepted_live_order_count": 1, "rejected_live_order_count": 0, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.9, "avg_slippage_bps": 2.0, "realized_pnl_usd": 3.0},
+                    ],
+                    "walk_forward_windows": [
+                        {"window_index": 1, "avg_net_edge_bps": 2.0, "avg_score": 0.2},
+                        {"window_index": 2, "avg_net_edge_bps": 3.0, "avg_score": 0.3},
+                        {"window_index": 3, "avg_net_edge_bps": 4.0, "avg_score": 0.3},
+                        {"window_index": 4, "avg_net_edge_bps": 5.0, "avg_score": 0.4},
+                    ],
+                },
+            },
+        )
+        self.assertEqual(payload["retention_monitor"]["status"], "rollback")
+        self.assertIn("RETENTION_MONITOR_CUMULATIVE_EDGE_COLLAPSE", payload["retention_monitor"]["reasons"])
+        self.assertEqual(payload["rollout_reason"], "POST_PROMOTION_RETENTION_DEGRADED")
 
     def test_session_flush_recomputes_candidate_policy_from_validation_report_decomposition(self) -> None:
         session = self._build_session()

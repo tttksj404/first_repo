@@ -172,6 +172,113 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 artifact["candidate_policy_score"],
             )
 
+    def test_build_policy_comparison_validation_artifact_emits_policy_application_delta_and_cumulative_retention(self) -> None:
+        candidate_policy = {
+            "adjustments": [
+                {
+                    "symbol": "BTCUSDT",
+                    "action": "promote",
+                    "size_multiplier": 1.4,
+                    "leverage_multiplier": 1.2,
+                    "entry_threshold_bps": -2.0,
+                    "expected_profit_floor_bps": -3.0,
+                }
+            ]
+        }
+        current_policy_state = {
+            "rollout_progression": {"execution_phase": "partial"},
+            "active_policy": {
+                "adjustments": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "action": "promote",
+                        "size_multiplier": 1.2,
+                        "leverage_multiplier": 1.1,
+                        "entry_threshold_bps": -1.0,
+                        "expected_profit_floor_bps": -1.0,
+                    }
+                ]
+            },
+            "policy_validation": {
+                "evidence": {
+                    "runner_total_realized_pnl_usd": 4.0,
+                    "runner_drawdown_to_pnl_ratio": 0.2,
+                    "runner_reject_rate": 0.02,
+                    "runner_avg_slippage_bps": 3.0,
+                    "runner_avg_realized_edge_bps": 5.0,
+                    "runner_avg_edge_retention_ratio": 0.72,
+                    "runner_shadow_alignment_score": 0.65,
+                    "runner_walk_forward_window_count": 3,
+                    "runner_positive_walk_forward_window_count": 2,
+                    "runner_positive_walk_forward_ratio": 0.666667,
+                    "recent_retention_window": {"run_count": 3},
+                    "cumulative_retention_window": {"run_count": 4},
+                }
+            },
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_root = base / "output" / "paper-live-shell"
+            for index, retention, pnl, accepted, rejected in (
+                ("run-a", 0.95, 2.0, 2, 0),
+                ("run-b", 0.92, 2.0, 2, 0),
+                ("run-c", 0.55, 1.0, 2, 1),
+                ("run-d", 0.45, 1.0, 1, 1),
+            ):
+                run_dir = run_root / index
+                logs_dir = run_dir / "logs"
+                logs_dir.mkdir(parents=True, exist_ok=True)
+                (run_dir / "summary.json").write_text(
+                    json.dumps(
+                        {
+                            "live_order_count": accepted + rejected,
+                            "accepted_live_order_count": accepted,
+                            "rejected_live_order_count": rejected,
+                            "tested_order_count": 1,
+                            "avg_slippage_bps": 3.0 + rejected,
+                            "avg_edge_retention_ratio": retention,
+                            "avg_realized_edge_bps": 6.0 - rejected,
+                            "avg_expected_edge_bps": 8.0,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                (logs_dir / "closed_trades.jsonl").write_text(
+                    json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": pnl, "realized_return_bps_estimate": 8.0}) + "\n",
+                    encoding="utf-8",
+                )
+                (logs_dir / "decisions.jsonl").write_text(
+                    "\n".join(
+                        [
+                            json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}),
+                            json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 71.0, "net_expected_edge_bps": 11.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:05:00+00:00"}),
+                        ]
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            comparison_summary = artifact["counterfactual_replay_path"]["execution_style_comparison"]["comparison_summary"]
+            current_path = artifact["counterfactual_replay_path"]["current_policy"]
+            self.assertEqual(artifact["recent_retention_window"]["run_count"], 3)
+            self.assertEqual(artifact["cumulative_retention_window"]["run_count"], 4)
+            self.assertEqual(current_path["policy_application"]["rollout_phase"], "partial")
+            self.assertEqual(current_path["policy_application"]["phase_application_factor"], 0.35)
+            self.assertGreater(
+                comparison_summary["policy_application_delta"]["avg_size_multiplier_delta"],
+                0.0,
+            )
+            self.assertLess(
+                comparison_summary["policy_application_delta"]["avg_entry_threshold_bps_delta"],
+                0.0,
+            )
+
     def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"
@@ -231,6 +338,8 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(artifact["micro_live_gate"]["status"], "pass")
             self.assertEqual(artifact["micro_live_gate"]["live_order_count"], 3)
             self.assertTrue(artifact["walk_forward_windows"])
+            self.assertEqual(artifact["recent_retention_window"]["run_count"], 1)
+            self.assertEqual(artifact["cumulative_retention_window"]["run_count"], 1)
 
     def test_build_policy_validation_runner_artifact_emits_decomposition_context(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -270,6 +379,50 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertIn("pruning_recommendations", artifact)
             self.assertEqual(artifact["symbol_summary"][0]["symbol"], "BTCUSDT")
             self.assertTrue(any(row["mode"] == "futures" for row in artifact["regime_summary"]))
+
+    def test_build_policy_validation_runner_artifact_tracks_recent_and_cumulative_windows(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_root = base / "output" / "paper-live-shell"
+            for index, retention in enumerate((0.95, 0.9, 0.5, 0.4), start=1):
+                run_dir = run_root / f"run-{index}"
+                logs_dir = run_dir / "logs"
+                logs_dir.mkdir(parents=True, exist_ok=True)
+                (run_dir / "summary.json").write_text(
+                    json.dumps(
+                        {
+                            "live_order_count": 2,
+                            "accepted_live_order_count": 2,
+                            "rejected_live_order_count": 0,
+                            "avg_slippage_bps": 3.0,
+                            "avg_edge_retention_ratio": retention,
+                            "avg_realized_edge_bps": 6.0,
+                            "avg_expected_edge_bps": 8.0,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                (logs_dir / "closed_trades.jsonl").write_text(
+                    json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 1.0, "realized_return_bps_estimate": 8.0}) + "\n",
+                    encoding="utf-8",
+                )
+                (logs_dir / "decisions.jsonl").write_text(
+                    "\n".join(
+                        [
+                            json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}),
+                            json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 71.0, "net_expected_edge_bps": 11.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:05:00+00:00"}),
+                        ]
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+            artifact = build_policy_validation_runner_artifact(base_dir=base, lookback_days=7)
+            self.assertEqual(artifact["recent_retention_window"]["run_count"], 3)
+            self.assertEqual(artifact["cumulative_retention_window"]["run_count"], 4)
+            self.assertLess(
+                artifact["recent_retention_window"]["avg_edge_retention_ratio"],
+                artifact["cumulative_retention_window"]["avg_edge_retention_ratio"],
+            )
 
     def test_build_weekly_validation_report_aggregates_recent_runs(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
