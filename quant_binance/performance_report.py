@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
+from math import floor
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -30,11 +31,24 @@ class RegimePerformance:
 
 
 @dataclass(frozen=True)
+class ScoreBucketPerformance:
+    score_bucket_label: str
+    trade_count: int
+    win_count: int
+    loss_count: int
+    hit_rate: float
+    realized_pnl_usd: float
+    expectancy_usd: float
+    average_return_bps: float
+
+
+@dataclass(frozen=True)
 class RuntimePerformanceReport:
     run_dir: str
     summary_path: str
     symbol_expectancy: tuple[SymbolExpectancy, ...]
     regime_performance: tuple[RegimePerformance, ...]
+    score_bucket_performance: tuple[ScoreBucketPerformance, ...]
     walk_forward: tuple[dict[str, object], ...]
     pruning_recommendations: tuple[dict[str, object], ...]
     closed_trade_count: int
@@ -46,6 +60,7 @@ class RuntimePerformanceReport:
             "summary_path": self.summary_path,
             "symbol_expectancy": [asdict(item) for item in self.symbol_expectancy],
             "regime_performance": [asdict(item) for item in self.regime_performance],
+            "score_bucket_performance": [asdict(item) for item in self.score_bucket_performance],
             "walk_forward": list(self.walk_forward),
             "pruning_recommendations": list(self.pruning_recommendations),
             "closed_trade_count": self.closed_trade_count,
@@ -65,6 +80,17 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+
+
+def _score_bucket_label(score: float) -> str:
+    bounded = max(0.0, min(float(score), 100.0))
+    lower = int(floor(bounded / 10.0) * 10)
+    upper = min(lower + 9, 100)
+    if lower >= 100:
+        return "100"
+    return f"{lower:02d}-{upper:02d}"
+
+
 def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerformanceReport:
     root = Path(run_dir)
     summary_path = root / "summary.json"
@@ -72,6 +98,15 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
     decisions = _load_jsonl(root / "logs" / "decisions.jsonl")
 
     by_symbol: dict[str, dict[str, float | int]] = defaultdict(
+        lambda: {
+            "trade_count": 0,
+            "win_count": 0,
+            "loss_count": 0,
+            "realized_pnl_usd": 0.0,
+            "return_bps_sum": 0.0,
+        }
+    )
+    score_buckets: dict[str, dict[str, float | int]] = defaultdict(
         lambda: {
             "trade_count": 0,
             "win_count": 0,
@@ -95,6 +130,19 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
             bucket["win_count"] = int(bucket["win_count"]) + 1
         elif pnl < 0:
             bucket["loss_count"] = int(bucket["loss_count"]) + 1
+        bucket_score = float(
+            trade.get("entry_predictability_score")
+            if trade.get("entry_predictability_score") is not None
+            else trade.get("latest_predictability_score", 0.0)
+        )
+        score_bucket = score_buckets[_score_bucket_label(bucket_score)]
+        score_bucket["trade_count"] = int(score_bucket["trade_count"]) + 1
+        score_bucket["realized_pnl_usd"] = float(score_bucket["realized_pnl_usd"]) + pnl
+        score_bucket["return_bps_sum"] = float(score_bucket["return_bps_sum"]) + bps
+        if pnl > 0:
+            score_bucket["win_count"] = int(score_bucket["win_count"]) + 1
+        elif pnl < 0:
+            score_bucket["loss_count"] = int(score_bucket["loss_count"]) + 1
         realized_total += pnl
 
     symbol_rows: list[SymbolExpectancy] = []
@@ -145,6 +193,26 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
             )
         )
     regime_rows.sort(key=lambda item: item.mode)
+
+    score_bucket_rows: list[ScoreBucketPerformance] = []
+    for label, bucket in score_buckets.items():
+        trade_count = int(bucket["trade_count"])
+        realized_pnl = float(bucket["realized_pnl_usd"])
+        win_count = int(bucket["win_count"])
+        loss_count = int(bucket["loss_count"])
+        score_bucket_rows.append(
+            ScoreBucketPerformance(
+                score_bucket_label=label,
+                trade_count=trade_count,
+                win_count=win_count,
+                loss_count=loss_count,
+                hit_rate=round(win_count / trade_count, 6) if trade_count else 0.0,
+                realized_pnl_usd=round(realized_pnl, 6),
+                expectancy_usd=round(realized_pnl / trade_count, 6) if trade_count else 0.0,
+                average_return_bps=round(float(bucket["return_bps_sum"]) / trade_count, 6) if trade_count else 0.0,
+            )
+        )
+    score_bucket_rows.sort(key=lambda item: item.score_bucket_label)
 
     decision_times = sorted(
         item.get("timestamp")
@@ -252,6 +320,7 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
         summary_path=str(summary_path),
         symbol_expectancy=tuple(symbol_rows),
         regime_performance=tuple(regime_rows),
+        score_bucket_performance=tuple(score_bucket_rows),
         walk_forward=tuple(walk_forward),
         pruning_recommendations=tuple(pruning_recommendations),
         closed_trade_count=len(closed_trades),

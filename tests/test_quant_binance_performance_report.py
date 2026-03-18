@@ -23,6 +23,7 @@ class QuantBinancePerformanceReportTests(unittest.TestCase):
                                 "symbol": "BTCUSDT",
                                 "realized_pnl_usd_estimate": 10.0,
                                 "realized_return_bps_estimate": 40.0,
+                                "entry_predictability_score": 72.0,
                             }
                         ),
                         json.dumps(
@@ -30,6 +31,7 @@ class QuantBinancePerformanceReportTests(unittest.TestCase):
                                 "symbol": "BTCUSDT",
                                 "realized_pnl_usd_estimate": -2.0,
                                 "realized_return_bps_estimate": -8.0,
+                                "entry_predictability_score": 71.0,
                             }
                         ),
                         json.dumps(
@@ -37,6 +39,7 @@ class QuantBinancePerformanceReportTests(unittest.TestCase):
                                 "symbol": "ETHUSDT",
                                 "realized_pnl_usd_estimate": 5.0,
                                 "realized_return_bps_estimate": 20.0,
+                                "entry_predictability_score": 61.0,
                             }
                         ),
                     ]
@@ -84,6 +87,9 @@ class QuantBinancePerformanceReportTests(unittest.TestCase):
             self.assertIn("futures", modes)
             self.assertIn("spot", modes)
             self.assertAlmostEqual(modes["futures"].avg_net_edge_bps, 12.0)
+            buckets = {row.score_bucket_label: row for row in report.score_bucket_performance}
+            self.assertAlmostEqual(buckets["70-79"].expectancy_usd, 4.0)
+            self.assertAlmostEqual(buckets["60-69"].expectancy_usd, 5.0)
             self.assertGreaterEqual(len(report.walk_forward), 1)
             recs = {row["symbol"]: row for row in report.pruning_recommendations}
             self.assertEqual(recs["BTCUSDT"]["recommendation"], "keep")
