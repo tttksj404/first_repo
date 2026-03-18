@@ -9,7 +9,7 @@ from quant_binance.models import FeatureVector, MarketSnapshot
 from quant_binance.execution.paper_broker import PaperBroker
 from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report, render_outcome_audit_report, render_prediction_report
 from quant_binance.observability.manifest import build_manifest_entry, write_manifest
-from quant_binance.observability.report import build_auto_tune_policy, build_persisted_policy_state, build_promotion_verdict, build_runtime_summary
+from quant_binance.observability.report import build_auto_tune_policy, build_persisted_policy_state, build_policy_validation, build_promotion_verdict, build_runtime_summary
 from quant_binance.policy.portfolio import build_portfolio_intent, decision_from_portfolio_intent
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
@@ -611,7 +611,7 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("ETHUSDT:demote", actions)
         self.assertEqual(summary["promotion_verdict"]["status"], "keep")
         self.assertEqual(summary["policy_state"]["status"], "keep")
-        self.assertIn(summary["policy_validation"]["status"], {"pass", "fail"})
+        self.assertIn(summary["policy_validation"]["status"], {"pass", "pending", "fail"})
 
     def test_build_promotion_verdict_blocks_promotion_when_candidate_underperforms_current(self) -> None:
         verdict = build_promotion_verdict(
@@ -649,6 +649,28 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(verdict["status"], "keep")
         self.assertIn("PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE", verdict["reasons"])
+
+    def test_build_policy_validation_marks_warmup_as_pending_instead_of_fail(self) -> None:
+        validation = build_policy_validation(
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "promote"}]},
+            {"status": "keep", "requested_status": "promote", "rollout_stage": "staged_rollout"},
+            {"status": "hold", "reasons": ["INSUFFICIENT_SAMPLE"]},
+            (),
+            {
+                "candidate_vs_current_score_delta": 0.2,
+                "runner_total_realized_pnl_usd": 5.0,
+                "runner_max_drawdown_pct": 20.0,
+                "runner_shadow_alignment_score": 0.8,
+                "runner_drawdown_to_pnl_ratio": 0.2,
+                "runner_reject_rate": 0.01,
+                "runner_avg_slippage_bps": 2.0,
+                "runner_avg_edge_retention_ratio": 0.8,
+                "micro_live_gate": {"available": True, "status": "pending", "reason": "MICRO_LIVE_THRESHOLD_NOT_MET"},
+            },
+        )
+        self.assertEqual(validation["status"], "pending")
+        self.assertIn("PROMOTION_STAGED_PENDING_MICRO_LIVE", validation["reasons"])
+        self.assertIn("CANDIDATE_OUTPERFORMS_CURRENT_POLICY", validation["reasons"])
 
     def test_build_promotion_verdict_blocks_promotion_when_walk_forward_is_weak(self) -> None:
         verdict = build_promotion_verdict(
