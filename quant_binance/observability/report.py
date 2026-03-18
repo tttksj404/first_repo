@@ -513,6 +513,7 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
     regime_breakdown = _runtime_regime_breakdown(payload)
     futures_supportive = bool(regime_breakdown.get("futures_supportive"))
     futures_elite = bool(regime_breakdown.get("futures_elite"))
+    observe_only_symbols = {str(symbol) for symbol in list(payload.get("observe_only_symbols", []) or []) if str(symbol)}
     adjustments: list[dict[str, object]] = []
     for row in list(payload.get("pruning_recommendations", []) or []):
         symbol = str(row.get("symbol", "") or "")
@@ -555,6 +556,8 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
         if not symbol or trade_count < 3 or recommendation not in {"promote", "prune"}:
             continue
         regime = "major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt"
+        if symbol in observe_only_symbols and regime != "major" and recommendation == "promote":
+            continue
         if recommendation == "promote" and expectancy > 0.0:
             action = "aggressive_promote" if regime == "major" and futures_elite else "promote"
             if action == "aggressive_promote" and not futures_supportive:
@@ -670,6 +673,33 @@ def _candidate_generation_summary(
     }
 
 
+def _observe_only_runtime_adjustments(runtime_evidence: dict[str, object] | None) -> list[dict[str, object]]:
+    payload = dict(runtime_evidence or {})
+    symbols = [str(symbol) for symbol in list(payload.get("observe_only_symbols", []) or []) if str(symbol)]
+    adjustments: list[dict[str, object]] = []
+    for symbol in symbols:
+        regime = "major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt"
+        adjustments.append(
+            _policy_adjustment_shape(
+                symbol=symbol,
+                regime=regime,
+                setup_class="runtime_observe_only",
+                side="both",
+                execution_quality_state="runtime_review",
+                sample_count=1,
+                action="demote",
+                reason="RUNTIME_OBSERVE_ONLY_SYMBOL",
+                signal_source="runtime_observe_only",
+                score_delta=-0.08 if regime == "major" else -0.18,
+                signal_context={
+                    "observe_only": True,
+                    "regime": regime,
+                },
+            )
+        )
+    return adjustments
+
+
 def build_auto_tune_policy(
     attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...],
     runtime_evidence: dict[str, object] | None = None,
@@ -681,6 +711,11 @@ def build_auto_tune_policy(
             continue
         adjustments_by_symbol[symbol] = _merge_policy_adjustments(adjustments_by_symbol.get(symbol), adjustment)
     for adjustment in _runtime_decomposition_adjustments(runtime_evidence):
+        symbol = str(adjustment.get("symbol", "") or "")
+        if not symbol:
+            continue
+        adjustments_by_symbol[symbol] = _merge_policy_adjustments(adjustments_by_symbol.get(symbol), adjustment)
+    for adjustment in _observe_only_runtime_adjustments(runtime_evidence):
         symbol = str(adjustment.get("symbol", "") or "")
         if not symbol:
             continue
