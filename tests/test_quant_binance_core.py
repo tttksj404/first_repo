@@ -1012,6 +1012,25 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(summary["operational_verdict"]["status"], "stop")
         self.assertIn("EDGE_RETENTION_TOO_LOW", summary["operational_verdict"]["reasons"])
 
+    def test_auto_tune_policy_demotes_observe_only_alt_and_blocks_promote(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "observe_only_symbols": ["XRPUSDT"],
+                "symbol_summary": [
+                    {"symbol": "XRPUSDT", "trade_count": 3, "expectancy_usd": 1.5, "recommendation": "promote"},
+                    {"symbol": "BTCUSDT", "trade_count": 3, "expectancy_usd": 4.0, "recommendation": "promote"},
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 70.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+            },
+        )
+        adjustments = {item["symbol"]: item for item in policy["adjustments"]}
+        self.assertEqual(adjustments["XRPUSDT"]["action"], "demote")
+        self.assertIn("runtime_observe_only", adjustments["XRPUSDT"]["signal_sources"])
+        self.assertEqual(adjustments["BTCUSDT"]["action"], "aggressive_promote")
+
     def test_runtime_summary_lists_observe_only_symbols(self) -> None:
         features = FeatureVector(
             ret_rank_1h=0.5,
