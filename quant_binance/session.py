@@ -1842,6 +1842,8 @@ class LivePaperSession:
             "quantity": round(quantity_closed, 8),
             "realized_pnl_usd_estimate": round(realized, 6),
             "realized_return_bps_estimate": round(return_bps, 6),
+            "entry_predictability_score": round(position.entry_predictability_score, 6),
+            "latest_predictability_score": round(position.latest_predictability_score or position.entry_predictability_score, 6),
             "exit_reason": exit_reason,
             "partial_exit": quantity_closed < position.quantity_opened,
             "loss_combo_key": loss_combo_key,

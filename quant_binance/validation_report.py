@@ -29,6 +29,7 @@ class WeeklyValidationReport:
     total_live_order_count: int
     total_tested_order_count: int
     sample_progress: dict[str, object]
+    score_alignment_summary: tuple[dict[str, object], ...]
     symbol_summary: tuple[dict[str, object], ...]
     regime_summary: tuple[dict[str, object], ...]
     criteria: tuple[ValidationCriteriaRow, ...]
@@ -46,6 +47,7 @@ class WeeklyValidationReport:
             "total_live_order_count": self.total_live_order_count,
             "total_tested_order_count": self.total_tested_order_count,
             "sample_progress": dict(self.sample_progress),
+            "score_alignment_summary": list(self.score_alignment_summary),
             "symbol_summary": list(self.symbol_summary),
             "regime_summary": list(self.regime_summary),
             "criteria": [asdict(item) for item in self.criteria],
@@ -797,6 +799,7 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
                 "remaining_live_order_count": 8,
                 "ready_for_comparison": False,
             },
+            score_alignment_summary=(),
             symbol_summary=(),
             regime_summary=(),
             criteria=_criteria_table(),
@@ -804,6 +807,7 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
 
     symbol_buckets: dict[str, dict[str, float | int]] = {}
     regime_buckets: dict[str, dict[str, float | int]] = {}
+    score_buckets: dict[str, dict[str, float | int]] = {}
     total_closed_trade_count = 0
     total_realized_pnl = 0.0
     total_live_orders = 0
@@ -833,6 +837,23 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
             bucket["expectancy_weighted_sum"] = float(bucket["expectancy_weighted_sum"]) + (row.expectancy_usd * max(row.trade_count, 1))
             bucket["win_count"] = int(bucket["win_count"]) + row.win_count
             bucket["loss_count"] = int(bucket["loss_count"]) + row.loss_count
+
+        for row in report.score_bucket_performance:
+            bucket = score_buckets.setdefault(
+                row.score_bucket_label,
+                {
+                    "trade_count": 0,
+                    "win_count": 0,
+                    "loss_count": 0,
+                    "realized_pnl_usd": 0.0,
+                    "average_return_bps_weighted_sum": 0.0,
+                },
+            )
+            bucket["trade_count"] = int(bucket["trade_count"]) + row.trade_count
+            bucket["win_count"] = int(bucket["win_count"]) + row.win_count
+            bucket["loss_count"] = int(bucket["loss_count"]) + row.loss_count
+            bucket["realized_pnl_usd"] = float(bucket["realized_pnl_usd"]) + row.realized_pnl_usd
+            bucket["average_return_bps_weighted_sum"] = float(bucket["average_return_bps_weighted_sum"]) + (row.average_return_bps * max(row.trade_count, 1))
 
         for row in report.regime_performance:
             bucket = regime_buckets.setdefault(
@@ -885,6 +906,25 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         )
     symbol_rows.sort(key=lambda item: (str(item["recommendation"]), float(item["expectancy_usd"])))
 
+    score_alignment_rows: list[dict[str, object]] = []
+    for label, bucket in score_buckets.items():
+        trade_count = int(bucket["trade_count"])
+        realized_pnl = float(bucket["realized_pnl_usd"])
+        expectancy = realized_pnl / max(trade_count, 1)
+        score_alignment_rows.append(
+            {
+                "score_bucket_label": label,
+                "trade_count": trade_count,
+                "win_count": int(bucket["win_count"]),
+                "loss_count": int(bucket["loss_count"]),
+                "hit_rate": round(int(bucket["win_count"]) / max(trade_count, 1), 6),
+                "realized_pnl_usd": round(realized_pnl, 6),
+                "expectancy_usd": round(expectancy, 6),
+                "average_return_bps": round(float(bucket["average_return_bps_weighted_sum"]) / max(trade_count, 1), 6),
+            }
+        )
+    score_alignment_rows.sort(key=lambda item: str(item["score_bucket_label"]))
+
     regime_rows: list[dict[str, object]] = []
     for mode, bucket in regime_buckets.items():
         count = int(bucket["decision_count"])
@@ -926,6 +966,7 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         total_live_order_count=total_live_orders,
         total_tested_order_count=total_tested_orders,
         sample_progress=sample_progress,
+        score_alignment_summary=tuple(score_alignment_rows),
         symbol_summary=tuple(symbol_rows),
         regime_summary=tuple(regime_rows),
         criteria=_criteria_table(),

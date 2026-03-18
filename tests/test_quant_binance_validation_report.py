@@ -569,6 +569,7 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                         "symbol": "BTCUSDT",
                         "realized_pnl_usd_estimate": 5.0,
                         "realized_return_bps_estimate": 10.0,
+                        "entry_predictability_score": 74.0,
                     }
                 )
                 + "\n",
@@ -580,6 +581,7 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                         "symbol": "BTCUSDT",
                         "realized_pnl_usd_estimate": -3.0,
                         "realized_return_bps_estimate": -6.0,
+                        "entry_predictability_score": 74.0,
                     }
                 )
                 + "\n",
@@ -613,6 +615,8 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(report.sample_progress["status"], "collecting_evidence")
             self.assertEqual(report.sample_progress["remaining_closed_trade_count"], 4)
             self.assertEqual(report.sample_progress["remaining_live_order_count"], 5)
+            self.assertEqual(report.score_alignment_summary[0]["score_bucket_label"], "70-79")
+            self.assertEqual(report.score_alignment_summary[0]["trade_count"], 2)
             symbols = {row["symbol"]: row for row in report.symbol_summary}
             self.assertEqual(symbols["BTCUSDT"]["sample_status"], "warming_up")
             self.assertEqual(symbols["BTCUSDT"]["remaining_trade_count_for_validation"], 1)
