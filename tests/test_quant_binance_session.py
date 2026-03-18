@@ -556,6 +556,54 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertAlmostEqual(capped.order_intent_notional_usd, 1625.0, places=6)
         self.assertIn("OPERATIONAL_AGGRESSIVE_PASS_SCALE", capped.size_boost_reasons)
 
+    def test_cap_live_order_decision_does_not_scale_up_alt_on_operational_aggressive_pass(self) -> None:
+        session = self._build_session()
+        session.capital_report = {
+            "futures_execution_balance_usd": 10000.0,
+            "futures_requirements": [{"symbol": "XRPUSDT", "min_notional_usd": 5.0, "min_quantity": 0.01}],
+        }
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 15.0, "realized_edge_bps": 15.0},
+            {"symbol": "ETHUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 16.0, "realized_edge_bps": 16.0},
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 17.0, "realized_edge_bps": 17.0},
+            {"symbol": "ETHUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 18.0, "realized_edge_bps": 18.0},
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 19.0, "realized_edge_bps": 19.0},
+            {"symbol": "ETHUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0},
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 21.0, "realized_edge_bps": 21.0},
+            {"symbol": "ETHUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 22.0, "realized_edge_bps": 22.0},
+            {"symbol": "BTCUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 23.0, "realized_edge_bps": 23.0},
+            {"symbol": "ETHUSDT", "side": "long", "accepted": True, "fill_status": "filled", "fill_ratio": 0.98, "expected_net_edge_bps": 24.0, "realized_edge_bps": 24.0},
+        ]
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        capped = session._cap_live_order_decision(make_decision(timestamp=now, symbol="XRPUSDT", order_intent_notional_usd=1000.0), reference_price=150.0)
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertAlmostEqual(capped.order_intent_notional_usd, 500.0, places=6)
+        self.assertIn("NON_MAJOR_CONSERVATIVE_OVERRIDE", capped.size_boost_reasons)
+        self.assertNotIn("OPERATIONAL_AGGRESSIVE_PASS_SCALE", capped.size_boost_reasons)
+
+    def test_cap_live_order_decision_does_not_scale_up_alt_on_operational_strong_pass(self) -> None:
+        session = self._build_session()
+        session.capital_report = {
+            "futures_execution_balance_usd": 10000.0,
+            "futures_requirements": [{"symbol": "XRPUSDT", "min_notional_usd": 5.0, "min_quantity": 0.01}],
+        }
+        session.live_orders = [
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 15.0, "realized_edge_bps": 13.0},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 14.0, "realized_edge_bps": 12.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.6},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 15.0, "realized_edge_bps": 12.5},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 17.0, "realized_edge_bps": 14.4},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.95, "expected_net_edge_bps": 13.0, "realized_edge_bps": 11.0},
+            {"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.97, "expected_net_edge_bps": 18.0, "realized_edge_bps": 15.0},
+            {"symbol": "ETHUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.96, "expected_net_edge_bps": 16.0, "realized_edge_bps": 13.4},
+        ]
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        capped = session._cap_live_order_decision(make_decision(timestamp=now, symbol="XRPUSDT", order_intent_notional_usd=1000.0), reference_price=150.0)
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertAlmostEqual(capped.order_intent_notional_usd, 1000.0, places=6)
+        self.assertIn("NON_MAJOR_CONSERVATIVE_OVERRIDE", capped.size_boost_reasons)
+        self.assertNotIn("OPERATIONAL_STRONG_PASS_SCALE", capped.size_boost_reasons)
+
     def test_cap_live_order_decision_scales_up_on_operational_strong_pass(self) -> None:
         session = self._build_session()
         session.capital_report = {
