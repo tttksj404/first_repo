@@ -796,14 +796,92 @@ class LivePaperSession:
         summary = build_runtime_summary(decisions=[], live_orders=self.live_orders)
         return build_policy_state(summary.get("candidate_policy", {}), summary.get("promotion_verdict", {}))
 
+    def _policy_rollout_progression(self, policy_state: dict[str, object]) -> dict[str, object]:
+        active_policy = dict(policy_state.get("active_policy", {}) or {})
+        return dict(
+            policy_state.get("rollout_progression", active_policy.get("rollout_progression", {})) or {}
+        )
+
+    def _policy_runtime_context(self) -> dict[str, object]:
+        policy_state = self._current_policy_state()
+        active_policy = dict(policy_state.get("active_policy", {}) or {})
+        rollout_progression = self._policy_rollout_progression(policy_state)
+        adjustments = list(active_policy.get("adjustments", []) or [])
+        source = "active_policy"
+        if not adjustments and str(policy_state.get("rollout_status", "baseline") or "baseline") == "micro_live_pending":
+            adjustments = list(dict(policy_state.get("candidate_policy", {}) or {}).get("adjustments", []) or [])
+            source = "candidate_policy"
+        return {
+            "policy_state": policy_state,
+            "active_policy": active_policy,
+            "adjustments": adjustments,
+            "source": source,
+            "execution_phase": str(rollout_progression.get("execution_phase", "baseline") or "baseline"),
+        }
+
+    def _policy_rollout_phase_scale(self, execution_phase: str) -> float:
+        return {
+            "partial": 0.35,
+            "broad": 0.7,
+            "full": 1.0,
+            "watch": 0.5,
+            "rollback": 0.0,
+        }.get(execution_phase, 1.0)
+
+    def _effective_policy_adjustment(
+        self,
+        adjustment: dict[str, object],
+        *,
+        symbol: str,
+        source: str,
+        execution_phase: str,
+    ) -> dict[str, object]:
+        payload = dict(adjustment or {})
+        if not payload:
+            return {}
+        action = str(payload.get("action", "") or "")
+        phase_scaled = source == "candidate_policy" or action in {"promote", "aggressive_promote"}
+        if not phase_scaled:
+            payload["rollout_adjustment_source"] = source
+            payload["rollout_execution_phase"] = execution_phase
+            payload["rollout_phase_scale"] = 1.0
+            return payload
+        scale = self._policy_rollout_phase_scale(execution_phase)
+        if execution_phase == "partial" and not is_major_futures_symbol(
+            symbol,
+            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+        ):
+            return {}
+        if scale <= 0.0:
+            return {}
+        payload["size_multiplier"] = round(1.0 + ((float(payload.get("size_multiplier", 1.0) or 1.0) - 1.0) * scale), 6)
+        payload["leverage_multiplier"] = round(
+            1.0 + ((float(payload.get("leverage_multiplier", 1.0) or 1.0) - 1.0) * scale),
+            6,
+        )
+        payload["entry_threshold_bps"] = round(float(payload.get("entry_threshold_bps", 0.0) or 0.0) * scale, 6)
+        payload["expected_profit_floor_bps"] = round(
+            float(payload.get("expected_profit_floor_bps", 0.0) or 0.0) * scale,
+            6,
+        )
+        if "score_delta" in payload:
+            payload["score_delta"] = round(float(payload.get("score_delta", 0.0) or 0.0) * scale, 6)
+        payload["rollout_adjustment_source"] = source
+        payload["rollout_execution_phase"] = execution_phase
+        payload["rollout_phase_scale"] = round(scale, 6)
+        payload["rollout_scope"] = "major_only" if execution_phase == "partial" else "full_universe"
+        return payload
 
     def _policy_adjustment_for_decision(self, decision: DecisionIntent) -> dict[str, object]:
-        if len(self.live_orders) < 5:
-            return {}
-        policy_state = self._current_policy_state()
-        for adjustment in list(policy_state.get("active_policy", {}).get("adjustments", [])):
+        context = self._policy_runtime_context()
+        for adjustment in list(context.get("adjustments", []) or []):
             if str(adjustment.get("symbol", "")) == decision.symbol:
-                return dict(adjustment)
+                return self._effective_policy_adjustment(
+                    dict(adjustment),
+                    symbol=decision.symbol,
+                    source=str(context.get("source", "active_policy") or "active_policy"),
+                    execution_phase=str(context.get("execution_phase", "baseline") or "baseline"),
+                )
         return {}
 
     def _policy_leverage_multiplier_for_decision(self, decision: DecisionIntent) -> float:
@@ -812,12 +890,16 @@ class LivePaperSession:
 
 
     def _policy_entry_floor_adjustment_for_symbol(self, symbol: str) -> float:
-        if len(self.live_orders) < 5:
-            return 0.0
-        policy_state = self._current_policy_state()
-        for adjustment in list(policy_state.get("active_policy", {}).get("adjustments", [])):
+        context = self._policy_runtime_context()
+        for adjustment in list(context.get("adjustments", []) or []):
             if str(adjustment.get("symbol", "")) == symbol:
-                return float(adjustment.get("entry_threshold_bps", 0.0) or 0.0)
+                effective = self._effective_policy_adjustment(
+                    dict(adjustment),
+                    symbol=symbol,
+                    source=str(context.get("source", "active_policy") or "active_policy"),
+                    execution_phase=str(context.get("execution_phase", "baseline") or "baseline"),
+                )
+                return float(effective.get("entry_threshold_bps", 0.0) or 0.0)
         return 0.0
 
     def _policy_entry_floor_adjustment_bps(self, decision: DecisionIntent) -> float:
@@ -842,12 +924,19 @@ class LivePaperSession:
         return 1.0
 
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
-        if len(self.live_orders) < 5:
+        policy_adjustment = self._policy_adjustment_for_decision(decision)
+        if len(self.live_orders) < 5 and not policy_adjustment:
             return decision
         verdict = self._current_operational_verdict()
-        status = str(verdict.get("status", "hold"))
-        policy_multiplier = self._policy_multiplier_for_decision(decision)
-        policy_symbol_bias = self._policy_symbol_bias_for_decision(decision)
+        status = "pass" if len(self.live_orders) < 5 else str(verdict.get("status", "hold"))
+        policy_multiplier = float(policy_adjustment.get("size_multiplier", 1.0) or 1.0)
+        policy_symbol_bias = str(policy_adjustment.get("symbol_bias", "neutral") or "neutral")
+        rollout_phase = str(policy_adjustment.get("rollout_execution_phase", "baseline") or "baseline")
+        phase_reason = (
+            (f"ACTIVE_POLICY_PHASE_{rollout_phase.upper()}",)
+            if rollout_phase in {"partial", "broad", "full", "watch", "rollback"}
+            else ()
+        )
         if policy_symbol_bias == "majors_only" and decision.symbol not in {"BTCUSDT", "ETHUSDT"}:
             return replace(
                 decision,
@@ -855,7 +944,7 @@ class LivePaperSession:
                 side="flat",
                 order_intent_notional_usd=0.0,
                 stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("ACTIVE_POLICY_MAJORS_ONLY",)))),
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("ACTIVE_POLICY_MAJORS_ONLY",) + phase_reason))),
             )
         if status == "stop":
             return replace(
@@ -897,7 +986,15 @@ class LivePaperSession:
                 decision,
                 order_intent_notional_usd=adjusted_notional,
                 strategy_size_multiplier=round(decision.strategy_size_multiplier * policy_multiplier, 6),
-                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (("ACTIVE_POLICY_PROMOTE",) if policy_multiplier > 1.0 else ("ACTIVE_POLICY_DEMOTE",))))),
+                size_boost_reasons=tuple(
+                    sorted(
+                        set(
+                            decision.size_boost_reasons
+                            + (("ACTIVE_POLICY_PROMOTE",) if policy_multiplier > 1.0 else ("ACTIVE_POLICY_DEMOTE",))
+                            + phase_reason
+                        )
+                    )
+                ),
             )
         if status != "hold":
             return decision
@@ -915,7 +1012,7 @@ class LivePaperSession:
             decision,
             order_intent_notional_usd=scaled_notional,
             strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5 * policy_multiplier, 6),
-            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_HOLD_SCALE",)))),
+            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_HOLD_SCALE",) + phase_reason))),
         )
 
     def _cap_live_order_decision(

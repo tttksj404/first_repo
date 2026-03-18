@@ -315,6 +315,167 @@ def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evi
     }
 
 
+def _retention_window_signal(
+    *,
+    validation_runs: list[dict[str, object]],
+    walk_forward_windows: list[dict[str, object]],
+    window_size: int | None = None,
+) -> dict[str, object]:
+    runs = list(validation_runs[-window_size:] if window_size is not None and window_size > 0 else validation_runs)
+    windows = list(walk_forward_windows[-window_size:] if window_size is not None and window_size > 0 else walk_forward_windows)
+    live_order_count = sum(_safe_int(item.get("live_order_count")) for item in runs)
+    accepted_live_order_count = sum(_safe_int(item.get("accepted_live_order_count")) for item in runs)
+    rejected_live_order_count = sum(_safe_int(item.get("rejected_live_order_count")) for item in runs)
+    closed_trade_count = sum(_safe_int(item.get("closed_trade_count")) for item in runs)
+    retention_weight = float(max(live_order_count, 0))
+    slippage_weight = float(max(accepted_live_order_count, 0))
+    positive_walk_forward_count = sum(
+        1
+        for item in windows
+        if _safe_float(item.get("avg_net_edge_bps")) > 0.0 and _safe_float(item.get("avg_score")) >= 0.0
+    )
+    pnl_series = [_safe_float(item.get("realized_pnl_usd")) for item in runs]
+    return {
+        "available": bool(runs or windows),
+        "window_size": window_size if window_size is not None else len(runs),
+        "run_count": len(runs),
+        "walk_forward_window_count": len(windows),
+        "live_order_count": live_order_count,
+        "accepted_live_order_count": accepted_live_order_count,
+        "rejected_live_order_count": rejected_live_order_count,
+        "closed_trade_count": closed_trade_count,
+        "avg_edge_retention_ratio": _weighted_metric(
+            sum(_safe_float(item.get("avg_edge_retention_ratio")) * _safe_int(item.get("live_order_count")) for item in runs),
+            retention_weight,
+        ),
+        "avg_slippage_bps": _weighted_metric(
+            sum(_safe_float(item.get("avg_slippage_bps")) * _safe_int(item.get("accepted_live_order_count")) for item in runs),
+            slippage_weight,
+        ),
+        "reject_rate": round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0,
+        "drawdown_to_pnl_ratio": _max_drawdown(pnl_series),
+        "positive_walk_forward_count": positive_walk_forward_count,
+        "positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(windows)), 6),
+    }
+
+
+def _policy_rollout_phase_scale(phase: str) -> float:
+    return {
+        "partial": 0.35,
+        "broad": 0.7,
+        "full": 1.0,
+        "watch": 0.5,
+        "rollback": 0.0,
+    }.get(str(phase or "full"), 1.0)
+
+
+def _policy_application_profile(
+    *,
+    policy: dict[str, Any],
+    rollout_phase: str,
+    source: str,
+) -> dict[str, object]:
+    adjustments = list(dict(policy or {}).get("adjustments", []) or [])
+    symbols = sorted(str(item.get("symbol", "") or "") for item in adjustments if str(item.get("symbol", "") or ""))
+    promote_count = 0
+    aggressive_promote_count = 0
+    demote_count = 0
+    disabled_count = 0
+    majors_only_count = 0
+    size_values: list[float] = []
+    leverage_values: list[float] = []
+    entry_values: list[float] = []
+    expected_floor_values: list[float] = []
+    phase_scale = _policy_rollout_phase_scale(rollout_phase)
+    for item in adjustments:
+        action = str(item.get("action", "") or "")
+        size_multiplier = _safe_float(item.get("size_multiplier"), 1.0)
+        leverage_multiplier = _safe_float(item.get("leverage_multiplier"), 1.0)
+        entry_threshold_bps = _safe_float(item.get("entry_threshold_bps"))
+        expected_profit_floor_bps = _safe_float(item.get("expected_profit_floor_bps"))
+        if action in {"promote", "aggressive_promote"}:
+            size_multiplier = round(1.0 + ((size_multiplier - 1.0) * phase_scale), 6)
+            leverage_multiplier = round(1.0 + ((leverage_multiplier - 1.0) * phase_scale), 6)
+            entry_threshold_bps = round(entry_threshold_bps * phase_scale, 6)
+            expected_profit_floor_bps = round(expected_profit_floor_bps * phase_scale, 6)
+            promote_count += 1
+            if action == "aggressive_promote":
+                aggressive_promote_count += 1
+        elif action == "demote":
+            demote_count += 1
+        elif action == "disabled":
+            disabled_count += 1
+        if str(item.get("symbol_bias", "neutral") or "neutral") == "majors_only":
+            majors_only_count += 1
+        size_values.append(size_multiplier)
+        leverage_values.append(leverage_multiplier)
+        entry_values.append(entry_threshold_bps)
+        expected_floor_values.append(expected_profit_floor_bps)
+    adjustment_count = len(adjustments)
+    return {
+        "source": source,
+        "rollout_phase": rollout_phase,
+        "phase_application_factor": round(phase_scale, 6),
+        "adjustment_count": adjustment_count,
+        "symbols": symbols,
+        "promote_count": promote_count,
+        "aggressive_promote_count": aggressive_promote_count,
+        "demote_count": demote_count,
+        "disabled_count": disabled_count,
+        "majors_only_count": majors_only_count,
+        "net_size_delta": round(sum(value - 1.0 for value in size_values), 6) if adjustment_count else 0.0,
+        "net_leverage_delta": round(sum(value - 1.0 for value in leverage_values), 6) if adjustment_count else 0.0,
+        "entry_aggressiveness_delta_bps": round(sum(-value for value in entry_values), 6) if adjustment_count else 0.0,
+        "expected_profit_floor_aggressiveness_delta_bps": round(sum(-value for value in expected_floor_values), 6) if adjustment_count else 0.0,
+        "avg_size_multiplier": round(sum(size_values) / adjustment_count, 6) if adjustment_count else 1.0,
+        "avg_leverage_multiplier": round(sum(leverage_values) / adjustment_count, 6) if adjustment_count else 1.0,
+        "avg_entry_threshold_bps": round(sum(entry_values) / adjustment_count, 6) if adjustment_count else 0.0,
+        "avg_expected_profit_floor_bps": round(sum(expected_floor_values) / adjustment_count, 6) if adjustment_count else 0.0,
+    }
+
+
+def _policy_application_delta(
+    *,
+    candidate_profile: dict[str, object],
+    current_profile: dict[str, object],
+) -> dict[str, object]:
+    metric_names = {
+        "avg_size_multiplier": "avg_size_multiplier_delta",
+        "avg_leverage_multiplier": "avg_leverage_multiplier_delta",
+        "avg_entry_threshold_bps": "avg_entry_threshold_bps_delta",
+        "avg_expected_profit_floor_bps": "avg_expected_profit_floor_bps_delta",
+        "promote_count": "promote_count_delta",
+        "aggressive_promote_count": "aggressive_promote_count_delta",
+        "demote_count": "demote_count_delta",
+        "disabled_count": "disabled_count_delta",
+        "majors_only_count": "majors_only_count_delta",
+        "adjustment_count": "adjustment_count_delta",
+        "net_size_delta": "net_size_delta",
+        "net_leverage_delta": "net_leverage_delta",
+        "entry_aggressiveness_delta_bps": "entry_aggressiveness_delta_bps",
+        "expected_profit_floor_aggressiveness_delta_bps": "expected_profit_floor_aggressiveness_delta_bps",
+    }
+    deltas = {
+        output_key: round(
+            _safe_float(candidate_profile.get(metric_name)) - _safe_float(current_profile.get(metric_name)),
+            6,
+        )
+        for metric_name, output_key in metric_names.items()
+    }
+    candidate_symbols = set(candidate_profile.get("symbols", []))
+    current_symbols = set(current_profile.get("symbols", []))
+    return {
+        "candidate_rollout_phase": str(candidate_profile.get("rollout_phase", "full") or "full"),
+        "current_rollout_phase": str(current_profile.get("rollout_phase", "full") or "full"),
+        "candidate_phase_application_factor": round(_safe_float(candidate_profile.get("phase_application_factor"), 1.0), 6),
+        "current_phase_application_factor": round(_safe_float(current_profile.get("phase_application_factor"), 1.0), 6),
+        "candidate_only_symbols": sorted(candidate_symbols - current_symbols),
+        "current_only_symbols": sorted(current_symbols - candidate_symbols),
+        "shared_symbols": sorted(candidate_symbols & current_symbols),
+        **deltas,
+    }
+
+
 def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> WeeklyValidationReport:
     root = Path(base_dir)
     runs = _resolve_recent_runs(base_dir=root, lookback_days=lookback_days)
@@ -503,6 +664,7 @@ def _execution_style_path_entry(
     replay_summary: dict[str, object],
     evidence: dict[str, Any],
     evidence_available: bool,
+    policy_application: dict[str, object],
 ) -> dict[str, object]:
     payload = dict(evidence or {})
     return {
@@ -510,6 +672,7 @@ def _execution_style_path_entry(
         "source": source,
         "policy_score": round(policy_score, 6),
         "evidence_available": evidence_available,
+        "policy_application": dict(policy_application or {}),
         "micro_live_gate": dict(payload.get("micro_live_gate", {}) or {}),
         "runner_metrics": {
             "total_realized_pnl_usd": round(_safe_float(payload.get("runner_total_realized_pnl_usd")), 6),
@@ -542,6 +705,8 @@ def _counterfactual_replay_path(
     candidate_evidence: dict[str, Any],
     current_evidence: dict[str, Any],
     current_evidence_available: bool,
+    candidate_policy_application: dict[str, object],
+    current_policy_application: dict[str, object],
 ) -> dict[str, object]:
     candidate_summary = dict(candidate_replay_summary or {})
     current_summary = dict(current_replay_summary or {})
@@ -553,6 +718,7 @@ def _counterfactual_replay_path(
         replay_summary=candidate_summary,
         evidence=candidate_evidence,
         evidence_available=_replay_summary_available(candidate_summary),
+        policy_application=candidate_policy_application,
     )
     current_entry = _execution_style_path_entry(
         policy_label="current_policy",
@@ -561,6 +727,11 @@ def _counterfactual_replay_path(
         replay_summary=current_summary,
         evidence=current_evidence,
         evidence_available=current_evidence_available and _replay_summary_available(current_summary),
+        policy_application=current_policy_application,
+    )
+    policy_application_delta = _policy_application_delta(
+        candidate_profile=candidate_policy_application,
+        current_profile=current_policy_application,
     )
     return {
         "mode": "counterfactual_current_vs_candidate_policy",
@@ -576,6 +747,7 @@ def _counterfactual_replay_path(
                 "current_evidence_available": bool(current_entry.get("evidence_available")),
                 "candidate_micro_live_status": str(candidate_entry["micro_live_gate"].get("status", "not_available") or "not_available"),
                 "current_micro_live_status": str(current_entry["micro_live_gate"].get("status", "not_available") or "not_available"),
+                "policy_application_delta": policy_application_delta,
             },
         },
         "candidate_policy": candidate_entry,
@@ -595,6 +767,22 @@ def build_policy_comparison_validation_artifact(*,
     current_policy_evidence = dict(dict(dict(current_policy_state or {}).get("policy_validation", {}) or {}).get("evidence", {}) or {})
     current_score = _policy_adjustment_score(current_policy)
     candidate_score = _policy_adjustment_score(candidate_policy)
+    current_rollout_phase = str(
+        dict(current_policy_state or {}).get("rollout_progression", dict(current_policy.get("rollout_progression", {}) or {})).get("execution_phase", "full")
+        or "full"
+    )
+    if not list(current_policy.get("adjustments", []) or []):
+        current_rollout_phase = "baseline"
+    candidate_policy_application = _policy_application_profile(
+        policy=candidate_policy,
+        rollout_phase="full",
+        source="candidate_policy_requested",
+    )
+    current_policy_application = _policy_application_profile(
+        policy=current_policy,
+        rollout_phase=current_rollout_phase,
+        source="current_policy_active",
+    )
     delta = round(candidate_score - current_score, 6)
     structural_verdict = "keep"
     if delta > 0.1:
@@ -636,6 +824,12 @@ def build_policy_comparison_validation_artifact(*,
         candidate_evidence=runner_evidence,
         current_evidence=current_policy_evidence,
         current_evidence_available=bool(runtime_comparison.get("runtime_evidence_available")),
+        candidate_policy_application=candidate_policy_application,
+        current_policy_application=current_policy_application,
+    )
+    policy_application_delta = dict(
+        dict(counterfactual_replay_path.get("execution_style_comparison", {}) or {}).get("comparison_summary", {}).get("policy_application_delta", {})
+        or {}
     )
     evidence = {
         "comparison_verdict": verdict,
@@ -656,10 +850,15 @@ def build_policy_comparison_validation_artifact(*,
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
         "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
         "micro_live_gate": runner.get("micro_live_gate", {}),
+        "recent_retention_window": runner.get("recent_retention_window", {}),
+        "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
         "candidate_vs_current_validation_path": validation_path,
         "counterfactual_replay_path": counterfactual_replay_path,
         "candidate_replay_summary": candidate_replay_summary,
         "current_replay_summary": current_replay_summary,
+        "candidate_policy_application": candidate_policy_application,
+        "current_policy_application": current_policy_application,
+        "policy_application_delta": policy_application_delta,
         "symbol_summary": runner.get("symbol_summary", []),
         "regime_summary": runner.get("regime_summary", []),
         "pruning_recommendations": runner.get("pruning_recommendations", []),
@@ -684,6 +883,8 @@ def build_policy_comparison_validation_artifact(*,
         "runner_avg_realized_edge_bps": runner.get("runner_avg_realized_edge_bps", 0.0),
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
         "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
+        "recent_retention_window": runner.get("recent_retention_window", {}),
+        "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
         "counterfactual_replay_path": counterfactual_replay_path,
         "candidate_replay_summary": candidate_replay_summary,
         "current_replay_summary": current_replay_summary,
@@ -764,6 +965,15 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         avg_realized_edge_bps=avg_realized_edge_bps,
         closed_trade_count=closed_trade_count,
     )
+    recent_retention_window = _retention_window_signal(
+        validation_runs=run_snapshots,
+        walk_forward_windows=walk_forward_windows,
+        window_size=3,
+    )
+    cumulative_retention_window = _retention_window_signal(
+        validation_runs=run_snapshots,
+        walk_forward_windows=walk_forward_windows,
+    )
     total_return_pct = total_realized_pnl_usd
     max_drawdown_pct = max_drawdown_usd
     evidence = {
@@ -781,6 +991,8 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "runner_positive_walk_forward_window_count": positive_walk_forward_count,
         "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
         "micro_live_gate": micro_live_gate,
+        "recent_retention_window": recent_retention_window,
+        "cumulative_retention_window": cumulative_retention_window,
     }
     return {
         "generated_at": report.generated_at,
@@ -806,6 +1018,8 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "regime_summary": regime_rows,
         "pruning_recommendations": pruning_recommendations,
         "micro_live_gate": micro_live_gate,
+        "recent_retention_window": recent_retention_window,
+        "cumulative_retention_window": cumulative_retention_window,
         "evidence": evidence,
     }
 
