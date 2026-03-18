@@ -25,6 +25,13 @@ DEFAULT_BURST_WINDOW_SECONDS = 45
 DEFAULT_BURST_THRESHOLD = 3
 
 
+REPORT_ONLY_PREFIXES = (
+    "[오픈클로 실거래 요약 리포트]",
+    "[주간 검증 리포트]",
+    "[실행 품질 리포트]",
+)
+
+
 def _env_flag_enabled(value: str) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
@@ -99,6 +106,11 @@ def telegram_auto_summary_enabled() -> bool:
     if not raw:
         return True
     return _env_flag_enabled(raw)
+
+
+def is_report_message(text: str) -> bool:
+    normalized = _normalize_message_text(text)
+    return any(normalized.startswith(prefix) for prefix in REPORT_ONLY_PREFIXES)
 
 
 def _normalize_message_text(text: str) -> str:
@@ -238,6 +250,8 @@ def send_telegram_message(text: str) -> dict[str, object]:
     chat_ids = resolve_telegram_chat_ids()
     if not token or not chat_ids:
         return {"sent": False, "reason": "missing_token_or_allowlist"}
+    if telegram_report_only_enabled() and not is_report_message(text):
+        return {"sent": False, "reason": "report_only_filtered"}
     prepared_text, meta = _prepare_outbound_text(text)
     if not prepared_text:
         return meta
