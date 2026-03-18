@@ -706,6 +706,11 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             symbols = {row["symbol"]: row for row in report.symbol_summary}
             self.assertEqual(symbols["BTCUSDT"]["sample_status"], "warming_up")
             self.assertEqual(symbols["BTCUSDT"]["remaining_trade_count_for_validation"], 1)
+            self.assertTrue(symbols["BTCUSDT"]["rolling_evidence"]["available"])
+            self.assertEqual(symbols["BTCUSDT"]["rolling_evidence"]["observed_run_count"], 2)
+            self.assertEqual(symbols["BTCUSDT"]["rolling_evidence"]["positive_window_ratio"], 0.5)
+            self.assertEqual(symbols["BTCUSDT"]["rolling_evidence"]["recent_run_consistency"], 0.5)
+            self.assertEqual(symbols["BTCUSDT"]["rolling_evidence"]["expectancy_stability"], 0.0)
             self.assertIn("BTCUSDT", symbols)
             self.assertIn("ETHUSDT", {row["symbol"]: row for row in report.symbol_summary} | {"ETHUSDT": {}})
             self.assertTrue(any(row["mode"] == "futures" for row in report.regime_summary))

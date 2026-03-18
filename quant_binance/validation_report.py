@@ -32,6 +32,7 @@ class WeeklyValidationReport:
     sample_progress: dict[str, object]
     score_alignment_summary: tuple[dict[str, object], ...]
     symbol_summary: tuple[dict[str, object], ...]
+    symbol_scorecard: tuple[dict[str, object], ...]
     regime_summary: tuple[dict[str, object], ...]
     criteria: tuple[ValidationCriteriaRow, ...]
 
@@ -50,6 +51,7 @@ class WeeklyValidationReport:
             "sample_progress": dict(self.sample_progress),
             "score_alignment_summary": list(self.score_alignment_summary),
             "symbol_summary": list(self.symbol_summary),
+            "symbol_scorecard": list(self.symbol_scorecard),
             "regime_summary": list(self.regime_summary),
             "criteria": [asdict(item) for item in self.criteria],
         }
@@ -174,6 +176,114 @@ def _safe_ratio(numerator: Any, denominator: Any) -> float:
     if denom <= 0.0:
         return 0.0
     return round(_safe_float(numerator) / denom, 6)
+
+
+def _rolling_expectancy_stability(expectancies: list[float]) -> float:
+    if not expectancies:
+        return 0.0
+    mean_expectancy = sum(expectancies) / len(expectancies)
+    mean_absolute_deviation = sum(abs(value - mean_expectancy) for value in expectancies) / len(expectancies)
+    scale = max(abs(mean_expectancy), 1.0)
+    return round(max(0.0, 1.0 - min(1.0, mean_absolute_deviation / scale)), 6)
+
+
+def _symbol_rolling_evidence(
+    *,
+    aggregate_expectancy: float,
+    history: list[dict[str, object]],
+) -> dict[str, object]:
+    observed_history = [dict(item) for item in history if _safe_int(item.get("trade_count")) > 0]
+    if not observed_history:
+        return {
+            "available": False,
+            "observed_run_count": 0,
+            "recent_run_count": 0,
+            "recent_run_consistency": 0.0,
+            "positive_window_count": 0,
+            "positive_window_ratio": 0.0,
+            "expectancy_stability": 0.0,
+        }
+    expectancies = [_safe_float(item.get("expectancy_usd")) for item in observed_history]
+    recent_expectancies = expectancies[-3:]
+    direction = 1 if aggregate_expectancy > 0.0 else (-1 if aggregate_expectancy < 0.0 else 0)
+    if direction > 0:
+        recent_consistency = _safe_ratio(sum(1 for value in recent_expectancies if value > 0.0), len(recent_expectancies))
+    elif direction < 0:
+        recent_consistency = _safe_ratio(sum(1 for value in recent_expectancies if value < 0.0), len(recent_expectancies))
+    else:
+        recent_consistency = 0.0
+    positive_window_count = sum(1 for value in expectancies if value > 0.0)
+    return {
+        "available": True,
+        "observed_run_count": len(observed_history),
+        "recent_run_count": len(recent_expectancies),
+        "recent_run_consistency": round(recent_consistency, 6),
+        "positive_window_count": positive_window_count,
+        "positive_window_ratio": round(_safe_ratio(positive_window_count, len(observed_history)), 6),
+        "expectancy_stability": _rolling_expectancy_stability(expectancies),
+    }
+
+
+def _build_symbol_scorecard(symbol_rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for row in list(symbol_rows):
+        symbol = str(row.get("symbol", "") or "")
+        recommendation = str(row.get("recommendation", "keep") or "keep")
+        expectancy = _safe_float(row.get("expectancy_usd"))
+        rolling_evidence = dict(row.get("rolling_evidence", {}) or {})
+        observed_run_count = _safe_int(rolling_evidence.get("observed_run_count"))
+        recent_run_count = _safe_int(rolling_evidence.get("recent_run_count"))
+        recent_run_consistency = _safe_float(rolling_evidence.get("recent_run_consistency"))
+        positive_window_ratio = _safe_float(rolling_evidence.get("positive_window_ratio"))
+        expectancy_stability = _safe_float(rolling_evidence.get("expectancy_stability"))
+        direction = 1 if expectancy > 0.0 else (-1 if expectancy < 0.0 else 0)
+        recent_positive_run_ratio = (
+            recent_run_consistency
+            if direction >= 0
+            else round(max(0.0, 1.0 - recent_run_consistency), 6)
+        )
+        directional_strength = (
+            (recent_run_consistency * 0.45)
+            + (positive_window_ratio * 0.35)
+            + (expectancy_stability * 0.2)
+        )
+        rolling_score = round(
+            0.5 + (directional_strength * 0.5 * direction),
+            6,
+        ) if direction != 0 else 0.5
+        scorecard_recommendation = "keep"
+        sample_status = "warmup"
+        if recommendation == "promote" and observed_run_count >= 2 and recent_run_consistency >= 0.67 and positive_window_ratio >= 0.6:
+            scorecard_recommendation = "promote"
+            sample_status = "supportive"
+        elif recommendation == "prune" and observed_run_count >= 2 and recent_run_consistency >= 0.67 and positive_window_ratio <= 0.4:
+            scorecard_recommendation = "demote"
+            sample_status = "supportive"
+        elif observed_run_count >= 2:
+            sample_status = "mixed"
+        rows.append(
+            {
+                "symbol": symbol,
+                "recommendation": scorecard_recommendation,
+                "sample_status": sample_status,
+                "rolling_score": max(0.0, min(1.0, rolling_score)),
+                "trade_count": _safe_int(row.get("trade_count")),
+                "trade_run_count": observed_run_count,
+                "recent_trade_run_count": recent_run_count,
+                "recent_positive_run_ratio": round(recent_positive_run_ratio, 6),
+                "positive_window_ratio": round(positive_window_ratio, 6),
+                "expectancy_stability": round(expectancy_stability, 6),
+            }
+        )
+    rows.sort(
+        key=lambda item: (
+            {"demote": 0, "keep": 1, "promote": 2}.get(str(item.get("recommendation", "keep")), 3),
+            float(item.get("rolling_score", 0.0)),
+            str(item.get("symbol", "")),
+        ),
+        reverse=True,
+    )
+    return rows
 
 
 def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
@@ -867,11 +977,13 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
             },
             score_alignment_summary=(),
             symbol_summary=(),
+            symbol_scorecard=(),
             regime_summary=(),
             criteria=_criteria_table(),
         )
 
     symbol_buckets: dict[str, dict[str, float | int]] = {}
+    symbol_run_history: dict[str, list[dict[str, object]]] = {}
     regime_buckets: dict[str, dict[str, float | int]] = {}
     score_buckets: dict[str, dict[str, float | int]] = {}
     total_closed_trade_count = 0
@@ -897,6 +1009,15 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
                     "win_count": 0,
                     "loss_count": 0,
                 },
+            )
+            history = symbol_run_history.setdefault(row.symbol, [])
+            history.append(
+                {
+                    "run_id": run_dir.name,
+                    "trade_count": row.trade_count,
+                    "expectancy_usd": row.expectancy_usd,
+                    "realized_pnl_usd": row.realized_pnl_usd,
+                }
             )
             bucket["trade_count"] = int(bucket["trade_count"]) + row.trade_count
             bucket["realized_pnl_usd"] = float(bucket["realized_pnl_usd"]) + row.realized_pnl_usd
@@ -968,9 +1089,14 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
                 "sample_status": sample_status,
                 "remaining_trade_count_for_validation": remaining_trade_count,
                 "required_trade_count_for_validation": required_symbol_trade_count,
+                "rolling_evidence": _symbol_rolling_evidence(
+                    aggregate_expectancy=expectancy,
+                    history=list(symbol_run_history.get(symbol, [])),
+                ),
             }
         )
     symbol_rows.sort(key=lambda item: (str(item["recommendation"]), float(item["expectancy_usd"])))
+    symbol_scorecard_rows = _build_symbol_scorecard(symbol_rows)
 
     score_alignment_rows: list[dict[str, object]] = []
     for label, bucket in score_buckets.items():
@@ -1034,6 +1160,7 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         sample_progress=sample_progress,
         score_alignment_summary=tuple(score_alignment_rows),
         symbol_summary=tuple(symbol_rows),
+        symbol_scorecard=tuple(symbol_scorecard_rows),
         regime_summary=tuple(regime_rows),
         criteria=_criteria_table(),
     )
@@ -1408,6 +1535,7 @@ def build_policy_comparison_validation_artifact(*,
         "replay_evidence_comparison": dict(execution_style_summary.get("replay_evidence_comparison", {}) or {}),
         "execution_replay_metric_delta": dict(execution_style_summary.get("execution_metric_delta", {}) or {}),
         "symbol_summary": runner.get("symbol_summary", []),
+        "symbol_scorecard": runner.get("symbol_scorecard", []),
         "regime_summary": runner.get("regime_summary", []),
         "pruning_recommendations": runner.get("pruning_recommendations", []),
         "walk_forward_windows": runner.get("walk_forward_windows", []),
@@ -1471,6 +1599,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
     runs = _resolve_recent_runs(base_dir=Path(base_dir), lookback_days=lookback_days)
     run_snapshots = [_run_validation_snapshot(run_dir=run_dir) for run_dir in runs]
     symbol_rows = list(report.symbol_summary)
+    symbol_scorecard = list(report.symbol_scorecard)
     regime_rows = list(report.regime_summary)
     pruning_recommendations = _aggregate_pruning_recommendations(run_snapshots)
     promote_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "promote")
@@ -1548,6 +1677,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "micro_live_gate": micro_live_gate,
         "recent_retention_window": recent_retention_window,
         "cumulative_retention_window": cumulative_retention_window,
+        "symbol_scorecard": symbol_scorecard,
     }
     return {
         "generated_at": report.generated_at,
@@ -1570,6 +1700,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "validation_runs": run_snapshots,
         "walk_forward_windows": walk_forward_windows,
         "symbol_summary": symbol_rows,
+        "symbol_scorecard": symbol_scorecard,
         "regime_summary": regime_rows,
         "pruning_recommendations": pruning_recommendations,
         "micro_live_gate": micro_live_gate,
