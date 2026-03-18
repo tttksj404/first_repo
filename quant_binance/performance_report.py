@@ -5,7 +5,8 @@ from collections import Counter, defaultdict
 from math import floor
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+
+from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 
 
 @dataclass(frozen=True)
@@ -68,20 +69,6 @@ class RuntimePerformanceReport:
         }
 
 
-def _load_jsonl(path: Path) -> list[dict[str, Any]]:
-    if not path.exists():
-        return []
-    rows: list[dict[str, Any]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        rows.append(json.loads(line))
-    return rows
-
-
-
-
 def _score_bucket_label(score: float) -> str:
     bounded = max(0.0, min(float(score), 100.0))
     lower = int(floor(bounded / 10.0) * 10)
@@ -94,8 +81,9 @@ def _score_bucket_label(score: float) -> str:
 def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerformanceReport:
     root = Path(run_dir)
     summary_path = root / "summary.json"
-    closed_trades = _load_jsonl(root / "logs" / "closed_trades.jsonl")
-    decisions = _load_jsonl(root / "logs" / "decisions.jsonl")
+    closed_trades = load_closed_trades_jsonl(root / "logs" / "closed_trades.jsonl")
+    decisions = load_closed_trades_jsonl(root / "logs" / "decisions.jsonl")
+    closed_trade_metrics = aggregate_closed_trades(closed_trades)
 
     by_symbol: dict[str, dict[str, float | int]] = defaultdict(
         lambda: {
@@ -115,7 +103,6 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
             "return_bps_sum": 0.0,
         }
     )
-    realized_total = 0.0
     for trade in closed_trades:
         symbol = str(trade.get("symbol", ""))
         pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
@@ -143,7 +130,6 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
             score_bucket["win_count"] = int(score_bucket["win_count"]) + 1
         elif pnl < 0:
             score_bucket["loss_count"] = int(score_bucket["loss_count"]) + 1
-        realized_total += pnl
 
     symbol_rows: list[SymbolExpectancy] = []
     for symbol, bucket in by_symbol.items():
@@ -323,8 +309,8 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
         score_bucket_performance=tuple(score_bucket_rows),
         walk_forward=tuple(walk_forward),
         pruning_recommendations=tuple(pruning_recommendations),
-        closed_trade_count=len(closed_trades),
-        realized_pnl_usd=round(realized_total, 6),
+        closed_trade_count=closed_trade_metrics.closed_trade_count,
+        realized_pnl_usd=closed_trade_metrics.realized_pnl_usd,
     )
 
 
