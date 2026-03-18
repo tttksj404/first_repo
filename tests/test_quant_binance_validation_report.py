@@ -610,7 +610,12 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(report.total_closed_trade_count, 2)
             self.assertEqual(report.total_live_order_count, 3)
             self.assertEqual(report.total_tested_order_count, 1)
+            self.assertEqual(report.sample_progress["status"], "collecting_evidence")
+            self.assertEqual(report.sample_progress["remaining_closed_trade_count"], 4)
+            self.assertEqual(report.sample_progress["remaining_live_order_count"], 5)
             symbols = {row["symbol"]: row for row in report.symbol_summary}
+            self.assertEqual(symbols["BTCUSDT"]["sample_status"], "warming_up")
+            self.assertEqual(symbols["BTCUSDT"]["remaining_trade_count_for_validation"], 1)
             self.assertIn("BTCUSDT", symbols)
             self.assertIn("ETHUSDT", {row["symbol"]: row for row in report.symbol_summary} | {"ETHUSDT": {}})
             self.assertTrue(any(row["mode"] == "futures" for row in report.regime_summary))

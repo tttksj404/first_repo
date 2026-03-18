@@ -142,6 +142,7 @@ def format_weekly_validation_report(base_dir: str | Path = "quant_runtime") -> s
     payload = _load_json(path)
     if not payload:
         return "주간 검증 리포트가 아직 없습니다."
+    sample_progress = dict(payload.get("sample_progress", {}) or {})
     lines = [
         "[주간 검증 리포트]",
         f"최근 run 수: {payload.get('run_count', 0)}",
@@ -150,6 +151,18 @@ def format_weekly_validation_report(base_dir: str | Path = "quant_runtime") -> s
         f"실주문 수: {payload.get('total_live_order_count', 0)}",
         f"테스트 주문 수: {payload.get('total_tested_order_count', 0)}",
     ]
+    if sample_progress:
+        lines.append(
+            "표본 진행도: "
+            f"closed {payload.get('total_closed_trade_count', 0)}/{sample_progress.get('required_total_closed_trade_count', 0)}, "
+            f"live {payload.get('total_live_order_count', 0)}/{sample_progress.get('required_total_live_order_count', 0)}"
+        )
+        if not bool(sample_progress.get('ready_for_comparison')):
+            lines.append(
+                "- 추가 필요: "
+                f"closed {sample_progress.get('remaining_closed_trade_count', 0)}, "
+                f"live {sample_progress.get('remaining_live_order_count', 0)}"
+            )
     regime_rows = payload.get("regime_summary") or []
     if regime_rows:
         lines.append("레짐별 요약:")
@@ -173,9 +186,12 @@ def format_weekly_validation_report(base_dir: str | Path = "quant_runtime") -> s
         if prune:
             lines.append("제외/관찰 후보:")
             for row in prune:
+                suffix = ""
+                if row.get("sample_status") == "warming_up":
+                    suffix = f", sample_left={row.get('remaining_trade_count_for_validation', 0)}"
                 lines.append(
                     f"- {row.get('symbol')}: {row.get('recommendation')} "
-                    f"(expectancy={float(row.get('expectancy_usd', 0.0)):.4f})"
+                    f"(expectancy={float(row.get('expectancy_usd', 0.0)):.4f}{suffix})"
                 )
     return "\n".join(lines)
 
