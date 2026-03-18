@@ -934,6 +934,10 @@ class LivePaperSession:
         policy_multiplier = float(policy_adjustment.get("size_multiplier", 1.0) or 1.0)
         policy_symbol_bias = str(policy_adjustment.get("symbol_bias", "neutral") or "neutral")
         rollout_phase = str(policy_adjustment.get("rollout_execution_phase", "baseline") or "baseline")
+        is_major_symbol = is_major_futures_symbol(
+            decision.symbol,
+            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+        )
         phase_reason = (
             (f"ACTIVE_POLICY_PHASE_{rollout_phase.upper()}",)
             if rollout_phase in {"partial", "broad", "full", "watch", "rollback"}
@@ -958,6 +962,14 @@ class LivePaperSession:
                 rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_STOP",)))),
             )
         if status == "aggressive_pass":
+            if not is_major_symbol:
+                scaled_notional = round(decision.order_intent_notional_usd * 0.5 * policy_multiplier, 6)
+                return replace(
+                    decision,
+                    order_intent_notional_usd=scaled_notional,
+                    strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5 * policy_multiplier, 6),
+                    size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("NON_MAJOR_CONSERVATIVE_OVERRIDE", "OPERATIONAL_HOLD_SCALE")))),
+                )
             boosted_notional = round(decision.order_intent_notional_usd * 1.3 * policy_multiplier, 6)
             return replace(
                 decision,
@@ -966,6 +978,11 @@ class LivePaperSession:
                 size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_AGGRESSIVE_PASS_SCALE",)))),
             )
         if status == "strong_pass":
+            if not is_major_symbol:
+                return replace(
+                    decision,
+                    size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("NON_MAJOR_CONSERVATIVE_OVERRIDE",)))),
+                )
             boosted_notional = round(decision.order_intent_notional_usd * 1.15 * policy_multiplier, 6)
             return replace(
                 decision,
