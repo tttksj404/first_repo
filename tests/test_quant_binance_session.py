@@ -1224,6 +1224,44 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertIn("runtime_symbol_summary", adjustments["BTCUSDT"]["signal_sources"])
             self.assertIn("runtime_pruning_recommendation", adjustments["SOLUSDT"]["signal_sources"])
 
+    def test_session_flush_blocks_symbol_promotion_when_rolling_evidence_is_mixed(self) -> None:
+        session = self._build_session()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir) / "quant_runtime"
+            run_root = base / "output" / "paper-live-shell"
+            for index, (run_name, pnl) in enumerate((("run-a", 8.0), ("run-b", -7.0), ("run-c", 1.0)), start=1):
+                run_dir = run_root / run_name
+                logs_dir = run_dir / "logs"
+                logs_dir.mkdir(parents=True, exist_ok=True)
+                (run_dir / "summary.json").write_text(
+                    json.dumps({"live_order_count": 1, "tested_order_count": 0}),
+                    encoding="utf-8",
+                )
+                (logs_dir / "closed_trades.jsonl").write_text(
+                    json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": pnl, "realized_return_bps_estimate": pnl * 2.0}) + "\n",
+                    encoding="utf-8",
+                )
+                (logs_dir / "decisions.jsonl").write_text(
+                    json.dumps(
+                        {
+                            "symbol": "BTCUSDT",
+                            "final_mode": "futures",
+                            "predictability_score": 70.0,
+                            "net_expected_edge_bps": 12.0,
+                            "estimated_round_trip_cost_bps": 8.0,
+                            "timestamp": f"2026-03-14T00:0{index}:00+00:00",
+                        }
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+            summary_path = run_root / "run-c" / "summary.json"
+            state_path = run_root / "run-c" / "summary.state.json"
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            adjustments = {item["symbol"]: item for item in summary["candidate_policy"]["adjustments"]}
+            self.assertNotIn("BTCUSDT", adjustments)
+            self.assertEqual(summary["candidate_policy"]["status"], "insufficient_data")
+
     def test_session_flush_rewrites_validation_report_even_when_stale_file_exists(self) -> None:
         session = self._build_session()
         with tempfile.TemporaryDirectory() as tmpdir:
