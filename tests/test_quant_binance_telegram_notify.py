@@ -14,7 +14,9 @@ class TelegramNotifyTests(unittest.TestCase):
             state_path = Path(tmp) / "telegram_notify_state.json"
             with patch.object(telegram_notify, "_dedup_window_seconds", return_value=180), patch.object(
                 telegram_notify, "_burst_window_seconds", return_value=45
-            ), patch.object(telegram_notify, "_burst_threshold", return_value=3):
+            ), patch.object(telegram_notify, "_burst_threshold", return_value=3), patch.object(
+                telegram_notify, "telegram_auto_summary_enabled", return_value=True
+            ):
                 first_text, first_meta = telegram_notify._prepare_outbound_text(
                     "same message", now_ts=1000.0, state_path=state_path
                 )
@@ -32,7 +34,9 @@ class TelegramNotifyTests(unittest.TestCase):
             state_path = Path(tmp) / "telegram_notify_state.json"
             with patch.object(telegram_notify, "_dedup_window_seconds", return_value=180), patch.object(
                 telegram_notify, "_burst_window_seconds", return_value=45
-            ), patch.object(telegram_notify, "_burst_threshold", return_value=3):
+            ), patch.object(telegram_notify, "_burst_threshold", return_value=3), patch.object(
+                telegram_notify, "telegram_auto_summary_enabled", return_value=True
+            ):
                 telegram_notify._prepare_outbound_text("first update", now_ts=1000.0, state_path=state_path)
                 telegram_notify._prepare_outbound_text("second update", now_ts=1005.0, state_path=state_path)
                 third_text, third_meta = telegram_notify._prepare_outbound_text(
@@ -48,27 +52,59 @@ class TelegramNotifyTests(unittest.TestCase):
         self.assertTrue(third_meta["sent"])
 
     def test_send_telegram_message_returns_suppressed_metadata_without_delivery(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            state_path = Path(tmp) / "telegram_notify_state.json"
-            deliveries: list[str] = []
+        deliveries: list[str] = []
 
-            def fake_deliver(*, token: str, chat_ids: list[str], text: str) -> dict[str, object]:
-                deliveries.append(text)
-                return {"sent": True, "chat_ids": chat_ids, "responses": []}
+        def fake_deliver(*, token: str, chat_ids: list[str], text: str) -> dict[str, object]:
+            deliveries.append(text)
+            return {"sent": True, "chat_ids": chat_ids, "responses": []}
 
-            with patch.object(telegram_notify, "TELEGRAM_NOTIFY_STATE_PATH", state_path), patch.object(
-                telegram_notify, "load_env_value", side_effect=lambda name: "token" if name == "TELEGRAM_BOT_TOKEN" else "123"
-            ), patch.object(telegram_notify, "resolve_telegram_chat_ids", return_value=["123"]), patch.object(
-                telegram_notify, "_deliver_message", side_effect=fake_deliver
-            ), patch.object(telegram_notify, "time") as mocked_time:
-                mocked_time.time.side_effect = [1000.0, 1010.0]
-                first = telegram_notify.send_telegram_message("same message")
-                second = telegram_notify.send_telegram_message("same message")
+        with patch.object(telegram_notify, "load_env_value", side_effect=lambda name: "token" if name == "TELEGRAM_BOT_TOKEN" else ""), patch.object(
+            telegram_notify, "resolve_telegram_chat_ids", return_value=["123"]
+        ), patch.object(telegram_notify, "_deliver_message", side_effect=fake_deliver), patch.object(
+            telegram_notify, "_prepare_outbound_text", side_effect=[("same message", {"sent": True, "signature": "a"}), (None, {"sent": False, "reason": "dedup_suppressed"})]
+        ):
+            first = telegram_notify.send_telegram_message("same message")
+            second = telegram_notify.send_telegram_message("same message")
 
         self.assertTrue(first["sent"])
         self.assertEqual(len(deliveries), 1)
         self.assertFalse(second["sent"])
         self.assertEqual(second["reason"], "dedup_suppressed")
+
+    @patch("quant_binance.telegram_notify.resolve_telegram_chat_ids", return_value=["6768216338"])
+    @patch("quant_binance.telegram_notify.load_env_value")
+    def test_send_telegram_message_filters_non_report_in_report_only_mode(self, mock_env, _mock_chat_ids) -> None:
+        def _fake(name: str) -> str:
+            if name == "TELEGRAM_BOT_TOKEN":
+                return "token"
+            if name == "TELEGRAM_REPORT_ONLY":
+                return "1"
+            if name == "TELEGRAM_NOTIFY_AUTO_SUMMARY":
+                return "0"
+            return ""
+
+        mock_env.side_effect = _fake
+        result = telegram_notify.send_telegram_message("[STOP_LOSS] BTCUSDT")
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "report_only_filtered")
+
+    @patch("quant_binance.telegram_notify._prepare_outbound_text", return_value=("[주간 검증 리포트]\nhello", {"sent": True, "signature": "ok"}))
+    @patch("quant_binance.telegram_notify._deliver_message", return_value={"sent": True, "chat_ids": ["6768216338"], "responses": []})
+    @patch("quant_binance.telegram_notify.resolve_telegram_chat_ids", return_value=["6768216338"])
+    @patch("quant_binance.telegram_notify.load_env_value")
+    def test_send_telegram_message_allows_report_in_report_only_mode(self, mock_env, _mock_chat_ids, _mock_deliver, _mock_prepare) -> None:
+        def _fake(name: str) -> str:
+            if name == "TELEGRAM_BOT_TOKEN":
+                return "token"
+            if name == "TELEGRAM_REPORT_ONLY":
+                return "1"
+            if name == "TELEGRAM_NOTIFY_AUTO_SUMMARY":
+                return "0"
+            return ""
+
+        mock_env.side_effect = _fake
+        result = telegram_notify.send_telegram_message("[주간 검증 리포트]\nhello")
+        self.assertTrue(result["sent"])
 
 
 if __name__ == "__main__":
