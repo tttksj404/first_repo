@@ -542,7 +542,7 @@ class LivePaperSession:
                 "self_healing": self_healing_status,
                 "macro_runtime": macro_runtime,
                 "execution_quality": summary["execution_quality"],
-                "closed_trade_count": len(self.closed_trades),
+                "closed_trade_count": summary["closed_trade_count"],
                 "kill_switch": self.runtime.kill_switch.status(),
                 "policy_state": persisted_policy_state,
             },
