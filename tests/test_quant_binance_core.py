@@ -923,6 +923,48 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(policy["decomposition_summary"]["dominant_regime_mode"], "futures")
         self.assertNotEqual(policy["decomposition_summary"]["score_delta_total"], 0.0)
 
+    def test_build_auto_tune_policy_blocks_mixed_rolling_symbol_evidence(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "trade_count": 3,
+                        "expectancy_usd": 4.5,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 0.666667,
+                            "positive_window_ratio": 0.666667,
+                            "expectancy_stability": 0.0,
+                        },
+                    },
+                    {
+                        "symbol": "SOLUSDT",
+                        "trade_count": 3,
+                        "expectancy_usd": -2.5,
+                        "recommendation": "prune",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 0.333333,
+                            "positive_window_ratio": 0.666667,
+                            "expectancy_stability": 0.2,
+                        },
+                    },
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 70.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+            },
+        )
+        self.assertEqual(policy["status"], "insufficient_data")
+        self.assertEqual(policy["adjustments"], [])
+
     def test_load_validation_runner_evidence_reads_report_metrics(self) -> None:
         import json
         import tempfile
