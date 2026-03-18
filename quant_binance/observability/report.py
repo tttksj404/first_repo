@@ -452,6 +452,69 @@ def _runtime_symbol_score_delta(
     return round(score if recommendation == "promote" else -score, 6)
 
 
+def _runtime_symbol_rolling_gate(row: dict[str, object]) -> tuple[bool, dict[str, object]]:
+    rolling_evidence = dict(row.get("rolling_evidence", {}) or {})
+    observed_run_count = int(rolling_evidence.get("observed_run_count", 0) or 0)
+    recommendation = str(row.get("recommendation", "") or "")
+    if observed_run_count < 2:
+        rolling_evidence["gate_status"] = "insufficient_history"
+        return True, rolling_evidence
+    recent_run_consistency = float(rolling_evidence.get("recent_run_consistency", 0.0) or 0.0)
+    positive_window_ratio = float(rolling_evidence.get("positive_window_ratio", 0.0) or 0.0)
+    expectancy_stability = float(rolling_evidence.get("expectancy_stability", 0.0) or 0.0)
+    supports_recommendation = False
+    if recommendation == "promote":
+        supports_recommendation = (
+            recent_run_consistency >= 0.67
+            and positive_window_ratio >= 0.6
+            and expectancy_stability >= 0.35
+        )
+    elif recommendation == "prune":
+        supports_recommendation = (
+            recent_run_consistency >= 0.67
+            and positive_window_ratio <= 0.4
+            and expectancy_stability >= 0.35
+        )
+    else:
+        supports_recommendation = True
+    rolling_evidence["gate_status"] = "supportive" if supports_recommendation else "mixed"
+    return supports_recommendation, rolling_evidence
+
+
+def _runtime_symbol_scorecard_gate(
+    *,
+    recommendation: str,
+    scorecard_row: dict[str, object] | None,
+) -> tuple[bool, dict[str, object]]:
+    payload = dict(scorecard_row or {})
+    if not payload:
+        return True, {}
+    trade_run_count = int(payload.get("trade_run_count", 0) or 0)
+    recent_trade_run_count = int(payload.get("recent_trade_run_count", 0) or 0)
+    if trade_run_count < 2 or recent_trade_run_count < 2:
+        payload["gate_status"] = "insufficient_history"
+        return True, payload
+    scorecard_recommendation = str(payload.get("recommendation", "keep") or "keep")
+    rolling_score = float(payload.get("rolling_score", 0.0) or 0.0)
+    recent_positive_run_ratio = float(payload.get("recent_positive_run_ratio", 0.0) or 0.0)
+    if recommendation == "promote":
+        supports_recommendation = not (
+            scorecard_recommendation == "demote"
+            or recent_positive_run_ratio < 0.67
+            or rolling_score < 0.6
+        )
+    elif recommendation == "prune":
+        supports_recommendation = not (
+            scorecard_recommendation == "promote"
+            and recent_positive_run_ratio >= 0.67
+            and rolling_score >= 0.7
+        )
+    else:
+        supports_recommendation = True
+    payload["gate_status"] = "supportive" if supports_recommendation else "conflicted"
+    return supports_recommendation, payload
+
+
 def _runtime_pruning_score_delta(
     *,
     recommendation: str,
@@ -474,6 +537,11 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
     futures_supportive = bool(regime_breakdown.get("futures_supportive"))
     futures_elite = bool(regime_breakdown.get("futures_elite"))
     observe_only_symbols = {str(symbol) for symbol in list(payload.get("observe_only_symbols", []) or []) if str(symbol)}
+    scorecard_by_symbol = {
+        str(row.get("symbol", "") or ""): dict(row)
+        for row in list(payload.get("symbol_scorecard", []) or [])
+        if str(row.get("symbol", "") or "")
+    }
     adjustments: list[dict[str, object]] = []
     for row in list(payload.get("pruning_recommendations", []) or []):
         symbol = str(row.get("symbol", "") or "")
@@ -518,8 +586,24 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
         regime = "major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt"
         if symbol in observe_only_symbols and regime != "major" and recommendation == "promote":
             continue
+        rolling_support, rolling_evidence = _runtime_symbol_rolling_gate(row)
+        if not rolling_support:
+            continue
+        scorecard_support, scorecard_evidence = _runtime_symbol_scorecard_gate(
+            recommendation=recommendation,
+            scorecard_row=scorecard_by_symbol.get(symbol),
+        )
+        if not scorecard_support:
+            continue
         if recommendation == "promote" and expectancy > 0.0:
             action = "aggressive_promote" if regime == "major" and futures_elite else "promote"
+            scorecard_gate_status = str(scorecard_evidence.get("gate_status", "") or "")
+            if (
+                scorecard_evidence
+                and scorecard_gate_status != "insufficient_history"
+                and str(scorecard_evidence.get("recommendation", "") or "") != "promote"
+            ):
+                action = "promote"
             if action == "aggressive_promote" and not futures_supportive:
                 action = "promote"
             adjustments.append(
@@ -545,6 +629,8 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                         "trade_count": trade_count,
                         "expectancy_usd": round(expectancy, 6),
                         "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
+                        "rolling_evidence": rolling_evidence,
+                        "scorecard_evidence": scorecard_evidence,
                     },
                 )
             )
@@ -572,6 +658,8 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                         "trade_count": trade_count,
                         "expectancy_usd": round(expectancy, 6),
                         "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
+                        "rolling_evidence": rolling_evidence,
+                        "scorecard_evidence": scorecard_evidence,
                     },
                 )
             )
@@ -627,6 +715,7 @@ def _candidate_generation_summary(
         "supportive_regime_modes": list(regime_breakdown.get("supportive_modes", []) or []),
         "elite_regime_modes": list(regime_breakdown.get("elite_modes", []) or []),
         "runtime_symbol_recommendation_count": len(list(payload.get("symbol_summary", []) or [])),
+        "runtime_symbol_scorecard_count": len(list(payload.get("symbol_scorecard", []) or [])),
         "runtime_pruning_recommendation_count": len(list(payload.get("pruning_recommendations", []) or [])),
         "score_delta_total": round(sum(float(item.get("score_delta", 0.0) or 0.0) for item in adjustments), 6),
         "candidate_adjustment_rows": adjustment_rows,
@@ -913,6 +1002,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "walk_forward_windows",
             "validation_runs",
             "symbol_summary",
+            "symbol_scorecard",
             "regime_summary",
             "pruning_recommendations",
             "metric_comparisons",
