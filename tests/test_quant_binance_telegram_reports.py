@@ -22,6 +22,13 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
                         "total_realized_pnl_usd": 12.34,
                         "total_live_order_count": 5,
                         "total_tested_order_count": 1,
+                        "sample_progress": {
+                            "required_total_closed_trade_count": 6,
+                            "required_total_live_order_count": 8,
+                            "remaining_closed_trade_count": 3,
+                            "remaining_live_order_count": 3,
+                            "ready_for_comparison": False,
+                        },
                         "regime_summary": [
                             {"mode": "futures", "decision_count": 10, "avg_score": 61.2, "avg_net_edge_bps": 8.4}
                         ],
@@ -35,6 +42,8 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
             )
             text = format_weekly_validation_report(base.parent)
             self.assertIn("[주간 검증 리포트]", text)
+            self.assertIn("표본 진행도", text)
+            self.assertIn("추가 필요", text)
             self.assertIn("승격 후보", text)
             self.assertIn("제외/관찰 후보", text)
 

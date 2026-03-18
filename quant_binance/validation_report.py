@@ -28,6 +28,7 @@ class WeeklyValidationReport:
     total_realized_pnl_usd: float
     total_live_order_count: int
     total_tested_order_count: int
+    sample_progress: dict[str, object]
     symbol_summary: tuple[dict[str, object], ...]
     regime_summary: tuple[dict[str, object], ...]
     criteria: tuple[ValidationCriteriaRow, ...]
@@ -44,6 +45,7 @@ class WeeklyValidationReport:
             "total_realized_pnl_usd": self.total_realized_pnl_usd,
             "total_live_order_count": self.total_live_order_count,
             "total_tested_order_count": self.total_tested_order_count,
+            "sample_progress": dict(self.sample_progress),
             "symbol_summary": list(self.symbol_summary),
             "regime_summary": list(self.regime_summary),
             "criteria": [asdict(item) for item in self.criteria],
@@ -787,6 +789,14 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
             total_realized_pnl_usd=0.0,
             total_live_order_count=0,
             total_tested_order_count=0,
+            sample_progress={
+                "status": "no_data",
+                "required_total_closed_trade_count": 6,
+                "required_total_live_order_count": 8,
+                "remaining_closed_trade_count": 6,
+                "remaining_live_order_count": 8,
+                "ready_for_comparison": False,
+            },
             symbol_summary=(),
             regime_summary=(),
             criteria=_criteria_table(),
@@ -840,17 +850,25 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
             bucket["cost_sum"] = float(bucket["cost_sum"]) + (row.avg_cost_bps * row.decision_count)
 
     symbol_rows: list[dict[str, object]] = []
+    required_symbol_trade_count = 3
     for symbol, bucket in symbol_buckets.items():
         trade_count = int(bucket["trade_count"])
         expectancy = float(bucket["expectancy_weighted_sum"]) / max(trade_count, 1)
         pnl = float(bucket["realized_pnl_usd"])
         recommendation = "keep"
+        sample_status = "warming_up"
+        remaining_trade_count = max(required_symbol_trade_count - trade_count, 0)
         if trade_count >= 3 and expectancy < 0:
             recommendation = "prune"
+            sample_status = "validated_negative"
         elif trade_count == 0:
             recommendation = "observe_only"
+            sample_status = "insufficient_symbol_data"
         elif trade_count >= 3 and expectancy > 0 and pnl > 0:
             recommendation = "promote"
+            sample_status = "validated_positive"
+        elif trade_count >= 3:
+            sample_status = "validated_mixed"
         symbol_rows.append(
             {
                 "symbol": symbol,
@@ -860,6 +878,9 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
                 "win_count": int(bucket["win_count"]),
                 "loss_count": int(bucket["loss_count"]),
                 "recommendation": recommendation,
+                "sample_status": sample_status,
+                "remaining_trade_count_for_validation": remaining_trade_count,
+                "required_trade_count_for_validation": required_symbol_trade_count,
             }
         )
     symbol_rows.sort(key=lambda item: (str(item["recommendation"]), float(item["expectancy_usd"])))
@@ -878,6 +899,21 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         )
     regime_rows.sort(key=lambda item: str(item["mode"]))
 
+    required_total_closed_trade_count = 6
+    required_total_live_order_count = 8
+    sample_progress = {
+        "status": (
+            "ready_for_comparison"
+            if total_closed_trade_count >= required_total_closed_trade_count and total_live_orders >= required_total_live_order_count
+            else "collecting_evidence"
+        ),
+        "required_total_closed_trade_count": required_total_closed_trade_count,
+        "required_total_live_order_count": required_total_live_order_count,
+        "remaining_closed_trade_count": max(required_total_closed_trade_count - total_closed_trade_count, 0),
+        "remaining_live_order_count": max(required_total_live_order_count - total_live_orders, 0),
+        "ready_for_comparison": total_closed_trade_count >= required_total_closed_trade_count and total_live_orders >= required_total_live_order_count,
+    }
+
     return WeeklyValidationReport(
         base_dir=str(root),
         generated_at=generated_at,
@@ -889,6 +925,7 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         total_realized_pnl_usd=round(total_realized_pnl, 6),
         total_live_order_count=total_live_orders,
         total_tested_order_count=total_tested_orders,
+        sample_progress=sample_progress,
         symbol_summary=tuple(symbol_rows),
         regime_summary=tuple(regime_rows),
         criteria=_criteria_table(),
