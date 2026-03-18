@@ -171,6 +171,20 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 artifact["evidence"]["counterfactual_replay_path"]["candidate_policy"]["policy_score"],
                 artifact["candidate_policy_score"],
             )
+            comparison_summary = artifact["counterfactual_replay_path"]["execution_style_comparison"]["comparison_summary"]
+            self.assertEqual(
+                comparison_summary["policy_application_comparison"]["delta"],
+                artifact["evidence"]["policy_application_delta"],
+            )
+            self.assertTrue(comparison_summary["execution_path_comparison"]["candidate"]["uses_projected_runtime_replay"])
+            self.assertEqual(
+                comparison_summary["replay_evidence_comparison"]["candidate"]["replay_source"],
+                "projected_candidate_policy_from_runtime_artifacts",
+            )
+            self.assertEqual(
+                comparison_summary["replay_evidence_comparison"]["current"]["replay_source"],
+                "observed_runtime_artifacts",
+            )
 
     def test_build_policy_comparison_validation_artifact_emits_policy_application_delta_and_cumulative_retention(self) -> None:
         candidate_policy = {
@@ -277,6 +291,115 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertLess(
                 comparison_summary["policy_application_delta"]["avg_entry_threshold_bps_delta"],
                 0.0,
+            )
+
+    def test_build_policy_comparison_validation_artifact_adds_separated_execution_replay_from_runtime_summary(self) -> None:
+        candidate_policy = {
+            "adjustments": [
+                {
+                    "symbol": "BTCUSDT",
+                    "action": "aggressive_promote",
+                    "size_multiplier": 1.25,
+                    "leverage_multiplier": 1.2,
+                    "entry_threshold_bps": -1.5,
+                    "expected_profit_floor_bps": -2.0,
+                }
+            ]
+        }
+        current_policy_state = {
+            "rollout_progression": {"execution_phase": "partial"},
+            "active_policy": {
+                "adjustments": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "action": "promote",
+                        "size_multiplier": 1.1,
+                        "leverage_multiplier": 1.05,
+                        "entry_threshold_bps": -0.5,
+                        "expected_profit_floor_bps": -1.0,
+                    }
+                ]
+            },
+        }
+        runtime_summary = {
+            "generated_at": "2026-03-18T00:00:00+00:00",
+            "live_order_count": 4,
+            "accepted_live_order_count": 4,
+            "rejected_live_order_count": 0,
+            "closed_trade_count": 1,
+            "avg_slippage_bps": 2.5,
+            "avg_edge_retention_ratio": 0.82,
+            "avg_realized_edge_bps": 6.0,
+            "avg_expected_edge_bps": 7.5,
+            "realized_pnl_usd_estimate": 5.0,
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 3,
+                        "accepted_live_order_count": 3,
+                        "rejected_live_order_count": 0,
+                        "tested_order_count": 1,
+                        "avg_slippage_bps": 3.0,
+                        "avg_edge_retention_ratio": 0.8,
+                        "avg_realized_edge_bps": 5.5,
+                        "avg_expected_edge_bps": 7.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 10.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 70.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"}),
+                        json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 72.0, "net_expected_edge_bps": 12.5, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:05:00+00:00"}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+                current_runtime_summary=runtime_summary,
+            )
+            comparison = artifact["counterfactual_replay_path"]["execution_style_comparison"]["comparison_summary"]
+            candidate_path = artifact["counterfactual_replay_path"]["candidate_policy"]
+            current_path = artifact["counterfactual_replay_path"]["current_policy"]
+            self.assertEqual(
+                candidate_path["runtime_summary_anchor"]["source"],
+                "current_runtime_summary",
+            )
+            self.assertEqual(
+                current_path["runtime_summary_anchor"]["source"],
+                "current_runtime_summary",
+            )
+            self.assertGreater(
+                comparison["execution_metric_delta"]["live_order_count_delta"],
+                0.0,
+            )
+            self.assertNotEqual(
+                artifact["candidate_execution_replay_score"],
+                artifact["current_execution_replay_score"],
+            )
+            self.assertEqual(
+                artifact["candidate_vs_current_score_delta"],
+                artifact["candidate_vs_current_execution_replay_score_delta"],
+            )
+            self.assertIn(
+                artifact["comparison_execution_replay_verdict"],
+                {"candidate_better", "keep"},
             )
 
     def test_write_policy_validation_runner_artifact_creates_runner_metrics(self) -> None:
