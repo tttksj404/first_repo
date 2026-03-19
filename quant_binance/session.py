@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from quant_binance.data.market_store import MissingMarketStateError
+from quant_binance.auto_mode import apply_auto_mode_runtime_overrides
 from quant_binance.execution_quality import MIN_EXECUTION_QUALITY_SAMPLE_SIZE, ExecutionQualityState
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter, OrderTestResult
@@ -27,7 +28,7 @@ from quant_binance.policy.execution import (
 )
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_auto_tune_policy, build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
+from quant_binance.observability.report import build_auto_tune_policy, build_executive_operating_verdict, build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
 from quant_binance.validation_report import write_policy_comparison_validation_artifact, write_policy_validation_runner_artifact
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
@@ -119,6 +120,15 @@ def _resume_staged_candidate_policy(
     )
     resumed["decomposition_summary"] = decomposition_summary
     return resumed
+
+
+_EXECUTIVE_VERDICT_PRIORITY = {
+    "rollback": 0,
+    "tighten": 1,
+    "rebuild_evidence": 2,
+    "hold": 3,
+    "expand": 4,
+}
 
 
 @dataclass
@@ -500,12 +510,25 @@ class LivePaperSession:
             current_runtime_summary=summary,
         )
         comparison_evidence = load_validation_runner_evidence(comparison_report_path)
+        checkpoint_auto_judge = dict(comparison_evidence.get("checkpoint_auto_judge", {}) or {})
+        if checkpoint_auto_judge:
+            (run_dir / "checkpoint_auto_judge.json").write_text(
+                json.dumps(checkpoint_auto_judge, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+        summary["checkpoint_auto_judge"] = checkpoint_auto_judge
         summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), comparison_evidence)
         summary["policy_validation"] = build_policy_validation(
             summary.get("candidate_policy", {}),
             summary.get("promotion_verdict", {}),
             summary.get("operational_verdict", {}),
             summary.get("performance_attribution", []),
+            comparison_evidence,
+        )
+        summary["executive_operating_verdict"] = build_executive_operating_verdict(
+            summary.get("promotion_verdict", {}),
+            summary.get("operational_verdict", {}),
+            summary.get("policy_validation", {}),
             comparison_evidence,
         )
         persisted_policy_state = build_persisted_policy_state(
@@ -516,6 +539,9 @@ class LivePaperSession:
             summary.get("policy_validation", {}),
         )
         summary["policy_state"] = persisted_policy_state
+        summary["executive_operating_verdict"] = dict(
+            persisted_policy_state.get("executive_operating_verdict", summary.get("executive_operating_verdict", {})) or {}
+        )
         write_runtime_summary(summary_path, summary)
         self._write_persisted_policy_state(persisted_policy_state)
         write_runtime_state(
@@ -687,8 +713,10 @@ class LivePaperSession:
         return True
 
     def _cash_reserve_fraction(self) -> float:
+        reserve_overrides = dict(self._conservative_auto_mode_runtime_overrides().get("cash_reserve", {}) or {})
         if self.capital_report.get("can_trade_futures_any", False):
-            return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
+            base_reserve = self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
+            return max(base_reserve, float(reserve_overrides.get("when_futures_enabled", base_reserve) or base_reserve))
         return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
     def _min_expected_profit_usd_threshold(self, decision: DecisionIntent) -> float:
@@ -841,7 +869,11 @@ class LivePaperSession:
         if persisted:
             return persisted
         summary = build_runtime_summary(decisions=[], live_orders=self.live_orders)
-        return build_policy_state(summary.get("candidate_policy", {}), summary.get("promotion_verdict", {}))
+        return build_policy_state(
+            summary.get("candidate_policy", {}),
+            summary.get("promotion_verdict", {}),
+            summary.get("executive_operating_verdict", {}),
+        )
 
     def _policy_rollout_progression(self, policy_state: dict[str, object]) -> dict[str, object]:
         active_policy = dict(policy_state.get("active_policy", {}) or {})
@@ -850,7 +882,19 @@ class LivePaperSession:
         )
 
     def _policy_runtime_context(self) -> dict[str, object]:
-        policy_state = self._current_policy_state()
+        policy_state = self._read_persisted_policy_state()
+        if not policy_state:
+            return {
+                "policy_state": {},
+                "active_policy": {},
+                "adjustments": [],
+                "source": "none",
+                "execution_phase": "baseline",
+                "auto_mode": {},
+                "live_evidence_rejudge": {},
+                "executive_operating_verdict": {},
+                "symbol_lifecycle": [],
+            }
         active_policy = dict(policy_state.get("active_policy", {}) or {})
         rollout_progression = self._policy_rollout_progression(policy_state)
         adjustments = list(active_policy.get("adjustments", []) or [])
@@ -868,7 +912,191 @@ class LivePaperSession:
             "adjustments": adjustments,
             "source": source,
             "execution_phase": str(rollout_progression.get("execution_phase", "baseline") or "baseline"),
+            "auto_mode": dict(policy_state.get("auto_mode", active_policy.get("auto_mode", {})) or {}),
+            "live_evidence_rejudge": dict(
+                policy_state.get("live_evidence_rejudge", active_policy.get("live_evidence_rejudge", {})) or {}
+            ),
+            "executive_operating_verdict": dict(
+                policy_state.get(
+                    "executive_operating_verdict",
+                    active_policy.get("executive_operating_verdict", {}),
+                )
+                or {}
+            ),
+            "symbol_lifecycle": list(policy_state.get("symbol_lifecycle", []) or []),
         }
+
+    def _conservative_auto_mode_runtime_overrides(self) -> dict[str, object]:
+        settings = self.runtime.paper_service.settings
+        auto_mode = dict(self._policy_runtime_context().get("auto_mode", {}) or {})
+        runtime_overrides = apply_auto_mode_runtime_overrides(
+            base_config={
+                "mode_thresholds": {
+                    "futures_score_min": settings.mode_thresholds.futures_score_min,
+                    "spot_score_min": settings.mode_thresholds.spot_score_min,
+                },
+                "risk": {"per_trade_equity_risk": settings.risk.per_trade_equity_risk},
+                "cash_reserve": {"when_futures_enabled": settings.cash_reserve.when_futures_enabled},
+            },
+            auto_mode=auto_mode,
+        )
+        threshold_overrides = dict(runtime_overrides.get("mode_thresholds", {}) or {})
+        risk_overrides = dict(runtime_overrides.get("risk", {}) or {})
+        reserve_overrides = dict(runtime_overrides.get("cash_reserve", {}) or {})
+        base_futures_threshold = float(settings.mode_thresholds.futures_score_min)
+        base_spot_threshold = float(settings.mode_thresholds.spot_score_min)
+        base_risk = float(settings.risk.per_trade_equity_risk)
+        base_reserve = float(settings.cash_reserve.when_futures_enabled)
+        return {
+            "mode_thresholds": {
+                "futures_score_min": max(
+                    base_futures_threshold,
+                    float(threshold_overrides.get("futures_score_min", base_futures_threshold) or base_futures_threshold),
+                ),
+                "spot_score_min": max(
+                    base_spot_threshold,
+                    float(threshold_overrides.get("spot_score_min", base_spot_threshold) or base_spot_threshold),
+                ),
+            },
+            "risk": {
+                "per_trade_equity_risk": min(
+                    base_risk,
+                    float(risk_overrides.get("per_trade_equity_risk", base_risk) or base_risk),
+                )
+            },
+            "cash_reserve": {
+                "when_futures_enabled": max(
+                    base_reserve,
+                    float(reserve_overrides.get("when_futures_enabled", base_reserve) or base_reserve),
+                )
+            },
+        }
+
+    def _effective_mode_thresholds(self) -> dict[str, float]:
+        settings = self.runtime.paper_service.settings
+        overrides = dict(self._conservative_auto_mode_runtime_overrides().get("mode_thresholds", {}) or {})
+        return {
+            "futures_score_min": float(
+                overrides.get("futures_score_min", settings.mode_thresholds.futures_score_min)
+                or settings.mode_thresholds.futures_score_min
+            ),
+            "spot_score_min": float(
+                overrides.get("spot_score_min", settings.mode_thresholds.spot_score_min)
+                or settings.mode_thresholds.spot_score_min
+            ),
+        }
+
+    def _effective_per_trade_equity_risk(self) -> float:
+        settings = self.runtime.paper_service.settings
+        overrides = dict(self._conservative_auto_mode_runtime_overrides().get("risk", {}) or {})
+        base_risk = float(settings.risk.per_trade_equity_risk)
+        return min(base_risk, float(overrides.get("per_trade_equity_risk", base_risk) or base_risk))
+
+    def _symbol_lifecycle_row_for_symbol(self, symbol: str) -> dict[str, object]:
+        for row in list(self._policy_runtime_context().get("symbol_lifecycle", []) or []):
+            payload = dict(row)
+            if str(payload.get("symbol", "") or "") == symbol:
+                return payload
+        return {}
+
+    def _effective_executive_runtime_verdict(
+        self,
+        *,
+        executive_operating_verdict: dict[str, object],
+        live_evidence_rejudge: dict[str, object],
+    ) -> tuple[str, str]:
+        current_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "hold") or "hold")
+        rejudge_effective = str(dict(live_evidence_rejudge or {}).get("effective_verdict", current_verdict) or current_verdict)
+        current_rank = _EXECUTIVE_VERDICT_PRIORITY.get(current_verdict, _EXECUTIVE_VERDICT_PRIORITY["hold"])
+        rejudge_rank = _EXECUTIVE_VERDICT_PRIORITY.get(rejudge_effective, current_rank)
+        if rejudge_rank < current_rank:
+            return rejudge_effective, str(dict(live_evidence_rejudge or {}).get("status", "unknown") or "unknown")
+        return current_verdict, str(dict(live_evidence_rejudge or {}).get("status", "unknown") or "unknown")
+
+    def _direct_policy_evidence_guardrails(self, decision: DecisionIntent) -> DecisionIntent:
+        if (
+            decision.final_mode not in {"spot", "futures"}
+            or decision.side not in {"long", "short"}
+            or decision.order_intent_notional_usd <= 0.0
+        ):
+            return decision
+        context = self._policy_runtime_context()
+        auto_mode = dict(context.get("auto_mode", {}) or {})
+        executive_operating_verdict = dict(context.get("executive_operating_verdict", {}) or {})
+        live_evidence_rejudge = dict(context.get("live_evidence_rejudge", {}) or {})
+        lifecycle_row = self._symbol_lifecycle_row_for_symbol(decision.symbol)
+        lifecycle_action = str(lifecycle_row.get("recommended_action", "keep") or "keep")
+        effective_verdict, rejudge_status = self._effective_executive_runtime_verdict(
+            executive_operating_verdict=executive_operating_verdict,
+            live_evidence_rejudge=live_evidence_rejudge,
+        )
+        is_major_symbol = is_major_futures_symbol(
+            decision.symbol,
+            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+        )
+        rejection_reasons: list[str] = []
+        if lifecycle_action in {"rollback", "hold", "re_review"}:
+            rejection_reasons.append(f"SYMBOL_LIFECYCLE_{lifecycle_action.upper()}")
+        if effective_verdict == "rollback":
+            rejection_reasons.append("EXECUTIVE_OPERATING_VERDICT_ROLLBACK")
+        elif effective_verdict in {"tighten", "rebuild_evidence"} and not is_major_symbol:
+            rejection_reasons.append("EXECUTIVE_MAJORS_ONLY_CONSERVATIVE_GATE")
+        if effective_verdict in {"rollback", "tighten", "rebuild_evidence"} and rejudge_status in {"waiting", "blocked"}:
+            rejection_reasons.append(f"LIVE_EVIDENCE_REJUDGE_{rejudge_status.upper()}")
+        if (
+            str(auto_mode.get("mode", "normal") or "normal") == "tighter"
+            and bool(dict(auto_mode.get("policy_guidance", {}) or {}).get("block_non_major_positive"))
+            and not is_major_symbol
+        ):
+            rejection_reasons.append("AUTO_MODE_BLOCK_NON_MAJOR_POSITIVE")
+        thresholds = self._effective_mode_thresholds()
+        base_score_floor = (
+            float(self.runtime.paper_service.settings.mode_thresholds.futures_score_min)
+            if decision.final_mode == "futures"
+            else float(self.runtime.paper_service.settings.mode_thresholds.spot_score_min)
+        )
+        score_floor = thresholds["futures_score_min"] if decision.final_mode == "futures" else thresholds["spot_score_min"]
+        if score_floor > base_score_floor and decision.predictability_score < score_floor:
+            rejection_reasons.append("AUTO_MODE_RUNTIME_SCORE_GATE")
+        if rejection_reasons:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + tuple(rejection_reasons)))),
+            )
+        if effective_verdict not in {"tighten", "rebuild_evidence"}:
+            return decision
+        base_risk = float(self.runtime.paper_service.settings.risk.per_trade_equity_risk)
+        effective_risk = self._effective_per_trade_equity_risk()
+        risk_scale = 1.0
+        if base_risk > 0.0:
+            risk_scale = min(max(effective_risk / base_risk, 0.0), 1.0)
+        risk_scale = min(risk_scale, 0.5)
+        if risk_scale >= 0.999999:
+            return decision
+        scaled_notional = round(decision.order_intent_notional_usd * risk_scale, 6)
+        if scaled_notional <= 0.0:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("EXECUTIVE_CONSERVATIVE_SCALE_ZERO",)))
+                ),
+            )
+        return replace(
+            decision,
+            order_intent_notional_usd=scaled_notional,
+            strategy_size_multiplier=round(decision.strategy_size_multiplier * risk_scale, 6),
+            size_boost_reasons=tuple(
+                sorted(set(decision.size_boost_reasons + ("EXECUTIVE_CONSERVATIVE_SCALE",)))
+            ),
+        )
 
     def _policy_rollout_phase_scale(self, execution_phase: str) -> float:
         return {
@@ -975,6 +1203,9 @@ class LivePaperSession:
         return 1.0
 
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
+        decision = self._direct_policy_evidence_guardrails(decision)
+        if decision.final_mode == "cash" or decision.order_intent_notional_usd <= 0.0:
+            return decision
         policy_adjustment = self._policy_adjustment_for_decision(decision)
         verdict = self._current_operational_verdict()
         verdict_status = str(verdict.get("status", "hold"))
