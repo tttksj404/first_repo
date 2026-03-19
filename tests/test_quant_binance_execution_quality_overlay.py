@@ -335,6 +335,31 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         self.assertEqual(staged_overlay.trade_restraint, "none")
         self.assertGreaterEqual(staged_overlay.sample_size, 3)
 
+    def test_bucket_scoped_overlay_does_not_fall_back_to_mixed_symbol_history(self) -> None:
+        state = ExecutionQualityState()
+        base = datetime(2026, 3, 16, 3, 22, tzinfo=timezone.utc)
+        for minute in range(3):
+            state.record(
+                symbol="BTCUSDT",
+                outcome="timeout",
+                fill_ratio=0.0,
+                slippage_bps=None,
+                realized_edge_bps=0.0,
+                timestamp=base + timedelta(minutes=minute),
+            )
+
+        bucket_overlay = state.overlay_for(
+            "BTCUSDT",
+            market="futures",
+            exchange_id="binance",
+            policy_bucket="active_policy",
+            now=base + timedelta(minutes=10),
+        )
+
+        self.assertEqual(bucket_overlay.trade_restraint, "none")
+        self.assertEqual(bucket_overlay.sample_size, 0)
+        self.assertEqual(bucket_overlay.source, "context")
+
     def test_overlay_tightens_runtime_thresholds_for_retention_and_protection_degradation(self) -> None:
         state = ExecutionQualityState()
         base = datetime(2026, 3, 16, 3, 30, tzinfo=timezone.utc)
@@ -460,6 +485,56 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             self.assertEqual(spot_overlay.trade_restraint, "none")
             self.assertGreaterEqual(spot_overlay.sample_size, 3)
 
+    def test_state_snapshot_groups_policy_bucket_contexts_explicitly(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            path = Path(tempdir) / "execution_quality_state.json"
+            state = ExecutionQualityState(path)
+            base = datetime(2026, 3, 16, 4, 15, tzinfo=timezone.utc)
+            for minute in range(3):
+                state.record(
+                    symbol="BTCUSDT",
+                    outcome="timeout",
+                    fill_ratio=0.0,
+                    slippage_bps=None,
+                    realized_edge_bps=0.0,
+                    timestamp=base + timedelta(minutes=minute),
+                    market="futures",
+                    exchange_id="binance",
+                    policy_bucket="active_policy",
+                )
+            for minute in range(3):
+                state.record(
+                    symbol="BTCUSDT",
+                    outcome="filled",
+                    fill_ratio=1.0,
+                    slippage_bps=1.0,
+                    realized_edge_bps=8.0,
+                    expected_edge_bps=10.0,
+                    timestamp=base + timedelta(minutes=10 + minute),
+                    market="futures",
+                    exchange_id="binance",
+                    policy_bucket="staged_candidate",
+                )
+
+            persisted = json.loads(path.read_text(encoding="utf-8"))
+            bucket_contexts = persisted["policy_bucket_contexts"]
+
+            self.assertIn("active_policy", bucket_contexts)
+            self.assertIn("staged_candidate", bucket_contexts)
+            active_key = "BTCUSDT|market=futures|exchange=binance|policy_bucket=active_policy"
+            staged_key = "BTCUSDT|market=futures|exchange=binance|policy_bucket=staged_candidate"
+            self.assertIn(active_key, bucket_contexts["active_policy"]["contexts"])
+            self.assertIn(staged_key, bucket_contexts["staged_candidate"]["contexts"])
+            self.assertIn(active_key, bucket_contexts["active_policy"]["degraded_overlays"])
+            self.assertEqual(
+                bucket_contexts["active_policy"]["degraded_overlays"][active_key]["trade_restraint"],
+                "execution_quality_halt",
+            )
+            self.assertEqual(
+                bucket_contexts["staged_candidate"]["active_overlays"][staged_key]["trade_restraint"],
+                "none",
+            )
+
     def test_session_records_partial_fill_metrics_and_flushes_execution_quality_snapshot(self) -> None:
         now = datetime(2026, 3, 16, 2, 0, tzinfo=timezone.utc)
         runtime, state = self._build_runtime(now)
@@ -502,6 +577,51 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             summary_state = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertIn("execution_quality", summary_state)
             self.assertEqual(summary_state["execution_quality"]["symbols"]["BTCUSDT"]["attempts"], 1)
+
+    def test_session_policy_bucket_blocks_mixed_execution_quality_fallback_when_bucket_evidence_is_pending(self) -> None:
+        now = datetime(2026, 3, 16, 5, 0, tzinfo=timezone.utc)
+        runtime, state = self._build_runtime(now)
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir)
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            summary_path.write_text("{}", encoding="utf-8")
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps({"active_policy": {"status": "baseline", "adjustments": []}}),
+                encoding="utf-8",
+            )
+            execution_quality_state_path = base / "execution_quality_state.json"
+            seeded_state = ExecutionQualityState(execution_quality_state_path)
+            for minute in range(3):
+                seeded_state.record(
+                    symbol="BTCUSDT",
+                    outcome="timeout",
+                    fill_ratio=0.0,
+                    slippage_bps=None,
+                    realized_edge_bps=0.0,
+                    timestamp=now + timedelta(minutes=minute),
+                )
+
+            session = LivePaperSession(
+                runtime=runtime,
+                equity_usd=10000.0,
+                remaining_portfolio_capacity_usd=5000.0,
+                execution_quality_state_path=execution_quality_state_path,
+            )
+            session.summary_path = summary_path
+
+            managed = session._record_decision(
+                decision=make_decision(timestamp=now + timedelta(minutes=10)),
+                state=state,
+                timestamp=now + timedelta(minutes=10),
+                bootstrap=True,
+            )
+
+            assert managed is not None
+            self.assertEqual(managed.final_mode, "futures")
+            self.assertEqual(managed.execution_quality_trade_restraint, "none")
+            self.assertEqual(managed.execution_quality_sample_size, 0)
 
 
 if __name__ == "__main__":

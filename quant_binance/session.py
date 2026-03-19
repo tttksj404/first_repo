@@ -989,6 +989,14 @@ class LivePaperSession:
             "entry_policy_lineage": dict(policy_state.get("policy_lineage", {}) or {}),
         }
 
+    def _policy_entry_bucket_name(self, policy_entry_context: dict[str, object] | None) -> str | None:
+        payload = dict(policy_entry_context or {})
+        context_source = str(payload.get("entry_policy_context_source", "") or "").strip().lower()
+        if context_source not in {"active_policy", "candidate_policy"}:
+            return None
+        bucket_name = str(payload.get("entry_policy_bucket", "") or "").strip().lower()
+        return bucket_name or None
+
     def _conservative_auto_mode_runtime_overrides(self) -> dict[str, object]:
         settings = self.runtime.paper_service.settings
         auto_mode = dict(self._policy_runtime_context().get("auto_mode", {}) or {})
@@ -5318,11 +5326,7 @@ class LivePaperSession:
         managed_decision = self._execution_quality_state.apply_overlay(
             managed_decision,
             exchange_id=self._execution_quality_exchange_id(),
-            policy_bucket=(
-                str(policy_entry_context.get("entry_policy_bucket", "") or "")
-                if bool(policy_entry_context.get("entry_policy_bucket_available"))
-                else None
-            ),
+            policy_bucket=self._policy_entry_bucket_name(policy_entry_context),
         )
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
@@ -5470,11 +5474,7 @@ class LivePaperSession:
                 self._clear_live_entry_starvation(symbol=executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
                 policy_entry_context = self._policy_entry_context_snapshot()
-                policy_bucket = (
-                    str(policy_entry_context.get("entry_policy_bucket", "") or "")
-                    if bool(policy_entry_context.get("entry_policy_bucket_available"))
-                    else None
-                )
+                policy_bucket = self._policy_entry_bucket_name(policy_entry_context)
                 try:
                     live_result = self.live_order_executor.execute_decision(
                         decision=executable_decision,
