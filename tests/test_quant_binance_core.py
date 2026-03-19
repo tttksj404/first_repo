@@ -712,7 +712,6 @@ class QuantBinanceCoreTests(unittest.TestCase):
                 "runner_avg_edge_retention_ratio": 0.8,
                 "runner_walk_forward_window_count": 3,
                 "runner_positive_walk_forward_ratio": 1.0,
-                "micro_live_gate": {"available": True, "status": "pass"},
                 "sample_quality_watchdog": {"status": "thin"},
             },
         )
@@ -773,6 +772,81 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(state["active_policy"]["status"], "baseline")
         self.assertEqual(state["rollout_progression"]["status"], "rollback_triggered")
         self.assertEqual(state["rollout_progression"]["execution_phase"], "rollback")
+
+    def test_build_persisted_policy_state_applies_protective_demotion_on_runtime_failure(self) -> None:
+        previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
+        state = build_persisted_policy_state(
+            {"version": 3, "active_policy": previous_active, "rollout_status": "ready"},
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "demote", "size_multiplier": 0.75, "leverage_multiplier": 0.75},
+                    {"symbol": "ETHUSDT", "action": "demote", "size_multiplier": 0.75, "leverage_multiplier": 0.75},
+                ],
+            },
+            {
+                "status": "demote",
+                "reasons": ["CANDIDATE_POLICY_WEAK", "CANDIDATE_OUTPERFORMS_CURRENT_POLICY"],
+                "comparison_verdict": "candidate_better",
+                "candidate_vs_current_score_delta": 0.35,
+            },
+            {"status": "pass", "reasons": []},
+            {
+                "status": "fail",
+                "evidence": {
+                    "comparison_verdict": "candidate_better",
+                    "candidate_vs_current_score_delta": 0.35,
+                    "runner_total_realized_pnl_usd": -12.0,
+                    "runner_drawdown_to_pnl_ratio": 0.95,
+                    "runner_avg_edge_retention_ratio": 0.3,
+                    "runner_walk_forward_window_count": 3,
+                    "runner_positive_walk_forward_ratio": 0.33,
+                },
+            },
+        )
+        self.assertEqual(state["status"], "demoted")
+        self.assertEqual(state["rollout_status"], "demoted")
+        self.assertEqual(state["rollout_reason"], "PROTECTIVE_DEMOTION_VALIDATED")
+        self.assertEqual(state["active_policy"]["status"], "demote")
+        self.assertEqual(
+            [item["action"] for item in state["active_policy"]["adjustments"]],
+            ["demote", "demote"],
+        )
+        self.assertEqual(state["version"], 4)
+
+    def test_build_persisted_policy_state_invalidates_staged_rollout_on_validation_failure(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 2,
+                "status": "staged_rollout",
+                "rollout_status": "micro_live_pending",
+                "active_policy": {"status": "baseline", "adjustments": []},
+                "candidate_policy": {
+                    "adjustments": [
+                        {"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1},
+                    ]
+                },
+            },
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1},
+                ]
+            },
+            {"status": "keep", "reasons": ["PROMOTION_BLOCKED_BY_EXECUTION_QUALITY"]},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "fail",
+                "evidence": {
+                    "micro_live_gate": {"available": True, "status": "pending"},
+                    "runner_avg_edge_retention_ratio": 0.3,
+                    "runner_drawdown_to_pnl_ratio": 0.9,
+                },
+            },
+        )
+        self.assertEqual(state["status"], "staged_rollout_invalidated")
+        self.assertEqual(state["rollout_status"], "baseline")
+        self.assertEqual(state["rollout_reason"], "STAGED_CANDIDATE_INVALIDATED")
+        self.assertEqual(state["active_policy"]["status"], "baseline")
+        self.assertEqual(state["active_policy"]["adjustments"], [])
 
     def test_build_persisted_policy_state_emits_checkpoint_revalidation_hooks(self) -> None:
         state = build_persisted_policy_state(
@@ -1150,8 +1224,8 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         adjustments = {item["symbol"]: item for item in policy["adjustments"]}
         self.assertEqual(set(adjustments), {"BTCUSDT", "SOLUSDT"})
-        self.assertEqual(adjustments["BTCUSDT"]["action"], "promote")
-        self.assertEqual(adjustments["BTCUSDT"]["size_multiplier"], 1.08)
+        self.assertEqual(adjustments["BTCUSDT"]["action"], "aggressive_promote")
+        self.assertEqual(adjustments["BTCUSDT"]["size_multiplier"], 1.2)
         self.assertEqual(adjustments["SOLUSDT"]["action"], "demote")
         self.assertEqual(
             adjustments["SOLUSDT"]["signal_contexts"]["sample_quality_watchdog"]["watchdog_action"],
