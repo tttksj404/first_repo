@@ -1932,6 +1932,190 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     return {"status": status, "reasons": reasons, "evidence": evidence}
 
 
+def build_executive_operating_verdict(
+    promotion_verdict: dict[str, object],
+    operational_verdict: dict[str, object],
+    policy_validation: dict[str, object],
+    evidence: dict[str, object] | None = None,
+) -> dict[str, object]:
+    validation = dict(policy_validation or {})
+    merged_evidence = dict(dict(validation.get("evidence", {}) or {}))
+    merged_evidence.update(dict(evidence or {}))
+    requested_status = str(
+        promotion_verdict.get("requested_status", promotion_verdict.get("status", "keep")) or "keep"
+    )
+    promotion_status = str(promotion_verdict.get("status", "keep") or "keep")
+    operational_status = str(operational_verdict.get("status", "hold") or "hold")
+    validation_status = str(validation.get("status", "fail") or "fail")
+    validation_reasons = [str(item) for item in list(validation.get("reasons", []) or []) if str(item)]
+    operational_reasons = [str(item) for item in list(operational_verdict.get("reasons", []) or []) if str(item)]
+    promotion_reasons = [str(item) for item in list(promotion_verdict.get("reasons", []) or []) if str(item)]
+    checkpoint_auto_judge = dict(merged_evidence.get("checkpoint_auto_judge", {}) or {})
+    checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "not_available") or "not_available")
+    sample_watchdog = dict(merged_evidence.get("sample_quality_watchdog", {}) or {})
+    sample_watchdog_status = str(sample_watchdog.get("status", "not_available") or "not_available")
+    baseline_gate = _simple_baseline_control_gate(merged_evidence)
+    auto_mode = dict(merged_evidence.get("auto_mode", promotion_verdict.get("auto_mode", {})) or {})
+    auto_mode_mode = str(auto_mode.get("mode", "normal") or "normal")
+    micro_live_gate = dict(merged_evidence.get("micro_live_gate", {}) or {})
+    micro_live_status = str(micro_live_gate.get("status", "not_available") or "not_available")
+    policy_alignment = dict(merged_evidence.get("current_policy_evidence_alignment", {}) or {})
+    lineage_status = str(
+        policy_alignment.get(
+            "status",
+            merged_evidence.get("checkpoint_auto_judge_lineage_status", "unknown"),
+        )
+        or "unknown"
+    )
+    lifecycle_signal = dict(promotion_verdict.get("symbol_lifecycle_signal", {}) or {})
+    blocked_symbols = sorted(
+        str(item)
+        for item in list(lifecycle_signal.get("blocked_symbols", []) or [])
+        if str(item)
+    )
+    review_symbols = sorted(
+        str(item)
+        for item in list(lifecycle_signal.get("review_symbols", []) or [])
+        if str(item)
+    )
+    cautious_symbols = sorted(
+        str(item)
+        for item in list(lifecycle_signal.get("cautious_symbols", []) or [])
+        if str(item)
+    )
+    if not blocked_symbols and not review_symbols:
+        for row in list(merged_evidence.get("symbol_lifecycle", []) or []):
+            payload = dict(row)
+            symbol = str(payload.get("symbol", "") or "")
+            action = str(payload.get("recommended_action", "keep") or "keep")
+            if not symbol:
+                continue
+            if action in {"rollback", "hold"}:
+                blocked_symbols.append(symbol)
+            elif action == "re_review":
+                review_symbols.append(symbol)
+            elif action == "cautious_repromote":
+                cautious_symbols.append(symbol)
+        blocked_symbols = sorted(set(blocked_symbols))
+        review_symbols = sorted(set(review_symbols))
+        cautious_symbols = sorted(set(cautious_symbols))
+
+    severe_validation_reasons = {
+        "CHECKPOINT_AUTO_JUDGE_ROLLBACK",
+        "REPLAY_DRAWDOWN_TOO_HIGH",
+        "RUNNER_REALIZED_PNL_NOT_POSITIVE",
+        "RUNNER_DRAWDOWN_ABOVE_LIMIT",
+        "RUNNER_REJECT_RATE_ABOVE_LIMIT",
+        "RUNNER_EXECUTION_QUALITY_BELOW_LIMIT",
+        "RUNNER_EDGE_RETENTION_BELOW_LIMIT",
+        "RUNNER_WALK_FORWARD_SUPPORT_TOO_WEAK",
+        "SAMPLE_QUALITY_WATCHDOG_DEGRADED",
+        "PROMOTION_PATH_BLOCKED_BY_SYMBOL_LIFECYCLE",
+    }
+    reasons: list[str] = []
+    verdict = "hold"
+    if checkpoint_verdict == "rollback":
+        verdict = "rollback"
+        reasons.append("EXECUTIVE_ROLLBACK_BY_CHECKPOINT")
+    elif operational_status == "stop":
+        verdict = "rollback"
+        reasons.append("EXECUTIVE_ROLLBACK_BY_OPERATIONAL_STOP")
+    elif validation_status == "fail" and any(reason in severe_validation_reasons for reason in validation_reasons):
+        verdict = "rollback"
+        reasons.append("EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE")
+    elif lineage_status in {"mismatch", "stale"}:
+        verdict = "rebuild_evidence"
+        reasons.append("EXECUTIVE_REBUILD_BY_POLICY_LINEAGE")
+    elif validation_status == "pending":
+        verdict = "rebuild_evidence"
+        reasons.append("EXECUTIVE_REBUILD_BY_PENDING_VALIDATION")
+    elif requested_status in {"promote", "promote_aggressive"} and (
+        sample_watchdog_status == "thin"
+        or (bool(micro_live_gate.get("available")) and micro_live_status == "pending")
+    ):
+        verdict = "rebuild_evidence"
+        reasons.append("EXECUTIVE_REBUILD_BY_THIN_OR_PENDING_EXPANSION_EVIDENCE")
+    elif checkpoint_verdict == "tighten":
+        verdict = "tighten"
+        reasons.append("EXECUTIVE_TIGHTEN_BY_CHECKPOINT")
+    elif sample_watchdog_status == "degraded":
+        verdict = "tighten"
+        reasons.append("EXECUTIVE_TIGHTEN_BY_SAMPLE_WATCHDOG")
+    elif auto_mode_mode == "tighter":
+        verdict = "tighten"
+        reasons.append("EXECUTIVE_TIGHTEN_BY_AUTO_MODE")
+    elif str(baseline_gate.get("status", "")) == "block" and requested_status in {"promote", "promote_aggressive"}:
+        verdict = "tighten"
+        reasons.append("EXECUTIVE_TIGHTEN_BY_SIMPLE_BASELINE_GATE")
+    elif blocked_symbols or review_symbols:
+        verdict = "tighten"
+        reasons.append("EXECUTIVE_TIGHTEN_BY_SYMBOL_LIFECYCLE")
+    elif operational_status == "hold" and set(operational_reasons) != {"INSUFFICIENT_SAMPLE"}:
+        verdict = "tighten"
+        reasons.append("EXECUTIVE_TIGHTEN_BY_OPERATIONAL_HOLD")
+    elif (
+        promotion_status in {"promote", "promote_aggressive"}
+        and validation_status == "pass"
+        and operational_status in {"strong_pass", "aggressive_pass"}
+        and checkpoint_verdict == "expand"
+        and sample_watchdog_status == "promote_ready"
+        and str(baseline_gate.get("status", "")) == "pass"
+        and auto_mode_mode == "cautiously_expanded"
+        and (not bool(micro_live_gate.get("available")) or micro_live_status == "pass")
+        and not blocked_symbols
+        and not review_symbols
+    ):
+        verdict = "expand"
+        reasons.append("EXECUTIVE_EXPAND_SUPPORTED_BY_ALIGNED_EVIDENCE")
+    elif requested_status in {"promote", "promote_aggressive"}:
+        reasons.append("EXECUTIVE_HOLD_UNTIL_EXPANSION_SUPPORT_IS_CLEAR")
+    else:
+        reasons.append("EXECUTIVE_HOLD_CURRENT_POSTURE")
+
+    confidence = "low"
+    if verdict == "expand":
+        confidence = "high"
+    elif verdict in {"rollback", "tighten"}:
+        confidence = "high" if validation_status in {"pass", "fail"} else "medium"
+    elif verdict == "rebuild_evidence":
+        confidence = "medium"
+    elif validation_status == "pass" or operational_status in {"pass", "strong_pass", "aggressive_pass"}:
+        confidence = "medium"
+
+    unique_reasons: list[str] = []
+    seen_reasons: set[str] = set()
+    for reason in reasons:
+        if reason and reason not in seen_reasons:
+            unique_reasons.append(reason)
+            seen_reasons.add(reason)
+    return {
+        "verdict": verdict,
+        "confidence": confidence,
+        "reasons": unique_reasons,
+        "signals": {
+            "requested_status": requested_status,
+            "promotion_status": promotion_status,
+            "operational_status": operational_status,
+            "policy_validation_status": validation_status,
+            "checkpoint_verdict": checkpoint_verdict,
+            "sample_quality_watchdog_status": sample_watchdog_status,
+            "simple_baseline_gate_status": str(baseline_gate.get("status", "not_available") or "not_available"),
+            "auto_mode": auto_mode_mode,
+            "micro_live_status": micro_live_status,
+            "policy_lineage_status": lineage_status,
+            "blocked_symbols": blocked_symbols,
+            "review_symbols": review_symbols,
+            "cautious_symbols": cautious_symbols,
+        },
+        "source_reason_codes": {
+            "promotion": promotion_reasons,
+            "operational": operational_reasons,
+            "policy_validation": validation_reasons,
+            "auto_mode": [str(item) for item in list(auto_mode.get("reason_codes", []) or []) if str(item)],
+        },
+    }
+
+
 def _coerce_float(value: object) -> float:
     try:
         return float(value or 0.0)
@@ -2613,6 +2797,12 @@ def build_persisted_policy_state(
     verdict_status = str(promotion_verdict.get("status", "keep"))
     validation_status = str(validation.get("status", "fail"))
     validation_evidence = dict(validation.get("evidence", {}) or {})
+    executive_operating_verdict = build_executive_operating_verdict(
+        promotion_verdict,
+        operational_verdict,
+        validation,
+        validation_evidence,
+    )
     comparison_verdict, _ = _resolved_policy_comparison_signal(
         validation_evidence=validation_evidence,
         promotion_verdict=promotion_verdict,
@@ -2788,10 +2978,12 @@ def build_persisted_policy_state(
     active_policy["checkpoint_auto_judge"] = checkpoint_auto_judge
     active_policy["sample_quality_watchdog"] = sample_watchdog
     active_policy["auto_mode"] = auto_mode
+    active_policy["executive_operating_verdict"] = dict(executive_operating_verdict)
     policy_state_payload = {
         "version": version,
         "active_policy": active_policy,
         "rollout_progression": rollout_progression,
+        "executive_operating_verdict": executive_operating_verdict,
         "updated_at": evaluated_at,
     }
     policy_lineage = build_policy_state_lineage_snapshot(
@@ -2813,6 +3005,7 @@ def build_persisted_policy_state(
         "checkpoint_revalidation": checkpoint_revalidation,
         "checkpoint_auto_judge": checkpoint_auto_judge,
         "auto_mode": auto_mode,
+        "executive_operating_verdict": executive_operating_verdict,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "policy_lineage": policy_lineage,
@@ -2836,6 +3029,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "checkpoint_revalidation": dict(policy_state.get("checkpoint_revalidation", {}) or {}),
         "checkpoint_auto_judge": dict(policy_state.get("checkpoint_auto_judge", {}) or {}),
         "auto_mode": dict(policy_state.get("auto_mode", {}) or {}),
+        "executive_operating_verdict": dict(policy_state.get("executive_operating_verdict", {}) or {}),
         "symbol_lifecycle_summary": dict(policy_state.get("symbol_lifecycle_summary", {}) or {}),
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
@@ -2846,10 +3040,15 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "micro_live_readiness": str(dict(policy_state.get("active_policy", {}) or {}).get("micro_live_readiness", "not_available")),
     }
 
-def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: dict[str, object]) -> dict[str, object]:
+def build_policy_state(
+    candidate_policy: dict[str, object],
+    promotion_verdict: dict[str, object],
+    executive_operating_verdict: dict[str, object] | None = None,
+) -> dict[str, object]:
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     verdict_status = str(promotion_verdict.get("status", "keep"))
     rollout_stage = str(promotion_verdict.get("rollout_stage", "baseline") or "baseline")
+    executive_verdict = dict(executive_operating_verdict or {})
     if verdict_status == "disable":
         active_adjustments = [dict(item, action="disabled", size_multiplier=0.0) for item in candidate_adjustments]
         active_status = "disabled"
@@ -2868,10 +3067,12 @@ def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: d
             "micro_live_readiness": str(promotion_verdict.get("micro_live_readiness", "not_available") or "not_available"),
             "micro_live_gate": dict(promotion_verdict.get("micro_live_gate", {}) or {}),
             "auto_mode": dict(promotion_verdict.get("auto_mode", candidate_policy.get("decomposition_summary", {}).get("auto_mode", {})) or {}),
+            "executive_operating_verdict": executive_verdict,
         },
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
         "auto_mode": dict(promotion_verdict.get("auto_mode", candidate_policy.get("decomposition_summary", {}).get("auto_mode", {})) or {}),
+        "executive_operating_verdict": executive_verdict,
     }
     payload["policy_lineage"] = build_policy_state_lineage_snapshot(
         {
@@ -3043,10 +3244,16 @@ def build_runtime_summary(
     performance_attribution = build_performance_attribution(live_orders)
     candidate_policy = build_auto_tune_policy(performance_attribution)
     promotion_verdict = build_promotion_verdict(candidate_policy)
-    policy_state = build_policy_state(candidate_policy, promotion_verdict)
     operational_verdict = build_operational_verdict(execution_outcomes)
     runner_evidence = load_validation_runner_evidence(None)
     policy_validation = build_policy_validation(candidate_policy, promotion_verdict, operational_verdict, performance_attribution, runner_evidence)
+    executive_operating_verdict = build_executive_operating_verdict(
+        promotion_verdict,
+        operational_verdict,
+        policy_validation,
+        runner_evidence,
+    )
+    policy_state = build_policy_state(candidate_policy, promotion_verdict, executive_operating_verdict)
     rejection_counts = Counter()
     for decision in decisions:
         for reason in decision.rejection_reasons:
@@ -3102,6 +3309,7 @@ def build_runtime_summary(
         "policy_state": policy_state,
         "policy_validation": policy_validation,
         "operational_verdict": operational_verdict,
+        "executive_operating_verdict": executive_operating_verdict,
         "account_snapshot": account_snapshot or {},
         "open_orders_snapshot": open_orders_snapshot or {},
         "capital_report": capital_report or {},
