@@ -270,6 +270,10 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 buckets["staged_candidate"]["policy_lineage"]["source"],
                 "staged_candidate_policy",
             )
+            self.assertEqual(
+                artifact["auto_mode"]["inputs"]["execution_quality"]["policy_bucket"],
+                "staged_candidate",
+            )
 
     def test_build_policy_comparison_validation_artifact_prefers_direct_active_bucket_from_current_policy_state(self) -> None:
         candidate_policy = {"adjustments": []}

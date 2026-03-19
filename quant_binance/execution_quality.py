@@ -627,6 +627,14 @@ class ExecutionQualityState:
                 source="context",
                 now=current_time,
             )
+        if key is not None and normalized_bucket:
+            return ExecutionQualityOverlay(
+                scope_key=key,
+                symbol=symbol,
+                market=normalized_market,
+                exchange_id=normalized_exchange,
+                source="context",
+            )
         if key is not None and self._has_context_for_symbol(symbol):
             return ExecutionQualityOverlay(
                 scope_key=key,
@@ -860,9 +868,10 @@ class ExecutionQualityState:
             )
             for symbol, metrics in sorted(self._symbols.items())
         }
+        policy_bucket_contexts: dict[str, dict[str, object]] = {}
         for key, metrics in sorted(self._contexts.items()):
             details = _context_key_details(key)
-            overlays[key] = self._overlay_from_metrics(
+            overlay = self._overlay_from_metrics(
                 metrics=metrics,
                 symbol=details["symbol"],
                 scope_key=key,
@@ -871,6 +880,39 @@ class ExecutionQualityState:
                 source="context",
                 now=current_time,
             )
+            overlays[key] = overlay
+            policy_bucket = str(details.get("policy_bucket", "") or "")
+            if policy_bucket:
+                bucket_payload = policy_bucket_contexts.setdefault(
+                    policy_bucket,
+                    {
+                        "contexts": {},
+                        "active_overlays": {},
+                        "degraded_keys": [],
+                        "degraded_overlays": {},
+                    },
+                )
+                context_payload = {
+                    **details,
+                    "metrics": metrics.as_dict(),
+                    "overlay": overlay.as_dict(),
+                }
+                contexts = bucket_payload["contexts"]
+                assert isinstance(contexts, dict)
+                contexts[key] = context_payload
+                if overlay.sample_size >= MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
+                    active_bucket_overlays = bucket_payload["active_overlays"]
+                    assert isinstance(active_bucket_overlays, dict)
+                    active_bucket_overlays[key] = overlay.as_dict()
+                    if overlay.degraded:
+                        degraded_bucket_keys = bucket_payload["degraded_keys"]
+                        assert isinstance(degraded_bucket_keys, list)
+                        degraded_bucket_keys.append(key)
+                        degraded_bucket_overlays = bucket_payload["degraded_overlays"]
+                        assert isinstance(degraded_bucket_overlays, dict)
+                        degraded_bucket_overlays[key] = overlay.as_dict()
+        for bucket_payload in policy_bucket_contexts.values():
+            bucket_payload["degraded_keys"] = sorted(set(bucket_payload["degraded_keys"]))
         active_overlays = {
             key: overlay.as_dict()
             for key, overlay in overlays.items()
@@ -902,4 +944,5 @@ class ExecutionQualityState:
                 key: active_overlays[key]
                 for key in degraded_keys
             },
+            "policy_bucket_contexts": policy_bucket_contexts,
         }
