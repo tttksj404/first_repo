@@ -824,9 +824,18 @@ def _apply_cross_symbol_promotion_priority(
     adjustments: list[dict[str, object]],
     runtime_evidence: dict[str, object] | None,
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
-    payload = dict(runtime_evidence or {})
-    promotion_top_k = max(int(payload.get("promotion_top_k", 0) or 0), 0)
+    positive_adjustment_count = sum(
+        1
+        for adjustment in adjustments
+        if str(adjustment.get("action", "") or "") in {"promote", "aggressive_promote"}
+    )
+    promotion_top_k, top_k_context = _effective_promotion_top_k(
+        runtime_evidence=runtime_evidence,
+        positive_adjustment_count=positive_adjustment_count,
+    )
     if promotion_top_k <= 0:
+        if int(top_k_context.get("explicit_promotion_top_k", 0) or 0) > 0 or int(top_k_context.get("watchdog_positive_cap", 0) or 0) > 0:
+            return adjustments, top_k_context
         return adjustments, {}
     positive_adjustments = [
         adjustment
@@ -854,6 +863,7 @@ def _apply_cross_symbol_promotion_priority(
             "promotion_candidate_count": len(ranked_positive),
             "selected_promotion_symbols": selected_symbols,
             "deferred_promotion_symbols": [],
+            **top_k_context,
         }
     selected_symbol_set = set(selected_symbols)
     filtered_adjustments = [
@@ -868,6 +878,7 @@ def _apply_cross_symbol_promotion_priority(
         "selected_promotion_symbols": selected_symbols,
         "deferred_promotion_symbols": [row["symbol"] for row in deferred_rows],
         "deferred_promotion_rows": deferred_rows,
+        **top_k_context,
     }
 
 
@@ -926,6 +937,150 @@ def _observe_only_runtime_adjustments(runtime_evidence: dict[str, object] | None
     return adjustments
 
 
+def _sample_quality_watchdog(runtime_evidence: dict[str, object] | None) -> dict[str, object]:
+    return dict(dict(runtime_evidence or {}).get("sample_quality_watchdog", {}) or {})
+
+
+def _watchdog_adjustment(
+    adjustment: dict[str, object],
+    *,
+    action: str,
+    operating_intensity: float,
+    reason: str,
+    score_delta: float,
+    signal_context: dict[str, object],
+) -> dict[str, object]:
+    payload = dict(adjustment or {})
+    updated = _policy_adjustment_shape(
+        symbol=str(payload.get("symbol", "") or ""),
+        regime=str(payload.get("regime", "") or ""),
+        setup_class=str(payload.get("setup_class", "") or ""),
+        side=str(payload.get("side", "") or ""),
+        execution_quality_state=str(payload.get("execution_quality_state", "") or ""),
+        sample_count=int(payload.get("sample_count", 0) or 0),
+        action=action,
+        reason=reason,
+        signal_source="sample_quality_watchdog",
+        score_delta=score_delta,
+        operating_intensity=operating_intensity,
+        signal_context=signal_context,
+    )
+    existing_sources = [str(source) for source in list(payload.get("signal_sources", []) or []) if str(source)]
+    updated["signal_sources"] = sorted(set(existing_sources + ["sample_quality_watchdog"]))
+    signal_contexts = dict(payload.get("signal_contexts", {}) or {})
+    signal_contexts["sample_quality_watchdog"] = signal_context
+    updated["signal_contexts"] = signal_contexts
+    return updated
+
+
+def _apply_sample_quality_watchdog(
+    *,
+    adjustments: list[dict[str, object]],
+    runtime_evidence: dict[str, object] | None,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    watchdog = _sample_quality_watchdog(runtime_evidence)
+    if not watchdog:
+        return adjustments, {}
+    status = str(watchdog.get("status", "unknown") or "unknown")
+    guardrails = dict(watchdog.get("policy_guardrails", {}) or {})
+    intensity_cap = max(0.5, min(float(guardrails.get("promotion_intensity_cap", 1.0) or 1.0), 1.1))
+    allow_alt_promotions = bool(guardrails.get("allow_alt_promotions"))
+    transformed: list[dict[str, object]] = []
+    action_rows: list[dict[str, object]] = []
+    for adjustment in adjustments:
+        payload = dict(adjustment)
+        symbol = str(payload.get("symbol", "") or "")
+        regime = str(payload.get("regime", "") or "")
+        is_major = regime == "major"
+        action = str(payload.get("action", "") or "")
+        operating_intensity = float(payload.get("operating_intensity", 1.0) or 1.0)
+        score_delta = float(payload.get("score_delta", 0.0) or 0.0)
+        updated = payload
+        if action in {"promote", "aggressive_promote"}:
+            if status == "degraded" and not is_major:
+                updated = _watchdog_adjustment(
+                    payload,
+                    action="demote",
+                    operating_intensity=1.0,
+                    reason="SAMPLE_QUALITY_WATCHDOG_DEGRADED_ALT_OBSERVE_ONLY",
+                    score_delta=-max(0.12, abs(score_delta) * 0.5),
+                    signal_context={
+                        "watchdog_status": status,
+                        "guardrails": guardrails,
+                        "watchdog_action": "non_major_positive_demoted",
+                    },
+                )
+            elif status == "thin" and not is_major and not allow_alt_promotions:
+                updated = _watchdog_adjustment(
+                    payload,
+                    action="demote",
+                    operating_intensity=0.8,
+                    reason="SAMPLE_QUALITY_WATCHDOG_THIN_ALT_OBSERVE_ONLY",
+                    score_delta=-max(0.08, abs(score_delta) * 0.4),
+                    signal_context={
+                        "watchdog_status": status,
+                        "guardrails": guardrails,
+                        "watchdog_action": "non_major_positive_demoted",
+                    },
+                )
+            else:
+                next_action = action
+                if action == "aggressive_promote" and status in {"thin", "degraded"}:
+                    next_action = "promote"
+                next_intensity = min(operating_intensity, intensity_cap)
+                next_score_delta = round(score_delta * max(min(next_intensity, 1.0), 0.65), 6)
+                if status == "promote_ready" and not is_major and action == "promote":
+                    next_intensity = max(next_intensity, min(intensity_cap, 1.05))
+                    next_score_delta = round(score_delta * next_intensity, 6)
+                if next_action != action or abs(next_intensity - operating_intensity) > 1e-9:
+                    updated = _watchdog_adjustment(
+                        payload,
+                        action=next_action,
+                        operating_intensity=next_intensity,
+                        reason=f"SAMPLE_QUALITY_WATCHDOG_{status.upper()}_{'RELAXED' if status == 'promote_ready' and not is_major else 'SOFTENED'}",
+                        score_delta=next_score_delta,
+                        signal_context={
+                            "watchdog_status": status,
+                            "guardrails": guardrails,
+                            "watchdog_action": "promotion_softened" if status in {"thin", "degraded"} else "promotion_relaxed",
+                        },
+                    )
+        transformed.append(updated)
+        if updated is not payload:
+            action_rows.append(
+                {
+                    "symbol": symbol,
+                    "from_action": action,
+                    "to_action": str(updated.get("action", "") or ""),
+                }
+            )
+    return transformed, {
+        "status": status,
+        "guardrails": guardrails,
+        "adjusted_symbols": action_rows,
+    }
+
+
+def _effective_promotion_top_k(
+    *,
+    runtime_evidence: dict[str, object] | None,
+    positive_adjustment_count: int,
+) -> tuple[int, dict[str, object]]:
+    payload = dict(runtime_evidence or {})
+    explicit_top_k = max(int(payload.get("promotion_top_k", 0) or 0), 0)
+    watchdog = _sample_quality_watchdog(runtime_evidence)
+    guardrails = dict(watchdog.get("policy_guardrails", {}) or {})
+    watchdog_cap = max(int(guardrails.get("max_positive_symbols", 0) or 0), 0)
+    effective_top_k = explicit_top_k
+    if watchdog_cap > 0:
+        effective_top_k = min(explicit_top_k, watchdog_cap) if explicit_top_k > 0 else min(watchdog_cap, positive_adjustment_count)
+    return effective_top_k, {
+        "watchdog_status": str(watchdog.get("status", "not_available") or "not_available"),
+        "explicit_promotion_top_k": explicit_top_k,
+        "watchdog_positive_cap": watchdog_cap,
+    }
+
+
 def build_auto_tune_policy(
     attribution_rows: list[dict[str, object]] | tuple[dict[str, object], ...],
     runtime_evidence: dict[str, object] | None = None,
@@ -947,6 +1102,10 @@ def build_auto_tune_policy(
             continue
         adjustments_by_symbol[symbol] = _merge_policy_adjustments(adjustments_by_symbol.get(symbol), adjustment)
     adjustments = sorted(adjustments_by_symbol.values(), key=lambda item: str(item.get("symbol", "")))
+    adjustments, watchdog_overlay_summary = _apply_sample_quality_watchdog(
+        adjustments=adjustments,
+        runtime_evidence=runtime_evidence,
+    )
     adjustments, promotion_priority_summary = _apply_cross_symbol_promotion_priority(
         adjustments=adjustments,
         runtime_evidence=runtime_evidence,
@@ -964,6 +1123,8 @@ def build_auto_tune_policy(
         runtime_evidence=runtime_evidence,
         adjustments=adjustments,
     )
+    if watchdog_overlay_summary:
+        decomposition_summary["sample_quality_watchdog"] = watchdog_overlay_summary
     if promotion_priority_summary:
         decomposition_summary["cross_symbol_promotion_priority"] = promotion_priority_summary
     return {
@@ -995,6 +1156,7 @@ def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, ob
                 "runner_total_realized_pnl_usd",
                 "runner_total_return_pct",
                 "runner_reject_rate",
+                "runner_protection_degraded_rate",
                 "runner_avg_slippage_bps",
                 "runner_avg_edge_retention_ratio",
                 "micro_live_gate",
@@ -1004,6 +1166,7 @@ def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, ob
         "realized_pnl_usd": float(payload.get("runner_total_realized_pnl_usd", payload.get("runner_total_return_pct", 0.0)) or 0.0),
         "drawdown_ratio": float(payload.get("runner_drawdown_to_pnl_ratio", payload.get("replay_like_drawdown_ratio", 0.0)) or 0.0),
         "reject_rate": float(payload.get("runner_reject_rate", payload.get("max_reject_rate", 0.0)) or 0.0),
+        "protection_degraded_rate": float(payload.get("runner_protection_degraded_rate", 0.0) or 0.0),
         "avg_slippage_bps": float(payload.get("runner_avg_slippage_bps", 0.0) or 0.0),
         "avg_realized_edge_bps": float(payload.get("runner_avg_realized_edge_bps", payload.get("avg_realized_edge_bps", 0.0)) or 0.0),
         "avg_edge_retention_ratio": float(payload.get("runner_avg_edge_retention_ratio", payload.get("avg_retention", 0.0)) or 0.0),
@@ -1029,6 +1192,16 @@ def _candidate_policy_requested_verdict(adjustments: list[dict[str, object]]) ->
     if demote_count >= promote_count + 2:
         return {"status": "disable", "reasons": ["CANDIDATE_POLICY_UNSTABLE"]}
     return {"status": "keep", "reasons": ["CANDIDATE_POLICY_MIXED"]}
+
+
+def _sample_quality_watchdog_block_reason(comparison_evidence: dict[str, object] | None) -> str:
+    watchdog = dict(dict(comparison_evidence or {}).get("sample_quality_watchdog", {}) or {})
+    status = str(watchdog.get("status", "") or "")
+    if status == "degraded":
+        return "PROMOTION_BLOCKED_BY_SAMPLE_QUALITY_WATCHDOG_DEGRADED"
+    if status == "thin":
+        return "PROMOTION_BLOCKED_BY_SAMPLE_QUALITY_WATCHDOG_THIN"
+    return ""
 
 
 def _promotion_rollout_signal(
@@ -1087,6 +1260,9 @@ def build_promotion_verdict(
             "status": verdict["status"],
             "reasons": list(verdict["reasons"]) + ["CANDIDATE_OUTPERFORMS_CURRENT_POLICY"],
         }
+    watchdog_block_reason = _sample_quality_watchdog_block_reason(comparison_evidence)
+    if verdict["status"] in {"promote", "promote_aggressive"} and watchdog_block_reason:
+        verdict = {"status": "keep", "reasons": list(verdict["reasons"]) + [watchdog_block_reason]}
     if verdict["status"] in {"promote", "promote_aggressive"} and bool(runner_quality.get("available")):
         reasons = list(verdict["reasons"])
         micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
@@ -1098,6 +1274,8 @@ def build_promotion_verdict(
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_DRAWDOWN"]}
         elif float(runner_quality["reject_rate"]) > 0.12:
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_REJECT_RATE"]}
+        elif float(runner_quality["protection_degraded_rate"]) > 0.08:
+            verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_EXECUTION_QUALITY"]}
         elif float(runner_quality["avg_slippage_bps"]) > 12.0:
             verdict = {"status": "keep", "reasons": reasons + ["PROMOTION_BLOCKED_BY_SLIPPAGE"]}
         elif float(runner_quality["avg_edge_retention_ratio"]) < 0.55:
@@ -1179,6 +1357,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
         for key in (
             "validation_path_mode",
             "sample_progress",
+            "sample_quality_watchdog",
             "score_alignment_summary",
             "total_closed_trade_count",
             "total_live_order_count",
@@ -1186,6 +1365,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "runner_walk_forward_window_count",
             "runner_positive_walk_forward_window_count",
             "runner_positive_walk_forward_ratio",
+            "runner_protection_degraded_rate",
             "recent_retention_window",
             "cumulative_retention_window",
             "walk_forward_windows",
@@ -1278,6 +1458,8 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     operational_reasons = list(operational_verdict.get("reasons", []) or [])
     evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
     runner_quality = _runner_quality_evidence(evidence)
+    sample_watchdog = dict(evidence.get("sample_quality_watchdog", {}) or {})
+    sample_watchdog_status = str(sample_watchdog.get("status", "") or "")
     reasons: list[str] = []
     status = "fail"
     pending_due_to_warmup = False
@@ -1312,6 +1494,13 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
     elif float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0) > 0.1:
         reasons.append("CANDIDATE_OUTPERFORMS_CURRENT_POLICY")
+    if sample_watchdog_status == "degraded":
+        status = "fail"
+        reasons.append("SAMPLE_QUALITY_WATCHDOG_DEGRADED")
+    elif sample_watchdog_status == "thin":
+        reasons.append("SAMPLE_QUALITY_WATCHDOG_THIN")
+        if requested_status in {"promote", "promote_aggressive"}:
+            pending_due_to_warmup = True
     if bool(runner_quality.get("available")):
         micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
         micro_live_status = str(micro_live_gate.get("status", "") or "")
@@ -1324,6 +1513,9 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         if float(runner_quality["reject_rate"]) > 0.12:
             status = "fail"
             reasons.append("RUNNER_REJECT_RATE_ABOVE_LIMIT")
+        if float(runner_quality["protection_degraded_rate"]) > 0.12:
+            status = "fail"
+            reasons.append("RUNNER_EXECUTION_QUALITY_BELOW_LIMIT")
         if float(runner_quality["avg_slippage_bps"]) > 12.0:
             status = "fail"
             reasons.append("RUNNER_SLIPPAGE_ABOVE_LIMIT")
@@ -1603,8 +1795,11 @@ def _retention_monitor(
     walk_forward_window_count = int(runner_quality.get("walk_forward_window_count", 0) or 0)
     positive_walk_forward_ratio = float(runner_quality.get("positive_walk_forward_ratio", 0.0) or 0.0)
     operational_status = str(operational_verdict.get("status", "hold") or "hold")
+    sample_watchdog_status = str(dict(validation_evidence.get("sample_quality_watchdog", {}) or {}).get("status", "") or "")
     if operational_status == "stop":
         reasons.append("RETENTION_MONITOR_OPERATIONAL_STOP")
+    if sample_watchdog_status == "degraded":
+        reasons.append("RETENTION_MONITOR_SAMPLE_WATCHDOG_DEGRADED")
     if retention < 0.40:
         reasons.append("RETENTION_MONITOR_EDGE_TOO_LOW")
     if realized <= 0.0:
@@ -1647,6 +1842,8 @@ def _retention_monitor(
     moderate_reasons: list[str] = []
     if operational_status == "hold":
         moderate_reasons.append("RETENTION_MONITOR_OPERATIONAL_HOLD")
+    if sample_watchdog_status == "thin":
+        moderate_reasons.append("RETENTION_MONITOR_SAMPLE_WATCHDOG_THIN")
     if retention < 0.65:
         moderate_reasons.append("RETENTION_MONITOR_EDGE_BELOW_PASS")
     if drawdown_ratio > 0.45:
@@ -1855,6 +2052,67 @@ def _rollout_progression_signal(
     }
 
 
+def _sample_quality_checkpoint_revalidation(
+    previous_state: dict[str, object],
+    validation_evidence: dict[str, object],
+) -> dict[str, object]:
+    previous_watchdog = dict(
+        dict(
+            dict(previous_state.get("policy_validation", {}) or {}).get("evidence", {})
+            or {}
+        ).get("sample_quality_watchdog", {})
+        or {}
+    )
+    current_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
+    previous_snapshot = dict(previous_watchdog.get("checkpoint_snapshot", {}) or {})
+    current_snapshot = dict(current_watchdog.get("checkpoint_snapshot", {}) or {})
+    hooks: list[dict[str, object]] = []
+    previous_portfolio = {
+        (str(item.get("metric", "") or ""), int(item.get("threshold", 0) or 0)): dict(item)
+        for item in list(previous_snapshot.get("portfolio", []) or [])
+        if str(item.get("metric", "") or "")
+    }
+    for item in list(current_snapshot.get("portfolio", []) or []):
+        metric = str(item.get("metric", "") or "")
+        threshold = int(item.get("threshold", 0) or 0)
+        current_reached = bool(item.get("reached"))
+        previous_reached = bool(previous_portfolio.get((metric, threshold), {}).get("reached"))
+        if current_reached and not previous_reached:
+            hooks.append(
+                {
+                    "kind": "portfolio_threshold_crossed",
+                    "metric": metric,
+                    "threshold": threshold,
+                    "previous_value": int(previous_portfolio.get((metric, threshold), {}).get("current_value", 0) or 0),
+                    "current_value": int(item.get("current_value", 0) or 0),
+                }
+            )
+    previous_symbols = {
+        str(item.get("symbol", "") or ""): dict(item)
+        for item in list(previous_snapshot.get("symbols", []) or [])
+        if str(item.get("symbol", "") or "")
+    }
+    for item in list(current_snapshot.get("symbols", []) or []):
+        symbol = str(item.get("symbol", "") or "")
+        if not symbol:
+            continue
+        if bool(item.get("validation_ready")) and not bool(previous_symbols.get(symbol, {}).get("validation_ready")):
+            hooks.append(
+                {
+                    "kind": "symbol_validation_ready",
+                    "symbol": symbol,
+                    "threshold": int(item.get("validation_threshold", 0) or 0),
+                    "previous_value": int(previous_symbols.get(symbol, {}).get("trade_count", 0) or 0),
+                    "current_value": int(item.get("trade_count", 0) or 0),
+                }
+            )
+    return {
+        "triggered": bool(hooks),
+        "hooks": hooks,
+        "watchdog_status": str(current_watchdog.get("status", "not_available") or "not_available"),
+    }
+
+
 def build_persisted_policy_state(
     previous_state: dict[str, object] | None,
     candidate_policy: dict[str, object],
@@ -1872,9 +2130,11 @@ def build_persisted_policy_state(
     comparison_underperforms = comparison_verdict == "candidate_worse"
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
+    sample_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
     rollout_status = "steady"
     rollout_reason = "UNCHANGED"
     retention_monitor = _retention_monitor(previous_state, previous_active, validation_evidence, operational_verdict)
+    checkpoint_revalidation = _sample_quality_checkpoint_revalidation(previous_state, validation_evidence)
     verdict_reasons = list(promotion_verdict.get("reasons", []) or [])
     staged_micro_live_block = (
         verdict_status == "keep"
@@ -1955,6 +2215,8 @@ def build_persisted_policy_state(
     )
     active_policy = _annotate_active_policy(active_policy, promotion_verdict, retention_monitor)
     active_policy["rollout_progression"] = rollout_progression
+    active_policy["checkpoint_revalidation"] = checkpoint_revalidation
+    active_policy["sample_quality_watchdog"] = sample_watchdog
     return {
         "version": version,
         "status": lifecycle,
@@ -1962,6 +2224,7 @@ def build_persisted_policy_state(
         "rollout_reason": rollout_reason,
         "rollout_progression": rollout_progression,
         "retention_monitor": retention_monitor,
+        "checkpoint_revalidation": checkpoint_revalidation,
         "active_policy": active_policy,
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
@@ -1979,6 +2242,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "rollout_status": policy_state.get("rollout_status", "unknown"),
         "rollout_reason": policy_state.get("rollout_reason", "unknown"),
         "retention_monitor": dict(policy_state.get("retention_monitor", {}) or {}),
+        "checkpoint_revalidation": dict(policy_state.get("checkpoint_revalidation", {}) or {}),
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
         "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
