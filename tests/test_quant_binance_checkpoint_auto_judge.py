@@ -640,6 +640,53 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
                 "directional_hold",
             )
 
+    def test_strategy_proposal_keeps_pending_when_simple_baseline_lacks_bucket_replay_ready_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {"name": "candidate-a", "objective_score": 8.0, "overrides": {}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "performance_report.json").write_text(
+                json.dumps({"pruning_recommendations": []}),
+                encoding="utf-8",
+            )
+            (run_dir / "policy_comparison.json").write_text(
+                json.dumps(
+                    {
+                        "baseline_control_comparison": {
+                            "available": True,
+                            "verdict": "supportive",
+                            "expansion_gate": "not_available",
+                            "expansion_gate_reason": "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE",
+                            "bucket_replay_ready": False,
+                            "bucket_replay_reference_bucket": "not_available",
+                            "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE",
+                            "best_simple_baseline": {"strategy_name": "directional_hold"},
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            proposal = build_strategy_proposal(base_dir=base)
+
+            self.assertEqual(proposal["status"], "proposal_pending")
+            self.assertEqual(proposal["gates"]["simple_baseline_gate_status"], "not_available")
+            self.assertFalse(proposal["gates"]["simple_baseline_bucket_replay_ready"])
+            self.assertEqual(
+                proposal["gates"]["simple_baseline_bucket_replay_reason"],
+                "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE",
+            )
+
     def test_strategy_proposal_marks_stale_checkpoint_lineage_as_pending(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"

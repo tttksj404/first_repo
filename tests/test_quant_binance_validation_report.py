@@ -275,6 +275,87 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 "staged_candidate",
             )
 
+    def test_build_policy_comparison_validation_artifact_requires_bucket_replay_before_simple_baseline_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            comparison_run = base / "output" / "strategy-comparison-recent" / "run-b"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            comparison_run.mkdir(parents=True, exist_ok=True)
+            (comparison_run / "comparison.json").write_text(
+                json.dumps(
+                    {
+                        "strategies": [
+                            {
+                                "strategy_name": "current_strategy",
+                                "trade_count": 4,
+                                "closed_trade_count": 4,
+                                "total_pnl_usd": 1.0,
+                                "total_return_pct": 0.08,
+                                "max_drawdown_pct": 0.1,
+                            },
+                            {
+                                "strategy_name": "directional_hold",
+                                "trade_count": 4,
+                                "closed_trade_count": 4,
+                                "total_pnl_usd": 0.2,
+                                "total_return_pct": 0.01,
+                                "max_drawdown_pct": 0.2,
+                            },
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 2,
+                        "accepted_live_order_count": 2,
+                        "rejected_live_order_count": 0,
+                        "tested_order_count": 1,
+                        "avg_slippage_bps": 2.0,
+                        "avg_edge_retention_ratio": 0.8,
+                        "avg_realized_edge_bps": 4.0,
+                        "avg_expected_edge_bps": 5.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.0, "realized_return_bps_estimate": 4.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "final_mode": "futures",
+                        "predictability_score": 70.0,
+                        "net_expected_edge_bps": 10.0,
+                        "estimated_round_trip_cost_bps": 6.0,
+                        "timestamp": "2026-03-14T00:00:00+00:00",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state={"active_policy": {"status": "baseline", "adjustments": []}},
+                candidate_policy={"adjustments": []},
+                base_dir=base,
+                lookback_days=7,
+            )
+
+            baseline = artifact["baseline_control_comparison"]
+            self.assertEqual(baseline["verdict"], "supportive")
+            self.assertEqual(baseline["expansion_gate"], "not_available")
+            self.assertFalse(baseline["bucket_replay_ready"])
+            self.assertEqual(baseline["bucket_replay_reason"], "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE")
+            self.assertNotIn("AUTO_MODE_SIMPLE_BASELINE_SUPPORTIVE", artifact["auto_mode"]["reason_codes"])
+
     def test_build_policy_comparison_validation_artifact_prefers_direct_active_bucket_from_current_policy_state(self) -> None:
         candidate_policy = {"adjustments": []}
         current_policy_state = {

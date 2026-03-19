@@ -54,10 +54,11 @@ class QuantBinancePromotionTests(unittest.TestCase):
 
             proposal = build_strategy_proposal(base_dir=base)
 
-            self.assertEqual(proposal["status"], "proposal_ready")
+            self.assertEqual(proposal["status"], "proposal_pending")
             self.assertEqual(proposal["candidate_name"], "candidate-a")
             self.assertTrue(proposal["supporting_artifacts"]["performance_report"])
             self.assertTrue(proposal["supporting_artifacts"]["recent_comparison"])
+            self.assertEqual(proposal["gates"]["simple_baseline_gate_status"], "not_available")
             self.assertEqual(proposal["gates"]["risky_symbols"], ["XYZUSDT"])
             self.assertEqual(proposal["gates"]["best_comparison_strategy"], "current_strategy")
             self.assertIn("universe", proposal["overrides"])
