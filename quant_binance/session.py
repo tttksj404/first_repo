@@ -480,7 +480,12 @@ class LivePaperSession:
         validation_report_path = run_dir / "validation_report.json"
         write_policy_validation_runner_artifact(base_dir=base_dir, output_path=validation_report_path)
         previous_policy_state = self._read_persisted_policy_state()
-        validation_runner_context = load_validation_runner_evidence(validation_report_path)
+        validation_runner_context = dict(load_validation_runner_evidence(validation_report_path))
+        if self.runtime.paper_service.settings.portfolio_focus.enabled:
+            validation_runner_context.setdefault(
+                "promotion_top_k",
+                max(int(self.runtime.paper_service.settings.portfolio_focus.futures_top_n), 0),
+            )
         summary["candidate_policy"] = _resume_staged_candidate_policy(
             previous_policy_state,
             build_auto_tune_policy(summary.get("performance_attribution", []), validation_runner_context),
@@ -3940,6 +3945,11 @@ class LivePaperSession:
             exit_time=timestamp,
             exit_reason=exit_reason,
         )
+        if position.market == "futures" and exit_reason == "CAPITAL_REALLOCATION":
+            cooldown_until = self._manual_reentry_cooldown_until(timestamp)
+            current = self.manual_symbol_cooldowns.get(position.symbol)
+            if current is None or cooldown_until > current:
+                self.manual_symbol_cooldowns[position.symbol] = cooldown_until
         if (
             position.market == "futures"
             and self._is_major_futures_symbol(position.symbol)
