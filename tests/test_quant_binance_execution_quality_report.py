@@ -95,6 +95,10 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
                                     ]
                                 },
                             },
+                            "auto_mode": {
+                                "mode": "tighter",
+                                "reason_codes": ["AUTO_MODE_TIGHTENED_BY_EXECUTION_QUALITY"],
+                            },
                         }
                     }
                 ),
@@ -113,6 +117,8 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
             self.assertEqual(report.protection_degraded_rate, 0.5)
             self.assertEqual(report.sample_quality_watchdog_status, "degraded")
             self.assertEqual(report.sample_quality_watchdog_reasons, ("EDGE_RETENTION_WEAK",))
+            self.assertEqual(report.auto_mode, "tighter")
+            self.assertEqual(report.auto_mode_reasons, ("AUTO_MODE_TIGHTENED_BY_EXECUTION_QUALITY",))
             self.assertEqual(report.top_error_codes[0]["code"], "40762")
             by_symbol = {row["symbol"]: row for row in report.symbol_order_summary}
             self.assertEqual(by_symbol["ETHUSDT"]["order_error_count"], 2)
