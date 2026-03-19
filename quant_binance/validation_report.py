@@ -112,6 +112,13 @@ def _resolve_latest_run_dir(*, base_dir: Path) -> Path | None:
     return max(runs, key=lambda candidate: candidate.stat().st_mtime)
 
 
+def _latest_file_under(root: Path, name: str) -> Path | None:
+    if not root.exists():
+        return None
+    matches = sorted(root.rglob(name), key=lambda path: path.stat().st_mtime, reverse=True)
+    return matches[0] if matches else None
+
+
 def _load_summary(run_dir: Path) -> dict[str, Any]:
     summary_path = run_dir / "summary.json"
     if not summary_path.exists():
@@ -1682,6 +1689,343 @@ def _counterfactual_replay_path(
     }
 
 
+def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[str, object]:
+    latest_path = _latest_file_under(Path(base_dir) / "output" / "strategy-comparison-recent", "comparison.json")
+    if latest_path is None:
+        return {
+            "available": False,
+            "artifact_path": "",
+            "reason": "NO_RECENT_BASELINE_CONTROL_ARTIFACT",
+            "verdict": "not_available",
+        }
+    try:
+        payload = json.loads(latest_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {
+            "available": False,
+            "artifact_path": str(latest_path),
+            "reason": "RECENT_BASELINE_CONTROL_ARTIFACT_UNREADABLE",
+            "verdict": "not_available",
+        }
+    strategies = [dict(item) for item in list(payload.get("strategies", []) or []) if isinstance(item, dict)]
+    if not strategies:
+        return {
+            "available": False,
+            "artifact_path": str(latest_path),
+            "reason": "RECENT_BASELINE_CONTROL_STRATEGIES_MISSING",
+            "verdict": "not_available",
+        }
+    current = next((item for item in strategies if str(item.get("strategy_name", "") or "") == "current_strategy"), {})
+    baselines = [
+        item
+        for item in strategies
+        if str(item.get("strategy_name", "") or "") != "current_strategy"
+    ]
+    if not current or not baselines:
+        return {
+            "available": False,
+            "artifact_path": str(latest_path),
+            "reason": "RECENT_BASELINE_CONTROL_CURRENT_OR_BASELINE_MISSING",
+            "verdict": "not_available",
+        }
+    best_baseline = max(
+        baselines,
+        key=lambda item: (
+            _safe_float(item.get("total_pnl_usd")),
+            _safe_float(item.get("realized_pnl_usd")),
+            _safe_int(item.get("trade_count")),
+            str(item.get("strategy_name", "")),
+        ),
+    )
+    pnl_delta = round(
+        _safe_float(current.get("total_pnl_usd")) - _safe_float(best_baseline.get("total_pnl_usd")),
+        6,
+    )
+    return_delta = round(
+        _safe_float(current.get("total_return_pct")) - _safe_float(best_baseline.get("total_return_pct")),
+        6,
+    )
+    verdict = "parity"
+    reason = "CURRENT_STRATEGY_NEAR_BASELINE_PARITY"
+    if pnl_delta <= -0.25:
+        verdict = "caution"
+        reason = "CURRENT_STRATEGY_UNDERPERFORMS_SIMPLE_BASELINE"
+    elif pnl_delta >= 0.25:
+        verdict = "supportive"
+        reason = "CURRENT_STRATEGY_OUTPERFORMS_SIMPLE_BASELINE"
+    return {
+        "available": True,
+        "artifact_path": str(latest_path),
+        "generated_at": payload.get("generated_at"),
+        "verdict": verdict,
+        "reason": reason,
+        "current_strategy": {
+            "strategy_name": str(current.get("strategy_name", "") or ""),
+            "trade_count": _safe_int(current.get("trade_count")),
+            "total_pnl_usd": round(_safe_float(current.get("total_pnl_usd")), 6),
+            "total_return_pct": round(_safe_float(current.get("total_return_pct")), 6),
+        },
+        "best_simple_baseline": {
+            "strategy_name": str(best_baseline.get("strategy_name", "") or ""),
+            "trade_count": _safe_int(best_baseline.get("trade_count")),
+            "total_pnl_usd": round(_safe_float(best_baseline.get("total_pnl_usd")), 6),
+            "total_return_pct": round(_safe_float(best_baseline.get("total_return_pct")), 6),
+        },
+        "current_vs_best_simple_baseline_total_pnl_usd_delta": pnl_delta,
+        "current_vs_best_simple_baseline_return_pct_delta": return_delta,
+    }
+
+
+def _checkpoint_symbol_lifecycle_actions(
+    *,
+    symbol_rows: list[dict[str, object]],
+    symbol_scorecard: list[dict[str, object]],
+    active_adjustments: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    scorecard_by_symbol = {
+        str(item.get("symbol", "") or ""): dict(item)
+        for item in list(symbol_scorecard or [])
+        if str(item.get("symbol", "") or "")
+    }
+    active_by_symbol = {
+        str(item.get("symbol", "") or ""): dict(item)
+        for item in list(active_adjustments or [])
+        if str(item.get("symbol", "") or "")
+    }
+    rows: list[dict[str, object]] = []
+    symbols = sorted(
+        {
+            str(item.get("symbol", "") or "")
+            for item in list(symbol_rows or [])
+        }.union(active_by_symbol)
+    )
+    for symbol in symbols:
+        if not symbol:
+            continue
+        row = next((dict(item) for item in symbol_rows if str(item.get("symbol", "") or "") == symbol), {})
+        active = dict(active_by_symbol.get(symbol, {}) or {})
+        scorecard = dict(scorecard_by_symbol.get(symbol, {}) or {})
+        recommendation = str(row.get("recommendation", active.get("action", "keep")) or "keep")
+        scorecard_recommendation = str(scorecard.get("recommendation", "keep") or "keep")
+        active_action = str(active.get("action", "") or "")
+        active_positive = active_action in {"promote", "aggressive_promote"}
+        lifecycle_action = ""
+        reason_codes: list[str] = []
+        if recommendation in {"prune", "demote"} or scorecard_recommendation == "demote":
+            lifecycle_action = "rollback" if active_positive else "hold"
+            reason_codes.append("SYMBOL_EVIDENCE_DEGRADED")
+            if active_positive:
+                reason_codes.append("ACTIVE_PROMOTION_SUPPORT_LOST")
+        elif recommendation == "observe_only":
+            lifecycle_action = "hold"
+            reason_codes.append("SYMBOL_OBSERVE_ONLY")
+        elif recommendation == "promote":
+            validation_ready = _safe_int(row.get("trade_count")) >= _safe_int(row.get("required_trade_count_for_validation"), 3)
+            if validation_ready and scorecard_recommendation == "promote":
+                lifecycle_action = "expand"
+                reason_codes.append("SYMBOL_PROMOTION_SUPPORTED")
+            else:
+                lifecycle_action = "re_review"
+                reason_codes.append("SYMBOL_PROMOTION_REQUIRES_RECHECK")
+        elif active_positive:
+            lifecycle_action = "re_review"
+            reason_codes.append("ACTIVE_SYMBOL_REQUIRES_RECHECK")
+        if not lifecycle_action:
+            continue
+        rows.append(
+            {
+                "symbol": symbol,
+                "lifecycle_action": lifecycle_action,
+                "recommendation": recommendation,
+                "active_policy_action": active_action or "none",
+                "trade_count": _safe_int(row.get("trade_count")),
+                "scorecard_recommendation": scorecard_recommendation,
+                "sample_status": str(scorecard.get("sample_status", "") or ""),
+                "reason_codes": reason_codes,
+            }
+        )
+    rows.sort(
+        key=lambda item: (
+            {"rollback": 0, "hold": 1, "re_review": 2, "expand": 3}.get(str(item.get("lifecycle_action", "")), 4),
+            str(item.get("symbol", "")),
+        )
+    )
+    return rows
+
+
+def _checkpoint_regime_actions(
+    *,
+    regime_rows: list[dict[str, object]],
+    sample_watchdog_status: str,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for item in list(regime_rows or []):
+        mode = str(item.get("mode", "") or "")
+        decision_count = _safe_int(item.get("decision_count"))
+        if not mode or decision_count < 3:
+            continue
+        avg_net_edge_bps = round(_safe_float(item.get("avg_net_edge_bps")), 6)
+        action = "hold"
+        reason_codes = ["REGIME_WITHIN_THRESHOLDS"]
+        if avg_net_edge_bps <= 0.0:
+            action = "tighten"
+            reason_codes = ["REGIME_EDGE_NON_POSITIVE"]
+        elif sample_watchdog_status == "promote_ready" and avg_net_edge_bps > 1.0:
+            action = "expand"
+            reason_codes = ["REGIME_EDGE_SUPPORTIVE"]
+        elif sample_watchdog_status == "degraded":
+            action = "tighten"
+            reason_codes = ["REGIME_TIGHTENED_BY_SAMPLE_WATCHDOG"]
+        rows.append(
+            {
+                "mode": mode,
+                "action": action,
+                "decision_count": decision_count,
+                "avg_net_edge_bps": avg_net_edge_bps,
+                "reason_codes": reason_codes,
+            }
+        )
+    return rows
+
+
+def _checkpoint_judge_confidence(
+    *,
+    run_count: int,
+    total_closed_trade_count: int,
+    total_live_order_count: int,
+    baseline_available: bool,
+    comparison_verdict: str,
+) -> str:
+    if (
+        run_count >= 2
+        and total_closed_trade_count >= 10
+        and total_live_order_count >= 12
+        and (baseline_available or comparison_verdict != "keep")
+    ):
+        return "high"
+    if run_count >= 2 and total_closed_trade_count >= 6:
+        return "medium"
+    return "low"
+
+
+def _build_checkpoint_auto_judge(
+    *,
+    current_policy_state: dict[str, Any] | None,
+    comparison_verdict: str,
+    comparison_delta: float,
+    runner_artifact: dict[str, object],
+    baseline_control_comparison: dict[str, object],
+) -> dict[str, object]:
+    payload = dict(runner_artifact or {})
+    sample_watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
+    sample_watchdog_status = str(sample_watchdog.get("status", "not_available") or "not_available")
+    active_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
+    active_adjustments = list(active_policy.get("adjustments", []) or [])
+    active_status = str(active_policy.get("status", "baseline") or "baseline")
+    run_count = _safe_int(payload.get("run_count"))
+    total_closed_trade_count = _safe_int(payload.get("total_closed_trade_count"))
+    total_live_order_count = _safe_int(payload.get("total_live_order_count"))
+    runner_total_realized_pnl_usd = round(_safe_float(payload.get("runner_total_realized_pnl_usd")), 6)
+    runner_drawdown_to_pnl_ratio = round(_safe_float(payload.get("runner_drawdown_to_pnl_ratio")), 6)
+    runner_reject_rate = round(_safe_float(payload.get("runner_reject_rate")), 6)
+    runner_protection_degraded_rate = round(_safe_float(payload.get("runner_protection_degraded_rate")), 6)
+    runner_avg_edge_retention_ratio = round(_safe_float(payload.get("runner_avg_edge_retention_ratio")), 6)
+    runner_positive_walk_forward_ratio = round(_safe_float(payload.get("runner_positive_walk_forward_ratio")), 6)
+    baseline_verdict = str(baseline_control_comparison.get("verdict", "not_available") or "not_available")
+    raw_verdict = "hold"
+    reason_codes: list[str] = []
+    if comparison_verdict == "candidate_worse":
+        raw_verdict = "rollback"
+        reason_codes.append("POLICY_COMPARISON_CANDIDATE_WORSE")
+    elif sample_watchdog_status == "degraded":
+        raw_verdict = "tighten"
+        reason_codes.append("SAMPLE_QUALITY_WATCHDOG_DEGRADED")
+    elif sample_watchdog_status == "promote_ready":
+        raw_verdict = "expand"
+        reason_codes.append("SAMPLE_QUALITY_WATCHDOG_PROMOTE_READY")
+    elif sample_watchdog_status == "healthy":
+        raw_verdict = "hold"
+        reason_codes.append("SAMPLE_QUALITY_WATCHDOG_HEALTHY")
+    else:
+        raw_verdict = "hold"
+        reason_codes.append("SAMPLE_QUALITY_WATCHDOG_THIN")
+    if baseline_verdict == "caution":
+        if raw_verdict == "expand":
+            raw_verdict = "hold"
+        elif raw_verdict == "hold":
+            raw_verdict = "tighten"
+        reason_codes.append("SIMPLE_BASELINE_CONTROL_UNDERPERFORMED")
+    elif baseline_verdict == "supportive":
+        reason_codes.append("SIMPLE_BASELINE_CONTROL_OUTPERFORMED")
+    if (
+        total_closed_trade_count >= 6
+        and (
+            runner_total_realized_pnl_usd <= 0.0
+            or runner_drawdown_to_pnl_ratio > 0.9
+            or runner_reject_rate > 0.15
+            or runner_protection_degraded_rate > 0.15
+            or runner_avg_edge_retention_ratio < 0.4
+        )
+    ):
+        raw_verdict = "rollback"
+        reason_codes.append("RUNNER_EVIDENCE_SEVERELY_NEGATIVE")
+    elif raw_verdict == "expand" and (
+        runner_avg_edge_retention_ratio < 0.68
+        or runner_positive_walk_forward_ratio < 0.67
+    ):
+        raw_verdict = "hold"
+        reason_codes.append("RUNNER_EVIDENCE_NOT_STRONG_ENOUGH_TO_EXPAND")
+    elif raw_verdict == "hold" and (
+        runner_avg_edge_retention_ratio < 0.55
+        or runner_reject_rate > 0.08
+        or runner_protection_degraded_rate > 0.08
+    ):
+        raw_verdict = "tighten"
+        reason_codes.append("RUNNER_EXECUTION_EVIDENCE_REQUIRES_TIGHTENING")
+    effective_verdict = raw_verdict
+    if raw_verdict == "rollback" and active_status in {"baseline", "keep"} and not active_adjustments:
+        effective_verdict = "tighten" if sample_watchdog_status == "degraded" else "hold"
+        reason_codes.append("NO_ACTIVE_NON_BASELINE_POLICY_TO_ROLL_BACK")
+    return {
+        "verdict": effective_verdict,
+        "raw_verdict": raw_verdict,
+        "confidence": _checkpoint_judge_confidence(
+            run_count=run_count,
+            total_closed_trade_count=total_closed_trade_count,
+            total_live_order_count=total_live_order_count,
+            baseline_available=bool(baseline_control_comparison.get("available")),
+            comparison_verdict=comparison_verdict,
+        ),
+        "reason_codes": sorted(set(reason_codes)),
+        "current_policy_status": active_status,
+        "comparison_verdict": comparison_verdict,
+        "comparison_score_delta": round(comparison_delta, 6),
+        "sample_quality_watchdog_status": sample_watchdog_status,
+        "baseline_control_comparison": dict(baseline_control_comparison or {}),
+        "policy_guardrails": dict(sample_watchdog.get("policy_guardrails", {}) or {}),
+        "evidence": {
+            "run_count": run_count,
+            "total_closed_trade_count": total_closed_trade_count,
+            "total_live_order_count": total_live_order_count,
+            "runner_total_realized_pnl_usd": runner_total_realized_pnl_usd,
+            "runner_drawdown_to_pnl_ratio": runner_drawdown_to_pnl_ratio,
+            "runner_reject_rate": runner_reject_rate,
+            "runner_protection_degraded_rate": runner_protection_degraded_rate,
+            "runner_avg_edge_retention_ratio": runner_avg_edge_retention_ratio,
+            "runner_positive_walk_forward_ratio": runner_positive_walk_forward_ratio,
+        },
+        "symbol_actions": _checkpoint_symbol_lifecycle_actions(
+            symbol_rows=list(payload.get("symbol_summary", []) or []),
+            symbol_scorecard=list(payload.get("symbol_scorecard", []) or []),
+            active_adjustments=active_adjustments,
+        ),
+        "regime_actions": _checkpoint_regime_actions(
+            regime_rows=list(payload.get("regime_summary", []) or []),
+            sample_watchdog_status=sample_watchdog_status,
+        ),
+    }
+
+
 def build_policy_comparison_validation_artifact(*,
     current_policy_state: dict[str, Any] | None,
     candidate_policy: dict[str, Any],
@@ -1691,6 +2035,7 @@ def build_policy_comparison_validation_artifact(*,
 ) -> dict[str, object]:
     runner = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
     runner_evidence = dict(runner.get("evidence", {}) or {})
+    baseline_control_comparison = dict(runner.get("baseline_control_comparison", {}) or {})
     current_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
     current_policy_evidence = dict(dict(dict(current_policy_state or {}).get("policy_validation", {}) or {}).get("evidence", {}) or {})
     current_score = _policy_adjustment_score(current_policy)
@@ -1804,6 +2149,13 @@ def build_policy_comparison_validation_artifact(*,
         execution_style_summary.get("policy_application_delta", {})
         or {}
     )
+    checkpoint_auto_judge = _build_checkpoint_auto_judge(
+        current_policy_state=current_policy_state,
+        comparison_verdict=verdict,
+        comparison_delta=comparison_delta,
+        runner_artifact=runner,
+        baseline_control_comparison=baseline_control_comparison,
+    )
     evidence = {
         "comparison_verdict": verdict,
         "comparison_structural_verdict": structural_verdict,
@@ -1832,6 +2184,8 @@ def build_policy_comparison_validation_artifact(*,
         "recent_retention_window": runner.get("recent_retention_window", {}),
         "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
         "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
+        "baseline_control_comparison": baseline_control_comparison,
+        "checkpoint_auto_judge": checkpoint_auto_judge,
         "candidate_vs_current_validation_path": validation_path,
         "counterfactual_replay_path": counterfactual_replay_path,
         "candidate_replay_summary": candidate_replay_summary,
@@ -1875,6 +2229,8 @@ def build_policy_comparison_validation_artifact(*,
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
         "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
         "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
+        "baseline_control_comparison": baseline_control_comparison,
+        "checkpoint_auto_judge": checkpoint_auto_judge,
         "recent_retention_window": runner.get("recent_retention_window", {}),
         "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
         "counterfactual_replay_path": counterfactual_replay_path,
@@ -1990,6 +2346,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         runner_walk_forward_window_count=len(walk_forward_windows),
         runner_positive_walk_forward_ratio=round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
     )
+    baseline_control_comparison = _load_recent_baseline_control_comparison(base_dir=base_dir)
     total_return_pct = 0.0
     max_drawdown_pct = 0.0
     evidence = {
@@ -2016,6 +2373,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "recent_retention_window": recent_retention_window,
         "cumulative_retention_window": cumulative_retention_window,
         "sample_quality_watchdog": sample_quality_watchdog,
+        "baseline_control_comparison": baseline_control_comparison,
         "symbol_scorecard": symbol_scorecard,
     }
     return {
@@ -2052,6 +2410,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "recent_retention_window": recent_retention_window,
         "cumulative_retention_window": cumulative_retention_window,
         "sample_quality_watchdog": sample_quality_watchdog,
+        "baseline_control_comparison": baseline_control_comparison,
         "evidence": evidence,
     }
 
