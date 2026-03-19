@@ -280,7 +280,7 @@ def _build_policy_evidence_buckets(
         "active_policy": _policy_evidence_bucket_entry(
             bucket_name="active_policy",
             source=(
-                "persisted_policy_validation_evidence"
+                str(dict(current_replay_summary or {}).get("source", "") or "persisted_policy_validation_evidence")
                 if current_policy_evidence
                 else "active_policy_evidence_unavailable"
             ),
@@ -1469,6 +1469,146 @@ def _policy_context_bucket_direct_evidence_map(
         if evidence:
             evidence_by_bucket[bucket_name] = evidence
     return evidence_by_bucket
+
+
+def _overlay_policy_context_bucket_evidence(
+    evidence: dict[str, Any] | None,
+    *,
+    bucket_evidence: dict[str, Any] | None,
+) -> tuple[dict[str, object], dict[str, object]]:
+    merged = dict(evidence or {})
+    bucket = dict(bucket_evidence or {})
+    bucket_runs = [
+        dict(item)
+        for item in list(bucket.get("policy_context_bucket_validation_runs", []) or [])
+        if isinstance(item, dict)
+    ]
+    bucket_walk_forward_windows = [
+        dict(item)
+        for item in list(bucket.get("policy_context_bucket_walk_forward_windows", []) or [])
+        if isinstance(item, dict)
+    ]
+    if not bucket:
+        return merged, {"applied": False}
+    retention_window = _retention_window_signal(
+        validation_runs=bucket_runs,
+        walk_forward_windows=bucket_walk_forward_windows,
+    )
+    if bucket_runs:
+        merged["validation_runs"] = bucket_runs
+    if bucket_walk_forward_windows:
+        merged["walk_forward_windows"] = bucket_walk_forward_windows
+    if "policy_context_bucket_symbol_summary" in bucket:
+        merged["symbol_summary"] = [
+            dict(item)
+            for item in list(bucket.get("policy_context_bucket_symbol_summary", []) or [])
+            if isinstance(item, dict)
+        ]
+    if "policy_context_bucket_symbol_execution_summary" in bucket:
+        merged["symbol_execution_summary"] = [
+            dict(item)
+            for item in list(bucket.get("policy_context_bucket_symbol_execution_summary", []) or [])
+            if isinstance(item, dict)
+        ]
+    if "policy_context_bucket_score_alignment_summary" in bucket:
+        merged["score_alignment_summary"] = [
+            dict(item)
+            for item in list(bucket.get("policy_context_bucket_score_alignment_summary", []) or [])
+            if isinstance(item, dict)
+        ]
+    if "policy_context_bucket_regime_summary" in bucket:
+        merged["regime_summary"] = [
+            dict(item)
+            for item in list(bucket.get("policy_context_bucket_regime_summary", []) or [])
+            if isinstance(item, dict)
+        ]
+    if "policy_context_bucket_pruning_recommendations" in bucket:
+        merged["pruning_recommendations"] = [
+            dict(item)
+            for item in list(bucket.get("policy_context_bucket_pruning_recommendations", []) or [])
+            if isinstance(item, dict)
+        ]
+    merged.update(
+        {
+            "run_count": _safe_int(bucket.get("policy_context_bucket_run_count", merged.get("run_count"))),
+            "total_closed_trade_count": _safe_int(
+                bucket.get("policy_context_bucket_closed_trade_count", merged.get("total_closed_trade_count"))
+            ),
+            "total_live_order_count": _safe_int(
+                bucket.get("policy_context_bucket_live_order_count", merged.get("total_live_order_count"))
+            ),
+            "total_tested_order_count": _safe_int(
+                bucket.get("policy_context_bucket_tested_order_count", merged.get("total_tested_order_count"))
+            ),
+            "runner_total_realized_pnl_usd": round(
+                _safe_float(
+                    bucket.get("policy_context_bucket_total_realized_pnl_usd", merged.get("runner_total_realized_pnl_usd"))
+                ),
+                6,
+            ),
+            "runner_drawdown_to_pnl_ratio": round(
+                _safe_float(retention_window.get("drawdown_to_pnl_ratio", merged.get("runner_drawdown_to_pnl_ratio"))),
+                6,
+            ),
+            "runner_reject_rate": round(_safe_float(bucket.get("reject_rate", merged.get("runner_reject_rate"))), 6),
+            "runner_protection_degraded_rate": round(
+                _safe_float(bucket.get("protection_degraded_rate", merged.get("runner_protection_degraded_rate"))),
+                6,
+            ),
+            "runner_avg_slippage_bps": round(
+                _safe_float(bucket.get("avg_slippage_bps", merged.get("runner_avg_slippage_bps"))),
+                6,
+            ),
+            "runner_avg_realized_edge_bps": round(
+                _safe_float(bucket.get("avg_realized_edge_bps", merged.get("runner_avg_realized_edge_bps"))),
+                6,
+            ),
+            "runner_avg_edge_retention_ratio": round(
+                _safe_float(bucket.get("avg_edge_retention_ratio", merged.get("runner_avg_edge_retention_ratio"))),
+                6,
+            ),
+            "runner_walk_forward_window_count": _safe_int(
+                bucket.get("policy_context_bucket_walk_forward_window_count", merged.get("runner_walk_forward_window_count"))
+            ),
+            "runner_positive_walk_forward_window_count": _safe_int(
+                retention_window.get("positive_walk_forward_count", merged.get("runner_positive_walk_forward_window_count"))
+            ),
+            "runner_positive_walk_forward_ratio": round(
+                _safe_float(
+                    bucket.get(
+                        "policy_context_bucket_positive_walk_forward_ratio",
+                        merged.get("runner_positive_walk_forward_ratio"),
+                    )
+                ),
+                6,
+            ),
+            "policy_context_bucket_name": str(bucket.get("policy_context_bucket_name", "") or ""),
+            "policy_context_bucket_source": str(bucket.get("policy_context_bucket_source", "") or ""),
+            "policy_context_bucket_available": bool(bucket.get("policy_context_bucket_available")),
+            "preferred_policy_bucket": str(bucket.get("policy_context_bucket_name", "") or ""),
+        }
+    )
+    bucket_live_order_count = _safe_int(bucket.get("policy_context_bucket_live_order_count"))
+    bucket_rejected_live_order_count = max(
+        bucket_live_order_count - _safe_int(bucket.get("accepted_live_order_count")),
+        _safe_int(bucket.get("rejected_live_order_count")),
+    )
+    bucket_closed_trade_count = _safe_int(bucket.get("policy_context_bucket_closed_trade_count"))
+    if bucket_live_order_count > 0 or bucket_closed_trade_count > 0 or bucket_runs:
+        merged["micro_live_gate"] = _build_micro_live_gate(
+            live_order_count=bucket_live_order_count,
+            rejected_live_order_count=bucket_rejected_live_order_count,
+            avg_slippage_bps=_safe_float(bucket.get("avg_slippage_bps")),
+            avg_realized_edge_bps=_safe_float(bucket.get("avg_realized_edge_bps")),
+            closed_trade_count=bucket_closed_trade_count,
+        )
+    return merged, {
+        "applied": True,
+        "bucket_name": str(bucket.get("policy_context_bucket_name", "") or ""),
+        "source": str(bucket.get("policy_context_bucket_source", "") or ""),
+        "used_validation_runs": bool(bucket_runs),
+        "used_walk_forward_windows": bool(bucket_walk_forward_windows),
+    }
 
 
 def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evidence: dict[str, Any]) -> dict[str, object]:
@@ -3753,11 +3893,17 @@ def build_policy_comparison_validation_artifact(*,
         run_snapshots=raw_validation_runs,
         active_policy_lineage=current_active_lineage,
     )
+    current_policy_run_snapshots = [dict(item) for item in filtered_validation_runs]
+    if runtime_summary_run_dir is not None:
+        current_policy_run_snapshots = _merge_runtime_summary_snapshot(
+            current_policy_run_snapshots,
+            _run_validation_snapshot(run_dir=runtime_summary_run_dir),
+        )
     current_policy_direct_bucket_evidence = _policy_context_bucket_direct_evidence(
         base_dir=base_dir,
         lookback_days=lookback_days,
         generated_at=str(raw_runner.get("generated_at", datetime.now(UTC).isoformat()) or datetime.now(UTC).isoformat()),
-        run_snapshots=filtered_validation_runs,
+        run_snapshots=current_policy_run_snapshots,
         bucket_name="active_policy",
     )
     runner = _build_policy_validation_runner_from_run_snapshots(
@@ -3786,11 +3932,10 @@ def build_policy_comparison_validation_artifact(*,
         if bool(current_evidence_lineage_alignment.get("aligned"))
         else {}
     )
-    if current_policy_direct_bucket_evidence:
-        current_policy_evidence_for_comparison = {
-            **dict(current_policy_evidence_for_comparison or {}),
-            **current_policy_direct_bucket_evidence,
-        }
+    current_policy_evidence_for_comparison, current_policy_bucket_overlay = _overlay_policy_context_bucket_evidence(
+        current_policy_evidence_for_comparison,
+        bucket_evidence=current_policy_direct_bucket_evidence,
+    )
     runtime_comparison = _compare_runtime_evidence(
         candidate_evidence=runner_evidence,
         current_evidence=current_policy_evidence_for_comparison,
@@ -3829,9 +3974,14 @@ def build_policy_comparison_validation_artifact(*,
         policy_application=current_policy_application,
         baseline_policy_application=current_policy_application,
         source=(
-            "persisted_policy_validation_evidence"
-            if list(current_policy_evidence_for_comparison.get("validation_runs", []) or [])
+            "observed_runtime_policy_bucket_artifacts"
+            if bool(current_policy_bucket_overlay.get("used_validation_runs"))
+            or bool(current_policy_bucket_overlay.get("used_walk_forward_windows"))
+            else (
+                "persisted_policy_validation_evidence"
+                if list(current_policy_evidence_for_comparison.get("validation_runs", []) or [])
             else "observed_runtime_artifacts"
+            )
         ),
         runtime_summary=current_runtime_summary,
         runtime_summary_run_dir=runtime_summary_run_dir,
