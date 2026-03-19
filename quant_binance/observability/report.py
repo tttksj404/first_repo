@@ -2138,6 +2138,20 @@ def _protective_policy_transition(
     return ""
 
 
+def _resolved_policy_comparison_signal(
+    *,
+    validation_evidence: dict[str, object],
+    promotion_verdict: dict[str, object],
+) -> tuple[str, float]:
+    comparison_verdict, comparison_delta = _policy_comparison_signal(validation_evidence)
+    if comparison_verdict != "keep" or comparison_delta != 0.0:
+        return comparison_verdict, comparison_delta
+    fallback_verdict, fallback_delta = _policy_comparison_signal(promotion_verdict)
+    if fallback_verdict != "keep" or fallback_delta != 0.0:
+        return fallback_verdict, fallback_delta
+    return comparison_verdict, comparison_delta
+
+
 def _invalidate_staged_rollout(
     *,
     previous_state: dict[str, object],
@@ -2166,7 +2180,10 @@ def build_persisted_policy_state(
     verdict_status = str(promotion_verdict.get("status", "keep"))
     validation_status = str(validation.get("status", "fail"))
     validation_evidence = dict(validation.get("evidence", {}) or {})
-    comparison_verdict, _ = _policy_comparison_signal(validation_evidence)
+    comparison_verdict, _ = _resolved_policy_comparison_signal(
+        validation_evidence=validation_evidence,
+        promotion_verdict=promotion_verdict,
+    )
     comparison_underperforms = comparison_verdict == "candidate_worse"
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
