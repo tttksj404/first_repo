@@ -382,6 +382,49 @@ class QuantBinanceDaemonTests(unittest.TestCase):
             self.assertEqual(summary_payload["decision_count"], 2)
             self.assertIn("ETHUSDT", summary_payload["observe_only_symbols"])
 
+    def test_run_live_paper_daemon_uses_aligned_bucket_evidence_to_mark_observe_only_symbols(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            config_path = Path(output_dir) / "config.json"
+            config_payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            config_payload["universe"] = ["BTCUSDT", "SOLUSDT"]
+            config_path.write_text(json.dumps(config_payload), encoding="utf-8")
+            latest_root = Path(output_dir) / "output" / "paper-live-shell" / "latest"
+            latest_root.mkdir(parents=True, exist_ok=True)
+            (latest_root / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 4,
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "alignment": {"aligned": True, "status": "aligned"},
+                                "evidence": {
+                                    "policy_context_bucket_symbol_summary": [
+                                        {
+                                            "symbol": "SOLUSDT",
+                                            "recommendation": "observe_only",
+                                            "trade_count": 3,
+                                        }
+                                    ]
+                                },
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", FakeShell):
+                    result = run_live_paper_daemon(
+                        config_path=config_path,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+            summary_payload = json.loads(result["run_paths"].summary_path.read_text(encoding="utf-8"))
+            self.assertIn("SOLUSDT", summary_payload["observe_only_symbols"])
+
     def test_run_live_paper_daemon_requires_credentials_for_bitget_live_orders(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
             with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetDaemonClient()):
