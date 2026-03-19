@@ -7,7 +7,7 @@ from pathlib import Path
 
 from quant_binance.observability.report import build_persisted_policy_state, build_policy_validation, build_promotion_verdict
 from quant_binance.promotion import apply_strategy_proposal, build_strategy_proposal
-from quant_binance.validation_report import build_policy_comparison_validation_artifact
+from quant_binance.validation_report import _build_checkpoint_auto_judge, build_policy_comparison_validation_artifact
 
 
 class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
@@ -95,6 +95,52 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             self.assertEqual(artifact["auto_mode"]["mode"], "tighter")
             self.assertIn("AUTO_MODE_TIGHTENED_BY_CHECKPOINT_ROLLBACK", artifact["auto_mode"]["reason_codes"])
             self.assertEqual(artifact["evidence"]["checkpoint_auto_judge"], judge)
+
+    def test_checkpoint_auto_judge_prefers_staged_candidate_bucket_execution_metrics(self) -> None:
+        judge = _build_checkpoint_auto_judge(
+            current_policy_state={
+                "active_policy": {"status": "baseline", "adjustments": []},
+                "rollout_progression": {"execution_phase": "baseline"},
+            },
+            comparison_verdict="candidate_better",
+            comparison_delta=0.3,
+            runner_artifact={
+                "run_count": 3,
+                "total_closed_trade_count": 9,
+                "total_live_order_count": 12,
+                "runner_total_realized_pnl_usd": 14.0,
+                "runner_drawdown_to_pnl_ratio": 0.12,
+                "runner_reject_rate": 0.01,
+                "runner_protection_degraded_rate": 0.01,
+                "runner_avg_edge_retention_ratio": 0.82,
+                "runner_positive_walk_forward_ratio": 1.0,
+                "sample_quality_watchdog": {"status": "promote_ready"},
+                "policy_context_bucket_evidence": {
+                    "staged_candidate": {
+                        "run_count": 2,
+                        "total_closed_trade_count": 7,
+                        "total_live_order_count": 8,
+                        "runner_total_realized_pnl_usd": -3.0,
+                        "runner_drawdown_to_pnl_ratio": 1.15,
+                        "runner_reject_rate": 0.18,
+                        "runner_protection_degraded_rate": 0.12,
+                        "runner_avg_edge_retention_ratio": 0.35,
+                        "runner_positive_walk_forward_ratio": 0.0,
+                    }
+                },
+                "preferred_policy_bucket": "staged_candidate",
+            },
+            baseline_control_comparison={},
+        )
+
+        self.assertEqual(judge["verdict"], "hold")
+        self.assertEqual(judge["raw_verdict"], "rollback")
+        self.assertEqual(judge["evidence_source"], "policy_bucket")
+        self.assertEqual(judge["evidence_policy_bucket"], "staged_candidate")
+        self.assertEqual(judge["evidence"]["runner_total_realized_pnl_usd"], -3.0)
+        self.assertIn("RUNNER_EVIDENCE_SEVERELY_NEGATIVE", judge["reason_codes"])
+        self.assertIn("NO_ACTIVE_NON_BASELINE_POLICY_TO_ROLL_BACK", judge["reason_codes"])
+        self.assertIn("CHECKPOINT_POLICY_BUCKET_STAGED_CANDIDATE_USED", judge["reason_codes"])
 
     def test_policy_comparison_artifact_does_not_claim_simple_baseline_gate_with_thin_comparison_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -441,6 +487,49 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             self.assertEqual(proposal["status"], "proposal_pending")
             self.assertEqual(proposal["gates"]["live_evidence_rejudge_status"], "waiting")
             self.assertFalse(proposal["gates"]["fresh_live_evidence_accumulated"])
+
+    def test_strategy_proposal_requires_bucket_expansion_evidence_before_ready(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {"name": "candidate-a", "objective_score": 8.0, "overrides": {}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "performance_report.json").write_text(json.dumps({"pruning_recommendations": []}), encoding="utf-8")
+            (run_dir / "policy_comparison.json").write_text(
+                json.dumps(
+                    {
+                        "checkpoint_auto_judge": {
+                            "verdict": "expand",
+                            "confidence": "medium",
+                            "reason_codes": ["SAMPLE_QUALITY_WATCHDOG_PROMOTE_READY"],
+                            "evidence_source": "root",
+                            "evidence_policy_bucket": "not_available",
+                        },
+                        "executive_operating_verdict": {
+                            "verdict": "rebuild_evidence",
+                            "confidence": "medium",
+                            "reasons": ["EXECUTIVE_REBUILD_BY_MISSING_BUCKET_EXPANSION_EVIDENCE"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            proposal = build_strategy_proposal(base_dir=base)
+
+            self.assertEqual(proposal["status"], "proposal_pending")
+            self.assertEqual(proposal["gates"]["checkpoint_auto_judge_verdict"], "expand")
+            self.assertEqual(proposal["gates"]["checkpoint_evidence_source"], "root")
+            self.assertEqual(proposal["gates"]["checkpoint_evidence_policy_bucket"], "not_available")
 
     def test_strategy_proposal_uses_simple_baseline_gate_when_checkpoint_judge_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

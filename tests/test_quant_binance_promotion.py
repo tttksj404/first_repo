@@ -172,6 +172,63 @@ class QuantBinancePromotionTests(unittest.TestCase):
             self.assertEqual(proposal["overrides"]["risk"]["per_trade_equity_risk"], 0.005665)
             self.assertEqual(proposal["overrides"]["cash_reserve"]["when_futures_enabled"], 0.07)
 
+    def test_build_strategy_proposal_reprioritizes_existing_bucket_supported_symbols_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            (base / "output" / "paper-live-shell" / "run-a").mkdir(parents=True, exist_ok=True)
+
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {
+                            "name": "candidate-d",
+                            "objective_score": 8.1,
+                            "overrides": {},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (base / "output" / "paper-live-shell" / "run-a" / "performance_report.json").write_text(
+                json.dumps({"pruning_recommendations": []}),
+                encoding="utf-8",
+            )
+            (base / "output" / "paper-live-shell" / "run-a" / "policy_comparison.json").write_text(
+                json.dumps(
+                    {
+                        "checkpoint_auto_judge": {"verdict": "hold"},
+                        "symbol_lifecycle": [
+                            {
+                                "symbol": "SOLUSDT",
+                                "recommended_action": "cautious_repromote",
+                                "target_state": "cautious_repromotion",
+                                "recommendation": "promote",
+                                "symbol_evidence_source": "policy_context_bucket",
+                                "policy_context_bucket_evidence_available": True,
+                            },
+                            {
+                                "symbol": "XLMUSDT",
+                                "recommended_action": "cautious_repromote",
+                                "target_state": "cautious_repromotion",
+                                "recommendation": "promote",
+                                "symbol_evidence_source": "policy_context_bucket",
+                                "policy_context_bucket_evidence_available": True,
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            proposal = build_strategy_proposal(base_dir=base)
+
+            futures_priority = proposal["overrides"]["futures_exposure"]["priority_symbols"]
+            self.assertEqual(futures_priority[0], "BTCUSDT")
+            self.assertLess(futures_priority.index("SOLUSDT"), futures_priority.index("DOGEUSDT"))
+            self.assertNotIn("XLMUSDT", futures_priority)
+
 
 if __name__ == "__main__":
     unittest.main()
