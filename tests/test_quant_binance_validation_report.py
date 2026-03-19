@@ -720,6 +720,8 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(artifact["runner_total_return_pct"], 0.0)
             self.assertTrue(any(row["mode"] == "futures" for row in artifact["regime_summary"]))
             self.assertEqual(artifact["evidence"]["score_alignment_summary"][0]["trade_count"], 3)
+            self.assertTrue(artifact["symbol_lifecycle"])
+            self.assertEqual(artifact["symbol_lifecycle_summary"]["symbol_count"], len(artifact["symbol_lifecycle"]))
 
     def test_build_policy_validation_runner_artifact_tracks_recent_and_cumulative_windows(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

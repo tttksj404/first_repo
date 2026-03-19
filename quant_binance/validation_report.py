@@ -8,6 +8,7 @@ from typing import Any
 
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report
+from quant_binance.symbol_lifecycle import build_symbol_lifecycle, summarize_symbol_lifecycle
 
 
 @dataclass(frozen=True)
@@ -2105,6 +2106,24 @@ def _build_checkpoint_auto_judge(
     if raw_verdict == "rollback" and active_status in {"baseline", "keep"} and not active_adjustments:
         effective_verdict = "tighten" if sample_watchdog_status == "degraded" else "hold"
         reason_codes.append("NO_ACTIVE_NON_BASELINE_POLICY_TO_ROLL_BACK")
+    symbol_lifecycle = build_symbol_lifecycle(
+        symbol_summary=list(payload.get("symbol_summary", []) or []),
+        symbol_scorecard=list(payload.get("symbol_scorecard", []) or []),
+        pruning_recommendations=list(payload.get("pruning_recommendations", []) or []),
+        active_adjustments=active_adjustments,
+        previous_rows=list(dict(current_policy_state or {}).get("symbol_lifecycle", []) or []),
+        checkpoint_auto_judge={
+            "verdict": effective_verdict,
+            "symbol_actions": _checkpoint_symbol_lifecycle_actions(
+                symbol_rows=list(payload.get("symbol_summary", []) or []),
+                symbol_scorecard=list(payload.get("symbol_scorecard", []) or []),
+                active_adjustments=active_adjustments,
+            ),
+        },
+        sample_quality_watchdog=sample_watchdog,
+        baseline_control_comparison=baseline_control_comparison,
+        evaluated_at=payload.get("generated_at", ""),
+    )
     return {
         "verdict": effective_verdict,
         "raw_verdict": raw_verdict,
@@ -2133,11 +2152,22 @@ def _build_checkpoint_auto_judge(
             "runner_avg_edge_retention_ratio": runner_avg_edge_retention_ratio,
             "runner_positive_walk_forward_ratio": runner_positive_walk_forward_ratio,
         },
-        "symbol_actions": _checkpoint_symbol_lifecycle_actions(
-            symbol_rows=list(payload.get("symbol_summary", []) or []),
-            symbol_scorecard=list(payload.get("symbol_scorecard", []) or []),
-            active_adjustments=active_adjustments,
-        ),
+        "symbol_actions": [
+            {
+                "symbol": str(item.get("symbol", "") or ""),
+                "lifecycle_action": str(item.get("recommended_action", "keep") or "keep"),
+                "recommendation": str(item.get("recommendation", "keep") or "keep"),
+                "active_policy_action": str(item.get("active_policy_action", "none") or "none"),
+                "trade_count": _safe_int(item.get("trade_count")),
+                "scorecard_recommendation": str(item.get("scorecard_recommendation", "keep") or "keep"),
+                "sample_status": str(item.get("sample_watchdog_status", "") or ""),
+                "reason_codes": list(item.get("reason_codes", []) or []),
+            }
+            for item in symbol_lifecycle
+            if str(item.get("recommended_action", "keep") or "keep") != "keep"
+        ],
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": summarize_symbol_lifecycle(symbol_lifecycle),
         "regime_actions": _checkpoint_regime_actions(
             regime_rows=list(payload.get("regime_summary", []) or []),
             sample_watchdog_status=sample_watchdog_status,
@@ -2275,6 +2305,10 @@ def build_policy_comparison_validation_artifact(*,
         runner_artifact=runner,
         baseline_control_comparison=baseline_control_comparison,
     )
+    symbol_lifecycle = list(checkpoint_auto_judge.get("symbol_lifecycle", runner.get("symbol_lifecycle", [])) or [])
+    symbol_lifecycle_summary = dict(
+        checkpoint_auto_judge.get("symbol_lifecycle_summary", runner.get("symbol_lifecycle_summary", {})) or {}
+    )
     evidence = {
         "comparison_verdict": verdict,
         "comparison_structural_verdict": structural_verdict,
@@ -2305,6 +2339,8 @@ def build_policy_comparison_validation_artifact(*,
         "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
         "baseline_control_comparison": baseline_control_comparison,
         "checkpoint_auto_judge": checkpoint_auto_judge,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "candidate_vs_current_validation_path": validation_path,
         "counterfactual_replay_path": counterfactual_replay_path,
         "candidate_replay_summary": candidate_replay_summary,
@@ -2350,6 +2386,8 @@ def build_policy_comparison_validation_artifact(*,
         "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
         "baseline_control_comparison": baseline_control_comparison,
         "checkpoint_auto_judge": checkpoint_auto_judge,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "recent_retention_window": runner.get("recent_retention_window", {}),
         "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
         "counterfactual_replay_path": counterfactual_replay_path,
@@ -2466,9 +2504,19 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         runner_positive_walk_forward_ratio=round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
     )
     baseline_control_comparison = _load_recent_baseline_control_comparison(base_dir=base_dir)
+    symbol_lifecycle = build_symbol_lifecycle(
+        symbol_summary=symbol_rows,
+        symbol_scorecard=symbol_scorecard,
+        pruning_recommendations=pruning_recommendations,
+        sample_quality_watchdog=sample_quality_watchdog,
+        baseline_control_comparison=baseline_control_comparison,
+        evaluated_at=report.generated_at,
+    )
+    symbol_lifecycle_summary = summarize_symbol_lifecycle(symbol_lifecycle)
     total_return_pct = 0.0
     max_drawdown_pct = 0.0
     evidence = {
+        "generated_at": report.generated_at,
         "sample_progress": dict(report.sample_progress),
         "score_alignment_summary": list(report.score_alignment_summary),
         "total_closed_trade_count": report.total_closed_trade_count,
@@ -2493,6 +2541,8 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "cumulative_retention_window": cumulative_retention_window,
         "sample_quality_watchdog": sample_quality_watchdog,
         "baseline_control_comparison": baseline_control_comparison,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "symbol_scorecard": symbol_scorecard,
     }
     return {
@@ -2523,6 +2573,8 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "walk_forward_windows": walk_forward_windows,
         "symbol_summary": symbol_rows,
         "symbol_scorecard": symbol_scorecard,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "regime_summary": regime_rows,
         "pruning_recommendations": pruning_recommendations,
         "micro_live_gate": micro_live_gate,

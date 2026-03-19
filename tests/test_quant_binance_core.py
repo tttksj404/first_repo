@@ -813,6 +813,45 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(state["version"], 4)
 
+    def test_build_persisted_policy_state_uses_promotion_verdict_comparison_fallback_for_protective_demotion(self) -> None:
+        state = build_persisted_policy_state(
+            {"version": 3, "active_policy": {"status": "baseline", "adjustments": []}, "rollout_status": "baseline"},
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "demote", "size_multiplier": 0.75, "leverage_multiplier": 0.75},
+                    {"symbol": "ETHUSDT", "action": "demote", "size_multiplier": 0.75, "leverage_multiplier": 0.75},
+                ],
+            },
+            {
+                "status": "demote",
+                "effective_status": "demote",
+                "requested_status": "demote",
+                "comparison_verdict": "candidate_better",
+                "candidate_vs_current_score_delta": 0.35,
+                "reasons": ["CANDIDATE_POLICY_WEAK", "CANDIDATE_OUTPERFORMS_CURRENT_POLICY"],
+            },
+            {"status": "pass", "reasons": []},
+            {
+                "status": "fail",
+                "evidence": {
+                    "runner_total_realized_pnl_usd": -12.0,
+                    "runner_drawdown_to_pnl_ratio": 0.95,
+                    "runner_avg_edge_retention_ratio": 0.3,
+                    "runner_walk_forward_window_count": 3,
+                    "runner_positive_walk_forward_ratio": 0.33,
+                },
+            },
+        )
+
+        self.assertEqual(state["status"], "demoted")
+        self.assertEqual(state["rollout_status"], "demoted")
+        self.assertEqual(state["rollout_reason"], "PROTECTIVE_DEMOTION_VALIDATED")
+        self.assertEqual(state["active_policy"]["status"], "demote")
+        self.assertEqual(
+            [item["action"] for item in state["active_policy"]["adjustments"]],
+            ["demote", "demote"],
+        )
+
     def test_build_persisted_policy_state_invalidates_staged_rollout_on_validation_failure(self) -> None:
         state = build_persisted_policy_state(
             {
