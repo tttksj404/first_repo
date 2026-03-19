@@ -92,6 +92,8 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             judge = artifact["checkpoint_auto_judge"]
             self.assertEqual(judge["verdict"], "rollback")
             self.assertEqual(judge["baseline_control_comparison"]["verdict"], "caution")
+            self.assertEqual(artifact["auto_mode"]["mode"], "tighter")
+            self.assertIn("AUTO_MODE_TIGHTENED_BY_CHECKPOINT_ROLLBACK", artifact["auto_mode"]["reason_codes"])
             self.assertEqual(artifact["evidence"]["checkpoint_auto_judge"], judge)
 
     def test_policy_comparison_artifact_does_not_claim_simple_baseline_gate_with_thin_comparison_evidence(self) -> None:
@@ -223,6 +225,38 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
         self.assertEqual(validation["status"], "fail")
         self.assertIn("SIMPLE_BASELINE_CONTROL_NOT_CLEARLY_BEATEN", validation["reasons"])
         self.assertIn("PROMOTION_PATH_BLOCKED_BY_SIMPLE_BASELINE_CONTROL", validation["reasons"])
+
+    def test_build_promotion_verdict_blocks_promotion_when_symbol_lifecycle_requires_hold(self) -> None:
+        verdict = build_promotion_verdict(
+            {
+                "adjustments": [
+                    {"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1},
+                ]
+            },
+            {
+                "comparison_verdict": "candidate_better",
+                "candidate_vs_current_score_delta": 0.2,
+                "runner_total_realized_pnl_usd": 6.0,
+                "runner_drawdown_to_pnl_ratio": 0.2,
+                "runner_reject_rate": 0.01,
+                "runner_avg_slippage_bps": 2.0,
+                "runner_avg_edge_retention_ratio": 0.82,
+                "runner_walk_forward_window_count": 3,
+                "runner_positive_walk_forward_ratio": 1.0,
+                "micro_live_gate": {"available": True, "status": "pass"},
+                "symbol_lifecycle": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "current_state": "observe_only",
+                        "target_state": "observe_only",
+                        "recommended_action": "hold",
+                    }
+                ],
+            },
+        )
+        self.assertEqual(verdict["status"], "keep")
+        self.assertIn("PROMOTION_BLOCKED_BY_SYMBOL_LIFECYCLE_HOLD", verdict["reasons"])
+        self.assertEqual(verdict["symbol_lifecycle_signal"]["blocked_symbols"], ["BTCUSDT"])
 
     def test_build_persisted_policy_state_rolls_back_on_checkpoint_auto_judge(self) -> None:
         state = build_persisted_policy_state(

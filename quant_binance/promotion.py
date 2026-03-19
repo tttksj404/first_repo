@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from quant_binance.auto_mode import apply_auto_mode_runtime_overrides
 from quant_binance.env import resolve_strategy_profile
 
 
@@ -52,6 +53,7 @@ def _derived_runtime_overrides(
     *,
     pruning_recommendations: list[dict[str, Any]],
     symbol_lifecycle: list[dict[str, Any]] | None = None,
+    auto_mode: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     base = _runtime_profile_config()
     prune_symbols = {
@@ -93,6 +95,10 @@ def _derived_runtime_overrides(
         overrides.setdefault("futures_exposure", {})["priority_symbols"] = futures_priority
     if spot_priority:
         overrides.setdefault("spot_support", {})["priority_symbols"] = spot_priority
+    overrides = _deep_merge(
+        overrides,
+        apply_auto_mode_runtime_overrides(base_config=base, auto_mode=auto_mode),
+    )
     return overrides
 
 
@@ -143,6 +149,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "judge": judge,
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
+                "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
             }
@@ -151,6 +158,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "judge": {},
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
+                "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
             }
@@ -167,6 +175,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "judge": judge,
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
+                "auto_mode": dict(payload.get("auto_mode", dict(judge.get("auto_mode", {})) or {}) or {}),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
             }
@@ -175,10 +184,18 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "judge": {},
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
+                "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
             }
-    return {"judge": {}, "baseline_control_comparison": {}, "symbol_lifecycle": [], "source_path": "", "source_type": ""}
+    return {
+        "judge": {},
+        "baseline_control_comparison": {},
+        "symbol_lifecycle": [],
+        "auto_mode": {},
+        "source_path": "",
+        "source_type": "",
+    }
 
 
 def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[str, Any]:
@@ -209,6 +226,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     checkpoint_auto_judge = dict(checkpoint_judge_context.get("judge", {}) or {})
     baseline_control_comparison = dict(checkpoint_judge_context.get("baseline_control_comparison", {}) or {})
     symbol_lifecycle = list(checkpoint_judge_context.get("symbol_lifecycle", []) or [])
+    auto_mode = dict(checkpoint_judge_context.get("auto_mode", {}) or {})
     lifecycle_block_rows = [
         dict(item)
         for item in symbol_lifecycle
@@ -222,6 +240,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     runtime_overrides = _derived_runtime_overrides(
         pruning_recommendations=pruning_recommendations,
         symbol_lifecycle=symbol_lifecycle,
+        auto_mode=auto_mode,
     )
     merged_overrides = _deep_merge(best.get("overrides", {}), runtime_overrides)
     baseline_gate = _simple_baseline_gate_from_comparison(baseline_control_comparison)
@@ -238,6 +257,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         "generated_at": optimization.get("generated_at"),
         "checkpoint_auto_judge": checkpoint_auto_judge,
         "baseline_control_comparison": baseline_control_comparison,
+        "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "supporting_artifacts": {
             "optimization_latest": str(latest),
@@ -256,6 +276,8 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "simple_baseline_gate_verdict": str(baseline_gate.get("verdict", "not_available") or "not_available"),
             "simple_baseline_gate_reason": str(baseline_gate.get("reason", "") or ""),
             "simple_baseline_gate_present": bool(baseline_control_comparison),
+            "auto_mode": str(auto_mode.get("mode", "normal") or "normal"),
+            "auto_mode_reason_codes": list(auto_mode.get("reason_codes", []) or []),
             "simple_baseline_strategy": str(
                 dict(baseline_control_comparison.get("best_simple_baseline", {}) or {}).get("strategy_name", "") or ""
             ),
