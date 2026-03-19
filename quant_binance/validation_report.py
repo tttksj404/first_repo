@@ -1658,9 +1658,14 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         validation_runs=run_snapshots,
         walk_forward_windows=walk_forward_windows,
     )
-    total_return_pct = total_realized_pnl_usd
-    max_drawdown_pct = max_drawdown_usd
+    total_return_pct = 0.0
+    max_drawdown_pct = 0.0
     evidence = {
+        "sample_progress": dict(report.sample_progress),
+        "score_alignment_summary": list(report.score_alignment_summary),
+        "total_closed_trade_count": report.total_closed_trade_count,
+        "total_live_order_count": report.total_live_order_count,
+        "total_tested_order_count": report.total_tested_order_count,
         "runner_total_return_pct": total_return_pct,
         "runner_total_realized_pnl_usd": total_realized_pnl_usd,
         "runner_max_drawdown_pct": max_drawdown_pct,
@@ -1684,6 +1689,11 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "lookback_days": report.lookback_days,
         "run_count": report.run_count,
         "validation_path_mode": "paper_live_walk_forward_artifacts",
+        "total_closed_trade_count": report.total_closed_trade_count,
+        "total_live_order_count": report.total_live_order_count,
+        "total_tested_order_count": report.total_tested_order_count,
+        "sample_progress": dict(report.sample_progress),
+        "score_alignment_summary": list(report.score_alignment_summary),
         "runner_total_return_pct": total_return_pct,
         "runner_total_realized_pnl_usd": total_realized_pnl_usd,
         "runner_max_drawdown_pct": max_drawdown_pct,
