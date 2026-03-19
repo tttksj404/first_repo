@@ -13,6 +13,7 @@ from quant_binance.policy_lineage import build_policy_state_lineage_snapshot, po
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "quant_binance" / "config.example.json"
+_MAJOR_PRIORITY_SYMBOLS = {"BTCUSDT", "ETHUSDT"}
 
 
 def proposal_paths(base_dir: str | Path = "quant_runtime") -> dict[str, Path]:
@@ -50,6 +51,60 @@ def _runtime_profile_config() -> dict[str, Any]:
     return raw
 
 
+def _bucket_aware_positive_priority_ranks(
+    symbol_lifecycle: list[dict[str, Any]] | None,
+) -> dict[str, int]:
+    ranks: dict[str, int] = {}
+    for item in list(symbol_lifecycle or []):
+        payload = dict(item)
+        symbol = str(payload.get("symbol", "") or "")
+        if not symbol:
+            continue
+        if str(payload.get("symbol_evidence_source", "") or "") != "policy_context_bucket":
+            continue
+        if not bool(payload.get("policy_context_bucket_evidence_available")):
+            continue
+        recommended_action = str(payload.get("recommended_action", "keep") or "keep")
+        target_state = str(payload.get("target_state", "baseline") or "baseline")
+        recommendation = str(payload.get("recommendation", "keep") or "keep")
+        rank: int | None = None
+        if recommended_action == "cautious_repromote" or target_state == "cautious_repromotion":
+            rank = 0
+        elif recommendation == "promote" and target_state == "promoted":
+            rank = 1
+        elif recommendation == "promote" and recommended_action == "keep":
+            rank = 2
+        if rank is None:
+            continue
+        previous_rank = ranks.get(symbol)
+        if previous_rank is None or rank < previous_rank:
+            ranks[symbol] = rank
+    return ranks
+
+
+def _reprioritize_symbols(
+    symbols: list[str],
+    *,
+    positive_priority_ranks: dict[str, int],
+) -> list[str]:
+    indexed_symbols = {
+        str(symbol): index
+        for index, symbol in enumerate(symbols)
+        if str(symbol)
+    }
+    return sorted(
+        [str(symbol) for symbol in symbols if str(symbol)],
+        key=lambda symbol: (
+            0 if symbol in positive_priority_ranks and symbol in _MAJOR_PRIORITY_SYMBOLS else
+            1 if symbol in _MAJOR_PRIORITY_SYMBOLS else
+            2 if symbol in positive_priority_ranks else
+            3,
+            positive_priority_ranks.get(symbol, 99),
+            indexed_symbols.get(symbol, 0),
+        ),
+    )
+
+
 def _derived_runtime_overrides(
     *,
     pruning_recommendations: list[dict[str, Any]],
@@ -78,20 +133,27 @@ def _derived_runtime_overrides(
             deprioritized_symbols.add(symbol)
         elif target_state in {"observe_only", "re_review"} or lifecycle_action in {"hold", "re_review"}:
             deprioritized_symbols.add(symbol)
+    positive_priority_ranks = _bucket_aware_positive_priority_ranks(symbol_lifecycle)
     overrides: dict[str, Any] = {}
     if prune_symbols:
         universe = [symbol for symbol in base.get("universe", []) if symbol not in prune_symbols]
         overrides["universe"] = universe
-    futures_priority = [
-        symbol
-        for symbol in base.get("futures_exposure", {}).get("priority_symbols", [])
-        if symbol not in deprioritized_symbols
-    ]
-    spot_priority = [
-        symbol
-        for symbol in base.get("spot_support", {}).get("priority_symbols", [])
-        if symbol not in deprioritized_symbols
-    ]
+    futures_priority = _reprioritize_symbols(
+        [
+            symbol
+            for symbol in base.get("futures_exposure", {}).get("priority_symbols", [])
+            if symbol not in deprioritized_symbols
+        ],
+        positive_priority_ranks=positive_priority_ranks,
+    )
+    spot_priority = _reprioritize_symbols(
+        [
+            symbol
+            for symbol in base.get("spot_support", {}).get("priority_symbols", [])
+            if symbol not in deprioritized_symbols
+        ],
+        positive_priority_ranks=positive_priority_ranks,
+    )
     if futures_priority:
         overrides.setdefault("futures_exposure", {})["priority_symbols"] = futures_priority
     if spot_priority:
@@ -132,6 +194,14 @@ def _proposal_status_from_gates(
 ) -> str:
     if lineage_status in {"mismatch", "stale"}:
         return "proposal_pending"
+    checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
+    checkpoint_evidence_source = str(checkpoint_auto_judge.get("evidence_source", "") or "")
+    checkpoint_evidence_policy_bucket = str(checkpoint_auto_judge.get("evidence_policy_bucket", "") or "")
+    if checkpoint_verdict == "expand" and (
+        checkpoint_evidence_source != "policy_bucket"
+        or checkpoint_evidence_policy_bucket != "staged_candidate"
+    ):
+        return "proposal_pending"
     executive_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "") or "")
     if executive_verdict == "rollback":
         return "proposal_blocked"
@@ -139,7 +209,6 @@ def _proposal_status_from_gates(
         return "proposal_pending"
     if str(dict(live_evidence_rejudge or {}).get("status", "") or "") in {"waiting", "blocked"}:
         return "proposal_pending"
-    checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
     if checkpoint_verdict == "rollback":
         return "proposal_blocked"
     if checkpoint_verdict in {"tighten", "hold"}:
@@ -396,6 +465,10 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "checkpoint_auto_judge_verdict": checkpoint_verdict or "not_available",
             "checkpoint_auto_judge_confidence": str(checkpoint_auto_judge.get("confidence", "") or ""),
             "checkpoint_auto_judge_reason_codes": list(checkpoint_auto_judge.get("reason_codes", []) or []),
+            "checkpoint_evidence_source": str(checkpoint_auto_judge.get("evidence_source", "not_available") or "not_available"),
+            "checkpoint_evidence_policy_bucket": str(
+                checkpoint_auto_judge.get("evidence_policy_bucket", "not_available") or "not_available"
+            ),
             "simple_baseline_gate_status": str(baseline_gate.get("status", "not_available") or "not_available"),
             "simple_baseline_gate_verdict": str(baseline_gate.get("verdict", "not_available") or "not_available"),
             "simple_baseline_gate_reason": str(baseline_gate.get("reason", "") or ""),
