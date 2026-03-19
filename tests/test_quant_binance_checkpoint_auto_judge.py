@@ -274,6 +274,7 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
         self.assertEqual(state["rollout_reason"], "CHECKPOINT_AUTO_JUDGE_ROLLBACK")
         self.assertEqual(state["active_policy"]["status"], "baseline")
         self.assertEqual(state["checkpoint_auto_judge"]["verdict"], "rollback")
+        self.assertEqual(state["executive_operating_verdict"]["verdict"], "rollback")
 
     def test_build_persisted_policy_state_tightens_active_policy_when_simple_baseline_gate_blocks_expansion(self) -> None:
         state = build_persisted_policy_state(
@@ -362,6 +363,44 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             apply_result = apply_strategy_proposal(base_dir=base)
             self.assertEqual(apply_result["status"], "proposal_not_ready")
             self.assertEqual(apply_result["proposal_status"], "proposal_pending")
+
+    def test_strategy_proposal_blocks_when_executive_verdict_requests_rollback(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (base / "output" / "strategy-comparison-recent" / "run-b").mkdir(parents=True, exist_ok=True)
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {"name": "candidate-a", "objective_score": 8.0, "overrides": {}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "performance_report.json").write_text(json.dumps({"pruning_recommendations": []}), encoding="utf-8")
+            (run_dir / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote"}]},
+                        "executive_operating_verdict": {
+                            "verdict": "rollback",
+                            "confidence": "high",
+                            "reasons": ["EXECUTIVE_ROLLBACK_BY_CHECKPOINT"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            proposal = build_strategy_proposal(base_dir=base)
+            self.assertEqual(proposal["status"], "proposal_blocked")
+            self.assertEqual(proposal["gates"]["executive_operating_verdict"], "rollback")
+            self.assertIn("EXECUTIVE_ROLLBACK_BY_CHECKPOINT", proposal["gates"]["executive_operating_reasons"])
+            apply_result = apply_strategy_proposal(base_dir=base)
+            self.assertEqual(apply_result["status"], "proposal_not_ready")
+            self.assertEqual(apply_result["executive_operating_verdict"]["verdict"], "rollback")
 
     def test_strategy_proposal_uses_simple_baseline_gate_when_checkpoint_judge_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

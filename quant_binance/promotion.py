@@ -126,9 +126,15 @@ def _proposal_status_from_gates(
     *,
     checkpoint_auto_judge: dict[str, Any],
     baseline_gate: dict[str, Any],
+    executive_operating_verdict: dict[str, Any] | None = None,
     lineage_status: str = "",
 ) -> str:
     if lineage_status in {"mismatch", "stale"}:
+        return "proposal_pending"
+    executive_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "") or "")
+    if executive_verdict == "rollback":
+        return "proposal_blocked"
+    if executive_verdict in {"tighten", "hold", "rebuild_evidence"}:
         return "proposal_pending"
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
     if checkpoint_verdict == "rollback":
@@ -163,10 +169,21 @@ def _comparison_policy_lineage(payload: dict[str, Any]) -> dict[str, Any]:
     return explicit
 
 
+def _executive_operating_verdict_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    return dict(
+        payload.get(
+            "executive_operating_verdict",
+            dict(payload.get("evidence", {}) or {}).get("executive_operating_verdict", {}),
+        )
+        or {}
+    )
+
+
 def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
     root = Path(base_dir) / "output" / "paper-live-shell"
     latest_policy_state_path = _latest_file_under(root, "policy_state.json")
     latest_policy_state_payload = _read_json(latest_policy_state_path)
+    latest_executive_operating_verdict = _executive_operating_verdict_from_payload(latest_policy_state_payload)
     active_policy_lineage = build_policy_state_lineage_snapshot(
         latest_policy_state_payload,
         source="proposal_latest_policy_state",
@@ -185,6 +202,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "baseline_control_comparison": {},
                 "symbol_lifecycle": [],
                 "auto_mode": {},
+                "executive_operating_verdict": latest_executive_operating_verdict,
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
                 "lineage_status": str(lineage_alignment.get("status", "mismatch") or "mismatch"),
@@ -196,6 +214,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
+                "executive_operating_verdict": (
+                    _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
+                ),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
                 "lineage_status": "aligned" if bool(lineage_alignment.get("aligned")) else "unknown",
@@ -207,6 +228,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
+                "executive_operating_verdict": (
+                    _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
+                ),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
                 "lineage_status": "aligned" if bool(lineage_alignment.get("aligned")) else "unknown",
@@ -225,6 +249,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
                 "auto_mode": dict(payload.get("auto_mode", dict(judge.get("auto_mode", {})) or {}) or {}),
+                "executive_operating_verdict": (
+                    _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
+                ),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
                 "lineage_status": "aligned",
@@ -236,6 +263,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "baseline_control_comparison": baseline_control_comparison,
                 "symbol_lifecycle": symbol_lifecycle,
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
+                "executive_operating_verdict": (
+                    _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
+                ),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
                 "lineage_status": "aligned",
@@ -246,6 +276,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
         "baseline_control_comparison": {},
         "symbol_lifecycle": [],
         "auto_mode": {},
+        "executive_operating_verdict": latest_executive_operating_verdict,
         "source_path": "",
         "source_type": "",
         "lineage_status": "unknown",
@@ -282,6 +313,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     baseline_control_comparison = dict(checkpoint_judge_context.get("baseline_control_comparison", {}) or {})
     symbol_lifecycle = list(checkpoint_judge_context.get("symbol_lifecycle", []) or [])
     auto_mode = dict(checkpoint_judge_context.get("auto_mode", {}) or {})
+    executive_operating_verdict = dict(checkpoint_judge_context.get("executive_operating_verdict", {}) or {})
     lifecycle_block_rows = [
         dict(item)
         for item in symbol_lifecycle
@@ -303,6 +335,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     proposal_status = _proposal_status_from_gates(
         checkpoint_auto_judge=checkpoint_auto_judge,
         baseline_gate=baseline_gate,
+        executive_operating_verdict=executive_operating_verdict,
         lineage_status=str(checkpoint_judge_context.get("lineage_status", "") or ""),
     )
     proposal = {
@@ -314,6 +347,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         "checkpoint_auto_judge": checkpoint_auto_judge,
         "baseline_control_comparison": baseline_control_comparison,
         "auto_mode": auto_mode,
+        "executive_operating_verdict": executive_operating_verdict,
         "symbol_lifecycle": symbol_lifecycle,
         "supporting_artifacts": {
             "optimization_latest": str(latest),
@@ -338,6 +372,9 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "checkpoint_auto_judge_lineage_reason": str(checkpoint_judge_context.get("lineage_reason", "") or ""),
             "auto_mode": str(auto_mode.get("mode", "normal") or "normal"),
             "auto_mode_reason_codes": list(auto_mode.get("reason_codes", []) or []),
+            "executive_operating_verdict": str(executive_operating_verdict.get("verdict", "not_available") or "not_available"),
+            "executive_operating_reasons": list(executive_operating_verdict.get("reasons", []) or []),
+            "executive_operating_confidence": str(executive_operating_verdict.get("confidence", "") or ""),
             "simple_baseline_strategy": str(
                 dict(baseline_control_comparison.get("best_simple_baseline", {}) or {}).get("strategy_name", "") or ""
             ),
@@ -379,6 +416,7 @@ def apply_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "proposal_status": str(proposal.get("status", "") or ""),
             "checkpoint_auto_judge": dict(proposal.get("checkpoint_auto_judge", {}) or {}),
             "baseline_control_comparison": dict(proposal.get("baseline_control_comparison", {}) or {}),
+            "executive_operating_verdict": dict(proposal.get("executive_operating_verdict", {}) or {}),
             "symbol_lifecycle": list(proposal.get("symbol_lifecycle", []) or []),
         }
     overrides = proposal.get("overrides", {})
