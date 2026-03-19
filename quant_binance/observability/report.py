@@ -972,43 +972,69 @@ def _apply_cross_symbol_promotion_priority(
         runtime_evidence=runtime_evidence,
         positive_adjustment_count=positive_adjustment_count,
     )
-    _, _, bucket_context = _preferred_policy_context_symbol_maps(runtime_evidence)
-    if promotion_top_k <= 0:
+    bucket_summary_by_symbol, bucket_pruning_by_symbol, bucket_context = _preferred_policy_context_symbol_maps(runtime_evidence)
+    auto_mode = _auto_mode(runtime_evidence)
+    guardrails = dict(_sample_quality_watchdog(runtime_evidence).get("policy_guardrails", {}) or {})
+    prefer_majors_only = bool(
+        guardrails.get("prefer_majors_only") or auto_mode_blocks_non_major_positive(auto_mode)
+    )
+    rankable_positive: list[dict[str, object]] = []
+    excluded_rows: list[dict[str, object]] = []
+    for adjustment in adjustments:
+        action = str(adjustment.get("action", "") or "")
+        if action not in {"promote", "aggressive_promote"}:
+            continue
+        symbol = str(adjustment.get("symbol", "") or "")
+        bucket_pruning_recommendation = str(
+            dict(bucket_pruning_by_symbol.get(symbol, {}) or {}).get("recommendation", "") or ""
+        )
+        bucket_summary_recommendation = str(
+            dict(bucket_summary_by_symbol.get(symbol, {}) or {}).get("recommendation", "") or ""
+        )
+        is_major = str(adjustment.get("regime", "") or "") == "major" or symbol in {"BTCUSDT", "ETHUSDT"}
+        exclusion_reason = ""
+        if bucket_pruning_recommendation in {"observe_only", "prune", "demote"}:
+            exclusion_reason = f"policy_bucket_{bucket_pruning_recommendation}"
+        elif bucket_summary_recommendation in {"observe_only", "prune", "demote"}:
+            exclusion_reason = f"policy_bucket_{bucket_summary_recommendation}"
+        elif prefer_majors_only and not is_major:
+            exclusion_reason = "majors_only_guardrail"
+        if exclusion_reason:
+            excluded_rows.append(
+                {
+                    "symbol": symbol,
+                    "action": action,
+                    "exclude_reason": exclusion_reason,
+                }
+            )
+            continue
+        rankable_positive.append(adjustment)
+    ranked_positive = sorted(rankable_positive, key=_promotion_priority_sort_key)
+    selected_ranked_positive = list(ranked_positive)
+    deferred_rows: list[dict[str, object]] = []
+    if promotion_top_k > 0:
+        selected_ranked_positive = ranked_positive[:promotion_top_k]
+        deferred_rows = [
+            {
+                "symbol": str(adjustment.get("symbol", "") or ""),
+                "action": str(adjustment.get("action", "") or ""),
+                "priority_rank": rank,
+            }
+            for rank, adjustment in enumerate(ranked_positive[promotion_top_k:], start=promotion_top_k + 1)
+            if str(adjustment.get("symbol", "") or "")
+        ]
+    selected_symbols = [
+        str(adjustment.get("symbol", "") or "")
+        for adjustment in selected_ranked_positive
+        if str(adjustment.get("symbol", "") or "")
+    ]
+    if promotion_top_k <= 0 and not excluded_rows and not deferred_rows:
         if int(top_k_context.get("explicit_promotion_top_k", 0) or 0) > 0 or int(top_k_context.get("watchdog_positive_cap", 0) or 0) > 0:
             return adjustments, {
                 **top_k_context,
                 **({"policy_context_bucket": str(bucket_context.get("bucket_name", "") or "")} if bucket_context else {}),
             }
         return adjustments, {}
-    positive_adjustments = [
-        adjustment
-        for adjustment in adjustments
-        if str(adjustment.get("action", "") or "") in {"promote", "aggressive_promote"}
-    ]
-    ranked_positive = sorted(positive_adjustments, key=_promotion_priority_sort_key)
-    selected_symbols = [
-        str(adjustment.get("symbol", "") or "")
-        for adjustment in ranked_positive[:promotion_top_k]
-        if str(adjustment.get("symbol", "") or "")
-    ]
-    deferred_rows = [
-        {
-            "symbol": str(adjustment.get("symbol", "") or ""),
-            "action": str(adjustment.get("action", "") or ""),
-            "priority_rank": rank,
-        }
-        for rank, adjustment in enumerate(ranked_positive[promotion_top_k:], start=promotion_top_k + 1)
-        if str(adjustment.get("symbol", "") or "")
-    ]
-    if not deferred_rows:
-        return adjustments, {
-            "promotion_top_k": promotion_top_k,
-            "promotion_candidate_count": len(ranked_positive),
-            "selected_promotion_symbols": selected_symbols,
-            "deferred_promotion_symbols": [],
-            **({"policy_context_bucket": str(bucket_context.get("bucket_name", "") or "")} if bucket_context else {}),
-            **top_k_context,
-        }
     selected_symbol_set = set(selected_symbols)
     filtered_adjustments = [
         adjustment
@@ -1022,6 +1048,8 @@ def _apply_cross_symbol_promotion_priority(
         "selected_promotion_symbols": selected_symbols,
         "deferred_promotion_symbols": [row["symbol"] for row in deferred_rows],
         "deferred_promotion_rows": deferred_rows,
+        "excluded_promotion_symbols": [row["symbol"] for row in excluded_rows],
+        "excluded_promotion_rows": excluded_rows,
         **({"policy_context_bucket": str(bucket_context.get("bucket_name", "") or "")} if bucket_context else {}),
         **top_k_context,
     }
