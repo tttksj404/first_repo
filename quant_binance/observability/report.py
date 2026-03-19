@@ -306,6 +306,7 @@ def _policy_adjustment_shape(
     reason: str,
     signal_source: str,
     score_delta: float = 0.0,
+    operating_intensity: float = 1.0,
     signal_context: dict[str, object] | None = None,
 ) -> dict[str, object]:
     size_multiplier = 1.0
@@ -315,9 +316,14 @@ def _policy_adjustment_shape(
         size_multiplier = 1.1
     elif action == "aggressive_promote":
         size_multiplier = 1.25
-    leverage_multiplier = 0.0 if action == "disabled" else round(min(max(size_multiplier, 0.0), 1.2), 6)
     entry_threshold_bps = -1.5 if action == "aggressive_promote" else (-0.5 if action == "promote" else (1.5 if action == "demote" else 0.0))
     expected_profit_floor_bps = -2.0 if action == "aggressive_promote" else (-1.0 if action == "promote" else (2.0 if action == "demote" else 0.0))
+    intensity = max(0.5, min(float(operating_intensity or 1.0), 1.25))
+    if action not in {"disabled", "keep"} and intensity != 1.0:
+        size_multiplier = round(min(1.25, max(0.5, 1.0 + ((size_multiplier - 1.0) * intensity))), 6)
+        entry_threshold_bps = round(entry_threshold_bps * intensity, 6)
+        expected_profit_floor_bps = round(expected_profit_floor_bps * intensity, 6)
+    leverage_multiplier = 0.0 if action == "disabled" else round(min(max(size_multiplier, 0.0), 1.2), 6)
     symbol_bias = "majors_only" if action in {"aggressive_promote", "promote"} and regime == "major" else "neutral"
     adjustment = {
         "symbol": symbol,
@@ -331,6 +337,7 @@ def _policy_adjustment_shape(
         "leverage_multiplier": leverage_multiplier,
         "entry_threshold_bps": entry_threshold_bps,
         "expected_profit_floor_bps": expected_profit_floor_bps,
+        "operating_intensity": round(intensity, 6),
         "symbol_bias": symbol_bias,
         "reason": reason,
         "score_delta": round(float(score_delta or 0.0), 6),
@@ -515,6 +522,79 @@ def _runtime_symbol_scorecard_gate(
     return supports_recommendation, payload
 
 
+def _runtime_symbol_scorecard_intensity(
+    *,
+    recommendation: str,
+    action: str,
+    scorecard_evidence: dict[str, object] | None,
+) -> tuple[str, float, dict[str, object]]:
+    payload = dict(scorecard_evidence or {})
+    if not payload:
+        return action, 1.0, payload
+    if str(payload.get("gate_status", "") or "") == "insufficient_history":
+        payload["intensity_status"] = "baseline"
+        payload["operating_intensity"] = 1.0
+        return action, 1.0, payload
+    scorecard_recommendation = str(payload.get("recommendation", "keep") or "keep")
+    rolling_score = float(payload.get("rolling_score", 0.0) or 0.0)
+    recent_positive_run_ratio = float(payload.get("recent_positive_run_ratio", 0.0) or 0.0)
+    if (
+        action == "aggressive_promote"
+        and (
+            scorecard_recommendation != "promote"
+            or rolling_score < 0.8
+            or recent_positive_run_ratio < 0.75
+        )
+    ):
+        payload["intensity_status"] = "downgraded"
+        payload["intensity_reason"] = "ROLLING_SCORECARD_NOT_ELITE"
+        payload["operating_intensity"] = 1.0
+        return "promote", 1.0, payload
+    if (
+        recommendation == "promote"
+        and action == "promote"
+        and scorecard_recommendation == "promote"
+        and rolling_score >= 0.85
+        and recent_positive_run_ratio >= 0.8
+    ):
+        payload["intensity_status"] = "strengthened"
+        payload["intensity_reason"] = "ROLLING_SCORECARD_STRONGLY_POSITIVE"
+        payload["operating_intensity"] = 1.1
+        return action, 1.1, payload
+    if (
+        recommendation == "promote"
+        and action == "promote"
+        and scorecard_recommendation != "promote"
+    ):
+        payload["intensity_status"] = "softened"
+        payload["intensity_reason"] = "ROLLING_SCORECARD_NOT_YET_SUPPORTIVE"
+        payload["operating_intensity"] = 0.8
+        return action, 0.8, payload
+    if (
+        recommendation == "prune"
+        and action == "demote"
+        and scorecard_recommendation == "demote"
+        and rolling_score <= 0.35
+        and recent_positive_run_ratio <= 0.34
+    ):
+        payload["intensity_status"] = "strengthened"
+        payload["intensity_reason"] = "ROLLING_SCORECARD_STRONGLY_NEGATIVE"
+        payload["operating_intensity"] = 1.2
+        return action, 1.2, payload
+    if (
+        recommendation == "prune"
+        and action == "demote"
+        and scorecard_recommendation != "demote"
+    ):
+        payload["intensity_status"] = "softened"
+        payload["intensity_reason"] = "ROLLING_SCORECARD_NOT_YET_NEGATIVE"
+        payload["operating_intensity"] = 0.8
+        return action, 0.8, payload
+    payload["intensity_status"] = "baseline"
+    payload["operating_intensity"] = 1.0
+    return action, 1.0, payload
+
+
 def _runtime_pruning_score_delta(
     *,
     recommendation: str,
@@ -551,6 +631,21 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
         trade_count = int(row.get("trade_count", 0) or 0)
         decision_count = int(row.get("decision_count", 0) or 0)
         avg_net_edge_bps = float(row.get("avg_net_edge_bps", 0.0) or 0.0)
+        action = "demote"
+        operating_intensity = 1.0
+        scorecard_evidence = dict(scorecard_by_symbol.get(symbol) or {})
+        if recommendation != "observe_only":
+            scorecard_support, scorecard_evidence = _runtime_symbol_scorecard_gate(
+                recommendation="prune",
+                scorecard_row=scorecard_by_symbol.get(symbol),
+            )
+            if not scorecard_support:
+                continue
+            action, operating_intensity, scorecard_evidence = _runtime_symbol_scorecard_intensity(
+                recommendation="prune",
+                action="demote",
+                scorecard_evidence=scorecard_evidence,
+            )
         adjustments.append(
             _policy_adjustment_shape(
                 symbol=symbol,
@@ -559,7 +654,7 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                 side="both",
                 execution_quality_state="runtime_review",
                 sample_count=max(trade_count, decision_count),
-                action="demote",
+                action=action,
                 reason=f"RUNTIME_{recommendation.upper()}_RECOMMENDATION",
                 signal_source="runtime_pruning_recommendation",
                 score_delta=_runtime_pruning_score_delta(
@@ -568,11 +663,13 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                     decision_count=decision_count,
                     avg_net_edge_bps=avg_net_edge_bps,
                 ),
+                operating_intensity=operating_intensity,
                 signal_context={
                     "recommendation": recommendation,
                     "trade_count": trade_count,
                     "decision_count": decision_count,
                     "avg_net_edge_bps": round(avg_net_edge_bps, 6),
+                    "scorecard_evidence": scorecard_evidence,
                 },
             )
         )
@@ -606,6 +703,11 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                 action = "promote"
             if action == "aggressive_promote" and not futures_supportive:
                 action = "promote"
+            action, operating_intensity, scorecard_evidence = _runtime_symbol_scorecard_intensity(
+                recommendation=recommendation,
+                action=action,
+                scorecard_evidence=scorecard_evidence,
+            )
             adjustments.append(
                 _policy_adjustment_shape(
                     symbol=symbol,
@@ -624,6 +726,7 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                         regime=regime,
                         regime_breakdown=regime_breakdown,
                     ),
+                    operating_intensity=operating_intensity,
                     signal_context={
                         "recommendation": recommendation,
                         "trade_count": trade_count,
@@ -635,6 +738,11 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                 )
             )
         elif recommendation == "prune":
+            action, operating_intensity, scorecard_evidence = _runtime_symbol_scorecard_intensity(
+                recommendation=recommendation,
+                action="demote",
+                scorecard_evidence=scorecard_evidence,
+            )
             adjustments.append(
                 _policy_adjustment_shape(
                     symbol=symbol,
@@ -643,7 +751,7 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                     side="both",
                     execution_quality_state="runtime_review",
                     sample_count=trade_count,
-                    action="demote",
+                    action=action,
                     reason="RUNTIME_SYMBOL_PRUNE",
                     signal_source="runtime_symbol_summary",
                     score_delta=_runtime_symbol_score_delta(
@@ -653,6 +761,7 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                         regime=regime,
                         regime_breakdown=regime_breakdown,
                     ),
+                    operating_intensity=operating_intensity,
                     signal_context={
                         "recommendation": recommendation,
                         "trade_count": trade_count,
@@ -994,6 +1103,11 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             evidence["runner_shadow_alignment_score"] = float(payload.get("shadow_alignment_score", 0.0) or 0.0)
         for key in (
             "validation_path_mode",
+            "sample_progress",
+            "score_alignment_summary",
+            "total_closed_trade_count",
+            "total_live_order_count",
+            "total_tested_order_count",
             "runner_walk_forward_window_count",
             "runner_positive_walk_forward_window_count",
             "runner_positive_walk_forward_ratio",
@@ -1028,9 +1142,14 @@ def merge_policy_validation_evidence(
     for key, value in dict(runner_evidence or {}).items():
         evidence[key] = value
     has_attribution_rows = bool(list(attribution_rows))
-    runner_max_drawdown_pct = float(evidence.get("runner_max_drawdown_pct", 0.0) or 0.0)
-    if runner_max_drawdown_pct > 0.0:
-        runner_drawdown_ratio = runner_max_drawdown_pct / 100.0
+    runner_drawdown_ratio = float(
+        evidence.get(
+            "runner_drawdown_to_pnl_ratio",
+            float(evidence.get("runner_max_drawdown_pct", 0.0) or 0.0) / 100.0,
+        )
+        or 0.0
+    )
+    if runner_drawdown_ratio > 0.0:
         if has_attribution_rows:
             evidence["replay_like_drawdown_ratio"] = round(max(float(evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0), runner_drawdown_ratio), 6)
         else:
