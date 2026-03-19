@@ -1513,6 +1513,9 @@ def _active_policy_evidence(payload: dict[str, object] | None) -> dict[str, obje
     if active_evidence:
         return active_evidence
     raw_payload = dict(payload or {})
+    validation_evidence = dict(dict(raw_payload.get("policy_validation", {}) or {}).get("evidence", {}) or {})
+    if validation_evidence:
+        return validation_evidence
     if "policy_evidence_buckets" not in raw_payload:
         return raw_payload
     return {}
@@ -2251,10 +2254,7 @@ def _build_live_evidence_rejudge(
     previous_verdict = str(
         dict(previous_state.get("executive_operating_verdict", {}) or {}).get("verdict", "not_available") or "not_available"
     )
-    previous_validation_evidence = dict(
-        dict(previous_state.get("policy_validation", {}) or {}).get("evidence", {}) or {}
-    )
-    previous_snapshot = _live_evidence_snapshot(previous_validation_evidence)
+    previous_snapshot = _live_evidence_snapshot(previous_state)
     current_snapshot = _live_evidence_snapshot(validation_evidence)
     lineage_status = str(current_snapshot.get("policy_lineage_status", "unknown") or "unknown")
     current_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "hold") or "hold")
@@ -3297,7 +3297,7 @@ def build_persisted_policy_state(
     active_policy["policy_lineage"] = dict(policy_lineage)
     validation_payload = dict(validation)
     validation_evidence_payload = dict(validation_payload.get("evidence", {}) or {})
-    previous_policy_bucket = policy_evidence_bucket(previous_state.get("policy_validation", {}).get("evidence", {}), "active_policy")
+    previous_policy_bucket = policy_evidence_bucket(previous_state, "active_policy")
     previous_policy_evidence = dict(previous_policy_bucket.get("evidence", {}) or {})
     if not previous_policy_evidence:
         previous_policy_evidence = _active_policy_evidence(
@@ -3378,6 +3378,7 @@ def build_persisted_policy_state(
         "promotion_verdict": promotion_verdict,
         "operational_verdict": operational_verdict,
         "policy_validation": validation_payload,
+        "policy_evidence_buckets": deepcopy(persisted_buckets),
         "updated_at": datetime.now(tz=timezone.utc).isoformat(),
     }
 

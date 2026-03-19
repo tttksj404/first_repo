@@ -1210,6 +1210,8 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(state["live_evidence_rejudge"]["status"], "waiting")
         self.assertEqual(state["executive_operating_verdict"]["verdict"], "rebuild_evidence")
+        self.assertIn("policy_evidence_buckets", state)
+        self.assertTrue(state["policy_evidence_buckets"]["previous_policy"]["available"])
         self.assertTrue(state["policy_validation"]["evidence"]["policy_evidence_buckets"]["previous_policy"]["available"])
 
     def test_build_persisted_policy_state_demotes_on_walk_forward_weakness(self) -> None:

@@ -10,7 +10,7 @@ from typing import Any
 from quant_binance.auto_mode import build_regime_aware_auto_mode
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report
-from quant_binance.policy_evidence import with_policy_evidence_buckets
+from quant_binance.policy_evidence import policy_evidence_bucket, policy_evidence_bucket_evidence, with_policy_evidence_buckets
 from quant_binance.policy_lineage import (
     build_policy_lineage_snapshot,
     build_policy_profile_lineage_snapshot,
@@ -2883,7 +2883,13 @@ def build_policy_comparison_validation_artifact(*,
 ) -> dict[str, object]:
     raw_runner = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
     current_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
-    current_policy_evidence = dict(dict(dict(current_policy_state or {}).get("policy_validation", {}) or {}).get("evidence", {}) or {})
+    current_policy_bucket = policy_evidence_bucket(current_policy_state, "active_policy")
+    current_policy_evidence = dict(policy_evidence_bucket_evidence(current_policy_state, "active_policy", fallback_to_root=False) or {})
+    legacy_current_policy_evidence = dict(dict(dict(current_policy_state or {}).get("policy_validation", {}) or {}).get("evidence", {}) or {})
+    if not current_policy_evidence and current_policy_bucket:
+        current_policy_evidence = dict(current_policy_bucket.get("evidence", {}) or {})
+    if not current_policy_evidence:
+        current_policy_evidence = legacy_current_policy_evidence
     current_score = _policy_adjustment_score(current_policy)
     candidate_score = _policy_adjustment_score(candidate_policy)
     current_rollout_phase = str(
@@ -2907,7 +2913,10 @@ def build_policy_comparison_validation_artifact(*,
         source="current_policy_state",
     )
     explicit_current_policy_evidence_lineage = dict(
-        current_policy_evidence.get("active_policy_lineage", dict(current_policy_state or {}).get("policy_lineage", {}))
+        current_policy_bucket.get(
+            "evidence_lineage",
+            current_policy_evidence.get("active_policy_lineage", dict(current_policy_state or {}).get("policy_lineage", {})),
+        )
         or {}
     )
     current_policy_evidence_lineage = (

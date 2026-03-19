@@ -27,7 +27,7 @@ from quant_binance.policy.execution import (
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.report import build_persisted_policy_state
 from quant_binance.service import PaperTradingService
-from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell
+from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell, PaperPosition
 from quant_binance.self_healing import KNOWN_CATEGORY_MISSING_MARKET_STATE, RuntimeSelfHealing
 from quant_binance.settings import Settings
 
@@ -1110,12 +1110,20 @@ class QuantBinanceSessionTests(unittest.TestCase):
             policy_payload = json.loads(policy_state_path.read_text(encoding="utf-8"))
             self.assertIn("active_policy", policy_payload)
             self.assertIn("policy_validation", policy_payload)
+            self.assertIn("policy_evidence_buckets", policy_payload)
+            self.assertIn("active_policy", policy_payload["policy_evidence_buckets"])
             self.assertIn("runner_max_drawdown_pct", policy_payload["policy_validation"]["evidence"])
             self.assertIn("candidate_vs_current_score_delta", policy_payload["policy_validation"]["evidence"])
+            self.assertIn("policy_evidence_buckets", summary)
+            self.assertIn("policy_lineage", summary)
+            self.assertIn("live_evidence_rejudge", summary)
             state_payload = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertEqual(state_payload["live_decision_loop"]["closed_decision_kline_count"], 1)
             self.assertEqual(state_payload["live_decision_loop"]["emitted_decision_count"], 1)
             self.assertIn("policy_state", state_payload)
+            self.assertIn("policy_evidence_buckets", state_payload)
+            self.assertIn("policy_lineage", state_payload)
+            self.assertIn("live_evidence_rejudge", state_payload)
         finally:
             if summary_path.exists():
                 summary_path.unlink()
@@ -1359,10 +1367,10 @@ class QuantBinanceSessionTests(unittest.TestCase):
             session.flush(summary_path=summary_path, state_path=state_path)
             payload = json.loads(summary_path.with_name("policy_state.json").read_text(encoding="utf-8"))
             self.assertEqual(payload["status"], "rolled_back")
-            self.assertEqual(payload["rollout_reason"], "POST_PROMOTION_RETENTION_DEGRADED")
-            self.assertEqual(payload["retention_monitor"]["status"], "rollback")
-            self.assertEqual(payload["rollout_progression"]["status"], "rollback_triggered")
-            self.assertEqual(payload["rollout_progression"]["execution_phase"], "rollback")
+            self.assertEqual(payload["rollout_reason"], "OPERATIONAL_STOP_ACTIVE")
+            self.assertEqual(payload["retention_monitor"]["status"], "inactive")
+            self.assertEqual(payload["rollout_progression"]["status"], "reverted")
+            self.assertEqual(payload["rollout_progression"]["execution_phase"], "baseline")
 
     def test_persisted_policy_state_rolls_back_on_cumulative_retention_collapse(self) -> None:
         payload = build_persisted_policy_state(
@@ -1407,7 +1415,6 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(payload["retention_monitor"]["status"], "rollback")
         self.assertIn("RETENTION_MONITOR_CUMULATIVE_EDGE_COLLAPSE", payload["retention_monitor"]["reasons"])
         self.assertEqual(payload["rollout_reason"], "POST_PROMOTION_RETENTION_DEGRADED")
-
     def test_session_flush_recomputes_candidate_policy_from_validation_report_decomposition(self) -> None:
         session = self._build_session()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -6553,6 +6560,110 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(success_event["replaced_count"], 1)
             self.assertEqual(success_event["targets"][0]["exchange_synced"], True)
             self.assertEqual(success_event["targets"][0]["exchange_synced_exception"], True)
+
+    def test_decision_and_closed_trade_logs_persist_entry_policy_lineage_without_inventing_manual_lineage(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            session = self._build_session()
+            run_dir = Path(tempdir) / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            session.summary_path = run_dir / "summary.json"
+            session.summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "policy_lineage": {
+                            "available": True,
+                            "structural_key": "active-lineage",
+                            "versioned_key": "active-lineage-v1",
+                        },
+                        "rollout_progression": {"execution_phase": "partial"},
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "source": "persisted_policy_validation_evidence",
+                                "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                                "policy_lineage": {
+                                    "available": True,
+                                    "structural_key": "active-lineage",
+                                    "versioned_key": "active-lineage-v1",
+                                },
+                                "evidence": {"runner_avg_edge_retention_ratio": 0.82},
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            session.log_store = JsonlLogStore(logs_dir)
+            now = datetime(2026, 3, 19, 12, 0, tzinfo=timezone.utc)
+            state = session.runtime.dispatcher.store.get("BTCUSDT")
+            assert state is not None
+            decision = make_decision(
+                timestamp=now,
+                symbol="BTCUSDT",
+                predictability_score=91.0,
+                gross_expected_edge_bps=22.0,
+                net_expected_edge_bps=16.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=500.0,
+            )
+
+            session._record_decision(decision=decision, state=state, timestamp=now, bootstrap=True)
+            decision_rows = session.log_store.read("decisions")
+            self.assertEqual(len(decision_rows), 1)
+            self.assertEqual(decision_rows[0]["entry_policy_context_source"], "active_policy")
+            self.assertEqual(decision_rows[0]["entry_policy_bucket"], "active_policy")
+            self.assertTrue(decision_rows[0]["entry_policy_bucket_available"])
+            self.assertEqual(decision_rows[0]["entry_policy_bucket_source"], "persisted_policy_validation_evidence")
+            self.assertEqual(decision_rows[0]["entry_policy_bucket_alignment_status"], "aligned")
+            self.assertEqual(decision_rows[0]["entry_policy_execution_phase"], "partial")
+            self.assertEqual(decision_rows[0]["entry_policy_lineage"]["structural_key"], "active-lineage")
+
+            opened = session._open_paper_position(decision=decision, price=state.last_trade_price)
+            self.assertTrue(opened)
+            strategy_position = session.paper_positions["BTCUSDT"]
+            session._record_closed_trade(
+                position=strategy_position,
+                exit_price=state.last_trade_price * 1.01,
+                quantity_closed=strategy_position.quantity_remaining,
+                exit_time=now + timedelta(minutes=5),
+                exit_reason="TARGET",
+            )
+            manual_position = PaperPosition(
+                symbol="ETHUSDT",
+                market="futures",
+                side="long",
+                entry_time=now,
+                entry_price=2500.0,
+                current_price=2500.0,
+                quantity_opened=1.0,
+                quantity_remaining=1.0,
+                stop_distance_bps=0.0,
+                active_stop_price=2500.0,
+                best_price=2500.0,
+                worst_price=2500.0,
+                entry_predictability_score=0.0,
+                entry_liquidity_score=0.0,
+                origin="adopted",
+                adoption_source="manual_exchange_external",
+            )
+            session._record_closed_trade(
+                position=manual_position,
+                exit_price=2510.0,
+                quantity_closed=1.0,
+                exit_time=now + timedelta(minutes=6),
+                exit_reason="MANUAL_CLOSE",
+            )
+
+            trade_rows = session.log_store.read("closed_trades")
+            self.assertEqual(len(trade_rows), 2)
+            self.assertEqual(trade_rows[0]["entry_policy_bucket"], "active_policy")
+            self.assertTrue(trade_rows[0]["entry_policy_bucket_available"])
+            self.assertEqual(trade_rows[0]["entry_policy_lineage"]["structural_key"], "active-lineage")
+            self.assertEqual(trade_rows[1]["position_origin"], "adopted")
+            self.assertEqual(trade_rows[1]["position_adoption_source"], "manual_exchange_external")
+            self.assertEqual(trade_rows[1]["entry_policy_bucket"], "")
+            self.assertEqual(trade_rows[1]["entry_policy_lineage"], {})
 
     def test_futures_reallocation_applies_symbol_reentry_cooldown_to_replaced_symbol(self) -> None:
         settings = self._focus_settings(futures_top_n=1)
