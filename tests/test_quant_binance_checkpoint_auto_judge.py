@@ -422,6 +422,59 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
                 "directional_hold",
             )
 
+    def test_strategy_proposal_marks_stale_checkpoint_lineage_as_pending(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {"name": "test", "objective_score": 1.0, "overrides": {}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 2,
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "rollout_progression": {"execution_phase": "baseline"},
+                        "updated_at": "2026-03-19T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "policy_comparison.json").write_text(
+                json.dumps(
+                    {
+                        "checkpoint_auto_judge": {"verdict": "tighten"},
+                        "evidence": {
+                            "current_policy_lineage": {
+                                "available": True,
+                                "basis": "adjustments",
+                                "policy_status": "baseline",
+                                "rollout_phase": "baseline",
+                                "version": 1,
+                                "updated_at": "2026-03-19T00:00:00+00:00",
+                                "adjustment_count": 0,
+                                "symbols": [],
+                                "adjustment_signature": "a",
+                                "structural_key": "s",
+                                "versioned_key": "v1",
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            proposal = build_strategy_proposal(base_dir=base)
+            self.assertEqual(proposal["status"], "proposal_pending")
+            self.assertEqual(proposal["gates"]["checkpoint_auto_judge_lineage_status"], "mismatch")
+
 
 if __name__ == "__main__":
     unittest.main()
