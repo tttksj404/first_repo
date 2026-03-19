@@ -803,6 +803,74 @@ def _merge_policy_adjustments(existing: dict[str, object] | None, incoming: dict
     return merged
 
 
+def _promotion_priority_sort_key(adjustment: dict[str, object]) -> tuple[float, float, float, float, float, float, str]:
+    signal_contexts = dict(adjustment.get("signal_contexts", {}) or {})
+    runtime_symbol_summary = dict(signal_contexts.get("runtime_symbol_summary", {}) or {})
+    scorecard_evidence = dict(runtime_symbol_summary.get("scorecard_evidence", {}) or {})
+    rolling_evidence = dict(runtime_symbol_summary.get("rolling_evidence", {}) or {})
+    return (
+        -float(_policy_action_strength(str(adjustment.get("action", "keep") or "keep"))),
+        -float(scorecard_evidence.get("rolling_score", 0.0) or 0.0),
+        -float(scorecard_evidence.get("recent_positive_run_ratio", 0.0) or 0.0),
+        -float(rolling_evidence.get("positive_window_ratio", 0.0) or 0.0),
+        -float(adjustment.get("score_delta", 0.0) or 0.0),
+        -float(adjustment.get("sample_count", 0) or 0),
+        str(adjustment.get("symbol", "") or ""),
+    )
+
+
+def _apply_cross_symbol_promotion_priority(
+    *,
+    adjustments: list[dict[str, object]],
+    runtime_evidence: dict[str, object] | None,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    payload = dict(runtime_evidence or {})
+    promotion_top_k = max(int(payload.get("promotion_top_k", 0) or 0), 0)
+    if promotion_top_k <= 0:
+        return adjustments, {}
+    positive_adjustments = [
+        adjustment
+        for adjustment in adjustments
+        if str(adjustment.get("action", "") or "") in {"promote", "aggressive_promote"}
+    ]
+    ranked_positive = sorted(positive_adjustments, key=_promotion_priority_sort_key)
+    selected_symbols = [
+        str(adjustment.get("symbol", "") or "")
+        for adjustment in ranked_positive[:promotion_top_k]
+        if str(adjustment.get("symbol", "") or "")
+    ]
+    deferred_rows = [
+        {
+            "symbol": str(adjustment.get("symbol", "") or ""),
+            "action": str(adjustment.get("action", "") or ""),
+            "priority_rank": rank,
+        }
+        for rank, adjustment in enumerate(ranked_positive[promotion_top_k:], start=promotion_top_k + 1)
+        if str(adjustment.get("symbol", "") or "")
+    ]
+    if not deferred_rows:
+        return adjustments, {
+            "promotion_top_k": promotion_top_k,
+            "promotion_candidate_count": len(ranked_positive),
+            "selected_promotion_symbols": selected_symbols,
+            "deferred_promotion_symbols": [],
+        }
+    selected_symbol_set = set(selected_symbols)
+    filtered_adjustments = [
+        adjustment
+        for adjustment in adjustments
+        if str(adjustment.get("action", "") or "") not in {"promote", "aggressive_promote"}
+        or str(adjustment.get("symbol", "") or "") in selected_symbol_set
+    ]
+    return filtered_adjustments, {
+        "promotion_top_k": promotion_top_k,
+        "promotion_candidate_count": len(ranked_positive),
+        "selected_promotion_symbols": selected_symbols,
+        "deferred_promotion_symbols": [row["symbol"] for row in deferred_rows],
+        "deferred_promotion_rows": deferred_rows,
+    }
+
+
 def _candidate_generation_summary(
     *,
     runtime_evidence: dict[str, object] | None,
@@ -879,6 +947,10 @@ def build_auto_tune_policy(
             continue
         adjustments_by_symbol[symbol] = _merge_policy_adjustments(adjustments_by_symbol.get(symbol), adjustment)
     adjustments = sorted(adjustments_by_symbol.values(), key=lambda item: str(item.get("symbol", "")))
+    adjustments, promotion_priority_summary = _apply_cross_symbol_promotion_priority(
+        adjustments=adjustments,
+        runtime_evidence=runtime_evidence,
+    )
     policy_status = "insufficient_data" if not adjustments else "candidate_ready"
     signal_sources = sorted(
         {
@@ -888,14 +960,17 @@ def build_auto_tune_policy(
             if str(source)
         }
     )
+    decomposition_summary = _candidate_generation_summary(
+        runtime_evidence=runtime_evidence,
+        adjustments=adjustments,
+    )
+    if promotion_priority_summary:
+        decomposition_summary["cross_symbol_promotion_priority"] = promotion_priority_summary
     return {
         "status": policy_status,
         "adjustments": adjustments,
         "signal_sources": signal_sources,
-        "decomposition_summary": _candidate_generation_summary(
-            runtime_evidence=runtime_evidence,
-            adjustments=adjustments,
-        ),
+        "decomposition_summary": decomposition_summary,
     }
 
 

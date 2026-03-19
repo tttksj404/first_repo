@@ -6169,6 +6169,74 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(success_event["targets"][0]["exchange_synced"], True)
             self.assertEqual(success_event["targets"][0]["exchange_synced_exception"], True)
 
+    def test_futures_reallocation_applies_symbol_reentry_cooldown_to_replaced_symbol(self) -> None:
+        settings = self._focus_settings(futures_top_n=1)
+        session = self._build_session(settings=settings)
+        now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        self._seed_weak_futures_position(session, symbol="ETHUSDT", entry_time=now - timedelta(minutes=15))
+        session.capital_report = {
+            "futures_available_balance_usd": 50.0,
+            "futures_execution_balance_usd": 1.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+                {"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+            ],
+        }
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+
+        managed = session._maybe_reallocate_futures_entry(
+            decision=make_decision(
+                timestamp=now,
+                symbol="BTCUSDT",
+                predictability_score=96.0,
+                gross_expected_edge_bps=36.0,
+                net_expected_edge_bps=24.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=2500.0,
+            ),
+            state=state,
+            timestamp=now,
+        )
+
+        self.assertEqual(managed.final_mode, "futures")
+        self.assertEqual(session.manual_symbol_cooldowns["ETHUSDT"], now + timedelta(minutes=5))
+
+        follow_time = now + timedelta(minutes=1)
+        session.runtime.dispatcher.store.put(
+            SymbolMarketState(
+                symbol="ETHUSDT",
+                top_of_book=TopOfBook(199.5, 1.0, 200.5, 1.2, follow_time),
+                last_trade_price=200.0,
+                funding_rate=0.0001,
+                open_interest=1000000.0,
+                basis_bps=3.0,
+                last_update_time=follow_time,
+            )
+        )
+        eth_state = session.runtime.dispatcher.store.get("ETHUSDT")
+        assert eth_state is not None
+
+        tested_before = len(session.tested_orders)
+        session._execute_recorded_decision(
+            managed_decision=make_decision(
+                timestamp=follow_time,
+                symbol="ETHUSDT",
+                predictability_score=95.0,
+                gross_expected_edge_bps=38.0,
+                net_expected_edge_bps=26.0,
+                estimated_round_trip_cost_bps=6.0,
+                order_intent_notional_usd=2500.0,
+            ),
+            state=eth_state,
+            timestamp=follow_time,
+        )
+
+        self.assertTrue(session._is_manual_symbol_cooldown_active("ETHUSDT", follow_time))
+        self.assertEqual(len(session.tested_orders), tested_before)
+        self.assertNotIn("ETHUSDT", session.paper_positions)
+
     def test_futures_reallocation_allows_small_exchange_synced_loss_under_aggressive_profile(self) -> None:
         settings = replace(
             self._focus_settings(futures_top_n=1),

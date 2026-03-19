@@ -923,6 +923,73 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(policy["decomposition_summary"]["dominant_regime_mode"], "futures")
         self.assertNotEqual(policy["decomposition_summary"]["score_delta_total"], 0.0)
 
+    def test_build_auto_tune_policy_limits_cross_symbol_promotions_to_top_k(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "promotion_top_k": 1,
+                "symbol_summary": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": 4.8,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 1.0,
+                            "expectancy_stability": 0.9,
+                        },
+                    },
+                    {
+                        "symbol": "ETHUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": 4.2,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 0.8,
+                            "expectancy_stability": 0.8,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.92,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 1.0,
+                    },
+                    {
+                        "symbol": "ETHUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.74,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.67,
+                    },
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 70.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+            },
+        )
+        adjustments = {item["symbol"]: item for item in policy["adjustments"]}
+        self.assertEqual(set(adjustments), {"BTCUSDT"})
+        self.assertEqual(adjustments["BTCUSDT"]["action"], "aggressive_promote")
+        priority = policy["decomposition_summary"]["cross_symbol_promotion_priority"]
+        self.assertEqual(priority["promotion_top_k"], 1)
+        self.assertEqual(priority["promotion_candidate_count"], 2)
+        self.assertEqual(priority["selected_promotion_symbols"], ["BTCUSDT"])
+        self.assertEqual(priority["deferred_promotion_symbols"], ["ETHUSDT"])
+
     def test_build_auto_tune_policy_blocks_mixed_rolling_symbol_evidence(self) -> None:
         policy = build_auto_tune_policy(
             [],
