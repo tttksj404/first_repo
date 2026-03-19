@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from quant_binance.auto_mode import build_regime_aware_auto_mode
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report
 from quant_binance.symbol_lifecycle import build_symbol_lifecycle, summarize_symbol_lifecycle
@@ -2309,6 +2310,28 @@ def build_policy_comparison_validation_artifact(*,
     symbol_lifecycle_summary = dict(
         checkpoint_auto_judge.get("symbol_lifecycle_summary", runner.get("symbol_lifecycle_summary", {})) or {}
     )
+    auto_mode = build_regime_aware_auto_mode(
+        regime_summary=list(runner.get("regime_summary", []) or []),
+        sample_quality_watchdog=dict(runner.get("sample_quality_watchdog", {}) or {}),
+        checkpoint_auto_judge=checkpoint_auto_judge,
+        baseline_control_comparison=baseline_control_comparison,
+        execution_quality={
+            "run_count": runner.get("run_count", 0),
+            "total_closed_trade_count": runner.get("total_closed_trade_count", 0),
+            "total_live_order_count": runner.get("total_live_order_count", 0),
+            "runner_total_realized_pnl_usd": runner.get("runner_total_realized_pnl_usd", 0.0),
+            "runner_drawdown_to_pnl_ratio": runner.get("runner_drawdown_to_pnl_ratio", 0.0),
+            "runner_reject_rate": runner.get("runner_reject_rate", 0.0),
+            "runner_protection_degraded_rate": runner.get("runner_protection_degraded_rate", 0.0),
+            "runner_avg_realized_edge_bps": runner.get("runner_avg_realized_edge_bps", 0.0),
+            "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
+            "runner_walk_forward_window_count": runner.get("runner_walk_forward_window_count", 0),
+            "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
+            "micro_live_gate": runner.get("micro_live_gate", {}),
+        },
+        symbol_lifecycle_summary=symbol_lifecycle_summary,
+        symbol_lifecycle=symbol_lifecycle,
+    )
     evidence = {
         "comparison_verdict": verdict,
         "comparison_structural_verdict": structural_verdict,
@@ -2339,6 +2362,7 @@ def build_policy_comparison_validation_artifact(*,
         "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
         "baseline_control_comparison": baseline_control_comparison,
         "checkpoint_auto_judge": checkpoint_auto_judge,
+        "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "candidate_vs_current_validation_path": validation_path,
@@ -2386,6 +2410,7 @@ def build_policy_comparison_validation_artifact(*,
         "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
         "baseline_control_comparison": baseline_control_comparison,
         "checkpoint_auto_judge": checkpoint_auto_judge,
+        "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "recent_retention_window": runner.get("recent_retention_window", {}),
@@ -2513,6 +2538,27 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         evaluated_at=report.generated_at,
     )
     symbol_lifecycle_summary = summarize_symbol_lifecycle(symbol_lifecycle)
+    auto_mode = build_regime_aware_auto_mode(
+        regime_summary=regime_rows,
+        sample_quality_watchdog=sample_quality_watchdog,
+        baseline_control_comparison=baseline_control_comparison,
+        execution_quality={
+            "run_count": report.run_count,
+            "total_closed_trade_count": report.total_closed_trade_count,
+            "total_live_order_count": report.total_live_order_count,
+            "runner_total_realized_pnl_usd": total_realized_pnl_usd,
+            "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
+            "runner_reject_rate": reject_rate,
+            "runner_protection_degraded_rate": protection_degraded_rate,
+            "runner_avg_realized_edge_bps": avg_realized_edge_bps,
+            "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
+            "runner_walk_forward_window_count": len(walk_forward_windows),
+            "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
+            "micro_live_gate": micro_live_gate,
+        },
+        symbol_lifecycle_summary=symbol_lifecycle_summary,
+        symbol_lifecycle=symbol_lifecycle,
+    )
     total_return_pct = 0.0
     max_drawdown_pct = 0.0
     evidence = {
@@ -2541,6 +2587,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "cumulative_retention_window": cumulative_retention_window,
         "sample_quality_watchdog": sample_quality_watchdog,
         "baseline_control_comparison": baseline_control_comparison,
+        "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "symbol_scorecard": symbol_scorecard,
@@ -2582,6 +2629,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "cumulative_retention_window": cumulative_retention_window,
         "sample_quality_watchdog": sample_quality_watchdog,
         "baseline_control_comparison": baseline_control_comparison,
+        "auto_mode": auto_mode,
         "evidence": evidence,
     }
 

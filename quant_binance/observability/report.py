@@ -6,6 +6,13 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from quant_binance.auto_mode import (
+    auto_mode_blocks_non_major_positive,
+    auto_mode_positive_action_cap,
+    auto_mode_positive_cap,
+    auto_mode_promotion_intensity_cap,
+    is_positive_policy_action,
+)
 from quant_binance.closed_trade_metrics import aggregate_closed_trades as aggregate_closed_trade_metrics
 from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
@@ -1081,6 +1088,115 @@ def _watchdog_adjustment(
     return updated
 
 
+def _auto_mode_adjustment(
+    adjustment: dict[str, object],
+    *,
+    action: str,
+    operating_intensity: float,
+    reason: str,
+    signal_context: dict[str, object],
+) -> dict[str, object]:
+    payload = dict(adjustment or {})
+    score_delta = float(payload.get("score_delta", 0.0) or 0.0)
+    if score_delta > 0.0:
+        score_delta = round(score_delta * max(min(operating_intensity, 1.0), 0.7), 6)
+    updated = _policy_adjustment_shape(
+        symbol=str(payload.get("symbol", "") or ""),
+        regime=str(payload.get("regime", "") or ""),
+        setup_class=str(payload.get("setup_class", "") or ""),
+        side=str(payload.get("side", "") or ""),
+        execution_quality_state=str(payload.get("execution_quality_state", "") or ""),
+        sample_count=int(payload.get("sample_count", 0) or 0),
+        action=action,
+        reason=reason,
+        signal_source="auto_mode",
+        score_delta=score_delta,
+        operating_intensity=operating_intensity,
+        signal_context=signal_context,
+    )
+    existing_sources = [str(source) for source in list(payload.get("signal_sources", []) or []) if str(source)]
+    updated["signal_sources"] = sorted(set(existing_sources + ["auto_mode"]))
+    signal_contexts = dict(payload.get("signal_contexts", {}) or {})
+    signal_contexts["auto_mode"] = signal_context
+    updated["signal_contexts"] = signal_contexts
+    return updated
+
+
+def _auto_mode(runtime_evidence: dict[str, object] | None) -> dict[str, object]:
+    return dict(dict(runtime_evidence or {}).get("auto_mode", {}) or {})
+
+
+def _apply_auto_mode_overlay(
+    *,
+    adjustments: list[dict[str, object]],
+    runtime_evidence: dict[str, object] | None,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    auto_mode = _auto_mode(runtime_evidence)
+    mode = str(auto_mode.get("mode", "") or "")
+    if not auto_mode or mode not in {"tighter", "cautiously_expanded"}:
+        return adjustments, auto_mode if auto_mode else {}
+    positive_cap = auto_mode_promotion_intensity_cap(auto_mode, default=1.0)
+    positive_action_cap = auto_mode_positive_action_cap(auto_mode)
+    block_non_major_positive = auto_mode_blocks_non_major_positive(auto_mode)
+    transformed: list[dict[str, object]] = []
+    blocked_symbols: list[str] = []
+    softened_symbols: list[str] = []
+    expanded_symbols: list[str] = []
+    for adjustment in adjustments:
+        payload = dict(adjustment)
+        symbol = str(payload.get("symbol", "") or "")
+        action = str(payload.get("action", "") or "")
+        regime = str(payload.get("regime", "") or "")
+        if not is_positive_policy_action(action):
+            transformed.append(payload)
+            continue
+        is_major = regime == "major"
+        if block_non_major_positive and not is_major:
+            blocked_symbols.append(symbol)
+            continue
+        current_intensity = float(payload.get("operating_intensity", 1.0) or 1.0)
+        next_action = action
+        next_reason = ""
+        next_intensity = current_intensity
+        if positive_action_cap == "promote" and action == "aggressive_promote":
+            next_action = "promote"
+        if mode == "tighter":
+            next_intensity = min(current_intensity, positive_cap)
+            next_reason = "AUTO_MODE_TIGHTER"
+        elif mode == "cautiously_expanded" and is_major:
+            next_intensity = max(current_intensity, positive_cap)
+            next_reason = "AUTO_MODE_CAUTIOUSLY_EXPANDED"
+        if next_action != action or abs(next_intensity - current_intensity) > 1e-9:
+            transformed.append(
+                _auto_mode_adjustment(
+                    payload,
+                    action=next_action,
+                    operating_intensity=next_intensity,
+                    reason=next_reason or "AUTO_MODE_APPLIED",
+                    signal_context={
+                        "mode": mode,
+                        "reason_codes": list(auto_mode.get("reason_codes", []) or []),
+                        "blocked_non_major_positive": block_non_major_positive,
+                    },
+                )
+            )
+            if mode == "tighter":
+                softened_symbols.append(symbol)
+            elif mode == "cautiously_expanded" and is_major:
+                expanded_symbols.append(symbol)
+            continue
+        transformed.append(payload)
+    return transformed, {
+        "mode": mode,
+        "reason_codes": list(auto_mode.get("reason_codes", []) or []),
+        "blocked_symbols": sorted(blocked_symbols),
+        "softened_symbols": sorted(softened_symbols),
+        "expanded_symbols": sorted(expanded_symbols),
+        "policy_guidance": dict(auto_mode.get("policy_guidance", {}) or {}),
+        "inputs": dict(auto_mode.get("inputs", {}) or {}),
+    }
+
+
 def _apply_sample_quality_watchdog(
     *,
     adjustments: list[dict[str, object]],
@@ -1179,13 +1295,19 @@ def _effective_promotion_top_k(
     watchdog = _sample_quality_watchdog(runtime_evidence)
     guardrails = dict(watchdog.get("policy_guardrails", {}) or {})
     watchdog_cap = max(int(guardrails.get("max_positive_symbols", 0) or 0), 0)
+    auto_mode = _auto_mode(runtime_evidence)
+    auto_mode_cap = auto_mode_positive_cap(auto_mode)
     effective_top_k = explicit_top_k
     if watchdog_cap > 0:
         effective_top_k = min(explicit_top_k, watchdog_cap) if explicit_top_k > 0 else min(watchdog_cap, positive_adjustment_count)
+    if auto_mode_cap > 0:
+        effective_top_k = min(effective_top_k, auto_mode_cap) if effective_top_k > 0 else min(auto_mode_cap, positive_adjustment_count)
     return effective_top_k, {
         "watchdog_status": str(watchdog.get("status", "not_available") or "not_available"),
         "explicit_promotion_top_k": explicit_top_k,
         "watchdog_positive_cap": watchdog_cap,
+        "auto_mode_positive_cap": auto_mode_cap,
+        "auto_mode": str(auto_mode.get("mode", "normal") or "normal"),
     }
 
 
@@ -1214,6 +1336,10 @@ def build_auto_tune_policy(
         adjustments=adjustments,
         runtime_evidence=runtime_evidence,
     )
+    adjustments, auto_mode_summary = _apply_auto_mode_overlay(
+        adjustments=adjustments,
+        runtime_evidence=runtime_evidence,
+    )
     adjustments, promotion_priority_summary = _apply_cross_symbol_promotion_priority(
         adjustments=adjustments,
         runtime_evidence=runtime_evidence,
@@ -1237,6 +1363,8 @@ def build_auto_tune_policy(
     )
     if watchdog_overlay_summary:
         decomposition_summary["sample_quality_watchdog"] = watchdog_overlay_summary
+    if auto_mode_summary:
+        decomposition_summary["auto_mode"] = auto_mode_summary
     if promotion_priority_summary:
         decomposition_summary["cross_symbol_promotion_priority"] = promotion_priority_summary
     if lifecycle_overlay_summary:
@@ -1515,6 +1643,9 @@ def build_promotion_verdict(
         verdict["baseline_control_comparison"] = baseline_control_comparison
         verdict["simple_baseline_gate_status"] = str(baseline_gate.get("status", "not_available") or "not_available")
         verdict["simple_baseline_gate_reason"] = str(baseline_gate.get("gate_reason", "") or "")
+    auto_mode = dict(dict(comparison_evidence or {}).get("auto_mode", {}) or {})
+    if auto_mode:
+        verdict["auto_mode"] = auto_mode
     if any(list(lifecycle_signal.values())):
         verdict["symbol_lifecycle_signal"] = lifecycle_signal
     verdict.update(
@@ -1582,6 +1713,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "sample_quality_watchdog",
             "baseline_control_comparison",
             "checkpoint_auto_judge",
+            "auto_mode",
             "symbol_lifecycle",
             "symbol_lifecycle_summary",
             "score_alignment_summary",
@@ -2485,6 +2617,7 @@ def build_persisted_policy_state(
     micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
     sample_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
     checkpoint_auto_judge = dict(validation_evidence.get("checkpoint_auto_judge", {}) or {})
+    auto_mode = dict(validation_evidence.get("auto_mode", {}) or {})
     baseline_gate = _simple_baseline_control_gate(validation_evidence)
     rollout_status = "steady"
     rollout_reason = "UNCHANGED"
@@ -2642,6 +2775,7 @@ def build_persisted_policy_state(
     active_policy["checkpoint_revalidation"] = checkpoint_revalidation
     active_policy["checkpoint_auto_judge"] = checkpoint_auto_judge
     active_policy["sample_quality_watchdog"] = sample_watchdog
+    active_policy["auto_mode"] = auto_mode
     return {
         "version": version,
         "status": lifecycle,
@@ -2651,6 +2785,7 @@ def build_persisted_policy_state(
         "retention_monitor": retention_monitor,
         "checkpoint_revalidation": checkpoint_revalidation,
         "checkpoint_auto_judge": checkpoint_auto_judge,
+        "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "active_policy": active_policy,
@@ -2672,6 +2807,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "retention_monitor": dict(policy_state.get("retention_monitor", {}) or {}),
         "checkpoint_revalidation": dict(policy_state.get("checkpoint_revalidation", {}) or {}),
         "checkpoint_auto_judge": dict(policy_state.get("checkpoint_auto_judge", {}) or {}),
+        "auto_mode": dict(policy_state.get("auto_mode", {}) or {}),
         "symbol_lifecycle_summary": dict(policy_state.get("symbol_lifecycle_summary", {}) or {}),
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
@@ -2702,9 +2838,11 @@ def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: d
             "lifecycle_stage": rollout_stage,
             "micro_live_readiness": str(promotion_verdict.get("micro_live_readiness", "not_available") or "not_available"),
             "micro_live_gate": dict(promotion_verdict.get("micro_live_gate", {}) or {}),
+            "auto_mode": dict(promotion_verdict.get("auto_mode", candidate_policy.get("decomposition_summary", {}).get("auto_mode", {})) or {}),
         },
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
+        "auto_mode": dict(promotion_verdict.get("auto_mode", candidate_policy.get("decomposition_summary", {}).get("auto_mode", {})) or {}),
     }
 
 def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str, object]:

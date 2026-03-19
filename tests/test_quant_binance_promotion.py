@@ -114,6 +114,64 @@ class QuantBinancePromotionTests(unittest.TestCase):
             self.assertIn("priority_symbols", proposal["overrides"]["futures_exposure"])
             self.assertNotIn("BTCUSDT", proposal["overrides"]["futures_exposure"]["priority_symbols"])
 
+    def test_build_strategy_proposal_applies_auto_mode_runtime_overrides(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            (base / "output" / "paper-live-shell" / "run-a").mkdir(parents=True, exist_ok=True)
+            (base / "output" / "strategy-comparison-recent" / "run-b").mkdir(parents=True, exist_ok=True)
+
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {
+                            "name": "candidate-c",
+                            "objective_score": 7.5,
+                            "overrides": {},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (base / "output" / "paper-live-shell" / "run-a" / "performance_report.json").write_text(
+                json.dumps({"pruning_recommendations": []}),
+                encoding="utf-8",
+            )
+            (base / "output" / "paper-live-shell" / "run-a" / "policy_comparison.json").write_text(
+                json.dumps(
+                    {
+                        "checkpoint_auto_judge": {"verdict": "expand"},
+                        "auto_mode": {
+                            "mode": "cautiously_expanded",
+                            "reason_codes": ["AUTO_MODE_EXECUTION_QUALITY_STRONG"],
+                            "runtime_guidance": {
+                                "mode_thresholds": {
+                                    "futures_score_min_delta": -1.0,
+                                    "spot_score_min_delta": -1.0,
+                                },
+                                "risk": {"per_trade_equity_risk_scale": 1.03},
+                                "cash_reserve": {"when_futures_enabled_delta": -0.01},
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (base / "output" / "strategy-comparison-recent" / "run-b" / "comparison.json").write_text(
+                json.dumps({"strategies": [{"strategy_name": "current_strategy", "total_pnl_usd": 1.0}]}),
+                encoding="utf-8",
+            )
+
+            proposal = build_strategy_proposal(base_dir=base)
+
+            self.assertEqual(proposal["auto_mode"]["mode"], "cautiously_expanded")
+            self.assertEqual(proposal["gates"]["auto_mode"], "cautiously_expanded")
+            self.assertEqual(proposal["overrides"]["mode_thresholds"]["futures_score_min"], 41.0)
+            self.assertEqual(proposal["overrides"]["mode_thresholds"]["spot_score_min"], 43.0)
+            self.assertEqual(proposal["overrides"]["risk"]["per_trade_equity_risk"], 0.005665)
+            self.assertEqual(proposal["overrides"]["cash_reserve"]["when_futures_enabled"], 0.07)
+
 
 if __name__ == "__main__":
     unittest.main()
