@@ -104,6 +104,17 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (run_root / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "executive_operating_verdict": {
+                            "verdict": "tighten",
+                            "reasons": ["EXECUTIVE_TIGHTEN_BY_AUTO_MODE"],
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
 
             report = build_execution_quality_report(base_dir=base, lookback_days=7)
 
@@ -119,6 +130,8 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
             self.assertEqual(report.sample_quality_watchdog_reasons, ("EDGE_RETENTION_WEAK",))
             self.assertEqual(report.auto_mode, "tighter")
             self.assertEqual(report.auto_mode_reasons, ("AUTO_MODE_TIGHTENED_BY_EXECUTION_QUALITY",))
+            self.assertEqual(report.executive_verdict, "tighten")
+            self.assertEqual(report.executive_reason_codes, ("EXECUTIVE_TIGHTEN_BY_AUTO_MODE",))
             self.assertEqual(report.top_error_codes[0]["code"], "40762")
             by_symbol = {row["symbol"]: row for row in report.symbol_order_summary}
             self.assertEqual(by_symbol["ETHUSDT"]["order_error_count"], 2)

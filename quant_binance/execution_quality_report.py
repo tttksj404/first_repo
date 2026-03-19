@@ -28,6 +28,10 @@ class ExecutionQualityReport:
     protection_degraded_rate: float
     sample_quality_watchdog_status: str
     sample_quality_watchdog_reasons: tuple[str, ...]
+    auto_mode: str
+    auto_mode_reasons: tuple[str, ...]
+    executive_verdict: str
+    executive_reason_codes: tuple[str, ...]
     top_error_codes: tuple[dict[str, object], ...]
     symbol_order_summary: tuple[dict[str, object], ...]
     top_symbols: tuple[dict[str, object], ...]
@@ -51,6 +55,10 @@ class ExecutionQualityReport:
             "protection_degraded_rate": self.protection_degraded_rate,
             "sample_quality_watchdog_status": self.sample_quality_watchdog_status,
             "sample_quality_watchdog_reasons": list(self.sample_quality_watchdog_reasons),
+            "auto_mode": self.auto_mode,
+            "auto_mode_reasons": list(self.auto_mode_reasons),
+            "executive_verdict": self.executive_verdict,
+            "executive_reason_codes": list(self.executive_reason_codes),
             "top_error_codes": list(self.top_error_codes),
             "symbol_order_summary": list(self.symbol_order_summary),
             "top_symbols": list(self.top_symbols),
@@ -73,6 +81,16 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
         if isinstance(payload, dict):
             rows.append(payload)
     return rows
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
 
 
 def _resolve_recent_runs(*, base_dir: Path, lookback_days: int) -> list[Path]:
@@ -185,6 +203,8 @@ def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lo
         }
     )
     latest_validation_evidence: dict[str, object] = {}
+    latest_policy_state: dict[str, object] = {}
+    latest_summary: dict[str, object] = {}
 
     for run_dir in runs:
         logs_dir = run_dir / "logs"
@@ -194,6 +214,8 @@ def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lo
         validation_evidence = load_validation_runner_evidence(run_dir / "validation_report.json")
         if validation_evidence:
             latest_validation_evidence = validation_evidence
+        latest_policy_state = _load_json(run_dir / "policy_state.json")
+        latest_summary = _load_json(run_dir / "summary.json")
 
         live_order_count += len(live_orders)
         tested_order_count += len(tested_orders)
@@ -287,6 +309,14 @@ def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lo
     acceptance_rate = round(accepted_live_order_count / live_order_count, 6) if live_order_count else 0.0
     reject_rate = round(rejected_live_order_count / live_order_count, 6) if live_order_count else 0.0
     watchdog = dict(latest_validation_evidence.get("sample_quality_watchdog", {}) or {})
+    auto_mode = dict(latest_validation_evidence.get("auto_mode", {}) or {})
+    executive_operating_verdict = dict(
+        latest_policy_state.get(
+            "executive_operating_verdict",
+            latest_summary.get("executive_operating_verdict", latest_validation_evidence.get("executive_operating_verdict", {})),
+        )
+        or {}
+    )
     checkpoint_by_symbol = _symbol_checkpoint_map(watchdog)
     top_symbols = tuple(
         {
@@ -342,6 +372,10 @@ def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lo
         protection_degraded_rate=round(protection_degraded_count / live_order_count, 6) if live_order_count else 0.0,
         sample_quality_watchdog_status=str(watchdog.get("status", "") or ""),
         sample_quality_watchdog_reasons=tuple(str(item) for item in list(watchdog.get("reason_codes", []) or [])),
+        auto_mode=str(auto_mode.get("mode", "normal") or "normal"),
+        auto_mode_reasons=tuple(str(item) for item in list(auto_mode.get("reason_codes", []) or [])),
+        executive_verdict=str(executive_operating_verdict.get("verdict", "not_available") or "not_available"),
+        executive_reason_codes=tuple(str(item) for item in list(executive_operating_verdict.get("reasons", []) or [])),
         top_error_codes=top_error_codes,
         symbol_order_summary=tuple(symbol_rows),
         top_symbols=top_symbols,
