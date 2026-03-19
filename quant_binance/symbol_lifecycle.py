@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 from typing import Any
+
+from quant_binance.policy_lineage import (
+    build_policy_lineage_snapshot,
+    policy_lineage_alignment,
+)
 
 
 _POSITIVE_ACTIONS = {"promote", "aggressive_promote"}
@@ -21,34 +25,6 @@ def _safe_float(value: object, default: float = 0.0) -> float:
         return float(value or 0.0)
     except (TypeError, ValueError):
         return default
-
-
-def _parse_iso8601(value: object) -> datetime | None:
-    if not value:
-        return None
-    try:
-        text = str(value)
-        if text.endswith("Z"):
-            text = text[:-1] + "+00:00"
-        parsed = datetime.fromisoformat(text)
-    except (TypeError, ValueError):
-        return None
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-    return parsed
-
-
-def _policy_context_fresh(
-    *,
-    previous_timestamp: object,
-    current_timestamp: object,
-    max_age_days: int = 10,
-) -> bool:
-    previous = _parse_iso8601(previous_timestamp)
-    current = _parse_iso8601(current_timestamp)
-    if previous is None or current is None:
-        return True
-    return abs(current - previous) <= timedelta(days=max_age_days)
 
 
 def summarize_symbol_lifecycle(rows: list[dict[str, Any]] | tuple[dict[str, Any], ...]) -> dict[str, object]:
@@ -78,11 +54,17 @@ def build_symbol_lifecycle(
     symbol_summary: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
     symbol_scorecard: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
     pruning_recommendations: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
+    policy_context_bucket_name: str = "",
+    policy_context_bucket_symbol_summary: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
+    policy_context_bucket_pruning_recommendations: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
     active_adjustments: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
     previous_rows: list[dict[str, Any]] | tuple[dict[str, Any], ...] = (),
     checkpoint_auto_judge: dict[str, Any] | None = None,
     sample_quality_watchdog: dict[str, Any] | None = None,
     baseline_control_comparison: dict[str, Any] | None = None,
+    active_policy: dict[str, Any] | None = None,
+    rollout_phase: str = "",
+    policy_version: object = None,
     evaluated_at: object = "",
 ) -> list[dict[str, object]]:
     summary_by_symbol = {
@@ -98,6 +80,16 @@ def build_symbol_lifecycle(
     pruning_by_symbol = {
         str(item.get("symbol", "") or ""): dict(item)
         for item in list(pruning_recommendations or [])
+        if str(item.get("symbol", "") or "")
+    }
+    bucket_summary_by_symbol = {
+        str(item.get("symbol", "") or ""): dict(item)
+        for item in list(policy_context_bucket_symbol_summary or [])
+        if str(item.get("symbol", "") or "")
+    }
+    bucket_pruning_by_symbol = {
+        str(item.get("symbol", "") or ""): dict(item)
+        for item in list(policy_context_bucket_pruning_recommendations or [])
         if str(item.get("symbol", "") or "")
     }
     active_by_symbol = {
@@ -119,29 +111,78 @@ def build_symbol_lifecycle(
     baseline_verdict = str(dict(baseline_control_comparison or {}).get("verdict", "not_available") or "not_available")
     baseline_gate = str(dict(baseline_control_comparison or {}).get("expansion_gate", "not_available") or "not_available")
     checkpoint_verdict = str(dict(checkpoint_auto_judge or {}).get("verdict", "") or "")
+    active_policy_lineage = build_policy_lineage_snapshot(
+        policy=dict(active_policy or {"adjustments": list(active_adjustments or [])}),
+        rollout_phase=rollout_phase,
+        policy_status=str(dict(active_policy or {}).get("status", "baseline") or "baseline"),
+        version=policy_version,
+        updated_at=evaluated_at,
+        source="active_policy_context",
+    )
     symbols = sorted(
         set(summary_by_symbol)
         | set(scorecard_by_symbol)
         | set(pruning_by_symbol)
+        | set(bucket_summary_by_symbol)
+        | set(bucket_pruning_by_symbol)
         | set(active_by_symbol)
         | set(previous_by_symbol)
         | set(checkpoint_symbol_actions)
     )
     rows: list[dict[str, object]] = []
     for symbol in symbols:
-        summary_row = dict(summary_by_symbol.get(symbol, {}) or {})
+        mixed_summary_row = dict(summary_by_symbol.get(symbol, {}) or {})
         scorecard_row = dict(scorecard_by_symbol.get(symbol, {}) or {})
-        pruning_row = dict(pruning_by_symbol.get(symbol, {}) or {})
+        mixed_pruning_row = dict(pruning_by_symbol.get(symbol, {}) or {})
+        bucket_summary_row = dict(bucket_summary_by_symbol.get(symbol, {}) or {})
+        bucket_pruning_row = dict(bucket_pruning_by_symbol.get(symbol, {}) or {})
         active_row = dict(active_by_symbol.get(symbol, {}) or {})
         previous_row = dict(previous_by_symbol.get(symbol, {}) or {})
         checkpoint_row = dict(checkpoint_symbol_actions.get(symbol, {}) or {})
+        bucket_scope_available = bool(policy_context_bucket_name) or bool(bucket_summary_by_symbol) or bool(bucket_pruning_by_symbol)
+        bucket_scoped_symbol = bucket_scope_available and (
+            bool(previous_row)
+            or bool(active_row)
+            or bool(bucket_summary_row)
+            or bool(bucket_pruning_row)
+        )
+        summary_row = dict(bucket_summary_row if bucket_scoped_symbol else mixed_summary_row)
+        pruning_row = dict(bucket_pruning_row if bucket_scoped_symbol else mixed_pruning_row)
 
         previous_state = str(previous_row.get("target_state", previous_row.get("current_state", "baseline")) or "baseline")
-        policy_context_fresh = _policy_context_fresh(
-            previous_timestamp=previous_row.get("evidence_generated_at", previous_row.get("updated_at", "")),
-            current_timestamp=evaluated_at,
+        previous_lineage = dict(previous_row.get("policy_lineage", {}) or {})
+        if not previous_lineage and previous_row:
+            previous_lineage = build_policy_lineage_snapshot(
+                policy={
+                    "status": previous_row.get("active_policy_action", previous_state),
+                    "adjustments": (
+                        [
+                            {
+                                "symbol": symbol,
+                                "action": previous_row.get("active_policy_action", "keep"),
+                            }
+                        ]
+                        if str(previous_row.get("active_policy_action", "") or "") not in {"", "none", "keep"}
+                        else []
+                    ),
+                },
+                rollout_phase=str(previous_row.get("rollout_phase", rollout_phase) or rollout_phase),
+                policy_status=str(previous_row.get("active_policy_status", previous_state) or previous_state),
+                updated_at=previous_row.get("evidence_generated_at", previous_row.get("updated_at", "")),
+                source="previous_symbol_lifecycle_row",
+            )
+        lineage_alignment = policy_lineage_alignment(
+            active_policy_lineage,
+            previous_lineage,
         )
-        active_action = str(active_row.get("action", previous_row.get("active_policy_action", "")) or "")
+        policy_context_fresh = bool(lineage_alignment.get("aligned"))
+        active_action = str(
+            active_row.get(
+                "action",
+                previous_row.get("active_policy_action", "") if policy_context_fresh else "",
+            )
+            or ""
+        )
         active_positive = active_action in _POSITIVE_ACTIONS
         active_negative = active_action in _NEGATIVE_ACTIONS
         derived_current_state = previous_state if previous_row and policy_context_fresh else "baseline"
@@ -263,7 +304,12 @@ def build_symbol_lifecycle(
         if checkpoint_verdict:
             reason_codes.append(f"CHECKPOINT_VERDICT_{checkpoint_verdict.upper()}")
         if not policy_context_fresh:
-            reason_codes.append("STALE_POLICY_CONTEXT_IGNORED")
+            reason_codes.append(str(lineage_alignment.get("reason", "STALE_POLICY_CONTEXT_IGNORED") or "STALE_POLICY_CONTEXT_IGNORED"))
+        if bucket_scoped_symbol and policy_context_bucket_name:
+            if bucket_summary_row or bucket_pruning_row:
+                reason_codes.append(f"POLICY_CONTEXT_BUCKET_{str(policy_context_bucket_name).upper()}_USED")
+            else:
+                reason_codes.append(f"POLICY_CONTEXT_BUCKET_{str(policy_context_bucket_name).upper()}_NO_SYMBOL_EVIDENCE")
 
         transition = (
             f"{current_state}_to_{target_state}"
@@ -280,6 +326,10 @@ def build_symbol_lifecycle(
                 "recommended_action": recommended_action,
                 "active_policy_action": active_action or "none",
                 "policy_context_fresh": policy_context_fresh,
+                "policy_context_alignment": dict(lineage_alignment),
+                "symbol_evidence_source": "policy_context_bucket" if bucket_scoped_symbol else "symbol_summary",
+                "symbol_evidence_bucket": str(policy_context_bucket_name or "") if bucket_scoped_symbol else "",
+                "policy_context_bucket_evidence_available": bool(bucket_summary_row or bucket_pruning_row),
                 "recommendation": recommendation,
                 "pruning_recommendation": pruning_recommendation or recommendation,
                 "scorecard_recommendation": scorecard_recommendation,
@@ -293,6 +343,8 @@ def build_symbol_lifecycle(
                 "rolling_positive_window_ratio": round(positive_window_ratio, 6),
                 "rolling_recent_run_consistency": round(recent_run_consistency, 6),
                 "evidence_generated_at": str(evaluated_at or ""),
+                "rollout_phase": str(rollout_phase or "baseline"),
+                "policy_lineage": dict(active_policy_lineage),
                 "reason_codes": sorted({code for code in reason_codes if str(code)}),
             }
         )

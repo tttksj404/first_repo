@@ -6665,6 +6665,90 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(trade_rows[1]["entry_policy_bucket"], "")
             self.assertEqual(trade_rows[1]["entry_policy_lineage"], {})
 
+    def test_live_order_logs_persist_entry_policy_bucket_context(self) -> None:
+        class AcceptedLiveExecutor:
+            def _exchange_id(self) -> str:
+                return "bitget"
+
+            def execute_decision(self, *, decision, reference_price):  # type: ignore[no-untyped-def]
+                return type(
+                    "LiveOrderResultStub",
+                    (),
+                    {
+                        "symbol": decision.symbol,
+                        "market": decision.final_mode,
+                        "side": decision.side,
+                        "quantity": round(decision.order_intent_notional_usd / reference_price, 8),
+                        "accepted": True,
+                        "response": {"status": "SUCCESS", "orderId": "live-policy-bucket-1"},
+                        "protection_orders": (),
+                        "protection_error": "",
+                    },
+                )()
+
+            def pop_last_preflight_rejection(self):  # type: ignore[no-untyped-def]
+                return None
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            session = self._build_session()
+            run_dir = Path(tempdir) / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            session.summary_path = run_dir / "summary.json"
+            session.summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "policy_lineage": {
+                            "available": True,
+                            "structural_key": "active-lineage",
+                            "versioned_key": "active-lineage-v1",
+                        },
+                        "rollout_progression": {"execution_phase": "partial"},
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "source": "persisted_policy_validation_evidence",
+                                "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                                "policy_lineage": {
+                                    "available": True,
+                                    "structural_key": "active-lineage",
+                                    "versioned_key": "active-lineage-v1",
+                                },
+                                "evidence": {"runner_avg_edge_retention_ratio": 0.82},
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            session.log_store = JsonlLogStore(logs_dir)
+            session.order_tester = None
+            session.live_order_executor = AcceptedLiveExecutor()  # type: ignore[assignment]
+            now = datetime(2026, 3, 19, 12, 0, tzinfo=timezone.utc)
+            state = session.runtime.dispatcher.store.get("BTCUSDT")
+            assert state is not None
+            state.last_trade_price = 100.0
+
+            session._record_decision(
+                decision=make_decision(
+                    timestamp=now,
+                    symbol="BTCUSDT",
+                    predictability_score=91.0,
+                    gross_expected_edge_bps=22.0,
+                    net_expected_edge_bps=16.0,
+                    estimated_round_trip_cost_bps=6.0,
+                    order_intent_notional_usd=500.0,
+                ),
+                state=state,
+                timestamp=now,
+            )
+
+            live_order_rows = session.log_store.read("live_orders")
+            self.assertEqual(len(live_order_rows), 1)
+            self.assertEqual(live_order_rows[0]["entry_policy_bucket"], "active_policy")
+            self.assertTrue(live_order_rows[0]["entry_policy_bucket_available"])
+            self.assertEqual(live_order_rows[0]["entry_policy_bucket_alignment_status"], "aligned")
+
     def test_futures_reallocation_applies_symbol_reentry_cooldown_to_replaced_symbol(self) -> None:
         settings = self._focus_settings(futures_top_n=1)
         session = self._build_session(settings=settings)
