@@ -127,6 +127,7 @@ def _proposal_status_from_gates(
     checkpoint_auto_judge: dict[str, Any],
     baseline_gate: dict[str, Any],
     executive_operating_verdict: dict[str, Any] | None = None,
+    live_evidence_rejudge: dict[str, Any] | None = None,
     lineage_status: str = "",
 ) -> str:
     if lineage_status in {"mismatch", "stale"}:
@@ -135,6 +136,8 @@ def _proposal_status_from_gates(
     if executive_verdict == "rollback":
         return "proposal_blocked"
     if executive_verdict in {"tighten", "hold", "rebuild_evidence"}:
+        return "proposal_pending"
+    if str(dict(live_evidence_rejudge or {}).get("status", "") or "") in {"waiting", "blocked"}:
         return "proposal_pending"
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
     if checkpoint_verdict == "rollback":
@@ -179,11 +182,23 @@ def _executive_operating_verdict_from_payload(payload: dict[str, Any]) -> dict[s
     )
 
 
+def _live_evidence_rejudge_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    executive_operating_verdict = _executive_operating_verdict_from_payload(payload)
+    return dict(
+        payload.get(
+            "live_evidence_rejudge",
+            executive_operating_verdict.get("live_evidence_rejudge", {}),
+        )
+        or {}
+    )
+
+
 def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
     root = Path(base_dir) / "output" / "paper-live-shell"
     latest_policy_state_path = _latest_file_under(root, "policy_state.json")
     latest_policy_state_payload = _read_json(latest_policy_state_path)
     latest_executive_operating_verdict = _executive_operating_verdict_from_payload(latest_policy_state_payload)
+    latest_live_evidence_rejudge = _live_evidence_rejudge_from_payload(latest_policy_state_payload)
     active_policy_lineage = build_policy_state_lineage_snapshot(
         latest_policy_state_payload,
         source="proposal_latest_policy_state",
@@ -203,6 +218,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "symbol_lifecycle": [],
                 "auto_mode": {},
                 "executive_operating_verdict": latest_executive_operating_verdict,
+                "live_evidence_rejudge": latest_live_evidence_rejudge,
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
                 "lineage_status": str(lineage_alignment.get("status", "mismatch") or "mismatch"),
@@ -217,6 +233,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "executive_operating_verdict": (
                     _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
                 ),
+                "live_evidence_rejudge": (
+                    _live_evidence_rejudge_from_payload(payload) or latest_live_evidence_rejudge
+                ),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
                 "lineage_status": "aligned" if bool(lineage_alignment.get("aligned")) else "unknown",
@@ -230,6 +249,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "executive_operating_verdict": (
                     _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
+                ),
+                "live_evidence_rejudge": (
+                    _live_evidence_rejudge_from_payload(payload) or latest_live_evidence_rejudge
                 ),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
@@ -252,6 +274,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "executive_operating_verdict": (
                     _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
                 ),
+                "live_evidence_rejudge": (
+                    _live_evidence_rejudge_from_payload(payload) or latest_live_evidence_rejudge
+                ),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
                 "lineage_status": "aligned",
@@ -266,6 +291,9 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "executive_operating_verdict": (
                     _executive_operating_verdict_from_payload(payload) or latest_executive_operating_verdict
                 ),
+                "live_evidence_rejudge": (
+                    _live_evidence_rejudge_from_payload(payload) or latest_live_evidence_rejudge
+                ),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
                 "lineage_status": "aligned",
@@ -277,6 +305,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
         "symbol_lifecycle": [],
         "auto_mode": {},
         "executive_operating_verdict": latest_executive_operating_verdict,
+        "live_evidence_rejudge": latest_live_evidence_rejudge,
         "source_path": "",
         "source_type": "",
         "lineage_status": "unknown",
@@ -314,6 +343,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     symbol_lifecycle = list(checkpoint_judge_context.get("symbol_lifecycle", []) or [])
     auto_mode = dict(checkpoint_judge_context.get("auto_mode", {}) or {})
     executive_operating_verdict = dict(checkpoint_judge_context.get("executive_operating_verdict", {}) or {})
+    live_evidence_rejudge = dict(checkpoint_judge_context.get("live_evidence_rejudge", {}) or {})
     lifecycle_block_rows = [
         dict(item)
         for item in symbol_lifecycle
@@ -336,6 +366,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         checkpoint_auto_judge=checkpoint_auto_judge,
         baseline_gate=baseline_gate,
         executive_operating_verdict=executive_operating_verdict,
+        live_evidence_rejudge=live_evidence_rejudge,
         lineage_status=str(checkpoint_judge_context.get("lineage_status", "") or ""),
     )
     proposal = {
@@ -348,6 +379,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         "baseline_control_comparison": baseline_control_comparison,
         "auto_mode": auto_mode,
         "executive_operating_verdict": executive_operating_verdict,
+        "live_evidence_rejudge": live_evidence_rejudge,
         "symbol_lifecycle": symbol_lifecycle,
         "supporting_artifacts": {
             "optimization_latest": str(latest),
@@ -375,6 +407,10 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "executive_operating_verdict": str(executive_operating_verdict.get("verdict", "not_available") or "not_available"),
             "executive_operating_reasons": list(executive_operating_verdict.get("reasons", []) or []),
             "executive_operating_confidence": str(executive_operating_verdict.get("confidence", "") or ""),
+            "live_evidence_rejudge_status": str(live_evidence_rejudge.get("status", "not_available") or "not_available"),
+            "live_evidence_rejudge_reasons": list(live_evidence_rejudge.get("reason_codes", []) or []),
+            "live_evidence_lineage_status": str(live_evidence_rejudge.get("policy_lineage_status", "unknown") or "unknown"),
+            "fresh_live_evidence_accumulated": bool(live_evidence_rejudge.get("fresh_evidence_accumulated")),
             "simple_baseline_strategy": str(
                 dict(baseline_control_comparison.get("best_simple_baseline", {}) or {}).get("strategy_name", "") or ""
             ),
