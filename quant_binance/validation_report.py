@@ -286,6 +286,312 @@ def _build_symbol_scorecard(symbol_rows: list[dict[str, object]]) -> list[dict[s
     return rows
 
 
+def _score_bucket_floor(label: str) -> int:
+    token = str(label or "").split("-", 1)[0].rstrip("+")
+    try:
+        return int(token)
+    except (TypeError, ValueError):
+        return -1
+
+
+def _score_alignment_signal(score_rows: list[dict[str, object]]) -> dict[str, object]:
+    ordered_rows = sorted(
+        [dict(row) for row in score_rows if isinstance(row, dict)],
+        key=lambda row: _score_bucket_floor(str(row.get("score_bucket_label", "") or "")),
+    )
+    if len(ordered_rows) < 2:
+        expectancy = _safe_float(ordered_rows[0].get("expectancy_usd")) if ordered_rows else 0.0
+        return {
+            "available": bool(ordered_rows),
+            "bucket_count": len(ordered_rows),
+            "monotonic_ratio": 0.0,
+            "high_vs_low_expectancy_delta_usd": round(expectancy, 6),
+            "alignment_score": 0.5 if ordered_rows else 0.0,
+        }
+    supportive_steps = 0
+    adjacent_steps = 0
+    for previous, current in zip(ordered_rows, ordered_rows[1:]):
+        adjacent_steps += 1
+        if _safe_float(current.get("expectancy_usd")) >= _safe_float(previous.get("expectancy_usd")) - 0.05:
+            supportive_steps += 1
+    midpoint = max(len(ordered_rows) // 2, 1)
+    low_rows = ordered_rows[:midpoint]
+    high_rows = ordered_rows[midpoint:]
+    low_weight = sum(_safe_int(row.get("trade_count")) for row in low_rows)
+    high_weight = sum(_safe_int(row.get("trade_count")) for row in high_rows)
+    low_expectancy = _weighted_metric(
+        sum(_safe_float(row.get("expectancy_usd")) * _safe_int(row.get("trade_count")) for row in low_rows),
+        float(max(low_weight, 1)),
+    )
+    high_expectancy = _weighted_metric(
+        sum(_safe_float(row.get("expectancy_usd")) * _safe_int(row.get("trade_count")) for row in high_rows),
+        float(max(high_weight, 1)),
+    )
+    monotonic_ratio = round(_safe_ratio(supportive_steps, adjacent_steps), 6)
+    expectancy_delta = round(high_expectancy - low_expectancy, 6)
+    alignment_score = _clamp(
+        0.5
+        + (expectancy_delta / 6.0)
+        + ((monotonic_ratio - 0.5) * 0.5),
+        lower=0.0,
+        upper=1.0,
+    )
+    return {
+        "available": True,
+        "bucket_count": len(ordered_rows),
+        "monotonic_ratio": monotonic_ratio,
+        "high_vs_low_expectancy_delta_usd": expectancy_delta,
+        "alignment_score": alignment_score,
+    }
+
+
+def _sample_quality_checkpoint_snapshot(
+    *,
+    total_closed_trade_count: int,
+    total_live_order_count: int,
+    total_tested_order_count: int,
+    symbol_rows: list[dict[str, object]],
+) -> dict[str, object]:
+    portfolio_thresholds = [
+        {
+            "metric": "total_closed_trade_count",
+            "threshold": 6,
+            "current_value": total_closed_trade_count,
+            "reached": total_closed_trade_count >= 6,
+        },
+        {
+            "metric": "total_closed_trade_count",
+            "threshold": 10,
+            "current_value": total_closed_trade_count,
+            "reached": total_closed_trade_count >= 10,
+        },
+        {
+            "metric": "total_live_order_count",
+            "threshold": 8,
+            "current_value": total_live_order_count,
+            "reached": total_live_order_count >= 8,
+        },
+        {
+            "metric": "total_live_order_count",
+            "threshold": 12,
+            "current_value": total_live_order_count,
+            "reached": total_live_order_count >= 12,
+        },
+        {
+            "metric": "total_tested_order_count",
+            "threshold": 4,
+            "current_value": total_tested_order_count,
+            "reached": total_tested_order_count >= 4,
+        },
+    ]
+    symbol_thresholds = [
+        {
+            "symbol": str(row.get("symbol", "") or ""),
+            "trade_count": _safe_int(row.get("trade_count")),
+            "validation_threshold": _safe_int(row.get("required_trade_count_for_validation"), 3),
+            "validation_ready": _safe_int(row.get("trade_count")) >= _safe_int(row.get("required_trade_count_for_validation"), 3),
+        }
+        for row in symbol_rows
+        if str(row.get("symbol", "") or "")
+    ]
+    symbol_thresholds.sort(key=lambda item: str(item["symbol"]))
+    return {
+        "portfolio": portfolio_thresholds,
+        "symbols": symbol_thresholds,
+    }
+
+
+def _build_sample_quality_watchdog(
+    *,
+    run_count: int,
+    total_closed_trade_count: int,
+    total_live_order_count: int,
+    total_tested_order_count: int,
+    total_realized_pnl_usd: float,
+    symbol_rows: list[dict[str, object]],
+    symbol_scorecard: list[dict[str, object]],
+    score_alignment_summary: list[dict[str, object]],
+    runner_reject_rate: float,
+    runner_avg_slippage_bps: float,
+    runner_avg_realized_edge_bps: float,
+    runner_avg_edge_retention_ratio: float,
+    runner_protection_degraded_rate: float,
+    runner_walk_forward_window_count: int,
+    runner_positive_walk_forward_ratio: float,
+) -> dict[str, object]:
+    total_symbol_trades = sum(_safe_int(row.get("trade_count")) for row in symbol_rows)
+    dominant_symbol_row = max(
+        symbol_rows,
+        key=lambda row: (_safe_int(row.get("trade_count")), str(row.get("symbol", ""))),
+        default={},
+    )
+    dominant_symbol_trade_count = _safe_int(dominant_symbol_row.get("trade_count"))
+    dominant_symbol_trade_share = round(
+        dominant_symbol_trade_count / max(total_symbol_trades, 1),
+        6,
+    ) if total_symbol_trades > 0 else 0.0
+    validated_symbol_count = sum(
+        1
+        for row in symbol_rows
+        if _safe_int(row.get("trade_count")) >= _safe_int(row.get("required_trade_count_for_validation"), 3)
+    )
+    alignment = _score_alignment_signal(score_alignment_summary)
+    scorecard_weight = float(sum(_safe_int(row.get("trade_count")) for row in symbol_scorecard))
+    weighted_recent_consistency = _weighted_metric(
+        sum(_safe_float(row.get("recent_positive_run_ratio")) * _safe_int(row.get("trade_count")) for row in symbol_scorecard),
+        scorecard_weight,
+    )
+    weighted_expectancy_stability = _weighted_metric(
+        sum(_safe_float(row.get("expectancy_stability")) * _safe_int(row.get("trade_count")) for row in symbol_scorecard),
+        scorecard_weight,
+    )
+    recent_consistency_score = _clamp(
+        (weighted_recent_consistency * 0.55)
+        + (weighted_expectancy_stability * 0.45),
+        lower=0.0,
+        upper=1.0,
+    )
+    reasons: list[str] = []
+    status = "healthy"
+    if total_closed_trade_count <= 0 and total_live_order_count <= 0:
+        status = "thin"
+        reasons.append("NO_SAMPLE_EVIDENCE")
+    else:
+        if total_closed_trade_count < 6:
+            reasons.append("CLOSED_TRADE_SAMPLE_THIN")
+        if total_live_order_count < 8:
+            reasons.append("LIVE_ORDER_SAMPLE_THIN")
+        if run_count < 2:
+            reasons.append("RUN_HISTORY_THIN")
+        if validated_symbol_count < 2:
+            reasons.append("VALIDATED_SYMBOL_BREADTH_THIN")
+        if dominant_symbol_trade_share >= 0.68 and total_closed_trade_count >= 4:
+            reasons.append("SYMBOL_CONCENTRATION_ELEVATED")
+        if (
+            total_closed_trade_count < 6
+            or total_live_order_count < 8
+            or run_count < 2
+            or validated_symbol_count < 2
+        ):
+            status = "thin"
+        if total_closed_trade_count >= 6:
+            degraded = False
+            if dominant_symbol_trade_share >= 0.82:
+                degraded = True
+                reasons.append("SYMBOL_CONCENTRATION_TOO_HIGH")
+            if total_realized_pnl_usd <= 0.0:
+                degraded = True
+                reasons.append("REALIZED_PNL_NON_POSITIVE")
+            if alignment["available"] and float(alignment.get("alignment_score", 0.0) or 0.0) < 0.45:
+                degraded = True
+                reasons.append("SCORE_TO_PNL_ALIGNMENT_WEAK")
+            if runner_avg_edge_retention_ratio < 0.55 and total_live_order_count >= 4:
+                degraded = True
+                reasons.append("EDGE_RETENTION_WEAK")
+            if runner_avg_realized_edge_bps <= 0.0 and total_live_order_count >= 4:
+                degraded = True
+                reasons.append("REALIZED_EDGE_NON_POSITIVE")
+            if runner_reject_rate > 0.12 and total_live_order_count >= 4:
+                degraded = True
+                reasons.append("REJECT_RATE_HIGH")
+            if runner_avg_slippage_bps > 12.0 and total_live_order_count >= 4:
+                degraded = True
+                reasons.append("SLIPPAGE_HIGH")
+            if runner_protection_degraded_rate > 0.12 and total_live_order_count >= 4:
+                degraded = True
+                reasons.append("EXECUTION_PROTECTION_DEGRADED")
+            if runner_walk_forward_window_count >= 2 and runner_positive_walk_forward_ratio < 0.5:
+                degraded = True
+                reasons.append("RUN_CONSISTENCY_WEAK")
+            if recent_consistency_score < 0.5 and validated_symbol_count >= 1:
+                degraded = True
+                reasons.append("SYMBOL_CONSISTENCY_WEAK")
+            if degraded:
+                status = "degraded"
+        if (
+            status != "degraded"
+            and total_closed_trade_count >= 10
+            and total_live_order_count >= 12
+            and validated_symbol_count >= 2
+            and dominant_symbol_trade_share <= 0.58
+            and total_realized_pnl_usd > 0.0
+            and float(alignment.get("alignment_score", 0.0) or 0.0) >= 0.6
+            and recent_consistency_score >= 0.62
+            and runner_avg_edge_retention_ratio >= 0.68
+            and runner_avg_realized_edge_bps > 0.0
+            and runner_reject_rate <= 0.06
+            and runner_avg_slippage_bps <= 8.0
+            and runner_protection_degraded_rate <= 0.08
+            and (runner_walk_forward_window_count < 2 or runner_positive_walk_forward_ratio >= 0.67)
+        ):
+            status = "promote_ready"
+            reasons = ["BROAD_SAMPLE_SUPPORTIVE"]
+    guardrails = {
+        "degraded": {
+            "promotion_intensity_cap": 0.65,
+            "max_positive_symbols": 1,
+            "allow_alt_promotions": False,
+            "prefer_majors_only": True,
+            "non_major_positive_bias": "observe_only",
+        },
+        "thin": {
+            "promotion_intensity_cap": 0.8,
+            "max_positive_symbols": 1,
+            "allow_alt_promotions": False,
+            "prefer_majors_only": True,
+            "non_major_positive_bias": "observe_only",
+        },
+        "healthy": {
+            "promotion_intensity_cap": 1.0,
+            "max_positive_symbols": 0,
+            "allow_alt_promotions": False,
+            "prefer_majors_only": True,
+            "non_major_positive_bias": "neutral",
+        },
+        "promote_ready": {
+            "promotion_intensity_cap": 1.05,
+            "max_positive_symbols": 2,
+            "allow_alt_promotions": True,
+            "prefer_majors_only": False,
+            "non_major_positive_bias": "neutral",
+        },
+    }
+    return {
+        "status": status,
+        "reason_codes": reasons,
+        "metrics": {
+            "run_count": run_count,
+            "total_closed_trade_count": total_closed_trade_count,
+            "total_live_order_count": total_live_order_count,
+            "total_tested_order_count": total_tested_order_count,
+            "total_realized_pnl_usd": round(total_realized_pnl_usd, 6),
+            "validated_symbol_count": validated_symbol_count,
+            "dominant_symbol": str(dominant_symbol_row.get("symbol", "") or ""),
+            "dominant_symbol_trade_share": dominant_symbol_trade_share,
+            "score_alignment_score": round(float(alignment.get("alignment_score", 0.0) or 0.0), 6),
+            "score_alignment_monotonic_ratio": round(float(alignment.get("monotonic_ratio", 0.0) or 0.0), 6),
+            "score_alignment_delta_usd": round(float(alignment.get("high_vs_low_expectancy_delta_usd", 0.0) or 0.0), 6),
+            "recent_run_consistency": round(weighted_recent_consistency, 6),
+            "recent_expectancy_stability": round(weighted_expectancy_stability, 6),
+            "recent_consistency_score": recent_consistency_score,
+            "runner_reject_rate": round(runner_reject_rate, 6),
+            "runner_avg_slippage_bps": round(runner_avg_slippage_bps, 6),
+            "runner_avg_realized_edge_bps": round(runner_avg_realized_edge_bps, 6),
+            "runner_avg_edge_retention_ratio": round(runner_avg_edge_retention_ratio, 6),
+            "runner_protection_degraded_rate": round(runner_protection_degraded_rate, 6),
+            "runner_walk_forward_window_count": runner_walk_forward_window_count,
+            "runner_positive_walk_forward_ratio": round(runner_positive_walk_forward_ratio, 6),
+        },
+        "policy_guardrails": guardrails[status],
+        "checkpoint_snapshot": _sample_quality_checkpoint_snapshot(
+            total_closed_trade_count=total_closed_trade_count,
+            total_live_order_count=total_live_order_count,
+            total_tested_order_count=total_tested_order_count,
+            symbol_rows=symbol_rows,
+        ),
+    }
+
+
 def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
     report = build_runtime_performance_report(run_dir=run_dir)
     summary = _load_summary(run_dir)
@@ -412,6 +718,7 @@ def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evi
         ("runner_total_realized_pnl_usd", True, 0.5),
         ("runner_drawdown_to_pnl_ratio", False, 0.05),
         ("runner_reject_rate", False, 0.01),
+        ("runner_protection_degraded_rate", False, 0.01),
         ("runner_avg_slippage_bps", False, 0.5),
         ("runner_avg_realized_edge_bps", True, 0.25),
         ("runner_avg_edge_retention_ratio", True, 0.02),
@@ -1516,6 +1823,7 @@ def build_policy_comparison_validation_artifact(*,
         "runner_drawdown_to_pnl_ratio": runner.get("runner_drawdown_to_pnl_ratio", 0.0),
         "runner_shadow_alignment_score": runner.get("runner_shadow_alignment_score", 0.0),
         "runner_reject_rate": runner.get("runner_reject_rate", 0.0),
+        "runner_protection_degraded_rate": runner.get("runner_protection_degraded_rate", 0.0),
         "runner_avg_slippage_bps": runner.get("runner_avg_slippage_bps", 0.0),
         "runner_avg_realized_edge_bps": runner.get("runner_avg_realized_edge_bps", 0.0),
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
@@ -1523,6 +1831,7 @@ def build_policy_comparison_validation_artifact(*,
         "micro_live_gate": runner.get("micro_live_gate", {}),
         "recent_retention_window": runner.get("recent_retention_window", {}),
         "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
+        "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
         "candidate_vs_current_validation_path": validation_path,
         "counterfactual_replay_path": counterfactual_replay_path,
         "candidate_replay_summary": candidate_replay_summary,
@@ -1560,10 +1869,12 @@ def build_policy_comparison_validation_artifact(*,
         "runner_drawdown_to_pnl_ratio": runner.get("runner_drawdown_to_pnl_ratio", 0.0),
         "runner_shadow_alignment_score": runner.get("runner_shadow_alignment_score", 0.0),
         "runner_reject_rate": runner.get("runner_reject_rate", 0.0),
+        "runner_protection_degraded_rate": runner.get("runner_protection_degraded_rate", 0.0),
         "runner_avg_slippage_bps": runner.get("runner_avg_slippage_bps", 0.0),
         "runner_avg_realized_edge_bps": runner.get("runner_avg_realized_edge_bps", 0.0),
         "runner_avg_edge_retention_ratio": runner.get("runner_avg_edge_retention_ratio", 0.0),
         "runner_positive_walk_forward_ratio": runner.get("runner_positive_walk_forward_ratio", 0.0),
+        "sample_quality_watchdog": runner.get("sample_quality_watchdog", {}),
         "recent_retention_window": runner.get("recent_retention_window", {}),
         "cumulative_retention_window": runner.get("cumulative_retention_window", {}),
         "counterfactual_replay_path": counterfactual_replay_path,
@@ -1642,6 +1953,10 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         retention_weight,
     )
     reject_rate = round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0
+    protection_degraded_rate = _weighted_metric(
+        sum(_safe_float(snapshot.get("protection_degraded_rate")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
+        retention_weight,
+    )
     micro_live_gate = _build_micro_live_gate(
         live_order_count=live_order_count,
         rejected_live_order_count=rejected_live_order_count,
@@ -1658,6 +1973,23 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         validation_runs=run_snapshots,
         walk_forward_windows=walk_forward_windows,
     )
+    sample_quality_watchdog = _build_sample_quality_watchdog(
+        run_count=report.run_count,
+        total_closed_trade_count=report.total_closed_trade_count,
+        total_live_order_count=report.total_live_order_count,
+        total_tested_order_count=report.total_tested_order_count,
+        total_realized_pnl_usd=total_realized_pnl_usd,
+        symbol_rows=symbol_rows,
+        symbol_scorecard=symbol_scorecard,
+        score_alignment_summary=list(report.score_alignment_summary),
+        runner_reject_rate=reject_rate,
+        runner_avg_slippage_bps=avg_slippage_bps,
+        runner_avg_realized_edge_bps=avg_realized_edge_bps,
+        runner_avg_edge_retention_ratio=avg_edge_retention_ratio,
+        runner_protection_degraded_rate=protection_degraded_rate,
+        runner_walk_forward_window_count=len(walk_forward_windows),
+        runner_positive_walk_forward_ratio=round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
+    )
     total_return_pct = 0.0
     max_drawdown_pct = 0.0
     evidence = {
@@ -1673,6 +2005,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
         "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
         "runner_reject_rate": reject_rate,
+        "runner_protection_degraded_rate": protection_degraded_rate,
         "runner_avg_slippage_bps": avg_slippage_bps,
         "runner_avg_realized_edge_bps": avg_realized_edge_bps,
         "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
@@ -1682,6 +2015,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "micro_live_gate": micro_live_gate,
         "recent_retention_window": recent_retention_window,
         "cumulative_retention_window": cumulative_retention_window,
+        "sample_quality_watchdog": sample_quality_watchdog,
         "symbol_scorecard": symbol_scorecard,
     }
     return {
@@ -1701,6 +2035,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
         "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
         "runner_reject_rate": reject_rate,
+        "runner_protection_degraded_rate": protection_degraded_rate,
         "runner_avg_slippage_bps": avg_slippage_bps,
         "runner_avg_realized_edge_bps": avg_realized_edge_bps,
         "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
@@ -1716,6 +2051,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         "micro_live_gate": micro_live_gate,
         "recent_retention_window": recent_retention_window,
         "cumulative_retention_window": cumulative_retention_window,
+        "sample_quality_watchdog": sample_quality_watchdog,
         "evidence": evidence,
     }
 

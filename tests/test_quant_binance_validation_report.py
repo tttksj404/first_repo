@@ -9,6 +9,26 @@ from quant_binance.validation_report import build_policy_comparison_validation_a
 
 
 class QuantBinanceValidationReportTests(unittest.TestCase):
+    def _write_watchdog_run(
+        self,
+        *,
+        run_dir: Path,
+        summary: dict[str, object],
+        trades: list[dict[str, object]],
+        decisions: list[dict[str, object]],
+    ) -> None:
+        logs_dir = run_dir / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "summary.json").write_text(json.dumps(summary), encoding="utf-8")
+        (logs_dir / "closed_trades.jsonl").write_text(
+            "\n".join(json.dumps(row) for row in trades) + ("\n" if trades else ""),
+            encoding="utf-8",
+        )
+        (logs_dir / "decisions.jsonl").write_text(
+            "\n".join(json.dumps(row) for row in decisions) + ("\n" if decisions else ""),
+            encoding="utf-8",
+        )
+
     def test_build_policy_comparison_validation_artifact_scores_candidate_vs_current(self) -> None:
         candidate_policy = {"adjustments": [{"symbol": "BTCUSDT", "size_multiplier": 1.1, "leverage_multiplier": 1.1, "entry_threshold_bps": -0.5, "expected_profit_floor_bps": -1.0}]}
         current_policy_state = {"active_policy": {"adjustments": [{"symbol": "BTCUSDT", "size_multiplier": 1.0, "leverage_multiplier": 1.0, "entry_threshold_bps": 0.0, "expected_profit_floor_bps": 0.0}]}}
@@ -185,6 +205,113 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 comparison_summary["replay_evidence_comparison"]["current"]["replay_source"],
                 "observed_runtime_artifacts",
             )
+
+    def test_build_policy_validation_runner_artifact_emits_thin_watchdog_and_checkpoint_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            self._write_watchdog_run(
+                run_dir=run_a,
+                summary={
+                    "live_order_count": 3,
+                    "accepted_live_order_count": 3,
+                    "rejected_live_order_count": 0,
+                    "tested_order_count": 1,
+                    "avg_slippage_bps": 3.0,
+                    "avg_edge_retention_ratio": 0.82,
+                    "avg_realized_edge_bps": 7.0,
+                    "avg_expected_edge_bps": 8.0,
+                    "protection_degraded_rate": 0.0,
+                },
+                trades=[
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 3.0, "realized_return_bps_estimate": 10.0, "entry_predictability_score": 72.0},
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.5, "realized_return_bps_estimate": 8.0, "entry_predictability_score": 74.0},
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 1.5, "realized_return_bps_estimate": 6.0, "entry_predictability_score": 76.0},
+                ],
+                decisions=[
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-14T00:00:00+00:00", "predictability_score": 72.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-14T00:05:00+00:00", "predictability_score": 74.0, "net_expected_edge_bps": 12.5, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-14T00:10:00+00:00", "predictability_score": 76.0, "net_expected_edge_bps": 13.0, "estimated_round_trip_cost_bps": 8.0},
+                ],
+            )
+            artifact = build_policy_validation_runner_artifact(base_dir=base, lookback_days=7)
+            watchdog = artifact["sample_quality_watchdog"]
+            self.assertEqual(watchdog["status"], "thin")
+            self.assertIn("RUN_HISTORY_THIN", watchdog["reason_codes"])
+            self.assertEqual(watchdog["metrics"]["dominant_symbol_trade_share"], 1.0)
+            self.assertEqual(watchdog["policy_guardrails"]["max_positive_symbols"], 1)
+            self.assertEqual(
+                watchdog["checkpoint_snapshot"]["symbols"][0]["validation_ready"],
+                True,
+            )
+
+    def test_build_policy_validation_runner_artifact_emits_promote_ready_watchdog_for_broad_supportive_sample(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            run_b = base / "output" / "paper-live-shell" / "run-b"
+            self._write_watchdog_run(
+                run_dir=run_a,
+                summary={
+                    "live_order_count": 6,
+                    "accepted_live_order_count": 6,
+                    "rejected_live_order_count": 0,
+                    "tested_order_count": 2,
+                    "avg_slippage_bps": 3.2,
+                    "avg_edge_retention_ratio": 0.83,
+                    "avg_realized_edge_bps": 8.5,
+                    "avg_expected_edge_bps": 9.4,
+                    "protection_degraded_rate": 0.0,
+                },
+                trades=[
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 3.0, "realized_return_bps_estimate": 12.0, "entry_predictability_score": 78.0},
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.2, "realized_return_bps_estimate": 9.0, "entry_predictability_score": 76.0},
+                    {"symbol": "ETHUSDT", "realized_pnl_usd_estimate": 2.4, "realized_return_bps_estimate": 11.0, "entry_predictability_score": 68.0},
+                    {"symbol": "ETHUSDT", "realized_pnl_usd_estimate": 1.8, "realized_return_bps_estimate": 8.0, "entry_predictability_score": 66.0},
+                    {"symbol": "SOLUSDT", "realized_pnl_usd_estimate": 1.4, "realized_return_bps_estimate": 7.0, "entry_predictability_score": 58.0},
+                ],
+                decisions=[
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-14T00:00:00+00:00", "predictability_score": 78.0, "net_expected_edge_bps": 13.0, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-14T00:05:00+00:00", "predictability_score": 76.0, "net_expected_edge_bps": 12.0, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "ETHUSDT", "final_mode": "spot", "timestamp": "2026-03-14T00:10:00+00:00", "predictability_score": 68.0, "net_expected_edge_bps": 10.0, "estimated_round_trip_cost_bps": 7.0},
+                    {"symbol": "ETHUSDT", "final_mode": "spot", "timestamp": "2026-03-14T00:15:00+00:00", "predictability_score": 66.0, "net_expected_edge_bps": 9.5, "estimated_round_trip_cost_bps": 7.0},
+                    {"symbol": "SOLUSDT", "final_mode": "spot", "timestamp": "2026-03-14T00:20:00+00:00", "predictability_score": 58.0, "net_expected_edge_bps": 7.5, "estimated_round_trip_cost_bps": 6.0},
+                ],
+            )
+            self._write_watchdog_run(
+                run_dir=run_b,
+                summary={
+                    "live_order_count": 6,
+                    "accepted_live_order_count": 6,
+                    "rejected_live_order_count": 0,
+                    "tested_order_count": 2,
+                    "avg_slippage_bps": 3.5,
+                    "avg_edge_retention_ratio": 0.81,
+                    "avg_realized_edge_bps": 8.1,
+                    "avg_expected_edge_bps": 9.0,
+                    "protection_degraded_rate": 0.0,
+                },
+                trades=[
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.8, "realized_return_bps_estimate": 11.0, "entry_predictability_score": 79.0},
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.0, "realized_return_bps_estimate": 8.0, "entry_predictability_score": 77.0},
+                    {"symbol": "ETHUSDT", "realized_pnl_usd_estimate": 2.1, "realized_return_bps_estimate": 9.0, "entry_predictability_score": 69.0},
+                    {"symbol": "ETHUSDT", "realized_pnl_usd_estimate": 1.7, "realized_return_bps_estimate": 7.0, "entry_predictability_score": 67.0},
+                    {"symbol": "SOLUSDT", "realized_pnl_usd_estimate": 1.2, "realized_return_bps_estimate": 5.0, "entry_predictability_score": 59.0},
+                ],
+                decisions=[
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-15T00:00:00+00:00", "predictability_score": 79.0, "net_expected_edge_bps": 13.2, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-15T00:05:00+00:00", "predictability_score": 77.0, "net_expected_edge_bps": 12.4, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "ETHUSDT", "final_mode": "spot", "timestamp": "2026-03-15T00:10:00+00:00", "predictability_score": 69.0, "net_expected_edge_bps": 10.2, "estimated_round_trip_cost_bps": 7.0},
+                    {"symbol": "ETHUSDT", "final_mode": "spot", "timestamp": "2026-03-15T00:15:00+00:00", "predictability_score": 67.0, "net_expected_edge_bps": 9.4, "estimated_round_trip_cost_bps": 7.0},
+                    {"symbol": "SOLUSDT", "final_mode": "spot", "timestamp": "2026-03-15T00:20:00+00:00", "predictability_score": 59.0, "net_expected_edge_bps": 7.4, "estimated_round_trip_cost_bps": 6.0},
+                ],
+            )
+            artifact = build_policy_validation_runner_artifact(base_dir=base, lookback_days=7)
+            watchdog = artifact["sample_quality_watchdog"]
+            self.assertEqual(watchdog["status"], "promote_ready")
+            self.assertEqual(watchdog["policy_guardrails"]["allow_alt_promotions"], True)
+            self.assertLess(watchdog["metrics"]["dominant_symbol_trade_share"], 0.5)
+            self.assertGreaterEqual(watchdog["metrics"]["score_alignment_score"], 0.6)
 
     def test_build_policy_comparison_validation_artifact_emits_policy_application_delta_and_cumulative_retention(self) -> None:
         candidate_policy = {
