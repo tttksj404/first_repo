@@ -34,6 +34,7 @@ from quant_binance.validation_report import write_policy_comparison_validation_a
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
+from quant_binance.runtime_universe import build_runtime_universe_hydration
 from quant_binance.self_healing import RuntimeSelfHealing, parse_error_code
 from quant_binance.telegram_notify import send_telegram_message, telegram_report_only_enabled
 
@@ -708,6 +709,7 @@ class LivePaperSession:
         timestamp: datetime,
         market: str | None = None,
         exchange_id: str | None = None,
+        policy_bucket: str | None = None,
     ) -> None:
         self._execution_quality_state.record(
             symbol=symbol,
@@ -720,6 +722,7 @@ class LivePaperSession:
             timestamp=timestamp,
             market=market,
             exchange_id=exchange_id,
+            policy_bucket=policy_bucket,
         )
 
     def _execution_quality_exchange_id(self) -> str | None:
@@ -920,6 +923,7 @@ class LivePaperSession:
                 "live_evidence_rejudge": {},
                 "executive_operating_verdict": {},
                 "symbol_lifecycle": [],
+                "runtime_universe_hydration": {},
             }
         active_policy = dict(policy_state.get("active_policy", {}) or {})
         rollout_progression = self._policy_rollout_progression(policy_state)
@@ -932,6 +936,18 @@ class LivePaperSession:
         ):
             adjustments = list(dict(policy_state.get("candidate_policy", {}) or {}).get("adjustments", []) or [])
             source = "candidate_policy"
+        configured_symbols = sorted(
+            {
+                str(symbol)
+                for symbol in list(self.runtime.eligible_symbols or set())
+                if str(symbol)
+            }
+            | {
+                str(symbol)
+                for symbol in list(self.observe_only_symbols or [])
+                if str(symbol)
+            }
+        )
         return {
             "policy_state": policy_state,
             "active_policy": active_policy,
@@ -950,6 +966,11 @@ class LivePaperSession:
                 or {}
             ),
             "symbol_lifecycle": list(policy_state.get("symbol_lifecycle", []) or []),
+            "runtime_universe_hydration": build_runtime_universe_hydration(
+                policy_state=policy_state,
+                configured_symbols=configured_symbols,
+                major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
+            ),
         }
 
     def _policy_entry_context_snapshot(self) -> dict[str, object]:
@@ -1041,6 +1062,11 @@ class LivePaperSession:
                 return payload
         return {}
 
+    def _runtime_universe_row_for_symbol(self, symbol: str) -> dict[str, object]:
+        hydration = dict(self._policy_runtime_context().get("runtime_universe_hydration", {}) or {})
+        rows_by_symbol = dict(hydration.get("rows_by_symbol", {}) or {})
+        return dict(rows_by_symbol.get(symbol, {}) or {})
+
     def _effective_executive_runtime_verdict(
         self,
         *,
@@ -1067,6 +1093,7 @@ class LivePaperSession:
         executive_operating_verdict = dict(context.get("executive_operating_verdict", {}) or {})
         live_evidence_rejudge = dict(context.get("live_evidence_rejudge", {}) or {})
         lifecycle_row = self._symbol_lifecycle_row_for_symbol(decision.symbol)
+        runtime_universe_row = self._runtime_universe_row_for_symbol(decision.symbol)
         lifecycle_action = str(lifecycle_row.get("recommended_action", "keep") or "keep")
         effective_verdict, rejudge_status = self._effective_executive_runtime_verdict(
             executive_operating_verdict=executive_operating_verdict,
@@ -1079,6 +1106,10 @@ class LivePaperSession:
         rejection_reasons: list[str] = []
         if lifecycle_action in {"rollback", "hold", "re_review"}:
             rejection_reasons.append(f"SYMBOL_LIFECYCLE_{lifecycle_action.upper()}")
+        if bool(runtime_universe_row.get("observe_only")):
+            rejection_reasons.append("POLICY_BUCKET_OBSERVE_ONLY")
+        elif not bool(runtime_universe_row.get("allow_bootstrap", True)):
+            rejection_reasons.append("POLICY_BUCKET_BOOTSTRAP_EXCLUDED")
         if effective_verdict == "rollback":
             rejection_reasons.append("EXECUTIVE_OPERATING_VERDICT_ROLLBACK")
         elif effective_verdict in {"tighten", "rebuild_evidence"} and not is_major_symbol:
@@ -5283,9 +5314,15 @@ class LivePaperSession:
         if last_recorded == decision.timestamp:
             return
         managed_decision = self._apply_loss_combo_downgrade(decision=decision)
+        policy_entry_context = self._policy_entry_context_snapshot()
         managed_decision = self._execution_quality_state.apply_overlay(
             managed_decision,
             exchange_id=self._execution_quality_exchange_id(),
+            policy_bucket=(
+                str(policy_entry_context.get("entry_policy_bucket", "") or "")
+                if bool(policy_entry_context.get("entry_policy_bucket_available"))
+                else None
+            ),
         )
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
@@ -5309,7 +5346,7 @@ class LivePaperSession:
                 "decisions",
                 {
                     **managed_decision.as_dict(),
-                    **self._policy_entry_context_snapshot(),
+                    **policy_entry_context,
                 },
             )
         if bootstrap:
@@ -5432,6 +5469,12 @@ class LivePaperSession:
             if executable_decision.final_mode not in {"spot", "futures"} or executable_decision.order_intent_notional_usd <= 0:
                 self._clear_live_entry_starvation(symbol=executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
+                policy_entry_context = self._policy_entry_context_snapshot()
+                policy_bucket = (
+                    str(policy_entry_context.get("entry_policy_bucket", "") or "")
+                    if bool(policy_entry_context.get("entry_policy_bucket_available"))
+                    else None
+                )
                 try:
                     live_result = self.live_order_executor.execute_decision(
                         decision=executable_decision,
@@ -5445,6 +5488,7 @@ class LivePaperSession:
                         "market": executable_decision.final_mode,
                         "stage": "live_order",
                         "error": error_text,
+                        **policy_entry_context,
                     }
                     if self.verbose:
                         print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
@@ -5458,6 +5502,7 @@ class LivePaperSession:
                         timestamp=timestamp,
                         market=executable_decision.final_mode,
                         exchange_id=self.live_order_executor._exchange_id(),
+                        policy_bucket=policy_bucket,
                     )
                     self._apply_order_error_cooldown(
                         symbol=executable_decision.symbol,
@@ -5515,6 +5560,7 @@ class LivePaperSession:
                             "protection_orders": list(live_result.protection_orders),
                             "protection_error": live_result.protection_error,
                             "response": live_result.response,
+                            **policy_entry_context,
                         }
                         self._record_execution_quality_outcome(
                             symbol=live_result.symbol,
@@ -5527,6 +5573,7 @@ class LivePaperSession:
                             timestamp=timestamp,
                             market=live_result.market,
                             exchange_id=self.live_order_executor._exchange_id(),
+                            policy_bucket=policy_bucket,
                         )
                         self.live_orders.append(payload)
                         if self.verbose:
@@ -5545,6 +5592,7 @@ class LivePaperSession:
                                     "market": live_result.market,
                                     "stage": "protection_order",
                                     "error": live_result.protection_error,
+                                    **policy_entry_context,
                                 },
                             )
                             self._apply_order_error_cooldown(
@@ -5597,6 +5645,7 @@ class LivePaperSession:
                                 timestamp=timestamp,
                                 market=str(preflight_rejection.get("market", executable_decision.final_mode)),
                                 exchange_id=self.live_order_executor._exchange_id(),
+                                policy_bucket=policy_bucket,
                             )
                             if reason in {"BITGET_MAX_OPEN_ZERO", "BITGET_MAX_OPEN_BELOW_MIN_QTY"}:
                                 self._apply_order_error_cooldown(

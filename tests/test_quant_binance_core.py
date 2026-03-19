@@ -1708,6 +1708,84 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(priority["selected_promotion_symbols"], ["BTCUSDT"])
         self.assertEqual(priority["deferred_promotion_symbols"], ["ETHUSDT"])
 
+    def test_build_auto_tune_policy_excludes_bucket_observe_only_symbols_before_top_k_selection(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "promotion_top_k": 1,
+                "symbol_summary": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": 4.6,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 1.0,
+                            "expectancy_stability": 0.9,
+                        },
+                    },
+                    {
+                        "symbol": "ETHUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": 5.1,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 1.0,
+                            "expectancy_stability": 0.9,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.9,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 1.0,
+                    },
+                    {
+                        "symbol": "ETHUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.95,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 1.0,
+                    },
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 70.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+                "policy_context_bucket_evidence": {
+                    "active_policy": {
+                        "policy_context_bucket_name": "active_policy",
+                        "policy_context_bucket_pruning_recommendations": [
+                            {
+                                "symbol": "ETHUSDT",
+                                "recommendation": "observe_only",
+                                "trade_count": 3,
+                            }
+                        ],
+                    }
+                },
+            },
+        )
+
+        adjustments = {item["symbol"]: item for item in policy["adjustments"]}
+        self.assertEqual(set(adjustments), {"BTCUSDT"})
+        priority = policy["decomposition_summary"]["cross_symbol_promotion_priority"]
+        self.assertEqual(priority["selected_promotion_symbols"], ["BTCUSDT"])
+        self.assertEqual(priority["excluded_promotion_symbols"], ["ETHUSDT"])
+        self.assertEqual(priority["excluded_promotion_rows"][0]["exclude_reason"], "policy_bucket_observe_only")
+
     def test_build_auto_tune_policy_watchdog_biases_to_majors_and_caps_positive_symbols(self) -> None:
         policy = build_auto_tune_policy(
             [],
