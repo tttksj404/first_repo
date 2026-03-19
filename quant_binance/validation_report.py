@@ -3248,6 +3248,234 @@ def _checkpoint_judge_confidence(
     return "low"
 
 
+def _checkpoint_bucket_evidence_map(payload: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    return {
+        str(bucket_name): dict(bucket_payload)
+        for bucket_name, bucket_payload in dict(dict(payload or {}).get("policy_context_bucket_evidence", {}) or {}).items()
+        if str(bucket_name)
+    }
+
+
+def _preferred_checkpoint_bucket_evidence(payload: dict[str, Any] | None) -> tuple[str, dict[str, Any], str]:
+    raw_payload = dict(payload or {})
+    bucket_payloads = _checkpoint_bucket_evidence_map(raw_payload)
+    preferred_bucket = str(raw_payload.get("preferred_policy_bucket", "") or "").strip().lower()
+    bucket_order: list[str] = []
+    if preferred_bucket:
+        bucket_order.append(preferred_bucket)
+    bucket_order.extend(
+        bucket_name
+        for bucket_name in ("staged_candidate", "active_policy", "previous_policy")
+        if bucket_name not in bucket_order
+    )
+    bucket_order.extend(
+        bucket_name
+        for bucket_name in bucket_payloads
+        if bucket_name not in bucket_order
+    )
+    for bucket_name in bucket_order:
+        bucket_payload = dict(bucket_payloads.get(bucket_name, {}) or {})
+        if bucket_payload:
+            return bucket_name, bucket_payload, "policy_bucket"
+    return "", raw_payload, "root"
+
+
+def _checkpoint_validation_runs(payload: dict[str, Any] | None) -> list[dict[str, Any]]:
+    return [
+        dict(item)
+        for item in list(
+            dict(payload or {}).get(
+                "validation_runs",
+                dict(payload or {}).get("policy_context_bucket_validation_runs", []),
+            )
+            or []
+        )
+        if isinstance(item, dict)
+    ]
+
+
+def _checkpoint_walk_forward_windows(payload: dict[str, Any] | None) -> list[dict[str, Any]]:
+    return [
+        dict(item)
+        for item in list(
+            dict(payload or {}).get(
+                "walk_forward_windows",
+                dict(payload or {}).get("policy_context_bucket_walk_forward_windows", []),
+            )
+            or []
+        )
+        if isinstance(item, dict)
+    ]
+
+
+def _checkpoint_drawdown_ratio_from_runs(validation_runs: list[dict[str, Any]]) -> float:
+    pnl_values = [_safe_float(item.get("realized_pnl_usd")) for item in validation_runs]
+    if not pnl_values:
+        return 0.0
+    cumulative = 0.0
+    peak = 0.0
+    max_drawdown = 0.0
+    for value in pnl_values:
+        cumulative += value
+        peak = max(peak, cumulative)
+        max_drawdown = max(max_drawdown, peak - cumulative)
+    return round(max_drawdown / max(abs(sum(pnl_values)), 1.0), 6)
+
+
+def _checkpoint_execution_metrics(payload: dict[str, Any] | None) -> dict[str, float | int]:
+    evidence = dict(payload or {})
+    validation_runs = _checkpoint_validation_runs(evidence)
+    walk_forward_windows = _checkpoint_walk_forward_windows(evidence)
+    summed_live_order_count = sum(_safe_int(item.get("live_order_count")) for item in validation_runs)
+    summed_rejected_live_order_count = sum(_safe_int(item.get("rejected_live_order_count")) for item in validation_runs)
+    summed_accepted_live_order_count = sum(_safe_int(item.get("accepted_live_order_count")) for item in validation_runs)
+    live_order_weight = max(summed_live_order_count, 0)
+    accepted_live_order_weight = max(summed_accepted_live_order_count, 0)
+    total_closed_trade_count = max(
+        _safe_int(evidence.get("policy_context_bucket_closed_trade_count")),
+        _safe_int(evidence.get("total_closed_trade_count")),
+        _safe_int(evidence.get("closed_trade_count")),
+        _safe_int(dict(evidence.get("micro_live_gate", {}) or {}).get("closed_trade_count")),
+        sum(_safe_int(item.get("closed_trade_count")) for item in validation_runs),
+    )
+    total_live_order_count = max(
+        _safe_int(evidence.get("total_live_order_count")),
+        _safe_int(evidence.get("live_order_count")),
+        _safe_int(dict(evidence.get("micro_live_gate", {}) or {}).get("live_order_count")),
+        live_order_weight,
+    )
+    run_count = max(
+        _safe_int(evidence.get("policy_context_bucket_run_count")),
+        _safe_int(evidence.get("run_count")),
+        len(validation_runs),
+    )
+    if "runner_total_realized_pnl_usd" in evidence or "policy_context_bucket_total_realized_pnl_usd" in evidence or "realized_pnl_usd" in evidence:
+        realized_pnl_usd = round(
+            _safe_float(
+                evidence.get(
+                    "runner_total_realized_pnl_usd",
+                    evidence.get(
+                        "policy_context_bucket_total_realized_pnl_usd",
+                        evidence.get("realized_pnl_usd"),
+                    ),
+                )
+            ),
+            6,
+        )
+    else:
+        realized_pnl_usd = round(sum(_safe_float(item.get("realized_pnl_usd")) for item in validation_runs), 6)
+    if "runner_drawdown_to_pnl_ratio" in evidence or "drawdown_to_pnl_ratio" in evidence:
+        drawdown_to_pnl_ratio = round(
+            _safe_float(
+                evidence.get(
+                    "runner_drawdown_to_pnl_ratio",
+                    evidence.get("drawdown_to_pnl_ratio"),
+                )
+            ),
+            6,
+        )
+    else:
+        drawdown_to_pnl_ratio = _checkpoint_drawdown_ratio_from_runs(validation_runs)
+    if "runner_reject_rate" in evidence or "reject_rate" in evidence:
+        reject_rate = round(
+            _safe_float(
+                evidence.get(
+                    "runner_reject_rate",
+                    evidence.get("reject_rate"),
+                )
+            ),
+            6,
+        )
+    else:
+        reject_rate = round(summed_rejected_live_order_count / max(live_order_weight, 1), 6) if live_order_weight > 0 else 0.0
+    if "runner_protection_degraded_rate" in evidence or "protection_degraded_rate" in evidence:
+        protection_degraded_rate = round(
+            _safe_float(
+                evidence.get(
+                    "runner_protection_degraded_rate",
+                    evidence.get("protection_degraded_rate"),
+                )
+            ),
+            6,
+        )
+    else:
+        protection_degraded_rate = (
+            round(
+                sum(_safe_float(item.get("protection_degraded_rate")) * _safe_int(item.get("live_order_count")) for item in validation_runs)
+                / max(live_order_weight, 1),
+                6,
+            )
+            if live_order_weight > 0
+            else 0.0
+        )
+    if "runner_avg_edge_retention_ratio" in evidence or "avg_edge_retention_ratio" in evidence or "avg_retention" in evidence:
+        avg_edge_retention_ratio = round(
+            _safe_float(
+                evidence.get(
+                    "runner_avg_edge_retention_ratio",
+                    evidence.get(
+                        "avg_edge_retention_ratio",
+                        evidence.get("avg_retention"),
+                    ),
+                )
+            ),
+            6,
+        )
+    else:
+        avg_edge_retention_ratio = (
+            round(
+                sum(_safe_float(item.get("avg_edge_retention_ratio")) * _safe_int(item.get("live_order_count")) for item in validation_runs)
+                / max(live_order_weight, 1),
+                6,
+            )
+            if live_order_weight > 0
+            else 0.0
+        )
+    if "runner_positive_walk_forward_ratio" in evidence or "policy_context_bucket_positive_walk_forward_ratio" in evidence or "positive_walk_forward_ratio" in evidence:
+        positive_walk_forward_ratio = round(
+            _safe_float(
+                evidence.get(
+                    "runner_positive_walk_forward_ratio",
+                    evidence.get(
+                        "policy_context_bucket_positive_walk_forward_ratio",
+                        evidence.get("positive_walk_forward_ratio"),
+                    ),
+                )
+            ),
+            6,
+        )
+    else:
+        positive_walk_forward_ratio = round(
+            _safe_ratio(
+                sum(
+                    1
+                    for item in walk_forward_windows
+                    if _safe_float(item.get("avg_net_edge_bps")) > 0.0 and _safe_float(item.get("avg_score")) >= 0.0
+                ),
+                len(walk_forward_windows),
+            ),
+            6,
+        )
+    walk_forward_window_count = max(
+        _safe_int(evidence.get("runner_walk_forward_window_count")),
+        _safe_int(evidence.get("policy_context_bucket_walk_forward_window_count")),
+        _safe_int(evidence.get("walk_forward_window_count")),
+        len(walk_forward_windows),
+    )
+    return {
+        "run_count": run_count,
+        "total_closed_trade_count": total_closed_trade_count,
+        "total_live_order_count": total_live_order_count,
+        "runner_total_realized_pnl_usd": realized_pnl_usd,
+        "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
+        "runner_reject_rate": reject_rate,
+        "runner_protection_degraded_rate": protection_degraded_rate,
+        "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
+        "runner_positive_walk_forward_ratio": positive_walk_forward_ratio,
+        "runner_walk_forward_window_count": walk_forward_window_count,
+    }
+
+
 def _build_checkpoint_auto_judge(
     *,
     current_policy_state: dict[str, Any] | None,
@@ -3257,16 +3485,8 @@ def _build_checkpoint_auto_judge(
     baseline_control_comparison: dict[str, object],
 ) -> dict[str, object]:
     payload = dict(runner_artifact or {})
-    policy_context_bucket_evidence = {
-        str(bucket_name): dict(bucket_payload)
-        for bucket_name, bucket_payload in dict(payload.get("policy_context_bucket_evidence", {}) or {}).items()
-        if str(bucket_name)
-    }
-    lifecycle_bucket_evidence = dict(
-        policy_context_bucket_evidence.get("active_policy", {})
-        or policy_context_bucket_evidence.get("staged_candidate", {})
-        or {}
-    )
+    checkpoint_bucket_name, checkpoint_bucket_evidence, checkpoint_evidence_source = _preferred_checkpoint_bucket_evidence(payload)
+    lifecycle_bucket_evidence = dict(checkpoint_bucket_evidence if checkpoint_evidence_source == "policy_bucket" else {})
     sample_watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
     sample_watchdog_status = str(sample_watchdog.get("status", "not_available") or "not_available")
     active_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
@@ -3276,15 +3496,16 @@ def _build_checkpoint_auto_judge(
         dict(current_policy_state or {}).get("rollout_progression", dict(active_policy.get("rollout_progression", {}) or {})).get("execution_phase", "baseline")
         or "baseline"
     )
-    run_count = _safe_int(payload.get("run_count"))
-    total_closed_trade_count = _safe_int(payload.get("total_closed_trade_count"))
-    total_live_order_count = _safe_int(payload.get("total_live_order_count"))
-    runner_total_realized_pnl_usd = round(_safe_float(payload.get("runner_total_realized_pnl_usd")), 6)
-    runner_drawdown_to_pnl_ratio = round(_safe_float(payload.get("runner_drawdown_to_pnl_ratio")), 6)
-    runner_reject_rate = round(_safe_float(payload.get("runner_reject_rate")), 6)
-    runner_protection_degraded_rate = round(_safe_float(payload.get("runner_protection_degraded_rate")), 6)
-    runner_avg_edge_retention_ratio = round(_safe_float(payload.get("runner_avg_edge_retention_ratio")), 6)
-    runner_positive_walk_forward_ratio = round(_safe_float(payload.get("runner_positive_walk_forward_ratio")), 6)
+    checkpoint_metrics = _checkpoint_execution_metrics(checkpoint_bucket_evidence)
+    run_count = _safe_int(checkpoint_metrics.get("run_count"))
+    total_closed_trade_count = _safe_int(checkpoint_metrics.get("total_closed_trade_count"))
+    total_live_order_count = _safe_int(checkpoint_metrics.get("total_live_order_count"))
+    runner_total_realized_pnl_usd = round(_safe_float(checkpoint_metrics.get("runner_total_realized_pnl_usd")), 6)
+    runner_drawdown_to_pnl_ratio = round(_safe_float(checkpoint_metrics.get("runner_drawdown_to_pnl_ratio")), 6)
+    runner_reject_rate = round(_safe_float(checkpoint_metrics.get("runner_reject_rate")), 6)
+    runner_protection_degraded_rate = round(_safe_float(checkpoint_metrics.get("runner_protection_degraded_rate")), 6)
+    runner_avg_edge_retention_ratio = round(_safe_float(checkpoint_metrics.get("runner_avg_edge_retention_ratio")), 6)
+    runner_positive_walk_forward_ratio = round(_safe_float(checkpoint_metrics.get("runner_positive_walk_forward_ratio")), 6)
     baseline_verdict = str(baseline_control_comparison.get("verdict", "not_available") or "not_available")
     baseline_gate = str(baseline_control_comparison.get("expansion_gate", "not_available") or "not_available")
     baseline_gate_reason = str(
@@ -3347,10 +3568,21 @@ def _build_checkpoint_auto_judge(
     ):
         raw_verdict = "tighten"
         reason_codes.append("RUNNER_EXECUTION_EVIDENCE_REQUIRES_TIGHTENING")
+    if raw_verdict == "expand":
+        if checkpoint_evidence_source != "policy_bucket":
+            raw_verdict = "hold"
+            reason_codes.append("CHECKPOINT_EXPANSION_REQUIRES_POLICY_BUCKET_EVIDENCE")
+        elif checkpoint_bucket_name != "staged_candidate":
+            raw_verdict = "hold"
+            reason_codes.append("CHECKPOINT_EXPANSION_REQUIRES_STAGED_CANDIDATE_BUCKET")
     effective_verdict = raw_verdict
     if raw_verdict == "rollback" and active_status in {"baseline", "keep"} and not active_adjustments:
         effective_verdict = "tighten" if sample_watchdog_status == "degraded" else "hold"
         reason_codes.append("NO_ACTIVE_NON_BASELINE_POLICY_TO_ROLL_BACK")
+    if checkpoint_evidence_source == "policy_bucket" and checkpoint_bucket_name:
+        reason_codes.append(f"CHECKPOINT_POLICY_BUCKET_{checkpoint_bucket_name.upper()}_USED")
+    elif not checkpoint_bucket_name:
+        reason_codes.append("CHECKPOINT_ROOT_EVIDENCE_FALLBACK")
     symbol_lifecycle = build_symbol_lifecycle(
         symbol_summary=list(payload.get("symbol_summary", []) or []),
         symbol_scorecard=list(payload.get("symbol_scorecard", []) or []),
@@ -3402,6 +3634,9 @@ def _build_checkpoint_auto_judge(
         "comparison_verdict": comparison_verdict,
         "comparison_score_delta": round(comparison_delta, 6),
         "sample_quality_watchdog_status": sample_watchdog_status,
+        "evidence_source": checkpoint_evidence_source,
+        "evidence_policy_bucket": checkpoint_bucket_name or "not_available",
+        "evidence_bucket_available": checkpoint_evidence_source == "policy_bucket",
         "baseline_control_comparison": dict(baseline_control_comparison or {}),
         "policy_guardrails": dict(sample_watchdog.get("policy_guardrails", {}) or {}),
         "evidence": {
@@ -3414,6 +3649,8 @@ def _build_checkpoint_auto_judge(
             "runner_protection_degraded_rate": runner_protection_degraded_rate,
             "runner_avg_edge_retention_ratio": runner_avg_edge_retention_ratio,
             "runner_positive_walk_forward_ratio": runner_positive_walk_forward_ratio,
+            "evidence_source": checkpoint_evidence_source,
+            "policy_bucket": checkpoint_bucket_name or "",
         },
         "symbol_actions": [
             {

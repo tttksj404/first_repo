@@ -658,7 +658,11 @@ class QuantBinanceCoreTests(unittest.TestCase):
                 "status": "pass",
                 "reasons": ["PROMOTION_PATH_VALIDATED"],
                 "evidence": {
-                    "checkpoint_auto_judge": {"verdict": "expand"},
+                    "checkpoint_auto_judge": {
+                        "verdict": "expand",
+                        "evidence_source": "policy_bucket",
+                        "evidence_policy_bucket": "staged_candidate",
+                    },
                     "sample_quality_watchdog": {"status": "promote_ready"},
                     "baseline_control_comparison": {
                         "available": True,
@@ -702,6 +706,36 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(verdict["verdict"], "rebuild_evidence")
         self.assertTrue(verdict["signals"]["staged_candidate_bucket_available"])
+
+    def test_build_executive_operating_verdict_rebuilds_when_checkpoint_expand_lacks_bucket_source(self) -> None:
+        verdict = build_executive_operating_verdict(
+            {"status": "promote", "requested_status": "promote"},
+            {"status": "strong_pass", "reasons": ["OPERATING_WITH_STRONG_EDGE"]},
+            {
+                "status": "pass",
+                "reasons": ["PROMOTION_PATH_VALIDATED"],
+                "evidence": {
+                    "checkpoint_auto_judge": {
+                        "verdict": "expand",
+                        "evidence_source": "root",
+                        "evidence_policy_bucket": "not_available",
+                    },
+                    "sample_quality_watchdog": {"status": "promote_ready"},
+                    "baseline_control_comparison": {
+                        "available": True,
+                        "verdict": "supportive",
+                        "expansion_gate": "pass",
+                    },
+                    "auto_mode": {"mode": "cautiously_expanded"},
+                    "micro_live_gate": {"available": True, "status": "pass"},
+                },
+            },
+        )
+
+        self.assertEqual(verdict["verdict"], "rebuild_evidence")
+        self.assertIn("EXECUTIVE_REBUILD_BY_MISSING_BUCKET_EXPANSION_EVIDENCE", verdict["reasons"])
+        self.assertEqual(verdict["signals"]["checkpoint_evidence_source"], "root")
+        self.assertEqual(verdict["signals"]["checkpoint_evidence_policy_bucket"], "not_available")
 
     def test_build_promotion_verdict_blocks_promotion_when_candidate_underperforms_current(self) -> None:
         verdict = build_promotion_verdict(
