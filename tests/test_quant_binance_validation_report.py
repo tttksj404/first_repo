@@ -206,6 +206,70 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 "observed_runtime_artifacts",
             )
 
+    def test_build_policy_comparison_validation_artifact_emits_policy_evidence_buckets(self) -> None:
+        candidate_policy = {"adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
+        current_policy_state = {
+            "active_policy": {"status": "baseline", "adjustments": []},
+            "policy_validation": {
+                "evidence": {
+                    "runner_total_realized_pnl_usd": 2.0,
+                    "runner_drawdown_to_pnl_ratio": 0.2,
+                    "runner_reject_rate": 0.01,
+                    "runner_avg_edge_retention_ratio": 0.75,
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 4, "closed_trade_count": 1},
+                    "sample_quality_watchdog": {"status": "healthy"},
+                    "validation_runs": [{"live_order_count": 4, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.75}],
+                    "walk_forward_windows": [{"avg_net_edge_bps": 2.0, "avg_score": 55.0}],
+                }
+            },
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 3,
+                        "accepted_live_order_count": 3,
+                        "rejected_live_order_count": 0,
+                        "avg_slippage_bps": 2.0,
+                        "avg_edge_retention_ratio": 0.8,
+                        "avg_realized_edge_bps": 6.0,
+                        "avg_expected_edge_bps": 8.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 9.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 71.0, "net_expected_edge_bps": 11.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"})
+                + "\n",
+                encoding="utf-8",
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            buckets = artifact["policy_evidence_buckets"]
+            self.assertEqual(sorted(buckets), ["active_policy", "baseline_control", "staged_candidate"])
+            self.assertTrue(buckets["staged_candidate"]["available"])
+            self.assertTrue(buckets["active_policy"]["available"])
+            self.assertEqual(
+                artifact["evidence"]["policy_evidence_buckets"]["baseline_control"]["comparison"],
+                artifact["baseline_control_comparison"],
+            )
+            self.assertEqual(
+                buckets["staged_candidate"]["policy_lineage"]["source"],
+                "staged_candidate_policy",
+            )
+
     def test_build_policy_comparison_validation_artifact_filters_mismatched_run_lineage(self) -> None:
         candidate_policy = {"adjustments": []}
         current_policy_state = {

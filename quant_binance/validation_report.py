@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
@@ -9,7 +10,9 @@ from typing import Any
 from quant_binance.auto_mode import build_regime_aware_auto_mode
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report
+from quant_binance.policy_evidence import with_policy_evidence_buckets
 from quant_binance.policy_lineage import (
+    build_policy_lineage_snapshot,
     build_policy_profile_lineage_snapshot,
     build_policy_state_lineage_snapshot,
     policy_lineage_alignment,
@@ -145,6 +148,142 @@ def _safe_int(value: Any, default: int = 0) -> int:
         return int(value or 0)
     except (TypeError, ValueError):
         return default
+
+
+_POLICY_BUCKET_EVIDENCE_KEYS = (
+    "comparison_verdict",
+    "comparison_structural_verdict",
+    "comparison_runtime_verdict",
+    "comparison_execution_replay_verdict",
+    "candidate_vs_current_structural_score_delta",
+    "candidate_vs_current_execution_replay_score_delta",
+    "candidate_vs_current_score_delta",
+    "run_count",
+    "total_closed_trade_count",
+    "total_live_order_count",
+    "total_tested_order_count",
+    "runner_total_return_pct",
+    "runner_total_realized_pnl_usd",
+    "runner_max_drawdown_pct",
+    "runner_max_drawdown_usd",
+    "runner_drawdown_to_pnl_ratio",
+    "runner_shadow_alignment_score",
+    "runner_reject_rate",
+    "runner_protection_degraded_rate",
+    "runner_avg_slippage_bps",
+    "runner_avg_realized_edge_bps",
+    "runner_avg_edge_retention_ratio",
+    "runner_walk_forward_window_count",
+    "runner_positive_walk_forward_window_count",
+    "runner_positive_walk_forward_ratio",
+    "micro_live_gate",
+    "recent_retention_window",
+    "cumulative_retention_window",
+    "sample_quality_watchdog",
+    "checkpoint_auto_judge",
+    "auto_mode",
+    "symbol_lifecycle",
+    "symbol_lifecycle_summary",
+    "symbol_summary",
+    "symbol_scorecard",
+    "regime_summary",
+    "pruning_recommendations",
+    "walk_forward_windows",
+    "validation_runs",
+    "metric_comparisons",
+    "current_policy_evidence_alignment",
+)
+
+
+def _bucketize_policy_evidence_payload(payload: dict[str, Any] | None) -> dict[str, object]:
+    source = dict(payload or {})
+    bucketed: dict[str, object] = {}
+    for key in _POLICY_BUCKET_EVIDENCE_KEYS:
+        if key in source:
+            bucketed[key] = deepcopy(source[key])
+    return bucketed
+
+
+def _policy_evidence_bucket_entry(
+    *,
+    bucket_name: str,
+    source: str,
+    available: bool,
+    evidence: dict[str, Any] | None = None,
+    comparison: dict[str, Any] | None = None,
+    policy_lineage: dict[str, Any] | None = None,
+    evidence_lineage: dict[str, Any] | None = None,
+    alignment: dict[str, Any] | None = None,
+    policy_application: dict[str, Any] | None = None,
+    replay_summary: dict[str, Any] | None = None,
+) -> dict[str, object]:
+    return {
+        "bucket": bucket_name,
+        "source": source,
+        "available": bool(available),
+        "evidence": _bucketize_policy_evidence_payload(evidence),
+        "comparison": deepcopy(dict(comparison or {})),
+        "policy_lineage": deepcopy(dict(policy_lineage or {})),
+        "evidence_lineage": deepcopy(dict(evidence_lineage or {})),
+        "alignment": deepcopy(dict(alignment or {})),
+        "policy_application": deepcopy(dict(policy_application or {})),
+        "replay_summary": deepcopy(dict(replay_summary or {})),
+    }
+
+
+def _build_policy_evidence_buckets(
+    *,
+    candidate_policy: dict[str, Any],
+    runner_evidence: dict[str, Any],
+    current_policy_evidence: dict[str, Any],
+    current_active_lineage: dict[str, Any],
+    current_policy_evidence_lineage: dict[str, Any],
+    current_evidence_lineage_alignment: dict[str, Any],
+    baseline_control_comparison: dict[str, Any],
+    candidate_policy_application: dict[str, Any],
+    current_policy_application: dict[str, Any],
+    candidate_replay_summary: dict[str, Any],
+    current_replay_summary: dict[str, Any],
+) -> dict[str, dict[str, object]]:
+    candidate_lineage = build_policy_lineage_snapshot(
+        policy=candidate_policy,
+        rollout_phase="full",
+        policy_status=str(dict(candidate_policy or {}).get("status", "") or ""),
+        source="staged_candidate_policy",
+    )
+    active_available = bool(current_policy_evidence) and bool(current_evidence_lineage_alignment.get("aligned"))
+    return {
+        "staged_candidate": _policy_evidence_bucket_entry(
+            bucket_name="staged_candidate",
+            source="policy_comparison_candidate_runner",
+            available=bool(runner_evidence),
+            evidence=runner_evidence,
+            policy_lineage=candidate_lineage,
+            policy_application=candidate_policy_application,
+            replay_summary=candidate_replay_summary,
+        ),
+        "active_policy": _policy_evidence_bucket_entry(
+            bucket_name="active_policy",
+            source=(
+                "persisted_policy_validation_evidence"
+                if current_policy_evidence
+                else "active_policy_evidence_unavailable"
+            ),
+            available=active_available,
+            evidence=current_policy_evidence if active_available else {},
+            policy_lineage=current_active_lineage,
+            evidence_lineage=current_policy_evidence_lineage,
+            alignment=current_evidence_lineage_alignment,
+            policy_application=current_policy_application,
+            replay_summary=current_replay_summary if active_available else {},
+        ),
+        "baseline_control": _policy_evidence_bucket_entry(
+            bucket_name="baseline_control",
+            source=str(dict(baseline_control_comparison or {}).get("artifact_path", "") or "baseline_control_comparison"),
+            available=bool(dict(baseline_control_comparison or {}).get("available")),
+            comparison=baseline_control_comparison,
+        ),
+    }
 
 
 def _simple_control_baseline_kind(strategy_name: str) -> str:
@@ -2913,6 +3052,30 @@ def build_policy_comparison_validation_artifact(*,
         execution_style_summary.get("policy_application_delta", {})
         or {}
     )
+    policy_evidence_buckets = _build_policy_evidence_buckets(
+        candidate_policy=candidate_policy,
+        runner_evidence=runner_evidence,
+        current_policy_evidence=current_policy_evidence_for_comparison,
+        current_active_lineage=current_active_lineage,
+        current_policy_evidence_lineage=current_policy_evidence_lineage,
+        current_evidence_lineage_alignment=current_evidence_lineage_alignment,
+        baseline_control_comparison=baseline_control_comparison,
+        candidate_policy_application=candidate_policy_application,
+        current_policy_application=current_policy_application,
+        candidate_replay_summary=candidate_replay_summary,
+        current_replay_summary=current_replay_summary,
+    )
+    policy_evidence_buckets["staged_candidate"]["evidence"].update(
+        {
+            "comparison_verdict": verdict,
+            "comparison_structural_verdict": structural_verdict,
+            "comparison_runtime_verdict": runtime_verdict,
+            "comparison_execution_replay_verdict": execution_replay_verdict,
+            "candidate_vs_current_structural_score_delta": delta,
+            "candidate_vs_current_execution_replay_score_delta": execution_replay_delta,
+            "candidate_vs_current_score_delta": comparison_delta,
+        }
+    )
     checkpoint_auto_judge = _build_checkpoint_auto_judge(
         current_policy_state=current_policy_state,
         comparison_verdict=verdict,
@@ -3002,6 +3165,7 @@ def build_policy_comparison_validation_artifact(*,
         "validation_runs": runner.get("validation_runs", []),
         **runtime_comparison,
     }
+    evidence = with_policy_evidence_buckets(evidence, policy_evidence_buckets)
     return {
         "generated_at": runner.get("generated_at"),
         "comparison_verdict": verdict,
@@ -3038,6 +3202,7 @@ def build_policy_comparison_validation_artifact(*,
         "current_replay_summary": current_replay_summary,
         "validation_path": validation_path,
         "lineage_attribution": dict(runner.get("lineage_attribution", {}) or {}),
+        "policy_evidence_buckets": policy_evidence_buckets,
         "evidence": evidence,
     }
 

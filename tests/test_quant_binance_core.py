@@ -673,6 +673,36 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(verdict["verdict"], "expand")
         self.assertIn("EXECUTIVE_EXPAND_SUPPORTED_BY_ALIGNED_EVIDENCE", verdict["reasons"])
 
+    def test_build_executive_operating_verdict_prefers_staged_candidate_bucket_for_expansion_evidence(self) -> None:
+        verdict = build_executive_operating_verdict(
+            {"status": "promote", "requested_status": "promote"},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "reasons": ["PROMOTION_PATH_VALIDATED"],
+                "evidence": {
+                    "sample_quality_watchdog": {"status": "healthy"},
+                    "micro_live_gate": {"available": True, "status": "pass"},
+                    "policy_evidence_buckets": {
+                        "staged_candidate": {
+                            "available": True,
+                            "evidence": {
+                                "sample_quality_watchdog": {"status": "thin"},
+                                "micro_live_gate": {"available": True, "status": "pending"},
+                            },
+                        },
+                        "active_policy": {
+                            "available": True,
+                            "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                            "evidence": {},
+                        },
+                    },
+                },
+            },
+        )
+        self.assertEqual(verdict["verdict"], "rebuild_evidence")
+        self.assertTrue(verdict["signals"]["staged_candidate_bucket_available"])
+
     def test_build_promotion_verdict_blocks_promotion_when_candidate_underperforms_current(self) -> None:
         verdict = build_promotion_verdict(
             {
@@ -1124,6 +1154,63 @@ class QuantBinanceCoreTests(unittest.TestCase):
             "EXECUTIVE_REJUDGE_BLOCKED_BY_POLICY_LINEAGE",
             state["executive_operating_verdict"]["reasons"],
         )
+
+    def test_build_persisted_policy_state_rejudge_ignores_staged_candidate_bucket_noise_without_active_bucket(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 4,
+                "executive_operating_verdict": {"verdict": "rebuild_evidence", "confidence": "medium"},
+                "policy_validation": {
+                    "evidence": {
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                                "evidence": {
+                                    "run_count": 1,
+                                    "total_live_order_count": 2,
+                                    "total_closed_trade_count": 0,
+                                    "runner_walk_forward_window_count": 0,
+                                    "sample_quality_watchdog": {"status": "thin"},
+                                    "micro_live_gate": {"available": True, "status": "pending", "live_order_count": 2, "closed_trade_count": 0},
+                                },
+                            }
+                        }
+                    }
+                },
+                "active_policy": {"status": "baseline", "adjustments": []},
+            },
+            {"adjustments": []},
+            {"status": "keep", "requested_status": "keep", "reasons": []},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "evidence": {
+                    "policy_evidence_buckets": {
+                        "staged_candidate": {
+                            "available": True,
+                            "evidence": {
+                                "run_count": 4,
+                                "total_live_order_count": 10,
+                                "total_closed_trade_count": 3,
+                                "runner_walk_forward_window_count": 2,
+                                "runner_positive_walk_forward_ratio": 1.0,
+                                "sample_quality_watchdog": {"status": "healthy"},
+                                "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 10, "closed_trade_count": 3},
+                            },
+                        },
+                        "active_policy": {
+                            "available": False,
+                            "alignment": {"aligned": False, "status": "pending", "reason": "ACTIVE_POLICY_CHANGED_PENDING_FRESH_EVIDENCE"},
+                            "evidence": {},
+                        },
+                    }
+                },
+            },
+        )
+        self.assertEqual(state["live_evidence_rejudge"]["status"], "waiting")
+        self.assertEqual(state["executive_operating_verdict"]["verdict"], "rebuild_evidence")
+        self.assertTrue(state["policy_validation"]["evidence"]["policy_evidence_buckets"]["previous_policy"]["available"])
 
     def test_build_persisted_policy_state_demotes_on_walk_forward_weakness(self) -> None:
         previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
