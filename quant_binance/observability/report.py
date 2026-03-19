@@ -632,6 +632,8 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
     regime_breakdown = _runtime_regime_breakdown(payload)
     futures_supportive = bool(regime_breakdown.get("futures_supportive"))
     futures_elite = bool(regime_breakdown.get("futures_elite"))
+    bucket_symbol_summary_by_symbol, bucket_pruning_by_symbol, bucket_context = _preferred_policy_context_symbol_maps(payload)
+    bucket_name = str(bucket_context.get("bucket_name", "") or "")
     observe_only_symbols = {str(symbol) for symbol in list(payload.get("observe_only_symbols", []) or []) if str(symbol)}
     scorecard_by_symbol = {
         str(row.get("symbol", "") or ""): dict(row)
@@ -641,12 +643,17 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
     adjustments: list[dict[str, object]] = []
     for row in list(payload.get("pruning_recommendations", []) or []):
         symbol = str(row.get("symbol", "") or "")
-        recommendation = str(row.get("recommendation", "") or "")
+        effective_row, policy_context_signal = _overlay_policy_context_bucket_row(
+            row,
+            bucket_pruning_by_symbol.get(symbol),
+            bucket_name=bucket_name,
+        )
+        recommendation = str(effective_row.get("recommendation", "") or "")
         if not symbol or recommendation not in {"prune", "demote", "observe_only"}:
             continue
-        trade_count = int(row.get("trade_count", 0) or 0)
-        decision_count = int(row.get("decision_count", 0) or 0)
-        avg_net_edge_bps = float(row.get("avg_net_edge_bps", 0.0) or 0.0)
+        trade_count = int(effective_row.get("trade_count", 0) or 0)
+        decision_count = int(effective_row.get("decision_count", 0) or 0)
+        avg_net_edge_bps = float(effective_row.get("avg_net_edge_bps", 0.0) or 0.0)
         action = "demote"
         operating_intensity = 1.0
         scorecard_evidence = dict(scorecard_by_symbol.get(symbol) or {})
@@ -686,20 +693,30 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                     "decision_count": decision_count,
                     "avg_net_edge_bps": round(avg_net_edge_bps, 6),
                     "scorecard_evidence": scorecard_evidence,
+                    **(
+                        {"policy_context_bucket_pruning_recommendation": policy_context_signal}
+                        if policy_context_signal
+                        else {}
+                    ),
                 },
             )
         )
     for row in list(payload.get("symbol_summary", []) or []):
         symbol = str(row.get("symbol", "") or "")
-        recommendation = str(row.get("recommendation", "") or "")
-        trade_count = int(row.get("trade_count", 0) or 0)
-        expectancy = float(row.get("expectancy_usd", 0.0) or 0.0)
+        effective_row, policy_context_signal = _overlay_policy_context_bucket_row(
+            row,
+            bucket_symbol_summary_by_symbol.get(symbol),
+            bucket_name=bucket_name,
+        )
+        recommendation = str(effective_row.get("recommendation", "") or "")
+        trade_count = int(effective_row.get("trade_count", 0) or 0)
+        expectancy = float(effective_row.get("expectancy_usd", 0.0) or 0.0)
         if not symbol or trade_count < 3 or recommendation not in {"promote", "prune"}:
             continue
         regime = "major" if symbol in {"BTCUSDT", "ETHUSDT"} else "alt"
         if symbol in observe_only_symbols and regime != "major" and recommendation == "promote":
             continue
-        rolling_support, rolling_evidence = _runtime_symbol_rolling_gate(row)
+        rolling_support, rolling_evidence = _runtime_symbol_rolling_gate(effective_row)
         if not rolling_support:
             continue
         scorecard_support, scorecard_evidence = _runtime_symbol_scorecard_gate(
@@ -750,6 +767,11 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                         "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
                         "rolling_evidence": rolling_evidence,
                         "scorecard_evidence": scorecard_evidence,
+                        **(
+                            {"policy_context_bucket_symbol_summary": policy_context_signal}
+                            if policy_context_signal
+                            else {}
+                        ),
                     },
                 )
             )
@@ -785,6 +807,11 @@ def _runtime_decomposition_adjustments(runtime_evidence: dict[str, object] | Non
                         "dominant_regime_mode": str(regime_breakdown.get("dominant_mode", "") or ""),
                         "rolling_evidence": rolling_evidence,
                         "scorecard_evidence": scorecard_evidence,
+                        **(
+                            {"policy_context_bucket_symbol_summary": policy_context_signal}
+                            if policy_context_signal
+                            else {}
+                        ),
                     },
                 )
             )
@@ -819,18 +846,114 @@ def _merge_policy_adjustments(existing: dict[str, object] | None, incoming: dict
     return merged
 
 
-def _promotion_priority_sort_key(adjustment: dict[str, object]) -> tuple[float, float, float, float, float, float, str]:
+def _policy_context_bucket_evidence_map(runtime_evidence: dict[str, object] | None) -> dict[str, dict[str, object]]:
+    payload = dict(runtime_evidence or {})
+    explicit = {
+        str(bucket_name): dict(bucket_payload)
+        for bucket_name, bucket_payload in dict(payload.get("policy_context_bucket_evidence", {}) or {}).items()
+        if str(bucket_name)
+    }
+    if explicit:
+        return explicit
+    derived: dict[str, dict[str, object]] = {}
+    for bucket_name in ("active_policy", "staged_candidate", "previous_policy"):
+        bucket = policy_evidence_bucket(payload, bucket_name)
+        evidence = dict(bucket.get("evidence", {}) or {})
+        if evidence:
+            derived[bucket_name] = evidence
+    return derived
+
+
+def _preferred_policy_context_symbol_maps(
+    runtime_evidence: dict[str, object] | None,
+) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, object]], dict[str, object]]:
+    evidence_by_bucket = _policy_context_bucket_evidence_map(runtime_evidence)
+    for bucket_name in ("active_policy", "staged_candidate", "previous_policy"):
+        evidence = dict(evidence_by_bucket.get(bucket_name, {}) or {})
+        symbol_rows = [
+            dict(row)
+            for row in list(
+                evidence.get(
+                    "policy_context_bucket_symbol_summary",
+                    evidence.get("symbol_summary", []),
+                )
+                or []
+            )
+            if isinstance(row, dict) and str(row.get("symbol", "") or "")
+        ]
+        pruning_rows = [
+            dict(row)
+            for row in list(
+                evidence.get(
+                    "policy_context_bucket_pruning_recommendations",
+                    evidence.get("pruning_recommendations", []),
+                )
+                or []
+            )
+            if isinstance(row, dict) and str(row.get("symbol", "") or "")
+        ]
+        if not symbol_rows and not pruning_rows:
+            continue
+        return (
+            {
+                str(row.get("symbol", "") or ""): row
+                for row in symbol_rows
+            },
+            {
+                str(row.get("symbol", "") or ""): row
+                for row in pruning_rows
+            },
+            {
+                "bucket_name": bucket_name,
+                "symbol_count": len(symbol_rows),
+                "pruning_symbol_count": len(pruning_rows),
+            },
+        )
+    return {}, {}, {}
+
+
+def _overlay_policy_context_bucket_row(
+    row: dict[str, object] | None,
+    bucket_row: dict[str, object] | None,
+    *,
+    bucket_name: str,
+) -> tuple[dict[str, object], dict[str, object]]:
+    base = dict(row or {})
+    scoped = dict(bucket_row or {})
+    if not scoped:
+        return base, {}
+    merged = dict(base)
+    merged.update(scoped)
+    if "rolling_evidence" in scoped or "rolling_evidence" in base:
+        merged["rolling_evidence"] = dict(scoped.get("rolling_evidence", base.get("rolling_evidence", {})) or {})
+    return merged, {
+        "bucket_name": bucket_name,
+        "symbol": str(merged.get("symbol", "") or ""),
+        "recommendation": str(merged.get("recommendation", "") or ""),
+        "trade_count": int(merged.get("trade_count", 0) or 0),
+        "expectancy_usd": round(float(merged.get("expectancy_usd", 0.0) or 0.0), 6),
+        "sample_status": str(merged.get("sample_status", "") or ""),
+        "rolling_evidence": dict(merged.get("rolling_evidence", {}) or {}),
+    }
+
+
+def _promotion_priority_sort_key(
+    adjustment: dict[str, object],
+) -> tuple[float, float, float, float, float, float, float, str]:
     signal_contexts = dict(adjustment.get("signal_contexts", {}) or {})
     runtime_symbol_summary = dict(signal_contexts.get("runtime_symbol_summary", {}) or {})
+    bucket_symbol_summary = dict(runtime_symbol_summary.get("policy_context_bucket_symbol_summary", {}) or {})
     scorecard_evidence = dict(runtime_symbol_summary.get("scorecard_evidence", {}) or {})
     rolling_evidence = dict(runtime_symbol_summary.get("rolling_evidence", {}) or {})
     return (
         -float(_policy_action_strength(str(adjustment.get("action", "keep") or "keep"))),
+        -float(1.0 if str(bucket_symbol_summary.get("recommendation", "") or "") == "promote" else 0.0),
+        -float(bucket_symbol_summary.get("expectancy_usd", 0.0) or 0.0),
+        -float(bucket_symbol_summary.get("trade_count", 0) or 0),
         -float(scorecard_evidence.get("rolling_score", 0.0) or 0.0),
         -float(scorecard_evidence.get("recent_positive_run_ratio", 0.0) or 0.0),
         -float(rolling_evidence.get("positive_window_ratio", 0.0) or 0.0),
         -float(adjustment.get("score_delta", 0.0) or 0.0),
-        -float(adjustment.get("sample_count", 0) or 0),
         str(adjustment.get("symbol", "") or ""),
     )
 
@@ -849,9 +972,13 @@ def _apply_cross_symbol_promotion_priority(
         runtime_evidence=runtime_evidence,
         positive_adjustment_count=positive_adjustment_count,
     )
+    _, _, bucket_context = _preferred_policy_context_symbol_maps(runtime_evidence)
     if promotion_top_k <= 0:
         if int(top_k_context.get("explicit_promotion_top_k", 0) or 0) > 0 or int(top_k_context.get("watchdog_positive_cap", 0) or 0) > 0:
-            return adjustments, top_k_context
+            return adjustments, {
+                **top_k_context,
+                **({"policy_context_bucket": str(bucket_context.get("bucket_name", "") or "")} if bucket_context else {}),
+            }
         return adjustments, {}
     positive_adjustments = [
         adjustment
@@ -879,6 +1006,7 @@ def _apply_cross_symbol_promotion_priority(
             "promotion_candidate_count": len(ranked_positive),
             "selected_promotion_symbols": selected_symbols,
             "deferred_promotion_symbols": [],
+            **({"policy_context_bucket": str(bucket_context.get("bucket_name", "") or "")} if bucket_context else {}),
             **top_k_context,
         }
     selected_symbol_set = set(selected_symbols)
@@ -894,6 +1022,7 @@ def _apply_cross_symbol_promotion_priority(
         "selected_promotion_symbols": selected_symbols,
         "deferred_promotion_symbols": [row["symbol"] for row in deferred_rows],
         "deferred_promotion_rows": deferred_rows,
+        **({"policy_context_bucket": str(bucket_context.get("bucket_name", "") or "")} if bucket_context else {}),
         **top_k_context,
     }
 
@@ -1798,6 +1927,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "walk_forward_windows",
             "validation_runs",
             "symbol_summary",
+            "symbol_execution_summary",
             "symbol_scorecard",
             "regime_summary",
             "pruning_recommendations",
@@ -1808,6 +1938,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "current_policy_application",
             "policy_application_delta",
             "counterfactual_replay_path",
+            "policy_context_bucket_evidence",
         ):
             if key in payload and key not in evidence:
                 evidence[key] = payload[key]
@@ -3383,10 +3514,31 @@ def build_persisted_policy_state(
         dict(previous_state.get("rollout_progression", dict(active_policy.get("rollout_progression", {}) or {})) or {}).get("execution_phase", "")
         or ("baseline" if not list(dict(active_policy or {}).get("adjustments", []) or []) else "full")
     )
+    validation_bucket_evidence = _policy_context_bucket_evidence_map(validation_evidence)
+    lifecycle_bucket_evidence = dict(
+        validation_bucket_evidence.get("active_policy", {})
+        or validation_bucket_evidence.get("staged_candidate", {})
+        or {}
+    )
     symbol_lifecycle = build_symbol_lifecycle(
         symbol_summary=list(validation_evidence.get("symbol_summary", []) or []),
         symbol_scorecard=list(validation_evidence.get("symbol_scorecard", []) or []),
         pruning_recommendations=list(validation_evidence.get("pruning_recommendations", []) or []),
+        policy_context_bucket_name=str(lifecycle_bucket_evidence.get("policy_context_bucket_name", "") or ""),
+        policy_context_bucket_symbol_summary=list(
+            lifecycle_bucket_evidence.get(
+                "policy_context_bucket_symbol_summary",
+                lifecycle_bucket_evidence.get("symbol_summary", []),
+            )
+            or []
+        ),
+        policy_context_bucket_pruning_recommendations=list(
+            lifecycle_bucket_evidence.get(
+                "policy_context_bucket_pruning_recommendations",
+                lifecycle_bucket_evidence.get("pruning_recommendations", []),
+            )
+            or []
+        ),
         active_adjustments=list(dict(active_policy or {}).get("adjustments", []) or []),
         previous_rows=list(previous_state.get("symbol_lifecycle", []) or []),
         checkpoint_auto_judge=checkpoint_auto_judge,
