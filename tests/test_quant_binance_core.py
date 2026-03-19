@@ -1326,6 +1326,177 @@ class QuantBinanceCoreTests(unittest.TestCase):
             "promotion_relaxed",
         )
 
+    def test_build_auto_tune_policy_auto_mode_tightens_to_major_only_when_global_evidence_is_bad(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "trade_count": 5,
+                        "expectancy_usd": 5.2,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 1.0,
+                            "expectancy_stability": 0.9,
+                        },
+                    },
+                    {
+                        "symbol": "SOLUSDT",
+                        "trade_count": 5,
+                        "expectancy_usd": 4.4,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 0.8,
+                            "expectancy_stability": 0.8,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.9,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.9,
+                    },
+                    {
+                        "symbol": "SOLUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.86,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.84,
+                    },
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 67.0, "avg_net_edge_bps": 11.0, "avg_cost_bps": 8.0},
+                ],
+                "sample_quality_watchdog": {
+                    "status": "healthy",
+                    "policy_guardrails": {
+                        "promotion_intensity_cap": 1.0,
+                        "max_positive_symbols": 0,
+                        "allow_alt_promotions": True,
+                        "prefer_majors_only": False,
+                        "non_major_positive_bias": "neutral",
+                    },
+                },
+                "checkpoint_auto_judge": {"verdict": "tighten"},
+                "baseline_control_comparison": {
+                    "available": True,
+                    "verdict": "parity",
+                    "expansion_gate": "block",
+                },
+                "auto_mode": {
+                    "mode": "tighter",
+                    "reason_codes": [
+                        "AUTO_MODE_TIGHTENED_BY_CHECKPOINT_TIGHTEN",
+                        "AUTO_MODE_EXPANSION_BLOCKED_BY_SIMPLE_BASELINE_PARITY",
+                    ],
+                    "policy_guidance": {
+                        "promotion_intensity_cap": 0.85,
+                        "max_positive_symbols": 1,
+                        "block_non_major_positive": True,
+                        "positive_action_cap": "promote",
+                    },
+                },
+            },
+        )
+
+        adjustments = {item["symbol"]: item for item in policy["adjustments"]}
+        self.assertEqual(set(adjustments), {"BTCUSDT"})
+        self.assertEqual(adjustments["BTCUSDT"]["action"], "promote")
+        self.assertEqual(adjustments["BTCUSDT"]["operating_intensity"], 0.85)
+        self.assertEqual(
+            policy["decomposition_summary"]["auto_mode"]["blocked_symbols"],
+            ["SOLUSDT"],
+        )
+
+    def test_build_auto_tune_policy_auto_mode_only_modestly_expands_major_promotions(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "trade_count": 5,
+                        "expectancy_usd": 6.5,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 1.0,
+                            "expectancy_stability": 0.9,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.9,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.9,
+                    },
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 8, "avg_score": 72.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+                "sample_quality_watchdog": {
+                    "status": "promote_ready",
+                    "policy_guardrails": {
+                        "promotion_intensity_cap": 1.05,
+                        "max_positive_symbols": 2,
+                        "allow_alt_promotions": True,
+                        "prefer_majors_only": False,
+                        "non_major_positive_bias": "neutral",
+                    },
+                },
+                "checkpoint_auto_judge": {"verdict": "expand"},
+                "baseline_control_comparison": {
+                    "available": True,
+                    "verdict": "supportive",
+                    "expansion_gate": "pass",
+                },
+                "auto_mode": {
+                    "mode": "cautiously_expanded",
+                    "reason_codes": [
+                        "AUTO_MODE_SAMPLE_QUALITY_PROMOTE_READY",
+                        "AUTO_MODE_CHECKPOINT_SUPPORTS_EXPANSION",
+                        "AUTO_MODE_SIMPLE_BASELINE_SUPPORTIVE",
+                    ],
+                    "policy_guidance": {
+                        "promotion_intensity_cap": 1.05,
+                        "max_positive_symbols": 2,
+                        "block_non_major_positive": False,
+                        "positive_action_cap": "promote",
+                    },
+                },
+            },
+        )
+
+        adjustment = policy["adjustments"][0]
+        self.assertEqual(adjustment["symbol"], "BTCUSDT")
+        self.assertEqual(adjustment["action"], "promote")
+        self.assertEqual(adjustment["operating_intensity"], 1.05)
+        self.assertEqual(
+            adjustment["signal_contexts"]["auto_mode"]["mode"],
+            "cautiously_expanded",
+        )
+
     def test_build_auto_tune_policy_blocks_mixed_rolling_symbol_evidence(self) -> None:
         policy = build_auto_tune_policy(
             [],
