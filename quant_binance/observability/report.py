@@ -2179,6 +2179,10 @@ def build_executive_operating_verdict(
     promotion_reasons = [str(item) for item in list(promotion_verdict.get("reasons", []) or []) if str(item)]
     checkpoint_auto_judge = dict(staged_candidate_evidence.get("checkpoint_auto_judge", {}) or {})
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "not_available") or "not_available")
+    checkpoint_evidence_source = str(checkpoint_auto_judge.get("evidence_source", "not_available") or "not_available")
+    checkpoint_evidence_policy_bucket = str(
+        checkpoint_auto_judge.get("evidence_policy_bucket", "not_available") or "not_available"
+    )
     sample_watchdog = dict(staged_candidate_evidence.get("sample_quality_watchdog", {}) or {})
     sample_watchdog_status = str(sample_watchdog.get("status", "not_available") or "not_available")
     baseline_gate = _simple_baseline_control_gate(merged_evidence)
@@ -2262,6 +2266,12 @@ def build_executive_operating_verdict(
     ):
         verdict = "rebuild_evidence"
         reasons.append("EXECUTIVE_REBUILD_BY_THIN_OR_PENDING_EXPANSION_EVIDENCE")
+    elif checkpoint_verdict == "expand" and (
+        checkpoint_evidence_source != "policy_bucket"
+        or checkpoint_evidence_policy_bucket != "staged_candidate"
+    ):
+        verdict = "rebuild_evidence"
+        reasons.append("EXECUTIVE_REBUILD_BY_MISSING_BUCKET_EXPANSION_EVIDENCE")
     elif checkpoint_verdict == "tighten":
         verdict = "tighten"
         reasons.append("EXECUTIVE_TIGHTEN_BY_CHECKPOINT")
@@ -2325,6 +2335,8 @@ def build_executive_operating_verdict(
             "operational_status": operational_status,
             "policy_validation_status": validation_status,
             "checkpoint_verdict": checkpoint_verdict,
+            "checkpoint_evidence_source": checkpoint_evidence_source,
+            "checkpoint_evidence_policy_bucket": checkpoint_evidence_policy_bucket,
             "sample_quality_watchdog_status": sample_watchdog_status,
             "simple_baseline_gate_status": str(baseline_gate.get("status", "not_available") or "not_available"),
             "auto_mode": auto_mode_mode,
@@ -2341,6 +2353,7 @@ def build_executive_operating_verdict(
             "promotion": promotion_reasons,
             "operational": operational_reasons,
             "policy_validation": validation_reasons,
+            "checkpoint_auto_judge": [str(item) for item in list(checkpoint_auto_judge.get("reason_codes", []) or []) if str(item)],
             "auto_mode": [str(item) for item in list(auto_mode.get("reason_codes", []) or []) if str(item)],
         },
     }
