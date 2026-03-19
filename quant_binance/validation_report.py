@@ -927,12 +927,173 @@ def _consensus_policy_lineage(lineages: list[dict[str, object]]) -> dict[str, ob
     return {}
 
 
+def _bucket_edge_retention_ratio(realized_edge_bps: object, expected_edge_bps: object) -> float | None:
+    realized = _safe_float(realized_edge_bps, None)
+    expected = _safe_float(expected_edge_bps, None)
+    if realized is None or expected is None:
+        return None
+    baseline = max(float(expected), 0.0)
+    if baseline <= 0.0:
+        return None
+    return round(max(min(float(realized) / max(baseline, 0.1), 2.0), -2.0), 6)
+
+
+def _policy_context_bucket_execution_snapshot(
+    *,
+    live_orders: list[dict[str, Any]],
+    tested_orders: list[dict[str, Any]],
+    order_errors: list[dict[str, Any]],
+) -> dict[str, object]:
+    by_symbol: dict[str, dict[str, float | int]] = {}
+    live_order_count = 0
+    accepted_live_order_count = 0
+    rejected_live_order_count = 0
+    tested_order_count = 0
+    order_error_count = 0
+    protection_degraded_count = 0
+    slippage_sum = 0.0
+    slippage_count = 0
+    realized_edge_sum = 0.0
+    realized_edge_count = 0
+    retention_sum = 0.0
+    retention_count = 0
+
+    def symbol_bucket(symbol: str) -> dict[str, float | int]:
+        return by_symbol.setdefault(
+            symbol,
+            {
+                "live_order_count": 0,
+                "accepted_live_order_count": 0,
+                "rejected_live_order_count": 0,
+                "tested_order_count": 0,
+                "order_error_count": 0,
+                "protection_degraded_count": 0,
+                "slippage_sum": 0.0,
+                "slippage_count": 0,
+                "realized_edge_sum": 0.0,
+                "realized_edge_count": 0,
+                "retention_sum": 0.0,
+                "retention_count": 0,
+            },
+        )
+
+    for row in live_orders:
+        symbol = str(row.get("symbol", "") or "")
+        if not symbol:
+            continue
+        bucket = symbol_bucket(symbol)
+        live_order_count += 1
+        bucket["live_order_count"] = int(bucket["live_order_count"]) + 1
+        accepted = bool(row.get("accepted", False))
+        if accepted:
+            accepted_live_order_count += 1
+            bucket["accepted_live_order_count"] = int(bucket["accepted_live_order_count"]) + 1
+        else:
+            rejected_live_order_count += 1
+            bucket["rejected_live_order_count"] = int(bucket["rejected_live_order_count"]) + 1
+        slippage = row.get("slippage_bps")
+        if slippage not in (None, ""):
+            value = _safe_float(slippage)
+            slippage_sum += value
+            slippage_count += 1
+            bucket["slippage_sum"] = float(bucket["slippage_sum"]) + value
+            bucket["slippage_count"] = int(bucket["slippage_count"]) + 1
+        realized_edge = row.get("realized_edge_bps")
+        if realized_edge not in (None, ""):
+            value = _safe_float(realized_edge)
+            realized_edge_sum += value
+            realized_edge_count += 1
+            bucket["realized_edge_sum"] = float(bucket["realized_edge_sum"]) + value
+            bucket["realized_edge_count"] = int(bucket["realized_edge_count"]) + 1
+            retention = _bucket_edge_retention_ratio(
+                realized_edge,
+                row.get("expected_net_edge_bps", row.get("net_expected_edge_bps")),
+            )
+            if retention is not None:
+                retention_sum += retention
+                retention_count += 1
+                bucket["retention_sum"] = float(bucket["retention_sum"]) + retention
+                bucket["retention_count"] = int(bucket["retention_count"]) + 1
+        if row.get("protection_error"):
+            protection_degraded_count += 1
+            bucket["protection_degraded_count"] = int(bucket["protection_degraded_count"]) + 1
+
+    for row in tested_orders:
+        symbol = str(row.get("symbol", "") or "")
+        if not symbol:
+            continue
+        tested_order_count += 1
+        bucket = symbol_bucket(symbol)
+        bucket["tested_order_count"] = int(bucket["tested_order_count"]) + 1
+
+    for row in order_errors:
+        symbol = str(row.get("symbol", "") or "")
+        if not symbol:
+            continue
+        order_error_count += 1
+        bucket = symbol_bucket(symbol)
+        bucket["order_error_count"] = int(bucket["order_error_count"]) + 1
+
+    symbol_execution_summary = []
+    for symbol, bucket in by_symbol.items():
+        symbol_live_order_count = int(bucket["live_order_count"])
+        symbol_accepted_count = int(bucket["accepted_live_order_count"])
+        symbol_rejected_count = int(bucket["rejected_live_order_count"])
+        symbol_slippage_count = int(bucket["slippage_count"])
+        symbol_realized_edge_count = int(bucket["realized_edge_count"])
+        symbol_retention_count = int(bucket["retention_count"])
+        symbol_execution_summary.append(
+            {
+                "symbol": symbol,
+                "live_order_count": symbol_live_order_count,
+                "accepted_live_order_count": symbol_accepted_count,
+                "rejected_live_order_count": symbol_rejected_count,
+                "tested_order_count": int(bucket["tested_order_count"]),
+                "order_error_count": int(bucket["order_error_count"]),
+                "avg_slippage_bps": round(float(bucket["slippage_sum"]) / symbol_slippage_count, 6) if symbol_slippage_count else 0.0,
+                "avg_realized_edge_bps": round(float(bucket["realized_edge_sum"]) / symbol_realized_edge_count, 6) if symbol_realized_edge_count else 0.0,
+                "avg_edge_retention_ratio": round(float(bucket["retention_sum"]) / symbol_retention_count, 6) if symbol_retention_count else 0.0,
+                "reject_rate": round(symbol_rejected_count / max(symbol_live_order_count, 1), 6) if symbol_live_order_count else 0.0,
+                "protection_degraded_count": int(bucket["protection_degraded_count"]),
+                "protection_degraded_rate": round(
+                    int(bucket["protection_degraded_count"]) / max(symbol_live_order_count, 1),
+                    6,
+                )
+                if symbol_live_order_count
+                else 0.0,
+            }
+        )
+    symbol_execution_summary.sort(
+        key=lambda item: (
+            -float(item.get("avg_edge_retention_ratio", 0.0) or 0.0),
+            -float(item.get("avg_realized_edge_bps", 0.0) or 0.0),
+            str(item.get("symbol", "") or ""),
+        )
+    )
+    return {
+        "live_order_count": live_order_count,
+        "accepted_live_order_count": accepted_live_order_count,
+        "rejected_live_order_count": rejected_live_order_count,
+        "tested_order_count": tested_order_count,
+        "order_error_count": order_error_count,
+        "avg_slippage_bps": round(slippage_sum / slippage_count, 6) if slippage_count else 0.0,
+        "avg_realized_edge_bps": round(realized_edge_sum / realized_edge_count, 6) if realized_edge_count else 0.0,
+        "avg_edge_retention_ratio": round(retention_sum / retention_count, 6) if retention_count else 0.0,
+        "reject_rate": round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count else 0.0,
+        "protection_degraded_rate": round(protection_degraded_count / max(live_order_count, 1), 6) if live_order_count else 0.0,
+        "symbol_execution_summary": symbol_execution_summary,
+    }
+
+
 def _policy_context_bucket_snapshot(
     *,
     run_dir: Path,
     bucket_name: str,
     decisions: list[dict[str, Any]],
     closed_trades: list[dict[str, Any]],
+    live_orders: list[dict[str, Any]],
+    tested_orders: list[dict[str, Any]],
+    order_errors: list[dict[str, Any]],
 ) -> dict[str, object]:
     report = build_runtime_performance_report_from_rows(
         run_dir=run_dir,
@@ -940,33 +1101,49 @@ def _policy_context_bucket_snapshot(
         decisions=decisions,
         closed_trades=closed_trades,
     )
+    execution_metrics = _policy_context_bucket_execution_snapshot(
+        live_orders=live_orders,
+        tested_orders=tested_orders,
+        order_errors=order_errors,
+    )
     lineages = [
         dict(item.get("entry_policy_lineage", {}) or {})
-        for item in [*decisions, *closed_trades]
+        for item in [*decisions, *closed_trades, *live_orders]
         if isinstance(item, dict)
     ]
     sources = sorted(
         {
             str(item.get("entry_policy_bucket_source", "") or "")
-            for item in [*decisions, *closed_trades]
+            for item in [*decisions, *closed_trades, *live_orders, *order_errors]
             if str(item.get("entry_policy_bucket_source", "") or "")
         }
     )
     alignment_statuses = sorted(
         {
             str(item.get("entry_policy_bucket_alignment_status", "") or "")
-            for item in [*decisions, *closed_trades]
+            for item in [*decisions, *closed_trades, *live_orders, *order_errors]
             if str(item.get("entry_policy_bucket_alignment_status", "") or "")
         }
     )
     return {
         "bucket": bucket_name,
-        "available": bool(decisions or closed_trades),
+        "available": bool(decisions or closed_trades or live_orders or tested_orders or order_errors),
         "decision_count": len(decisions),
         "closed_trade_count": report.closed_trade_count,
         "realized_pnl_usd": round(report.realized_pnl_usd, 6),
+        "live_order_count": int(execution_metrics.get("live_order_count", 0) or 0),
+        "accepted_live_order_count": int(execution_metrics.get("accepted_live_order_count", 0) or 0),
+        "rejected_live_order_count": int(execution_metrics.get("rejected_live_order_count", 0) or 0),
+        "tested_order_count": int(execution_metrics.get("tested_order_count", 0) or 0),
+        "order_error_count": int(execution_metrics.get("order_error_count", 0) or 0),
+        "avg_slippage_bps": round(_safe_float(execution_metrics.get("avg_slippage_bps")), 6),
+        "avg_realized_edge_bps": round(_safe_float(execution_metrics.get("avg_realized_edge_bps")), 6),
+        "avg_edge_retention_ratio": round(_safe_float(execution_metrics.get("avg_edge_retention_ratio")), 6),
+        "reject_rate": round(_safe_float(execution_metrics.get("reject_rate")), 6),
+        "protection_degraded_rate": round(_safe_float(execution_metrics.get("protection_degraded_rate")), 6),
         "walk_forward": [dict(item) for item in report.walk_forward],
         "symbol_expectancy": [asdict(item) for item in report.symbol_expectancy],
+        "symbol_execution_summary": list(execution_metrics.get("symbol_execution_summary", []) or []),
         "regime_performance": [asdict(item) for item in report.regime_performance],
         "score_bucket_performance": [asdict(item) for item in report.score_bucket_performance],
         "pruning_recommendations": [dict(item) for item in report.pruning_recommendations],
@@ -980,12 +1157,15 @@ def _policy_context_bucket_snapshots(run_dir: Path) -> dict[str, dict[str, objec
     logs_dir = run_dir / "logs"
     decisions = load_closed_trades_jsonl(logs_dir / "decisions.jsonl")
     closed_trades = load_closed_trades_jsonl(logs_dir / "closed_trades.jsonl")
+    live_orders = load_closed_trades_jsonl(logs_dir / "live_orders.jsonl")
+    tested_orders = load_closed_trades_jsonl(logs_dir / "tested_orders.jsonl")
+    order_errors = load_closed_trades_jsonl(logs_dir / "order_errors.jsonl")
     bucket_names = sorted(
         {
             bucket_name
             for bucket_name in (
                 _policy_context_bucket_name(row)
-                for row in [*decisions, *closed_trades]
+                for row in [*decisions, *closed_trades, *live_orders, *tested_orders, *order_errors]
             )
             if bucket_name
         }
@@ -1002,11 +1182,29 @@ def _policy_context_bucket_snapshots(run_dir: Path) -> dict[str, dict[str, objec
             for item in closed_trades
             if _policy_context_bucket_name(item) == bucket_name
         ]
+        bucket_live_orders = [
+            dict(item)
+            for item in live_orders
+            if _policy_context_bucket_name(item) == bucket_name
+        ]
+        bucket_tested_orders = [
+            dict(item)
+            for item in tested_orders
+            if _policy_context_bucket_name(item) == bucket_name
+        ]
+        bucket_order_errors = [
+            dict(item)
+            for item in order_errors
+            if _policy_context_bucket_name(item) == bucket_name
+        ]
         snapshots[bucket_name] = _policy_context_bucket_snapshot(
             run_dir=run_dir,
             bucket_name=bucket_name,
             decisions=bucket_decisions,
             closed_trades=bucket_closed_trades,
+            live_orders=bucket_live_orders,
+            tested_orders=bucket_tested_orders,
+            order_errors=bucket_order_errors,
         )
     return snapshots
 
@@ -1107,18 +1305,22 @@ def _policy_context_bucket_run_snapshots(
                 "decision_count": _safe_int(bucket_payload.get("decision_count")),
                 "closed_trade_count": _safe_int(bucket_payload.get("closed_trade_count")),
                 "realized_pnl_usd": round(_safe_float(bucket_payload.get("realized_pnl_usd")), 6),
-                "live_order_count": 0,
-                "accepted_live_order_count": 0,
-                "rejected_live_order_count": 0,
-                "tested_order_count": 0,
-                "avg_slippage_bps": 0.0,
-                "avg_edge_retention_ratio": 0.0,
-                "avg_realized_edge_bps": 0.0,
+                "live_order_count": _safe_int(bucket_payload.get("live_order_count")),
+                "accepted_live_order_count": _safe_int(bucket_payload.get("accepted_live_order_count")),
+                "rejected_live_order_count": _safe_int(bucket_payload.get("rejected_live_order_count")),
+                "tested_order_count": _safe_int(bucket_payload.get("tested_order_count")),
+                "avg_slippage_bps": round(_safe_float(bucket_payload.get("avg_slippage_bps")), 6),
+                "avg_edge_retention_ratio": round(_safe_float(bucket_payload.get("avg_edge_retention_ratio")), 6),
+                "avg_realized_edge_bps": round(_safe_float(bucket_payload.get("avg_realized_edge_bps")), 6),
                 "avg_expected_edge_bps": 0.0,
-                "reject_rate": 0.0,
-                "protection_degraded_rate": 0.0,
+                "reject_rate": round(_safe_float(bucket_payload.get("reject_rate")), 6),
+                "protection_degraded_rate": round(_safe_float(bucket_payload.get("protection_degraded_rate")), 6),
                 "walk_forward": [dict(item) for item in list(bucket_payload.get("walk_forward", []) or [])],
                 "symbol_expectancy": [dict(item) for item in list(bucket_payload.get("symbol_expectancy", []) or [])],
+                "symbol_execution_summary": [
+                    dict(item)
+                    for item in list(bucket_payload.get("symbol_execution_summary", []) or [])
+                ],
                 "regime_performance": [dict(item) for item in list(bucket_payload.get("regime_performance", []) or [])],
                 "score_bucket_performance": [dict(item) for item in list(bucket_payload.get("score_bucket_performance", []) or [])],
                 "pruning_recommendations": [dict(item) for item in list(bucket_payload.get("pruning_recommendations", []) or [])],
@@ -1154,7 +1356,35 @@ def _policy_context_bucket_direct_evidence(
         for window in walk_forward_windows
         if _safe_float(window.get("avg_net_edge_bps")) > 0.0 and _safe_float(window.get("avg_score")) >= 0.0
     )
+    live_order_count = sum(_safe_int(item.get("live_order_count")) for item in bucket_runs)
+    accepted_live_order_count = sum(_safe_int(item.get("accepted_live_order_count")) for item in bucket_runs)
+    rejected_live_order_count = sum(_safe_int(item.get("rejected_live_order_count")) for item in bucket_runs)
+    tested_order_count = sum(_safe_int(item.get("tested_order_count")) for item in bucket_runs)
+    slippage_weight = float(sum(_safe_int(item.get("accepted_live_order_count")) for item in bucket_runs))
+    retention_weight = float(sum(_safe_int(item.get("live_order_count")) for item in bucket_runs))
+    avg_slippage_bps = _weighted_metric(
+        sum(_safe_float(item.get("avg_slippage_bps")) * _safe_int(item.get("accepted_live_order_count")) for item in bucket_runs),
+        slippage_weight,
+    )
+    avg_realized_edge_bps = _weighted_metric(
+        sum(_safe_float(item.get("avg_realized_edge_bps")) * _safe_int(item.get("live_order_count")) for item in bucket_runs),
+        retention_weight,
+    )
+    avg_edge_retention_ratio = _weighted_metric(
+        sum(_safe_float(item.get("avg_edge_retention_ratio")) * _safe_int(item.get("live_order_count")) for item in bucket_runs),
+        retention_weight,
+    )
+    reject_rate = round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0
+    protection_degraded_rate = _weighted_metric(
+        sum(_safe_float(item.get("protection_degraded_rate")) * _safe_int(item.get("live_order_count")) for item in bucket_runs),
+        retention_weight,
+    )
     pruning_recommendations = _aggregate_pruning_recommendations(bucket_runs)
+    symbol_execution_summary = [
+        dict(item)
+        for snapshot in bucket_runs
+        for item in list(snapshot.get("symbol_execution_summary", []) or [])
+    ]
     return {
         "policy_context_bucket_name": bucket_name,
         "policy_context_bucket_source": "decision_closed_trade_logs",
@@ -1162,6 +1392,8 @@ def _policy_context_bucket_direct_evidence(
         "policy_context_bucket_run_count": len(bucket_runs),
         "policy_context_bucket_decision_count": sum(_safe_int(item.get("decision_count")) for item in bucket_runs),
         "policy_context_bucket_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+        "policy_context_bucket_live_order_count": live_order_count,
+        "policy_context_bucket_tested_order_count": tested_order_count,
         "policy_context_bucket_total_realized_pnl_usd": aggregated.get("total_realized_pnl_usd", 0.0),
         "policy_context_bucket_walk_forward_window_count": len(walk_forward_windows),
         "policy_context_bucket_positive_walk_forward_ratio": round(
@@ -1171,25 +1403,72 @@ def _policy_context_bucket_direct_evidence(
         "policy_context_bucket_validation_runs": bucket_runs,
         "policy_context_bucket_walk_forward_windows": walk_forward_windows,
         "policy_context_bucket_symbol_summary": list(aggregated.get("symbol_summary", []) or []),
+        "policy_context_bucket_symbol_execution_summary": symbol_execution_summary,
         "policy_context_bucket_score_alignment_summary": list(aggregated.get("score_alignment_summary", []) or []),
         "policy_context_bucket_regime_summary": list(aggregated.get("regime_summary", []) or []),
         "policy_context_bucket_pruning_recommendations": pruning_recommendations,
         "run_count": len(bucket_runs),
         "total_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+        "total_live_order_count": live_order_count,
+        "total_tested_order_count": tested_order_count,
         "runner_total_realized_pnl_usd": aggregated.get("total_realized_pnl_usd", 0.0),
+        "runner_reject_rate": reject_rate,
+        "runner_protection_degraded_rate": protection_degraded_rate,
+        "runner_avg_slippage_bps": avg_slippage_bps,
+        "runner_avg_realized_edge_bps": avg_realized_edge_bps,
+        "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
         "runner_walk_forward_window_count": len(walk_forward_windows),
         "runner_positive_walk_forward_window_count": positive_walk_forward_count,
         "runner_positive_walk_forward_ratio": round(
             _safe_ratio(positive_walk_forward_count, len(walk_forward_windows)),
             6,
         ),
+        "live_order_count": live_order_count,
+        "accepted_live_order_count": accepted_live_order_count,
+        "rejected_live_order_count": rejected_live_order_count,
+        "tested_order_count": tested_order_count,
+        "avg_slippage_bps": avg_slippage_bps,
+        "avg_realized_edge_bps": avg_realized_edge_bps,
+        "avg_edge_retention_ratio": avg_edge_retention_ratio,
+        "reject_rate": reject_rate,
+        "protection_degraded_rate": protection_degraded_rate,
         "symbol_summary": list(aggregated.get("symbol_summary", []) or []),
+        "symbol_execution_summary": symbol_execution_summary,
         "symbol_scorecard": list(aggregated.get("symbol_scorecard", []) or []),
         "score_alignment_summary": list(aggregated.get("score_alignment_summary", []) or []),
         "regime_summary": list(aggregated.get("regime_summary", []) or []),
         "pruning_recommendations": pruning_recommendations,
         "walk_forward_windows": walk_forward_windows,
     }
+
+
+def _policy_context_bucket_direct_evidence_map(
+    *,
+    base_dir: str | Path,
+    lookback_days: int,
+    generated_at: str,
+    run_snapshots: list[dict[str, object]],
+) -> dict[str, dict[str, object]]:
+    bucket_names = sorted(
+        {
+            str(bucket_name)
+            for snapshot in run_snapshots
+            for bucket_name in dict(snapshot.get("policy_context_buckets", {}) or {})
+            if str(bucket_name)
+        }
+    )
+    evidence_by_bucket: dict[str, dict[str, object]] = {}
+    for bucket_name in bucket_names:
+        evidence = _policy_context_bucket_direct_evidence(
+            base_dir=base_dir,
+            lookback_days=lookback_days,
+            generated_at=generated_at,
+            run_snapshots=run_snapshots,
+            bucket_name=bucket_name,
+        )
+        if evidence:
+            evidence_by_bucket[bucket_name] = evidence
+    return evidence_by_bucket
 
 
 def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evidence: dict[str, Any]) -> dict[str, object]:
@@ -2243,6 +2522,17 @@ def _build_policy_validation_runner_from_run_snapshots(
         lookback_days=lookback_days,
         generated_at=generated_at,
     )
+    policy_context_bucket_evidence = _policy_context_bucket_direct_evidence_map(
+        base_dir=base_dir,
+        lookback_days=lookback_days,
+        generated_at=generated_at,
+        run_snapshots=run_snapshots,
+    )
+    lifecycle_bucket_evidence = dict(
+        policy_context_bucket_evidence.get("active_policy", {})
+        or policy_context_bucket_evidence.get("staged_candidate", {})
+        or {}
+    )
     symbol_rows = list(aggregated.get("symbol_summary", []) or [])
     symbol_scorecard = list(aggregated.get("symbol_scorecard", []) or [])
     regime_rows = list(aggregated.get("regime_summary", []) or [])
@@ -2332,6 +2622,21 @@ def _build_policy_validation_runner_from_run_snapshots(
         symbol_summary=symbol_rows,
         symbol_scorecard=symbol_scorecard,
         pruning_recommendations=pruning_recommendations,
+        policy_context_bucket_name=str(lifecycle_bucket_evidence.get("policy_context_bucket_name", "") or ""),
+        policy_context_bucket_symbol_summary=list(
+            lifecycle_bucket_evidence.get(
+                "policy_context_bucket_symbol_summary",
+                lifecycle_bucket_evidence.get("symbol_summary", []),
+            )
+            or []
+        ),
+        policy_context_bucket_pruning_recommendations=list(
+            lifecycle_bucket_evidence.get(
+                "policy_context_bucket_pruning_recommendations",
+                lifecycle_bucket_evidence.get("pruning_recommendations", []),
+            )
+            or []
+        ),
         sample_quality_watchdog=sample_quality_watchdog,
         baseline_control_comparison=guarded_baseline,
         active_policy={"status": "baseline", "adjustments": []},
@@ -2393,6 +2698,7 @@ def _build_policy_validation_runner_from_run_snapshots(
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "symbol_scorecard": symbol_scorecard,
         "lineage_attribution": dict(lineage_attribution or {}),
+        "policy_context_bucket_evidence": policy_context_bucket_evidence,
     }
     return {
         "generated_at": generated_at,
@@ -2426,6 +2732,7 @@ def _build_policy_validation_runner_from_run_snapshots(
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "regime_summary": regime_rows,
         "pruning_recommendations": pruning_recommendations,
+        "policy_context_bucket_evidence": policy_context_bucket_evidence,
         "micro_live_gate": micro_live_gate,
         "recent_retention_window": recent_retention_window,
         "cumulative_retention_window": cumulative_retention_window,
@@ -2948,6 +3255,16 @@ def _build_checkpoint_auto_judge(
     baseline_control_comparison: dict[str, object],
 ) -> dict[str, object]:
     payload = dict(runner_artifact or {})
+    policy_context_bucket_evidence = {
+        str(bucket_name): dict(bucket_payload)
+        for bucket_name, bucket_payload in dict(payload.get("policy_context_bucket_evidence", {}) or {}).items()
+        if str(bucket_name)
+    }
+    lifecycle_bucket_evidence = dict(
+        policy_context_bucket_evidence.get("active_policy", {})
+        or policy_context_bucket_evidence.get("staged_candidate", {})
+        or {}
+    )
     sample_watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
     sample_watchdog_status = str(sample_watchdog.get("status", "not_available") or "not_available")
     active_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
@@ -3036,6 +3353,21 @@ def _build_checkpoint_auto_judge(
         symbol_summary=list(payload.get("symbol_summary", []) or []),
         symbol_scorecard=list(payload.get("symbol_scorecard", []) or []),
         pruning_recommendations=list(payload.get("pruning_recommendations", []) or []),
+        policy_context_bucket_name=str(lifecycle_bucket_evidence.get("policy_context_bucket_name", "") or ""),
+        policy_context_bucket_symbol_summary=list(
+            lifecycle_bucket_evidence.get(
+                "policy_context_bucket_symbol_summary",
+                lifecycle_bucket_evidence.get("symbol_summary", []),
+            )
+            or []
+        ),
+        policy_context_bucket_pruning_recommendations=list(
+            lifecycle_bucket_evidence.get(
+                "policy_context_bucket_pruning_recommendations",
+                lifecycle_bucket_evidence.get("pruning_recommendations", []),
+            )
+            or []
+        ),
         active_adjustments=active_adjustments,
         previous_rows=list(dict(current_policy_state or {}).get("symbol_lifecycle", []) or []),
         checkpoint_auto_judge={

@@ -89,28 +89,39 @@ def _normalize_scope_value(value: str | None) -> str:
     return str(value or "").strip().lower()
 
 
-def _context_key(symbol: str, *, market: str | None = None, exchange_id: str | None = None) -> str | None:
+def _context_key(
+    symbol: str,
+    *,
+    market: str | None = None,
+    exchange_id: str | None = None,
+    policy_bucket: str | None = None,
+) -> str | None:
     normalized_market = _normalize_scope_value(market)
     normalized_exchange = _normalize_scope_value(exchange_id)
-    if not normalized_market and not normalized_exchange:
+    normalized_bucket = _normalize_scope_value(policy_bucket)
+    if not normalized_market and not normalized_exchange and not normalized_bucket:
         return None
     parts = [symbol]
     if normalized_market:
         parts.append(f"market={normalized_market}")
     if normalized_exchange:
         parts.append(f"exchange={normalized_exchange}")
+    if normalized_bucket:
+        parts.append(f"policy_bucket={normalized_bucket}")
     return "|".join(parts)
 
 
 def _context_key_details(key: str) -> dict[str, str]:
     symbol, *_ = key.split("|")
-    details = {"symbol": symbol, "market": "", "exchange_id": ""}
+    details = {"symbol": symbol, "market": "", "exchange_id": "", "policy_bucket": ""}
     for part in key.split("|")[1:]:
         name, _, value = part.partition("=")
         if name == "market":
             details["market"] = value
         if name == "exchange":
             details["exchange_id"] = value
+        if name == "policy_bucket":
+            details["policy_bucket"] = value
     return details
 
 
@@ -421,8 +432,9 @@ class ExecutionQualityState:
         *,
         market: str | None = None,
         exchange_id: str | None = None,
+        policy_bucket: str | None = None,
     ) -> tuple[str | None, ExecutionQualityMetrics | None]:
-        key = _context_key(symbol, market=market, exchange_id=exchange_id)
+        key = _context_key(symbol, market=market, exchange_id=exchange_id, policy_bucket=policy_bucket)
         if key is None:
             return None, None
         return key, self._contexts.get(key)
@@ -592,15 +604,18 @@ class ExecutionQualityState:
         *,
         market: str | None = None,
         exchange_id: str | None = None,
+        policy_bucket: str | None = None,
         now: datetime | None = None,
     ) -> ExecutionQualityOverlay:
         current_time = now or _utc_now()
         normalized_market = _normalize_scope_value(market)
         normalized_exchange = _normalize_scope_value(exchange_id)
+        normalized_bucket = _normalize_scope_value(policy_bucket)
         key, context_metrics = self._context_metrics_for(
             symbol,
             market=normalized_market,
             exchange_id=normalized_exchange,
+            policy_bucket=normalized_bucket,
         )
         if key is not None and context_metrics is not None:
             return self._overlay_from_metrics(
@@ -633,12 +648,14 @@ class ExecutionQualityState:
         decision: DecisionIntent,
         *,
         exchange_id: str | None = None,
+        policy_bucket: str | None = None,
         now: datetime | None = None,
     ) -> DecisionIntent:
         overlay = self.overlay_for(
             decision.symbol,
             market=decision.final_mode,
             exchange_id=exchange_id,
+            policy_bucket=policy_bucket,
             now=now,
         )
         annotated = {
@@ -800,6 +817,7 @@ class ExecutionQualityState:
         timestamp: datetime | None = None,
         market: str | None = None,
         exchange_id: str | None = None,
+        policy_bucket: str | None = None,
     ) -> ExecutionQualityMetrics:
         event_time = timestamp or _utc_now()
         symbol_metrics = self.metrics_for(symbol)
@@ -814,7 +832,7 @@ class ExecutionQualityState:
             timestamp=event_time,
         )
         self._symbols[symbol] = updated_symbol_metrics
-        key = _context_key(symbol, market=market, exchange_id=exchange_id)
+        key = _context_key(symbol, market=market, exchange_id=exchange_id, policy_bucket=policy_bucket)
         if key is not None:
             context_metrics = self._contexts.get(key, ExecutionQualityMetrics())
             self._contexts[key] = self._record_metrics(

@@ -1220,6 +1220,124 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 artifact["cumulative_retention_window"]["avg_edge_retention_ratio"],
             )
 
+    def test_build_policy_validation_runner_artifact_emits_policy_context_bucket_symbol_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "summary.json").write_text(
+                json.dumps({"live_order_count": 0, "tested_order_count": 0}),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "symbol": "BTCUSDT",
+                                "realized_pnl_usd_estimate": 3.0,
+                                "realized_return_bps_estimate": 8.0,
+                                "entry_policy_bucket": "active_policy",
+                                "entry_policy_bucket_available": True,
+                                "entry_policy_bucket_alignment_status": "aligned",
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "symbol": "ETHUSDT",
+                                "realized_pnl_usd_estimate": 1.0,
+                                "realized_return_bps_estimate": 2.0,
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "symbol": "BTCUSDT",
+                                "final_mode": "futures",
+                                "predictability_score": 70.0,
+                                "net_expected_edge_bps": 12.0,
+                                "estimated_round_trip_cost_bps": 8.0,
+                                "timestamp": "2026-03-14T00:00:00+00:00",
+                                "entry_policy_bucket": "active_policy",
+                                "entry_policy_bucket_available": True,
+                                "entry_policy_bucket_alignment_status": "aligned",
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "symbol": "ETHUSDT",
+                                "final_mode": "futures",
+                                "predictability_score": 68.0,
+                                "net_expected_edge_bps": 10.0,
+                                "estimated_round_trip_cost_bps": 8.0,
+                                "timestamp": "2026-03-14T00:05:00+00:00",
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "live_orders.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "accepted": True,
+                        "slippage_bps": 2.0,
+                        "realized_edge_bps": 6.0,
+                        "expected_net_edge_bps": 8.0,
+                        "entry_policy_bucket": "active_policy",
+                        "entry_policy_bucket_available": True,
+                        "entry_policy_bucket_alignment_status": "aligned",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "tested_orders.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "entry_policy_bucket": "active_policy",
+                        "entry_policy_bucket_available": True,
+                        "entry_policy_bucket_alignment_status": "aligned",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "order_errors.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "stage": "protection_order",
+                        "error": "timeout",
+                        "entry_policy_bucket": "active_policy",
+                        "entry_policy_bucket_available": True,
+                        "entry_policy_bucket_alignment_status": "aligned",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            artifact = build_policy_validation_runner_artifact(base_dir=base, lookback_days=7)
+            bucket_evidence = artifact["policy_context_bucket_evidence"]["active_policy"]
+            self.assertEqual(bucket_evidence["policy_context_bucket_name"], "active_policy")
+            self.assertEqual(bucket_evidence["policy_context_bucket_symbol_summary"][0]["symbol"], "BTCUSDT")
+            self.assertEqual(bucket_evidence["policy_context_bucket_symbol_summary"][0]["trade_count"], 1)
+            self.assertEqual(bucket_evidence["policy_context_bucket_pruning_recommendations"][0]["symbol"], "BTCUSDT")
+            self.assertEqual(bucket_evidence["live_order_count"], 1)
+            self.assertEqual(bucket_evidence["tested_order_count"], 1)
+            self.assertEqual(bucket_evidence["avg_edge_retention_ratio"], 0.75)
+
     def test_build_weekly_validation_report_aggregates_recent_runs(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"
