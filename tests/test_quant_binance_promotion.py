@@ -63,6 +63,57 @@ class QuantBinancePromotionTests(unittest.TestCase):
             self.assertIn("universe", proposal["overrides"])
             self.assertNotIn("XYZUSDT", proposal["overrides"]["universe"])
 
+    def test_build_strategy_proposal_includes_symbol_lifecycle_and_deprioritizes_held_symbols(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            (base / "output" / "paper-live-shell" / "run-a").mkdir(parents=True, exist_ok=True)
+            (base / "output" / "strategy-comparison-recent" / "run-b").mkdir(parents=True, exist_ok=True)
+
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {
+                            "name": "candidate-b",
+                            "objective_score": 9.5,
+                            "overrides": {},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (base / "output" / "paper-live-shell" / "run-a" / "performance_report.json").write_text(
+                json.dumps({"pruning_recommendations": []}),
+                encoding="utf-8",
+            )
+            (base / "output" / "paper-live-shell" / "run-a" / "policy_comparison.json").write_text(
+                json.dumps(
+                    {
+                        "checkpoint_auto_judge": {"verdict": "hold"},
+                        "symbol_lifecycle": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "target_state": "observe_only",
+                                "recommended_action": "hold",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (base / "output" / "strategy-comparison-recent" / "run-b" / "comparison.json").write_text(
+                json.dumps({"strategies": [{"strategy_name": "current_strategy", "total_pnl_usd": 1.0}]}),
+                encoding="utf-8",
+            )
+
+            proposal = build_strategy_proposal(base_dir=base)
+
+            self.assertEqual(proposal["gates"]["lifecycle_blocked_symbols"], ["BTCUSDT"])
+            self.assertEqual(proposal["symbol_lifecycle"][0]["symbol"], "BTCUSDT")
+            self.assertIn("priority_symbols", proposal["overrides"]["futures_exposure"])
+            self.assertNotIn("BTCUSDT", proposal["overrides"]["futures_exposure"]["priority_symbols"])
+
 
 if __name__ == "__main__":
     unittest.main()
