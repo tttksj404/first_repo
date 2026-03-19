@@ -10,7 +10,14 @@ from typing import Any
 from quant_binance.auto_mode import build_regime_aware_auto_mode
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report, build_runtime_performance_report_from_rows
-from quant_binance.policy_evidence import policy_evidence_bucket, policy_evidence_bucket_evidence, with_policy_evidence_buckets
+from quant_binance.policy_evidence import (
+    baseline_control_replay_provenance,
+    checkpoint_replay_provenance,
+    policy_evidence_bucket,
+    policy_evidence_bucket_evidence,
+    replay_summary_provenance,
+    with_policy_evidence_buckets,
+)
 from quant_binance.policy_lineage import (
     build_policy_lineage_snapshot,
     build_policy_profile_lineage_snapshot,
@@ -2140,7 +2147,7 @@ def _execution_replay_summary_from_runs(
         "avg_slippage_bps": round(_safe_float(dict(runtime_summary or {}).get("avg_slippage_bps")), 6),
         "realized_pnl_usd": runtime_summary_realized_pnl_usd,
     }
-    return {
+    summary = {
         "source": source,
         "policy_pressure": candidate_pressure,
         "baseline_policy_pressure": baseline_pressure,
@@ -2162,6 +2169,8 @@ def _execution_replay_summary_from_runs(
         "execution_score": _execution_replay_score(execution_metrics),
         "runtime_summary_anchor": runtime_summary_anchor,
     }
+    summary["replay_provenance"] = replay_summary_provenance(summary)
+    return summary
 
 
 def _execution_replay_summary_from_bucket_evidence(
@@ -2381,6 +2390,7 @@ def _execution_replay_summary_from_bucket_evidence(
             "execution_score": _execution_replay_score(execution_metrics),
         }
     )
+    summary["replay_provenance"] = replay_summary_provenance(summary)
     return summary
 
 
@@ -3177,6 +3187,7 @@ def _execution_style_path_entry(
     execution_metrics = dict(replay_payload.get("execution_metrics", {}) or {})
     replay_source = str(replay_payload.get("source", source) or source)
     runtime_summary_anchor = dict(replay_payload.get("runtime_summary_anchor", {}) or {})
+    replay_provenance = replay_summary_provenance(replay_payload or {"source": replay_source})
     evidence_basis = {
         "replay_source": replay_source,
         "runtime_summary_anchor_source": str(runtime_summary_anchor.get("source", "") or ""),
@@ -3189,6 +3200,7 @@ def _execution_style_path_entry(
         "top_symbol_count": len(list(replay_payload.get("top_symbols", []) or [])),
         "top_regime_count": len(list(replay_payload.get("top_regimes", []) or [])),
         "micro_live_status": str(dict(replay_payload.get("micro_live_gate", {}) or {}).get("status", "not_available") or "not_available"),
+        "replay_provenance": str(replay_provenance.get("summary", "") or ""),
     }
     execution_path = {
         "policy_label": policy_label,
@@ -3199,6 +3211,7 @@ def _execution_style_path_entry(
         "uses_projected_runtime_replay": replay_source.startswith("projected_"),
         "uses_bucket_log_replay": replay_source.startswith("observed_") or bool(replay_payload.get("bucket_name")),
         "uses_persisted_validation_evidence": replay_source == "persisted_policy_validation_evidence",
+        "replay_provenance": str(replay_provenance.get("summary", "") or ""),
     }
     return {
         "policy_label": policy_label,
@@ -3220,6 +3233,7 @@ def _execution_style_path_entry(
         "execution_metrics": execution_metrics,
         "execution_path": execution_path,
         "replay_evidence_basis": evidence_basis,
+        "replay_provenance": replay_provenance,
         "runtime_summary_anchor": runtime_summary_anchor,
         "replay_summary": dict(replay_summary or {}),
     }
@@ -3314,6 +3328,8 @@ def _counterfactual_replay_path(
                     "candidate": dict(candidate_entry.get("replay_evidence_basis", {}) or {}),
                     "current": dict(current_entry.get("replay_evidence_basis", {}) or {}),
                 },
+                "candidate_replay_provenance": dict(candidate_entry.get("replay_provenance", {}) or {}),
+                "current_replay_provenance": dict(current_entry.get("replay_provenance", {}) or {}),
             },
         },
         "candidate_policy": candidate_entry,
@@ -3606,6 +3622,7 @@ def _bucket_aware_baseline_control_comparison(
     if str(payload.get("expansion_gate", "not_available") or "not_available") == "pass" and not bucket_replay_ready:
         payload["expansion_gate"] = "not_available"
         payload["expansion_gate_reason"] = bucket_replay_reason
+    payload["replay_provenance"] = baseline_control_replay_provenance(payload)
     return payload
 
 
@@ -4129,6 +4146,12 @@ def _build_checkpoint_auto_judge(
         policy_version=dict(current_policy_state or {}).get("version"),
         evaluated_at=payload.get("generated_at", ""),
     )
+    replay_provenance = checkpoint_replay_provenance(
+        {
+            "evidence_source": checkpoint_evidence_source,
+            "evidence_policy_bucket": checkpoint_bucket_name or "not_available",
+        }
+    )
     return {
         "verdict": effective_verdict,
         "raw_verdict": raw_verdict,
@@ -4147,6 +4170,7 @@ def _build_checkpoint_auto_judge(
         "evidence_source": checkpoint_evidence_source,
         "evidence_policy_bucket": checkpoint_bucket_name or "not_available",
         "evidence_bucket_available": checkpoint_evidence_source == "policy_bucket",
+        "replay_provenance": replay_provenance,
         "baseline_control_comparison": dict(baseline_control_comparison or {}),
         "policy_guardrails": dict(sample_watchdog.get("policy_guardrails", {}) or {}),
         "evidence": {

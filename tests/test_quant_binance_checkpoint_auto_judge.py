@@ -580,6 +580,18 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             self.assertEqual(proposal["gates"]["checkpoint_auto_judge_verdict"], "expand")
             self.assertEqual(proposal["gates"]["checkpoint_evidence_source"], "root")
             self.assertEqual(proposal["gates"]["checkpoint_evidence_policy_bucket"], "not_available")
+            self.assertEqual(
+                proposal["gates"]["checkpoint_replay_provenance"],
+                "mixed_root_summary_fallback:root",
+            )
+            self.assertEqual(
+                proposal["gates"]["proposal_primary_replay_provenance"],
+                "mixed_root_summary_fallback:root",
+            )
+            self.assertEqual(
+                proposal["replay_provenance"]["checkpoint_auto_judge"]["classification"],
+                "mixed_root_summary_fallback",
+            )
 
     def test_strategy_proposal_uses_simple_baseline_gate_when_checkpoint_judge_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
