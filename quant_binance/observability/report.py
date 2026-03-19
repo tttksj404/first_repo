@@ -1147,6 +1147,44 @@ def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, 
     return verdict, delta
 
 
+def _simple_baseline_control_gate(evidence: dict[str, object] | None) -> dict[str, object]:
+    payload = dict(evidence or {})
+    baseline = dict(payload.get("baseline_control_comparison", {}) or {})
+    verdict = str(baseline.get("verdict", "not_available") or "not_available")
+    expansion_gate = str(baseline.get("expansion_gate", "") or "")
+    if not expansion_gate:
+        if verdict == "supportive":
+            expansion_gate = "pass"
+        elif verdict in {"parity", "caution"}:
+            expansion_gate = "block"
+        else:
+            expansion_gate = "not_available"
+    gate_reason = str(baseline.get("expansion_gate_reason", "") or "")
+    if not gate_reason:
+        gate_reason = {
+            "supportive": "SIMPLE_BASELINE_CONTROL_CLEARED",
+            "parity": "SIMPLE_BASELINE_CONTROL_NOT_CLEARLY_BEATEN",
+            "caution": "SIMPLE_BASELINE_CONTROL_UNDERPERFORMED",
+        }.get(verdict, "NO_JUSTIFIED_SIMPLE_BASELINE_GATE")
+    promotion_block_reason = {
+        "parity": "PROMOTION_BLOCKED_BY_SIMPLE_BASELINE_PARITY",
+        "caution": "PROMOTION_BLOCKED_BY_SIMPLE_BASELINE_UNDERPERFORMANCE",
+    }.get(verdict, "")
+    validation_reason = {
+        "parity": "SIMPLE_BASELINE_CONTROL_NOT_CLEARLY_BEATEN",
+        "caution": "SIMPLE_BASELINE_CONTROL_UNDERPERFORMED",
+    }.get(verdict, "")
+    return {
+        "available": bool(baseline.get("available")),
+        "verdict": verdict,
+        "status": expansion_gate,
+        "gate_reason": gate_reason,
+        "promotion_block_reason": promotion_block_reason,
+        "validation_reason": validation_reason,
+        "baseline_control_comparison": baseline,
+    }
+
+
 def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, object]:
     payload = dict(evidence or {})
     return {
@@ -1250,6 +1288,7 @@ def build_promotion_verdict(
     verdict = _candidate_policy_requested_verdict(adjustments)
     requested_status = str(verdict.get("status", "keep") or "keep")
     comparison_verdict, comparison_delta = _policy_comparison_signal(comparison_evidence)
+    baseline_gate = _simple_baseline_control_gate(comparison_evidence)
     runner_quality = _runner_quality_evidence(comparison_evidence)
     if comparison_verdict == "candidate_worse":
         reasons = list(verdict["reasons"])
@@ -1265,6 +1304,9 @@ def build_promotion_verdict(
             "status": verdict["status"],
             "reasons": list(verdict["reasons"]) + ["CANDIDATE_OUTPERFORMS_CURRENT_POLICY"],
         }
+    if verdict["status"] in {"promote", "promote_aggressive"} and str(baseline_gate.get("status", "")) == "block":
+        block_reason = str(baseline_gate.get("promotion_block_reason", "") or "PROMOTION_BLOCKED_BY_SIMPLE_BASELINE_CONTROL")
+        verdict = {"status": "keep", "reasons": list(verdict["reasons"]) + [block_reason]}
     watchdog_block_reason = _sample_quality_watchdog_block_reason(comparison_evidence)
     if verdict["status"] in {"promote", "promote_aggressive"} and watchdog_block_reason:
         verdict = {"status": "keep", "reasons": list(verdict["reasons"]) + [watchdog_block_reason]}
@@ -1300,6 +1342,11 @@ def build_promotion_verdict(
     if comparison_verdict != "keep" or comparison_delta != 0.0:
         verdict["comparison_verdict"] = comparison_verdict
         verdict["candidate_vs_current_score_delta"] = comparison_delta
+    baseline_control_comparison = dict(baseline_gate.get("baseline_control_comparison", {}) or {})
+    if baseline_control_comparison:
+        verdict["baseline_control_comparison"] = baseline_control_comparison
+        verdict["simple_baseline_gate_status"] = str(baseline_gate.get("status", "not_available") or "not_available")
+        verdict["simple_baseline_gate_reason"] = str(baseline_gate.get("gate_reason", "") or "")
     verdict.update(
         _promotion_rollout_signal(
             requested_status=requested_status,
@@ -1467,6 +1514,7 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     runner_quality = _runner_quality_evidence(evidence)
     sample_watchdog = dict(evidence.get("sample_quality_watchdog", {}) or {})
     checkpoint_auto_judge = dict(evidence.get("checkpoint_auto_judge", {}) or {})
+    baseline_gate = _simple_baseline_control_gate(evidence)
     sample_watchdog_status = str(sample_watchdog.get("status", "") or "")
     reasons: list[str] = []
     status = "fail"
@@ -1502,6 +1550,13 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
     elif float(evidence.get("candidate_vs_current_score_delta", 0.0) or 0.0) > 0.1:
         reasons.append("CANDIDATE_OUTPERFORMS_CURRENT_POLICY")
+    if requested_status in {"promote", "promote_aggressive"} and str(baseline_gate.get("status", "")) == "block":
+        status = "fail"
+        baseline_validation_reason = str(
+            baseline_gate.get("validation_reason", "") or "SIMPLE_BASELINE_CONTROL_NOT_CLEARLY_BEATEN"
+        )
+        reasons.append(baseline_validation_reason)
+        reasons.append("PROMOTION_PATH_BLOCKED_BY_SIMPLE_BASELINE_CONTROL")
     if sample_watchdog_status == "degraded":
         status = "fail"
         reasons.append("SAMPLE_QUALITY_WATCHDOG_DEGRADED")
@@ -2202,6 +2257,7 @@ def build_persisted_policy_state(
     micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
     sample_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
     checkpoint_auto_judge = dict(validation_evidence.get("checkpoint_auto_judge", {}) or {})
+    baseline_gate = _simple_baseline_control_gate(validation_evidence)
     rollout_status = "steady"
     rollout_reason = "UNCHANGED"
     retention_monitor = _retention_monitor(previous_state, previous_active, validation_evidence, operational_verdict)
@@ -2231,6 +2287,19 @@ def build_persisted_policy_state(
         lifecycle = "rolled_back"
         rollout_status = "reverted"
         rollout_reason = "CHECKPOINT_AUTO_JUDGE_ROLLBACK"
+        version = previous_version + 1
+    elif (
+        previous_active
+        and str(previous_active.get("status", "") or "") in {"promote", "promote_aggressive"}
+        and str(checkpoint_auto_judge.get("verdict", "") or "") == "tighten"
+        and str(baseline_gate.get("status", "")) == "block"
+    ):
+        active_policy = _demoted_active_policy(previous_active)
+        for item in list(active_policy.get("adjustments", []) or []):
+            item["reason"] = str(baseline_gate.get("gate_reason", "") or "SIMPLE_BASELINE_CONTROL_GATE")
+        lifecycle = "checkpoint_tightened"
+        rollout_status = "checkpoint_tightened"
+        rollout_reason = str(baseline_gate.get("gate_reason", "") or "SIMPLE_BASELINE_CONTROL_GATE")
         version = previous_version + 1
     elif protective_transition:
         if protective_transition == "disable":

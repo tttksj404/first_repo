@@ -81,6 +81,85 @@ def _derived_runtime_overrides(*, pruning_recommendations: list[dict[str, Any]])
     return overrides
 
 
+def _simple_baseline_gate_from_comparison(baseline_control_comparison: dict[str, Any]) -> dict[str, Any]:
+    baseline = dict(baseline_control_comparison or {})
+    verdict = str(baseline.get("verdict", "not_available") or "not_available")
+    gate = str(baseline.get("expansion_gate", "") or "")
+    if not gate:
+        if verdict == "supportive":
+            gate = "pass"
+        elif verdict in {"parity", "caution"}:
+            gate = "block"
+        else:
+            gate = "not_available"
+    return {
+        "status": gate,
+        "verdict": verdict,
+        "reason": str(baseline.get("expansion_gate_reason", "") or ""),
+        "baseline_control_comparison": baseline,
+    }
+
+
+def _proposal_status_from_gates(
+    *,
+    checkpoint_auto_judge: dict[str, Any],
+    baseline_gate: dict[str, Any],
+) -> str:
+    checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
+    if checkpoint_verdict == "rollback":
+        return "proposal_blocked"
+    if checkpoint_verdict in {"tighten", "hold"}:
+        return "proposal_pending"
+    if str(baseline_gate.get("status", "")) == "block":
+        return "proposal_pending"
+    return "proposal_ready"
+
+
+def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
+    root = Path(base_dir) / "output" / "paper-live-shell"
+    latest_policy_comparison_path = _latest_file_under(root, "policy_comparison.json")
+    if latest_policy_comparison_path is not None:
+        payload = json.loads(latest_policy_comparison_path.read_text(encoding="utf-8"))
+        judge = dict(payload.get("checkpoint_auto_judge", {}) or {})
+        baseline_control_comparison = dict(payload.get("baseline_control_comparison", {}) or {})
+        if judge:
+            return {
+                "judge": judge,
+                "baseline_control_comparison": baseline_control_comparison,
+                "source_path": str(latest_policy_comparison_path),
+                "source_type": "policy_comparison",
+            }
+        if baseline_control_comparison:
+            return {
+                "judge": {},
+                "baseline_control_comparison": baseline_control_comparison,
+                "source_path": str(latest_policy_comparison_path),
+                "source_type": "policy_comparison",
+            }
+    latest_policy_state_path = _latest_file_under(root, "policy_state.json")
+    if latest_policy_state_path is not None:
+        payload = json.loads(latest_policy_state_path.read_text(encoding="utf-8"))
+        judge = dict(payload.get("checkpoint_auto_judge", {}) or {})
+        baseline_control_comparison = dict(
+            judge.get("baseline_control_comparison", payload.get("baseline_control_comparison", {})) or {}
+        )
+        if judge:
+            return {
+                "judge": judge,
+                "baseline_control_comparison": baseline_control_comparison,
+                "source_path": str(latest_policy_state_path),
+                "source_type": "policy_state",
+            }
+        if baseline_control_comparison:
+            return {
+                "judge": {},
+                "baseline_control_comparison": baseline_control_comparison,
+                "source_path": str(latest_policy_state_path),
+                "source_type": "policy_state",
+            }
+    return {"judge": {}, "baseline_control_comparison": {}, "source_path": "", "source_type": ""}
+
+
 def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[str, Any]:
     paths = proposal_paths(base_dir)
     latest = paths["optimization_latest"]
@@ -107,20 +186,43 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     if strategies:
         best_comparison = max(strategies, key=lambda item: float(item.get("total_pnl_usd", 0.0)))
     merged_overrides = _deep_merge(best.get("overrides", {}), runtime_overrides)
+    checkpoint_judge_context = _load_checkpoint_auto_judge(base_dir=base_dir)
+    checkpoint_auto_judge = dict(checkpoint_judge_context.get("judge", {}) or {})
+    baseline_control_comparison = dict(checkpoint_judge_context.get("baseline_control_comparison", {}) or {})
+    baseline_gate = _simple_baseline_gate_from_comparison(baseline_control_comparison)
+    checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
+    proposal_status = _proposal_status_from_gates(
+        checkpoint_auto_judge=checkpoint_auto_judge,
+        baseline_gate=baseline_gate,
+    )
     proposal = {
-        "status": "proposal_ready",
+        "status": proposal_status,
         "candidate_name": best.get("name"),
         "objective_score": best.get("objective_score"),
         "overrides": merged_overrides,
         "generated_at": optimization.get("generated_at"),
+        "checkpoint_auto_judge": checkpoint_auto_judge,
+        "baseline_control_comparison": baseline_control_comparison,
         "supporting_artifacts": {
             "optimization_latest": str(latest),
             "performance_report": str(latest_performance_path) if latest_performance_path else "",
             "recent_comparison": str(latest_recent_comparison_path) if latest_recent_comparison_path else "",
+            "checkpoint_auto_judge_source": str(checkpoint_judge_context.get("source_path", "") or ""),
         },
         "gates": {
             "performance_report_present": bool(latest_performance_path),
             "recent_comparison_present": bool(latest_recent_comparison_path),
+            "checkpoint_auto_judge_present": bool(checkpoint_auto_judge),
+            "checkpoint_auto_judge_verdict": checkpoint_verdict or "not_available",
+            "checkpoint_auto_judge_confidence": str(checkpoint_auto_judge.get("confidence", "") or ""),
+            "checkpoint_auto_judge_reason_codes": list(checkpoint_auto_judge.get("reason_codes", []) or []),
+            "simple_baseline_gate_status": str(baseline_gate.get("status", "not_available") or "not_available"),
+            "simple_baseline_gate_verdict": str(baseline_gate.get("verdict", "not_available") or "not_available"),
+            "simple_baseline_gate_reason": str(baseline_gate.get("reason", "") or ""),
+            "simple_baseline_gate_present": bool(baseline_control_comparison),
+            "simple_baseline_strategy": str(
+                dict(baseline_control_comparison.get("best_simple_baseline", {}) or {}).get("strategy_name", "") or ""
+            ),
             "risky_symbols": risky_symbols,
             "auto_pruned_symbols": sorted(
                 str(symbol)
@@ -143,6 +245,13 @@ def apply_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     if not pending.exists():
         return {"status": "no_pending_proposal"}
     proposal = json.loads(pending.read_text(encoding="utf-8"))
+    if str(proposal.get("status", "proposal_ready") or "proposal_ready") != "proposal_ready":
+        return {
+            "status": "proposal_not_ready",
+            "proposal_status": str(proposal.get("status", "") or ""),
+            "checkpoint_auto_judge": dict(proposal.get("checkpoint_auto_judge", {}) or {}),
+            "baseline_control_comparison": dict(proposal.get("baseline_control_comparison", {}) or {}),
+        }
     overrides = proposal.get("overrides", {})
     paths["approved"].write_text(json.dumps(overrides, indent=2, sort_keys=True), encoding="utf-8")
     pending.unlink()
