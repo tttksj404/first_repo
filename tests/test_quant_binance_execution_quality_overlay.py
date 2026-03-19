@@ -287,6 +287,54 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         self.assertEqual(futures_bitget.execution_quality_trade_restraint, "none")
         self.assertEqual(futures_bitget.execution_quality_sample_size, 0)
 
+    def test_overlay_can_scope_execution_quality_by_policy_bucket(self) -> None:
+        state = ExecutionQualityState()
+        base = datetime(2026, 3, 16, 3, 15, tzinfo=timezone.utc)
+        for minute in range(3):
+            state.record(
+                symbol="BTCUSDT",
+                outcome="timeout",
+                fill_ratio=0.0,
+                slippage_bps=None,
+                realized_edge_bps=0.0,
+                timestamp=base + timedelta(minutes=minute),
+                market="futures",
+                exchange_id="binance",
+                policy_bucket="active_policy",
+            )
+        for minute in range(3):
+            state.record(
+                symbol="BTCUSDT",
+                outcome="filled",
+                fill_ratio=1.0,
+                slippage_bps=1.0,
+                realized_edge_bps=10.0,
+                expected_edge_bps=12.0,
+                timestamp=base + timedelta(minutes=10 + minute),
+                market="futures",
+                exchange_id="binance",
+                policy_bucket="staged_candidate",
+            )
+
+        active_overlay = state.overlay_for(
+            "BTCUSDT",
+            market="futures",
+            exchange_id="binance",
+            policy_bucket="active_policy",
+            now=base + timedelta(minutes=20),
+        )
+        staged_overlay = state.overlay_for(
+            "BTCUSDT",
+            market="futures",
+            exchange_id="binance",
+            policy_bucket="staged_candidate",
+            now=base + timedelta(minutes=20),
+        )
+
+        self.assertEqual(active_overlay.trade_restraint, "execution_quality_halt")
+        self.assertEqual(staged_overlay.trade_restraint, "none")
+        self.assertGreaterEqual(staged_overlay.sample_size, 3)
+
     def test_overlay_tightens_runtime_thresholds_for_retention_and_protection_degradation(self) -> None:
         state = ExecutionQualityState()
         base = datetime(2026, 3, 16, 3, 30, tzinfo=timezone.utc)
