@@ -513,6 +513,39 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertAlmostEqual(session._policy_leverage_multiplier_for_decision(decision), 1.07, places=6)
             self.assertAlmostEqual(session._policy_entry_floor_adjustment_bps(decision), -3.5, places=6)
 
+    def test_non_staged_runtime_context_does_not_apply_candidate_policy(self) -> None:
+        session = self._build_session()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        decision = make_decision(timestamp=now, symbol="BTCUSDT", order_intent_notional_usd=100.0, net_expected_edge_bps=100.0)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "status": "kept",
+                        "rollout_status": "micro_live_pending",
+                        "rollout_progression": {"execution_phase": "partial"},
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "candidate_policy": {
+                            "adjustments": [
+                                {
+                                    "symbol": "BTCUSDT",
+                                    "action": "promote",
+                                    "size_multiplier": 1.2,
+                                    "leverage_multiplier": 1.2,
+                                    "entry_threshold_bps": -10.0,
+                                    "expected_profit_floor_bps": -100.0,
+                                }
+                            ]
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(session._policy_adjustment_for_decision(decision), {})
+            self.assertEqual(session._policy_multiplier_for_decision(decision), 1.0)
+
     def test_cap_live_order_decision_scales_size_on_operational_hold(self) -> None:
         session = self._build_session()
         session.capital_report = {

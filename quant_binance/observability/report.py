@@ -1025,7 +1025,7 @@ def _apply_sample_quality_watchdog(
                 )
             else:
                 next_action = action
-                if action == "aggressive_promote" and status in {"thin", "degraded"}:
+                if action == "aggressive_promote" and status == "degraded" and not is_major:
                     next_action = "promote"
                 next_intensity = min(operating_intensity, intensity_cap)
                 next_score_delta = round(score_delta * max(min(next_intensity, 1.0), 0.65), 6)
@@ -1195,7 +1195,12 @@ def _candidate_policy_requested_verdict(adjustments: list[dict[str, object]]) ->
 
 
 def _sample_quality_watchdog_block_reason(comparison_evidence: dict[str, object] | None) -> str:
-    watchdog = dict(dict(comparison_evidence or {}).get("sample_quality_watchdog", {}) or {})
+    payload = dict(comparison_evidence or {})
+    watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
+    micro_live_gate = dict(payload.get("micro_live_gate", {}) or {})
+    micro_live_status = str(micro_live_gate.get("status", "") or "")
+    if micro_live_status in {"pending", "pass"}:
+        return ""
     status = str(watchdog.get("status", "") or "")
     if status == "degraded":
         return "PROMOTION_BLOCKED_BY_SAMPLE_QUALITY_WATCHDOG_DEGRADED"
@@ -2113,6 +2118,41 @@ def _sample_quality_checkpoint_revalidation(
     }
 
 
+def _protective_policy_transition(
+    *,
+    verdict_status: str,
+    candidate_adjustments: list[dict[str, object]],
+    comparison_verdict: str,
+) -> str:
+    if comparison_verdict == "candidate_worse":
+        return ""
+    actions = {
+        str(item.get("action", "") or "")
+        for item in list(candidate_adjustments or [])
+        if str(item.get("action", "") or "")
+    }
+    if verdict_status == "disable":
+        return "disable"
+    if verdict_status == "demote" and actions and actions <= {"demote", "disabled"}:
+        return "demote"
+    return ""
+
+
+def _invalidate_staged_rollout(
+    *,
+    previous_state: dict[str, object],
+    validation_status: str,
+    staged_micro_live_block: bool,
+) -> bool:
+    if str(previous_state.get("status", "") or "") != "staged_rollout":
+        return False
+    if str(previous_state.get("rollout_status", "") or "") != "micro_live_pending":
+        return False
+    if staged_micro_live_block:
+        return False
+    return validation_status == "fail"
+
+
 def build_persisted_policy_state(
     previous_state: dict[str, object] | None,
     candidate_policy: dict[str, object],
@@ -2141,7 +2181,39 @@ def build_persisted_policy_state(
         and "PROMOTION_BLOCKED_BY_MICRO_LIVE_GATE" in verdict_reasons
         and any(str(item.get("action", "")) in {"promote", "aggressive_promote"} for item in candidate_adjustments)
     )
-    if previous_active and retention_monitor.get("status") == "rollback":
+    protective_transition = _protective_policy_transition(
+        verdict_status=verdict_status,
+        candidate_adjustments=candidate_adjustments,
+        comparison_verdict=comparison_verdict,
+    )
+    invalidate_staged_rollout = _invalidate_staged_rollout(
+        previous_state=previous_state,
+        validation_status=validation_status,
+        staged_micro_live_block=staged_micro_live_block,
+    )
+    if protective_transition:
+        if protective_transition == "disable":
+            active_policy = {
+                "status": "disabled",
+                "adjustments": [dict(item, action="disabled", size_multiplier=0.0) for item in candidate_adjustments],
+            }
+            lifecycle = "disabled"
+            rollout_status = "halted"
+            rollout_reason = "PROTECTIVE_DISABLE_VALIDATED"
+        else:
+            active_policy = dict(candidate_policy)
+            active_policy["status"] = "demote"
+            lifecycle = "demoted"
+            rollout_status = "demoted"
+            rollout_reason = "PROTECTIVE_DEMOTION_VALIDATED"
+        version = previous_version + 1
+    elif invalidate_staged_rollout:
+        active_policy = {"status": "baseline", "adjustments": []}
+        lifecycle = "staged_rollout_invalidated"
+        rollout_status = "baseline"
+        rollout_reason = "STAGED_CANDIDATE_INVALIDATED"
+        version = previous_version + 1
+    elif previous_active and retention_monitor.get("status") == "rollback":
         active_policy = {"status": "baseline", "adjustments": []}
         lifecycle = "rolled_back"
         rollout_status = "reverted"
