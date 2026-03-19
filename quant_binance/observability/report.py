@@ -2116,6 +2116,216 @@ def build_executive_operating_verdict(
     }
 
 
+def _dedupe_strings(items: list[str] | tuple[str, ...]) -> list[str]:
+    unique_items: list[str] = []
+    seen_items: set[str] = set()
+    for item in items:
+        normalized = str(item or "")
+        if normalized and normalized not in seen_items:
+            unique_items.append(normalized)
+            seen_items.add(normalized)
+    return unique_items
+
+
+def _live_evidence_snapshot(validation_evidence: dict[str, object] | None) -> dict[str, object]:
+    payload = dict(validation_evidence or {})
+    micro_live_gate = dict(payload.get("micro_live_gate", {}) or {})
+    sample_watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
+    policy_alignment = dict(payload.get("current_policy_evidence_alignment", {}) or {})
+    validation_runs = list(payload.get("validation_runs", []) or [])
+    walk_forward_windows = list(payload.get("walk_forward_windows", []) or [])
+    run_count = max(_coerce_int(payload.get("run_count")), len(validation_runs))
+    live_order_count = max(
+        _coerce_int(payload.get("total_live_order_count")),
+        _coerce_int(payload.get("live_order_count")),
+        _coerce_int(micro_live_gate.get("live_order_count")),
+    )
+    closed_trade_count = max(
+        _coerce_int(payload.get("total_closed_trade_count")),
+        _coerce_int(payload.get("closed_trade_count")),
+        _coerce_int(micro_live_gate.get("closed_trade_count")),
+    )
+    walk_forward_window_count = max(
+        _coerce_int(payload.get("runner_walk_forward_window_count")),
+        _coerce_int(payload.get("walk_forward_window_count")),
+        len(walk_forward_windows),
+    )
+    positive_walk_forward_ratio = round(
+        _coerce_float(
+            payload.get(
+                "runner_positive_walk_forward_ratio",
+                payload.get("positive_walk_forward_ratio"),
+            )
+        ),
+        6,
+    )
+    return {
+        "run_count": run_count,
+        "live_order_count": live_order_count,
+        "closed_trade_count": closed_trade_count,
+        "walk_forward_window_count": walk_forward_window_count,
+        "positive_walk_forward_ratio": positive_walk_forward_ratio,
+        "sample_quality_watchdog_status": str(sample_watchdog.get("status", "not_available") or "not_available"),
+        "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
+        "policy_lineage_status": str(policy_alignment.get("status", "unknown") or "unknown"),
+    }
+
+
+def _build_live_evidence_rejudge(
+    *,
+    previous_state: dict[str, object],
+    validation_evidence: dict[str, object],
+    checkpoint_revalidation: dict[str, object],
+    executive_operating_verdict: dict[str, object],
+) -> dict[str, object]:
+    previous_verdict = str(
+        dict(previous_state.get("executive_operating_verdict", {}) or {}).get("verdict", "not_available") or "not_available"
+    )
+    previous_validation_evidence = dict(
+        dict(previous_state.get("policy_validation", {}) or {}).get("evidence", {}) or {}
+    )
+    previous_snapshot = _live_evidence_snapshot(previous_validation_evidence)
+    current_snapshot = _live_evidence_snapshot(validation_evidence)
+    lineage_status = str(current_snapshot.get("policy_lineage_status", "unknown") or "unknown")
+    current_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "hold") or "hold")
+    evidence_delta = {
+        "run_count": int(current_snapshot.get("run_count", 0)) - int(previous_snapshot.get("run_count", 0)),
+        "live_order_count": int(current_snapshot.get("live_order_count", 0)) - int(previous_snapshot.get("live_order_count", 0)),
+        "closed_trade_count": int(current_snapshot.get("closed_trade_count", 0)) - int(previous_snapshot.get("closed_trade_count", 0)),
+        "walk_forward_window_count": int(current_snapshot.get("walk_forward_window_count", 0)) - int(previous_snapshot.get("walk_forward_window_count", 0)),
+        "positive_walk_forward_ratio": round(
+            float(current_snapshot.get("positive_walk_forward_ratio", 0.0) or 0.0)
+            - float(previous_snapshot.get("positive_walk_forward_ratio", 0.0) or 0.0),
+            6,
+        ),
+    }
+    revalidation_hooks = [
+        dict(item)
+        for item in list(dict(checkpoint_revalidation or {}).get("hooks", []) or [])
+        if isinstance(item, dict)
+    ]
+    fresh_reasons: list[str] = []
+    if evidence_delta["live_order_count"] >= 2:
+        fresh_reasons.append("LIVE_ORDER_SAMPLE_INCREASED")
+    if evidence_delta["closed_trade_count"] >= 1:
+        fresh_reasons.append("CLOSED_TRADE_SAMPLE_INCREASED")
+    if evidence_delta["walk_forward_window_count"] >= 1:
+        fresh_reasons.append("WALK_FORWARD_SUPPORT_INCREASED")
+    if (
+        str(previous_snapshot.get("micro_live_status", "not_available") or "not_available")
+        != str(current_snapshot.get("micro_live_status", "not_available") or "not_available")
+        and str(current_snapshot.get("micro_live_status", "not_available") or "not_available") in {"pass", "fail"}
+    ):
+        fresh_reasons.append("MICRO_LIVE_STATUS_CHANGED")
+    if (
+        str(previous_snapshot.get("sample_quality_watchdog_status", "not_available") or "not_available")
+        != str(current_snapshot.get("sample_quality_watchdog_status", "not_available") or "not_available")
+        and str(current_snapshot.get("sample_quality_watchdog_status", "not_available") or "not_available")
+        in {"healthy", "promote_ready", "degraded"}
+    ):
+        fresh_reasons.append("SAMPLE_QUALITY_STATUS_CHANGED")
+    if revalidation_hooks:
+        fresh_reasons.extend(
+            f"CHECKPOINT_REVALIDATION_{str(item.get('kind', 'triggered')).upper()}"
+            for item in revalidation_hooks
+        )
+    fresh_reasons = _dedupe_strings(fresh_reasons)
+    if previous_verdict == "not_available":
+        status = "initial"
+        reason_codes = ["NO_PREVIOUS_EXECUTIVE_VERDICT"]
+        triggered = False
+    elif lineage_status in {"mismatch", "stale"}:
+        status = "blocked"
+        reason_codes = [f"LIVE_EVIDENCE_REJUDGE_BLOCKED_BY_{lineage_status.upper()}_LINEAGE"]
+        triggered = False
+    elif not fresh_reasons:
+        status = "waiting"
+        reason_codes = ["NO_MATERIAL_LIVE_EVIDENCE_ACCUMULATION"]
+        triggered = False
+    elif (
+        str(current_snapshot.get("sample_quality_watchdog_status", "not_available") or "not_available") == "thin"
+        and str(current_snapshot.get("micro_live_status", "not_available") or "not_available") != "pass"
+    ):
+        status = "waiting"
+        reason_codes = ["LIVE_EVIDENCE_STILL_THIN_AFTER_ACCUMULATION", *fresh_reasons]
+        triggered = False
+    else:
+        status = "triggered"
+        reason_codes = ["LIVE_EVIDENCE_REJUDGE_TRIGGERED", *fresh_reasons]
+        triggered = True
+    return {
+        "status": status,
+        "triggered": triggered,
+        "previous_verdict": previous_verdict,
+        "current_raw_verdict": current_verdict,
+        "policy_lineage_status": lineage_status,
+        "fresh_evidence_accumulated": bool(fresh_reasons),
+        "fresh_reason_codes": fresh_reasons,
+        "reason_codes": _dedupe_strings(reason_codes),
+        "evidence_delta": evidence_delta,
+        "previous_snapshot": previous_snapshot,
+        "current_snapshot": current_snapshot,
+        "checkpoint_revalidation_triggered": bool(dict(checkpoint_revalidation or {}).get("triggered")),
+        "checkpoint_revalidation_hook_count": len(revalidation_hooks),
+    }
+
+
+_EXECUTIVE_VERDICT_RANK = {
+    "rollback": 0,
+    "tighten": 1,
+    "rebuild_evidence": 2,
+    "hold": 3,
+    "expand": 4,
+}
+
+
+def _apply_live_evidence_rejudge_to_executive_verdict(
+    *,
+    previous_state: dict[str, object],
+    executive_operating_verdict: dict[str, object],
+    live_evidence_rejudge: dict[str, object],
+) -> dict[str, object]:
+    adjusted = dict(executive_operating_verdict or {})
+    previous_verdict = str(live_evidence_rejudge.get("previous_verdict", "not_available") or "not_available")
+    current_verdict = str(adjusted.get("verdict", "hold") or "hold")
+    rejudge_status = str(live_evidence_rejudge.get("status", "unknown") or "unknown")
+    previous_rank = _EXECUTIVE_VERDICT_RANK.get(previous_verdict, -1)
+    current_rank = _EXECUTIVE_VERDICT_RANK.get(current_verdict, -1)
+    retained_previous_verdict = False
+    if previous_rank >= 0 and current_rank > previous_rank and rejudge_status != "triggered":
+        adjusted["verdict"] = previous_verdict
+        previous_confidence = str(
+            dict(previous_state.get("executive_operating_verdict", {}) or {}).get("confidence", adjusted.get("confidence", "low"))
+            or adjusted.get("confidence", "low")
+        )
+        adjusted["confidence"] = previous_confidence
+        retained_previous_verdict = True
+        extra_reason = (
+            "EXECUTIVE_REJUDGE_BLOCKED_BY_POLICY_LINEAGE"
+            if rejudge_status == "blocked"
+            else "EXECUTIVE_REJUDGE_WAITING_FOR_FRESH_EVIDENCE"
+        )
+        adjusted["reasons"] = _dedupe_strings(
+            list(adjusted.get("reasons", []) or [])
+            + [extra_reason]
+        )
+    adjusted["signals"] = {
+        **dict(adjusted.get("signals", {}) or {}),
+        "live_evidence_rejudge_status": rejudge_status,
+        "live_evidence_fresh": bool(live_evidence_rejudge.get("fresh_evidence_accumulated")),
+        "live_evidence_lineage_status": str(live_evidence_rejudge.get("policy_lineage_status", "unknown") or "unknown"),
+    }
+    source_reason_codes = dict(adjusted.get("source_reason_codes", {}) or {})
+    source_reason_codes["live_evidence_rejudge"] = list(live_evidence_rejudge.get("reason_codes", []) or [])
+    adjusted["source_reason_codes"] = source_reason_codes
+    adjusted["live_evidence_rejudge"] = {
+        **dict(live_evidence_rejudge or {}),
+        "effective_verdict": str(adjusted.get("verdict", current_verdict) or current_verdict),
+        "retained_previous_verdict": retained_previous_verdict,
+    }
+    return adjusted
+
+
 def _coerce_float(value: object) -> float:
     try:
         return float(value or 0.0)
@@ -2797,12 +3007,6 @@ def build_persisted_policy_state(
     verdict_status = str(promotion_verdict.get("status", "keep"))
     validation_status = str(validation.get("status", "fail"))
     validation_evidence = dict(validation.get("evidence", {}) or {})
-    executive_operating_verdict = build_executive_operating_verdict(
-        promotion_verdict,
-        operational_verdict,
-        validation,
-        validation_evidence,
-    )
     comparison_verdict, _ = _resolved_policy_comparison_signal(
         validation_evidence=validation_evidence,
         promotion_verdict=promotion_verdict,
@@ -2818,6 +3022,23 @@ def build_persisted_policy_state(
     rollout_reason = "UNCHANGED"
     retention_monitor = _retention_monitor(previous_state, previous_active, validation_evidence, operational_verdict)
     checkpoint_revalidation = _sample_quality_checkpoint_revalidation(previous_state, validation_evidence)
+    raw_executive_operating_verdict = build_executive_operating_verdict(
+        promotion_verdict,
+        operational_verdict,
+        validation,
+        validation_evidence,
+    )
+    executive_operating_verdict = _apply_live_evidence_rejudge_to_executive_verdict(
+        previous_state=previous_state,
+        executive_operating_verdict=raw_executive_operating_verdict,
+        live_evidence_rejudge=_build_live_evidence_rejudge(
+            previous_state=previous_state,
+            validation_evidence=validation_evidence,
+            checkpoint_revalidation=checkpoint_revalidation,
+            executive_operating_verdict=raw_executive_operating_verdict,
+        ),
+    )
+    live_evidence_rejudge = dict(executive_operating_verdict.get("live_evidence_rejudge", {}) or {})
     verdict_reasons = list(promotion_verdict.get("reasons", []) or [])
     staged_micro_live_block = (
         verdict_status == "keep"
@@ -2978,6 +3199,7 @@ def build_persisted_policy_state(
     active_policy["checkpoint_auto_judge"] = checkpoint_auto_judge
     active_policy["sample_quality_watchdog"] = sample_watchdog
     active_policy["auto_mode"] = auto_mode
+    active_policy["live_evidence_rejudge"] = live_evidence_rejudge
     active_policy["executive_operating_verdict"] = dict(executive_operating_verdict)
     policy_state_payload = {
         "version": version,
@@ -3005,6 +3227,7 @@ def build_persisted_policy_state(
         "checkpoint_revalidation": checkpoint_revalidation,
         "checkpoint_auto_judge": checkpoint_auto_judge,
         "auto_mode": auto_mode,
+        "live_evidence_rejudge": live_evidence_rejudge,
         "executive_operating_verdict": executive_operating_verdict,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
@@ -3029,6 +3252,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "checkpoint_revalidation": dict(policy_state.get("checkpoint_revalidation", {}) or {}),
         "checkpoint_auto_judge": dict(policy_state.get("checkpoint_auto_judge", {}) or {}),
         "auto_mode": dict(policy_state.get("auto_mode", {}) or {}),
+        "live_evidence_rejudge": dict(policy_state.get("live_evidence_rejudge", {}) or {}),
         "executive_operating_verdict": dict(policy_state.get("executive_operating_verdict", {}) or {}),
         "symbol_lifecycle_summary": dict(policy_state.get("symbol_lifecycle_summary", {}) or {}),
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
