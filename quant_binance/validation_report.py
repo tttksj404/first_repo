@@ -2164,6 +2164,226 @@ def _execution_replay_summary_from_runs(
     }
 
 
+def _execution_replay_summary_from_bucket_evidence(
+    *,
+    bucket_evidence: dict[str, Any] | None,
+    policy_application: dict[str, object],
+    source: str,
+    runtime_summary: dict[str, Any] | None = None,
+    runtime_summary_run_dir: Path | None = None,
+) -> dict[str, object]:
+    bucket = dict(bucket_evidence or {})
+    validation_runs = [
+        dict(item)
+        for item in list(
+            bucket.get(
+                "policy_context_bucket_validation_runs",
+                bucket.get("validation_runs", []),
+            )
+            or []
+        )
+        if isinstance(item, dict)
+    ]
+    walk_forward_windows = [
+        dict(item)
+        for item in list(
+            bucket.get(
+                "policy_context_bucket_walk_forward_windows",
+                bucket.get("walk_forward_windows", []),
+            )
+            or []
+        )
+        if isinstance(item, dict)
+    ]
+    symbol_summary = [
+        dict(item)
+        for item in list(
+            bucket.get(
+                "policy_context_bucket_symbol_summary",
+                bucket.get("symbol_summary", []),
+            )
+            or []
+        )
+        if isinstance(item, dict)
+    ]
+    regime_summary = [
+        dict(item)
+        for item in list(
+            bucket.get(
+                "policy_context_bucket_regime_summary",
+                bucket.get("regime_summary", []),
+            )
+            or []
+        )
+        if isinstance(item, dict)
+    ]
+    if not bucket and not validation_runs and not walk_forward_windows and not symbol_summary and not regime_summary:
+        return {}
+    summary = _execution_replay_summary_from_runs(
+        validation_runs=validation_runs,
+        walk_forward_windows=walk_forward_windows,
+        symbol_summary=symbol_summary,
+        regime_summary=regime_summary,
+        policy_application=policy_application,
+        baseline_policy_application=policy_application,
+        source=source,
+        runtime_summary=runtime_summary,
+        runtime_summary_run_dir=runtime_summary_run_dir,
+    )
+    positive_walk_forward_window_count = max(
+        _safe_int(summary.get("positive_walk_forward_window_count")),
+        _safe_int(bucket.get("runner_positive_walk_forward_window_count")),
+    )
+    execution_metrics = dict(summary.get("execution_metrics", {}) or {})
+    execution_metrics.update(
+        {
+            "run_count": max(
+                _safe_int(execution_metrics.get("run_count")),
+                _safe_int(bucket.get("policy_context_bucket_run_count", bucket.get("run_count"))),
+            ),
+            "walk_forward_window_count": max(
+                _safe_int(execution_metrics.get("walk_forward_window_count")),
+                _safe_int(
+                    bucket.get(
+                        "policy_context_bucket_walk_forward_window_count",
+                        bucket.get("runner_walk_forward_window_count"),
+                    )
+                ),
+            ),
+            "live_order_count": max(
+                _safe_int(execution_metrics.get("live_order_count")),
+                _safe_int(bucket.get("policy_context_bucket_live_order_count", bucket.get("live_order_count"))),
+            ),
+            "accepted_live_order_count": max(
+                _safe_int(execution_metrics.get("accepted_live_order_count")),
+                _safe_int(bucket.get("accepted_live_order_count")),
+            ),
+            "rejected_live_order_count": max(
+                _safe_int(execution_metrics.get("rejected_live_order_count")),
+                _safe_int(bucket.get("rejected_live_order_count")),
+            ),
+            "closed_trade_count": max(
+                _safe_int(execution_metrics.get("closed_trade_count")),
+                _safe_int(
+                    bucket.get(
+                        "policy_context_bucket_closed_trade_count",
+                        bucket.get("closed_trade_count"),
+                    )
+                ),
+            ),
+            "total_realized_pnl_usd": round(
+                _safe_float(
+                    bucket.get(
+                        "runner_total_realized_pnl_usd",
+                        bucket.get(
+                            "policy_context_bucket_total_realized_pnl_usd",
+                            execution_metrics.get("total_realized_pnl_usd"),
+                        ),
+                    )
+                ),
+                6,
+            ),
+            "avg_edge_retention_ratio": round(
+                _safe_float(
+                    bucket.get(
+                        "runner_avg_edge_retention_ratio",
+                        bucket.get(
+                            "avg_edge_retention_ratio",
+                            execution_metrics.get("avg_edge_retention_ratio"),
+                        ),
+                    )
+                ),
+                6,
+            ),
+            "avg_slippage_bps": round(
+                _safe_float(
+                    bucket.get(
+                        "runner_avg_slippage_bps",
+                        bucket.get("avg_slippage_bps", execution_metrics.get("avg_slippage_bps")),
+                    )
+                ),
+                6,
+            ),
+            "avg_realized_edge_bps": round(
+                _safe_float(
+                    bucket.get(
+                        "runner_avg_realized_edge_bps",
+                        bucket.get(
+                            "avg_realized_edge_bps",
+                            execution_metrics.get("avg_realized_edge_bps"),
+                        ),
+                    )
+                ),
+                6,
+            ),
+            "avg_expected_edge_bps": round(
+                _safe_float(
+                    bucket.get("avg_expected_edge_bps", execution_metrics.get("avg_expected_edge_bps"))
+                ),
+                6,
+            ),
+            "reject_rate": round(
+                _safe_float(
+                    bucket.get(
+                        "runner_reject_rate",
+                        bucket.get("reject_rate", execution_metrics.get("reject_rate")),
+                    )
+                ),
+                6,
+            ),
+            "drawdown_to_pnl_ratio": round(
+                _safe_float(
+                    bucket.get(
+                        "runner_drawdown_to_pnl_ratio",
+                        execution_metrics.get("drawdown_to_pnl_ratio"),
+                    )
+                ),
+                6,
+            ),
+            "positive_walk_forward_ratio": round(
+                _safe_float(
+                    bucket.get(
+                        "policy_context_bucket_positive_walk_forward_ratio",
+                        bucket.get(
+                            "runner_positive_walk_forward_ratio",
+                            execution_metrics.get("positive_walk_forward_ratio"),
+                        ),
+                    )
+                ),
+                6,
+            ),
+        }
+    )
+    live_order_count = _safe_int(execution_metrics.get("live_order_count"))
+    rejected_live_order_count = _safe_int(execution_metrics.get("rejected_live_order_count"))
+    closed_trade_count = _safe_int(execution_metrics.get("closed_trade_count"))
+    summary.update(
+        {
+            "source": source,
+            "bucket_name": str(bucket.get("policy_context_bucket_name", "") or ""),
+            "run_count": _safe_int(execution_metrics.get("run_count")),
+            "walk_forward_window_count": _safe_int(execution_metrics.get("walk_forward_window_count")),
+            "positive_walk_forward_window_count": positive_walk_forward_window_count,
+            "positive_walk_forward_ratio": round(
+                _safe_float(execution_metrics.get("positive_walk_forward_ratio")),
+                6,
+            ),
+            "micro_live_gate": _build_micro_live_gate(
+                live_order_count=live_order_count,
+                rejected_live_order_count=rejected_live_order_count,
+                avg_slippage_bps=_safe_float(execution_metrics.get("avg_slippage_bps")),
+                avg_realized_edge_bps=_safe_float(execution_metrics.get("avg_realized_edge_bps")),
+                closed_trade_count=closed_trade_count,
+            ),
+            "top_symbols": symbol_summary[:3],
+            "top_regimes": regime_summary[:3],
+            "execution_metrics": execution_metrics,
+            "execution_score": _execution_replay_score(execution_metrics),
+        }
+    )
+    return summary
+
+
 def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> WeeklyValidationReport:
     root = Path(base_dir)
     runs = _resolve_recent_runs(base_dir=root, lookback_days=lookback_days)
@@ -2960,8 +3180,12 @@ def _execution_style_path_entry(
     evidence_basis = {
         "replay_source": replay_source,
         "runtime_summary_anchor_source": str(runtime_summary_anchor.get("source", "") or ""),
+        "bucket_name": str(replay_payload.get("bucket_name", "") or ""),
         "validation_run_count": _safe_int(replay_payload.get("run_count")),
         "walk_forward_window_count": _safe_int(replay_payload.get("walk_forward_window_count")),
+        "live_order_count": _safe_int(execution_metrics.get("live_order_count")),
+        "tested_order_count": _safe_int(execution_metrics.get("tested_order_count")),
+        "closed_trade_count": _safe_int(execution_metrics.get("closed_trade_count")),
         "top_symbol_count": len(list(replay_payload.get("top_symbols", []) or [])),
         "top_regime_count": len(list(replay_payload.get("top_regimes", []) or [])),
         "micro_live_status": str(dict(replay_payload.get("micro_live_gate", {}) or {}).get("status", "not_available") or "not_available"),
@@ -2970,8 +3194,10 @@ def _execution_style_path_entry(
         "policy_label": policy_label,
         "source": replay_source,
         "rollout_phase": str(dict(policy_application or {}).get("rollout_phase", "unknown") or "unknown"),
+        "bucket_name": str(replay_payload.get("bucket_name", "") or ""),
         "has_runtime_summary_anchor": bool(runtime_summary_anchor),
         "uses_projected_runtime_replay": replay_source.startswith("projected_"),
+        "uses_bucket_log_replay": replay_source.startswith("observed_") or bool(replay_payload.get("bucket_name")),
         "uses_persisted_validation_evidence": replay_source == "persisted_policy_validation_evidence",
     }
     return {
@@ -3101,6 +3327,8 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
         return {
             "available": False,
             "artifact_path": "",
+            "evidence_source": "summary_artifact",
+            "replay_grounding": "strategy_comparison_recent_summary",
             "reason": "NO_RECENT_BASELINE_CONTROL_ARTIFACT",
             "verdict": "not_available",
         }
@@ -3110,6 +3338,8 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
         return {
             "available": False,
             "artifact_path": str(latest_path),
+            "evidence_source": "summary_artifact",
+            "replay_grounding": "strategy_comparison_recent_summary",
             "reason": "RECENT_BASELINE_CONTROL_ARTIFACT_UNREADABLE",
             "verdict": "not_available",
         }
@@ -3118,6 +3348,8 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
         return {
             "available": False,
             "artifact_path": str(latest_path),
+            "evidence_source": "summary_artifact",
+            "replay_grounding": "strategy_comparison_recent_summary",
             "reason": "RECENT_BASELINE_CONTROL_STRATEGIES_MISSING",
             "verdict": "not_available",
         }
@@ -3139,6 +3371,8 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
         return {
             "available": False,
             "artifact_path": str(latest_path),
+            "evidence_source": "summary_artifact",
+            "replay_grounding": "strategy_comparison_recent_summary",
             "reason": (
                 "RECENT_BASELINE_CONTROL_CURRENT_OR_BASELINE_MISSING"
                 if current
@@ -3207,6 +3441,8 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
     return {
         "available": True,
         "artifact_path": str(latest_path),
+        "evidence_source": "summary_artifact",
+        "replay_grounding": "strategy_comparison_recent_summary",
         "generated_at": payload.get("generated_at"),
         "verdict": verdict,
         "reason": reason,
@@ -3484,6 +3720,16 @@ def _checkpoint_execution_metrics(payload: dict[str, Any] | None) -> dict[str, f
         _safe_int(dict(evidence.get("micro_live_gate", {}) or {}).get("live_order_count")),
         live_order_weight,
     )
+    total_tested_order_count = max(
+        _safe_int(evidence.get("policy_context_bucket_tested_order_count")),
+        _safe_int(evidence.get("total_tested_order_count")),
+        _safe_int(evidence.get("tested_order_count")),
+        sum(_safe_int(item.get("tested_order_count")) for item in validation_runs),
+    )
+    decision_count = max(
+        _safe_int(evidence.get("policy_context_bucket_decision_count")),
+        _safe_int(evidence.get("decision_count")),
+    )
     run_count = max(
         _safe_int(evidence.get("policy_context_bucket_run_count")),
         _safe_int(evidence.get("run_count")),
@@ -3604,8 +3850,10 @@ def _checkpoint_execution_metrics(payload: dict[str, Any] | None) -> dict[str, f
     )
     return {
         "run_count": run_count,
+        "decision_count": decision_count,
         "total_closed_trade_count": total_closed_trade_count,
         "total_live_order_count": total_live_order_count,
+        "total_tested_order_count": total_tested_order_count,
         "runner_total_realized_pnl_usd": realized_pnl_usd,
         "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
         "runner_reject_rate": reject_rate,
@@ -3638,8 +3886,10 @@ def _build_checkpoint_auto_judge(
     )
     checkpoint_metrics = _checkpoint_execution_metrics(checkpoint_bucket_evidence)
     run_count = _safe_int(checkpoint_metrics.get("run_count"))
+    decision_count = _safe_int(checkpoint_metrics.get("decision_count"))
     total_closed_trade_count = _safe_int(checkpoint_metrics.get("total_closed_trade_count"))
     total_live_order_count = _safe_int(checkpoint_metrics.get("total_live_order_count"))
+    total_tested_order_count = _safe_int(checkpoint_metrics.get("total_tested_order_count"))
     runner_total_realized_pnl_usd = round(_safe_float(checkpoint_metrics.get("runner_total_realized_pnl_usd")), 6)
     runner_drawdown_to_pnl_ratio = round(_safe_float(checkpoint_metrics.get("runner_drawdown_to_pnl_ratio")), 6)
     runner_reject_rate = round(_safe_float(checkpoint_metrics.get("runner_reject_rate")), 6)
@@ -3709,6 +3959,9 @@ def _build_checkpoint_auto_judge(
         raw_verdict = "tighten"
         reason_codes.append("RUNNER_EXECUTION_EVIDENCE_REQUIRES_TIGHTENING")
     if raw_verdict == "expand":
+        if decision_count <= 0 or total_tested_order_count <= 0:
+            raw_verdict = "hold"
+            reason_codes.append("CHECKPOINT_EXPANSION_REQUIRES_DECISION_AND_TESTED_ORDER_LOG_EVIDENCE")
         if checkpoint_evidence_source != "policy_bucket":
             raw_verdict = "hold"
             reason_codes.append("CHECKPOINT_EXPANSION_REQUIRES_POLICY_BUCKET_EVIDENCE")
@@ -3781,8 +4034,10 @@ def _build_checkpoint_auto_judge(
         "policy_guardrails": dict(sample_watchdog.get("policy_guardrails", {}) or {}),
         "evidence": {
             "run_count": run_count,
+            "decision_count": decision_count,
             "total_closed_trade_count": total_closed_trade_count,
             "total_live_order_count": total_live_order_count,
+            "total_tested_order_count": total_tested_order_count,
             "runner_total_realized_pnl_usd": runner_total_realized_pnl_usd,
             "runner_drawdown_to_pnl_ratio": runner_drawdown_to_pnl_ratio,
             "runner_reject_rate": runner_reject_rate,
@@ -3936,6 +4191,11 @@ def build_policy_comparison_validation_artifact(*,
         current_policy_evidence_for_comparison,
         bucket_evidence=current_policy_direct_bucket_evidence,
     )
+    current_policy_bucket_evidence = dict(current_policy_direct_bucket_evidence or {})
+    candidate_policy_bucket_evidence = dict(
+        dict(runner.get("policy_context_bucket_evidence", {}) or {}).get("staged_candidate", {})
+        or {}
+    )
     runtime_comparison = _compare_runtime_evidence(
         candidate_evidence=runner_evidence,
         current_evidence=current_policy_evidence_for_comparison,
@@ -3955,7 +4215,7 @@ def build_policy_comparison_validation_artifact(*,
     candidate_regime_summary = list(runner.get("regime_summary", []) or [])
     current_symbol_summary = list(current_policy_evidence_for_comparison.get("symbol_summary", []) or candidate_symbol_summary)
     current_regime_summary = list(current_policy_evidence_for_comparison.get("regime_summary", []) or candidate_regime_summary)
-    candidate_replay_summary = _execution_replay_summary_from_runs(
+    projected_candidate_replay_summary = _execution_replay_summary_from_runs(
         validation_runs=shared_validation_runs,
         walk_forward_windows=shared_walk_forward_windows,
         symbol_summary=candidate_symbol_summary,
@@ -3966,7 +4226,17 @@ def build_policy_comparison_validation_artifact(*,
         runtime_summary=current_runtime_summary,
         runtime_summary_run_dir=runtime_summary_run_dir,
     )
-    current_replay_summary = _execution_replay_summary_from_runs(
+    direct_candidate_replay_summary = _execution_replay_summary_from_bucket_evidence(
+        bucket_evidence=candidate_policy_bucket_evidence,
+        policy_application=candidate_policy_application,
+        source="observed_staged_candidate_policy_bucket_artifacts",
+    )
+    candidate_replay_summary = (
+        direct_candidate_replay_summary
+        if _replay_summary_available(direct_candidate_replay_summary)
+        else projected_candidate_replay_summary
+    )
+    projected_current_replay_summary = _execution_replay_summary_from_runs(
         validation_runs=current_validation_runs,
         walk_forward_windows=current_walk_forward_windows,
         symbol_summary=current_symbol_summary,
@@ -3986,14 +4256,30 @@ def build_policy_comparison_validation_artifact(*,
         runtime_summary=current_runtime_summary,
         runtime_summary_run_dir=runtime_summary_run_dir,
     )
+    direct_current_replay_summary = _execution_replay_summary_from_bucket_evidence(
+        bucket_evidence=current_policy_bucket_evidence,
+        policy_application=current_policy_application,
+        source="observed_runtime_policy_bucket_artifacts",
+        runtime_summary=current_runtime_summary,
+        runtime_summary_run_dir=runtime_summary_run_dir,
+    )
+    current_replay_summary = (
+        direct_current_replay_summary
+        if _replay_summary_available(direct_current_replay_summary)
+        else projected_current_replay_summary
+    )
     validation_path = {
         "mode": str(runner.get("validation_path_mode", "artifact_walk_forward")),
         "candidate_run_count": _safe_int(runner.get("run_count")),
         "candidate_walk_forward_window_count": _safe_int(runner.get("runner_walk_forward_window_count")),
         "candidate_positive_walk_forward_ratio": round(_safe_float(runner.get("runner_positive_walk_forward_ratio")), 6),
+        "candidate_replay_source": str(candidate_replay_summary.get("source", "") or ""),
         "current_evidence_available": bool(runtime_comparison.get("runtime_evidence_available")),
         "current_walk_forward_window_count": _safe_int(current_policy_evidence_for_comparison.get("runner_walk_forward_window_count")),
         "current_positive_walk_forward_ratio": round(_safe_float(current_policy_evidence_for_comparison.get("runner_positive_walk_forward_ratio")), 6),
+        "current_replay_source": str(current_replay_summary.get("source", "") or ""),
+        "baseline_control_evidence_source": str(baseline_control_comparison.get("evidence_source", "") or ""),
+        "baseline_control_replay_grounding": str(baseline_control_comparison.get("replay_grounding", "") or ""),
         "compared_metrics": list(runtime_comparison.get("compared_metrics", [])),
         "lineage_attribution_mode": str(dict(lineage_attribution or {}).get("mode", "unfiltered") or "unfiltered"),
         "current_policy_evidence_alignment": dict(current_evidence_lineage_alignment),
