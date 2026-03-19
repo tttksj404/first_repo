@@ -16,6 +16,7 @@ from quant_binance.auto_mode import (
 from quant_binance.closed_trade_metrics import aggregate_closed_trades as aggregate_closed_trade_metrics
 from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
+from quant_binance.policy_lineage import build_policy_state_lineage_snapshot
 from quant_binance.symbol_lifecycle import build_symbol_lifecycle, summarize_symbol_lifecycle
 
 
@@ -1709,6 +1710,10 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             evidence["runner_shadow_alignment_score"] = float(payload.get("shadow_alignment_score", 0.0) or 0.0)
         for key in (
             "validation_path_mode",
+            "lineage_attribution",
+            "current_policy_lineage",
+            "current_policy_evidence_lineage",
+            "current_policy_evidence_alignment",
             "sample_progress",
             "sample_quality_watchdog",
             "baseline_control_comparison",
@@ -2748,6 +2753,10 @@ def build_persisted_policy_state(
         rollout_reason = "NO_ACTIVE_POLICY"
         version = previous_version
     evaluated_at = str(validation_evidence.get("generated_at", previous_state.get("updated_at", "")) or datetime.now(tz=timezone.utc).isoformat())
+    lifecycle_rollout_phase = str(
+        dict(previous_state.get("rollout_progression", dict(active_policy.get("rollout_progression", {}) or {})) or {}).get("execution_phase", "")
+        or ("baseline" if not list(dict(active_policy or {}).get("adjustments", []) or []) else "full")
+    )
     symbol_lifecycle = build_symbol_lifecycle(
         symbol_summary=list(validation_evidence.get("symbol_summary", []) or []),
         symbol_scorecard=list(validation_evidence.get("symbol_scorecard", []) or []),
@@ -2757,6 +2766,9 @@ def build_persisted_policy_state(
         checkpoint_auto_judge=checkpoint_auto_judge,
         sample_quality_watchdog=sample_watchdog,
         baseline_control_comparison=dict(validation_evidence.get("baseline_control_comparison", {}) or {}),
+        active_policy=active_policy,
+        rollout_phase=lifecycle_rollout_phase,
+        policy_version=version,
         evaluated_at=evaluated_at,
     )
     active_policy = _apply_symbol_lifecycle_to_active_policy(active_policy, symbol_lifecycle)
@@ -2776,6 +2788,21 @@ def build_persisted_policy_state(
     active_policy["checkpoint_auto_judge"] = checkpoint_auto_judge
     active_policy["sample_quality_watchdog"] = sample_watchdog
     active_policy["auto_mode"] = auto_mode
+    policy_state_payload = {
+        "version": version,
+        "active_policy": active_policy,
+        "rollout_progression": rollout_progression,
+        "updated_at": evaluated_at,
+    }
+    policy_lineage = build_policy_state_lineage_snapshot(
+        policy_state_payload,
+        source="persisted_policy_state",
+    )
+    active_policy["policy_lineage"] = dict(policy_lineage)
+    validation_payload = dict(validation)
+    validation_evidence_payload = dict(validation_payload.get("evidence", {}) or {})
+    validation_evidence_payload["active_policy_lineage"] = dict(policy_lineage)
+    validation_payload["evidence"] = validation_evidence_payload
     return {
         "version": version,
         "status": lifecycle,
@@ -2788,11 +2815,12 @@ def build_persisted_policy_state(
         "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
+        "policy_lineage": policy_lineage,
         "active_policy": active_policy,
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
         "operational_verdict": operational_verdict,
-        "policy_validation": validation,
+        "policy_validation": validation_payload,
         "updated_at": datetime.now(tz=timezone.utc).isoformat(),
     }
 
@@ -2812,6 +2840,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
         "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
+        "policy_lineage": dict(policy_state.get("policy_lineage", {}) or {}),
         "active_policy_status": str(dict(policy_state.get("active_policy", {}) or {}).get("status", "unknown")),
         "active_adjustment_count": len(list(dict(policy_state.get("active_policy", {}) or {}).get("adjustments", []))),
         "micro_live_readiness": str(dict(policy_state.get("active_policy", {}) or {}).get("micro_live_readiness", "not_available")),
@@ -2830,7 +2859,7 @@ def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: d
     else:
         active_adjustments = [dict(item, action="keep", size_multiplier=1.0, reason="ACTIVE_POLICY_UNCHANGED") for item in candidate_adjustments]
         active_status = "baseline" if rollout_stage == "staged_rollout" else "keep"
-    return {
+    payload = {
         "status": "staged_rollout" if rollout_stage == "staged_rollout" else active_status,
         "active_policy": {
             "status": active_status,
@@ -2844,6 +2873,16 @@ def build_policy_state(candidate_policy: dict[str, object], promotion_verdict: d
         "promotion_verdict": promotion_verdict,
         "auto_mode": dict(promotion_verdict.get("auto_mode", candidate_policy.get("decomposition_summary", {}).get("auto_mode", {})) or {}),
     }
+    payload["policy_lineage"] = build_policy_state_lineage_snapshot(
+        {
+            "version": 0,
+            "active_policy": dict(payload.get("active_policy", {}) or {}),
+            "rollout_progression": dict(payload.get("active_policy", {}).get("rollout_progression", {}) or {}),
+        },
+        source="ephemeral_policy_state",
+    )
+    payload["active_policy"]["policy_lineage"] = dict(payload["policy_lineage"])
+    return payload
 
 def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str, object]:
     live_order_count = int(execution_outcomes.get("accepted_live_order_count", 0)) + int(execution_outcomes.get("rejected_live_order_count", 0))
