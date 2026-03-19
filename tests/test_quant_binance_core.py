@@ -706,6 +706,10 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(verdict["verdict"], "rebuild_evidence")
         self.assertTrue(verdict["signals"]["staged_candidate_bucket_available"])
+        self.assertEqual(
+            verdict["replay_provenance"]["staged_candidate"]["classification"],
+            "not_available",
+        )
 
     def test_build_executive_operating_verdict_rebuilds_when_checkpoint_expand_lacks_bucket_source(self) -> None:
         verdict = build_executive_operating_verdict(
@@ -736,6 +740,14 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertIn("EXECUTIVE_REBUILD_BY_MISSING_BUCKET_EXPANSION_EVIDENCE", verdict["reasons"])
         self.assertEqual(verdict["signals"]["checkpoint_evidence_source"], "root")
         self.assertEqual(verdict["signals"]["checkpoint_evidence_policy_bucket"], "not_available")
+        self.assertEqual(
+            verdict["replay_provenance"]["checkpoint_auto_judge"]["classification"],
+            "mixed_root_summary_fallback",
+        )
+        self.assertEqual(
+            verdict["replay_provenance"]["primary"]["summary"],
+            "mixed_root_summary_fallback:root",
+        )
 
     def test_build_promotion_verdict_blocks_promotion_when_candidate_underperforms_current(self) -> None:
         verdict = build_promotion_verdict(
