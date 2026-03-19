@@ -8,6 +8,7 @@ from typing import Any
 
 from quant_binance.auto_mode import apply_auto_mode_runtime_overrides
 from quant_binance.env import resolve_strategy_profile
+from quant_binance.policy_lineage import build_policy_state_lineage_snapshot, policy_lineage_alignment
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -125,7 +126,10 @@ def _proposal_status_from_gates(
     *,
     checkpoint_auto_judge: dict[str, Any],
     baseline_gate: dict[str, Any],
+    lineage_status: str = "",
 ) -> str:
+    if lineage_status in {"mismatch", "stale"}:
+        return "proposal_pending"
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
     if checkpoint_verdict == "rollback":
         return "proposal_blocked"
@@ -136,14 +140,56 @@ def _proposal_status_from_gates(
     return "proposal_ready"
 
 
+def _read_json(path: Path | None) -> dict[str, Any]:
+    if path is None or not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _comparison_policy_lineage(payload: dict[str, Any]) -> dict[str, Any]:
+    evidence = dict(payload.get("evidence", {}) or {})
+    lineage_attribution = dict(payload.get("lineage_attribution", evidence.get("lineage_attribution", {})) or {})
+    explicit = dict(
+        payload.get(
+            "current_policy_lineage",
+            evidence.get("current_policy_lineage", lineage_attribution.get("current_policy_lineage", {})),
+        )
+        or {}
+    )
+    return explicit
+
+
 def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
     root = Path(base_dir) / "output" / "paper-live-shell"
+    latest_policy_state_path = _latest_file_under(root, "policy_state.json")
+    latest_policy_state_payload = _read_json(latest_policy_state_path)
+    active_policy_lineage = build_policy_state_lineage_snapshot(
+        latest_policy_state_payload,
+        source="proposal_latest_policy_state",
+    )
     latest_policy_comparison_path = _latest_file_under(root, "policy_comparison.json")
     if latest_policy_comparison_path is not None:
-        payload = json.loads(latest_policy_comparison_path.read_text(encoding="utf-8"))
+        payload = _read_json(latest_policy_comparison_path)
         judge = dict(payload.get("checkpoint_auto_judge", {}) or {})
         baseline_control_comparison = dict(payload.get("baseline_control_comparison", {}) or {})
         symbol_lifecycle = list(payload.get("symbol_lifecycle", payload.get("evidence", {}).get("symbol_lifecycle", [])) or [])
+        comparison_lineage = _comparison_policy_lineage(payload)
+        lineage_alignment = policy_lineage_alignment(active_policy_lineage, comparison_lineage)
+        if bool(active_policy_lineage.get("available")) and bool(comparison_lineage.get("available")) and not bool(lineage_alignment.get("aligned")):
+            return {
+                "judge": {},
+                "baseline_control_comparison": {},
+                "symbol_lifecycle": [],
+                "auto_mode": {},
+                "source_path": str(latest_policy_comparison_path),
+                "source_type": "policy_comparison",
+                "lineage_status": str(lineage_alignment.get("status", "mismatch") or "mismatch"),
+                "lineage_reason": str(lineage_alignment.get("reason", "POLICY_LINEAGE_MISMATCH") or "POLICY_LINEAGE_MISMATCH"),
+            }
         if judge:
             return {
                 "judge": judge,
@@ -152,6 +198,8 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
+                "lineage_status": "aligned" if bool(lineage_alignment.get("aligned")) else "unknown",
+                "lineage_reason": str(lineage_alignment.get("reason", "") or ""),
             }
         if baseline_control_comparison:
             return {
@@ -161,10 +209,11 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
+                "lineage_status": "aligned" if bool(lineage_alignment.get("aligned")) else "unknown",
+                "lineage_reason": str(lineage_alignment.get("reason", "") or ""),
             }
-    latest_policy_state_path = _latest_file_under(root, "policy_state.json")
     if latest_policy_state_path is not None:
-        payload = json.loads(latest_policy_state_path.read_text(encoding="utf-8"))
+        payload = latest_policy_state_payload
         judge = dict(payload.get("checkpoint_auto_judge", {}) or {})
         baseline_control_comparison = dict(
             judge.get("baseline_control_comparison", payload.get("baseline_control_comparison", {})) or {}
@@ -178,6 +227,8 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "auto_mode": dict(payload.get("auto_mode", dict(judge.get("auto_mode", {})) or {}) or {}),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
+                "lineage_status": "aligned",
+                "lineage_reason": "POLICY_STATE_CURRENT",
             }
         if baseline_control_comparison:
             return {
@@ -187,6 +238,8 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
                 "auto_mode": dict(payload.get("auto_mode", {}) or {}),
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
+                "lineage_status": "aligned",
+                "lineage_reason": "POLICY_STATE_CURRENT",
             }
     return {
         "judge": {},
@@ -195,6 +248,8 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
         "auto_mode": {},
         "source_path": "",
         "source_type": "",
+        "lineage_status": "unknown",
+        "lineage_reason": "",
     }
 
 
@@ -248,6 +303,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     proposal_status = _proposal_status_from_gates(
         checkpoint_auto_judge=checkpoint_auto_judge,
         baseline_gate=baseline_gate,
+        lineage_status=str(checkpoint_judge_context.get("lineage_status", "") or ""),
     )
     proposal = {
         "status": proposal_status,
@@ -264,6 +320,8 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "performance_report": str(latest_performance_path) if latest_performance_path else "",
             "recent_comparison": str(latest_recent_comparison_path) if latest_recent_comparison_path else "",
             "checkpoint_auto_judge_source": str(checkpoint_judge_context.get("source_path", "") or ""),
+            "checkpoint_auto_judge_lineage_status": str(checkpoint_judge_context.get("lineage_status", "unknown") or "unknown"),
+            "checkpoint_auto_judge_lineage_reason": str(checkpoint_judge_context.get("lineage_reason", "") or ""),
         },
         "gates": {
             "performance_report_present": bool(latest_performance_path),
@@ -276,6 +334,8 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "simple_baseline_gate_verdict": str(baseline_gate.get("verdict", "not_available") or "not_available"),
             "simple_baseline_gate_reason": str(baseline_gate.get("reason", "") or ""),
             "simple_baseline_gate_present": bool(baseline_control_comparison),
+            "checkpoint_auto_judge_lineage_status": str(checkpoint_judge_context.get("lineage_status", "unknown") or "unknown"),
+            "checkpoint_auto_judge_lineage_reason": str(checkpoint_judge_context.get("lineage_reason", "") or ""),
             "auto_mode": str(auto_mode.get("mode", "normal") or "normal"),
             "auto_mode_reason_codes": list(auto_mode.get("reason_codes", []) or []),
             "simple_baseline_strategy": str(

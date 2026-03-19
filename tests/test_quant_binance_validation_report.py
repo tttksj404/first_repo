@@ -206,6 +206,137 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 "observed_runtime_artifacts",
             )
 
+    def test_build_policy_comparison_validation_artifact_filters_mismatched_run_lineage(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 7,
+            "active_policy": {"status": "baseline", "adjustments": []},
+            "rollout_progression": {"execution_phase": "baseline"},
+            "policy_validation": {"evidence": {}},
+            "updated_at": "2026-03-19T00:00:00+00:00",
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            run_b = base / "output" / "paper-live-shell" / "run-b"
+            self._write_watchdog_run(
+                run_dir=run_a,
+                summary={
+                    "generated_at": "2026-03-19T00:00:00+00:00",
+                    "live_order_count": 2,
+                    "accepted_live_order_count": 2,
+                    "rejected_live_order_count": 0,
+                    "tested_order_count": 1,
+                    "avg_slippage_bps": 2.0,
+                    "avg_edge_retention_ratio": 0.8,
+                    "avg_realized_edge_bps": 4.0,
+                    "avg_expected_edge_bps": 5.0,
+                },
+                trades=[
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.0, "realized_return_bps_estimate": 6.0},
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.0, "realized_return_bps_estimate": 5.0},
+                ],
+                decisions=[
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-19T00:00:00+00:00", "predictability_score": 70.0, "net_expected_edge_bps": 10.0, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-19T00:05:00+00:00", "predictability_score": 71.0, "net_expected_edge_bps": 11.0, "estimated_round_trip_cost_bps": 8.0},
+                ],
+            )
+            self._write_watchdog_run(
+                run_dir=run_b,
+                summary={
+                    "generated_at": "2026-03-19T00:10:00+00:00",
+                    "live_order_count": 2,
+                    "accepted_live_order_count": 2,
+                    "rejected_live_order_count": 0,
+                    "tested_order_count": 1,
+                    "avg_slippage_bps": 10.0,
+                    "avg_edge_retention_ratio": 0.2,
+                    "avg_realized_edge_bps": -5.0,
+                    "avg_expected_edge_bps": 5.0,
+                },
+                trades=[
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": -6.0, "realized_return_bps_estimate": -10.0},
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": -4.0, "realized_return_bps_estimate": -8.0},
+                ],
+                decisions=[
+                    {"symbol": "BTCUSDT", "final_mode": "cash", "timestamp": "2026-03-19T00:10:00+00:00", "predictability_score": 45.0, "net_expected_edge_bps": 0.0, "estimated_round_trip_cost_bps": 8.0},
+                    {"symbol": "BTCUSDT", "final_mode": "cash", "timestamp": "2026-03-19T00:15:00+00:00", "predictability_score": 46.0, "net_expected_edge_bps": 0.0, "estimated_round_trip_cost_bps": 8.0},
+                ],
+            )
+            (run_a / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 7,
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "rollout_progression": {"execution_phase": "baseline"},
+                        "updated_at": "2026-03-19T00:00:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_b / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 6,
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "rollout_progression": {"execution_phase": "baseline"},
+                        "updated_at": "2026-03-19T00:10:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            self.assertTrue(artifact["lineage_attribution"]["applied"])
+            self.assertEqual(artifact["lineage_attribution"]["aligned_run_count"], 1)
+            self.assertEqual(artifact["lineage_attribution"]["mismatched_run_count"], 1)
+            self.assertEqual(artifact["runner_total_realized_pnl_usd"], 4.0)
+            self.assertEqual(artifact["validation_path"]["lineage_attribution_mode"], "filtered_to_active_lineage")
+
+    def test_build_policy_comparison_validation_artifact_preserves_legacy_runner_when_run_lineage_is_unknown(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 3,
+            "active_policy": {"status": "baseline", "adjustments": []},
+            "rollout_progression": {"execution_phase": "baseline"},
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            self._write_watchdog_run(
+                run_dir=run_a,
+                summary={
+                    "generated_at": "2026-03-19T00:00:00+00:00",
+                    "live_order_count": 2,
+                    "accepted_live_order_count": 2,
+                    "rejected_live_order_count": 0,
+                    "tested_order_count": 1,
+                    "avg_slippage_bps": 2.0,
+                    "avg_edge_retention_ratio": 0.8,
+                    "avg_realized_edge_bps": 4.0,
+                    "avg_expected_edge_bps": 5.0,
+                },
+                trades=[
+                    {"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 2.0, "realized_return_bps_estimate": 6.0},
+                ],
+                decisions=[
+                    {"symbol": "BTCUSDT", "final_mode": "futures", "timestamp": "2026-03-19T00:00:00+00:00", "predictability_score": 70.0, "net_expected_edge_bps": 10.0, "estimated_round_trip_cost_bps": 8.0},
+                ],
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            self.assertFalse(artifact["lineage_attribution"]["applied"])
+            self.assertEqual(artifact["lineage_attribution"]["mode"], "unfiltered_no_derived_run_lineage")
+            self.assertEqual(artifact["runner_total_realized_pnl_usd"], 2.0)
+
     def test_build_policy_validation_runner_artifact_emits_thin_watchdog_and_checkpoint_snapshot(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"

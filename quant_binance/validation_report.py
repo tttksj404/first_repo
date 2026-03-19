@@ -9,6 +9,11 @@ from typing import Any
 from quant_binance.auto_mode import build_regime_aware_auto_mode
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
 from quant_binance.performance_report import build_runtime_performance_report
+from quant_binance.policy_lineage import (
+    build_policy_profile_lineage_snapshot,
+    build_policy_state_lineage_snapshot,
+    policy_lineage_alignment,
+)
 from quant_binance.symbol_lifecycle import build_symbol_lifecycle, summarize_symbol_lifecycle
 
 
@@ -219,6 +224,65 @@ def _safe_ratio(numerator: Any, denominator: Any) -> float:
     if denom <= 0.0:
         return 0.0
     return round(_safe_float(numerator) / denom, 6)
+
+
+def _extract_policy_lineage_from_payload(
+    payload: dict[str, Any] | None,
+    *,
+    source: str,
+    updated_at: object = "",
+) -> dict[str, object]:
+    item = dict(payload or {})
+    explicit_lineage = dict(item.get("policy_lineage", item.get("active_policy_lineage", {})) or {})
+    if explicit_lineage:
+        return explicit_lineage
+    profile = dict(item.get("current_policy_application", item.get("policy_application", {})) or {})
+    if profile:
+        return build_policy_profile_lineage_snapshot(
+            policy_profile=profile,
+            updated_at=updated_at or item.get("generated_at", ""),
+            source=source,
+        )
+    active_policy = dict(item.get("active_policy", {}) or {})
+    if active_policy:
+        return build_policy_state_lineage_snapshot(
+            item,
+            source=source,
+        )
+    return {}
+
+
+def _load_run_policy_lineage(run_dir: Path) -> dict[str, object]:
+    state_path = run_dir / "policy_state.json"
+    if state_path.exists():
+        try:
+            payload = json.loads(state_path.read_text(encoding="utf-8"))
+        except Exception:
+            payload = {}
+        if isinstance(payload, dict):
+            lineage = _extract_policy_lineage_from_payload(payload, source="run_policy_state")
+            if lineage:
+                return lineage
+    comparison_path = run_dir / "policy_comparison.json"
+    if comparison_path.exists():
+        try:
+            payload = json.loads(comparison_path.read_text(encoding="utf-8"))
+        except Exception:
+            payload = {}
+        if isinstance(payload, dict):
+            current_policy = dict(payload.get("current_policy", {}) or {})
+            lineage = _extract_policy_lineage_from_payload(
+                {
+                    "policy_application": payload.get("current_policy_application", current_policy.get("policy_application", {})),
+                    "active_policy_lineage": payload.get("current_policy_lineage", {}),
+                    "generated_at": payload.get("generated_at", ""),
+                },
+                source="run_policy_comparison",
+                updated_at=payload.get("generated_at", ""),
+            )
+            if lineage:
+                return lineage
+    return {}
 
 
 def _rolling_expectancy_stability(expectancies: list[float]) -> float:
@@ -661,6 +725,7 @@ def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
         "run_id": run_dir.name,
         "run_dir": str(run_dir),
         "generated_at": str(summary.get("generated_at", "")),
+        "policy_lineage": _load_run_policy_lineage(run_dir),
         "closed_trade_count": report.closed_trade_count,
         "realized_pnl_usd": round(report.realized_pnl_usd, 6),
         "live_order_count": live_order_count,
@@ -674,6 +739,9 @@ def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
         "reject_rate": round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0,
         "protection_degraded_rate": round(_safe_float(summary.get("protection_degraded_rate")), 6),
         "walk_forward": walk_forward,
+        "symbol_expectancy": [asdict(item) for item in report.symbol_expectancy],
+        "regime_performance": [asdict(item) for item in report.regime_performance],
+        "score_bucket_performance": [asdict(item) for item in report.score_bucket_performance],
         "pruning_recommendations": [dict(item) for item in report.pruning_recommendations],
     }
 
@@ -999,6 +1067,7 @@ def _runtime_summary_validation_snapshot(
     runtime_summary: dict[str, Any] | None,
     *,
     run_dir: Path | None = None,
+    policy_lineage: dict[str, object] | None = None,
 ) -> dict[str, object] | None:
     payload = dict(runtime_summary or {})
     live_order_count = _safe_int(payload.get("live_order_count"))
@@ -1012,6 +1081,7 @@ def _runtime_summary_validation_snapshot(
         "run_id": run_dir.name if run_dir is not None else "current-runtime-summary",
         "run_dir": str(run_dir) if run_dir is not None else "current-runtime-summary",
         "generated_at": generated_at,
+        "policy_lineage": dict(policy_lineage or {}),
         "closed_trade_count": closed_trade_count,
         "realized_pnl_usd": realized_pnl_usd,
         "live_order_count": live_order_count,
@@ -1038,13 +1108,18 @@ def _merge_runtime_summary_snapshot(
         return merged
     snapshot_run_dir = str(snapshot.get("run_dir", "") or "")
     snapshot_run_id = str(snapshot.get("run_id", "") or "")
+    snapshot_generated_at = str(snapshot.get("generated_at", "") or "")
     for index, item in enumerate(merged):
         item_run_dir = str(item.get("run_dir", "") or "")
         item_run_id = str(item.get("run_id", "") or "")
+        item_generated_at = str(item.get("generated_at", "") or "")
         if snapshot_run_dir and item_run_dir == snapshot_run_dir:
             merged[index] = snapshot
             return merged
         if snapshot_run_id and item_run_id == snapshot_run_id:
+            merged[index] = snapshot
+            return merged
+        if snapshot_generated_at and snapshot_generated_at == item_generated_at:
             merged[index] = snapshot
             return merged
     merged.append(snapshot)
@@ -1514,6 +1589,483 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         regime_summary=tuple(regime_rows),
         criteria=_criteria_table(),
     )
+
+
+def _aggregate_weekly_validation_from_run_snapshots(
+    *,
+    base_dir: str | Path,
+    run_snapshots: list[dict[str, object]],
+    lookback_days: int,
+    generated_at: str,
+) -> dict[str, object]:
+    symbol_buckets: dict[str, dict[str, float | int]] = {}
+    symbol_run_history: dict[str, list[dict[str, object]]] = {}
+    regime_buckets: dict[str, dict[str, float | int]] = {}
+    score_buckets: dict[str, dict[str, float | int]] = {}
+    total_closed_trade_count = 0
+    total_realized_pnl = 0.0
+    total_live_orders = 0
+    total_tested_orders = 0
+    for snapshot in run_snapshots:
+        total_closed_trade_count += _safe_int(snapshot.get("closed_trade_count"))
+        total_realized_pnl += _safe_float(snapshot.get("realized_pnl_usd"))
+        total_live_orders += _safe_int(snapshot.get("live_order_count"))
+        total_tested_orders += _safe_int(snapshot.get("tested_order_count"))
+        for row in list(snapshot.get("symbol_expectancy", []) or []):
+            symbol = str(row.get("symbol", "") or "")
+            if not symbol:
+                continue
+            bucket = symbol_buckets.setdefault(
+                symbol,
+                {
+                    "trade_count": 0,
+                    "realized_pnl_usd": 0.0,
+                    "expectancy_weighted_sum": 0.0,
+                    "win_count": 0,
+                    "loss_count": 0,
+                },
+            )
+            history = symbol_run_history.setdefault(symbol, [])
+            history.append(
+                {
+                    "run_id": str(snapshot.get("run_id", "") or ""),
+                    "trade_count": _safe_int(row.get("trade_count")),
+                    "expectancy_usd": _safe_float(row.get("expectancy_usd")),
+                    "realized_pnl_usd": _safe_float(row.get("realized_pnl_usd")),
+                }
+            )
+            trade_count = _safe_int(row.get("trade_count"))
+            bucket["trade_count"] = int(bucket["trade_count"]) + trade_count
+            bucket["realized_pnl_usd"] = float(bucket["realized_pnl_usd"]) + _safe_float(row.get("realized_pnl_usd"))
+            bucket["expectancy_weighted_sum"] = float(bucket["expectancy_weighted_sum"]) + (_safe_float(row.get("expectancy_usd")) * max(trade_count, 1))
+            bucket["win_count"] = int(bucket["win_count"]) + _safe_int(row.get("win_count"))
+            bucket["loss_count"] = int(bucket["loss_count"]) + _safe_int(row.get("loss_count"))
+        for row in list(snapshot.get("score_bucket_performance", []) or []):
+            label = str(row.get("score_bucket_label", "") or "")
+            if not label:
+                continue
+            bucket = score_buckets.setdefault(
+                label,
+                {
+                    "trade_count": 0,
+                    "win_count": 0,
+                    "loss_count": 0,
+                    "realized_pnl_usd": 0.0,
+                    "average_return_bps_weighted_sum": 0.0,
+                },
+            )
+            trade_count = _safe_int(row.get("trade_count"))
+            bucket["trade_count"] = int(bucket["trade_count"]) + trade_count
+            bucket["win_count"] = int(bucket["win_count"]) + _safe_int(row.get("win_count"))
+            bucket["loss_count"] = int(bucket["loss_count"]) + _safe_int(row.get("loss_count"))
+            bucket["realized_pnl_usd"] = float(bucket["realized_pnl_usd"]) + _safe_float(row.get("realized_pnl_usd"))
+            bucket["average_return_bps_weighted_sum"] = float(bucket["average_return_bps_weighted_sum"]) + (_safe_float(row.get("average_return_bps")) * max(trade_count, 1))
+        for row in list(snapshot.get("regime_performance", []) or []):
+            mode = str(row.get("mode", "") or "")
+            if not mode:
+                continue
+            bucket = regime_buckets.setdefault(
+                mode,
+                {
+                    "decision_count": 0,
+                    "score_sum": 0.0,
+                    "net_edge_sum": 0.0,
+                    "cost_sum": 0.0,
+                },
+            )
+            decision_count = _safe_int(row.get("decision_count"))
+            bucket["decision_count"] = int(bucket["decision_count"]) + decision_count
+            bucket["score_sum"] = float(bucket["score_sum"]) + (_safe_float(row.get("avg_score")) * decision_count)
+            bucket["net_edge_sum"] = float(bucket["net_edge_sum"]) + (_safe_float(row.get("avg_net_edge_bps")) * decision_count)
+            bucket["cost_sum"] = float(bucket["cost_sum"]) + (_safe_float(row.get("avg_cost_bps")) * decision_count)
+    symbol_rows: list[dict[str, object]] = []
+    required_symbol_trade_count = 3
+    for symbol, bucket in symbol_buckets.items():
+        trade_count = int(bucket["trade_count"])
+        expectancy = float(bucket["expectancy_weighted_sum"]) / max(trade_count, 1)
+        pnl = float(bucket["realized_pnl_usd"])
+        recommendation = "keep"
+        sample_status = "warming_up"
+        remaining_trade_count = max(required_symbol_trade_count - trade_count, 0)
+        if trade_count >= 3 and expectancy < 0:
+            recommendation = "prune"
+            sample_status = "validated_negative"
+        elif trade_count == 0:
+            recommendation = "observe_only"
+            sample_status = "insufficient_symbol_data"
+        elif trade_count >= 3 and expectancy > 0 and pnl > 0:
+            recommendation = "promote"
+            sample_status = "validated_positive"
+        elif trade_count >= 3:
+            sample_status = "validated_mixed"
+        symbol_rows.append(
+            {
+                "symbol": symbol,
+                "trade_count": trade_count,
+                "realized_pnl_usd": round(pnl, 6),
+                "expectancy_usd": round(expectancy, 6),
+                "win_count": int(bucket["win_count"]),
+                "loss_count": int(bucket["loss_count"]),
+                "recommendation": recommendation,
+                "sample_status": sample_status,
+                "remaining_trade_count_for_validation": remaining_trade_count,
+                "required_trade_count_for_validation": required_symbol_trade_count,
+                "rolling_evidence": _symbol_rolling_evidence(
+                    aggregate_expectancy=expectancy,
+                    history=list(symbol_run_history.get(symbol, [])),
+                ),
+            }
+        )
+    symbol_rows.sort(key=lambda item: (str(item["recommendation"]), float(item["expectancy_usd"])))
+    symbol_scorecard_rows = _build_symbol_scorecard(symbol_rows)
+    score_alignment_rows: list[dict[str, object]] = []
+    for label, bucket in score_buckets.items():
+        trade_count = int(bucket["trade_count"])
+        realized_pnl = float(bucket["realized_pnl_usd"])
+        expectancy = realized_pnl / max(trade_count, 1)
+        score_alignment_rows.append(
+            {
+                "score_bucket_label": label,
+                "trade_count": trade_count,
+                "win_count": int(bucket["win_count"]),
+                "loss_count": int(bucket["loss_count"]),
+                "hit_rate": round(int(bucket["win_count"]) / max(trade_count, 1), 6),
+                "realized_pnl_usd": round(realized_pnl, 6),
+                "expectancy_usd": round(expectancy, 6),
+                "average_return_bps": round(float(bucket["average_return_bps_weighted_sum"]) / max(trade_count, 1), 6),
+            }
+        )
+    score_alignment_rows.sort(key=lambda item: str(item["score_bucket_label"]))
+    regime_rows: list[dict[str, object]] = []
+    for mode, bucket in regime_buckets.items():
+        count = int(bucket["decision_count"])
+        regime_rows.append(
+            {
+                "mode": mode,
+                "decision_count": count,
+                "avg_score": round(float(bucket["score_sum"]) / max(count, 1), 6),
+                "avg_net_edge_bps": round(float(bucket["net_edge_sum"]) / max(count, 1), 6),
+                "avg_cost_bps": round(float(bucket["cost_sum"]) / max(count, 1), 6),
+            }
+        )
+    regime_rows.sort(key=lambda item: str(item["mode"]))
+    required_total_closed_trade_count = 6
+    required_total_live_order_count = 8
+    return {
+        "base_dir": str(base_dir),
+        "generated_at": generated_at,
+        "lookback_days": lookback_days,
+        "run_count": len(run_snapshots),
+        "total_closed_trade_count": total_closed_trade_count,
+        "total_realized_pnl_usd": round(total_realized_pnl, 6),
+        "total_live_order_count": total_live_orders,
+        "total_tested_order_count": total_tested_orders,
+        "sample_progress": {
+            "status": (
+                "ready_for_comparison"
+                if total_closed_trade_count >= required_total_closed_trade_count and total_live_orders >= required_total_live_order_count
+                else "collecting_evidence"
+            ),
+            "required_total_closed_trade_count": required_total_closed_trade_count,
+            "required_total_live_order_count": required_total_live_order_count,
+            "remaining_closed_trade_count": max(required_total_closed_trade_count - total_closed_trade_count, 0),
+            "remaining_live_order_count": max(required_total_live_order_count - total_live_orders, 0),
+            "ready_for_comparison": total_closed_trade_count >= required_total_closed_trade_count and total_live_orders >= required_total_live_order_count,
+        },
+        "score_alignment_summary": score_alignment_rows,
+        "symbol_summary": symbol_rows,
+        "symbol_scorecard": symbol_scorecard_rows,
+        "regime_summary": regime_rows,
+    }
+
+
+def _filter_lineage_aligned_run_snapshots(
+    *,
+    run_snapshots: list[dict[str, object]],
+    active_policy_lineage: dict[str, object] | None,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    target = dict(active_policy_lineage or {})
+    annotated: list[dict[str, object]] = []
+    aligned_rows: list[dict[str, object]] = []
+    known_count = 0
+    mismatch_count = 0
+    unknown_count = 0
+    for snapshot in run_snapshots:
+        payload = dict(snapshot)
+        observed = dict(payload.get("policy_lineage", {}) or {})
+        alignment = policy_lineage_alignment(target, observed)
+        payload["policy_lineage_alignment"] = alignment
+        annotated.append(payload)
+        if bool(observed.get("available")):
+            known_count += 1
+        else:
+            unknown_count += 1
+        if bool(alignment.get("aligned")):
+            aligned_rows.append(payload)
+        elif str(alignment.get("status", "")) == "mismatch":
+            mismatch_count += 1
+    if not bool(target.get("available")):
+        return annotated, {
+            "applied": False,
+            "mode": "unfiltered_no_active_lineage",
+            "active_policy_lineage": target,
+            "known_run_lineage_count": known_count,
+            "unknown_run_lineage_count": unknown_count,
+            "aligned_run_count": len(aligned_rows),
+            "mismatched_run_count": mismatch_count,
+        }
+    if known_count <= 0:
+        return annotated, {
+            "applied": False,
+            "mode": "unfiltered_no_derived_run_lineage",
+            "active_policy_lineage": target,
+            "known_run_lineage_count": known_count,
+            "unknown_run_lineage_count": unknown_count,
+            "aligned_run_count": len(aligned_rows),
+            "mismatched_run_count": mismatch_count,
+        }
+    return aligned_rows, {
+        "applied": True,
+        "mode": "filtered_to_active_lineage",
+        "active_policy_lineage": target,
+        "known_run_lineage_count": known_count,
+        "unknown_run_lineage_count": unknown_count,
+        "aligned_run_count": len(aligned_rows),
+        "mismatched_run_count": mismatch_count,
+    }
+
+
+def _lineage_guarded_baseline_control_comparison(
+    baseline_control_comparison: dict[str, object],
+    lineage_attribution: dict[str, object],
+) -> dict[str, object]:
+    payload = dict(baseline_control_comparison or {})
+    if not payload:
+        return payload
+    if not bool(lineage_attribution.get("applied")):
+        payload["lineage_scope_status"] = str(lineage_attribution.get("mode", "unfiltered") or "unfiltered")
+        return payload
+    if int(lineage_attribution.get("aligned_run_count", 0) or 0) > 0:
+        payload["lineage_scope_status"] = "aligned"
+        return payload
+    return {
+        "available": False,
+        "artifact_path": str(payload.get("artifact_path", "") or ""),
+        "reason": "BASELINE_CONTROL_REQUIRES_ALIGNED_POLICY_LINEAGE",
+        "verdict": "not_available",
+        "expansion_gate": "not_available",
+        "expansion_gate_reason": "BASELINE_CONTROL_REQUIRES_ALIGNED_POLICY_LINEAGE",
+        "lineage_scope_status": "no_aligned_policy_runs",
+    }
+
+
+def _build_policy_validation_runner_from_run_snapshots(
+    *,
+    base_dir: str | Path,
+    run_snapshots: list[dict[str, object]],
+    lookback_days: int,
+    generated_at: str,
+    baseline_control_comparison: dict[str, object] | None = None,
+    lineage_attribution: dict[str, object] | None = None,
+) -> dict[str, object]:
+    aggregated = _aggregate_weekly_validation_from_run_snapshots(
+        base_dir=base_dir,
+        run_snapshots=run_snapshots,
+        lookback_days=lookback_days,
+        generated_at=generated_at,
+    )
+    symbol_rows = list(aggregated.get("symbol_summary", []) or [])
+    symbol_scorecard = list(aggregated.get("symbol_scorecard", []) or [])
+    regime_rows = list(aggregated.get("regime_summary", []) or [])
+    pruning_recommendations = _aggregate_pruning_recommendations(run_snapshots)
+    walk_forward_windows = [window for snapshot in run_snapshots for window in list(snapshot.get("walk_forward", []) or [])]
+    positive_walk_forward_count = sum(
+        1
+        for window in walk_forward_windows
+        if _safe_float(window.get("avg_net_edge_bps")) > 0.0 and _safe_float(window.get("avg_score")) >= 0.0
+    )
+    promote_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "promote")
+    prune_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "prune")
+    total_symbols = max(len(symbol_rows), 1)
+    walk_forward_alignment = (
+        positive_walk_forward_count / len(walk_forward_windows)
+        if walk_forward_windows
+        else (1.0 if int(aggregated.get("run_count", 0) or 0) > 0 and _safe_float(aggregated.get("total_realized_pnl_usd")) > 0.0 else 0.0)
+    )
+    shadow_alignment_score = max(
+        0.0,
+        min(1.0, ((promote_count - prune_count + total_symbols) / (2 * total_symbols) * 0.5) + (walk_forward_alignment * 0.5)),
+    )
+    pnl_series = [_safe_float(snapshot.get("realized_pnl_usd")) for snapshot in run_snapshots]
+    total_realized_pnl_usd = round(sum(pnl_series), 6)
+    max_drawdown_usd = _max_drawdown(pnl_series)
+    drawdown_to_pnl_ratio = round(max_drawdown_usd / max(abs(total_realized_pnl_usd), 1.0), 6)
+    live_order_count = sum(_safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots)
+    rejected_live_order_count = sum(_safe_int(snapshot.get("rejected_live_order_count")) for snapshot in run_snapshots)
+    closed_trade_count = sum(_safe_int(snapshot.get("closed_trade_count")) for snapshot in run_snapshots)
+    slippage_weight = float(sum(_safe_int(snapshot.get("accepted_live_order_count")) for snapshot in run_snapshots))
+    retention_weight = float(sum(_safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots))
+    avg_slippage_bps = _weighted_metric(
+        sum(_safe_float(snapshot.get("avg_slippage_bps")) * _safe_int(snapshot.get("accepted_live_order_count")) for snapshot in run_snapshots),
+        slippage_weight,
+    )
+    avg_realized_edge_bps = _weighted_metric(
+        sum(_safe_float(snapshot.get("avg_realized_edge_bps")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
+        retention_weight,
+    )
+    avg_edge_retention_ratio = _weighted_metric(
+        sum(_safe_float(snapshot.get("avg_edge_retention_ratio")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
+        retention_weight,
+    )
+    reject_rate = round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0
+    protection_degraded_rate = _weighted_metric(
+        sum(_safe_float(snapshot.get("protection_degraded_rate")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
+        retention_weight,
+    )
+    micro_live_gate = _build_micro_live_gate(
+        live_order_count=live_order_count,
+        rejected_live_order_count=rejected_live_order_count,
+        avg_slippage_bps=avg_slippage_bps,
+        avg_realized_edge_bps=avg_realized_edge_bps,
+        closed_trade_count=closed_trade_count,
+    )
+    recent_retention_window = _retention_window_signal(
+        validation_runs=run_snapshots,
+        walk_forward_windows=walk_forward_windows,
+        window_size=3,
+    )
+    cumulative_retention_window = _retention_window_signal(
+        validation_runs=run_snapshots,
+        walk_forward_windows=walk_forward_windows,
+    )
+    sample_quality_watchdog = _build_sample_quality_watchdog(
+        run_count=int(aggregated.get("run_count", 0) or 0),
+        total_closed_trade_count=int(aggregated.get("total_closed_trade_count", 0) or 0),
+        total_live_order_count=int(aggregated.get("total_live_order_count", 0) or 0),
+        total_tested_order_count=int(aggregated.get("total_tested_order_count", 0) or 0),
+        total_realized_pnl_usd=total_realized_pnl_usd,
+        symbol_rows=symbol_rows,
+        symbol_scorecard=symbol_scorecard,
+        score_alignment_summary=list(aggregated.get("score_alignment_summary", []) or []),
+        runner_reject_rate=reject_rate,
+        runner_avg_slippage_bps=avg_slippage_bps,
+        runner_avg_realized_edge_bps=avg_realized_edge_bps,
+        runner_avg_edge_retention_ratio=avg_edge_retention_ratio,
+        runner_protection_degraded_rate=protection_degraded_rate,
+        runner_walk_forward_window_count=len(walk_forward_windows),
+        runner_positive_walk_forward_ratio=round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
+    )
+    guarded_baseline = _lineage_guarded_baseline_control_comparison(
+        dict(baseline_control_comparison or {}),
+        dict(lineage_attribution or {}),
+    )
+    symbol_lifecycle = build_symbol_lifecycle(
+        symbol_summary=symbol_rows,
+        symbol_scorecard=symbol_scorecard,
+        pruning_recommendations=pruning_recommendations,
+        sample_quality_watchdog=sample_quality_watchdog,
+        baseline_control_comparison=guarded_baseline,
+        active_policy={"status": "baseline", "adjustments": []},
+        rollout_phase="baseline",
+        evaluated_at=generated_at,
+    )
+    symbol_lifecycle_summary = summarize_symbol_lifecycle(symbol_lifecycle)
+    auto_mode = build_regime_aware_auto_mode(
+        regime_summary=regime_rows,
+        sample_quality_watchdog=sample_quality_watchdog,
+        baseline_control_comparison=guarded_baseline,
+        execution_quality={
+            "run_count": aggregated.get("run_count", 0),
+            "total_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+            "total_live_order_count": aggregated.get("total_live_order_count", 0),
+            "runner_total_realized_pnl_usd": total_realized_pnl_usd,
+            "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
+            "runner_reject_rate": reject_rate,
+            "runner_protection_degraded_rate": protection_degraded_rate,
+            "runner_avg_realized_edge_bps": avg_realized_edge_bps,
+            "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
+            "runner_walk_forward_window_count": len(walk_forward_windows),
+            "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
+            "micro_live_gate": micro_live_gate,
+        },
+        symbol_lifecycle_summary=symbol_lifecycle_summary,
+        symbol_lifecycle=symbol_lifecycle,
+    )
+    total_return_pct = 0.0
+    max_drawdown_pct = 0.0
+    evidence = {
+        "generated_at": generated_at,
+        "sample_progress": dict(aggregated.get("sample_progress", {}) or {}),
+        "score_alignment_summary": list(aggregated.get("score_alignment_summary", []) or []),
+        "total_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+        "total_live_order_count": aggregated.get("total_live_order_count", 0),
+        "total_tested_order_count": aggregated.get("total_tested_order_count", 0),
+        "runner_total_return_pct": total_return_pct,
+        "runner_total_realized_pnl_usd": total_realized_pnl_usd,
+        "runner_max_drawdown_pct": max_drawdown_pct,
+        "runner_max_drawdown_usd": max_drawdown_usd,
+        "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
+        "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
+        "runner_reject_rate": reject_rate,
+        "runner_protection_degraded_rate": protection_degraded_rate,
+        "runner_avg_slippage_bps": avg_slippage_bps,
+        "runner_avg_realized_edge_bps": avg_realized_edge_bps,
+        "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
+        "runner_walk_forward_window_count": len(walk_forward_windows),
+        "runner_positive_walk_forward_window_count": positive_walk_forward_count,
+        "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
+        "micro_live_gate": micro_live_gate,
+        "recent_retention_window": recent_retention_window,
+        "cumulative_retention_window": cumulative_retention_window,
+        "sample_quality_watchdog": sample_quality_watchdog,
+        "baseline_control_comparison": guarded_baseline,
+        "auto_mode": auto_mode,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
+        "symbol_scorecard": symbol_scorecard,
+        "lineage_attribution": dict(lineage_attribution or {}),
+    }
+    return {
+        "generated_at": generated_at,
+        "lookback_days": lookback_days,
+        "run_count": aggregated.get("run_count", 0),
+        "validation_path_mode": "paper_live_walk_forward_artifacts",
+        "total_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+        "total_live_order_count": aggregated.get("total_live_order_count", 0),
+        "total_tested_order_count": aggregated.get("total_tested_order_count", 0),
+        "sample_progress": dict(aggregated.get("sample_progress", {}) or {}),
+        "score_alignment_summary": list(aggregated.get("score_alignment_summary", []) or []),
+        "runner_total_return_pct": total_return_pct,
+        "runner_total_realized_pnl_usd": total_realized_pnl_usd,
+        "runner_max_drawdown_pct": max_drawdown_pct,
+        "runner_max_drawdown_usd": max_drawdown_usd,
+        "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
+        "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
+        "runner_reject_rate": reject_rate,
+        "runner_protection_degraded_rate": protection_degraded_rate,
+        "runner_avg_slippage_bps": avg_slippage_bps,
+        "runner_avg_realized_edge_bps": avg_realized_edge_bps,
+        "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
+        "runner_walk_forward_window_count": len(walk_forward_windows),
+        "runner_positive_walk_forward_window_count": positive_walk_forward_count,
+        "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
+        "validation_runs": run_snapshots,
+        "walk_forward_windows": walk_forward_windows,
+        "symbol_summary": symbol_rows,
+        "symbol_scorecard": symbol_scorecard,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
+        "regime_summary": regime_rows,
+        "pruning_recommendations": pruning_recommendations,
+        "micro_live_gate": micro_live_gate,
+        "recent_retention_window": recent_retention_window,
+        "cumulative_retention_window": cumulative_retention_window,
+        "sample_quality_watchdog": sample_quality_watchdog,
+        "baseline_control_comparison": guarded_baseline,
+        "auto_mode": auto_mode,
+        "lineage_attribution": dict(lineage_attribution or {}),
+        "evidence": evidence,
+    }
 
 
 
@@ -2032,6 +2584,10 @@ def _build_checkpoint_auto_judge(
     active_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
     active_adjustments = list(active_policy.get("adjustments", []) or [])
     active_status = str(active_policy.get("status", "baseline") or "baseline")
+    active_rollout_phase = str(
+        dict(current_policy_state or {}).get("rollout_progression", dict(active_policy.get("rollout_progression", {}) or {})).get("execution_phase", "baseline")
+        or "baseline"
+    )
     run_count = _safe_int(payload.get("run_count"))
     total_closed_trade_count = _safe_int(payload.get("total_closed_trade_count"))
     total_live_order_count = _safe_int(payload.get("total_live_order_count"))
@@ -2123,6 +2679,9 @@ def _build_checkpoint_auto_judge(
         },
         sample_quality_watchdog=sample_watchdog,
         baseline_control_comparison=baseline_control_comparison,
+        active_policy=active_policy,
+        rollout_phase=active_rollout_phase,
+        policy_version=dict(current_policy_state or {}).get("version"),
         evaluated_at=payload.get("generated_at", ""),
     )
     return {
@@ -2183,9 +2742,7 @@ def build_policy_comparison_validation_artifact(*,
     lookback_days: int = 7,
     current_runtime_summary: dict[str, Any] | None = None,
 ) -> dict[str, object]:
-    runner = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
-    runner_evidence = dict(runner.get("evidence", {}) or {})
-    baseline_control_comparison = dict(runner.get("baseline_control_comparison", {}) or {})
+    raw_runner = build_policy_validation_runner_artifact(base_dir=base_dir, lookback_days=lookback_days)
     current_policy = dict(dict(current_policy_state or {}).get("active_policy", {}) or {})
     current_policy_evidence = dict(dict(dict(current_policy_state or {}).get("policy_validation", {}) or {}).get("evidence", {}) or {})
     current_score = _policy_adjustment_score(current_policy)
@@ -2206,37 +2763,92 @@ def build_policy_comparison_validation_artifact(*,
         rollout_phase=current_rollout_phase,
         source="current_policy_active",
     )
+    current_active_lineage = build_policy_state_lineage_snapshot(
+        current_policy_state,
+        source="current_policy_state",
+    )
+    explicit_current_policy_evidence_lineage = dict(
+        current_policy_evidence.get("active_policy_lineage", dict(current_policy_state or {}).get("policy_lineage", {}))
+        or {}
+    )
+    current_policy_evidence_lineage = (
+        _extract_policy_lineage_from_payload(
+            {
+                "active_policy_lineage": explicit_current_policy_evidence_lineage,
+                "policy_application": current_policy_evidence.get("current_policy_application", current_policy_application),
+                "generated_at": current_policy_evidence.get("generated_at", dict(current_policy_state or {}).get("updated_at", "")),
+            },
+            source="current_policy_evidence",
+            updated_at=current_policy_evidence.get("generated_at", dict(current_policy_state or {}).get("updated_at", "")),
+        )
+        if explicit_current_policy_evidence_lineage
+        else dict(current_active_lineage)
+    )
+    current_evidence_lineage_alignment = policy_lineage_alignment(
+        current_active_lineage,
+        current_policy_evidence_lineage,
+    )
+    raw_validation_runs = [dict(item) for item in list(raw_runner.get("validation_runs", []) or [])]
+    runtime_summary_run_dir = _resolve_latest_run_dir(base_dir=Path(base_dir)) if current_runtime_summary else None
+    runtime_summary_snapshot = _runtime_summary_validation_snapshot(
+        current_runtime_summary,
+        run_dir=runtime_summary_run_dir,
+        policy_lineage=current_active_lineage,
+    )
+    if runtime_summary_snapshot is not None and (
+        (runtime_summary_run_dir is None and not raw_validation_runs)
+        or (runtime_summary_run_dir is not None and (runtime_summary_run_dir.name != "latest" or not raw_validation_runs))
+    ):
+        raw_validation_runs = _merge_runtime_summary_snapshot(raw_validation_runs, runtime_summary_snapshot)
+    filtered_validation_runs, lineage_attribution = _filter_lineage_aligned_run_snapshots(
+        run_snapshots=raw_validation_runs,
+        active_policy_lineage=current_active_lineage,
+    )
+    runner = _build_policy_validation_runner_from_run_snapshots(
+        base_dir=base_dir,
+        run_snapshots=filtered_validation_runs,
+        lookback_days=lookback_days,
+        generated_at=str(raw_runner.get("generated_at", datetime.now(UTC).isoformat()) or datetime.now(UTC).isoformat()),
+        baseline_control_comparison=dict(raw_runner.get("baseline_control_comparison", {}) or {}),
+        lineage_attribution={
+            **dict(lineage_attribution or {}),
+            "current_policy_lineage": dict(current_active_lineage),
+            "current_policy_evidence_lineage": dict(current_policy_evidence_lineage),
+            "current_policy_evidence_alignment": dict(current_evidence_lineage_alignment),
+        },
+    )
+    runner_evidence = dict(runner.get("evidence", {}) or {})
+    baseline_control_comparison = dict(runner.get("baseline_control_comparison", {}) or {})
     delta = round(candidate_score - current_score, 6)
     structural_verdict = "keep"
     if delta > 0.1:
         structural_verdict = "candidate_better"
     elif delta < -0.1:
         structural_verdict = "candidate_worse"
+    current_policy_evidence_for_comparison = (
+        current_policy_evidence
+        if bool(current_evidence_lineage_alignment.get("aligned"))
+        else {}
+    )
     runtime_comparison = _compare_runtime_evidence(
         candidate_evidence=runner_evidence,
-        current_evidence=current_policy_evidence,
+        current_evidence=current_policy_evidence_for_comparison,
     )
     runtime_verdict = str(runtime_comparison.get("runtime_comparison_verdict", "keep"))
     shared_validation_runs = [dict(item) for item in list(runner.get("validation_runs", []) or [])]
-    runtime_summary_run_dir = _resolve_latest_run_dir(base_dir=Path(base_dir)) if current_runtime_summary else None
-    runtime_summary_snapshot = _runtime_summary_validation_snapshot(
-        current_runtime_summary,
-        run_dir=runtime_summary_run_dir,
-    )
-    shared_validation_runs = _merge_runtime_summary_snapshot(shared_validation_runs, runtime_summary_snapshot)
     shared_walk_forward_windows = [dict(item) for item in list(runner.get("walk_forward_windows", []) or [])]
     current_validation_runs = [
         dict(item)
-        for item in list(current_policy_evidence.get("validation_runs", []) or shared_validation_runs)
+        for item in list(current_policy_evidence_for_comparison.get("validation_runs", []) or shared_validation_runs)
     ]
     current_walk_forward_windows = [
         dict(item)
-        for item in list(current_policy_evidence.get("walk_forward_windows", []) or shared_walk_forward_windows)
+        for item in list(current_policy_evidence_for_comparison.get("walk_forward_windows", []) or shared_walk_forward_windows)
     ]
     candidate_symbol_summary = list(runner.get("symbol_summary", []) or [])
     candidate_regime_summary = list(runner.get("regime_summary", []) or [])
-    current_symbol_summary = list(current_policy_evidence.get("symbol_summary", []) or candidate_symbol_summary)
-    current_regime_summary = list(current_policy_evidence.get("regime_summary", []) or candidate_regime_summary)
+    current_symbol_summary = list(current_policy_evidence_for_comparison.get("symbol_summary", []) or candidate_symbol_summary)
+    current_regime_summary = list(current_policy_evidence_for_comparison.get("regime_summary", []) or candidate_regime_summary)
     candidate_replay_summary = _execution_replay_summary_from_runs(
         validation_runs=shared_validation_runs,
         walk_forward_windows=shared_walk_forward_windows,
@@ -2257,7 +2869,7 @@ def build_policy_comparison_validation_artifact(*,
         baseline_policy_application=current_policy_application,
         source=(
             "persisted_policy_validation_evidence"
-            if list(current_policy_evidence.get("validation_runs", []) or [])
+            if list(current_policy_evidence_for_comparison.get("validation_runs", []) or [])
             else "observed_runtime_artifacts"
         ),
         runtime_summary=current_runtime_summary,
@@ -2269,9 +2881,11 @@ def build_policy_comparison_validation_artifact(*,
         "candidate_walk_forward_window_count": _safe_int(runner.get("runner_walk_forward_window_count")),
         "candidate_positive_walk_forward_ratio": round(_safe_float(runner.get("runner_positive_walk_forward_ratio")), 6),
         "current_evidence_available": bool(runtime_comparison.get("runtime_evidence_available")),
-        "current_walk_forward_window_count": _safe_int(current_policy_evidence.get("runner_walk_forward_window_count")),
-        "current_positive_walk_forward_ratio": round(_safe_float(current_policy_evidence.get("runner_positive_walk_forward_ratio")), 6),
+        "current_walk_forward_window_count": _safe_int(current_policy_evidence_for_comparison.get("runner_walk_forward_window_count")),
+        "current_positive_walk_forward_ratio": round(_safe_float(current_policy_evidence_for_comparison.get("runner_positive_walk_forward_ratio")), 6),
         "compared_metrics": list(runtime_comparison.get("compared_metrics", [])),
+        "lineage_attribution_mode": str(dict(lineage_attribution or {}).get("mode", "unfiltered") or "unfiltered"),
+        "current_policy_evidence_alignment": dict(current_evidence_lineage_alignment),
     }
     counterfactual_replay_path = _counterfactual_replay_path(
         validation_mode=str(runner.get("validation_path_mode", "artifact_walk_forward")),
@@ -2280,7 +2894,7 @@ def build_policy_comparison_validation_artifact(*,
         candidate_replay_summary=candidate_replay_summary,
         current_replay_summary=current_replay_summary,
         candidate_evidence=runner_evidence,
-        current_evidence=current_policy_evidence,
+        current_evidence=current_policy_evidence_for_comparison,
         current_evidence_available=bool(runtime_comparison.get("runtime_evidence_available")),
         candidate_policy_application=candidate_policy_application,
         current_policy_application=current_policy_application,
@@ -2365,6 +2979,10 @@ def build_policy_comparison_validation_artifact(*,
         "auto_mode": auto_mode,
         "symbol_lifecycle": symbol_lifecycle,
         "symbol_lifecycle_summary": symbol_lifecycle_summary,
+        "lineage_attribution": dict(runner.get("lineage_attribution", {}) or {}),
+        "current_policy_lineage": dict(current_active_lineage),
+        "current_policy_evidence_lineage": dict(current_policy_evidence_lineage),
+        "current_policy_evidence_alignment": dict(current_evidence_lineage_alignment),
         "candidate_vs_current_validation_path": validation_path,
         "counterfactual_replay_path": counterfactual_replay_path,
         "candidate_replay_summary": candidate_replay_summary,
@@ -2419,6 +3037,7 @@ def build_policy_comparison_validation_artifact(*,
         "candidate_replay_summary": candidate_replay_summary,
         "current_replay_summary": current_replay_summary,
         "validation_path": validation_path,
+        "lineage_attribution": dict(runner.get("lineage_attribution", {}) or {}),
         "evidence": evidence,
     }
 
@@ -2444,194 +3063,24 @@ def write_policy_comparison_validation_artifact(*,
     return target
 
 def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> dict[str, object]:
-    report = build_weekly_validation_report(base_dir=base_dir, lookback_days=lookback_days)
     runs = _resolve_recent_runs(base_dir=Path(base_dir), lookback_days=lookback_days)
     run_snapshots = [_run_validation_snapshot(run_dir=run_dir) for run_dir in runs]
-    symbol_rows = list(report.symbol_summary)
-    symbol_scorecard = list(report.symbol_scorecard)
-    regime_rows = list(report.regime_summary)
-    pruning_recommendations = _aggregate_pruning_recommendations(run_snapshots)
-    promote_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "promote")
-    prune_count = sum(1 for row in symbol_rows if str(row.get("recommendation", "")) == "prune")
-    total_symbols = max(len(symbol_rows), 1)
-    walk_forward_windows = [window for snapshot in run_snapshots for window in list(snapshot.get("walk_forward", []))]
-    positive_walk_forward_count = sum(
-        1
-        for window in walk_forward_windows
-        if _safe_float(window.get("avg_net_edge_bps")) > 0.0 and _safe_float(window.get("avg_score")) >= 0.0
-    )
-    walk_forward_alignment = (
-        positive_walk_forward_count / len(walk_forward_windows)
-        if walk_forward_windows
-        else (1.0 if report.run_count > 0 and report.total_realized_pnl_usd > 0.0 else 0.0)
-    )
-    shadow_alignment_score = max(
-        0.0,
-        min(1.0, ((promote_count - prune_count + total_symbols) / (2 * total_symbols) * 0.5) + (walk_forward_alignment * 0.5)),
-    )
-    pnl_series = [_safe_float(snapshot.get("realized_pnl_usd")) for snapshot in run_snapshots]
-    total_realized_pnl_usd = round(sum(pnl_series), 6)
-    max_drawdown_usd = _max_drawdown(pnl_series)
-    drawdown_to_pnl_ratio = round(max_drawdown_usd / max(abs(total_realized_pnl_usd), 1.0), 6)
-    live_order_count = sum(_safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots)
-    rejected_live_order_count = sum(_safe_int(snapshot.get("rejected_live_order_count")) for snapshot in run_snapshots)
-    closed_trade_count = sum(_safe_int(snapshot.get("closed_trade_count")) for snapshot in run_snapshots)
-    slippage_weight = float(sum(_safe_int(snapshot.get("accepted_live_order_count")) for snapshot in run_snapshots))
-    retention_weight = float(sum(_safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots))
-    avg_slippage_bps = _weighted_metric(
-        sum(_safe_float(snapshot.get("avg_slippage_bps")) * _safe_int(snapshot.get("accepted_live_order_count")) for snapshot in run_snapshots),
-        slippage_weight,
-    )
-    avg_realized_edge_bps = _weighted_metric(
-        sum(_safe_float(snapshot.get("avg_realized_edge_bps")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
-        retention_weight,
-    )
-    avg_edge_retention_ratio = _weighted_metric(
-        sum(_safe_float(snapshot.get("avg_edge_retention_ratio")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
-        retention_weight,
-    )
-    reject_rate = round(rejected_live_order_count / max(live_order_count, 1), 6) if live_order_count > 0 else 0.0
-    protection_degraded_rate = _weighted_metric(
-        sum(_safe_float(snapshot.get("protection_degraded_rate")) * _safe_int(snapshot.get("live_order_count")) for snapshot in run_snapshots),
-        retention_weight,
-    )
-    micro_live_gate = _build_micro_live_gate(
-        live_order_count=live_order_count,
-        rejected_live_order_count=rejected_live_order_count,
-        avg_slippage_bps=avg_slippage_bps,
-        avg_realized_edge_bps=avg_realized_edge_bps,
-        closed_trade_count=closed_trade_count,
-    )
-    recent_retention_window = _retention_window_signal(
-        validation_runs=run_snapshots,
-        walk_forward_windows=walk_forward_windows,
-        window_size=3,
-    )
-    cumulative_retention_window = _retention_window_signal(
-        validation_runs=run_snapshots,
-        walk_forward_windows=walk_forward_windows,
-    )
-    sample_quality_watchdog = _build_sample_quality_watchdog(
-        run_count=report.run_count,
-        total_closed_trade_count=report.total_closed_trade_count,
-        total_live_order_count=report.total_live_order_count,
-        total_tested_order_count=report.total_tested_order_count,
-        total_realized_pnl_usd=total_realized_pnl_usd,
-        symbol_rows=symbol_rows,
-        symbol_scorecard=symbol_scorecard,
-        score_alignment_summary=list(report.score_alignment_summary),
-        runner_reject_rate=reject_rate,
-        runner_avg_slippage_bps=avg_slippage_bps,
-        runner_avg_realized_edge_bps=avg_realized_edge_bps,
-        runner_avg_edge_retention_ratio=avg_edge_retention_ratio,
-        runner_protection_degraded_rate=protection_degraded_rate,
-        runner_walk_forward_window_count=len(walk_forward_windows),
-        runner_positive_walk_forward_ratio=round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
-    )
     baseline_control_comparison = _load_recent_baseline_control_comparison(base_dir=base_dir)
-    symbol_lifecycle = build_symbol_lifecycle(
-        symbol_summary=symbol_rows,
-        symbol_scorecard=symbol_scorecard,
-        pruning_recommendations=pruning_recommendations,
-        sample_quality_watchdog=sample_quality_watchdog,
+    return _build_policy_validation_runner_from_run_snapshots(
+        base_dir=base_dir,
+        run_snapshots=run_snapshots,
+        lookback_days=lookback_days,
+        generated_at=datetime.now(UTC).isoformat(),
         baseline_control_comparison=baseline_control_comparison,
-        evaluated_at=report.generated_at,
-    )
-    symbol_lifecycle_summary = summarize_symbol_lifecycle(symbol_lifecycle)
-    auto_mode = build_regime_aware_auto_mode(
-        regime_summary=regime_rows,
-        sample_quality_watchdog=sample_quality_watchdog,
-        baseline_control_comparison=baseline_control_comparison,
-        execution_quality={
-            "run_count": report.run_count,
-            "total_closed_trade_count": report.total_closed_trade_count,
-            "total_live_order_count": report.total_live_order_count,
-            "runner_total_realized_pnl_usd": total_realized_pnl_usd,
-            "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
-            "runner_reject_rate": reject_rate,
-            "runner_protection_degraded_rate": protection_degraded_rate,
-            "runner_avg_realized_edge_bps": avg_realized_edge_bps,
-            "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
-            "runner_walk_forward_window_count": len(walk_forward_windows),
-            "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
-            "micro_live_gate": micro_live_gate,
+        lineage_attribution={
+            "applied": False,
+            "mode": "unfiltered_runner_artifact",
+            "known_run_lineage_count": sum(1 for snapshot in run_snapshots if bool(dict(snapshot.get("policy_lineage", {}) or {}).get("available"))),
+            "unknown_run_lineage_count": sum(1 for snapshot in run_snapshots if not bool(dict(snapshot.get("policy_lineage", {}) or {}).get("available"))),
+            "aligned_run_count": 0,
+            "mismatched_run_count": 0,
         },
-        symbol_lifecycle_summary=symbol_lifecycle_summary,
-        symbol_lifecycle=symbol_lifecycle,
     )
-    total_return_pct = 0.0
-    max_drawdown_pct = 0.0
-    evidence = {
-        "generated_at": report.generated_at,
-        "sample_progress": dict(report.sample_progress),
-        "score_alignment_summary": list(report.score_alignment_summary),
-        "total_closed_trade_count": report.total_closed_trade_count,
-        "total_live_order_count": report.total_live_order_count,
-        "total_tested_order_count": report.total_tested_order_count,
-        "runner_total_return_pct": total_return_pct,
-        "runner_total_realized_pnl_usd": total_realized_pnl_usd,
-        "runner_max_drawdown_pct": max_drawdown_pct,
-        "runner_max_drawdown_usd": max_drawdown_usd,
-        "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
-        "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
-        "runner_reject_rate": reject_rate,
-        "runner_protection_degraded_rate": protection_degraded_rate,
-        "runner_avg_slippage_bps": avg_slippage_bps,
-        "runner_avg_realized_edge_bps": avg_realized_edge_bps,
-        "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
-        "runner_walk_forward_window_count": len(walk_forward_windows),
-        "runner_positive_walk_forward_window_count": positive_walk_forward_count,
-        "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
-        "micro_live_gate": micro_live_gate,
-        "recent_retention_window": recent_retention_window,
-        "cumulative_retention_window": cumulative_retention_window,
-        "sample_quality_watchdog": sample_quality_watchdog,
-        "baseline_control_comparison": baseline_control_comparison,
-        "auto_mode": auto_mode,
-        "symbol_lifecycle": symbol_lifecycle,
-        "symbol_lifecycle_summary": symbol_lifecycle_summary,
-        "symbol_scorecard": symbol_scorecard,
-    }
-    return {
-        "generated_at": report.generated_at,
-        "lookback_days": report.lookback_days,
-        "run_count": report.run_count,
-        "validation_path_mode": "paper_live_walk_forward_artifacts",
-        "total_closed_trade_count": report.total_closed_trade_count,
-        "total_live_order_count": report.total_live_order_count,
-        "total_tested_order_count": report.total_tested_order_count,
-        "sample_progress": dict(report.sample_progress),
-        "score_alignment_summary": list(report.score_alignment_summary),
-        "runner_total_return_pct": total_return_pct,
-        "runner_total_realized_pnl_usd": total_realized_pnl_usd,
-        "runner_max_drawdown_pct": max_drawdown_pct,
-        "runner_max_drawdown_usd": max_drawdown_usd,
-        "runner_drawdown_to_pnl_ratio": drawdown_to_pnl_ratio,
-        "runner_shadow_alignment_score": round(shadow_alignment_score, 6),
-        "runner_reject_rate": reject_rate,
-        "runner_protection_degraded_rate": protection_degraded_rate,
-        "runner_avg_slippage_bps": avg_slippage_bps,
-        "runner_avg_realized_edge_bps": avg_realized_edge_bps,
-        "runner_avg_edge_retention_ratio": avg_edge_retention_ratio,
-        "runner_walk_forward_window_count": len(walk_forward_windows),
-        "runner_positive_walk_forward_window_count": positive_walk_forward_count,
-        "runner_positive_walk_forward_ratio": round(_safe_ratio(positive_walk_forward_count, len(walk_forward_windows)), 6),
-        "validation_runs": run_snapshots,
-        "walk_forward_windows": walk_forward_windows,
-        "symbol_summary": symbol_rows,
-        "symbol_scorecard": symbol_scorecard,
-        "symbol_lifecycle": symbol_lifecycle,
-        "symbol_lifecycle_summary": symbol_lifecycle_summary,
-        "regime_summary": regime_rows,
-        "pruning_recommendations": pruning_recommendations,
-        "micro_live_gate": micro_live_gate,
-        "recent_retention_window": recent_retention_window,
-        "cumulative_retention_window": cumulative_retention_window,
-        "sample_quality_watchdog": sample_quality_watchdog,
-        "baseline_control_comparison": baseline_control_comparison,
-        "auto_mode": auto_mode,
-        "evidence": evidence,
-    }
 
 
 def write_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_runtime", output_path: str | Path, lookback_days: int = 7) -> Path:
