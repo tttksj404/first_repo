@@ -9,7 +9,7 @@ from typing import Any
 
 from quant_binance.auto_mode import build_regime_aware_auto_mode
 from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
-from quant_binance.performance_report import build_runtime_performance_report
+from quant_binance.performance_report import build_runtime_performance_report, build_runtime_performance_report_from_rows
 from quant_binance.policy_evidence import policy_evidence_bucket, policy_evidence_bucket_evidence, with_policy_evidence_buckets
 from quant_binance.policy_lineage import (
     build_policy_lineage_snapshot,
@@ -190,6 +190,21 @@ _POLICY_BUCKET_EVIDENCE_KEYS = (
     "pruning_recommendations",
     "walk_forward_windows",
     "validation_runs",
+    "policy_context_bucket_name",
+    "policy_context_bucket_source",
+    "policy_context_bucket_available",
+    "policy_context_bucket_run_count",
+    "policy_context_bucket_decision_count",
+    "policy_context_bucket_closed_trade_count",
+    "policy_context_bucket_total_realized_pnl_usd",
+    "policy_context_bucket_walk_forward_window_count",
+    "policy_context_bucket_positive_walk_forward_ratio",
+    "policy_context_bucket_validation_runs",
+    "policy_context_bucket_walk_forward_windows",
+    "policy_context_bucket_symbol_summary",
+    "policy_context_bucket_score_alignment_summary",
+    "policy_context_bucket_regime_summary",
+    "policy_context_bucket_pruning_recommendations",
     "metric_comparisons",
     "current_policy_evidence_alignment",
 )
@@ -865,6 +880,7 @@ def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
         "run_dir": str(run_dir),
         "generated_at": str(summary.get("generated_at", "")),
         "policy_lineage": _load_run_policy_lineage(run_dir),
+        "policy_context_buckets": _policy_context_bucket_snapshots(run_dir),
         "closed_trade_count": report.closed_trade_count,
         "realized_pnl_usd": round(report.realized_pnl_usd, 6),
         "live_order_count": live_order_count,
@@ -883,6 +899,116 @@ def _run_validation_snapshot(*, run_dir: Path) -> dict[str, object]:
         "score_bucket_performance": [asdict(item) for item in report.score_bucket_performance],
         "pruning_recommendations": [dict(item) for item in report.pruning_recommendations],
     }
+
+
+def _policy_context_bucket_name(row: dict[str, Any] | None) -> str:
+    payload = dict(row or {})
+    bucket_name = str(payload.get("entry_policy_bucket", "") or "")
+    if not bucket_name or not bool(payload.get("entry_policy_bucket_available")):
+        return ""
+    alignment_status = str(payload.get("entry_policy_bucket_alignment_status", "") or "")
+    if alignment_status and alignment_status not in {"aligned", "legacy_unbucketed"}:
+        return ""
+    return bucket_name
+
+
+def _consensus_policy_lineage(lineages: list[dict[str, object]]) -> dict[str, object]:
+    known: dict[str, dict[str, object]] = {}
+    for item in lineages:
+        payload = dict(item or {})
+        if not payload:
+            continue
+        lineage_key = str(payload.get("structural_key", "") or payload.get("versioned_key", "") or "")
+        if not lineage_key:
+            continue
+        known.setdefault(lineage_key, payload)
+    if len(known) == 1:
+        return dict(next(iter(known.values())))
+    return {}
+
+
+def _policy_context_bucket_snapshot(
+    *,
+    run_dir: Path,
+    bucket_name: str,
+    decisions: list[dict[str, Any]],
+    closed_trades: list[dict[str, Any]],
+) -> dict[str, object]:
+    report = build_runtime_performance_report_from_rows(
+        run_dir=run_dir,
+        summary_path=run_dir / "summary.json",
+        decisions=decisions,
+        closed_trades=closed_trades,
+    )
+    lineages = [
+        dict(item.get("entry_policy_lineage", {}) or {})
+        for item in [*decisions, *closed_trades]
+        if isinstance(item, dict)
+    ]
+    sources = sorted(
+        {
+            str(item.get("entry_policy_bucket_source", "") or "")
+            for item in [*decisions, *closed_trades]
+            if str(item.get("entry_policy_bucket_source", "") or "")
+        }
+    )
+    alignment_statuses = sorted(
+        {
+            str(item.get("entry_policy_bucket_alignment_status", "") or "")
+            for item in [*decisions, *closed_trades]
+            if str(item.get("entry_policy_bucket_alignment_status", "") or "")
+        }
+    )
+    return {
+        "bucket": bucket_name,
+        "available": bool(decisions or closed_trades),
+        "decision_count": len(decisions),
+        "closed_trade_count": report.closed_trade_count,
+        "realized_pnl_usd": round(report.realized_pnl_usd, 6),
+        "walk_forward": [dict(item) for item in report.walk_forward],
+        "symbol_expectancy": [asdict(item) for item in report.symbol_expectancy],
+        "regime_performance": [asdict(item) for item in report.regime_performance],
+        "score_bucket_performance": [asdict(item) for item in report.score_bucket_performance],
+        "pruning_recommendations": [dict(item) for item in report.pruning_recommendations],
+        "policy_lineage": _consensus_policy_lineage(lineages),
+        "sources": sources,
+        "alignment_statuses": alignment_statuses,
+    }
+
+
+def _policy_context_bucket_snapshots(run_dir: Path) -> dict[str, dict[str, object]]:
+    logs_dir = run_dir / "logs"
+    decisions = load_closed_trades_jsonl(logs_dir / "decisions.jsonl")
+    closed_trades = load_closed_trades_jsonl(logs_dir / "closed_trades.jsonl")
+    bucket_names = sorted(
+        {
+            bucket_name
+            for bucket_name in (
+                _policy_context_bucket_name(row)
+                for row in [*decisions, *closed_trades]
+            )
+            if bucket_name
+        }
+    )
+    snapshots: dict[str, dict[str, object]] = {}
+    for bucket_name in bucket_names:
+        bucket_decisions = [
+            dict(item)
+            for item in decisions
+            if _policy_context_bucket_name(item) == bucket_name
+        ]
+        bucket_closed_trades = [
+            dict(item)
+            for item in closed_trades
+            if _policy_context_bucket_name(item) == bucket_name
+        ]
+        snapshots[bucket_name] = _policy_context_bucket_snapshot(
+            run_dir=run_dir,
+            bucket_name=bucket_name,
+            decisions=bucket_decisions,
+            closed_trades=bucket_closed_trades,
+        )
+    return snapshots
 
 
 def _build_micro_live_gate(*, live_order_count: int, rejected_live_order_count: int, avg_slippage_bps: float, avg_realized_edge_bps: float, closed_trade_count: int) -> dict[str, object]:
@@ -960,6 +1086,110 @@ def _aggregate_pruning_recommendations(
             str(item.get("symbol", "")),
         ),
     )
+
+
+def _policy_context_bucket_run_snapshots(
+    *,
+    run_snapshots: list[dict[str, object]],
+    bucket_name: str,
+) -> list[dict[str, object]]:
+    bucket_runs: list[dict[str, object]] = []
+    for snapshot in run_snapshots:
+        bucket_payload = dict(dict(snapshot.get("policy_context_buckets", {}) or {}).get(bucket_name, {}) or {})
+        if not bool(bucket_payload.get("available")):
+            continue
+        bucket_runs.append(
+            {
+                "run_id": str(snapshot.get("run_id", "") or ""),
+                "run_dir": str(snapshot.get("run_dir", "") or ""),
+                "generated_at": str(snapshot.get("generated_at", "") or ""),
+                "policy_lineage": dict(bucket_payload.get("policy_lineage", {}) or {}),
+                "decision_count": _safe_int(bucket_payload.get("decision_count")),
+                "closed_trade_count": _safe_int(bucket_payload.get("closed_trade_count")),
+                "realized_pnl_usd": round(_safe_float(bucket_payload.get("realized_pnl_usd")), 6),
+                "live_order_count": 0,
+                "accepted_live_order_count": 0,
+                "rejected_live_order_count": 0,
+                "tested_order_count": 0,
+                "avg_slippage_bps": 0.0,
+                "avg_edge_retention_ratio": 0.0,
+                "avg_realized_edge_bps": 0.0,
+                "avg_expected_edge_bps": 0.0,
+                "reject_rate": 0.0,
+                "protection_degraded_rate": 0.0,
+                "walk_forward": [dict(item) for item in list(bucket_payload.get("walk_forward", []) or [])],
+                "symbol_expectancy": [dict(item) for item in list(bucket_payload.get("symbol_expectancy", []) or [])],
+                "regime_performance": [dict(item) for item in list(bucket_payload.get("regime_performance", []) or [])],
+                "score_bucket_performance": [dict(item) for item in list(bucket_payload.get("score_bucket_performance", []) or [])],
+                "pruning_recommendations": [dict(item) for item in list(bucket_payload.get("pruning_recommendations", []) or [])],
+            }
+        )
+    return bucket_runs
+
+
+def _policy_context_bucket_direct_evidence(
+    *,
+    base_dir: str | Path,
+    lookback_days: int,
+    generated_at: str,
+    run_snapshots: list[dict[str, object]],
+    bucket_name: str,
+) -> dict[str, object]:
+    bucket_runs = _policy_context_bucket_run_snapshots(run_snapshots=run_snapshots, bucket_name=bucket_name)
+    if not bucket_runs:
+        return {}
+    aggregated = _aggregate_weekly_validation_from_run_snapshots(
+        base_dir=base_dir,
+        run_snapshots=bucket_runs,
+        lookback_days=lookback_days,
+        generated_at=generated_at,
+    )
+    walk_forward_windows = [
+        dict(window)
+        for snapshot in bucket_runs
+        for window in list(snapshot.get("walk_forward", []) or [])
+    ]
+    positive_walk_forward_count = sum(
+        1
+        for window in walk_forward_windows
+        if _safe_float(window.get("avg_net_edge_bps")) > 0.0 and _safe_float(window.get("avg_score")) >= 0.0
+    )
+    pruning_recommendations = _aggregate_pruning_recommendations(bucket_runs)
+    return {
+        "policy_context_bucket_name": bucket_name,
+        "policy_context_bucket_source": "decision_closed_trade_logs",
+        "policy_context_bucket_available": True,
+        "policy_context_bucket_run_count": len(bucket_runs),
+        "policy_context_bucket_decision_count": sum(_safe_int(item.get("decision_count")) for item in bucket_runs),
+        "policy_context_bucket_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+        "policy_context_bucket_total_realized_pnl_usd": aggregated.get("total_realized_pnl_usd", 0.0),
+        "policy_context_bucket_walk_forward_window_count": len(walk_forward_windows),
+        "policy_context_bucket_positive_walk_forward_ratio": round(
+            _safe_ratio(positive_walk_forward_count, len(walk_forward_windows)),
+            6,
+        ),
+        "policy_context_bucket_validation_runs": bucket_runs,
+        "policy_context_bucket_walk_forward_windows": walk_forward_windows,
+        "policy_context_bucket_symbol_summary": list(aggregated.get("symbol_summary", []) or []),
+        "policy_context_bucket_score_alignment_summary": list(aggregated.get("score_alignment_summary", []) or []),
+        "policy_context_bucket_regime_summary": list(aggregated.get("regime_summary", []) or []),
+        "policy_context_bucket_pruning_recommendations": pruning_recommendations,
+        "run_count": len(bucket_runs),
+        "total_closed_trade_count": aggregated.get("total_closed_trade_count", 0),
+        "runner_total_realized_pnl_usd": aggregated.get("total_realized_pnl_usd", 0.0),
+        "runner_walk_forward_window_count": len(walk_forward_windows),
+        "runner_positive_walk_forward_window_count": positive_walk_forward_count,
+        "runner_positive_walk_forward_ratio": round(
+            _safe_ratio(positive_walk_forward_count, len(walk_forward_windows)),
+            6,
+        ),
+        "symbol_summary": list(aggregated.get("symbol_summary", []) or []),
+        "symbol_scorecard": list(aggregated.get("symbol_scorecard", []) or []),
+        "score_alignment_summary": list(aggregated.get("score_alignment_summary", []) or []),
+        "regime_summary": list(aggregated.get("regime_summary", []) or []),
+        "pruning_recommendations": pruning_recommendations,
+        "walk_forward_windows": walk_forward_windows,
+    }
 
 
 def _compare_runtime_evidence(*, candidate_evidence: dict[str, Any], current_evidence: dict[str, Any]) -> dict[str, object]:
@@ -2952,6 +3182,13 @@ def build_policy_comparison_validation_artifact(*,
         run_snapshots=raw_validation_runs,
         active_policy_lineage=current_active_lineage,
     )
+    current_policy_direct_bucket_evidence = _policy_context_bucket_direct_evidence(
+        base_dir=base_dir,
+        lookback_days=lookback_days,
+        generated_at=str(raw_runner.get("generated_at", datetime.now(UTC).isoformat()) or datetime.now(UTC).isoformat()),
+        run_snapshots=filtered_validation_runs,
+        bucket_name="active_policy",
+    )
     runner = _build_policy_validation_runner_from_run_snapshots(
         base_dir=base_dir,
         run_snapshots=filtered_validation_runs,
@@ -2978,6 +3215,11 @@ def build_policy_comparison_validation_artifact(*,
         if bool(current_evidence_lineage_alignment.get("aligned"))
         else {}
     )
+    if current_policy_direct_bucket_evidence:
+        current_policy_evidence_for_comparison = {
+            **dict(current_policy_evidence_for_comparison or {}),
+            **current_policy_direct_bucket_evidence,
+        }
     runtime_comparison = _compare_runtime_evidence(
         candidate_evidence=runner_evidence,
         current_evidence=current_policy_evidence_for_comparison,
