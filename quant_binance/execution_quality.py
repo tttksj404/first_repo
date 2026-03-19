@@ -75,6 +75,16 @@ def _quality_scale(value: float, *, start: float, span: float, cap: float) -> fl
     return _clamp((value - start) / span, 0.0, 1.0) * cap
 
 
+def _edge_retention_ratio(realized_edge_bps: float | None, expected_edge_bps: float | None) -> float | None:
+    if realized_edge_bps is None or expected_edge_bps is None:
+        return None
+    baseline = max(float(expected_edge_bps), 0.0)
+    if baseline <= 0.0:
+        return None
+    retained = max(float(realized_edge_bps), 0.0)
+    return round(_clamp(retained / max(baseline, 0.1), 0.0, 1.5), 6)
+
+
 def _normalize_scope_value(value: str | None) -> str:
     return str(value or "").strip().lower()
 
@@ -111,24 +121,30 @@ class ExecutionQualityMetrics:
     partial_fills: int = 0
     rejects: int = 0
     timeouts: int = 0
+    protection_degraded: int = 0
     avg_slippage_bps: float = 0.0
     avg_fill_ratio: float = 1.0
     avg_realized_edge_bps: float = 0.0
+    avg_edge_retention_ratio: float = 1.0
     last_updated_time: str = ""
     slippage_sample_count: int = 0
     fill_ratio_sample_count: int = 0
     realized_edge_sample_count: int = 0
+    edge_retention_sample_count: int = 0
     weighted_attempts: float = 0.0
     weighted_fills: float = 0.0
     weighted_partial_fills: float = 0.0
     weighted_rejects: float = 0.0
     weighted_timeouts: float = 0.0
+    weighted_protection_degraded: float = 0.0
     weighted_slippage_sum: float = 0.0
     weighted_fill_ratio_sum: float = 0.0
     weighted_realized_edge_sum: float = 0.0
+    weighted_edge_retention_sum: float = 0.0
     weighted_slippage_samples: float = 0.0
     weighted_fill_ratio_samples: float = 0.0
     weighted_realized_edge_samples: float = 0.0
+    weighted_edge_retention_samples: float = 0.0
 
     @classmethod
     def from_dict(cls, payload: dict[str, object] | None) -> "ExecutionQualityMetrics":
@@ -140,24 +156,30 @@ class ExecutionQualityMetrics:
             partial_fills=_safe_int(payload.get("partial_fills")),
             rejects=_safe_int(payload.get("rejects")),
             timeouts=_safe_int(payload.get("timeouts")),
+            protection_degraded=_safe_int(payload.get("protection_degraded")),
             avg_slippage_bps=_safe_float(payload.get("avg_slippage_bps")),
             avg_fill_ratio=_safe_float(payload.get("avg_fill_ratio"), 1.0),
             avg_realized_edge_bps=_safe_float(payload.get("avg_realized_edge_bps")),
+            avg_edge_retention_ratio=_safe_float(payload.get("avg_edge_retention_ratio"), 1.0),
             last_updated_time=str(payload.get("last_updated_time") or ""),
             slippage_sample_count=_safe_int(payload.get("slippage_sample_count")),
             fill_ratio_sample_count=_safe_int(payload.get("fill_ratio_sample_count")),
             realized_edge_sample_count=_safe_int(payload.get("realized_edge_sample_count")),
+            edge_retention_sample_count=_safe_int(payload.get("edge_retention_sample_count")),
             weighted_attempts=_safe_float(payload.get("weighted_attempts")),
             weighted_fills=_safe_float(payload.get("weighted_fills")),
             weighted_partial_fills=_safe_float(payload.get("weighted_partial_fills")),
             weighted_rejects=_safe_float(payload.get("weighted_rejects")),
             weighted_timeouts=_safe_float(payload.get("weighted_timeouts")),
+            weighted_protection_degraded=_safe_float(payload.get("weighted_protection_degraded")),
             weighted_slippage_sum=_safe_float(payload.get("weighted_slippage_sum")),
             weighted_fill_ratio_sum=_safe_float(payload.get("weighted_fill_ratio_sum")),
             weighted_realized_edge_sum=_safe_float(payload.get("weighted_realized_edge_sum")),
+            weighted_edge_retention_sum=_safe_float(payload.get("weighted_edge_retention_sum")),
             weighted_slippage_samples=_safe_float(payload.get("weighted_slippage_samples")),
             weighted_fill_ratio_samples=_safe_float(payload.get("weighted_fill_ratio_samples")),
             weighted_realized_edge_samples=_safe_float(payload.get("weighted_realized_edge_samples")),
+            weighted_edge_retention_samples=_safe_float(payload.get("weighted_edge_retention_samples")),
         )
 
     def as_dict(self) -> dict[str, object]:
@@ -167,24 +189,30 @@ class ExecutionQualityMetrics:
             "partial_fills": self.partial_fills,
             "rejects": self.rejects,
             "timeouts": self.timeouts,
+            "protection_degraded": self.protection_degraded,
             "avg_slippage_bps": round(self.avg_slippage_bps, 6),
             "avg_fill_ratio": round(self.avg_fill_ratio, 6),
             "avg_realized_edge_bps": round(self.avg_realized_edge_bps, 6),
+            "avg_edge_retention_ratio": round(self.avg_edge_retention_ratio, 6),
             "last_updated_time": self.last_updated_time,
             "slippage_sample_count": self.slippage_sample_count,
             "fill_ratio_sample_count": self.fill_ratio_sample_count,
             "realized_edge_sample_count": self.realized_edge_sample_count,
+            "edge_retention_sample_count": self.edge_retention_sample_count,
             "weighted_attempts": round(self.weighted_attempts, 6),
             "weighted_fills": round(self.weighted_fills, 6),
             "weighted_partial_fills": round(self.weighted_partial_fills, 6),
             "weighted_rejects": round(self.weighted_rejects, 6),
             "weighted_timeouts": round(self.weighted_timeouts, 6),
+            "weighted_protection_degraded": round(self.weighted_protection_degraded, 6),
             "weighted_slippage_sum": round(self.weighted_slippage_sum, 6),
             "weighted_fill_ratio_sum": round(self.weighted_fill_ratio_sum, 6),
             "weighted_realized_edge_sum": round(self.weighted_realized_edge_sum, 6),
+            "weighted_edge_retention_sum": round(self.weighted_edge_retention_sum, 6),
             "weighted_slippage_samples": round(self.weighted_slippage_samples, 6),
             "weighted_fill_ratio_samples": round(self.weighted_fill_ratio_samples, 6),
             "weighted_realized_edge_samples": round(self.weighted_realized_edge_samples, 6),
+            "weighted_edge_retention_samples": round(self.weighted_edge_retention_samples, 6),
         }
 
 
@@ -194,9 +222,11 @@ class EffectiveExecutionQualityMetrics:
     avg_slippage_bps: float = 0.0
     avg_fill_ratio: float = 1.0
     avg_realized_edge_bps: float = 0.0
+    avg_edge_retention_ratio: float = 1.0
     reject_rate: float = 0.0
     timeout_rate: float = 0.0
     partial_fill_rate: float = 0.0
+    protection_degraded_rate: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -205,14 +235,19 @@ class ExecutionQualityOverlay:
     raw_sample_size: int = 0
     effective_sample_size: float = 0.0
     size_multiplier: float = 1.0
+    leverage_multiplier: float = 1.0
     edge_penalty_bps: float = 0.0
+    entry_threshold_bps: float = 0.0
+    expected_profit_floor_bps: float = 0.0
     trade_restraint: str = "none"
     avg_slippage_bps: float = 0.0
     avg_fill_ratio: float = 1.0
     avg_realized_edge_bps: float = 0.0
+    avg_edge_retention_ratio: float = 1.0
     reject_rate: float = 0.0
     timeout_rate: float = 0.0
     partial_fill_rate: float = 0.0
+    protection_degraded_rate: float = 0.0
     scope_key: str = ""
     symbol: str = ""
     market: str = ""
@@ -226,14 +261,19 @@ class ExecutionQualityOverlay:
             "raw_sample_size": self.raw_sample_size,
             "effective_sample_size": round(self.effective_sample_size, 6),
             "size_multiplier": round(self.size_multiplier, 6),
+            "leverage_multiplier": round(self.leverage_multiplier, 6),
             "edge_penalty_bps": round(self.edge_penalty_bps, 6),
+            "entry_threshold_bps": round(self.entry_threshold_bps, 6),
+            "expected_profit_floor_bps": round(self.expected_profit_floor_bps, 6),
             "trade_restraint": self.trade_restraint,
             "avg_slippage_bps": round(self.avg_slippage_bps, 6),
             "avg_fill_ratio": round(self.avg_fill_ratio, 6),
             "avg_realized_edge_bps": round(self.avg_realized_edge_bps, 6),
+            "avg_edge_retention_ratio": round(self.avg_edge_retention_ratio, 6),
             "reject_rate": round(self.reject_rate, 6),
             "timeout_rate": round(self.timeout_rate, 6),
             "partial_fill_rate": round(self.partial_fill_rate, 6),
+            "protection_degraded_rate": round(self.protection_degraded_rate, 6),
             "scope_key": self.scope_key,
             "symbol": self.symbol,
             "market": self.market,
@@ -296,12 +336,15 @@ class ExecutionQualityState:
             weighted_partial_fills=float(metrics.partial_fills),
             weighted_rejects=float(metrics.rejects),
             weighted_timeouts=float(metrics.timeouts),
+            weighted_protection_degraded=float(metrics.protection_degraded),
             weighted_slippage_sum=float(metrics.avg_slippage_bps * metrics.slippage_sample_count),
             weighted_fill_ratio_sum=float(metrics.avg_fill_ratio * metrics.fill_ratio_sample_count),
             weighted_realized_edge_sum=float(metrics.avg_realized_edge_bps * metrics.realized_edge_sample_count),
+            weighted_edge_retention_sum=float(metrics.avg_edge_retention_ratio * metrics.edge_retention_sample_count),
             weighted_slippage_samples=float(metrics.slippage_sample_count),
             weighted_fill_ratio_samples=float(metrics.fill_ratio_sample_count),
             weighted_realized_edge_samples=float(metrics.realized_edge_sample_count),
+            weighted_edge_retention_samples=float(metrics.edge_retention_sample_count),
         )
 
     def _decayed_metrics(
@@ -321,12 +364,15 @@ class ExecutionQualityState:
             weighted_partial_fills=hydrated.weighted_partial_fills * factor,
             weighted_rejects=hydrated.weighted_rejects * factor,
             weighted_timeouts=hydrated.weighted_timeouts * factor,
+            weighted_protection_degraded=hydrated.weighted_protection_degraded * factor,
             weighted_slippage_sum=hydrated.weighted_slippage_sum * factor,
             weighted_fill_ratio_sum=hydrated.weighted_fill_ratio_sum * factor,
             weighted_realized_edge_sum=hydrated.weighted_realized_edge_sum * factor,
+            weighted_edge_retention_sum=hydrated.weighted_edge_retention_sum * factor,
             weighted_slippage_samples=hydrated.weighted_slippage_samples * factor,
             weighted_fill_ratio_samples=hydrated.weighted_fill_ratio_samples * factor,
             weighted_realized_edge_samples=hydrated.weighted_realized_edge_samples * factor,
+            weighted_edge_retention_samples=hydrated.weighted_edge_retention_samples * factor,
         )
 
     def _effective_metrics(
@@ -340,6 +386,7 @@ class ExecutionQualityState:
         slippage_samples = max(decayed.weighted_slippage_samples, 0.0)
         fill_ratio_samples = max(decayed.weighted_fill_ratio_samples, 0.0)
         realized_edge_samples = max(decayed.weighted_realized_edge_samples, 0.0)
+        edge_retention_samples = max(decayed.weighted_edge_retention_samples, 0.0)
         return EffectiveExecutionQualityMetrics(
             effective_sample_size=attempts,
             avg_slippage_bps=(
@@ -357,9 +404,15 @@ class ExecutionQualityState:
                 if realized_edge_samples > 0.0
                 else metrics.avg_realized_edge_bps
             ),
+            avg_edge_retention_ratio=(
+                decayed.weighted_edge_retention_sum / edge_retention_samples
+                if edge_retention_samples > 0.0
+                else metrics.avg_edge_retention_ratio
+            ),
             reject_rate=decayed.weighted_rejects / attempts if attempts > 0.0 else 0.0,
             timeout_rate=decayed.weighted_timeouts / attempts if attempts > 0.0 else 0.0,
             partial_fill_rate=decayed.weighted_partial_fills / attempts if attempts > 0.0 else 0.0,
+            protection_degraded_rate=decayed.weighted_protection_degraded / attempts if attempts > 0.0 else 0.0,
         )
 
     def _context_metrics_for(
@@ -400,9 +453,11 @@ class ExecutionQualityState:
                 avg_slippage_bps=effective.avg_slippage_bps,
                 avg_fill_ratio=effective.avg_fill_ratio,
                 avg_realized_edge_bps=effective.avg_realized_edge_bps,
+                avg_edge_retention_ratio=effective.avg_edge_retention_ratio,
                 reject_rate=effective.reject_rate,
                 timeout_rate=effective.timeout_rate,
                 partial_fill_rate=effective.partial_fill_rate,
+                protection_degraded_rate=effective.protection_degraded_rate,
                 scope_key=scope_key,
                 symbol=symbol,
                 market=market,
@@ -413,6 +468,7 @@ class ExecutionQualityState:
         reject_timeout_rate = effective.reject_rate + effective.timeout_rate
         fill_ratio_gap = max(1.0 - effective.avg_fill_ratio, 0.0)
         negative_edge_bps = max(-effective.avg_realized_edge_bps, 0.0)
+        retention_gap = max(0.75 - effective.avg_edge_retention_ratio, 0.0)
 
         size_reduction = 0.0
         size_reduction += _quality_scale(reject_timeout_rate, start=0.12, span=0.48, cap=0.40)
@@ -420,6 +476,8 @@ class ExecutionQualityState:
         size_reduction += _quality_scale(effective.partial_fill_rate, start=0.18, span=0.42, cap=0.18)
         size_reduction += _quality_scale(effective.avg_slippage_bps, start=5.0, span=15.0, cap=0.22)
         size_reduction += _quality_scale(negative_edge_bps, start=0.5, span=5.5, cap=0.15)
+        size_reduction += _quality_scale(retention_gap, start=0.15, span=0.6, cap=0.16)
+        size_reduction += _quality_scale(effective.protection_degraded_rate, start=0.18, span=0.52, cap=0.18)
         size_multiplier = _clamp(1.0 - size_reduction, 0.0, 1.0)
         if effective.avg_fill_ratio < 0.85 or effective.partial_fill_rate >= 0.35:
             size_multiplier = min(size_multiplier, 0.8)
@@ -431,6 +489,19 @@ class ExecutionQualityState:
             or effective.partial_fill_rate >= 0.5
         ):
             size_multiplier = min(size_multiplier, 0.6)
+        if effective.protection_degraded_rate >= 0.35 or effective.avg_edge_retention_ratio < 0.35:
+            size_multiplier = min(size_multiplier, 0.7)
+
+        leverage_reduction = 0.0
+        leverage_reduction += _quality_scale(reject_timeout_rate, start=0.15, span=0.45, cap=0.25)
+        leverage_reduction += _quality_scale(effective.avg_slippage_bps, start=6.0, span=14.0, cap=0.12)
+        leverage_reduction += _quality_scale(retention_gap, start=0.15, span=0.6, cap=0.18)
+        leverage_reduction += _quality_scale(effective.protection_degraded_rate, start=0.18, span=0.52, cap=0.16)
+        leverage_multiplier = _clamp(1.0 - leverage_reduction, 0.55, 1.0)
+        if effective.protection_degraded_rate >= 0.35 or retention_gap >= 0.4:
+            leverage_multiplier = min(leverage_multiplier, 0.75)
+        if reject_timeout_rate >= 0.4 or effective.avg_slippage_bps > 14.0:
+            leverage_multiplier = min(leverage_multiplier, 0.7)
 
         edge_penalty_bps = 0.0
         edge_penalty_bps += _quality_scale(reject_timeout_rate, start=0.1, span=0.5, cap=6.0)
@@ -446,12 +517,34 @@ class ExecutionQualityState:
             edge_penalty_bps = max(edge_penalty_bps, min(abs(effective.avg_realized_edge_bps), 4.0))
         edge_penalty_bps = round(min(edge_penalty_bps, 8.0), 6)
 
+        entry_threshold_bps = 0.0
+        entry_threshold_bps += _quality_scale(reject_timeout_rate, start=0.18, span=0.42, cap=10.0)
+        entry_threshold_bps += _quality_scale(effective.avg_slippage_bps, start=7.0, span=13.0, cap=8.0)
+        entry_threshold_bps += _quality_scale(retention_gap, start=0.18, span=0.57, cap=6.0)
+        entry_threshold_bps += _quality_scale(effective.protection_degraded_rate, start=0.2, span=0.5, cap=10.0)
+        if effective.avg_fill_ratio < 0.8 or effective.partial_fill_rate >= 0.3:
+            entry_threshold_bps = max(entry_threshold_bps, 6.0)
+        entry_threshold_bps = round(min(entry_threshold_bps, 30.0), 6)
+
+        expected_profit_floor_bps = 0.0
+        expected_profit_floor_bps += _quality_scale(reject_timeout_rate, start=0.12, span=0.48, cap=22.0)
+        expected_profit_floor_bps += _quality_scale(effective.avg_slippage_bps, start=6.0, span=14.0, cap=12.0)
+        expected_profit_floor_bps += _quality_scale(retention_gap, start=0.15, span=0.6, cap=12.0)
+        expected_profit_floor_bps += _quality_scale(effective.protection_degraded_rate, start=0.18, span=0.52, cap=16.0)
+        if effective.avg_realized_edge_bps < 0.0:
+            expected_profit_floor_bps = max(
+                expected_profit_floor_bps,
+                min(abs(effective.avg_realized_edge_bps) * 6.0, 18.0),
+            )
+        expected_profit_floor_bps = round(min(expected_profit_floor_bps, 60.0), 6)
+
         trade_restraint = "none"
         if (
             reject_timeout_rate >= 0.6
             or effective.avg_fill_ratio < 0.35
             or effective.avg_slippage_bps > 20.0
             or (effective_attempts >= 5.0 and effective.avg_realized_edge_bps < -2.0)
+            or (effective_attempts >= 5.0 and effective.protection_degraded_rate >= 0.75)
         ):
             trade_restraint = "execution_quality_halt"
             size_multiplier = 0.0
@@ -460,20 +553,28 @@ class ExecutionQualityState:
             trade_restraint != "none"
             or size_multiplier < 0.999999
             or edge_penalty_bps > 0.0
+            or leverage_multiplier < 0.999999
+            or entry_threshold_bps > 0.0
+            or expected_profit_floor_bps > 0.0
         )
         return ExecutionQualityOverlay(
             sample_size=rounded_sample_size,
             raw_sample_size=max(metrics.attempts, 0),
             effective_sample_size=effective_attempts,
             size_multiplier=round(size_multiplier, 6),
+            leverage_multiplier=round(leverage_multiplier, 6),
             edge_penalty_bps=edge_penalty_bps,
+            entry_threshold_bps=entry_threshold_bps,
+            expected_profit_floor_bps=expected_profit_floor_bps,
             trade_restraint=trade_restraint,
             avg_slippage_bps=effective.avg_slippage_bps,
             avg_fill_ratio=effective.avg_fill_ratio,
             avg_realized_edge_bps=effective.avg_realized_edge_bps,
+            avg_edge_retention_ratio=effective.avg_edge_retention_ratio,
             reject_rate=effective.reject_rate,
             timeout_rate=effective.timeout_rate,
             partial_fill_rate=effective.partial_fill_rate,
+            protection_degraded_rate=effective.protection_degraded_rate,
             scope_key=scope_key,
             symbol=symbol,
             market=market,
@@ -543,14 +644,19 @@ class ExecutionQualityState:
         annotated = {
             "execution_quality_sample_size": overlay.sample_size,
             "execution_quality_size_multiplier": overlay.size_multiplier,
+            "execution_quality_leverage_multiplier": overlay.leverage_multiplier,
             "execution_quality_edge_penalty_bps": overlay.edge_penalty_bps,
+            "execution_quality_entry_threshold_bps": overlay.entry_threshold_bps,
+            "execution_quality_expected_profit_floor_bps": overlay.expected_profit_floor_bps,
             "execution_quality_trade_restraint": overlay.trade_restraint,
             "execution_quality_avg_slippage_bps": overlay.avg_slippage_bps,
             "execution_quality_avg_fill_ratio": overlay.avg_fill_ratio,
             "execution_quality_avg_realized_edge_bps": overlay.avg_realized_edge_bps,
+            "execution_quality_avg_edge_retention_ratio": overlay.avg_edge_retention_ratio,
             "execution_quality_reject_rate": overlay.reject_rate,
             "execution_quality_timeout_rate": overlay.timeout_rate,
             "execution_quality_partial_fill_rate": overlay.partial_fill_rate,
+            "execution_quality_protection_degraded_rate": overlay.protection_degraded_rate,
         }
         if decision.final_mode not in {"spot", "futures"} or decision.order_intent_notional_usd <= 0.0:
             return DecisionIntent(**(asdict(decision) | annotated))
@@ -601,10 +707,13 @@ class ExecutionQualityState:
         fill_ratio: float,
         slippage_bps: float | None,
         realized_edge_bps: float | None,
+        expected_edge_bps: float | None,
+        protection_degraded: bool,
         timestamp: datetime,
     ) -> ExecutionQualityMetrics:
         normalized_fill_ratio = _clamp(fill_ratio, 0.0, 1.0)
         normalized_slippage_bps = max(slippage_bps or 0.0, 0.0)
+        edge_retention_ratio = _edge_retention_ratio(realized_edge_bps, expected_edge_bps)
         decayed = self._decayed_metrics(metrics, now=timestamp)
         return ExecutionQualityMetrics(
             attempts=metrics.attempts + 1,
@@ -612,6 +721,7 @@ class ExecutionQualityState:
             partial_fills=metrics.partial_fills + (1 if outcome == "partial_fill" else 0),
             rejects=metrics.rejects + (1 if outcome == "reject" else 0),
             timeouts=metrics.timeouts + (1 if outcome == "timeout" else 0),
+            protection_degraded=metrics.protection_degraded + (1 if protection_degraded else 0),
             avg_slippage_bps=(
                 _running_average(metrics.avg_slippage_bps, metrics.slippage_sample_count, normalized_slippage_bps)
                 if slippage_bps is not None
@@ -631,15 +741,26 @@ class ExecutionQualityState:
                 if realized_edge_bps is not None
                 else metrics.avg_realized_edge_bps
             ),
+            avg_edge_retention_ratio=(
+                _running_average(
+                    metrics.avg_edge_retention_ratio,
+                    metrics.edge_retention_sample_count,
+                    edge_retention_ratio,
+                )
+                if edge_retention_ratio is not None
+                else metrics.avg_edge_retention_ratio
+            ),
             last_updated_time=timestamp.isoformat(),
             slippage_sample_count=metrics.slippage_sample_count + (1 if slippage_bps is not None else 0),
             fill_ratio_sample_count=metrics.fill_ratio_sample_count + 1,
             realized_edge_sample_count=metrics.realized_edge_sample_count + (1 if realized_edge_bps is not None else 0),
+            edge_retention_sample_count=metrics.edge_retention_sample_count + (1 if edge_retention_ratio is not None else 0),
             weighted_attempts=decayed.weighted_attempts + 1.0,
             weighted_fills=decayed.weighted_fills + (1.0 if outcome == "filled" else 0.0),
             weighted_partial_fills=decayed.weighted_partial_fills + (1.0 if outcome == "partial_fill" else 0.0),
             weighted_rejects=decayed.weighted_rejects + (1.0 if outcome == "reject" else 0.0),
             weighted_timeouts=decayed.weighted_timeouts + (1.0 if outcome == "timeout" else 0.0),
+            weighted_protection_degraded=decayed.weighted_protection_degraded + (1.0 if protection_degraded else 0.0),
             weighted_slippage_sum=(
                 decayed.weighted_slippage_sum + normalized_slippage_bps
                 if slippage_bps is not None
@@ -651,10 +772,18 @@ class ExecutionQualityState:
                 if realized_edge_bps is not None
                 else decayed.weighted_realized_edge_sum
             ),
+            weighted_edge_retention_sum=(
+                decayed.weighted_edge_retention_sum + float(edge_retention_ratio)
+                if edge_retention_ratio is not None
+                else decayed.weighted_edge_retention_sum
+            ),
             weighted_slippage_samples=decayed.weighted_slippage_samples + (1.0 if slippage_bps is not None else 0.0),
             weighted_fill_ratio_samples=decayed.weighted_fill_ratio_samples + 1.0,
             weighted_realized_edge_samples=(
                 decayed.weighted_realized_edge_samples + (1.0 if realized_edge_bps is not None else 0.0)
+            ),
+            weighted_edge_retention_samples=(
+                decayed.weighted_edge_retention_samples + (1.0 if edge_retention_ratio is not None else 0.0)
             ),
         )
 
@@ -666,6 +795,8 @@ class ExecutionQualityState:
         fill_ratio: float,
         slippage_bps: float | None,
         realized_edge_bps: float | None,
+        expected_edge_bps: float | None = None,
+        protection_degraded: bool = False,
         timestamp: datetime | None = None,
         market: str | None = None,
         exchange_id: str | None = None,
@@ -678,6 +809,8 @@ class ExecutionQualityState:
             fill_ratio=fill_ratio,
             slippage_bps=slippage_bps,
             realized_edge_bps=realized_edge_bps,
+            expected_edge_bps=expected_edge_bps,
+            protection_degraded=protection_degraded,
             timestamp=event_time,
         )
         self._symbols[symbol] = updated_symbol_metrics
@@ -690,6 +823,8 @@ class ExecutionQualityState:
                 fill_ratio=fill_ratio,
                 slippage_bps=slippage_bps,
                 realized_edge_bps=realized_edge_bps,
+                expected_edge_bps=expected_edge_bps,
+                protection_degraded=protection_degraded,
                 timestamp=event_time,
             )
         self._persist()

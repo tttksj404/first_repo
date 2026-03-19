@@ -206,14 +206,19 @@ class DecisionIntent:
     macro_symbol_bias: str = "neutral"
     execution_quality_sample_size: int = 0
     execution_quality_size_multiplier: float = 1.0
+    execution_quality_leverage_multiplier: float = 1.0
     execution_quality_edge_penalty_bps: float = 0.0
+    execution_quality_entry_threshold_bps: float = 0.0
+    execution_quality_expected_profit_floor_bps: float = 0.0
     execution_quality_trade_restraint: str = "none"
     execution_quality_avg_slippage_bps: float = 0.0
     execution_quality_avg_fill_ratio: float = 1.0
     execution_quality_avg_realized_edge_bps: float = 0.0
+    execution_quality_avg_edge_retention_ratio: float = 1.0
     execution_quality_reject_rate: float = 0.0
     execution_quality_timeout_rate: float = 0.0
     execution_quality_partial_fill_rate: float = 0.0
+    execution_quality_protection_degraded_rate: float = 0.0
     linked_order_ids: tuple[str, ...] = field(default_factory=tuple)
     rejection_reasons: tuple[str, ...] = field(default_factory=tuple)
     exit_reason_code: str = ""
