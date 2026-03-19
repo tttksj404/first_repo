@@ -287,6 +287,79 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         self.assertEqual(futures_bitget.execution_quality_trade_restraint, "none")
         self.assertEqual(futures_bitget.execution_quality_sample_size, 0)
 
+    def test_overlay_tightens_runtime_thresholds_for_retention_and_protection_degradation(self) -> None:
+        state = ExecutionQualityState()
+        base = datetime(2026, 3, 16, 3, 30, tzinfo=timezone.utc)
+        for minute in range(4):
+            state.record(
+                symbol="BTCUSDT",
+                outcome="filled",
+                fill_ratio=1.0,
+                slippage_bps=9.0,
+                realized_edge_bps=3.0,
+                expected_edge_bps=18.0,
+                protection_degraded=True,
+                timestamp=base + timedelta(minutes=minute),
+                market="futures",
+                exchange_id="binance",
+            )
+
+        throttled = state.apply_overlay(
+            make_decision(timestamp=base + timedelta(minutes=10)),
+            exchange_id="binance",
+            now=base + timedelta(minutes=10),
+        )
+
+        self.assertEqual(throttled.final_mode, "futures")
+        self.assertLess(throttled.execution_quality_leverage_multiplier, 1.0)
+        self.assertGreater(throttled.execution_quality_expected_profit_floor_bps, 0.0)
+        self.assertGreater(throttled.execution_quality_entry_threshold_bps, 0.0)
+        self.assertLess(throttled.execution_quality_avg_edge_retention_ratio, 0.5)
+        self.assertGreater(throttled.execution_quality_protection_degraded_rate, 0.0)
+
+    def test_overlay_degrades_only_target_symbol_and_keeps_other_major_symbol_healthy(self) -> None:
+        state = ExecutionQualityState()
+        base = datetime(2026, 3, 16, 3, 45, tzinfo=timezone.utc)
+        for minute in range(4):
+            state.record(
+                symbol="BTCUSDT",
+                outcome="timeout",
+                fill_ratio=0.0,
+                slippage_bps=None,
+                realized_edge_bps=0.0,
+                expected_edge_bps=18.0,
+                timestamp=base + timedelta(minutes=minute),
+                market="futures",
+                exchange_id="binance",
+            )
+            state.record(
+                symbol="ETHUSDT",
+                outcome="filled",
+                fill_ratio=1.0,
+                slippage_bps=1.0,
+                realized_edge_bps=16.0,
+                expected_edge_bps=18.0,
+                timestamp=base + timedelta(minutes=minute),
+                market="futures",
+                exchange_id="binance",
+            )
+
+        degraded_btc = state.apply_overlay(
+            make_decision(timestamp=base + timedelta(minutes=10), symbol="BTCUSDT"),
+            exchange_id="binance",
+            now=base + timedelta(minutes=10),
+        )
+        healthy_eth = state.apply_overlay(
+            make_decision(timestamp=base + timedelta(minutes=10), symbol="ETHUSDT"),
+            exchange_id="binance",
+            now=base + timedelta(minutes=10),
+        )
+
+        self.assertEqual(degraded_btc.final_mode, "cash")
+        self.assertEqual(healthy_eth.final_mode, "futures")
+        self.assertEqual(healthy_eth.execution_quality_trade_restraint, "none")
+        self.assertEqual(healthy_eth.execution_quality_size_multiplier, 1.0)
+
     def test_state_persists_and_reloads_market_exchange_buckets(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             path = Path(tempdir) / "execution_quality_state.json"
