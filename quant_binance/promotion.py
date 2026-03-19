@@ -48,7 +48,11 @@ def _runtime_profile_config() -> dict[str, Any]:
     return raw
 
 
-def _derived_runtime_overrides(*, pruning_recommendations: list[dict[str, Any]]) -> dict[str, Any]:
+def _derived_runtime_overrides(
+    *,
+    pruning_recommendations: list[dict[str, Any]],
+    symbol_lifecycle: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     base = _runtime_profile_config()
     prune_symbols = {
         str(item.get("symbol"))
@@ -60,6 +64,17 @@ def _derived_runtime_overrides(*, pruning_recommendations: list[dict[str, Any]])
         for item in pruning_recommendations
         if item.get("recommendation") in {"prune", "demote", "observe_only"} and item.get("symbol")
     }
+    for item in list(symbol_lifecycle or []):
+        symbol = str(item.get("symbol", "") or "")
+        target_state = str(item.get("target_state", "baseline") or "baseline")
+        lifecycle_action = str(item.get("recommended_action", "keep") or "keep")
+        if not symbol:
+            continue
+        if target_state == "demoted" and lifecycle_action in {"rollback", "hold"}:
+            prune_symbols.add(symbol)
+            deprioritized_symbols.add(symbol)
+        elif target_state in {"observe_only", "re_review"} or lifecycle_action in {"hold", "re_review"}:
+            deprioritized_symbols.add(symbol)
     overrides: dict[str, Any] = {}
     if prune_symbols:
         universe = [symbol for symbol in base.get("universe", []) if symbol not in prune_symbols]
@@ -122,10 +137,12 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
         payload = json.loads(latest_policy_comparison_path.read_text(encoding="utf-8"))
         judge = dict(payload.get("checkpoint_auto_judge", {}) or {})
         baseline_control_comparison = dict(payload.get("baseline_control_comparison", {}) or {})
+        symbol_lifecycle = list(payload.get("symbol_lifecycle", payload.get("evidence", {}).get("symbol_lifecycle", [])) or [])
         if judge:
             return {
                 "judge": judge,
                 "baseline_control_comparison": baseline_control_comparison,
+                "symbol_lifecycle": symbol_lifecycle,
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
             }
@@ -133,6 +150,7 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
             return {
                 "judge": {},
                 "baseline_control_comparison": baseline_control_comparison,
+                "symbol_lifecycle": symbol_lifecycle,
                 "source_path": str(latest_policy_comparison_path),
                 "source_type": "policy_comparison",
             }
@@ -143,10 +161,12 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
         baseline_control_comparison = dict(
             judge.get("baseline_control_comparison", payload.get("baseline_control_comparison", {})) or {}
         )
+        symbol_lifecycle = list(payload.get("symbol_lifecycle", []) or [])
         if judge:
             return {
                 "judge": judge,
                 "baseline_control_comparison": baseline_control_comparison,
+                "symbol_lifecycle": symbol_lifecycle,
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
             }
@@ -154,10 +174,11 @@ def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
             return {
                 "judge": {},
                 "baseline_control_comparison": baseline_control_comparison,
+                "symbol_lifecycle": symbol_lifecycle,
                 "source_path": str(latest_policy_state_path),
                 "source_type": "policy_state",
             }
-    return {"judge": {}, "baseline_control_comparison": {}, "source_path": "", "source_type": ""}
+    return {"judge": {}, "baseline_control_comparison": {}, "symbol_lifecycle": [], "source_path": "", "source_type": ""}
 
 
 def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[str, Any]:
@@ -180,15 +201,29 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         for item in pruning_recommendations
         if item.get("recommendation") in {"prune", "demote", "observe_only"}
     ]
-    runtime_overrides = _derived_runtime_overrides(pruning_recommendations=pruning_recommendations)
     strategies = comparison.get("strategies") or []
     best_comparison = None
     if strategies:
         best_comparison = max(strategies, key=lambda item: float(item.get("total_pnl_usd", 0.0)))
-    merged_overrides = _deep_merge(best.get("overrides", {}), runtime_overrides)
     checkpoint_judge_context = _load_checkpoint_auto_judge(base_dir=base_dir)
     checkpoint_auto_judge = dict(checkpoint_judge_context.get("judge", {}) or {})
     baseline_control_comparison = dict(checkpoint_judge_context.get("baseline_control_comparison", {}) or {})
+    symbol_lifecycle = list(checkpoint_judge_context.get("symbol_lifecycle", []) or [])
+    lifecycle_block_rows = [
+        dict(item)
+        for item in symbol_lifecycle
+        if str(item.get("recommended_action", "keep") or "keep") in {"rollback", "hold", "re_review"}
+    ]
+    lifecycle_cautious_rows = [
+        dict(item)
+        for item in symbol_lifecycle
+        if str(item.get("recommended_action", "keep") or "keep") == "cautious_repromote"
+    ]
+    runtime_overrides = _derived_runtime_overrides(
+        pruning_recommendations=pruning_recommendations,
+        symbol_lifecycle=symbol_lifecycle,
+    )
+    merged_overrides = _deep_merge(best.get("overrides", {}), runtime_overrides)
     baseline_gate = _simple_baseline_gate_from_comparison(baseline_control_comparison)
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
     proposal_status = _proposal_status_from_gates(
@@ -203,6 +238,7 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         "generated_at": optimization.get("generated_at"),
         "checkpoint_auto_judge": checkpoint_auto_judge,
         "baseline_control_comparison": baseline_control_comparison,
+        "symbol_lifecycle": symbol_lifecycle,
         "supporting_artifacts": {
             "optimization_latest": str(latest),
             "performance_report": str(latest_performance_path) if latest_performance_path else "",
@@ -224,6 +260,16 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
                 dict(baseline_control_comparison.get("best_simple_baseline", {}) or {}).get("strategy_name", "") or ""
             ),
             "risky_symbols": risky_symbols,
+            "lifecycle_blocked_symbols": sorted(
+                str(item.get("symbol", "") or "")
+                for item in lifecycle_block_rows
+                if str(item.get("symbol", "") or "")
+            ),
+            "lifecycle_cautious_repromotion_symbols": sorted(
+                str(item.get("symbol", "") or "")
+                for item in lifecycle_cautious_rows
+                if str(item.get("symbol", "") or "")
+            ),
             "auto_pruned_symbols": sorted(
                 str(symbol)
                 for symbol in merged_overrides.get("universe", [])
@@ -251,6 +297,7 @@ def apply_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "proposal_status": str(proposal.get("status", "") or ""),
             "checkpoint_auto_judge": dict(proposal.get("checkpoint_auto_judge", {}) or {}),
             "baseline_control_comparison": dict(proposal.get("baseline_control_comparison", {}) or {}),
+            "symbol_lifecycle": list(proposal.get("symbol_lifecycle", []) or []),
         }
     overrides = proposal.get("overrides", {})
     paths["approved"].write_text(json.dumps(overrides, indent=2, sort_keys=True), encoding="utf-8")

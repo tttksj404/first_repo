@@ -9,6 +9,7 @@ from pathlib import Path
 from quant_binance.closed_trade_metrics import aggregate_closed_trades as aggregate_closed_trade_metrics
 from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
+from quant_binance.symbol_lifecycle import build_symbol_lifecycle, summarize_symbol_lifecycle
 
 
 def _active_exchange_futures_positions(
@@ -882,6 +883,113 @@ def _apply_cross_symbol_promotion_priority(
     }
 
 
+def _retune_adjustment_for_action(
+    adjustment: dict[str, object],
+    *,
+    action: str,
+    reason: str,
+    lifecycle_row: dict[str, object],
+) -> dict[str, object]:
+    updated = dict(adjustment)
+    updated["action"] = action
+    if action == "demote":
+        updated["size_multiplier"] = round(min(float(updated.get("size_multiplier", 1.0) or 1.0), 0.9), 6)
+        if float(updated["size_multiplier"]) >= 1.0:
+            updated["size_multiplier"] = 0.75
+        updated["leverage_multiplier"] = round(min(float(updated.get("leverage_multiplier", 1.0) or 1.0), float(updated["size_multiplier"])), 6)
+        updated["entry_threshold_bps"] = max(float(updated.get("entry_threshold_bps", 0.0) or 0.0), 1.0)
+        updated["expected_profit_floor_bps"] = max(float(updated.get("expected_profit_floor_bps", 0.0) or 0.0), 1.0)
+        updated["symbol_bias"] = "neutral"
+    elif action == "promote":
+        updated["size_multiplier"] = 1.1
+        updated["leverage_multiplier"] = 1.1
+        updated["entry_threshold_bps"] = -0.5
+        updated["expected_profit_floor_bps"] = -1.0
+        updated["symbol_bias"] = "majors_only" if str(updated.get("regime", "") or "") == "major" else "neutral"
+    updated["reason"] = reason
+    updated["signal_sources"] = sorted(
+        {
+            str(source)
+            for source in list(updated.get("signal_sources", []) or []) + ["symbol_lifecycle"]
+            if str(source)
+        }
+    )
+    signal_contexts = dict(updated.get("signal_contexts", {}) or {})
+    signal_contexts["symbol_lifecycle"] = dict(lifecycle_row)
+    updated["signal_contexts"] = signal_contexts
+    return updated
+
+
+def _apply_symbol_lifecycle_overlay(
+    *,
+    adjustments: list[dict[str, object]],
+    runtime_evidence: dict[str, object] | None,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    lifecycle_rows = [
+        dict(row)
+        for row in list(dict(runtime_evidence or {}).get("symbol_lifecycle", []) or [])
+        if isinstance(row, dict) and str(row.get("symbol", "") or "")
+    ]
+    if not lifecycle_rows:
+        return adjustments, {}
+    lifecycle_by_symbol = {
+        str(row.get("symbol", "") or ""): row
+        for row in lifecycle_rows
+    }
+    adjusted_rows: list[dict[str, object]] = []
+    blocked_symbols: list[str] = []
+    demoted_symbols: list[str] = []
+    cautious_symbols: list[str] = []
+    review_symbols: list[str] = []
+    for adjustment in adjustments:
+        symbol = str(adjustment.get("symbol", "") or "")
+        lifecycle_row = dict(lifecycle_by_symbol.get(symbol, {}) or {})
+        lifecycle_action = str(lifecycle_row.get("recommended_action", "keep") or "keep")
+        current_action = str(adjustment.get("action", "keep") or "keep")
+        if current_action in {"promote", "aggressive_promote"}:
+            if lifecycle_action in {"rollback", "hold"}:
+                if str(lifecycle_row.get("current_state", "baseline") or "baseline") == "promoted":
+                    adjusted_rows.append(
+                        _retune_adjustment_for_action(
+                            adjustment,
+                            action="demote",
+                            reason="SYMBOL_LIFECYCLE_ROLLBACK",
+                            lifecycle_row=lifecycle_row,
+                        )
+                    )
+                    demoted_symbols.append(symbol)
+                else:
+                    blocked_symbols.append(symbol)
+                continue
+            if lifecycle_action == "re_review":
+                review_symbols.append(symbol)
+                blocked_symbols.append(symbol)
+                continue
+            if lifecycle_action == "cautious_repromote" and current_action == "aggressive_promote":
+                adjusted_rows.append(
+                    _retune_adjustment_for_action(
+                        adjustment,
+                        action="promote",
+                        reason="SYMBOL_LIFECYCLE_CAUTIOUS_REPROMOTION",
+                        lifecycle_row=lifecycle_row,
+                    )
+                )
+                cautious_symbols.append(symbol)
+                continue
+        adjusted_rows.append(adjustment)
+    summary = {
+        "applied": bool(blocked_symbols or demoted_symbols or cautious_symbols or review_symbols),
+        "blocked_symbols": sorted(blocked_symbols),
+        "demoted_symbols": sorted(demoted_symbols),
+        "cautious_repromotion_symbols": sorted(cautious_symbols),
+        "re_review_symbols": sorted(review_symbols),
+        "lifecycle_summary": summarize_symbol_lifecycle(lifecycle_rows),
+    }
+    if not summary["applied"]:
+        return adjusted_rows, {}
+    return adjusted_rows, summary
+
+
 def _candidate_generation_summary(
     *,
     runtime_evidence: dict[str, object] | None,
@@ -1110,6 +1218,10 @@ def build_auto_tune_policy(
         adjustments=adjustments,
         runtime_evidence=runtime_evidence,
     )
+    adjustments, lifecycle_overlay_summary = _apply_symbol_lifecycle_overlay(
+        adjustments=adjustments,
+        runtime_evidence=runtime_evidence,
+    )
     policy_status = "insufficient_data" if not adjustments else "candidate_ready"
     signal_sources = sorted(
         {
@@ -1127,6 +1239,8 @@ def build_auto_tune_policy(
         decomposition_summary["sample_quality_watchdog"] = watchdog_overlay_summary
     if promotion_priority_summary:
         decomposition_summary["cross_symbol_promotion_priority"] = promotion_priority_summary
+    if lifecycle_overlay_summary:
+        decomposition_summary["symbol_lifecycle_overlay"] = lifecycle_overlay_summary
     return {
         "status": policy_status,
         "adjustments": adjustments,
@@ -1247,6 +1361,41 @@ def _sample_quality_watchdog_block_reason(comparison_evidence: dict[str, object]
     return ""
 
 
+def _symbol_lifecycle_promotion_signal(
+    *,
+    candidate_policy: dict[str, object],
+    comparison_evidence: dict[str, object] | None,
+) -> dict[str, object]:
+    lifecycle_rows = {
+        str(row.get("symbol", "") or ""): dict(row)
+        for row in list(dict(comparison_evidence or {}).get("symbol_lifecycle", []) or [])
+        if isinstance(row, dict) and str(row.get("symbol", "") or "")
+    }
+    if not lifecycle_rows:
+        return {"blocked_symbols": [], "review_symbols": [], "cautious_symbols": []}
+    blocked_symbols: list[str] = []
+    review_symbols: list[str] = []
+    cautious_symbols: list[str] = []
+    for adjustment in list(candidate_policy.get("adjustments", []) or []):
+        action = str(adjustment.get("action", "") or "")
+        if action not in {"promote", "aggressive_promote"}:
+            continue
+        symbol = str(adjustment.get("symbol", "") or "")
+        lifecycle_row = dict(lifecycle_rows.get(symbol, {}) or {})
+        lifecycle_action = str(lifecycle_row.get("recommended_action", "keep") or "keep")
+        if lifecycle_action in {"rollback", "hold"}:
+            blocked_symbols.append(symbol)
+        elif lifecycle_action == "re_review":
+            review_symbols.append(symbol)
+        elif lifecycle_action == "cautious_repromote" and action == "aggressive_promote":
+            cautious_symbols.append(symbol)
+    return {
+        "blocked_symbols": sorted(blocked_symbols),
+        "review_symbols": sorted(review_symbols),
+        "cautious_symbols": sorted(cautious_symbols),
+    }
+
+
 def _promotion_rollout_signal(
     *,
     requested_status: str,
@@ -1339,6 +1488,25 @@ def build_promotion_verdict(
             or (int(runner_quality["walk_forward_window_count"]) >= 2 and float(runner_quality["positive_walk_forward_ratio"]) < 0.75)
         ):
             verdict = {"status": "promote", "reasons": reasons + ["AGGRESSIVE_PROMOTION_DOWNGRADED_BY_RUNTIME_EVIDENCE"]}
+    lifecycle_signal = _symbol_lifecycle_promotion_signal(
+        candidate_policy=candidate_policy,
+        comparison_evidence=comparison_evidence,
+    )
+    if verdict["status"] in {"promote", "promote_aggressive"} and list(lifecycle_signal.get("blocked_symbols", [])):
+        verdict = {
+            "status": "keep",
+            "reasons": list(verdict["reasons"]) + ["PROMOTION_BLOCKED_BY_SYMBOL_LIFECYCLE_HOLD"],
+        }
+    elif verdict["status"] in {"promote", "promote_aggressive"} and list(lifecycle_signal.get("review_symbols", [])):
+        verdict = {
+            "status": "keep",
+            "reasons": list(verdict["reasons"]) + ["PROMOTION_REQUIRES_SYMBOL_RE_REVIEW"],
+        }
+    elif verdict["status"] == "promote_aggressive" and list(lifecycle_signal.get("cautious_symbols", [])):
+        verdict = {
+            "status": "promote",
+            "reasons": list(verdict["reasons"]) + ["AGGRESSIVE_PROMOTION_DOWNGRADED_BY_SYMBOL_LIFECYCLE"],
+        }
     if comparison_verdict != "keep" or comparison_delta != 0.0:
         verdict["comparison_verdict"] = comparison_verdict
         verdict["candidate_vs_current_score_delta"] = comparison_delta
@@ -1347,6 +1515,8 @@ def build_promotion_verdict(
         verdict["baseline_control_comparison"] = baseline_control_comparison
         verdict["simple_baseline_gate_status"] = str(baseline_gate.get("status", "not_available") or "not_available")
         verdict["simple_baseline_gate_reason"] = str(baseline_gate.get("gate_reason", "") or "")
+    if any(list(lifecycle_signal.values())):
+        verdict["symbol_lifecycle_signal"] = lifecycle_signal
     verdict.update(
         _promotion_rollout_signal(
             requested_status=requested_status,
@@ -1412,6 +1582,8 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "sample_quality_watchdog",
             "baseline_control_comparison",
             "checkpoint_auto_judge",
+            "symbol_lifecycle",
+            "symbol_lifecycle_summary",
             "score_alignment_summary",
             "total_closed_trade_count",
             "total_live_order_count",
@@ -1539,6 +1711,13 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("PROMOTION_PATH_VALIDATED")
     else:
         reasons.append("NO_PROMOTION_ACTION")
+    verdict_reasons = {str(reason) for reason in list(promotion_verdict.get("reasons", []) or []) if str(reason)}
+    if "PROMOTION_BLOCKED_BY_SYMBOL_LIFECYCLE_HOLD" in verdict_reasons:
+        status = "fail"
+        reasons.append("PROMOTION_PATH_BLOCKED_BY_SYMBOL_LIFECYCLE")
+    if "PROMOTION_REQUIRES_SYMBOL_RE_REVIEW" in verdict_reasons:
+        pending_due_to_warmup = True
+        reasons.append("PROMOTION_PATH_REQUIRES_SYMBOL_RE_REVIEW")
     if evidence["replay_like_drawdown_ratio"] > 0.45:
         status = "fail"
         reasons.append("REPLAY_DRAWDOWN_TOO_HIGH")
@@ -1976,6 +2155,55 @@ def _demoted_active_policy(previous_active: dict[str, object]) -> dict[str, obje
     return {"status": "demote", "adjustments": demoted_adjustments}
 
 
+def _apply_symbol_lifecycle_to_active_policy(
+    active_policy: dict[str, object],
+    symbol_lifecycle: list[dict[str, object]] | tuple[dict[str, object], ...],
+) -> dict[str, object]:
+    lifecycle_by_symbol = {
+        str(row.get("symbol", "") or ""): dict(row)
+        for row in list(symbol_lifecycle or [])
+        if str(row.get("symbol", "") or "")
+    }
+    if not lifecycle_by_symbol:
+        return active_policy
+    adjustments: list[dict[str, object]] = []
+    changed = False
+    for item in list(dict(active_policy or {}).get("adjustments", []) or []):
+        symbol = str(item.get("symbol", "") or "")
+        lifecycle_row = dict(lifecycle_by_symbol.get(symbol, {}) or {})
+        lifecycle_action = str(lifecycle_row.get("recommended_action", "keep") or "keep")
+        action = str(item.get("action", "") or "")
+        if action in {"promote", "aggressive_promote"} and lifecycle_action in {"rollback", "hold"}:
+            adjustments.append(
+                _retune_adjustment_for_action(
+                    dict(item),
+                    action="demote",
+                    reason="SYMBOL_LIFECYCLE_ROLLBACK",
+                    lifecycle_row=lifecycle_row,
+                )
+            )
+            changed = True
+        elif action == "aggressive_promote" and lifecycle_action == "cautious_repromote":
+            adjustments.append(
+                _retune_adjustment_for_action(
+                    dict(item),
+                    action="promote",
+                    reason="SYMBOL_LIFECYCLE_CAUTIOUS_REPROMOTION",
+                    lifecycle_row=lifecycle_row,
+                )
+            )
+            changed = True
+        else:
+            adjustments.append(dict(item))
+    if not changed:
+        return active_policy
+    updated = dict(active_policy)
+    updated["adjustments"] = adjustments
+    if adjustments and all(str(item.get("action", "") or "") in {"demote", "disabled"} for item in adjustments):
+        updated["status"] = "demote"
+    return updated
+
+
 def _annotate_active_policy(
     active_policy: dict[str, object],
     promotion_verdict: dict[str, object],
@@ -2386,6 +2614,20 @@ def build_persisted_policy_state(
         rollout_status = "baseline"
         rollout_reason = "NO_ACTIVE_POLICY"
         version = previous_version
+    evaluated_at = str(validation_evidence.get("generated_at", previous_state.get("updated_at", "")) or datetime.now(tz=timezone.utc).isoformat())
+    symbol_lifecycle = build_symbol_lifecycle(
+        symbol_summary=list(validation_evidence.get("symbol_summary", []) or []),
+        symbol_scorecard=list(validation_evidence.get("symbol_scorecard", []) or []),
+        pruning_recommendations=list(validation_evidence.get("pruning_recommendations", []) or []),
+        active_adjustments=list(dict(active_policy or {}).get("adjustments", []) or []),
+        previous_rows=list(previous_state.get("symbol_lifecycle", []) or []),
+        checkpoint_auto_judge=checkpoint_auto_judge,
+        sample_quality_watchdog=sample_watchdog,
+        baseline_control_comparison=dict(validation_evidence.get("baseline_control_comparison", {}) or {}),
+        evaluated_at=evaluated_at,
+    )
+    active_policy = _apply_symbol_lifecycle_to_active_policy(active_policy, symbol_lifecycle)
+    symbol_lifecycle_summary = summarize_symbol_lifecycle(symbol_lifecycle)
     rollout_progression = _rollout_progression_signal(
         previous_state=previous_state,
         active_policy=active_policy,
@@ -2409,6 +2651,8 @@ def build_persisted_policy_state(
         "retention_monitor": retention_monitor,
         "checkpoint_revalidation": checkpoint_revalidation,
         "checkpoint_auto_judge": checkpoint_auto_judge,
+        "symbol_lifecycle": symbol_lifecycle,
+        "symbol_lifecycle_summary": symbol_lifecycle_summary,
         "active_policy": active_policy,
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
@@ -2428,6 +2672,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "retention_monitor": dict(policy_state.get("retention_monitor", {}) or {}),
         "checkpoint_revalidation": dict(policy_state.get("checkpoint_revalidation", {}) or {}),
         "checkpoint_auto_judge": dict(policy_state.get("checkpoint_auto_judge", {}) or {}),
+        "symbol_lifecycle_summary": dict(policy_state.get("symbol_lifecycle_summary", {}) or {}),
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
         "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
