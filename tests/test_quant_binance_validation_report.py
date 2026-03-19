@@ -532,6 +532,319 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(artifact["validation_path"]["current_walk_forward_window_count"], 2)
             self.assertAlmostEqual(artifact["validation_path"]["current_positive_walk_forward_ratio"], 1.0)
 
+    def test_build_policy_comparison_validation_artifact_prefers_active_bucket_logs_over_root_current_evidence(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 5,
+            "active_policy": {
+                "status": "promote",
+                "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}],
+            },
+            "rollout_progression": {"execution_phase": "partial"},
+            "policy_validation": {
+                "evidence": {
+                    "validation_runs": [
+                        {
+                            "live_order_count": 8,
+                            "accepted_live_order_count": 8,
+                            "rejected_live_order_count": 0,
+                            "closed_trade_count": 3,
+                            "realized_pnl_usd": 9.0,
+                            "avg_edge_retention_ratio": 0.92,
+                            "avg_slippage_bps": 2.0,
+                        }
+                    ],
+                    "walk_forward_windows": [{"avg_net_edge_bps": 3.5, "avg_score": 60.0}],
+                }
+            },
+        }
+        current_lineage = build_policy_state_lineage_snapshot(current_policy_state, source="current_policy_state")
+        current_policy_state["policy_lineage"] = dict(current_lineage)
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 2,
+                        "accepted_live_order_count": 2,
+                        "rejected_live_order_count": 0,
+                        "tested_order_count": 2,
+                        "avg_slippage_bps": 5.5,
+                        "avg_edge_retention_ratio": 0.1,
+                        "avg_realized_edge_bps": -0.5,
+                        "avg_expected_edge_bps": 5.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            entry_fields = {
+                "entry_policy_bucket_available": True,
+                "entry_policy_bucket_alignment_status": "aligned",
+                "entry_policy_bucket_source": "persisted_policy_state",
+                "entry_policy_lineage": dict(current_lineage),
+            }
+            (logs_dir / "decisions.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "symbol": "BTCUSDT",
+                                "final_mode": "futures",
+                                "predictability_score": 72.0,
+                                "net_expected_edge_bps": 12.0,
+                                "estimated_round_trip_cost_bps": 8.0,
+                                "timestamp": "2026-03-18T00:00:00+00:00",
+                                "entry_policy_bucket": "active_policy",
+                                **entry_fields,
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "symbol": "ETHUSDT",
+                                "final_mode": "futures",
+                                "predictability_score": 58.0,
+                                "net_expected_edge_bps": 6.0,
+                                "estimated_round_trip_cost_bps": 8.0,
+                                "timestamp": "2026-03-18T00:05:00+00:00",
+                                "entry_policy_bucket": "staged_candidate",
+                                **entry_fields,
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "live_orders.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "symbol": "BTCUSDT",
+                                "accepted": True,
+                                "fill_status": "accepted",
+                                "slippage_bps": 2.0,
+                                "realized_edge_bps": 4.0,
+                                "expected_net_edge_bps": 5.0,
+                                "entry_policy_bucket": "active_policy",
+                                **entry_fields,
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "symbol": "ETHUSDT",
+                                "accepted": True,
+                                "fill_status": "accepted",
+                                "slippage_bps": 9.0,
+                                "realized_edge_bps": -3.0,
+                                "expected_net_edge_bps": 5.0,
+                                "entry_policy_bucket": "staged_candidate",
+                                **entry_fields,
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "tested_orders.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps({"symbol": "BTCUSDT", "entry_policy_bucket": "active_policy", **entry_fields}),
+                        json.dumps({"symbol": "ETHUSDT", "entry_policy_bucket": "staged_candidate", **entry_fields}),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "symbol": "BTCUSDT",
+                                "realized_pnl_usd_estimate": 3.0,
+                                "realized_return_bps_estimate": 7.0,
+                                "entry_predictability_score": 72.0,
+                                "entry_policy_bucket": "active_policy",
+                                **entry_fields,
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "symbol": "ETHUSDT",
+                                "realized_pnl_usd_estimate": -4.0,
+                                "realized_return_bps_estimate": -8.0,
+                                "entry_predictability_score": 58.0,
+                                "entry_policy_bucket": "staged_candidate",
+                                **entry_fields,
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+
+            self.assertEqual(artifact["current_replay_summary"]["source"], "observed_runtime_policy_bucket_artifacts")
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["live_order_count"], 1)
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["closed_trade_count"], 1)
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["total_realized_pnl_usd"], 3.0)
+            self.assertEqual(artifact["validation_path"]["current_walk_forward_window_count"], 1)
+            self.assertEqual(artifact["policy_evidence_buckets"]["active_policy"]["source"], "observed_runtime_policy_bucket_artifacts")
+
+    def test_build_policy_comparison_validation_artifact_uses_latest_bucket_logs_for_current_policy_replay(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 6,
+            "active_policy": {
+                "status": "promote",
+                "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}],
+            },
+            "rollout_progression": {"execution_phase": "partial"},
+        }
+        current_lineage = build_policy_state_lineage_snapshot(current_policy_state, source="current_policy_state")
+        current_policy_state["policy_lineage"] = dict(current_lineage)
+        runtime_summary = {
+            "generated_at": "2026-03-18T00:10:00+00:00",
+            "live_order_count": 5,
+            "accepted_live_order_count": 5,
+            "rejected_live_order_count": 0,
+            "closed_trade_count": 5,
+            "avg_slippage_bps": 2.0,
+            "avg_edge_retention_ratio": 0.9,
+            "avg_realized_edge_bps": 7.0,
+            "avg_expected_edge_bps": 8.0,
+            "realized_pnl_usd_estimate": 12.0,
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            latest = base / "output" / "paper-live-shell" / "latest"
+            for run_dir in (run_a, latest):
+                (run_dir / "logs").mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-17T00:00:00+00:00",
+                        "live_order_count": 1,
+                        "accepted_live_order_count": 1,
+                        "rejected_live_order_count": 0,
+                        "tested_order_count": 1,
+                        "avg_slippage_bps": 6.0,
+                        "avg_edge_retention_ratio": 0.5,
+                        "avg_realized_edge_bps": 1.0,
+                        "avg_expected_edge_bps": 3.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_a / "logs" / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "ETHUSDT", "realized_pnl_usd_estimate": -1.0, "realized_return_bps_estimate": -2.0}) + "\n",
+                encoding="utf-8",
+            )
+            (run_a / "logs" / "decisions.jsonl").write_text(
+                json.dumps({"symbol": "ETHUSDT", "final_mode": "spot", "predictability_score": 51.0, "net_expected_edge_bps": 4.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-17T00:00:00+00:00"})
+                + "\n",
+                encoding="utf-8",
+            )
+            entry_fields = {
+                "entry_policy_bucket_available": True,
+                "entry_policy_bucket_alignment_status": "aligned",
+                "entry_policy_bucket_source": "persisted_policy_state",
+                "entry_policy_lineage": dict(current_lineage),
+            }
+            (latest / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-18T00:10:00+00:00",
+                        "live_order_count": 2,
+                        "accepted_live_order_count": 2,
+                        "rejected_live_order_count": 0,
+                        "tested_order_count": 1,
+                        "avg_slippage_bps": 5.0,
+                        "avg_edge_retention_ratio": 0.1,
+                        "avg_realized_edge_bps": -1.0,
+                        "avg_expected_edge_bps": 5.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (latest / "logs" / "decisions.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "final_mode": "futures",
+                        "predictability_score": 73.0,
+                        "net_expected_edge_bps": 11.0,
+                        "estimated_round_trip_cost_bps": 8.0,
+                        "timestamp": "2026-03-18T00:10:00+00:00",
+                        "entry_policy_bucket": "active_policy",
+                        **entry_fields,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (latest / "logs" / "live_orders.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "accepted": True,
+                        "fill_status": "accepted",
+                        "slippage_bps": 1.5,
+                        "realized_edge_bps": 3.0,
+                        "expected_net_edge_bps": 4.0,
+                        "entry_policy_bucket": "active_policy",
+                        **entry_fields,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (latest / "logs" / "tested_orders.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "entry_policy_bucket": "active_policy", **entry_fields}) + "\n",
+                encoding="utf-8",
+            )
+            (latest / "logs" / "closed_trades.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "BTCUSDT",
+                        "realized_pnl_usd_estimate": 2.5,
+                        "realized_return_bps_estimate": 6.0,
+                        "entry_predictability_score": 73.0,
+                        "entry_policy_bucket": "active_policy",
+                        **entry_fields,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+                current_runtime_summary=runtime_summary,
+            )
+
+            self.assertEqual(artifact["current_replay_summary"]["source"], "observed_runtime_policy_bucket_artifacts")
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["live_order_count"], 1)
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["closed_trade_count"], 1)
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["total_realized_pnl_usd"], 2.5)
+            self.assertEqual(artifact["current_replay_summary"]["runtime_summary_anchor"]["source"], "current_runtime_summary")
+
     def test_build_policy_comparison_validation_artifact_filters_mismatched_run_lineage(self) -> None:
         candidate_policy = {"adjustments": []}
         current_policy_state = {
