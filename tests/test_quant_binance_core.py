@@ -965,19 +965,265 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(policy["status"], "insufficient_data")
         self.assertEqual(policy["adjustments"], [])
 
+    def test_build_auto_tune_policy_downgrades_aggressive_promotion_when_scorecard_is_not_elite(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": 6.0,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 1.0,
+                            "expectancy_stability": 0.8,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "BTCUSDT",
+                        "recommendation": "promote",
+                        "rolling_score": 0.78,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.74,
+                    },
+                ],
+                "regime_summary": [
+                    {"mode": "futures", "decision_count": 6, "avg_score": 70.0, "avg_net_edge_bps": 12.0, "avg_cost_bps": 8.0},
+                ],
+            },
+        )
+        adjustment = policy["adjustments"][0]
+        self.assertEqual(adjustment["action"], "promote")
+        self.assertEqual(adjustment["size_multiplier"], 1.1)
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_status"],
+            "downgraded",
+        )
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_reason"],
+            "ROLLING_SCORECARD_NOT_ELITE",
+        )
+
+    def test_build_auto_tune_policy_strengthens_demotion_when_scorecard_is_strongly_negative(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "SOLUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": -3.0,
+                        "recommendation": "prune",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 0.333333,
+                            "expectancy_stability": 0.9,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "SOLUSDT",
+                        "recommendation": "demote",
+                        "rolling_score": 0.25,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.2,
+                    },
+                ],
+            },
+        )
+        adjustment = policy["adjustments"][0]
+        self.assertEqual(adjustment["action"], "demote")
+        self.assertEqual(adjustment["size_multiplier"], 0.7)
+        self.assertEqual(adjustment["leverage_multiplier"], 0.7)
+        self.assertEqual(adjustment["entry_threshold_bps"], 1.8)
+        self.assertEqual(adjustment["expected_profit_floor_bps"], 2.4)
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_status"],
+            "strengthened",
+        )
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_reason"],
+            "ROLLING_SCORECARD_STRONGLY_NEGATIVE",
+        )
+        self.assertEqual(adjustment["operating_intensity"], 1.2)
+
+    def test_build_auto_tune_policy_softens_promotion_when_scorecard_is_not_yet_supportive(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "SOLUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": 4.0,
+                        "recommendation": "promote",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 0.67,
+                            "expectancy_stability": 0.75,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "SOLUSDT",
+                        "recommendation": "keep",
+                        "rolling_score": 0.66,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.68,
+                    },
+                ],
+            },
+        )
+        adjustment = policy["adjustments"][0]
+        self.assertEqual(adjustment["action"], "promote")
+        self.assertEqual(adjustment["size_multiplier"], 1.08)
+        self.assertEqual(adjustment["leverage_multiplier"], 1.08)
+        self.assertEqual(adjustment["entry_threshold_bps"], -0.4)
+        self.assertEqual(adjustment["expected_profit_floor_bps"], -0.8)
+        self.assertEqual(adjustment["operating_intensity"], 0.8)
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_status"],
+            "softened",
+        )
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_reason"],
+            "ROLLING_SCORECARD_NOT_YET_SUPPORTIVE",
+        )
+
+    def test_build_auto_tune_policy_softens_demotion_when_scorecard_is_not_yet_negative(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "symbol_summary": [
+                    {
+                        "symbol": "XRPUSDT",
+                        "trade_count": 4,
+                        "expectancy_usd": -2.0,
+                        "recommendation": "prune",
+                        "rolling_evidence": {
+                            "available": True,
+                            "observed_run_count": 3,
+                            "recent_run_count": 3,
+                            "recent_run_consistency": 1.0,
+                            "positive_window_ratio": 0.33,
+                            "expectancy_stability": 0.8,
+                        },
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "XRPUSDT",
+                        "recommendation": "keep",
+                        "rolling_score": 0.44,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.45,
+                    },
+                ],
+            },
+        )
+        adjustment = policy["adjustments"][0]
+        self.assertEqual(adjustment["action"], "demote")
+        self.assertEqual(adjustment["size_multiplier"], 0.8)
+        self.assertEqual(adjustment["leverage_multiplier"], 0.8)
+        self.assertEqual(adjustment["entry_threshold_bps"], 1.2)
+        self.assertEqual(adjustment["expected_profit_floor_bps"], 1.6)
+        self.assertEqual(adjustment["operating_intensity"], 0.8)
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_status"],
+            "softened",
+        )
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_symbol_summary"]["scorecard_evidence"]["intensity_reason"],
+            "ROLLING_SCORECARD_NOT_YET_NEGATIVE",
+        )
+
+    def test_build_auto_tune_policy_softens_pruning_recommendation_when_scorecard_is_not_yet_negative(self) -> None:
+        policy = build_auto_tune_policy(
+            [],
+            {
+                "pruning_recommendations": [
+                    {
+                        "symbol": "ADAUSDT",
+                        "recommendation": "prune",
+                        "decision_count": 4,
+                        "trade_count": 1,
+                        "avg_net_edge_bps": -1.5,
+                    },
+                ],
+                "symbol_scorecard": [
+                    {
+                        "symbol": "ADAUSDT",
+                        "recommendation": "keep",
+                        "rolling_score": 0.43,
+                        "trade_run_count": 3,
+                        "recent_trade_run_count": 3,
+                        "recent_positive_run_ratio": 0.42,
+                    },
+                ],
+            },
+        )
+        adjustment = policy["adjustments"][0]
+        self.assertEqual(adjustment["action"], "demote")
+        self.assertEqual(adjustment["operating_intensity"], 0.8)
+        self.assertEqual(
+            adjustment["signal_contexts"]["runtime_pruning_recommendation"]["scorecard_evidence"]["intensity_status"],
+            "softened",
+        )
+
     def test_load_validation_runner_evidence_reads_report_metrics(self) -> None:
         import json
         import tempfile
         from quant_binance.observability.report import load_validation_runner_evidence, merge_policy_validation_evidence
         with tempfile.TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "policy_comparison.json"
-            path.write_text(json.dumps({"evidence": {"runner_max_drawdown_pct": 12.5, "runner_shadow_alignment_score": 0.88, "runner_total_return_pct": 4.2, "candidate_vs_current_score_delta": 0.3}}), encoding="utf-8")
+            path.write_text(
+                json.dumps(
+                    {
+                        "sample_progress": {"status": "collecting_evidence", "remaining_closed_trade_count": 4},
+                        "score_alignment_summary": [{"score_bucket_label": "70-79", "trade_count": 2}],
+                        "total_closed_trade_count": 2,
+                        "total_live_order_count": 3,
+                        "total_tested_order_count": 1,
+                        "evidence": {
+                            "runner_max_drawdown_pct": 12.5,
+                            "runner_drawdown_to_pnl_ratio": 0.42,
+                            "runner_shadow_alignment_score": 0.88,
+                            "runner_total_return_pct": 4.2,
+                            "candidate_vs_current_score_delta": 0.3,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
             evidence = load_validation_runner_evidence(Path(tmpdir))
             self.assertEqual(evidence["runner_max_drawdown_pct"], 12.5)
+            self.assertEqual(evidence["sample_progress"]["status"], "collecting_evidence")
+            self.assertEqual(evidence["score_alignment_summary"][0]["score_bucket_label"], "70-79")
+            self.assertEqual(evidence["total_closed_trade_count"], 2)
             merged = merge_policy_validation_evidence([], evidence)
             self.assertEqual(merged["runner_total_return_pct"], 4.2)
             self.assertEqual(merged["shadow_alignment_score"], 0.88)
             self.assertEqual(merged["candidate_vs_current_score_delta"], 0.3)
+            self.assertEqual(merged["replay_like_drawdown_ratio"], 0.42)
 
     def test_runtime_summary_operational_verdict_can_emit_aggressive_pass(self) -> None:
         summary = build_runtime_summary(
