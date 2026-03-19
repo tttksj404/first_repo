@@ -317,7 +317,17 @@ class QuantBinanceDaemonTests(unittest.TestCase):
                         "version": 7,
                         "status": "baseline",
                         "active_policy": {"status": "baseline", "adjustments": []},
+                        "policy_lineage": {"available": True, "structural_key": "daemon-lineage"},
                         "executive_operating_verdict": {"verdict": "tighten"},
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "source": "persisted_policy_validation_evidence",
+                                "alignment": {"aligned": True, "status": "aligned"},
+                                "policy_lineage": {"available": True, "structural_key": "daemon-lineage"},
+                                "evidence": {"runner_avg_edge_retention_ratio": 0.74},
+                            }
+                        },
                     }
                 ),
                 encoding="utf-8",
@@ -333,6 +343,12 @@ class QuantBinanceDaemonTests(unittest.TestCase):
             policy_path = result["run_paths"].summary_path.with_name("policy_state.json")
             policy_payload = json.loads(policy_path.read_text(encoding="utf-8"))
             self.assertGreaterEqual(int(policy_payload["version"]), 7)
+            self.assertIn("policy_evidence_buckets", policy_payload)
+            self.assertTrue(policy_payload["policy_evidence_buckets"]["previous_policy"]["available"])
+            self.assertEqual(
+                policy_payload["policy_evidence_buckets"]["previous_policy"]["policy_lineage"]["structural_key"],
+                "daemon-lineage",
+            )
 
     def test_run_live_paper_daemon_skips_lifecycle_held_symbols_during_bootstrap(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:

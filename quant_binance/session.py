@@ -26,6 +26,7 @@ from quant_binance.policy.execution import (
     is_major_medium_futures_decision,
     is_major_strong_futures_decision,
 )
+from quant_binance.policy_evidence import policy_evidence_bucket
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
 from quant_binance.observability.report import build_auto_tune_policy, build_executive_operating_verdict, build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
@@ -169,6 +170,13 @@ class PaperPosition:
     adoption_source: str = ""
     adopted_at: datetime | None = None
     adoption_grace_until: datetime | None = None
+    entry_policy_context_source: str = ""
+    entry_policy_bucket: str = ""
+    entry_policy_bucket_available: bool = False
+    entry_policy_bucket_source: str = ""
+    entry_policy_bucket_alignment_status: str = ""
+    entry_policy_execution_phase: str = "baseline"
+    entry_policy_lineage: dict[str, object] = field(default_factory=dict)
 
     def is_adopted(self) -> bool:
         origin = self.origin.strip().lower()
@@ -232,6 +240,13 @@ class PaperPosition:
             "adopted_at": self.adopted_at,
             "adoption_grace_until": self.adoption_grace_until,
             "adoption_grace_active": self.adoption_grace_active(),
+            "entry_policy_context_source": self.entry_policy_context_source,
+            "entry_policy_bucket": self.entry_policy_bucket,
+            "entry_policy_bucket_available": self.entry_policy_bucket_available,
+            "entry_policy_bucket_source": self.entry_policy_bucket_source,
+            "entry_policy_bucket_alignment_status": self.entry_policy_bucket_alignment_status,
+            "entry_policy_execution_phase": self.entry_policy_execution_phase,
+            "entry_policy_lineage": dict(self.entry_policy_lineage),
         }
 
 
@@ -542,6 +557,11 @@ class LivePaperSession:
         summary["executive_operating_verdict"] = dict(
             persisted_policy_state.get("executive_operating_verdict", summary.get("executive_operating_verdict", {})) or {}
         )
+        summary["live_evidence_rejudge"] = dict(persisted_policy_state.get("live_evidence_rejudge", {}) or {})
+        summary["retention_monitor"] = dict(persisted_policy_state.get("retention_monitor", {}) or {})
+        summary["rollout_progression"] = dict(persisted_policy_state.get("rollout_progression", {}) or {})
+        summary["policy_lineage"] = dict(persisted_policy_state.get("policy_lineage", {}) or {})
+        summary["policy_evidence_buckets"] = dict(persisted_policy_state.get("policy_evidence_buckets", {}) or {})
         write_runtime_summary(summary_path, summary)
         self._write_persisted_policy_state(persisted_policy_state)
         write_runtime_state(
@@ -576,6 +596,12 @@ class LivePaperSession:
                 "closed_trade_count": summary["closed_trade_count"],
                 "kill_switch": self.runtime.kill_switch.status(),
                 "policy_state": persisted_policy_state,
+                "executive_operating_verdict": dict(persisted_policy_state.get("executive_operating_verdict", {}) or {}),
+                "live_evidence_rejudge": dict(persisted_policy_state.get("live_evidence_rejudge", {}) or {}),
+                "retention_monitor": dict(persisted_policy_state.get("retention_monitor", {}) or {}),
+                "rollout_progression": dict(persisted_policy_state.get("rollout_progression", {}) or {}),
+                "policy_lineage": dict(persisted_policy_state.get("policy_lineage", {}) or {}),
+                "policy_evidence_buckets": dict(persisted_policy_state.get("policy_evidence_buckets", {}) or {}),
             },
         )
         overview_path = Path(summary_path).with_name("overview.json")
@@ -924,6 +950,22 @@ class LivePaperSession:
                 or {}
             ),
             "symbol_lifecycle": list(policy_state.get("symbol_lifecycle", []) or []),
+        }
+
+    def _policy_entry_context_snapshot(self) -> dict[str, object]:
+        context = self._policy_runtime_context()
+        policy_state = dict(context.get("policy_state", {}) or {})
+        bucket_name = "staged_candidate" if str(context.get("source", "active_policy") or "active_policy") == "candidate_policy" else "active_policy"
+        bucket = policy_evidence_bucket(policy_state, bucket_name)
+        alignment = dict(bucket.get("alignment", {}) or {})
+        return {
+            "entry_policy_context_source": str(context.get("source", "") or ""),
+            "entry_policy_bucket": bucket_name,
+            "entry_policy_bucket_available": bool(bucket.get("available")),
+            "entry_policy_bucket_source": str(bucket.get("source", "") or ""),
+            "entry_policy_bucket_alignment_status": str(alignment.get("status", "unknown") or "unknown"),
+            "entry_policy_execution_phase": str(context.get("execution_phase", "baseline") or "baseline"),
+            "entry_policy_lineage": dict(policy_state.get("policy_lineage", {}) or {}),
         }
 
     def _conservative_auto_mode_runtime_overrides(self) -> dict[str, object]:
@@ -2157,6 +2199,13 @@ class LivePaperSession:
             "loss_combo_time_bucket_utc": loss_combo_bucket_start.strftime("%H:%M"),
             "position_origin": position.origin,
             "position_adoption_source": position.adoption_source,
+            "entry_policy_context_source": position.entry_policy_context_source,
+            "entry_policy_bucket": position.entry_policy_bucket,
+            "entry_policy_bucket_available": position.entry_policy_bucket_available,
+            "entry_policy_bucket_source": position.entry_policy_bucket_source,
+            "entry_policy_bucket_alignment_status": position.entry_policy_bucket_alignment_status,
+            "entry_policy_execution_phase": position.entry_policy_execution_phase,
+            "entry_policy_lineage": dict(position.entry_policy_lineage),
         }
         self.closed_trades.append(trade)
         self._update_loss_combo_downgrade_state(
@@ -3136,6 +3185,13 @@ class LivePaperSession:
             adoption_source=adoption_source,
             adopted_at=adopted_at,
             adoption_grace_until=adoption_grace_until,
+            entry_policy_context_source=str(payload.get("entry_policy_context_source", "") or ""),
+            entry_policy_bucket=str(payload.get("entry_policy_bucket", "") or ""),
+            entry_policy_bucket_available=bool(payload.get("entry_policy_bucket_available", False)),
+            entry_policy_bucket_source=str(payload.get("entry_policy_bucket_source", "") or ""),
+            entry_policy_bucket_alignment_status=str(payload.get("entry_policy_bucket_alignment_status", "") or ""),
+            entry_policy_execution_phase=str(payload.get("entry_policy_execution_phase", "baseline") or "baseline"),
+            entry_policy_lineage=dict(payload.get("entry_policy_lineage", {}) or {}),
         )
 
     def restore_futures_state_from_runtime(
@@ -4171,6 +4227,7 @@ class LivePaperSession:
             0.0,
             self.remaining_portfolio_capacity_usd - decision.order_intent_notional_usd,
         )
+        policy_entry_context = self._policy_entry_context_snapshot()
         self.paper_positions[decision.symbol] = PaperPosition(
             symbol=decision.symbol,
             market=decision.final_mode,
@@ -4200,6 +4257,13 @@ class LivePaperSession:
             latest_decision_time=decision.timestamp,
             confirmation_pending=(decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED"),
             confirmation_pending_since=decision.timestamp if decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED" else None,
+            entry_policy_context_source=str(policy_entry_context.get("entry_policy_context_source", "") or ""),
+            entry_policy_bucket=str(policy_entry_context.get("entry_policy_bucket", "") or ""),
+            entry_policy_bucket_available=bool(policy_entry_context.get("entry_policy_bucket_available", False)),
+            entry_policy_bucket_source=str(policy_entry_context.get("entry_policy_bucket_source", "") or ""),
+            entry_policy_bucket_alignment_status=str(policy_entry_context.get("entry_policy_bucket_alignment_status", "") or ""),
+            entry_policy_execution_phase=str(policy_entry_context.get("entry_policy_execution_phase", "baseline") or "baseline"),
+            entry_policy_lineage=dict(policy_entry_context.get("entry_policy_lineage", {}) or {}),
         )
         return True
 
@@ -5241,7 +5305,13 @@ class LivePaperSession:
         if self.learner is not None:
             self.learner.ingest_decisions((managed_decision,))
         if self.log_store is not None:
-            self.log_store.append("decisions", managed_decision.as_dict())
+            self.log_store.append(
+                "decisions",
+                {
+                    **managed_decision.as_dict(),
+                    **self._policy_entry_context_snapshot(),
+                },
+            )
         if bootstrap:
             return managed_decision
         self._execute_recorded_decision(
