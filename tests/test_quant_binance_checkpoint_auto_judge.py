@@ -402,6 +402,46 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             self.assertEqual(apply_result["status"], "proposal_not_ready")
             self.assertEqual(apply_result["executive_operating_verdict"]["verdict"], "rollback")
 
+    def test_strategy_proposal_reports_live_evidence_rejudge_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            (base / "artifacts" / "optimization").mkdir(parents=True, exist_ok=True)
+            run_dir = base / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (base / "artifacts" / "optimization" / "latest.json").write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-19T00:00:00+00:00",
+                        "best_candidate": {"name": "candidate-a", "objective_score": 8.0, "overrides": {}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "performance_report.json").write_text(json.dumps({"pruning_recommendations": []}), encoding="utf-8")
+            (run_dir / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "executive_operating_verdict": {
+                            "verdict": "hold",
+                            "confidence": "medium",
+                            "reasons": ["EXECUTIVE_HOLD_CURRENT_POSTURE"],
+                        },
+                        "live_evidence_rejudge": {
+                            "status": "waiting",
+                            "policy_lineage_status": "aligned",
+                            "fresh_evidence_accumulated": False,
+                            "reason_codes": ["NO_MATERIAL_LIVE_EVIDENCE_ACCUMULATION"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            proposal = build_strategy_proposal(base_dir=base)
+            self.assertEqual(proposal["status"], "proposal_pending")
+            self.assertEqual(proposal["gates"]["live_evidence_rejudge_status"], "waiting")
+            self.assertFalse(proposal["gates"]["fresh_live_evidence_accumulated"])
+
     def test_strategy_proposal_uses_simple_baseline_gate_when_checkpoint_judge_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             base = Path(tempdir) / "quant_runtime"

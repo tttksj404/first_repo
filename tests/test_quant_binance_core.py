@@ -992,6 +992,139 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(kinds, {"portfolio_threshold_crossed", "symbol_validation_ready"})
         self.assertTrue(state["active_policy"]["checkpoint_revalidation"]["triggered"])
 
+    def test_build_persisted_policy_state_keeps_previous_rebuild_verdict_without_fresh_evidence(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 2,
+                "executive_operating_verdict": {"verdict": "rebuild_evidence", "confidence": "medium"},
+                "policy_validation": {
+                    "evidence": {
+                        "run_count": 2,
+                        "total_live_order_count": 4,
+                        "total_closed_trade_count": 1,
+                        "runner_walk_forward_window_count": 1,
+                        "runner_positive_walk_forward_ratio": 1.0,
+                        "sample_quality_watchdog": {"status": "healthy"},
+                        "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 4, "closed_trade_count": 1},
+                        "current_policy_evidence_alignment": {"status": "aligned"},
+                    }
+                },
+                "active_policy": {"status": "baseline", "adjustments": []},
+            },
+            {"adjustments": []},
+            {"status": "keep", "requested_status": "keep", "reasons": []},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "evidence": {
+                    "run_count": 2,
+                    "total_live_order_count": 4,
+                    "total_closed_trade_count": 1,
+                    "runner_walk_forward_window_count": 1,
+                    "runner_positive_walk_forward_ratio": 1.0,
+                    "sample_quality_watchdog": {"status": "healthy"},
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 4, "closed_trade_count": 1},
+                    "current_policy_evidence_alignment": {"status": "aligned"},
+                },
+            },
+        )
+        self.assertEqual(state["executive_operating_verdict"]["verdict"], "rebuild_evidence")
+        self.assertEqual(state["live_evidence_rejudge"]["status"], "waiting")
+        self.assertIn(
+            "EXECUTIVE_REJUDGE_WAITING_FOR_FRESH_EVIDENCE",
+            state["executive_operating_verdict"]["reasons"],
+        )
+
+    def test_build_persisted_policy_state_rejudges_when_aligned_live_evidence_accumulates(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 2,
+                "executive_operating_verdict": {"verdict": "rebuild_evidence", "confidence": "medium"},
+                "policy_validation": {
+                    "evidence": {
+                        "run_count": 1,
+                        "total_live_order_count": 2,
+                        "total_closed_trade_count": 0,
+                        "runner_walk_forward_window_count": 0,
+                        "runner_positive_walk_forward_ratio": 0.0,
+                        "sample_quality_watchdog": {"status": "thin"},
+                        "micro_live_gate": {"available": True, "status": "pending", "live_order_count": 2, "closed_trade_count": 0},
+                        "current_policy_evidence_alignment": {"status": "aligned"},
+                    }
+                },
+                "active_policy": {"status": "baseline", "adjustments": []},
+            },
+            {"adjustments": []},
+            {"status": "keep", "requested_status": "keep", "reasons": []},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "evidence": {
+                    "run_count": 3,
+                    "total_live_order_count": 6,
+                    "total_closed_trade_count": 2,
+                    "runner_walk_forward_window_count": 2,
+                    "runner_positive_walk_forward_ratio": 1.0,
+                    "sample_quality_watchdog": {
+                        "status": "healthy",
+                        "checkpoint_snapshot": {
+                            "portfolio": [
+                                {"metric": "total_closed_trade_count", "threshold": 2, "current_value": 2, "reached": True},
+                            ]
+                        },
+                    },
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 6, "closed_trade_count": 2},
+                    "current_policy_evidence_alignment": {"status": "aligned"},
+                },
+            },
+        )
+        self.assertEqual(state["executive_operating_verdict"]["verdict"], "hold")
+        self.assertEqual(state["live_evidence_rejudge"]["status"], "triggered")
+        self.assertTrue(state["live_evidence_rejudge"]["fresh_evidence_accumulated"])
+        self.assertEqual(state["live_evidence_rejudge"]["evidence_delta"]["live_order_count"], 4)
+
+    def test_build_persisted_policy_state_blocks_rejudging_when_lineage_is_stale(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 2,
+                "executive_operating_verdict": {"verdict": "tighten", "confidence": "high"},
+                "policy_validation": {
+                    "evidence": {
+                        "run_count": 1,
+                        "total_live_order_count": 2,
+                        "total_closed_trade_count": 0,
+                        "runner_walk_forward_window_count": 0,
+                        "sample_quality_watchdog": {"status": "thin"},
+                        "micro_live_gate": {"available": True, "status": "pending", "live_order_count": 2, "closed_trade_count": 0},
+                        "current_policy_evidence_alignment": {"status": "aligned"},
+                    }
+                },
+                "active_policy": {"status": "baseline", "adjustments": []},
+            },
+            {"adjustments": []},
+            {"status": "keep", "requested_status": "keep", "reasons": []},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "evidence": {
+                    "run_count": 3,
+                    "total_live_order_count": 6,
+                    "total_closed_trade_count": 2,
+                    "runner_walk_forward_window_count": 2,
+                    "runner_positive_walk_forward_ratio": 1.0,
+                    "sample_quality_watchdog": {"status": "healthy"},
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 6, "closed_trade_count": 2},
+                    "current_policy_evidence_alignment": {"status": "stale"},
+                },
+            },
+        )
+        self.assertEqual(state["executive_operating_verdict"]["verdict"], "tighten")
+        self.assertEqual(state["live_evidence_rejudge"]["status"], "blocked")
+        self.assertIn(
+            "EXECUTIVE_REJUDGE_BLOCKED_BY_POLICY_LINEAGE",
+            state["executive_operating_verdict"]["reasons"],
+        )
+
     def test_build_persisted_policy_state_demotes_on_walk_forward_weakness(self) -> None:
         previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
         state = build_persisted_policy_state(
