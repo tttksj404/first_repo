@@ -307,6 +307,65 @@ class QuantBinanceDaemonTests(unittest.TestCase):
         self.assertIn("self_healing", result["summary"])
         self.assertIn("status", result["summary"]["self_healing"])
 
+    def test_run_live_paper_daemon_primes_current_run_with_latest_policy_state(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            latest_root = Path(output_dir) / "output" / "paper-live-shell" / "latest"
+            latest_root.mkdir(parents=True, exist_ok=True)
+            (latest_root / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 7,
+                        "status": "baseline",
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "executive_operating_verdict": {"verdict": "tighten"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", FakeShell):
+                    result = run_live_paper_daemon(
+                        config_path=CONFIG_PATH,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+            policy_path = result["run_paths"].summary_path.with_name("policy_state.json")
+            policy_payload = json.loads(policy_path.read_text(encoding="utf-8"))
+            self.assertGreaterEqual(int(policy_payload["version"]), 7)
+
+    def test_run_live_paper_daemon_skips_lifecycle_held_symbols_during_bootstrap(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            config_path = Path(output_dir) / "config.json"
+            config_payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            config_payload["universe"] = ["BTCUSDT", "ETHUSDT"]
+            config_path.write_text(json.dumps(config_payload), encoding="utf-8")
+            latest_root = Path(output_dir) / "output" / "paper-live-shell" / "latest"
+            latest_root.mkdir(parents=True, exist_ok=True)
+            (latest_root / "policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "version": 3,
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "symbol_lifecycle": [
+                            {"symbol": "ETHUSDT", "recommended_action": "hold", "target_state": "observe_only"}
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", FakeShell):
+                    result = run_live_paper_daemon(
+                        config_path=config_path,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+            summary_payload = json.loads(result["run_paths"].summary_path.read_text(encoding="utf-8"))
+            self.assertEqual(summary_payload["decision_count"], 2)
+            self.assertIn("ETHUSDT", summary_payload["observe_only_symbols"])
+
     def test_run_live_paper_daemon_requires_credentials_for_bitget_live_orders(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
             with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetDaemonClient()):

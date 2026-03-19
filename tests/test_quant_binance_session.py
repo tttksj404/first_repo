@@ -367,6 +367,147 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(capped.final_mode, "cash")
             self.assertIn("ACTIVE_POLICY_MAJORS_ONLY", capped.rejection_reasons)
 
+    def test_cap_live_order_decision_blocks_entries_on_executive_rollback(self) -> None:
+        import tempfile
+        session = self._build_session()
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 1000.0,
+            "futures_available_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "executive_operating_verdict": {
+                            "verdict": "rollback",
+                            "confidence": "high",
+                            "reasons": ["EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"],
+                        },
+                        "live_evidence_rejudge": {
+                            "status": "waiting",
+                            "effective_verdict": "rollback",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            decision = make_decision(
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                final_mode="futures",
+                order_intent_notional_usd=100.0,
+                net_expected_edge_bps=30.0,
+            )
+            capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+            self.assertEqual(capped.final_mode, "cash")
+            self.assertIn("EXECUTIVE_OPERATING_VERDICT_ROLLBACK", capped.rejection_reasons)
+            self.assertIn("LIVE_EVIDENCE_REJUDGE_WAITING", capped.rejection_reasons)
+
+    def test_cap_live_order_decision_blocks_symbol_lifecycle_hold(self) -> None:
+        import tempfile
+        session = self._build_session()
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 1000.0,
+            "futures_available_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "symbol_lifecycle": [
+                            {"symbol": "BTCUSDT", "recommended_action": "hold", "target_state": "observe_only"}
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            decision = make_decision(
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                final_mode="futures",
+                order_intent_notional_usd=100.0,
+                net_expected_edge_bps=30.0,
+            )
+            capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+            self.assertEqual(capped.final_mode, "cash")
+            self.assertIn("SYMBOL_LIFECYCLE_HOLD", capped.rejection_reasons)
+
+    def test_cap_live_order_decision_blocks_non_major_when_auto_mode_is_tighter(self) -> None:
+        import tempfile
+        session = self._build_session()
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 1000.0,
+            "futures_available_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "XRPUSDT", "min_notional_usd": 5.0, "min_quantity": 0.1}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "auto_mode": {
+                            "mode": "tighter",
+                            "policy_guidance": {"block_non_major_positive": True},
+                            "runtime_guidance": {
+                                "mode_thresholds": {"futures_score_min_delta": 2.0},
+                                "risk": {"per_trade_equity_risk_scale": 0.85},
+                                "cash_reserve": {"when_futures_enabled_delta": 0.03},
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            decision = make_decision(
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                symbol="XRPUSDT",
+                final_mode="futures",
+                predictability_score=90.0,
+                order_intent_notional_usd=100.0,
+                net_expected_edge_bps=30.0,
+            )
+            capped = session._cap_live_order_decision(decision, reference_price=1.0)
+            self.assertEqual(capped.final_mode, "cash")
+            self.assertIn("AUTO_MODE_BLOCK_NON_MAJOR_POSITIVE", capped.rejection_reasons)
+
+    def test_cash_reserve_fraction_uses_conservative_auto_mode_runtime_guidance(self) -> None:
+        import tempfile
+        session = self._build_session()
+        session.capital_report = {"can_trade_futures_any": True}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "auto_mode": {
+                            "mode": "tighter",
+                            "runtime_guidance": {"cash_reserve": {"when_futures_enabled_delta": 0.03}},
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            expected = session.runtime.paper_service.settings.cash_reserve.when_futures_enabled + 0.03
+            self.assertAlmostEqual(session._cash_reserve_fraction(), expected, places=6)
+
     def test_cap_live_order_decision_uses_persisted_policy_to_relax_expected_profit_floor(self) -> None:
         import tempfile
         session = self._build_session(settings=replace(
@@ -643,7 +784,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
         capped = session._cap_live_order_decision(make_decision(timestamp=now, symbol="BTCUSDT", order_intent_notional_usd=1000.0), reference_price=50000.0)
         self.assertEqual(capped.final_mode, "futures")
-        self.assertAlmostEqual(capped.order_intent_notional_usd, 1625.0, places=6)
+        self.assertAlmostEqual(capped.order_intent_notional_usd, 1300.0, places=6)
         self.assertIn("OPERATIONAL_AGGRESSIVE_PASS_SCALE", capped.size_boost_reasons)
 
     def test_cap_live_order_decision_does_not_scale_up_alt_on_operational_aggressive_pass(self) -> None:
@@ -713,7 +854,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
         capped = session._cap_live_order_decision(make_decision(timestamp=now, order_intent_notional_usd=1000.0), reference_price=50000.0)
         self.assertEqual(capped.final_mode, "futures")
-        self.assertAlmostEqual(capped.order_intent_notional_usd, 1265.0, places=6)
+        self.assertAlmostEqual(capped.order_intent_notional_usd, 1150.0, places=6)
         self.assertIn("OPERATIONAL_STRONG_PASS_SCALE", capped.size_boost_reasons)
 
     def test_cap_live_order_decision_blocks_new_entries_on_early_operational_stop(self) -> None:
