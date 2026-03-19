@@ -66,7 +66,17 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
                         "estimated_live_acceptance_rate": 0.75,
                         "tested_order_count": 1,
                         "order_error_count": 2,
+                        "executive_verdict": "tighten",
+                        "executive_reason_codes": ["EXECUTIVE_TIGHTEN_BY_AUTO_MODE"],
                         "top_error_codes": [{"code": "40762", "count": 2}],
+                        "policy_bucket_summary": [
+                            {
+                                "policy_bucket": "active_policy",
+                                "live_order_count": 2,
+                                "estimated_live_acceptance_rate": 1.0,
+                                "order_error_count": 0,
+                            }
+                        ],
                         "symbol_order_summary": [
                             {"symbol": "BTCUSDT", "live_order_count": 2, "estimated_live_acceptance_rate": 1.0, "order_error_count": 0}
                         ],
@@ -76,8 +86,10 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
             )
             text = format_execution_quality_report(base.parent)
             self.assertIn("[실행 품질 리포트]", text)
+            self.assertIn("운영 총괄 판정: tighten", text)
             self.assertIn("주요 오류 코드", text)
             self.assertIn("심볼별 주문 상태", text)
+            self.assertIn("정책 버킷별 주문 상태", text)
 
     def test_format_runtime_telegram_report_in_korean(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

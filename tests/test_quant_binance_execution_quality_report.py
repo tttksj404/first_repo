@@ -25,6 +25,7 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
                                 "slippage_bps": 4.0,
                                 "realized_edge_bps": 12.0,
                                 "expected_net_edge_bps": 20.0,
+                                "entry_policy_bucket": "active_policy",
                             }
                         ),
                         json.dumps(
@@ -35,6 +36,7 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
                                 "realized_edge_bps": -2.0,
                                 "expected_net_edge_bps": 10.0,
                                 "protection_error": True,
+                                "entry_policy_bucket": "staged_candidate",
                             }
                         ),
                     ]
@@ -43,14 +45,14 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (logs_dir / "tested_orders.jsonl").write_text(
-                json.dumps({"symbol": "BTCUSDT"}) + "\n",
+                json.dumps({"symbol": "BTCUSDT", "entry_policy_bucket": "active_policy"}) + "\n",
                 encoding="utf-8",
             )
             (logs_dir / "order_errors.jsonl").write_text(
                 "\n".join(
                     [
-                        json.dumps({"symbol": "ETHUSDT", "error_message": 'Bitget HTTP 400: {"code":"40762","msg":"balance"}'}),
-                        json.dumps({"symbol": "ETHUSDT", "error_message": 'Bitget HTTP 400: {"code":"40762","msg":"balance"}'}),
+                        json.dumps({"symbol": "ETHUSDT", "entry_policy_bucket": "staged_candidate", "error_message": 'Bitget HTTP 400: {"code":"40762","msg":"balance"}'}),
+                        json.dumps({"symbol": "ETHUSDT", "entry_policy_bucket": "staged_candidate", "error_message": 'Bitget HTTP 400: {"code":"40762","msg":"balance"}'}),
                     ]
                 )
                 + "\n",
@@ -136,6 +138,11 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
             by_symbol = {row["symbol"]: row for row in report.symbol_order_summary}
             self.assertEqual(by_symbol["ETHUSDT"]["order_error_count"], 2)
             self.assertEqual(by_symbol["ETHUSDT"]["reject_rate"], 1.0)
+            by_policy_bucket = {row["policy_bucket"]: row for row in report.policy_bucket_summary}
+            self.assertEqual(by_policy_bucket["active_policy"]["live_order_count"], 1)
+            self.assertEqual(by_policy_bucket["active_policy"]["tested_order_count"], 1)
+            self.assertEqual(by_policy_bucket["staged_candidate"]["order_error_count"], 2)
+            self.assertEqual(by_policy_bucket["staged_candidate"]["reject_rate"], 1.0)
             self.assertEqual(report.top_symbols[0]["symbol"], "BTCUSDT")
             self.assertTrue(report.top_symbols[0]["validation_ready"])
             self.assertEqual(report.checkpoint_symbols[0]["symbol"], "BTCUSDT")
