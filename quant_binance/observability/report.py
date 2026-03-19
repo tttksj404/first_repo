@@ -2204,43 +2204,58 @@ def _live_evidence_snapshot(validation_evidence: dict[str, object] | None) -> di
     sample_watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
     active_bucket = policy_evidence_bucket(validation_evidence, "active_policy")
     policy_alignment = dict(active_bucket.get("alignment") or payload.get("current_policy_evidence_alignment", {}) or {})
+    bucket_direct = _policy_context_bucket_direct_metrics(payload)
     validation_runs = list(payload.get("validation_runs", []) or [])
     walk_forward_windows = list(payload.get("walk_forward_windows", []) or [])
-    run_count = max(_coerce_int(payload.get("run_count")), len(validation_runs))
+    run_count = max(
+        _coerce_int(payload.get("run_count")),
+        len(validation_runs),
+        _coerce_int(bucket_direct.get("run_count")),
+    )
     live_order_count = max(
         _coerce_int(payload.get("total_live_order_count")),
         _coerce_int(payload.get("live_order_count")),
         _coerce_int(micro_live_gate.get("live_order_count")),
     )
     closed_trade_count = max(
+        _coerce_int(bucket_direct.get("closed_trade_count")),
         _coerce_int(payload.get("total_closed_trade_count")),
         _coerce_int(payload.get("closed_trade_count")),
         _coerce_int(micro_live_gate.get("closed_trade_count")),
     )
     walk_forward_window_count = max(
+        _coerce_int(bucket_direct.get("walk_forward_window_count")),
         _coerce_int(payload.get("runner_walk_forward_window_count")),
         _coerce_int(payload.get("walk_forward_window_count")),
         len(walk_forward_windows),
     )
-    positive_walk_forward_ratio = round(
-        _coerce_float(
-            payload.get(
-                "runner_positive_walk_forward_ratio",
-                payload.get("positive_walk_forward_ratio"),
-            )
-        ),
-        6,
-    )
+    positive_walk_forward_ratio = round(_coerce_float(bucket_direct.get("positive_walk_forward_ratio")), 6)
+    if positive_walk_forward_ratio == 0.0 and walk_forward_window_count <= 0:
+        positive_walk_forward_ratio = round(
+            _coerce_float(
+                payload.get(
+                    "runner_positive_walk_forward_ratio",
+                    payload.get("positive_walk_forward_ratio"),
+                )
+            ),
+            6,
+        )
     return {
         "run_count": run_count,
+        "decision_count": _coerce_int(bucket_direct.get("decision_count")),
         "live_order_count": live_order_count,
         "closed_trade_count": closed_trade_count,
+        "realized_pnl_usd": round(
+            _coerce_float(bucket_direct.get("realized_pnl_usd", payload.get("runner_total_realized_pnl_usd"))),
+            6,
+        ),
         "walk_forward_window_count": walk_forward_window_count,
         "positive_walk_forward_ratio": positive_walk_forward_ratio,
         "sample_quality_watchdog_status": str(sample_watchdog.get("status", "not_available") or "not_available"),
         "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
         "policy_lineage_status": str(policy_alignment.get("status", "unknown") or "unknown"),
         "bucket_available": bool(active_bucket.get("available")) or "policy_evidence_buckets" not in dict(validation_evidence or {}),
+        "bucket_direct_available": bool(bucket_direct.get("available")),
     }
 
 
@@ -2260,8 +2275,14 @@ def _build_live_evidence_rejudge(
     current_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "hold") or "hold")
     evidence_delta = {
         "run_count": int(current_snapshot.get("run_count", 0)) - int(previous_snapshot.get("run_count", 0)),
+        "decision_count": int(current_snapshot.get("decision_count", 0)) - int(previous_snapshot.get("decision_count", 0)),
         "live_order_count": int(current_snapshot.get("live_order_count", 0)) - int(previous_snapshot.get("live_order_count", 0)),
         "closed_trade_count": int(current_snapshot.get("closed_trade_count", 0)) - int(previous_snapshot.get("closed_trade_count", 0)),
+        "realized_pnl_usd": round(
+            float(current_snapshot.get("realized_pnl_usd", 0.0) or 0.0)
+            - float(previous_snapshot.get("realized_pnl_usd", 0.0) or 0.0),
+            6,
+        ),
         "walk_forward_window_count": int(current_snapshot.get("walk_forward_window_count", 0)) - int(previous_snapshot.get("walk_forward_window_count", 0)),
         "positive_walk_forward_ratio": round(
             float(current_snapshot.get("positive_walk_forward_ratio", 0.0) or 0.0)
@@ -2275,6 +2296,8 @@ def _build_live_evidence_rejudge(
         if isinstance(item, dict)
     ]
     fresh_reasons: list[str] = []
+    if evidence_delta["decision_count"] >= 2:
+        fresh_reasons.append("POLICY_BUCKET_DECISION_SAMPLE_INCREASED")
     if evidence_delta["live_order_count"] >= 2:
         fresh_reasons.append("LIVE_ORDER_SAMPLE_INCREASED")
     if evidence_delta["closed_trade_count"] >= 1:
@@ -2410,6 +2433,57 @@ def _coerce_int(value: object) -> int:
         return 0
 
 
+def _policy_context_bucket_direct_metrics(payload: dict[str, object] | None) -> dict[str, object]:
+    item = dict(payload or {})
+    bucket_runs = [dict(run) for run in list(item.get("policy_context_bucket_validation_runs", []) or [])]
+    bucket_windows = [dict(window) for window in list(item.get("policy_context_bucket_walk_forward_windows", []) or [])]
+    bucket_closed_trade_count = max(
+        _coerce_int(item.get("policy_context_bucket_closed_trade_count")),
+        sum(_coerce_int(run.get("closed_trade_count")) for run in bucket_runs),
+    )
+    bucket_decision_count = max(
+        _coerce_int(item.get("policy_context_bucket_decision_count")),
+        sum(_coerce_int(run.get("decision_count")) for run in bucket_runs),
+    )
+    positive_walk_forward_count = sum(
+        1
+        for window in bucket_windows
+        if _coerce_float(window.get("avg_net_edge_bps")) > 0.0 and _coerce_float(window.get("avg_score")) >= 0.0
+    )
+    bucket_positive_walk_forward_ratio = round(
+        _coerce_float(
+            item.get(
+                "policy_context_bucket_positive_walk_forward_ratio",
+                positive_walk_forward_count / len(bucket_windows) if bucket_windows else 0.0,
+            )
+        ),
+        6,
+    )
+    return {
+        "available": bool(item.get("policy_context_bucket_available")) or bool(bucket_runs) or bool(bucket_windows) or bucket_closed_trade_count > 0 or bucket_decision_count > 0,
+        "bucket_name": str(item.get("policy_context_bucket_name", "") or ""),
+        "run_count": max(_coerce_int(item.get("policy_context_bucket_run_count")), len(bucket_runs)),
+        "decision_count": bucket_decision_count,
+        "closed_trade_count": bucket_closed_trade_count,
+        "realized_pnl_usd": round(
+            _coerce_float(
+                item.get(
+                    "policy_context_bucket_total_realized_pnl_usd",
+                    sum(_coerce_float(run.get("realized_pnl_usd")) for run in bucket_runs),
+                )
+            ),
+            6,
+        ),
+        "walk_forward_window_count": max(_coerce_int(item.get("policy_context_bucket_walk_forward_window_count")), len(bucket_windows)),
+        "positive_walk_forward_ratio": bucket_positive_walk_forward_ratio,
+        "drawdown_to_pnl_ratio": _recent_drawdown_ratio(
+            [_coerce_float(run.get("realized_pnl_usd")) for run in bucket_runs]
+        ),
+        "validation_runs": bucket_runs,
+        "walk_forward_windows": bucket_windows,
+    }
+
+
 def _recent_drawdown_ratio(values: list[float]) -> float:
     if not values:
         return 0.0
@@ -2429,14 +2503,18 @@ def _recent_retention_window(
     validation_evidence: dict[str, object],
 ) -> dict[str, object]:
     active_evidence = _active_policy_evidence(validation_evidence)
+    bucket_direct = _policy_context_bucket_direct_metrics(active_evidence)
     validation_runs = list(active_evidence.get("validation_runs", []) or [])
     walk_forward_windows = list(active_evidence.get("walk_forward_windows", []) or [])
     recent_runs = validation_runs[-3:]
     recent_windows = walk_forward_windows[-3:]
+    recent_bucket_runs = list(bucket_direct.get("validation_runs", []) or [])[-3:]
+    recent_bucket_windows = list(bucket_direct.get("walk_forward_windows", []) or [])[-3:]
     recent_live_order_count = sum(_coerce_int(item.get("live_order_count")) for item in recent_runs)
     recent_rejected_live_order_count = sum(_coerce_int(item.get("rejected_live_order_count")) for item in recent_runs)
     recent_accepted_live_order_count = sum(_coerce_int(item.get("accepted_live_order_count")) for item in recent_runs)
     recent_closed_trade_count = sum(_coerce_int(item.get("closed_trade_count")) for item in recent_runs)
+    bucket_recent_closed_trade_count = sum(_coerce_int(item.get("closed_trade_count")) for item in recent_bucket_runs)
     retention_weight = float(max(recent_live_order_count, 0))
     slippage_weight = float(max(recent_accepted_live_order_count, 0))
     recent_retention = (
@@ -2459,33 +2537,50 @@ def _recent_retention_window(
         else 0.0
     )
     recent_pnl_series = [_coerce_float(item.get("realized_pnl_usd")) for item in recent_runs]
+    bucket_recent_pnl_series = [_coerce_float(item.get("realized_pnl_usd")) for item in recent_bucket_runs]
     recent_positive_walk_forward_count = sum(
         1
         for item in recent_windows
         if _coerce_float(item.get("avg_net_edge_bps")) > 0.0 and _coerce_float(item.get("avg_score")) >= 0.0
     )
+    bucket_recent_positive_walk_forward_count = sum(
+        1
+        for item in recent_bucket_windows
+        if _coerce_float(item.get("avg_net_edge_bps")) > 0.0 and _coerce_float(item.get("avg_score")) >= 0.0
+    )
     recent_positive_walk_forward_ratio = (
         round(recent_positive_walk_forward_count / len(recent_windows), 6) if recent_windows else 0.0
+    )
+    bucket_recent_positive_walk_forward_ratio = (
+        round(bucket_recent_positive_walk_forward_count / len(recent_bucket_windows), 6) if recent_bucket_windows else 0.0
     )
     previous_metrics = dict(dict(previous_state.get("retention_monitor", {}) or {}).get("metrics", {}) or {})
     previous_recent = dict(previous_metrics.get("recent_window", {}) or {})
     micro_live_gate = dict(active_evidence.get("micro_live_gate", {}) or {})
+    bucket_recent_drawdown = _recent_drawdown_ratio(bucket_recent_pnl_series)
+    effective_drawdown = bucket_recent_drawdown if recent_bucket_runs else _recent_drawdown_ratio(recent_pnl_series)
     return {
         "available": bool(recent_runs or recent_windows),
         "run_count": len(recent_runs),
-        "walk_forward_window_count": len(recent_windows),
+        "walk_forward_window_count": len(recent_bucket_windows) if recent_bucket_windows else len(recent_windows),
         "live_order_count": recent_live_order_count,
         "accepted_live_order_count": recent_accepted_live_order_count,
         "rejected_live_order_count": recent_rejected_live_order_count,
-        "closed_trade_count": recent_closed_trade_count,
+        "closed_trade_count": bucket_recent_closed_trade_count if recent_bucket_runs else recent_closed_trade_count,
         "avg_edge_retention_ratio": recent_retention,
-        "drawdown_to_pnl_ratio": _recent_drawdown_ratio(recent_pnl_series),
+        "drawdown_to_pnl_ratio": effective_drawdown,
         "reject_rate": recent_reject_rate,
         "avg_slippage_bps": recent_slippage,
-        "positive_walk_forward_ratio": recent_positive_walk_forward_ratio,
+        "positive_walk_forward_ratio": (
+            bucket_recent_positive_walk_forward_ratio if recent_bucket_windows else recent_positive_walk_forward_ratio
+        ),
         "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
+        "bucket_available": bool(bucket_direct.get("available")),
+        "bucket_decision_count": sum(_coerce_int(item.get("decision_count")) for item in recent_bucket_runs),
+        "bucket_realized_pnl_usd": round(sum(bucket_recent_pnl_series), 6),
+        "bucket_run_count": len(recent_bucket_runs),
         "retention_delta": round(recent_retention - _coerce_float(previous_recent.get("avg_edge_retention_ratio", recent_retention)), 6),
-        "drawdown_delta": round(_recent_drawdown_ratio(recent_pnl_series) - _coerce_float(previous_recent.get("drawdown_to_pnl_ratio", _recent_drawdown_ratio(recent_pnl_series))), 6),
+        "drawdown_delta": round(effective_drawdown - _coerce_float(previous_recent.get("drawdown_to_pnl_ratio", effective_drawdown)), 6),
         "reject_rate_delta": round(recent_reject_rate - _coerce_float(previous_recent.get("reject_rate", recent_reject_rate)), 6),
     }
 
@@ -2496,12 +2591,16 @@ def _cumulative_retention_window(
     validation_evidence: dict[str, object],
 ) -> dict[str, object]:
     active_evidence = _active_policy_evidence(validation_evidence)
+    bucket_direct = _policy_context_bucket_direct_metrics(active_evidence)
     validation_runs = list(active_evidence.get("validation_runs", []) or [])
     walk_forward_windows = list(active_evidence.get("walk_forward_windows", []) or [])
+    bucket_runs = list(bucket_direct.get("validation_runs", []) or [])
+    bucket_windows = list(bucket_direct.get("walk_forward_windows", []) or [])
     live_order_count = sum(_coerce_int(item.get("live_order_count")) for item in validation_runs)
     accepted_live_order_count = sum(_coerce_int(item.get("accepted_live_order_count")) for item in validation_runs)
     rejected_live_order_count = sum(_coerce_int(item.get("rejected_live_order_count")) for item in validation_runs)
     closed_trade_count = sum(_coerce_int(item.get("closed_trade_count")) for item in validation_runs)
+    bucket_closed_trade_count = sum(_coerce_int(item.get("closed_trade_count")) for item in bucket_runs)
     retention_weight = float(max(live_order_count, 0))
     slippage_weight = float(max(accepted_live_order_count, 0))
     avg_edge_retention_ratio = (
@@ -2524,37 +2623,51 @@ def _cumulative_retention_window(
         else 0.0
     )
     pnl_series = [_coerce_float(item.get("realized_pnl_usd")) for item in validation_runs]
+    bucket_pnl_series = [_coerce_float(item.get("realized_pnl_usd")) for item in bucket_runs]
     positive_walk_forward_count = sum(
         1
         for item in walk_forward_windows
         if _coerce_float(item.get("avg_net_edge_bps")) > 0.0 and _coerce_float(item.get("avg_score")) >= 0.0
     )
+    bucket_positive_walk_forward_count = sum(
+        1
+        for item in bucket_windows
+        if _coerce_float(item.get("avg_net_edge_bps")) > 0.0 and _coerce_float(item.get("avg_score")) >= 0.0
+    )
     positive_walk_forward_ratio = (
         round(positive_walk_forward_count / len(walk_forward_windows), 6) if walk_forward_windows else 0.0
     )
+    bucket_positive_walk_forward_ratio = (
+        round(bucket_positive_walk_forward_count / len(bucket_windows), 6) if bucket_windows else 0.0
+    )
     previous_metrics = dict(dict(previous_state.get("retention_monitor", {}) or {}).get("metrics", {}) or {})
     previous_cumulative = dict(previous_metrics.get("cumulative_window", {}) or {})
+    effective_drawdown = _recent_drawdown_ratio(bucket_pnl_series) if bucket_runs else _recent_drawdown_ratio(pnl_series)
     return {
         "available": bool(validation_runs or walk_forward_windows),
         "run_count": len(validation_runs),
-        "walk_forward_window_count": len(walk_forward_windows),
+        "walk_forward_window_count": len(bucket_windows) if bucket_windows else len(walk_forward_windows),
         "live_order_count": live_order_count,
         "accepted_live_order_count": accepted_live_order_count,
         "rejected_live_order_count": rejected_live_order_count,
-        "closed_trade_count": closed_trade_count,
+        "closed_trade_count": bucket_closed_trade_count if bucket_runs else closed_trade_count,
         "avg_edge_retention_ratio": avg_edge_retention_ratio,
-        "drawdown_to_pnl_ratio": _recent_drawdown_ratio(pnl_series),
+        "drawdown_to_pnl_ratio": effective_drawdown,
         "reject_rate": reject_rate,
         "avg_slippage_bps": avg_slippage_bps,
-        "positive_walk_forward_ratio": positive_walk_forward_ratio,
+        "positive_walk_forward_ratio": bucket_positive_walk_forward_ratio if bucket_windows else positive_walk_forward_ratio,
+        "bucket_available": bool(bucket_direct.get("available")),
+        "bucket_decision_count": sum(_coerce_int(item.get("decision_count")) for item in bucket_runs),
+        "bucket_realized_pnl_usd": round(sum(bucket_pnl_series), 6),
+        "bucket_run_count": len(bucket_runs),
         "retention_delta": round(
             avg_edge_retention_ratio
             - _coerce_float(previous_cumulative.get("avg_edge_retention_ratio", avg_edge_retention_ratio)),
             6,
         ),
         "drawdown_delta": round(
-            _recent_drawdown_ratio(pnl_series)
-            - _coerce_float(previous_cumulative.get("drawdown_to_pnl_ratio", _recent_drawdown_ratio(pnl_series))),
+            effective_drawdown
+            - _coerce_float(previous_cumulative.get("drawdown_to_pnl_ratio", effective_drawdown)),
             6,
         ),
         "reject_rate_delta": round(reject_rate - _coerce_float(previous_cumulative.get("reject_rate", reject_rate)), 6),
@@ -2637,6 +2750,7 @@ def _retention_monitor(
     if active_status not in {"promote", "promote_aggressive"}:
         return {"status": "inactive", "reasons": []}
     active_evidence = _active_policy_evidence(validation_evidence)
+    bucket_direct = _policy_context_bucket_direct_metrics(active_evidence)
     runner_quality = _runner_quality_evidence(active_evidence)
     if not bool(runner_quality.get("available")):
         return {"status": "inactive", "reasons": []}
@@ -2644,12 +2758,27 @@ def _retention_monitor(
     cumulative_window = _cumulative_retention_window(previous_state=previous_state, validation_evidence=validation_evidence)
     reasons: list[str] = []
     retention = float(runner_quality.get("avg_edge_retention_ratio", 0.0) or 0.0)
-    realized = float(runner_quality.get("realized_pnl_usd", 0.0) or 0.0)
+    realized = float(
+        bucket_direct.get("realized_pnl_usd", runner_quality.get("realized_pnl_usd", 0.0))
+        if bool(bucket_direct.get("available")) and _coerce_int(bucket_direct.get("closed_trade_count")) > 0
+        else runner_quality.get("realized_pnl_usd", 0.0)
+        or 0.0
+    )
     drawdown_ratio = float(runner_quality.get("drawdown_ratio", 0.0) or 0.0)
     reject_rate = float(runner_quality.get("reject_rate", 0.0) or 0.0)
     slippage = float(runner_quality.get("avg_slippage_bps", 0.0) or 0.0)
-    walk_forward_window_count = int(runner_quality.get("walk_forward_window_count", 0) or 0)
-    positive_walk_forward_ratio = float(runner_quality.get("positive_walk_forward_ratio", 0.0) or 0.0)
+    walk_forward_window_count = int(
+        bucket_direct.get("walk_forward_window_count", runner_quality.get("walk_forward_window_count", 0))
+        if bool(bucket_direct.get("available")) and _coerce_int(bucket_direct.get("walk_forward_window_count")) > 0
+        else runner_quality.get("walk_forward_window_count", 0)
+        or 0
+    )
+    positive_walk_forward_ratio = float(
+        bucket_direct.get("positive_walk_forward_ratio", runner_quality.get("positive_walk_forward_ratio", 0.0))
+        if bool(bucket_direct.get("available")) and _coerce_int(bucket_direct.get("walk_forward_window_count")) > 0
+        else runner_quality.get("positive_walk_forward_ratio", 0.0)
+        or 0.0
+    )
     operational_status = str(operational_verdict.get("status", "hold") or "hold")
     sample_watchdog_status = str(dict(active_evidence.get("sample_quality_watchdog", {}) or {}).get("status", "") or "")
     if operational_status == "stop":
@@ -2674,6 +2803,10 @@ def _retention_monitor(
         "avg_slippage_bps": round(slippage, 6),
         "walk_forward_window_count": walk_forward_window_count,
         "positive_walk_forward_ratio": round(positive_walk_forward_ratio, 6),
+        "policy_context_bucket_available": bool(bucket_direct.get("available")),
+        "policy_context_bucket_name": str(bucket_direct.get("bucket_name", "") or ""),
+        "policy_context_bucket_decision_count": _coerce_int(bucket_direct.get("decision_count")),
+        "policy_context_bucket_closed_trade_count": _coerce_int(bucket_direct.get("closed_trade_count")),
         "recent_window": recent_window,
         "cumulative_window": cumulative_window,
     }

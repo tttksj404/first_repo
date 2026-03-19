@@ -345,6 +345,189 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
                 artifact["counterfactual_replay_path"]["current_policy"]["execution_path"]["uses_persisted_validation_evidence"]
             )
 
+    def test_build_policy_comparison_validation_artifact_prefers_bucket_validation_runs_for_current_snapshot(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 4,
+            "active_policy": {
+                "status": "promote",
+                "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}],
+            },
+            "rollout_progression": {"execution_phase": "partial"},
+            "policy_validation": {
+                "evidence": {
+                    "validation_runs": [
+                        {
+                            "live_order_count": 9,
+                            "accepted_live_order_count": 8,
+                            "rejected_live_order_count": 1,
+                            "closed_trade_count": 3,
+                            "realized_pnl_usd": 7.0,
+                            "avg_edge_retention_ratio": 0.88,
+                            "avg_slippage_bps": 3.0,
+                        }
+                    ],
+                    "walk_forward_windows": [{"avg_net_edge_bps": 3.5, "avg_score": 62.0}],
+                }
+            },
+            "policy_evidence_buckets": {
+                "active_policy": {
+                    "available": True,
+                    "source": "persisted_policy_validation_evidence",
+                    "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                    "evidence": {
+                        "runner_walk_forward_window_count": 2,
+                        "runner_positive_walk_forward_ratio": 1.0,
+                        "validation_runs": [
+                            {
+                                "live_order_count": 2,
+                                "accepted_live_order_count": 2,
+                                "rejected_live_order_count": 0,
+                                "closed_trade_count": 1,
+                                "realized_pnl_usd": 1.2,
+                                "avg_edge_retention_ratio": 0.75,
+                                "avg_slippage_bps": 2.4,
+                            },
+                            {
+                                "live_order_count": 4,
+                                "accepted_live_order_count": 3,
+                                "rejected_live_order_count": 1,
+                                "closed_trade_count": 1,
+                                "realized_pnl_usd": 1.0,
+                                "avg_edge_retention_ratio": 0.65,
+                                "avg_slippage_bps": 3.2,
+                            },
+                        ],
+                        "walk_forward_windows": [
+                            {"avg_net_edge_bps": 2.0, "avg_score": 55.0},
+                            {"avg_net_edge_bps": 1.0, "avg_score": 51.0},
+                        ],
+                    },
+                }
+            },
+        }
+        current_lineage = build_policy_state_lineage_snapshot(current_policy_state, source="current_policy_state")
+        current_policy_state["policy_lineage"] = dict(current_lineage)
+        current_policy_state["policy_evidence_buckets"]["active_policy"]["policy_lineage"] = dict(current_lineage)
+        current_policy_state["policy_evidence_buckets"]["active_policy"]["evidence_lineage"] = dict(current_lineage)
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 3,
+                        "accepted_live_order_count": 2,
+                        "rejected_live_order_count": 1,
+                        "avg_slippage_bps": 9.0,
+                        "avg_edge_retention_ratio": 0.2,
+                        "avg_realized_edge_bps": -2.0,
+                        "avg_expected_edge_bps": 8.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": -2.0, "realized_return_bps_estimate": -5.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "final_mode": "cash", "predictability_score": 42.0, "net_expected_edge_bps": 0.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"})
+                + "\n",
+                encoding="utf-8",
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            self.assertEqual(artifact["current_replay_summary"]["source"], "persisted_policy_validation_evidence")
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["live_order_count"], 6)
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["closed_trade_count"], 2)
+            self.assertAlmostEqual(artifact["current_replay_summary"]["positive_walk_forward_ratio"], 1.0)
+            self.assertEqual(artifact["validation_path"]["current_walk_forward_window_count"], 2)
+            self.assertAlmostEqual(artifact["validation_path"]["current_positive_walk_forward_ratio"], 1.0)
+
+    def test_build_policy_comparison_validation_artifact_falls_back_to_legacy_current_validation_runs_without_buckets(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 2,
+            "active_policy": {"status": "baseline", "adjustments": []},
+            "policy_validation": {
+                "evidence": {
+                    "runner_walk_forward_window_count": 2,
+                    "runner_positive_walk_forward_ratio": 1.0,
+                    "validation_runs": [
+                        {
+                            "live_order_count": 3,
+                            "accepted_live_order_count": 3,
+                            "rejected_live_order_count": 0,
+                            "closed_trade_count": 1,
+                            "realized_pnl_usd": 1.1,
+                            "avg_edge_retention_ratio": 0.72,
+                            "avg_slippage_bps": 2.8,
+                        },
+                        {
+                            "live_order_count": 3,
+                            "accepted_live_order_count": 2,
+                            "rejected_live_order_count": 1,
+                            "closed_trade_count": 1,
+                            "realized_pnl_usd": 0.9,
+                            "avg_edge_retention_ratio": 0.68,
+                            "avg_slippage_bps": 3.1,
+                        },
+                    ],
+                    "walk_forward_windows": [
+                        {"avg_net_edge_bps": 1.8, "avg_score": 54.0},
+                        {"avg_net_edge_bps": 1.1, "avg_score": 52.0},
+                    ],
+                }
+            },
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 4,
+                        "accepted_live_order_count": 2,
+                        "rejected_live_order_count": 2,
+                        "avg_slippage_bps": 11.0,
+                        "avg_edge_retention_ratio": 0.1,
+                        "avg_realized_edge_bps": -4.0,
+                        "avg_expected_edge_bps": 6.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": -3.0, "realized_return_bps_estimate": -7.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "final_mode": "cash", "predictability_score": 40.0, "net_expected_edge_bps": 0.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"})
+                + "\n",
+                encoding="utf-8",
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            self.assertEqual(artifact["current_replay_summary"]["source"], "persisted_policy_validation_evidence")
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["live_order_count"], 6)
+            self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["closed_trade_count"], 2)
+            self.assertAlmostEqual(artifact["current_replay_summary"]["positive_walk_forward_ratio"], 1.0)
+            self.assertEqual(artifact["validation_path"]["current_walk_forward_window_count"], 2)
+            self.assertAlmostEqual(artifact["validation_path"]["current_positive_walk_forward_ratio"], 1.0)
+
     def test_build_policy_comparison_validation_artifact_filters_mismatched_run_lineage(self) -> None:
         candidate_policy = {"adjustments": []}
         current_policy_state = {

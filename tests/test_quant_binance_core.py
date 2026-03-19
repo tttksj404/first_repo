@@ -1214,6 +1214,154 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertTrue(state["policy_evidence_buckets"]["previous_policy"]["available"])
         self.assertTrue(state["policy_validation"]["evidence"]["policy_evidence_buckets"]["previous_policy"]["available"])
 
+    def test_build_persisted_policy_state_prefers_active_bucket_for_retention_and_rejudge_snapshots(self) -> None:
+        state = build_persisted_policy_state(
+            {
+                "version": 4,
+                "policy_lineage": {"structural_key": "policy-v1"},
+                "executive_operating_verdict": {"verdict": "rebuild_evidence", "confidence": "medium"},
+                "policy_validation": {
+                    "evidence": {
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                                "evidence": {
+                                    "run_count": 1,
+                                    "total_live_order_count": 2,
+                                    "total_closed_trade_count": 1,
+                                    "runner_walk_forward_window_count": 1,
+                                    "runner_positive_walk_forward_ratio": 1.0,
+                                    "sample_quality_watchdog": {"status": "healthy"},
+                                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 2, "closed_trade_count": 1},
+                                    "validation_runs": [
+                                        {
+                                            "realized_pnl_usd": 1.0,
+                                            "live_order_count": 2,
+                                            "accepted_live_order_count": 2,
+                                            "rejected_live_order_count": 0,
+                                            "closed_trade_count": 1,
+                                            "avg_edge_retention_ratio": 0.82,
+                                            "avg_slippage_bps": 3.0,
+                                        }
+                                    ],
+                                    "walk_forward_windows": [{"avg_net_edge_bps": 2.0, "avg_score": 58.0}],
+                                },
+                            }
+                        }
+                    }
+                },
+                "active_policy": {
+                    "status": "promote",
+                    "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}],
+                },
+                "retention_monitor": {
+                    "status": "stable",
+                    "metrics": {
+                        "recent_window": {
+                            "avg_edge_retention_ratio": 0.82,
+                            "drawdown_to_pnl_ratio": 0.15,
+                            "reject_rate": 0.0,
+                        }
+                    },
+                },
+                "rollout_status": "ready",
+            },
+            {"adjustments": [{"symbol": "BTCUSDT", "action": "keep", "size_multiplier": 1.0}]},
+            {"status": "keep", "requested_status": "keep", "reasons": []},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "pass",
+                "evidence": {
+                    "policy_evidence_buckets": {
+                        "active_policy": {
+                            "available": True,
+                            "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                            "evidence": {
+                                "run_count": 1,
+                                "total_live_order_count": 3,
+                                "total_closed_trade_count": 1,
+                                "runner_total_realized_pnl_usd": 2.4,
+                                "runner_avg_edge_retention_ratio": 0.52,
+                                "runner_drawdown_to_pnl_ratio": 0.5,
+                                "runner_reject_rate": 0.12,
+                                "runner_avg_slippage_bps": 6.5,
+                                "runner_walk_forward_window_count": 2,
+                                "runner_positive_walk_forward_ratio": 0.0,
+                                "sample_quality_watchdog": {"status": "thin"},
+                                "micro_live_gate": {"available": True, "status": "pending", "live_order_count": 3, "closed_trade_count": 1},
+                                "validation_runs": [
+                                    {
+                                        "realized_pnl_usd": 1.0,
+                                        "live_order_count": 1,
+                                        "accepted_live_order_count": 1,
+                                        "rejected_live_order_count": 0,
+                                        "closed_trade_count": 0,
+                                        "avg_edge_retention_ratio": 0.7,
+                                        "avg_slippage_bps": 4.0,
+                                    },
+                                    {
+                                        "realized_pnl_usd": 0.8,
+                                        "live_order_count": 1,
+                                        "accepted_live_order_count": 1,
+                                        "rejected_live_order_count": 0,
+                                        "closed_trade_count": 0,
+                                        "avg_edge_retention_ratio": 0.5,
+                                        "avg_slippage_bps": 6.0,
+                                    },
+                                    {
+                                        "realized_pnl_usd": 0.6,
+                                        "live_order_count": 1,
+                                        "accepted_live_order_count": 0,
+                                        "rejected_live_order_count": 1,
+                                        "closed_trade_count": 1,
+                                        "avg_edge_retention_ratio": 0.3,
+                                        "avg_slippage_bps": 0.0,
+                                    },
+                                ],
+                                "walk_forward_windows": [
+                                    {"avg_net_edge_bps": -0.5, "avg_score": 46.0},
+                                    {"avg_net_edge_bps": -0.2, "avg_score": 44.0},
+                                ],
+                            },
+                        }
+                    },
+                    "run_count": 5,
+                    "total_live_order_count": 12,
+                    "total_closed_trade_count": 4,
+                    "runner_total_realized_pnl_usd": 9.0,
+                    "runner_avg_edge_retention_ratio": 0.86,
+                    "runner_drawdown_to_pnl_ratio": 0.12,
+                    "runner_reject_rate": 0.0,
+                    "runner_avg_slippage_bps": 2.0,
+                    "runner_walk_forward_window_count": 4,
+                    "runner_positive_walk_forward_ratio": 1.0,
+                    "sample_quality_watchdog": {"status": "healthy"},
+                    "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 12, "closed_trade_count": 4},
+                    "validation_runs": [
+                        {
+                            "realized_pnl_usd": 3.0,
+                            "live_order_count": 4,
+                            "accepted_live_order_count": 4,
+                            "rejected_live_order_count": 0,
+                            "closed_trade_count": 1,
+                            "avg_edge_retention_ratio": 0.9,
+                            "avg_slippage_bps": 2.0,
+                        }
+                    ],
+                    "walk_forward_windows": [{"avg_net_edge_bps": 3.0, "avg_score": 61.0}],
+                },
+            },
+        )
+        self.assertEqual(state["retention_monitor"]["status"], "rollback")
+        self.assertIn("RETENTION_MONITOR_RECENT_REJECT_SURGE", state["retention_monitor"]["reasons"])
+        self.assertIn("RETENTION_MONITOR_RECENT_WALK_FORWARD_FAIL", state["retention_monitor"]["reasons"])
+        self.assertEqual(state["retention_monitor"]["metrics"]["recent_window"]["live_order_count"], 3)
+        self.assertEqual(state["live_evidence_rejudge"]["status"], "waiting")
+        self.assertEqual(state["live_evidence_rejudge"]["current_snapshot"]["live_order_count"], 3)
+        self.assertEqual(state["live_evidence_rejudge"]["current_snapshot"]["micro_live_status"], "pending")
+        self.assertEqual(state["live_evidence_rejudge"]["evidence_delta"]["live_order_count"], 1)
+
     def test_build_persisted_policy_state_demotes_on_walk_forward_weakness(self) -> None:
         previous_active = {"status": "promote", "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}]}
         state = build_persisted_policy_state(
