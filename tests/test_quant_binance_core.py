@@ -9,7 +9,7 @@ from quant_binance.models import FeatureVector, MarketSnapshot
 from quant_binance.execution.paper_broker import PaperBroker
 from quant_binance.observability.decision_log import hash_decision_payload, render_audit_report, render_outcome_audit_report, render_prediction_report
 from quant_binance.observability.manifest import build_manifest_entry, write_manifest
-from quant_binance.observability.report import build_auto_tune_policy, build_persisted_policy_state, build_policy_validation, build_promotion_verdict, build_runtime_summary
+from quant_binance.observability.report import build_auto_tune_policy, build_executive_operating_verdict, build_persisted_policy_state, build_policy_validation, build_promotion_verdict, build_runtime_summary
 from quant_binance.policy.portfolio import build_portfolio_intent, decision_from_portfolio_intent
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
@@ -612,6 +612,66 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(summary["promotion_verdict"]["status"], "keep")
         self.assertEqual(summary["policy_state"]["status"], "keep")
         self.assertIn(summary["policy_validation"]["status"], {"pass", "pending", "fail"})
+        self.assertIn("verdict", summary["executive_operating_verdict"])
+
+    def test_build_executive_operating_verdict_rebuilds_pending_expansion_evidence(self) -> None:
+        verdict = build_executive_operating_verdict(
+            {"status": "keep", "requested_status": "promote"},
+            {"status": "hold", "reasons": ["INSUFFICIENT_SAMPLE"]},
+            {
+                "status": "pending",
+                "reasons": ["PROMOTION_STAGED_PENDING_MICRO_LIVE"],
+                "evidence": {
+                    "sample_quality_watchdog": {"status": "thin"},
+                    "micro_live_gate": {"available": True, "status": "pending"},
+                },
+            },
+        )
+        self.assertEqual(verdict["verdict"], "rebuild_evidence")
+        self.assertIn("EXECUTIVE_REBUILD_BY_PENDING_VALIDATION", verdict["reasons"])
+
+    def test_build_executive_operating_verdict_tightens_on_checkpoint_signal(self) -> None:
+        verdict = build_executive_operating_verdict(
+            {"status": "keep", "requested_status": "promote"},
+            {"status": "pass", "reasons": []},
+            {
+                "status": "fail",
+                "reasons": ["PROMOTION_PATH_BLOCKED_BY_SIMPLE_BASELINE_CONTROL"],
+                "evidence": {
+                    "checkpoint_auto_judge": {"verdict": "tighten"},
+                    "baseline_control_comparison": {
+                        "available": True,
+                        "verdict": "parity",
+                        "expansion_gate": "block",
+                    },
+                },
+            },
+        )
+        self.assertEqual(verdict["verdict"], "tighten")
+        self.assertIn("EXECUTIVE_TIGHTEN_BY_CHECKPOINT", verdict["reasons"])
+
+    def test_build_executive_operating_verdict_expands_only_with_aligned_support(self) -> None:
+        verdict = build_executive_operating_verdict(
+            {"status": "promote", "requested_status": "promote"},
+            {"status": "strong_pass", "reasons": ["OPERATING_WITH_STRONG_EDGE"]},
+            {
+                "status": "pass",
+                "reasons": ["PROMOTION_PATH_VALIDATED"],
+                "evidence": {
+                    "checkpoint_auto_judge": {"verdict": "expand"},
+                    "sample_quality_watchdog": {"status": "promote_ready"},
+                    "baseline_control_comparison": {
+                        "available": True,
+                        "verdict": "supportive",
+                        "expansion_gate": "pass",
+                    },
+                    "auto_mode": {"mode": "cautiously_expanded"},
+                    "micro_live_gate": {"available": True, "status": "pass"},
+                },
+            },
+        )
+        self.assertEqual(verdict["verdict"], "expand")
+        self.assertIn("EXECUTIVE_EXPAND_SUPPORTED_BY_ALIGNED_EVIDENCE", verdict["reasons"])
 
     def test_build_promotion_verdict_blocks_promotion_when_candidate_underperforms_current(self) -> None:
         verdict = build_promotion_verdict(
