@@ -1363,6 +1363,8 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
             "validation_path_mode",
             "sample_progress",
             "sample_quality_watchdog",
+            "baseline_control_comparison",
+            "checkpoint_auto_judge",
             "score_alignment_summary",
             "total_closed_trade_count",
             "total_live_order_count",
@@ -1464,6 +1466,7 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
     runner_quality = _runner_quality_evidence(evidence)
     sample_watchdog = dict(evidence.get("sample_quality_watchdog", {}) or {})
+    checkpoint_auto_judge = dict(evidence.get("checkpoint_auto_judge", {}) or {})
     sample_watchdog_status = str(sample_watchdog.get("status", "") or "")
     reasons: list[str] = []
     status = "fail"
@@ -1506,6 +1509,16 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
         reasons.append("SAMPLE_QUALITY_WATCHDOG_THIN")
         if requested_status in {"promote", "promote_aggressive"}:
             pending_due_to_warmup = True
+    checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
+    if checkpoint_verdict == "rollback":
+        status = "fail"
+        reasons.append("CHECKPOINT_AUTO_JUDGE_ROLLBACK")
+    elif checkpoint_verdict == "tighten":
+        reasons.append("CHECKPOINT_AUTO_JUDGE_TIGHTEN")
+        if requested_status in {"promote", "promote_aggressive"}:
+            status = "fail"
+    elif checkpoint_verdict == "expand":
+        reasons.append("CHECKPOINT_AUTO_JUDGE_EXPAND")
     if bool(runner_quality.get("available")):
         micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
         micro_live_status = str(micro_live_gate.get("status", "") or "")
@@ -2188,6 +2201,7 @@ def build_persisted_policy_state(
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
     micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
     sample_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
+    checkpoint_auto_judge = dict(validation_evidence.get("checkpoint_auto_judge", {}) or {})
     rollout_status = "steady"
     rollout_reason = "UNCHANGED"
     retention_monitor = _retention_monitor(previous_state, previous_active, validation_evidence, operational_verdict)
@@ -2208,7 +2222,17 @@ def build_persisted_policy_state(
         validation_status=validation_status,
         staged_micro_live_block=staged_micro_live_block,
     )
-    if protective_transition:
+    if (
+        str(checkpoint_auto_judge.get("verdict", "") or "") == "rollback"
+        and previous_active
+        and str(previous_active.get("status", "") or "") not in {"baseline", "keep"}
+    ):
+        active_policy = {"status": "baseline", "adjustments": []}
+        lifecycle = "rolled_back"
+        rollout_status = "reverted"
+        rollout_reason = "CHECKPOINT_AUTO_JUDGE_ROLLBACK"
+        version = previous_version + 1
+    elif protective_transition:
         if protective_transition == "disable":
             active_policy = {
                 "status": "disabled",
@@ -2305,6 +2329,7 @@ def build_persisted_policy_state(
     active_policy = _annotate_active_policy(active_policy, promotion_verdict, retention_monitor)
     active_policy["rollout_progression"] = rollout_progression
     active_policy["checkpoint_revalidation"] = checkpoint_revalidation
+    active_policy["checkpoint_auto_judge"] = checkpoint_auto_judge
     active_policy["sample_quality_watchdog"] = sample_watchdog
     return {
         "version": version,
@@ -2314,6 +2339,7 @@ def build_persisted_policy_state(
         "rollout_progression": rollout_progression,
         "retention_monitor": retention_monitor,
         "checkpoint_revalidation": checkpoint_revalidation,
+        "checkpoint_auto_judge": checkpoint_auto_judge,
         "active_policy": active_policy,
         "candidate_policy": candidate_policy,
         "promotion_verdict": promotion_verdict,
@@ -2332,6 +2358,7 @@ def build_policy_history_entry(policy_state: dict[str, object]) -> dict[str, obj
         "rollout_reason": policy_state.get("rollout_reason", "unknown"),
         "retention_monitor": dict(policy_state.get("retention_monitor", {}) or {}),
         "checkpoint_revalidation": dict(policy_state.get("checkpoint_revalidation", {}) or {}),
+        "checkpoint_auto_judge": dict(policy_state.get("checkpoint_auto_judge", {}) or {}),
         "rollout_progression": dict(policy_state.get("rollout_progression", {}) or {}),
         "promotion_verdict": dict(policy_state.get("promotion_verdict", {}) or {}),
         "policy_validation": dict(policy_state.get("policy_validation", {}) or {}),
