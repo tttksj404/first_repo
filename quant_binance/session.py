@@ -814,7 +814,11 @@ class LivePaperSession:
         rollout_progression = self._policy_rollout_progression(policy_state)
         adjustments = list(active_policy.get("adjustments", []) or [])
         source = "active_policy"
-        if not adjustments and str(policy_state.get("rollout_status", "baseline") or "baseline") == "micro_live_pending":
+        if (
+            not adjustments
+            and str(policy_state.get("status", "") or "") == "staged_rollout"
+            and str(policy_state.get("rollout_status", "baseline") or "baseline") == "micro_live_pending"
+        ):
             adjustments = list(dict(policy_state.get("candidate_policy", {}) or {}).get("adjustments", []) or [])
             source = "candidate_policy"
         return {
