@@ -187,6 +187,56 @@ class QuantBinanceCheckpointAutoJudgeTests(unittest.TestCase):
             self.assertEqual(baseline["verdict"], "not_available")
             self.assertEqual(baseline["expansion_gate"], "not_available")
             self.assertEqual(baseline["reason"], "RECENT_BASELINE_CONTROL_EVIDENCE_THIN")
+            self.assertEqual(baseline["evidence_source"], "summary_artifact")
+            self.assertEqual(
+                artifact["validation_path"]["baseline_control_replay_grounding"],
+                "strategy_comparison_recent_summary",
+            )
+
+    def test_checkpoint_auto_judge_requires_decision_and_tested_order_logs_for_expand(self) -> None:
+        judge = _build_checkpoint_auto_judge(
+            current_policy_state={
+                "active_policy": {"status": "baseline", "adjustments": []},
+                "rollout_progression": {"execution_phase": "baseline"},
+            },
+            comparison_verdict="candidate_better",
+            comparison_delta=0.3,
+            runner_artifact={
+                "sample_quality_watchdog": {"status": "promote_ready"},
+                "policy_context_bucket_evidence": {
+                    "staged_candidate": {
+                        "policy_context_bucket_run_count": 2,
+                        "policy_context_bucket_closed_trade_count": 6,
+                        "policy_context_bucket_live_order_count": 8,
+                        "policy_context_bucket_tested_order_count": 0,
+                        "policy_context_bucket_decision_count": 0,
+                        "runner_total_realized_pnl_usd": 12.0,
+                        "runner_drawdown_to_pnl_ratio": 0.12,
+                        "runner_reject_rate": 0.01,
+                        "runner_protection_degraded_rate": 0.01,
+                        "runner_avg_edge_retention_ratio": 0.82,
+                        "runner_positive_walk_forward_ratio": 1.0,
+                    }
+                },
+                "preferred_policy_bucket": "staged_candidate",
+            },
+            baseline_control_comparison={
+                "available": True,
+                "verdict": "supportive",
+                "expansion_gate": "pass",
+                "expansion_gate_reason": "SIMPLE_BASELINE_CONTROL_CLEARED",
+            },
+        )
+
+        self.assertEqual(judge["verdict"], "hold")
+        self.assertEqual(judge["raw_verdict"], "hold")
+        self.assertEqual(judge["evidence_source"], "policy_bucket")
+        self.assertEqual(judge["evidence"]["decision_count"], 0)
+        self.assertEqual(judge["evidence"]["total_tested_order_count"], 0)
+        self.assertIn(
+            "CHECKPOINT_EXPANSION_REQUIRES_DECISION_AND_TESTED_ORDER_LOG_EVIDENCE",
+            judge["reason_codes"],
+        )
 
     def test_build_policy_validation_fails_when_checkpoint_auto_judge_requests_rollback(self) -> None:
         validation = build_policy_validation(
