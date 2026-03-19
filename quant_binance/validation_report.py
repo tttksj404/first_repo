@@ -3492,6 +3492,123 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
     }
 
 
+_BASELINE_CONTROL_BUCKET_REPLAY_REQUIREMENTS = (
+    ("decision_count", "DECISION_LOGS"),
+    ("total_tested_order_count", "TESTED_ORDER_LOGS"),
+    ("total_live_order_count", "LIVE_ORDER_LOGS"),
+    ("total_closed_trade_count", "CLOSED_TRADE_LOGS"),
+)
+
+
+def _baseline_control_bucket_replay_entry(
+    *,
+    bucket_name: str,
+    bucket_evidence: dict[str, object] | None,
+    replay_summary: dict[str, object] | None,
+) -> dict[str, object]:
+    bucket = dict(bucket_evidence or {})
+    summary = dict(replay_summary or {})
+    execution_metrics = dict(summary.get("execution_metrics", {}) or {})
+    decision_count = max(
+        _safe_int(bucket.get("policy_context_bucket_decision_count")),
+        _safe_int(bucket.get("decision_count")),
+    )
+    total_tested_order_count = max(
+        _safe_int(bucket.get("policy_context_bucket_tested_order_count")),
+        _safe_int(bucket.get("total_tested_order_count")),
+        _safe_int(bucket.get("tested_order_count")),
+    )
+    total_live_order_count = max(
+        _safe_int(bucket.get("policy_context_bucket_live_order_count")),
+        _safe_int(bucket.get("total_live_order_count")),
+        _safe_int(bucket.get("live_order_count")),
+        _safe_int(execution_metrics.get("live_order_count")),
+    )
+    total_closed_trade_count = max(
+        _safe_int(bucket.get("policy_context_bucket_closed_trade_count")),
+        _safe_int(bucket.get("total_closed_trade_count")),
+        _safe_int(bucket.get("closed_trade_count")),
+        _safe_int(execution_metrics.get("closed_trade_count")),
+    )
+    run_count = max(
+        _safe_int(bucket.get("policy_context_bucket_run_count")),
+        _safe_int(bucket.get("run_count")),
+        _safe_int(execution_metrics.get("run_count")),
+    )
+    available = bool(bucket) or _replay_summary_available(summary)
+    missing_surfaces = [
+        label.lower()
+        for metric_name, label in _BASELINE_CONTROL_BUCKET_REPLAY_REQUIREMENTS
+        if _safe_int(locals()[metric_name]) <= 0
+    ]
+    bucket_replay_ready = bool(available) and not missing_surfaces
+    if bucket_replay_ready:
+        bucket_replay_reason = "BASELINE_CONTROL_BUCKET_REPLAY_READY"
+    elif available:
+        bucket_replay_reason = "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_" + "_AND_".join(
+            label for metric_name, label in _BASELINE_CONTROL_BUCKET_REPLAY_REQUIREMENTS if _safe_int(locals()[metric_name]) <= 0
+        )
+    else:
+        bucket_replay_reason = "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE"
+    return {
+        "available": bool(available),
+        "bucket_name": bucket_name,
+        "run_count": run_count,
+        "decision_count": decision_count,
+        "total_tested_order_count": total_tested_order_count,
+        "total_live_order_count": total_live_order_count,
+        "total_closed_trade_count": total_closed_trade_count,
+        "micro_live_status": str(dict(summary.get("micro_live_gate", {}) or {}).get("status", "not_available") or "not_available"),
+        "replay_source": str(summary.get("source", "") or ""),
+        "bucket_replay_ready": bucket_replay_ready,
+        "bucket_replay_reason": bucket_replay_reason,
+        "missing_surfaces": missing_surfaces,
+    }
+
+
+def _bucket_aware_baseline_control_comparison(
+    *,
+    baseline_control_comparison: dict[str, object],
+    current_policy_bucket_evidence: dict[str, object] | None,
+    current_policy_direct_replay_summary: dict[str, object] | None,
+    staged_candidate_bucket_evidence: dict[str, object] | None,
+    staged_candidate_direct_replay_summary: dict[str, object] | None,
+) -> dict[str, object]:
+    payload = dict(baseline_control_comparison or {})
+    if not payload:
+        return payload
+    current_policy_bucket_replay = _baseline_control_bucket_replay_entry(
+        bucket_name="active_policy",
+        bucket_evidence=current_policy_bucket_evidence,
+        replay_summary=current_policy_direct_replay_summary,
+    )
+    staged_candidate_bucket_replay = _baseline_control_bucket_replay_entry(
+        bucket_name="staged_candidate",
+        bucket_evidence=staged_candidate_bucket_evidence,
+        replay_summary=staged_candidate_direct_replay_summary,
+    )
+    reference_bucket = (
+        staged_candidate_bucket_replay
+        if bool(staged_candidate_bucket_replay.get("available"))
+        else current_policy_bucket_replay
+    )
+    bucket_replay_ready = bool(reference_bucket.get("bucket_replay_ready"))
+    bucket_replay_reason = str(reference_bucket.get("bucket_replay_reason", "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE") or "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE")
+    payload["bucket_replay_required_for_expansion"] = True
+    payload["bucket_replay_ready"] = bucket_replay_ready
+    payload["bucket_replay_reference_bucket"] = str(reference_bucket.get("bucket_name", "not_available") or "not_available")
+    payload["bucket_replay_reason"] = bucket_replay_reason
+    payload["current_policy_bucket_replay"] = current_policy_bucket_replay
+    payload["staged_candidate_bucket_replay"] = staged_candidate_bucket_replay
+    if bool(current_policy_bucket_replay.get("available")) or bool(staged_candidate_bucket_replay.get("available")):
+        payload["evidence_source"] = "summary_artifact+policy_bucket_replay"
+        payload["replay_grounding"] = "strategy_comparison_recent_summary+policy_bucket_replay"
+    if str(payload.get("expansion_gate", "not_available") or "not_available") == "pass" and not bucket_replay_ready:
+        payload["expansion_gate"] = "not_available"
+        payload["expansion_gate_reason"] = bucket_replay_reason
+    return payload
+
+
 def _checkpoint_symbol_lifecycle_actions(
     *,
     symbol_rows: list[dict[str, object]],
@@ -3931,7 +4048,7 @@ def _build_checkpoint_auto_judge(
         elif baseline_verdict == "parity" and raw_verdict == "expand":
             raw_verdict = "hold"
         reason_codes.append(baseline_gate_reason)
-    elif baseline_verdict == "supportive":
+    elif baseline_verdict == "supportive" and baseline_gate == "pass":
         reason_codes.append("SIMPLE_BASELINE_CONTROL_CLEARED")
     if (
         total_closed_trade_count >= 6
@@ -4267,6 +4384,13 @@ def build_policy_comparison_validation_artifact(*,
         direct_current_replay_summary
         if _replay_summary_available(direct_current_replay_summary)
         else projected_current_replay_summary
+    )
+    baseline_control_comparison = _bucket_aware_baseline_control_comparison(
+        baseline_control_comparison=baseline_control_comparison,
+        current_policy_bucket_evidence=current_policy_bucket_evidence,
+        current_policy_direct_replay_summary=direct_current_replay_summary,
+        staged_candidate_bucket_evidence=candidate_policy_bucket_evidence,
+        staged_candidate_direct_replay_summary=direct_candidate_replay_summary,
     )
     validation_path = {
         "mode": str(runner.get("validation_path_mode", "artifact_walk_forward")),
