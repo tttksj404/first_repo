@@ -219,6 +219,21 @@ def format_execution_quality_report(base_dir: str | Path = "quant_runtime") -> s
         f"테스트 주문 수: {payload.get('tested_order_count', 0)}",
         f"주문 오류 수: {payload.get('order_error_count', 0)}",
     ]
+    executive_verdict = str(payload.get("executive_verdict", "") or "")
+    if executive_verdict:
+        lines.append(f"운영 총괄 판정: {executive_verdict}")
+        executive_reasons = list(payload.get("executive_reason_codes", []) or [])
+        if executive_reasons:
+            lines.append("판정 사유: " + ", ".join(str(item) for item in executive_reasons[:4]))
+        executive_replay_provenance = dict(payload.get("executive_replay_provenance", {}) or {})
+        primary_provenance = dict(executive_replay_provenance.get("primary", executive_replay_provenance) or {})
+        provenance_summary = str(primary_provenance.get("summary", "") or "")
+        if provenance_summary:
+            provenance_line = f"판정 근거 provenance: {provenance_summary}"
+            provenance_bucket = str(primary_provenance.get("policy_bucket", "not_available") or "not_available")
+            if provenance_bucket != "not_available":
+                provenance_line += f" (bucket={provenance_bucket})"
+            lines.append(provenance_line)
     top_error_codes = payload.get("top_error_codes") or []
     if top_error_codes:
         lines.append("주요 오류 코드:")
@@ -230,6 +245,15 @@ def format_execution_quality_report(base_dir: str | Path = "quant_runtime") -> s
         for row in symbol_rows[:5]:
             lines.append(
                 f"- {row.get('symbol')}: live={row.get('live_order_count')} "
+                f"accept_rate={float(row.get('estimated_live_acceptance_rate', 0.0)) * 100:.1f}% "
+                f"errors={row.get('order_error_count')}"
+            )
+    policy_bucket_rows = payload.get("policy_bucket_summary") or []
+    if policy_bucket_rows:
+        lines.append("정책 버킷별 주문 상태:")
+        for row in policy_bucket_rows[:5]:
+            lines.append(
+                f"- {row.get('policy_bucket')}: live={row.get('live_order_count')} "
                 f"accept_rate={float(row.get('estimated_live_acceptance_rate', 0.0)) * 100:.1f}% "
                 f"errors={row.get('order_error_count')}"
             )

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from quant_binance.observability.report import load_validation_runner_evidence
+from quant_binance.policy_evidence import build_replay_provenance
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,7 @@ class ExecutionQualityReport:
     auto_mode_reasons: tuple[str, ...]
     executive_verdict: str
     executive_reason_codes: tuple[str, ...]
+    executive_replay_provenance: dict[str, object]
     top_error_codes: tuple[dict[str, object], ...]
     policy_bucket_summary: tuple[dict[str, object], ...]
     symbol_order_summary: tuple[dict[str, object], ...]
@@ -60,6 +62,7 @@ class ExecutionQualityReport:
             "auto_mode_reasons": list(self.auto_mode_reasons),
             "executive_verdict": self.executive_verdict,
             "executive_reason_codes": list(self.executive_reason_codes),
+            "executive_replay_provenance": dict(self.executive_replay_provenance),
             "top_error_codes": list(self.top_error_codes),
             "policy_bucket_summary": list(self.policy_bucket_summary),
             "symbol_order_summary": list(self.symbol_order_summary),
@@ -361,6 +364,9 @@ def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lo
         )
         or {}
     )
+    executive_replay_provenance = dict(executive_operating_verdict.get("replay_provenance", {}) or {})
+    if not executive_replay_provenance:
+        executive_replay_provenance = {"primary": build_replay_provenance()}
     checkpoint_by_symbol = _symbol_checkpoint_map(watchdog)
     top_symbols = tuple(
         {
@@ -420,6 +426,7 @@ def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lo
         auto_mode_reasons=tuple(str(item) for item in list(auto_mode.get("reason_codes", []) or [])),
         executive_verdict=str(executive_operating_verdict.get("verdict", "not_available") or "not_available"),
         executive_reason_codes=tuple(str(item) for item in list(executive_operating_verdict.get("reasons", []) or [])),
+        executive_replay_provenance=executive_replay_provenance,
         top_error_codes=top_error_codes,
         policy_bucket_summary=tuple(policy_bucket_rows),
         symbol_order_summary=tuple(symbol_rows),
