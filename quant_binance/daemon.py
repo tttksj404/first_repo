@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -25,7 +26,7 @@ from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
-from quant_binance.observability.runtime_snapshot import load_latest_runtime_payloads
+from quant_binance.observability.runtime_snapshot import latest_runtime_artifact_path, load_latest_runtime_payloads
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.paths import prepare_run_paths
 from quant_binance.session import BackoffPolicy, LivePaperSession, LivePaperShell
@@ -161,6 +162,50 @@ def _stateful_runtime_symbols(
     return tuple(symbol for symbol in configured_symbols if store.get(symbol) is not None)
 
 
+def _read_json_payload(path: Path | None) -> dict[str, object]:
+    if path is None or not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _apply_persisted_runtime_policy_guards(
+    *,
+    eligible_symbols: set[str],
+    observe_only_symbols: list[str],
+    policy_state: dict[str, object],
+    major_symbols: tuple[str, ...],
+) -> tuple[set[str], list[str]]:
+    adjusted_eligible = set(eligible_symbols)
+    adjusted_observe_only = set(str(symbol) for symbol in observe_only_symbols if str(symbol))
+    lifecycle_rows = [
+        dict(row)
+        for row in list(policy_state.get("symbol_lifecycle", []) or [])
+        if isinstance(row, dict)
+    ]
+    lifecycle_blocked_symbols = {
+        str(row.get("symbol", "") or "")
+        for row in lifecycle_rows
+        if str(row.get("recommended_action", "keep") or "keep") in {"rollback", "hold", "re_review"}
+        and str(row.get("symbol", "") or "")
+    }
+    adjusted_eligible.difference_update(lifecycle_blocked_symbols)
+    adjusted_observe_only.update(lifecycle_blocked_symbols)
+    auto_mode = dict(policy_state.get("auto_mode", {}) or {})
+    policy_guidance = dict(auto_mode.get("policy_guidance", {}) or {})
+    if (
+        str(auto_mode.get("mode", "normal") or "normal") == "tighter"
+        and bool(policy_guidance.get("block_non_major_positive"))
+    ):
+        non_major_symbols = {symbol for symbol in adjusted_eligible if symbol not in set(major_symbols)}
+        adjusted_eligible.difference_update(non_major_symbols)
+        adjusted_observe_only.update(non_major_symbols)
+    return adjusted_eligible, sorted(adjusted_observe_only)
+
+
 def run_live_paper_daemon(
     *,
     config_path: str | Path,
@@ -176,6 +221,11 @@ def run_live_paper_daemon(
     initialize_workspace(output_base_dir)
     cost_calibration_path = Path(output_base_dir) / "artifacts" / "cost_calibration.json"
     run_paths = prepare_run_paths(base_dir=Path(output_base_dir) / "output", mode="paper-live-shell")
+    previous_policy_state_path = latest_runtime_artifact_path(
+        output_base_dir,
+        filename="policy_state.json",
+    )
+    previous_policy_state = _read_json_payload(previous_policy_state_path)
     try:
         rest_client = build_exchange_rest_client(
             exchange=exchange_id,
@@ -260,6 +310,12 @@ def run_live_paper_daemon(
                 observe_only_symbols.append(symbol)
             else:
                 eligible_symbols.add(symbol)
+        eligible_symbols, observe_only_symbols = _apply_persisted_runtime_policy_guards(
+            eligible_symbols=eligible_symbols,
+            observe_only_symbols=observe_only_symbols,
+            policy_state=previous_policy_state,
+            major_symbols=tuple(settings.futures_exposure.major_symbols),
+        )
         dispatcher = EventDispatcher(store)
         runtime = LivePaperRuntime(
             dispatcher=dispatcher,
@@ -288,6 +344,14 @@ def run_live_paper_daemon(
             verbose=True,
             observe_only_symbols=sorted(observe_only_symbols),
         )
+        session.summary_path = run_paths.summary_path
+        if previous_policy_state_path is not None and previous_policy_state_path.exists():
+            current_policy_state_path = run_paths.summary_path.with_name("policy_state.json")
+            if previous_policy_state_path.resolve() != current_policy_state_path.resolve():
+                current_policy_state_path.write_text(
+                    previous_policy_state_path.read_text(encoding="utf-8"),
+                    encoding="utf-8",
+                )
         session.self_healing.log_store = log_store
         session.self_healing.stall_timeout_seconds = RuntimeSelfHealing.recommended_stall_timeout_seconds(
             sync_interval_seconds=sync_interval_seconds,
@@ -305,6 +369,7 @@ def run_live_paper_daemon(
             store=store,
             interval_minutes=settings.decision_engine.decision_interval_minutes,
         )
+        bootstrap_records: list[tuple[Any, Any]] = []
         for symbol in runtime_symbols:
             if symbol not in eligible_symbols:
                 continue
@@ -320,11 +385,18 @@ def run_live_paper_daemon(
                 )
             primitive_inputs = extractor.build_primitive_inputs(state)
             history = extractor.build_history_context(state)
-            session.run_bootstrap_cycle(
+            bootstrap_decision = session.run_bootstrap_cycle(
                 state=bootstrap_state,
                 primitive_inputs=primitive_inputs,
                 history=history,
                 decision_time=bootstrap_time,
+            )
+            bootstrap_records.append((bootstrap_decision, bootstrap_state))
+        for bootstrap_decision, bootstrap_state in bootstrap_records:
+            session._execute_recorded_decision(
+                managed_decision=bootstrap_decision,
+                state=bootstrap_state,
+                timestamp=bootstrap_time,
             )
         session.minimum_live_decision_timestamp = bootstrap_time
         session.flush(
