@@ -140,6 +140,40 @@ def _safe_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _simple_control_baseline_kind(strategy_name: str) -> str:
+    normalized = str(strategy_name or "").strip().lower()
+    if not normalized or normalized == "current_strategy":
+        return ""
+    if normalized == "directional_hold":
+        return "directional_hold"
+    if normalized == "simple_momentum":
+        return "simple_momentum"
+    if normalized == "simple_mean_reversion":
+        return "simple_mean_reversion"
+    if "majors" in normalized and ("only" in normalized or "control" in normalized or "baseline" in normalized):
+        return "majors_only_control"
+    if normalized.startswith("simple_"):
+        return "simple_control"
+    if "control" in normalized or "baseline" in normalized or "hold" in normalized:
+        return "conservative_control"
+    return ""
+
+
+def _simple_control_baseline_priority(kind: str) -> int:
+    return {
+        "majors_only_control": 0,
+        "directional_hold": 1,
+        "simple_momentum": 2,
+        "simple_mean_reversion": 3,
+        "simple_control": 4,
+        "conservative_control": 5,
+    }.get(str(kind or ""), 9)
+
+
+def _baseline_observation_count(row: dict[str, object]) -> int:
+    return max(_safe_int(row.get("closed_trade_count")), _safe_int(row.get("trade_count")))
+
+
 def _runtime_summary_closed_trade_metrics(
     runtime_summary: dict[str, Any] | None,
     *,
@@ -1716,27 +1750,45 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
             "verdict": "not_available",
         }
     current = next((item for item in strategies if str(item.get("strategy_name", "") or "") == "current_strategy"), {})
-    baselines = [
-        item
-        for item in strategies
-        if str(item.get("strategy_name", "") or "") != "current_strategy"
-    ]
+    baselines = []
+    for item in strategies:
+        strategy_name = str(item.get("strategy_name", "") or "")
+        baseline_kind = _simple_control_baseline_kind(strategy_name)
+        if not baseline_kind:
+            continue
+        baselines.append(
+            dict(
+                item,
+                baseline_kind=baseline_kind,
+                observation_count=_baseline_observation_count(item),
+            )
+        )
     if not current or not baselines:
         return {
             "available": False,
             "artifact_path": str(latest_path),
-            "reason": "RECENT_BASELINE_CONTROL_CURRENT_OR_BASELINE_MISSING",
+            "reason": (
+                "RECENT_BASELINE_CONTROL_CURRENT_OR_BASELINE_MISSING"
+                if current
+                else "RECENT_BASELINE_CONTROL_CURRENT_STRATEGY_MISSING"
+            ),
             "verdict": "not_available",
         }
+    current_observation_count = _baseline_observation_count(current)
     best_baseline = max(
         baselines,
         key=lambda item: (
             _safe_float(item.get("total_pnl_usd")),
             _safe_float(item.get("realized_pnl_usd")),
+            -_safe_float(item.get("max_drawdown_pct")),
+            _safe_int(item.get("observation_count")),
             _safe_int(item.get("trade_count")),
+            -_simple_control_baseline_priority(str(item.get("baseline_kind", "") or "")),
             str(item.get("strategy_name", "")),
         ),
     )
+    baseline_observation_count = _safe_int(best_baseline.get("observation_count"))
+    evidence_ready = current_observation_count >= 3 and baseline_observation_count >= 3
     pnl_delta = round(
         _safe_float(current.get("total_pnl_usd")) - _safe_float(best_baseline.get("total_pnl_usd")),
         6,
@@ -1745,34 +1797,90 @@ def _load_recent_baseline_control_comparison(*, base_dir: str | Path) -> dict[st
         _safe_float(current.get("total_return_pct")) - _safe_float(best_baseline.get("total_return_pct")),
         6,
     )
-    verdict = "parity"
-    reason = "CURRENT_STRATEGY_NEAR_BASELINE_PARITY"
-    if pnl_delta <= -0.25:
-        verdict = "caution"
-        reason = "CURRENT_STRATEGY_UNDERPERFORMS_SIMPLE_BASELINE"
-    elif pnl_delta >= 0.25:
-        verdict = "supportive"
-        reason = "CURRENT_STRATEGY_OUTPERFORMS_SIMPLE_BASELINE"
+    current_max_drawdown_pct = round(_safe_float(current.get("max_drawdown_pct")), 6)
+    baseline_max_drawdown_pct = round(_safe_float(best_baseline.get("max_drawdown_pct")), 6)
+    drawdown_advantage_pct = round(baseline_max_drawdown_pct - current_max_drawdown_pct, 6)
+    pnl_margin_required = 0.25
+    return_margin_required = 0.02
+    drawdown_tolerance_pct = 1.0
+    if not evidence_ready:
+        verdict = "not_available"
+        reason = "RECENT_BASELINE_CONTROL_EVIDENCE_THIN"
+        expansion_gate = "not_available"
+        expansion_gate_reason = "NO_JUSTIFIED_SIMPLE_BASELINE_GATE"
+    else:
+        current_clearly_better = (
+            pnl_delta >= pnl_margin_required
+            and return_delta >= return_margin_required
+            and current_max_drawdown_pct <= baseline_max_drawdown_pct + drawdown_tolerance_pct
+        )
+        baseline_clearly_better = (
+            pnl_delta <= -pnl_margin_required
+            and return_delta <= -return_margin_required
+            and baseline_max_drawdown_pct <= current_max_drawdown_pct + drawdown_tolerance_pct
+        )
+        verdict = "parity"
+        reason = "CURRENT_STRATEGY_NOT_CLEARLY_AHEAD_OF_SIMPLE_BASELINE"
+        expansion_gate = "block"
+        expansion_gate_reason = "SIMPLE_BASELINE_CONTROL_NOT_CLEARLY_BEATEN"
+        if baseline_clearly_better:
+            verdict = "caution"
+            reason = "CURRENT_STRATEGY_UNDERPERFORMS_SIMPLE_BASELINE"
+            expansion_gate_reason = "SIMPLE_BASELINE_CONTROL_UNDERPERFORMED"
+        elif current_clearly_better:
+            verdict = "supportive"
+            reason = "CURRENT_STRATEGY_CLEARLY_OUTPERFORMS_SIMPLE_BASELINE"
+            expansion_gate = "pass"
+            expansion_gate_reason = "SIMPLE_BASELINE_CONTROL_CLEARED"
     return {
         "available": True,
         "artifact_path": str(latest_path),
         "generated_at": payload.get("generated_at"),
         "verdict": verdict,
         "reason": reason,
+        "expansion_gate": expansion_gate,
+        "expansion_gate_reason": expansion_gate_reason,
+        "current_policy_clearly_beats_simple_baseline": verdict == "supportive",
+        "simple_control_strategy_names": [
+            str(item.get("strategy_name", "") or "")
+            for item in sorted(
+                baselines,
+                key=lambda item: (
+                    _simple_control_baseline_priority(str(item.get("baseline_kind", "") or "")),
+                    str(item.get("strategy_name", "") or ""),
+                ),
+            )
+        ],
+        "simple_control_baseline_count": len(baselines),
+        "selected_simple_baseline_kind": str(best_baseline.get("baseline_kind", "") or ""),
+        "comparison_thresholds": {
+            "minimum_observation_count": 3,
+            "total_pnl_usd_margin_required": pnl_margin_required,
+            "return_pct_margin_required": return_margin_required,
+            "drawdown_tolerance_pct": drawdown_tolerance_pct,
+        },
         "current_strategy": {
             "strategy_name": str(current.get("strategy_name", "") or ""),
             "trade_count": _safe_int(current.get("trade_count")),
+            "closed_trade_count": _safe_int(current.get("closed_trade_count")),
+            "observation_count": current_observation_count,
             "total_pnl_usd": round(_safe_float(current.get("total_pnl_usd")), 6),
             "total_return_pct": round(_safe_float(current.get("total_return_pct")), 6),
+            "max_drawdown_pct": current_max_drawdown_pct,
         },
         "best_simple_baseline": {
             "strategy_name": str(best_baseline.get("strategy_name", "") or ""),
+            "baseline_kind": str(best_baseline.get("baseline_kind", "") or ""),
             "trade_count": _safe_int(best_baseline.get("trade_count")),
+            "closed_trade_count": _safe_int(best_baseline.get("closed_trade_count")),
+            "observation_count": baseline_observation_count,
             "total_pnl_usd": round(_safe_float(best_baseline.get("total_pnl_usd")), 6),
             "total_return_pct": round(_safe_float(best_baseline.get("total_return_pct")), 6),
+            "max_drawdown_pct": baseline_max_drawdown_pct,
         },
         "current_vs_best_simple_baseline_total_pnl_usd_delta": pnl_delta,
         "current_vs_best_simple_baseline_return_pct_delta": return_delta,
+        "current_vs_best_simple_baseline_max_drawdown_pct_delta": drawdown_advantage_pct,
     }
 
 
@@ -1932,6 +2040,14 @@ def _build_checkpoint_auto_judge(
     runner_avg_edge_retention_ratio = round(_safe_float(payload.get("runner_avg_edge_retention_ratio")), 6)
     runner_positive_walk_forward_ratio = round(_safe_float(payload.get("runner_positive_walk_forward_ratio")), 6)
     baseline_verdict = str(baseline_control_comparison.get("verdict", "not_available") or "not_available")
+    baseline_gate = str(baseline_control_comparison.get("expansion_gate", "not_available") or "not_available")
+    baseline_gate_reason = str(
+        baseline_control_comparison.get(
+            "expansion_gate_reason",
+            "NO_JUSTIFIED_SIMPLE_BASELINE_GATE",
+        )
+        or "NO_JUSTIFIED_SIMPLE_BASELINE_GATE"
+    )
     raw_verdict = "hold"
     reason_codes: list[str] = []
     if comparison_verdict == "candidate_worse":
@@ -1949,14 +2065,17 @@ def _build_checkpoint_auto_judge(
     else:
         raw_verdict = "hold"
         reason_codes.append("SAMPLE_QUALITY_WATCHDOG_THIN")
-    if baseline_verdict == "caution":
-        if raw_verdict == "expand":
+    if baseline_gate == "block":
+        if baseline_verdict == "caution":
+            if raw_verdict == "expand":
+                raw_verdict = "hold"
+            elif raw_verdict == "hold":
+                raw_verdict = "tighten"
+        elif baseline_verdict == "parity" and raw_verdict == "expand":
             raw_verdict = "hold"
-        elif raw_verdict == "hold":
-            raw_verdict = "tighten"
-        reason_codes.append("SIMPLE_BASELINE_CONTROL_UNDERPERFORMED")
+        reason_codes.append(baseline_gate_reason)
     elif baseline_verdict == "supportive":
-        reason_codes.append("SIMPLE_BASELINE_CONTROL_OUTPERFORMED")
+        reason_codes.append("SIMPLE_BASELINE_CONTROL_CLEARED")
     if (
         total_closed_trade_count >= 6
         and (
