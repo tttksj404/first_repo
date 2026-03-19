@@ -112,6 +112,12 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
                         "executive_operating_verdict": {
                             "verdict": "tighten",
                             "reasons": ["EXECUTIVE_TIGHTEN_BY_AUTO_MODE"],
+                            "replay_provenance": {
+                                "primary": {
+                                    "classification": "mixed_root_summary_fallback",
+                                    "summary": "mixed_root_summary_fallback:root",
+                                }
+                            },
                         }
                     }
                 ),
@@ -134,6 +140,10 @@ class QuantBinanceExecutionQualityReportTests(unittest.TestCase):
             self.assertEqual(report.auto_mode_reasons, ("AUTO_MODE_TIGHTENED_BY_EXECUTION_QUALITY",))
             self.assertEqual(report.executive_verdict, "tighten")
             self.assertEqual(report.executive_reason_codes, ("EXECUTIVE_TIGHTEN_BY_AUTO_MODE",))
+            self.assertEqual(
+                report.executive_replay_provenance["primary"]["classification"],
+                "mixed_root_summary_fallback",
+            )
             self.assertEqual(report.top_error_codes[0]["code"], "40762")
             by_symbol = {row["symbol"]: row for row in report.symbol_order_summary}
             self.assertEqual(by_symbol["ETHUSDT"]["order_error_count"], 2)

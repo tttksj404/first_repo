@@ -68,6 +68,12 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
                         "order_error_count": 2,
                         "executive_verdict": "tighten",
                         "executive_reason_codes": ["EXECUTIVE_TIGHTEN_BY_AUTO_MODE"],
+                        "executive_replay_provenance": {
+                            "primary": {
+                                "summary": "mixed_root_summary_fallback:root",
+                                "policy_bucket": "not_available",
+                            }
+                        },
                         "top_error_codes": [{"code": "40762", "count": 2}],
                         "policy_bucket_summary": [
                             {
@@ -87,6 +93,7 @@ class QuantBinanceTelegramReportsTests(unittest.TestCase):
             text = format_execution_quality_report(base.parent)
             self.assertIn("[실행 품질 리포트]", text)
             self.assertIn("운영 총괄 판정: tighten", text)
+            self.assertIn("판정 근거 provenance: mixed_root_summary_fallback:root", text)
             self.assertIn("주요 오류 코드", text)
             self.assertIn("심볼별 주문 상태", text)
             self.assertIn("정책 버킷별 주문 상태", text)

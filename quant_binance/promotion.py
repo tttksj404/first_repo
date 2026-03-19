@@ -8,6 +8,11 @@ from typing import Any
 
 from quant_binance.auto_mode import apply_auto_mode_runtime_overrides
 from quant_binance.env import resolve_strategy_profile
+from quant_binance.policy_evidence import (
+    baseline_control_replay_provenance,
+    build_replay_provenance,
+    checkpoint_replay_provenance,
+)
 from quant_binance.policy_lineage import build_policy_state_lineage_snapshot, policy_lineage_alignment
 
 
@@ -180,6 +185,9 @@ def _simple_baseline_gate_from_comparison(baseline_control_comparison: dict[str,
         "status": gate,
         "verdict": verdict,
         "reason": str(baseline.get("expansion_gate_reason", "") or ""),
+        "bucket_replay_ready": bool(baseline.get("bucket_replay_ready")),
+        "bucket_replay_reference_bucket": str(baseline.get("bucket_replay_reference_bucket", "not_available") or "not_available"),
+        "bucket_replay_reason": str(baseline.get("bucket_replay_reason", "") or ""),
         "baseline_control_comparison": baseline,
     }
 
@@ -208,6 +216,8 @@ def _proposal_status_from_gates(
     if executive_verdict in {"tighten", "hold", "rebuild_evidence"}:
         return "proposal_pending"
     if str(dict(live_evidence_rejudge or {}).get("status", "") or "") in {"waiting", "blocked"}:
+        return "proposal_pending"
+    if not checkpoint_auto_judge and str(baseline_gate.get("status", "not_available") or "not_available") != "pass":
         return "proposal_pending"
     if checkpoint_verdict == "rollback":
         return "proposal_blocked"
@@ -260,6 +270,35 @@ def _live_evidence_rejudge_from_payload(payload: dict[str, Any]) -> dict[str, An
         )
         or {}
     )
+
+
+def _primary_proposal_replay_provenance(
+    executive_operating_verdict: dict[str, Any] | None,
+    checkpoint_auto_judge: dict[str, Any] | None,
+    baseline_control_comparison: dict[str, Any] | None,
+) -> dict[str, Any]:
+    executive_payload = dict(executive_operating_verdict or {})
+    executive_provenance = dict(executive_payload.get("replay_provenance", {}) or {})
+    primary = dict(executive_provenance.get("primary", {}) or {})
+    if str(primary.get("classification", "not_available") or "not_available") != "not_available":
+        return primary
+    checkpoint_provenance = dict(checkpoint_auto_judge or {}).get("replay_provenance", {})
+    if not checkpoint_provenance:
+        checkpoint_provenance = checkpoint_replay_provenance(checkpoint_auto_judge)
+    checkpoint_entry = dict(checkpoint_provenance or {})
+    if str(checkpoint_entry.get("classification", "not_available") or "not_available") != "not_available":
+        checkpoint_entry["decision_surface"] = "checkpoint_auto_judge"
+        return checkpoint_entry
+    baseline_provenance = dict(baseline_control_comparison or {}).get("replay_provenance", {})
+    if not baseline_provenance:
+        baseline_provenance = baseline_control_replay_provenance(baseline_control_comparison)
+    baseline_entry = dict(baseline_provenance or {})
+    if str(baseline_entry.get("classification", "not_available") or "not_available") != "not_available":
+        baseline_entry["decision_surface"] = "baseline_control"
+        return baseline_entry
+    fallback = build_replay_provenance()
+    fallback["decision_surface"] = "not_available"
+    return fallback
 
 
 def _load_checkpoint_auto_judge(*, base_dir: str | Path) -> dict[str, Any]:
@@ -431,6 +470,18 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
     merged_overrides = _deep_merge(best.get("overrides", {}), runtime_overrides)
     baseline_gate = _simple_baseline_gate_from_comparison(baseline_control_comparison)
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "") or "")
+    checkpoint_provenance = dict(
+        checkpoint_auto_judge.get("replay_provenance", {}) or checkpoint_replay_provenance(checkpoint_auto_judge)
+    )
+    baseline_provenance = dict(
+        baseline_control_comparison.get("replay_provenance", {}) or baseline_control_replay_provenance(baseline_control_comparison)
+    )
+    executive_replay_provenance = dict(executive_operating_verdict.get("replay_provenance", {}) or {})
+    primary_replay_provenance = _primary_proposal_replay_provenance(
+        executive_operating_verdict=executive_operating_verdict,
+        checkpoint_auto_judge=checkpoint_auto_judge,
+        baseline_control_comparison=baseline_control_comparison,
+    )
     proposal_status = _proposal_status_from_gates(
         checkpoint_auto_judge=checkpoint_auto_judge,
         baseline_gate=baseline_gate,
@@ -449,6 +500,12 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
         "auto_mode": auto_mode,
         "executive_operating_verdict": executive_operating_verdict,
         "live_evidence_rejudge": live_evidence_rejudge,
+        "replay_provenance": {
+            "primary": primary_replay_provenance,
+            "checkpoint_auto_judge": checkpoint_provenance,
+            "simple_baseline_gate": baseline_provenance,
+            "executive_operating_verdict": executive_replay_provenance,
+        },
         "symbol_lifecycle": symbol_lifecycle,
         "supporting_artifacts": {
             "optimization_latest": str(latest),
@@ -469,10 +526,21 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "checkpoint_evidence_policy_bucket": str(
                 checkpoint_auto_judge.get("evidence_policy_bucket", "not_available") or "not_available"
             ),
+            "checkpoint_replay_provenance": str(
+                checkpoint_provenance.get("summary", "not_available") or "not_available"
+            ),
             "simple_baseline_gate_status": str(baseline_gate.get("status", "not_available") or "not_available"),
             "simple_baseline_gate_verdict": str(baseline_gate.get("verdict", "not_available") or "not_available"),
             "simple_baseline_gate_reason": str(baseline_gate.get("reason", "") or ""),
             "simple_baseline_gate_present": bool(baseline_control_comparison),
+            "simple_baseline_bucket_replay_ready": bool(baseline_gate.get("bucket_replay_ready")),
+            "simple_baseline_bucket_replay_reference_bucket": str(
+                baseline_gate.get("bucket_replay_reference_bucket", "not_available") or "not_available"
+            ),
+            "simple_baseline_bucket_replay_reason": str(baseline_gate.get("bucket_replay_reason", "") or ""),
+            "simple_baseline_replay_provenance": str(
+                baseline_provenance.get("summary", "not_available") or "not_available"
+            ),
             "checkpoint_auto_judge_lineage_status": str(checkpoint_judge_context.get("lineage_status", "unknown") or "unknown"),
             "checkpoint_auto_judge_lineage_reason": str(checkpoint_judge_context.get("lineage_reason", "") or ""),
             "auto_mode": str(auto_mode.get("mode", "normal") or "normal"),
@@ -480,6 +548,12 @@ def build_strategy_proposal(*, base_dir: str | Path = "quant_runtime") -> dict[s
             "executive_operating_verdict": str(executive_operating_verdict.get("verdict", "not_available") or "not_available"),
             "executive_operating_reasons": list(executive_operating_verdict.get("reasons", []) or []),
             "executive_operating_confidence": str(executive_operating_verdict.get("confidence", "") or ""),
+            "executive_replay_provenance": str(
+                dict(executive_replay_provenance.get("primary", {}) or {}).get("summary", "not_available") or "not_available"
+            ),
+            "proposal_primary_replay_provenance": str(
+                primary_replay_provenance.get("summary", "not_available") or "not_available"
+            ),
             "live_evidence_rejudge_status": str(live_evidence_rejudge.get("status", "not_available") or "not_available"),
             "live_evidence_rejudge_reasons": list(live_evidence_rejudge.get("reason_codes", []) or []),
             "live_evidence_lineage_status": str(live_evidence_rejudge.get("policy_lineage_status", "unknown") or "unknown"),
