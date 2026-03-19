@@ -444,6 +444,53 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(capped.final_mode, "cash")
             self.assertIn("SYMBOL_LIFECYCLE_HOLD", capped.rejection_reasons)
 
+    def test_cap_live_order_decision_blocks_bucket_observe_only_symbol(self) -> None:
+        import tempfile
+        session = self._build_session()
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 1000.0,
+            "futures_available_balance_usd": 1000.0,
+            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        session.live_orders = [{"symbol": "BTCUSDT", "accepted": True, "fill_status": "filled", "fill_ratio": 0.99, "expected_net_edge_bps": 20.0, "realized_edge_bps": 20.0}] * 5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            summary_path = Path(tmpdir) / "summary.json"
+            session.summary_path = summary_path
+            summary_path.with_name("policy_state.json").write_text(
+                json.dumps(
+                    {
+                        "active_policy": {"status": "baseline", "adjustments": []},
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "alignment": {"aligned": True, "status": "aligned"},
+                                "evidence": {
+                                    "policy_context_bucket_symbol_summary": [
+                                        {
+                                            "symbol": "BTCUSDT",
+                                            "recommendation": "observe_only",
+                                            "trade_count": 3,
+                                        }
+                                    ]
+                                },
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            decision = make_decision(
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                final_mode="futures",
+                order_intent_notional_usd=100.0,
+                net_expected_edge_bps=30.0,
+            )
+            capped = session._cap_live_order_decision(decision, reference_price=50000.0)
+            self.assertEqual(capped.final_mode, "cash")
+            self.assertIn("POLICY_BUCKET_OBSERVE_ONLY", capped.rejection_reasons)
+
     def test_cap_live_order_decision_blocks_non_major_when_auto_mode_is_tighter(self) -> None:
         import tempfile
         session = self._build_session()

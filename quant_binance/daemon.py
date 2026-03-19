@@ -38,6 +38,7 @@ from quant_binance.strategy.regime import observe_only_reasons
 from quant_binance.strategy.scorer import apply_score_and_costs
 from quant_binance.overlays import apply_altcoin_overlay, apply_macro_overlay, apply_sentiment_overlay, load_altcoin_inputs, load_macro_inputs
 from quant_binance.features.primitive import build_feature_vector_from_primitives
+from quant_binance.runtime_universe import build_runtime_universe_hydration
 
 
 def _next_decision_boundary(timestamp, interval_minutes: int):
@@ -178,32 +179,32 @@ def _apply_persisted_runtime_policy_guards(
     observe_only_symbols: list[str],
     policy_state: dict[str, object],
     major_symbols: tuple[str, ...],
-) -> tuple[set[str], list[str]]:
+) -> tuple[set[str], list[str], dict[str, object]]:
     adjusted_eligible = set(eligible_symbols)
     adjusted_observe_only = set(str(symbol) for symbol in observe_only_symbols if str(symbol))
-    lifecycle_rows = [
-        dict(row)
-        for row in list(policy_state.get("symbol_lifecycle", []) or [])
-        if isinstance(row, dict)
-    ]
-    lifecycle_blocked_symbols = {
-        str(row.get("symbol", "") or "")
-        for row in lifecycle_rows
-        if str(row.get("recommended_action", "keep") or "keep") in {"rollback", "hold", "re_review"}
-        and str(row.get("symbol", "") or "")
-    }
-    adjusted_eligible.difference_update(lifecycle_blocked_symbols)
-    adjusted_observe_only.update(lifecycle_blocked_symbols)
+    hydration = build_runtime_universe_hydration(
+        policy_state=policy_state,
+        configured_symbols=sorted(adjusted_eligible | adjusted_observe_only),
+        major_symbols=major_symbols,
+    )
+    for symbol, row in dict(hydration.get("rows_by_symbol", {}) or {}).items():
+        payload = dict(row or {})
+        if bool(payload.get("observe_only")):
+            adjusted_observe_only.add(symbol)
+            adjusted_eligible.discard(symbol)
+            continue
+        if not bool(payload.get("allow_bootstrap", True)):
+            adjusted_eligible.discard(symbol)
     auto_mode = dict(policy_state.get("auto_mode", {}) or {})
     policy_guidance = dict(auto_mode.get("policy_guidance", {}) or {})
     if (
         str(auto_mode.get("mode", "normal") or "normal") == "tighter"
         and bool(policy_guidance.get("block_non_major_positive"))
-    ):
+        ):
         non_major_symbols = {symbol for symbol in adjusted_eligible if symbol not in set(major_symbols)}
         adjusted_eligible.difference_update(non_major_symbols)
         adjusted_observe_only.update(non_major_symbols)
-    return adjusted_eligible, sorted(adjusted_observe_only)
+    return adjusted_eligible, sorted(adjusted_observe_only), hydration
 
 
 def run_live_paper_daemon(
@@ -310,7 +311,7 @@ def run_live_paper_daemon(
                 observe_only_symbols.append(symbol)
             else:
                 eligible_symbols.add(symbol)
-        eligible_symbols, observe_only_symbols = _apply_persisted_runtime_policy_guards(
+        eligible_symbols, observe_only_symbols, runtime_universe_hydration = _apply_persisted_runtime_policy_guards(
             eligible_symbols=eligible_symbols,
             observe_only_symbols=observe_only_symbols,
             policy_state=previous_policy_state,
@@ -370,7 +371,17 @@ def run_live_paper_daemon(
             interval_minutes=settings.decision_engine.decision_interval_minutes,
         )
         bootstrap_records: list[tuple[Any, Any]] = []
-        for symbol in runtime_symbols:
+        hydration_rows_by_symbol = dict(runtime_universe_hydration.get("rows_by_symbol", {}) or {})
+        bootstrap_symbols = sorted(
+            runtime_symbols,
+            key=lambda symbol: tuple(
+                dict(hydration_rows_by_symbol.get(symbol, {}) or {}).get(
+                    "sort_key",
+                    (0, 1 if symbol not in set(settings.futures_exposure.major_symbols) else 0, 1, 0, symbol),
+                )
+            ),
+        )
+        for symbol in bootstrap_symbols:
             if symbol not in eligible_symbols:
                 continue
             state = store.get(symbol)
