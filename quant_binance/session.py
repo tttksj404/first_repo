@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from quant_binance.data.market_store import MissingMarketStateError
-from quant_binance.execution_quality import ExecutionQualityState
+from quant_binance.execution_quality import MIN_EXECUTION_QUALITY_SAMPLE_SIZE, ExecutionQualityState
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter, OrderTestResult
 from quant_binance.learning import OnlineEdgeLearner
@@ -651,6 +651,8 @@ class LivePaperSession:
         fill_ratio: float,
         slippage_bps: float | None,
         realized_edge_bps: float | None,
+        expected_edge_bps: float | None = None,
+        protection_degraded: bool = False,
         timestamp: datetime,
         market: str | None = None,
         exchange_id: str | None = None,
@@ -661,6 +663,8 @@ class LivePaperSession:
             fill_ratio=fill_ratio,
             slippage_bps=slippage_bps,
             realized_edge_bps=realized_edge_bps,
+            expected_edge_bps=expected_edge_bps,
+            protection_degraded=protection_degraded,
             timestamp=timestamp,
             market=market,
             exchange_id=exchange_id,
@@ -690,6 +694,7 @@ class LivePaperSession:
     def _min_expected_profit_usd_threshold(self, decision: DecisionIntent) -> float:
         base_threshold = float(self.runtime.paper_service.settings.risk.min_expected_profit_usd_per_trade)
         base_threshold = max(0.0, base_threshold + self._policy_expected_profit_floor_adjustment_usd(decision))
+        base_threshold = max(0.0, base_threshold + self._execution_quality_expected_profit_floor_adjustment_usd(decision))
         if base_threshold <= 0.0:
             return 0.0
         if (
@@ -700,15 +705,51 @@ class LivePaperSession:
             return min(base_threshold, 0.1)
         return base_threshold
 
-    def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float) -> float:
+    def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float, decision: DecisionIntent | None = None) -> float:
         floor = max(float(configured_floor), 0.0)
         floor = max(floor + self._policy_entry_floor_adjustment_for_symbol(symbol), 0.0)
+        if decision is not None:
+            floor = max(floor + self._execution_quality_entry_floor_adjustment_bps(decision), 0.0)
         if (
             self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
             and symbol in {"BTCUSDT", "ETHUSDT"}
         ):
             return min(floor, 60.0) if floor > 0.0 else 60.0
         return floor
+
+    def _execution_quality_runtime_scale(self, decision: DecisionIntent) -> float:
+        if decision.final_mode == "futures" and self._is_major_futures_symbol(decision.symbol):
+            return 0.5
+        return 1.0
+
+    def _execution_quality_leverage_multiplier_for_decision(self, decision: DecisionIntent) -> float:
+        if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
+            return 1.0
+        raw_multiplier = float(decision.execution_quality_leverage_multiplier or 1.0)
+        scaled_reduction = (1.0 - raw_multiplier) * self._execution_quality_runtime_scale(decision)
+        return max(0.0, min(1.0, 1.0 - scaled_reduction))
+
+    def _execution_quality_entry_floor_adjustment_bps(self, decision: DecisionIntent) -> float:
+        if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
+            return 0.0
+        raw_adjustment = float(decision.execution_quality_entry_threshold_bps or 0.0)
+        return max(0.0, raw_adjustment * self._execution_quality_runtime_scale(decision))
+
+    def _execution_quality_expected_profit_floor_adjustment_usd(self, decision: DecisionIntent) -> float:
+        if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
+            return 0.0
+        threshold_bps = max(
+            0.0,
+            float(decision.execution_quality_expected_profit_floor_bps or 0.0) * self._execution_quality_runtime_scale(decision),
+        )
+        return decision.order_intent_notional_usd * threshold_bps / 10000.0
+
+    def _preserve_execution_quality_size_throttle(self, decision: DecisionIntent) -> bool:
+        return (
+            decision.execution_quality_sample_size >= MIN_EXECUTION_QUALITY_SAMPLE_SIZE
+            and decision.execution_quality_trade_restraint == "none"
+            and float(decision.execution_quality_size_multiplier or 1.0) < 0.999999
+        )
 
     def _market_min_quantity(self, *, market: str, symbol: str) -> float:
         if not self.capital_report:
@@ -1142,6 +1183,7 @@ class LivePaperSession:
                 settings=self.runtime.paper_service.settings,
             )
             leverage = max(1.0, leverage * self._policy_leverage_multiplier_for_decision(decision))
+            leverage = max(1.0, leverage * self._execution_quality_leverage_multiplier_for_decision(decision))
             execution_headroom = max(0.0, available * (1.0 - reserve_fraction))
             max_notional = max(0.0, execution_headroom * leverage)
             current_futures_notional = sum(
@@ -1193,6 +1235,7 @@ class LivePaperSession:
             if decision.final_mode == "spot"
             else self.runtime.paper_service.settings.risk.min_meaningful_futures_notional_usd
         )
+        preserve_execution_quality_size_throttle = self._preserve_execution_quality_size_throttle(decision)
         major_medium_entry_floor = 0.0
         major_strong_entry_floor = 0.0
         if (
@@ -1205,19 +1248,26 @@ class LivePaperSession:
                 self._major_futures_entry_floor(
                     symbol=decision.symbol,
                     configured_floor=self.runtime.paper_service.settings.futures_exposure.major_min_meaningful_notional_usd,
+                    decision=decision,
                 ),
             )
         if is_major_medium_futures_decision:
             major_medium_entry_floor = self._major_futures_entry_floor(
                 symbol=decision.symbol,
                 configured_floor=self.runtime.paper_service.settings.futures_exposure.major_medium_min_entry_notional_usd,
+                decision=decision,
             )
+            if preserve_execution_quality_size_throttle:
+                major_medium_entry_floor = 0.0
             meaningful_notional_floor = max(meaningful_notional_floor, major_medium_entry_floor)
         if is_major_strong_futures_decision:
             major_strong_entry_floor = self._major_futures_entry_floor(
                 symbol=decision.symbol,
                 configured_floor=self.runtime.paper_service.settings.futures_exposure.major_strong_min_entry_notional_usd,
+                decision=decision,
             )
+            if preserve_execution_quality_size_throttle:
+                major_strong_entry_floor = 0.0
             meaningful_notional_floor = max(meaningful_notional_floor, major_strong_entry_floor)
         if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
             rejection_reasons = list(decision.rejection_reasons + (rejection_code,))
@@ -5103,6 +5153,7 @@ class LivePaperSession:
                         fill_ratio=0.0,
                         slippage_bps=None,
                         realized_edge_bps=0.0,
+                        expected_edge_bps=executable_decision.net_expected_edge_bps,
                         timestamp=timestamp,
                         market=executable_decision.final_mode,
                         exchange_id=self.live_order_executor._exchange_id(),
@@ -5170,6 +5221,8 @@ class LivePaperSession:
                             fill_ratio=fill_ratio,
                             slippage_bps=slippage_bps if fill_ratio > 0.0 else None,
                             realized_edge_bps=realized_edge_bps,
+                            expected_edge_bps=executable_decision.net_expected_edge_bps,
+                            protection_degraded=bool(live_result.protection_error),
                             timestamp=timestamp,
                             market=live_result.market,
                             exchange_id=self.live_order_executor._exchange_id(),
@@ -5239,6 +5292,7 @@ class LivePaperSession:
                                 fill_ratio=0.0,
                                 slippage_bps=None,
                                 realized_edge_bps=0.0,
+                                expected_edge_bps=executable_decision.net_expected_edge_bps,
                                 timestamp=timestamp,
                                 market=str(preflight_rejection.get("market", executable_decision.final_mode)),
                                 exchange_id=self.live_order_executor._exchange_id(),
