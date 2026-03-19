@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import shutil
 from collections import Counter, defaultdict
@@ -16,6 +17,12 @@ from quant_binance.auto_mode import (
 from quant_binance.closed_trade_metrics import aggregate_closed_trades as aggregate_closed_trade_metrics
 from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
+from quant_binance.policy_evidence import (
+    baseline_control_bucket_comparison,
+    policy_evidence_bucket,
+    policy_evidence_bucket_evidence,
+    with_policy_evidence_buckets,
+)
 from quant_binance.policy_lineage import build_policy_state_lineage_snapshot
 from quant_binance.symbol_lifecycle import build_symbol_lifecycle, summarize_symbol_lifecycle
 
@@ -1379,7 +1386,7 @@ def build_auto_tune_policy(
 
 
 def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, float]:
-    payload = dict(evidence or {})
+    payload = policy_evidence_bucket_evidence(evidence, "staged_candidate", fallback_to_root=True)
     delta = round(float(payload.get("candidate_vs_current_score_delta", 0.0) or 0.0), 6)
     verdict = str(payload.get("comparison_verdict", "keep") or "keep")
     if verdict == "keep":
@@ -1391,8 +1398,7 @@ def _policy_comparison_signal(evidence: dict[str, object] | None) -> tuple[str, 
 
 
 def _simple_baseline_control_gate(evidence: dict[str, object] | None) -> dict[str, object]:
-    payload = dict(evidence or {})
-    baseline = dict(payload.get("baseline_control_comparison", {}) or {})
+    baseline = baseline_control_bucket_comparison(evidence)
     verdict = str(baseline.get("verdict", "not_available") or "not_available")
     expansion_gate = str(baseline.get("expansion_gate", "") or "")
     if not expansion_gate:
@@ -1428,8 +1434,17 @@ def _simple_baseline_control_gate(evidence: dict[str, object] | None) -> dict[st
     }
 
 
-def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, object]:
-    payload = dict(evidence or {})
+def _runner_quality_evidence(
+    evidence: dict[str, object] | None,
+    *,
+    bucket_name: str | None = None,
+    fallback_to_root: bool = True,
+) -> dict[str, object]:
+    payload = (
+        policy_evidence_bucket_evidence(evidence, bucket_name, fallback_to_root=fallback_to_root)
+        if bucket_name
+        else dict(evidence or {})
+    )
     return {
         "available": any(
             key in payload
@@ -1458,6 +1473,51 @@ def _runner_quality_evidence(evidence: dict[str, object] | None) -> dict[str, ob
     }
 
 
+def _policy_bucket_evidence(payload: dict[str, object] | None, bucket_name: str) -> dict[str, object]:
+    return policy_evidence_bucket_evidence(payload, bucket_name, fallback_to_root=False)
+
+
+def _policy_bucket_entry(
+    *,
+    bucket_name: str,
+    source: str,
+    available: bool,
+    evidence: dict[str, object] | None = None,
+    comparison: dict[str, object] | None = None,
+    policy_lineage: dict[str, object] | None = None,
+    evidence_lineage: dict[str, object] | None = None,
+    alignment: dict[str, object] | None = None,
+    policy_application: dict[str, object] | None = None,
+    replay_summary: dict[str, object] | None = None,
+) -> dict[str, object]:
+    return {
+        "bucket": bucket_name,
+        "source": source,
+        "available": bool(available),
+        "evidence": deepcopy(dict(evidence or {})),
+        "comparison": deepcopy(dict(comparison or {})),
+        "policy_lineage": deepcopy(dict(policy_lineage or {})),
+        "evidence_lineage": deepcopy(dict(evidence_lineage or {})),
+        "alignment": deepcopy(dict(alignment or {})),
+        "policy_application": deepcopy(dict(policy_application or {})),
+        "replay_summary": deepcopy(dict(replay_summary or {})),
+    }
+
+
+def _staged_candidate_evidence(payload: dict[str, object] | None) -> dict[str, object]:
+    return policy_evidence_bucket_evidence(payload, "staged_candidate", fallback_to_root=True)
+
+
+def _active_policy_evidence(payload: dict[str, object] | None) -> dict[str, object]:
+    active_evidence = policy_evidence_bucket_evidence(payload, "active_policy", fallback_to_root=False)
+    if active_evidence:
+        return active_evidence
+    raw_payload = dict(payload or {})
+    if "policy_evidence_buckets" not in raw_payload:
+        return raw_payload
+    return {}
+
+
 def _candidate_policy_requested_verdict(adjustments: list[dict[str, object]]) -> dict[str, object]:
     if not adjustments:
         return {"status": "keep", "reasons": ["INSUFFICIENT_ATTRIBUTION_DATA"]}
@@ -1476,7 +1536,7 @@ def _candidate_policy_requested_verdict(adjustments: list[dict[str, object]]) ->
 
 
 def _sample_quality_watchdog_block_reason(comparison_evidence: dict[str, object] | None) -> str:
-    payload = dict(comparison_evidence or {})
+    payload = _staged_candidate_evidence(comparison_evidence)
     watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
     micro_live_gate = dict(payload.get("micro_live_gate", {}) or {})
     micro_live_status = str(micro_live_gate.get("status", "") or "")
@@ -1495,9 +1555,10 @@ def _symbol_lifecycle_promotion_signal(
     candidate_policy: dict[str, object],
     comparison_evidence: dict[str, object] | None,
 ) -> dict[str, object]:
+    candidate_evidence = _staged_candidate_evidence(comparison_evidence)
     lifecycle_rows = {
         str(row.get("symbol", "") or ""): dict(row)
-        for row in list(dict(comparison_evidence or {}).get("symbol_lifecycle", []) or [])
+        for row in list(candidate_evidence.get("symbol_lifecycle", []) or [])
         if isinstance(row, dict) and str(row.get("symbol", "") or "")
     }
     if not lifecycle_rows:
@@ -1532,7 +1593,7 @@ def _promotion_rollout_signal(
     reasons: list[str],
     comparison_evidence: dict[str, object] | None,
 ) -> dict[str, object]:
-    runner_quality = _runner_quality_evidence(comparison_evidence)
+    runner_quality = _runner_quality_evidence(comparison_evidence, bucket_name="staged_candidate")
     micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
     micro_live_readiness = str(micro_live_gate.get("status", "not_available") or "not_available") if micro_live_gate else "not_available"
     if requested_status in {"promote", "promote_aggressive"}:
@@ -1567,7 +1628,7 @@ def build_promotion_verdict(
     requested_status = str(verdict.get("status", "keep") or "keep")
     comparison_verdict, comparison_delta = _policy_comparison_signal(comparison_evidence)
     baseline_gate = _simple_baseline_control_gate(comparison_evidence)
-    runner_quality = _runner_quality_evidence(comparison_evidence)
+    runner_quality = _runner_quality_evidence(comparison_evidence, bucket_name="staged_candidate")
     if comparison_verdict == "candidate_worse":
         reasons = list(verdict["reasons"])
         reasons.append("CANDIDATE_UNDERPERFORMS_CURRENT_POLICY")
@@ -1644,7 +1705,7 @@ def build_promotion_verdict(
         verdict["baseline_control_comparison"] = baseline_control_comparison
         verdict["simple_baseline_gate_status"] = str(baseline_gate.get("status", "not_available") or "not_available")
         verdict["simple_baseline_gate_reason"] = str(baseline_gate.get("gate_reason", "") or "")
-    auto_mode = dict(dict(comparison_evidence or {}).get("auto_mode", {}) or {})
+    auto_mode = dict(_staged_candidate_evidence(comparison_evidence).get("auto_mode", {}) or {})
     if auto_mode:
         verdict["auto_mode"] = auto_mode
     if any(list(lifecycle_signal.values())):
@@ -1820,9 +1881,10 @@ def build_policy_validation(candidate_policy: dict[str, object], promotion_verdi
     operational_status = str(operational_verdict.get("status", "hold"))
     operational_reasons = list(operational_verdict.get("reasons", []) or [])
     evidence = merge_policy_validation_evidence(attribution_rows, runner_evidence)
-    runner_quality = _runner_quality_evidence(evidence)
-    sample_watchdog = dict(evidence.get("sample_quality_watchdog", {}) or {})
-    checkpoint_auto_judge = dict(evidence.get("checkpoint_auto_judge", {}) or {})
+    staged_candidate_evidence = _staged_candidate_evidence(evidence)
+    runner_quality = _runner_quality_evidence(evidence, bucket_name="staged_candidate")
+    sample_watchdog = dict(staged_candidate_evidence.get("sample_quality_watchdog", {}) or {})
+    checkpoint_auto_judge = dict(staged_candidate_evidence.get("checkpoint_auto_judge", {}) or {})
     baseline_gate = _simple_baseline_control_gate(evidence)
     sample_watchdog_status = str(sample_watchdog.get("status", "") or "")
     reasons: list[str] = []
@@ -1941,6 +2003,9 @@ def build_executive_operating_verdict(
     validation = dict(policy_validation or {})
     merged_evidence = dict(dict(validation.get("evidence", {}) or {}))
     merged_evidence.update(dict(evidence or {}))
+    staged_candidate_evidence = _staged_candidate_evidence(merged_evidence)
+    active_policy_bucket = policy_evidence_bucket(merged_evidence, "active_policy")
+    baseline_control_bucket = policy_evidence_bucket(merged_evidence, "baseline_control")
     requested_status = str(
         promotion_verdict.get("requested_status", promotion_verdict.get("status", "keep")) or "keep"
     )
@@ -1950,16 +2015,16 @@ def build_executive_operating_verdict(
     validation_reasons = [str(item) for item in list(validation.get("reasons", []) or []) if str(item)]
     operational_reasons = [str(item) for item in list(operational_verdict.get("reasons", []) or []) if str(item)]
     promotion_reasons = [str(item) for item in list(promotion_verdict.get("reasons", []) or []) if str(item)]
-    checkpoint_auto_judge = dict(merged_evidence.get("checkpoint_auto_judge", {}) or {})
+    checkpoint_auto_judge = dict(staged_candidate_evidence.get("checkpoint_auto_judge", {}) or {})
     checkpoint_verdict = str(checkpoint_auto_judge.get("verdict", "not_available") or "not_available")
-    sample_watchdog = dict(merged_evidence.get("sample_quality_watchdog", {}) or {})
+    sample_watchdog = dict(staged_candidate_evidence.get("sample_quality_watchdog", {}) or {})
     sample_watchdog_status = str(sample_watchdog.get("status", "not_available") or "not_available")
     baseline_gate = _simple_baseline_control_gate(merged_evidence)
-    auto_mode = dict(merged_evidence.get("auto_mode", promotion_verdict.get("auto_mode", {})) or {})
+    auto_mode = dict(staged_candidate_evidence.get("auto_mode", promotion_verdict.get("auto_mode", {})) or {})
     auto_mode_mode = str(auto_mode.get("mode", "normal") or "normal")
-    micro_live_gate = dict(merged_evidence.get("micro_live_gate", {}) or {})
+    micro_live_gate = dict(staged_candidate_evidence.get("micro_live_gate", {}) or {})
     micro_live_status = str(micro_live_gate.get("status", "not_available") or "not_available")
-    policy_alignment = dict(merged_evidence.get("current_policy_evidence_alignment", {}) or {})
+    policy_alignment = dict(active_policy_bucket.get("alignment") or staged_candidate_evidence.get("current_policy_evidence_alignment", {}) or {})
     lineage_status = str(
         policy_alignment.get(
             "status",
@@ -2103,6 +2168,9 @@ def build_executive_operating_verdict(
             "auto_mode": auto_mode_mode,
             "micro_live_status": micro_live_status,
             "policy_lineage_status": lineage_status,
+            "active_policy_bucket_available": bool(active_policy_bucket.get("available")),
+            "staged_candidate_bucket_available": bool(policy_evidence_bucket(merged_evidence, "staged_candidate").get("available")),
+            "baseline_control_bucket_available": bool(baseline_control_bucket.get("available")),
             "blocked_symbols": blocked_symbols,
             "review_symbols": review_symbols,
             "cautious_symbols": cautious_symbols,
@@ -2128,10 +2196,11 @@ def _dedupe_strings(items: list[str] | tuple[str, ...]) -> list[str]:
 
 
 def _live_evidence_snapshot(validation_evidence: dict[str, object] | None) -> dict[str, object]:
-    payload = dict(validation_evidence or {})
+    payload = _active_policy_evidence(validation_evidence)
     micro_live_gate = dict(payload.get("micro_live_gate", {}) or {})
     sample_watchdog = dict(payload.get("sample_quality_watchdog", {}) or {})
-    policy_alignment = dict(payload.get("current_policy_evidence_alignment", {}) or {})
+    active_bucket = policy_evidence_bucket(validation_evidence, "active_policy")
+    policy_alignment = dict(active_bucket.get("alignment") or payload.get("current_policy_evidence_alignment", {}) or {})
     validation_runs = list(payload.get("validation_runs", []) or [])
     walk_forward_windows = list(payload.get("walk_forward_windows", []) or [])
     run_count = max(_coerce_int(payload.get("run_count")), len(validation_runs))
@@ -2168,6 +2237,7 @@ def _live_evidence_snapshot(validation_evidence: dict[str, object] | None) -> di
         "sample_quality_watchdog_status": str(sample_watchdog.get("status", "not_available") or "not_available"),
         "micro_live_status": str(micro_live_gate.get("status", "not_available") or "not_available"),
         "policy_lineage_status": str(policy_alignment.get("status", "unknown") or "unknown"),
+        "bucket_available": bool(active_bucket.get("available")) or "policy_evidence_buckets" not in dict(validation_evidence or {}),
     }
 
 
@@ -2358,8 +2428,9 @@ def _recent_retention_window(
     previous_state: dict[str, object],
     validation_evidence: dict[str, object],
 ) -> dict[str, object]:
-    validation_runs = list(validation_evidence.get("validation_runs", []) or [])
-    walk_forward_windows = list(validation_evidence.get("walk_forward_windows", []) or [])
+    active_evidence = _active_policy_evidence(validation_evidence)
+    validation_runs = list(active_evidence.get("validation_runs", []) or [])
+    walk_forward_windows = list(active_evidence.get("walk_forward_windows", []) or [])
     recent_runs = validation_runs[-3:]
     recent_windows = walk_forward_windows[-3:]
     recent_live_order_count = sum(_coerce_int(item.get("live_order_count")) for item in recent_runs)
@@ -2398,7 +2469,7 @@ def _recent_retention_window(
     )
     previous_metrics = dict(dict(previous_state.get("retention_monitor", {}) or {}).get("metrics", {}) or {})
     previous_recent = dict(previous_metrics.get("recent_window", {}) or {})
-    micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
+    micro_live_gate = dict(active_evidence.get("micro_live_gate", {}) or {})
     return {
         "available": bool(recent_runs or recent_windows),
         "run_count": len(recent_runs),
@@ -2424,8 +2495,9 @@ def _cumulative_retention_window(
     previous_state: dict[str, object],
     validation_evidence: dict[str, object],
 ) -> dict[str, object]:
-    validation_runs = list(validation_evidence.get("validation_runs", []) or [])
-    walk_forward_windows = list(validation_evidence.get("walk_forward_windows", []) or [])
+    active_evidence = _active_policy_evidence(validation_evidence)
+    validation_runs = list(active_evidence.get("validation_runs", []) or [])
+    walk_forward_windows = list(active_evidence.get("walk_forward_windows", []) or [])
     live_order_count = sum(_coerce_int(item.get("live_order_count")) for item in validation_runs)
     accepted_live_order_count = sum(_coerce_int(item.get("accepted_live_order_count")) for item in validation_runs)
     rejected_live_order_count = sum(_coerce_int(item.get("rejected_live_order_count")) for item in validation_runs)
@@ -2564,7 +2636,8 @@ def _retention_monitor(
     active_status = str(previous_active.get("status", "") or "")
     if active_status not in {"promote", "promote_aggressive"}:
         return {"status": "inactive", "reasons": []}
-    runner_quality = _runner_quality_evidence(validation_evidence)
+    active_evidence = _active_policy_evidence(validation_evidence)
+    runner_quality = _runner_quality_evidence(active_evidence)
     if not bool(runner_quality.get("available")):
         return {"status": "inactive", "reasons": []}
     recent_window = _recent_retention_window(previous_state=previous_state, validation_evidence=validation_evidence)
@@ -2578,7 +2651,7 @@ def _retention_monitor(
     walk_forward_window_count = int(runner_quality.get("walk_forward_window_count", 0) or 0)
     positive_walk_forward_ratio = float(runner_quality.get("positive_walk_forward_ratio", 0.0) or 0.0)
     operational_status = str(operational_verdict.get("status", "hold") or "hold")
-    sample_watchdog_status = str(dict(validation_evidence.get("sample_quality_watchdog", {}) or {}).get("status", "") or "")
+    sample_watchdog_status = str(dict(active_evidence.get("sample_quality_watchdog", {}) or {}).get("status", "") or "")
     if operational_status == "stop":
         reasons.append("RETENTION_MONITOR_OPERATIONAL_STOP")
     if sample_watchdog_status == "degraded":
@@ -2765,8 +2838,12 @@ def _rollout_progression_signal(
     active_status = str(active_policy.get("status", "baseline") or "baseline")
     requested_status = str(promotion_verdict.get("requested_status", promotion_verdict.get("status", "keep")) or "keep")
     effective_status = str(promotion_verdict.get("effective_status", promotion_verdict.get("status", "keep")) or "keep")
-    runner_quality = _runner_quality_evidence(validation_evidence)
+    active_evidence = _active_policy_evidence(validation_evidence)
+    runner_quality = _runner_quality_evidence(active_evidence)
+    staged_candidate_evidence = _staged_candidate_evidence(validation_evidence)
     micro_live_gate = dict(runner_quality.get("micro_live_gate", {}) or {})
+    if not micro_live_gate:
+        micro_live_gate = dict(staged_candidate_evidence.get("micro_live_gate", {}) or {})
     live_order_count = int(micro_live_gate.get("live_order_count", 0) or 0)
     closed_trade_count = int(micro_live_gate.get("closed_trade_count", 0) or 0)
     required_live_order_count = int(micro_live_gate.get("required_live_order_count", 2) or 2)
@@ -2895,7 +2972,7 @@ def _sample_quality_checkpoint_revalidation(
         ).get("sample_quality_watchdog", {})
         or {}
     )
-    current_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
+    current_watchdog = dict(_active_policy_evidence(validation_evidence).get("sample_quality_watchdog", {}) or {})
     previous_snapshot = dict(previous_watchdog.get("checkpoint_snapshot", {}) or {})
     current_snapshot = dict(current_watchdog.get("checkpoint_snapshot", {}) or {})
     hooks: list[dict[str, object]] = []
@@ -3007,16 +3084,17 @@ def build_persisted_policy_state(
     verdict_status = str(promotion_verdict.get("status", "keep"))
     validation_status = str(validation.get("status", "fail"))
     validation_evidence = dict(validation.get("evidence", {}) or {})
+    staged_candidate_evidence = _staged_candidate_evidence(validation_evidence)
     comparison_verdict, _ = _resolved_policy_comparison_signal(
         validation_evidence=validation_evidence,
         promotion_verdict=promotion_verdict,
     )
     comparison_underperforms = comparison_verdict == "candidate_worse"
     candidate_adjustments = list(candidate_policy.get("adjustments", []))
-    micro_live_gate = dict(validation_evidence.get("micro_live_gate", {}) or {})
-    sample_watchdog = dict(validation_evidence.get("sample_quality_watchdog", {}) or {})
-    checkpoint_auto_judge = dict(validation_evidence.get("checkpoint_auto_judge", {}) or {})
-    auto_mode = dict(validation_evidence.get("auto_mode", {}) or {})
+    micro_live_gate = dict(staged_candidate_evidence.get("micro_live_gate", {}) or {})
+    sample_watchdog = dict(staged_candidate_evidence.get("sample_quality_watchdog", {}) or {})
+    checkpoint_auto_judge = dict(staged_candidate_evidence.get("checkpoint_auto_judge", {}) or {})
+    auto_mode = dict(staged_candidate_evidence.get("auto_mode", {}) or {})
     baseline_gate = _simple_baseline_control_gate(validation_evidence)
     rollout_status = "steady"
     rollout_reason = "UNCHANGED"
@@ -3140,7 +3218,11 @@ def build_persisted_policy_state(
         rollout_status = "halted"
         rollout_reason = "CANDIDATE_DISABLED"
         version = previous_version + 1
-    elif (comparison_underperforms or str(operational_verdict.get("status", "")) == "stop" or float(validation_evidence.get("replay_like_drawdown_ratio", 0.0) or 0.0) > 0.5) and previous_active:
+    elif (
+        comparison_underperforms
+        or str(operational_verdict.get("status", "")) == "stop"
+        or float(staged_candidate_evidence.get("replay_like_drawdown_ratio", validation_evidence.get("replay_like_drawdown_ratio", 0.0)) or 0.0) > 0.5
+    ) and previous_active:
         active_policy = {"status": "baseline", "adjustments": []}
         lifecycle = "rolled_back"
         rollout_status = "reverted"
@@ -3215,7 +3297,66 @@ def build_persisted_policy_state(
     active_policy["policy_lineage"] = dict(policy_lineage)
     validation_payload = dict(validation)
     validation_evidence_payload = dict(validation_payload.get("evidence", {}) or {})
+    previous_policy_bucket = policy_evidence_bucket(previous_state.get("policy_validation", {}).get("evidence", {}), "active_policy")
+    previous_policy_evidence = dict(previous_policy_bucket.get("evidence", {}) or {})
+    if not previous_policy_evidence:
+        previous_policy_evidence = _active_policy_evidence(
+            dict(dict(previous_state.get("policy_validation", {}) or {}).get("evidence", {}) or {})
+        )
+    current_active_bucket = policy_evidence_bucket(validation_evidence_payload, "active_policy")
+    current_active_bucket_evidence = dict(current_active_bucket.get("evidence", {}) or {})
+    current_active_bucket_alignment = dict(current_active_bucket.get("alignment", {}) or {})
+    if not current_active_bucket_evidence and "policy_evidence_buckets" not in validation_evidence_payload:
+        current_active_bucket_evidence = _active_policy_evidence(validation_evidence_payload)
+        if current_active_bucket_evidence and not current_active_bucket_alignment:
+            current_active_bucket_alignment = dict(
+                validation_evidence_payload.get("current_policy_evidence_alignment", {})
+                or {"aligned": True, "status": "legacy_unbucketed", "reason": "LEGACY_UNBUCKETED_ACTIVE_POLICY_EVIDENCE"}
+            )
+    active_policy_changed = bool(policy_lineage) and bool(dict(previous_state.get("policy_lineage", {}) or {})) and (
+        dict(previous_state.get("policy_lineage", {}) or {}).get("structural_key") != policy_lineage.get("structural_key")
+    )
+    current_active_evidence_available = bool(current_active_bucket.get("available")) and bool(current_active_bucket_alignment.get("aligned"))
+    persisted_active_bucket = _policy_bucket_entry(
+        bucket_name="active_policy",
+        source=(
+            str(current_active_bucket.get("source", "") or "persisted_active_policy_validation_evidence")
+            if current_active_evidence_available and not active_policy_changed
+            else "active_policy_live_evidence_pending"
+        ),
+        available=current_active_evidence_available and not active_policy_changed,
+        evidence=current_active_bucket_evidence if current_active_evidence_available and not active_policy_changed else {},
+        policy_lineage=policy_lineage,
+        evidence_lineage=dict(current_active_bucket.get("evidence_lineage", {}) or {}),
+        alignment=current_active_bucket_alignment if not active_policy_changed else {"aligned": False, "status": "pending", "reason": "ACTIVE_POLICY_CHANGED_PENDING_FRESH_EVIDENCE"},
+        policy_application=dict(current_active_bucket.get("policy_application", {}) or {}),
+        replay_summary=dict(current_active_bucket.get("replay_summary", {}) or {}) if current_active_evidence_available and not active_policy_changed else {},
+    )
+    previous_policy_lineage = dict(
+        previous_policy_bucket.get("policy_lineage", previous_state.get("policy_lineage", {}))
+        or {}
+    )
+    persisted_buckets = {
+        **{
+            name: bucket
+            for name, bucket in dict(validation_evidence_payload.get("policy_evidence_buckets", {}) or {}).items()
+            if name in {"staged_candidate", "baseline_control"}
+        },
+        "previous_policy": _policy_bucket_entry(
+            bucket_name="previous_policy",
+            source=str(previous_policy_bucket.get("source", "") or "previous_persisted_policy_state"),
+            available=bool(previous_policy_evidence or previous_policy_lineage),
+            evidence=previous_policy_evidence,
+            policy_lineage=previous_policy_lineage,
+            evidence_lineage=dict(previous_policy_bucket.get("evidence_lineage", {}) or {}),
+            alignment=dict(previous_policy_bucket.get("alignment", {}) or {}),
+            policy_application=dict(previous_policy_bucket.get("policy_application", {}) or {}),
+            replay_summary=dict(previous_policy_bucket.get("replay_summary", {}) or {}),
+        ),
+        "active_policy": persisted_active_bucket,
+    }
     validation_evidence_payload["active_policy_lineage"] = dict(policy_lineage)
+    validation_evidence_payload = with_policy_evidence_buckets(validation_evidence_payload, persisted_buckets)
     validation_payload["evidence"] = validation_evidence_payload
     return {
         "version": version,
