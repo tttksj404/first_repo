@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from quant_binance.policy_lineage import build_policy_state_lineage_snapshot
 from quant_binance.validation_report import build_policy_comparison_validation_artifact, build_policy_validation_runner_artifact, build_weekly_validation_report, write_policy_validation_runner_artifact
 
 
@@ -268,6 +269,80 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(
                 buckets["staged_candidate"]["policy_lineage"]["source"],
                 "staged_candidate_policy",
+            )
+
+    def test_build_policy_comparison_validation_artifact_prefers_direct_active_bucket_from_current_policy_state(self) -> None:
+        candidate_policy = {"adjustments": []}
+        current_policy_state = {
+            "version": 3,
+            "active_policy": {
+                "status": "promote",
+                "adjustments": [{"symbol": "BTCUSDT", "action": "promote", "size_multiplier": 1.1}],
+            },
+            "rollout_progression": {"execution_phase": "partial"},
+            "policy_evidence_buckets": {
+                "active_policy": {
+                    "available": True,
+                    "source": "persisted_policy_validation_evidence",
+                    "alignment": {"aligned": True, "status": "aligned", "reason": "POLICY_LINEAGE_MATCH"},
+                    "evidence": {
+                        "runner_total_realized_pnl_usd": 3.5,
+                        "runner_drawdown_to_pnl_ratio": 0.08,
+                        "runner_reject_rate": 0.0,
+                        "runner_avg_edge_retention_ratio": 0.82,
+                        "runner_walk_forward_window_count": 1,
+                        "runner_positive_walk_forward_ratio": 1.0,
+                        "micro_live_gate": {"available": True, "status": "pass", "live_order_count": 4, "closed_trade_count": 1},
+                        "sample_quality_watchdog": {"status": "healthy"},
+                        "validation_runs": [{"live_order_count": 4, "closed_trade_count": 1, "avg_edge_retention_ratio": 0.82}],
+                        "walk_forward_windows": [{"avg_net_edge_bps": 2.1, "avg_score": 56.0}],
+                    },
+                }
+            },
+        }
+        current_lineage = build_policy_state_lineage_snapshot(current_policy_state, source="current_policy_state")
+        current_policy_state["policy_lineage"] = dict(current_lineage)
+        current_policy_state["policy_evidence_buckets"]["active_policy"]["policy_lineage"] = dict(current_lineage)
+        current_policy_state["policy_evidence_buckets"]["active_policy"]["evidence_lineage"] = dict(current_lineage)
+        with tempfile.TemporaryDirectory() as tempdir:
+            base = Path(tempdir) / "quant_runtime"
+            run_a = base / "output" / "paper-live-shell" / "run-a"
+            logs_dir = run_a / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_a / "summary.json").write_text(
+                json.dumps(
+                    {
+                        "live_order_count": 3,
+                        "accepted_live_order_count": 3,
+                        "rejected_live_order_count": 0,
+                        "avg_slippage_bps": 2.2,
+                        "avg_edge_retention_ratio": 0.8,
+                        "avg_realized_edge_bps": 6.0,
+                        "avg_expected_edge_bps": 8.0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "realized_pnl_usd_estimate": 4.0, "realized_return_bps_estimate": 9.0}) + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text(
+                json.dumps({"symbol": "BTCUSDT", "final_mode": "futures", "predictability_score": 71.0, "net_expected_edge_bps": 11.0, "estimated_round_trip_cost_bps": 8.0, "timestamp": "2026-03-14T00:00:00+00:00"})
+                + "\n",
+                encoding="utf-8",
+            )
+            artifact = build_policy_comparison_validation_artifact(
+                current_policy_state=current_policy_state,
+                candidate_policy=candidate_policy,
+                base_dir=base,
+                lookback_days=7,
+            )
+            self.assertTrue(artifact["policy_evidence_buckets"]["active_policy"]["available"])
+            self.assertTrue(artifact["validation_path"]["current_evidence_available"])
+            self.assertEqual(artifact["current_replay_summary"]["source"], "persisted_policy_validation_evidence")
+            self.assertTrue(
+                artifact["counterfactual_replay_path"]["current_policy"]["execution_path"]["uses_persisted_validation_evidence"]
             )
 
     def test_build_policy_comparison_validation_artifact_filters_mismatched_run_lineage(self) -> None:
