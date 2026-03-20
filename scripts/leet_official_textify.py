@@ -11,6 +11,8 @@ from typing import Iterable, Sequence
 import pdfplumber
 
 DEFAULT_VAULT_ROOT = Path("/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note")
+OFFICIAL_PAST_EXAMS_REL = Path("02. Resources/LEET/00. Official_Past_Exams")
+OFFICIAL_TEXTIFIED_REL = Path("02. Resources/LEET/01. Official_Textified")
 QUESTION_RE = re.compile(r"^\d+\.\s")
 RANGE_RE = re.compile(r"^\[\d+(?:~\d+)?\]\s")
 CHOICE_RE = re.compile(r"^[①-⑤]\s")
@@ -26,6 +28,61 @@ NOISE_LINE_RE = re.compile(
 class TextLine:
     text: str
     top: float
+
+
+@dataclass(frozen=True)
+class GenerationResult:
+    source_path: Path
+    output_path: Path
+    changed: bool
+
+
+def official_past_exams_root(vault_root: Path) -> Path:
+    return vault_root / OFFICIAL_PAST_EXAMS_REL
+
+
+def official_textified_root(vault_root: Path, override_root: Path | None = None) -> Path:
+    return override_root or (vault_root / OFFICIAL_TEXTIFIED_REL)
+
+
+def official_relative_pdf_path(source_path: Path, vault_root: Path) -> Path | None:
+    try:
+        relative_path = source_path.relative_to(official_past_exams_root(vault_root))
+    except ValueError:
+        return None
+    if source_path.suffix.lower() != ".pdf":
+        return None
+    return relative_path
+
+
+def is_supported_official_source(source_path: Path, vault_root: Path) -> bool:
+    return official_relative_pdf_path(source_path, vault_root) is not None
+
+
+def derive_official_output_path(
+    source_path: Path,
+    vault_root: Path,
+    textified_root_override: Path | None = None,
+) -> Path:
+    relative_pdf_path = official_relative_pdf_path(source_path, vault_root)
+    if relative_pdf_path is None:
+        raise ValueError(f"Unsupported official source path: {source_path}")
+    return official_textified_root(vault_root, textified_root_override) / relative_pdf_path.with_suffix(".md")
+
+
+def collect_supported_official_sources(paths: Sequence[Path], vault_root: Path) -> list[Path]:
+    collected: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        candidates = sorted(path.rglob("*.pdf")) if path.is_dir() else [path]
+        for candidate in candidates:
+            if not is_supported_official_source(candidate, vault_root):
+                continue
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            collected.append(candidate)
+    return collected
 
 
 def normalize_line_text(text: str) -> str:
@@ -290,16 +347,59 @@ def build_markdown(pdf_path: Path, body_text: str, vault_root: Path) -> str:
     )
 
 
+def render_markdown(pdf_path: Path, vault_root: Path) -> str:
+    body_text = format_pdf_text(pdf_path)
+    return build_markdown(pdf_path, body_text, vault_root)
+
+
+def write_markdown_output(output_path: Path, markdown: str) -> bool:
+    if output_path.exists():
+        existing = output_path.read_text(encoding="utf-8")
+        if existing == markdown:
+            return False
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(markdown, encoding="utf-8")
+    return True
+
+
+def export_pdf(
+    pdf_path: Path,
+    vault_root: Path,
+    output_path: Path,
+) -> GenerationResult:
+    markdown = render_markdown(pdf_path, vault_root)
+    changed = write_markdown_output(output_path, markdown)
+    return GenerationResult(source_path=pdf_path, output_path=output_path, changed=changed)
+
+
+def export_supported_official_sources(
+    paths: Sequence[Path],
+    vault_root: Path,
+    textified_root_override: Path | None = None,
+) -> list[GenerationResult]:
+    sources = collect_supported_official_sources(paths, vault_root)
+    if not sources:
+        raise SystemExit("No supported official PDF sources were found under the provided path(s).")
+    return [
+        export_pdf(
+            pdf_path=source_path,
+            vault_root=vault_root,
+            output_path=derive_official_output_path(source_path, vault_root, textified_root_override),
+        )
+        for source_path in sources
+    ]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Format LEET official PDFs into exam-like markdown."
     )
-    parser.add_argument("input", type=Path, help="Source PDF path")
+    parser.add_argument("inputs", nargs="+", type=Path, help="Source PDF path(s) or supported official tree directories")
     parser.add_argument(
         "-o",
         "--output",
         type=Path,
-        help="Markdown output path; prints to stdout when omitted",
+        help="Markdown output path for a single explicit input; prints to stdout when omitted outside the supported official tree",
     )
     parser.add_argument(
         "--vault-root",
@@ -307,23 +407,57 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_VAULT_ROOT,
         help="Vault root used to build Obsidian source links",
     )
+    parser.add_argument(
+        "--official-textified-root",
+        type=Path,
+        help="Override the destination root used when mirroring supported official exam PDFs into Official_Textified markdown",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    if args.input.suffix.lower() != ".pdf":
-        raise SystemExit("Only PDF inputs are supported by this formatter.")
+    inputs = [path.expanduser() for path in args.inputs]
 
-    body_text = format_pdf_text(args.input)
-    markdown = build_markdown(args.input, body_text, args.vault_root)
+    if args.output and len(inputs) != 1:
+        raise SystemExit("--output can only be used with a single input path.")
 
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(markdown, encoding="utf-8")
-        print(args.output)
+    batch_mode = len(inputs) > 1 or any(path.is_dir() for path in inputs)
+    if batch_mode:
+        if args.output:
+            raise SystemExit("--output is not supported for batch or directory inputs.")
+        results = export_supported_official_sources(
+            paths=inputs,
+            vault_root=args.vault_root,
+            textified_root_override=args.official_textified_root,
+        )
+        for result in results:
+            print(result.output_path)
         return
 
+    input_path = inputs[0]
+    if input_path.suffix.lower() != ".pdf":
+        raise SystemExit("Only PDF inputs are supported by this formatter.")
+
+    if args.output:
+        result = export_pdf(input_path, args.vault_root, args.output)
+        print(result.output_path)
+        return
+
+    if is_supported_official_source(input_path, args.vault_root):
+        result = export_pdf(
+            pdf_path=input_path,
+            vault_root=args.vault_root,
+            output_path=derive_official_output_path(
+                input_path,
+                args.vault_root,
+                args.official_textified_root,
+            ),
+        )
+        print(result.output_path)
+        return
+
+    markdown = render_markdown(input_path, args.vault_root)
     print(markdown, end="")
 
 
