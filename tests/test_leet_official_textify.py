@@ -135,6 +135,38 @@ class LeetOfficialTextifyTests(unittest.TestCase):
         self.assertIn("\n① ㄱ\n② ㄴ\n③ ㄱ, ㄴ\n", formatted)
         self.assertIn("갑: 첫 번째 발화\n을: 두 번째 발화", formatted)
 
+    def test_preserves_blank_question_boundaries_for_unnumbered_hwp_stems(self) -> None:
+        lines = [
+            "⑤ 애당초 정의(正義)를 의식적으로 부정할 목적으로 제정된 법은",
+            "법으로서의 효력을 갖지 않는다는 것은 을의 논지를 강화하고",
+            "병의 논지를 약화한다.",
+            "",
+            "다음 견해를 분석한 것으로 옳은 것을 <보기>에서 고른 것은?",
+            "",
+            "<표>",
+            "",
+            "갑：인간은 야수로부터 자신을 보호하기 위하여 사회를 구성하",
+            "게 되었다.",
+        ]
+
+        formatted = format_exam_lines(lines)
+
+        self.assertIn(
+            "⑤ 애당초 정의(正義)를 의식적으로 부정할 목적으로 제정된 법은\n"
+            "법으로서의 효력을 갖지 않는다는 것은 을의 논지를 강화하고 병의 논지를 약화한다.\n\n"
+            "다음 견해를 분석한 것으로 옳은 것을 <보기>에서 고른 것은?\n",
+            formatted,
+        )
+        self.assertIn("\n<표>\n", formatted)
+        self.assertIn(
+            "갑：인간은 야수로부터 자신을 보호하기 위하여 사회를 구성하 게 되었다.\n",
+            formatted,
+        )
+        self.assertNotIn(
+            "병의 논지를 약화한다. 다음 견해를 분석한 것으로 옳은 것을 <보기>에서 고른 것은?",
+            formatted,
+        )
+
     def test_maps_supported_official_pdf_into_textified_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             vault_root = Path(tempdir)
