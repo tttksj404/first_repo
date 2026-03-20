@@ -17,6 +17,7 @@ from scripts.leet_official_textify import (
     derive_official_output_path,
     export_hwp,
     export_pdf,
+    extract_hwp_lines_from_xml,
     extract_hwp_paragraph_lines,
     extract_text_lines,
     format_exam_lines,
@@ -273,6 +274,127 @@ class LeetOfficialTextifyTests(unittest.TestCase):
                 "<표>",
             ],
         )
+
+    def test_extract_hwp_paragraph_lines_skips_textful_table_placeholder(self) -> None:
+        paragraph = ET.fromstring(
+            """
+            <Paragraph>
+              <LineSeg>
+                <TableControl>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Paragraph>
+                          <LineSeg>
+                            <Text>표 안 텍스트</Text>
+                          </LineSeg>
+                        </Paragraph>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </TableControl>
+              </LineSeg>
+            </Paragraph>
+            """
+        )
+
+        self.assertEqual(extract_hwp_paragraph_lines(paragraph), [])
+
+    def test_extract_hwp_paragraph_lines_skips_textbox_gshape_placeholder(self) -> None:
+        paragraph = ET.fromstring(
+            """
+            <Paragraph>
+              <LineSeg>
+                <GShapeObjectControl>
+                  <ShapeComponent chid="$rec" />
+                  <TextboxParagraphList>
+                    <Paragraph>
+                      <LineSeg>
+                        <Text>홀수형</Text>
+                      </LineSeg>
+                    </Paragraph>
+                  </TextboxParagraphList>
+                </GShapeObjectControl>
+              </LineSeg>
+            </Paragraph>
+            """
+        )
+
+        self.assertEqual(extract_hwp_paragraph_lines(paragraph), [])
+
+    def test_extract_hwp_paragraph_lines_skips_line_only_gshape_placeholder(self) -> None:
+        paragraph = ET.fromstring(
+            """
+            <Paragraph>
+              <LineSeg>
+                <GShapeObjectControl>
+                  <ShapeComponent chid="$lin" />
+                </GShapeObjectControl>
+              </LineSeg>
+            </Paragraph>
+            """
+        )
+
+        self.assertEqual(extract_hwp_paragraph_lines(paragraph), [])
+
+    def test_extract_hwp_paragraph_lines_keeps_picture_gshape_placeholder(self) -> None:
+        paragraph = ET.fromstring(
+            """
+            <Paragraph>
+              <LineSeg>
+                <GShapeObjectControl>
+                  <ShapeComponent chid="$pic" />
+                </GShapeObjectControl>
+              </LineSeg>
+            </Paragraph>
+            """
+        )
+
+        self.assertEqual(extract_hwp_paragraph_lines(paragraph), ["<그림>"])
+
+    def test_extract_hwp_lines_from_xml_recovers_nested_table_text_without_placeholder(self) -> None:
+        xml = """
+        <HwpDoc>
+          <BodyText>
+            <Paragraph>
+              <LineSeg>
+                <Text>문항 앞 설명</Text>
+              </LineSeg>
+            </Paragraph>
+            <Paragraph>
+              <LineSeg>
+                <TableControl>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Paragraph>
+                          <LineSeg>
+                            <Text>&lt;보기&gt;</Text>
+                          </LineSeg>
+                        </Paragraph>
+                        <Paragraph>
+                          <LineSeg>
+                            <Text>ㄱ. 표 안 텍스트</Text>
+                          </LineSeg>
+                        </Paragraph>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </TableControl>
+              </LineSeg>
+            </Paragraph>
+          </BodyText>
+        </HwpDoc>
+        """
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            xml_path = Path(tempdir) / "sample.xml"
+            xml_path.write_text(xml, encoding="utf-8")
+
+            self.assertEqual(
+                extract_hwp_lines_from_xml(xml_path),
+                ["문항 앞 설명", "", "<보기>", "", "ㄱ. 표 안 텍스트", ""],
+            )
 
     def test_export_hwp_writes_once_and_skips_identical_rewrite(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
