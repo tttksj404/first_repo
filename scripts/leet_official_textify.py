@@ -38,7 +38,7 @@ OFFICIAL_TEXTIFIED_REL = Path("02. Resources/LEET/01. Official_Textified")
 SUPPORTED_SOURCE_SUFFIXES = {".pdf", ".hwp"}
 QUESTION_RE = re.compile(r"^\d+\.\s")
 RANGE_RE = re.compile(r"^\[\d+(?:~\d+)?\]\s")
-CHOICE_RE = re.compile(r"^[①-⑤]\s")
+CHOICE_RE = re.compile(r"^[①-⑤](?:\s|$)")
 BOGI_ITEM_RE = re.compile(r"^[ㄱ-ㅎ]\.\s")
 DIALOGUE_RE = re.compile(r"^(?:갑|을|병|정|무|A|B|C|D|甲|乙|丙|丁)\s*:")
 LABEL_RE = re.compile(r"^<(?:보기|견해|규칙|사례|실험|표|그림|조건)>$")
@@ -60,6 +60,11 @@ PLACEHOLDER_BY_TAG = {
 PICTURE_OCR_MIN_VISIBLE_CHARS = 12
 PICTURE_OCR_MAX_LINES = 8
 PICTURE_OCR_PREFIX = "◦ OCR: "
+PICTURE_OCR_MIN_ACCEPTED_LINES = 2
+FRAGMENT_WRAP_WIDTH = 32
+BARE_CHOICE_RE = re.compile(r"^[①-⑤]$")
+OCR_EDGE_NOISE_RE = re.compile(r"^[~`'\".,;:]+|[~`'\".,;:]+$")
+OCR_NOISE_GLYPH_RE = re.compile(r"[~_=|/\\<>`]")
 
 
 @dataclass(frozen=True)
@@ -343,6 +348,79 @@ def prepare_exam_lines(lines: Iterable[str]) -> list[str]:
     return prepared
 
 
+def visible_char_count(text: str) -> int:
+    return len(re.sub(r"\s+", "", text))
+
+
+def is_compactable_fragment_line(text: str) -> bool:
+    if not text:
+        return False
+
+    kind = line_kind(text)
+    if kind in {"blank", "question", "range", "bogi_label", "label", "dialogue", "bullet", "bogi_item"}:
+        return False
+    if kind == "choice":
+        return BARE_CHOICE_RE.match(text) is not None
+
+    visible_count = visible_char_count(text)
+    if visible_count > 18 and not re.search(r"[↓ⓐ-ⓩA-Za-z0-9+\-=/()]", text):
+        return False
+    if visible_count > FRAGMENT_WRAP_WIDTH:
+        return False
+    if re.search(r"[?!.]$", text) and visible_count > 6:
+        return False
+    return True
+
+
+def wrap_fragment_tokens(tokens: Sequence[str]) -> list[str]:
+    wrapped: list[str] = []
+    current = ""
+    for token in tokens:
+        if current and BARE_CHOICE_RE.match(token):
+            wrapped.append(current)
+            current = token
+            continue
+        candidate = token if not current else f"{current} {token}"
+        if current and visible_char_count(candidate) > FRAGMENT_WRAP_WIDTH:
+            wrapped.append(current)
+            current = token
+            continue
+        current = candidate
+    if current:
+        wrapped.append(current)
+    return wrapped
+
+
+def compact_fragmented_output(lines: Sequence[str]) -> list[str]:
+    compacted: list[str] = []
+    index = 0
+    while index < len(lines):
+        current = lines[index]
+        if current == "":
+            compacted.append(current)
+            index += 1
+            continue
+
+        if is_compactable_fragment_line(current):
+            run = [current]
+            next_index = index + 1
+            while next_index + 1 < len(lines) and lines[next_index] == "" and is_compactable_fragment_line(lines[next_index + 1]):
+                run.append(lines[next_index + 1])
+                next_index += 2
+
+            if len(run) >= 3 and (
+                any(BARE_CHOICE_RE.match(token) for token in run)
+                or sum(visible_char_count(token) <= 4 for token in run) >= 2
+            ):
+                compacted.extend(wrap_fragment_tokens(run))
+                index = next_index
+                continue
+
+        compacted.append(current)
+        index += 1
+    return compacted
+
+
 def format_exam_lines(lines: Iterable[str]) -> str:
     prepared_lines = merge_wrapped_question_headers(prepare_exam_lines(lines))
     expanded_lines: list[str] = []
@@ -396,6 +474,7 @@ def format_exam_lines(lines: Iterable[str]) -> str:
         if line == "" and (not cleaned or cleaned[-1] == ""):
             continue
         cleaned.append(line)
+    cleaned = compact_fragmented_output(cleaned)
     return "\n".join(cleaned).strip() + "\n"
 
 
@@ -575,10 +654,39 @@ def run_tesseract_ocr(image_path: Path) -> str | None:
     return result.stdout
 
 
+def is_useful_hwp_picture_ocr_line(line: str) -> bool:
+    visible_text = re.sub(r"\s+", "", line)
+    if len(visible_text) < 2:
+        return False
+
+    hangul_count = len(re.findall(r"[가-힣]", line))
+    if hangul_count < 2:
+        return False
+
+    latin_count = len(re.findall(r"[A-Za-z]", line))
+    latin_tokens = re.findall(r"[A-Za-z]{2,}", line)
+    noise_count = len(OCR_NOISE_GLYPH_RE.findall(line))
+    if re.search(r"[A-Za-z]{3,}", line) and hangul_count * 2 < latin_count:
+        return False
+    if latin_count >= 4 and hangul_count < latin_count:
+        return False
+    if len(latin_tokens) >= 2 and hangul_count < latin_count * 3:
+        return False
+    if latin_tokens and noise_count and hangul_count < 12:
+        return False
+    if noise_count >= 2 and hangul_count < 5:
+        return False
+
+    tokens = re.findall(r"[A-Za-z가-힣0-9]+", line)
+    if tokens and len(tokens) == 1 and len(tokens[0]) < 3 and hangul_count < 3:
+        return False
+    return True
+
+
 def format_hwp_picture_ocr_lines(text: str) -> list[str]:
     normalized_lines: list[str] = []
     for raw_line in text.splitlines():
-        normalized = normalize_hwp_line(raw_line)
+        normalized = OCR_EDGE_NOISE_RE.sub("", normalize_hwp_line(raw_line)).strip()
         if not normalized:
             continue
         if normalized_lines and normalized_lines[-1] == normalized:
@@ -595,7 +703,15 @@ def format_hwp_picture_ocr_lines(text: str) -> list[str]:
     if not re.search(r"[가-힣]", "".join(normalized_lines)) and len(re.findall(r"[A-Za-z0-9]", visible_text)) < 12:
         return []
 
-    return [f"{PICTURE_OCR_PREFIX}{line}" for line in normalized_lines[:PICTURE_OCR_MAX_LINES]]
+    accepted_lines = [line for line in normalized_lines if is_useful_hwp_picture_ocr_line(line)]
+    if not accepted_lines:
+        return []
+    if len(accepted_lines) < PICTURE_OCR_MIN_ACCEPTED_LINES:
+        hangul_total = sum(len(re.findall(r"[가-힣]", line)) for line in accepted_lines)
+        if hangul_total < 8:
+            return []
+
+    return [f"{PICTURE_OCR_PREFIX}{line}" for line in accepted_lines[:PICTURE_OCR_MAX_LINES]]
 
 
 def build_hwp_picture_ocr_lines_by_bindata_id(hwp_path: Path, xml_path: Path) -> dict[int, list[str]]:

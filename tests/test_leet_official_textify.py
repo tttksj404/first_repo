@@ -175,6 +175,66 @@ class LeetOfficialTextifyTests(unittest.TestCase):
             formatted,
         )
 
+    def test_compacts_blank_separated_symbolic_choice_fragments(self) -> None:
+        lines = [
+            "다음 논증의 구조를 가장 잘 표현한 것은?",
+            "①",
+            "",
+            "ⓐ+ⓑ+ⓒ+ⓓ",
+            "",
+            "↓",
+            "",
+            "ⓔ",
+            "",
+            "↓",
+            "",
+            "ⓕ+ⓖ+ⓗ",
+            "",
+            "↓",
+            "",
+            "ⓘ",
+            "",
+            "②",
+            "",
+            "ⓐ+ⓑ",
+            "",
+            "↓",
+            "",
+            "ⓒ",
+        ]
+
+        formatted = format_exam_lines(lines)
+
+        self.assertIn("① ⓐ+ⓑ+ⓒ+ⓓ ↓ ⓔ ↓ ⓕ+ⓖ+ⓗ ↓ ⓘ", formatted)
+        self.assertIn("② ⓐ+ⓑ ↓ ⓒ", formatted)
+
+    def test_compacts_blank_separated_table_fragments_into_readable_lines(self) -> None:
+        lines = [
+            "평가 결과표",
+            "영역",
+            "",
+            "사원",
+            "",
+            "업무 능력",
+            "",
+            "리더십",
+            "",
+            "인화력",
+            "",
+            "A",
+            "",
+            "B",
+            "",
+            "C",
+            "",
+            "◦ 각자의 총점은 0이다.",
+        ]
+
+        formatted = format_exam_lines(lines)
+
+        self.assertIn("영역 사원 업무 능력 리더십 인화력 A B C", formatted)
+        self.assertIn("\n◦ 각자의 총점은 0이다.\n", formatted)
+
     def test_maps_supported_official_pdf_into_textified_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             vault_root = Path(tempdir)
@@ -417,6 +477,39 @@ class LeetOfficialTextifyTests(unittest.TestCase):
 
     def test_format_hwp_picture_ocr_lines_rejects_short_label_only_text(self) -> None:
         self.assertEqual(format_hwp_picture_ocr_lines("A\nB\nC"), [])
+
+    def test_format_hwp_picture_ocr_lines_drops_mixed_noise_and_keeps_useful_labels(self) -> None:
+        self.assertEqual(
+            format_hwp_picture_ocr_lines(
+                "A Baa 구간 BoB 구간 C\n출발선 신발 교체\n갑(구두) 운동화\n을(등산화)\n병(운동화)\n"
+            ),
+            [
+                "◦ OCR: 출발선 신발 교체",
+                "◦ OCR: 갑(구두) 운동화",
+                "◦ OCR: 을(등산화)",
+                "◦ OCR: 병(운동화)",
+            ],
+        )
+
+    def test_format_hwp_picture_ocr_lines_rejects_block_when_only_short_noise_survives(self) -> None:
+        self.assertEqual(
+            format_hwp_picture_ocr_lines("~\naN,\nFASS SE\n4222\n체내\n"),
+            [],
+        )
+
+    def test_format_hwp_picture_ocr_lines_rejects_hybrid_latin_noise_lines(self) -> None:
+        self.assertEqual(
+            format_hwp_picture_ocr_lines(
+                "개혁의 이득] 곡선\n"
+                "시작점 RAE <_RL TR, 개혁의 진행 정도\n"
+                "3ㆍ신규 시장 부문 행위자\n"
+                "ci All 부문 (국영)노동자들\n"
+            ),
+            [
+                "◦ OCR: 개혁의 이득] 곡선",
+                "◦ OCR: 3ㆍ신규 시장 부문 행위자",
+            ],
+        )
 
     def test_build_hwp_picture_ocr_lines_by_bindata_id_formats_tesseract_output(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
