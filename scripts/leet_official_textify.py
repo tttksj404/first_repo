@@ -19,6 +19,8 @@ CHOICE_RE = re.compile(r"^[①-⑤]\s")
 BOGI_ITEM_RE = re.compile(r"^[ㄱ-ㅎ]\.\s")
 DIALOGUE_RE = re.compile(r"^(?:갑|을|병|정|무|A|B|C|D|甲|乙|丙|丁)\s*:")
 LABEL_RE = re.compile(r"^<(?:보기|견해|규칙|사례|실험|표|그림|조건)>$")
+TEXT_LINE_X_TOLERANCE = 2
+TEXT_LINE_Y_TOLERANCE = 3
 NOISE_LINE_RE = re.compile(
     r"^(?:\d+|제\s+\d\s+교시|성명(?:\s+수.*)?|수험번호|홀\s*수형|짝\s*수형|언어이해|추리논증|호)$"
 )
@@ -173,7 +175,10 @@ def infer_gap_threshold(lines: Sequence[TextLine]) -> float:
 
 
 def extract_text_lines(page: pdfplumber.page.Page, bbox: tuple[float, float, float, float]) -> list[str]:
-    raw_lines = page.within_bbox(bbox).extract_text_lines()
+    raw_lines = page.within_bbox(bbox).extract_text_lines(
+        x_tolerance=TEXT_LINE_X_TOLERANCE,
+        y_tolerance=TEXT_LINE_Y_TOLERANCE,
+    )
     filtered: list[TextLine] = []
     for raw_line in raw_lines:
         normalized = normalize_line_text(raw_line["text"])
