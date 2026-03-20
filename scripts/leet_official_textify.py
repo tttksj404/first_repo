@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
+import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
+import zlib
 from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,6 +15,14 @@ from statistics import median
 from typing import Iterable, Sequence
 
 import pdfplumber
+
+try:
+    import olefile
+except ImportError as exc:  # pragma: no cover - dependency presence varies by machine
+    olefile = None
+    OLEFILE_IMPORT_ERROR = exc
+else:
+    OLEFILE_IMPORT_ERROR = None
 
 try:
     from hwp5.xmlmodel import Hwp5File
@@ -46,6 +57,9 @@ PLACEHOLDER_BY_TAG = {
     "TableControl": "<표>",
     "GShapeObjectControl": "<그림>",
 }
+PICTURE_OCR_MIN_VISIBLE_CHARS = 12
+PICTURE_OCR_MAX_LINES = 8
+PICTURE_OCR_PREFIX = "◦ OCR: "
 
 
 @dataclass(frozen=True)
@@ -59,6 +73,21 @@ class GenerationResult:
     source_path: Path
     output_path: Path
     changed: bool
+
+
+@dataclass(frozen=True)
+class HwpBinDataRef:
+    bindata_id: int
+    storage_id: str
+    ext: str
+
+
+@dataclass(frozen=True)
+class HwpPictureAsset:
+    bindata_id: int
+    storage_id: str
+    ext: str
+    data: bytes
 
 
 def official_past_exams_root(vault_root: Path) -> Path:
@@ -431,6 +460,179 @@ def hwp_control_placeholder(control: ET.Element) -> str | None:
     return placeholder
 
 
+def hwp_picture_bindata_id(control: ET.Element) -> int | None:
+    for node in control.iter():
+        if xml_local_name(node.tag) != "PictureInfo":
+            continue
+        bindata_id = node.attrib.get("bindata-id")
+        if bindata_id is None:
+            continue
+        try:
+            return int(bindata_id)
+        except ValueError:
+            return None
+    return None
+
+
+def extract_hwp_bindata_refs(root: ET.Element) -> dict[int, HwpBinDataRef]:
+    refs: dict[int, HwpBinDataRef] = {}
+    next_bindata_id = 1
+    for node in root.iter():
+        if xml_local_name(node.tag) != "BinData":
+            continue
+        embedding = next((child for child in node if xml_local_name(child.tag) == "BinDataEmbedding"), None)
+        if embedding is None:
+            next_bindata_id += 1
+            continue
+        storage_id = embedding.attrib.get("storage-id")
+        if storage_id:
+            refs[next_bindata_id] = HwpBinDataRef(
+                bindata_id=next_bindata_id,
+                storage_id=storage_id,
+                ext=(embedding.attrib.get("ext") or "bin").lower(),
+            )
+        next_bindata_id += 1
+    return refs
+
+
+def decompress_hwp_embedded_data(data: bytes) -> bytes:
+    try:
+        return zlib.decompress(data, -15)
+    except zlib.error:
+        return data
+
+
+def resolve_hwp_bindata_stream_name(
+    ole: "olefile.OleFileIO",
+    storage_id: str,
+    ext: str,
+) -> tuple[str, str] | None:
+    candidates = [f"{storage_id}.{ext}", f"{storage_id}.{ext.lower()}", f"{storage_id}.{ext.upper()}", storage_id]
+    for candidate in dict.fromkeys(candidates):
+        if ole.exists(["BinData", candidate]):
+            resolved_ext = Path(candidate).suffix.lstrip(".").lower() or ext
+            return candidate, resolved_ext
+
+    prefix = f"{storage_id}."
+    for entry in ole.listdir():
+        if len(entry) != 2 or entry[0] != "BinData":
+            continue
+        if not entry[1].startswith(prefix):
+            continue
+        resolved_ext = Path(entry[1]).suffix.lstrip(".").lower() or ext
+        return entry[1], resolved_ext
+    return None
+
+
+def extract_hwp_picture_assets(
+    hwp_path: Path,
+    bindata_refs: dict[int, HwpBinDataRef],
+) -> dict[int, HwpPictureAsset]:
+    if olefile is None:
+        return {}
+
+    assets: dict[int, HwpPictureAsset] = {}
+    with olefile.OleFileIO(str(hwp_path)) as ole:
+        for bindata_id, ref in bindata_refs.items():
+            resolved = resolve_hwp_bindata_stream_name(ole, ref.storage_id, ref.ext)
+            if resolved is None:
+                continue
+            stream_name, resolved_ext = resolved
+            raw_data = ole.openstream(["BinData", stream_name]).read()
+            assets[bindata_id] = HwpPictureAsset(
+                bindata_id=bindata_id,
+                storage_id=ref.storage_id,
+                ext=resolved_ext,
+                data=decompress_hwp_embedded_data(raw_data),
+            )
+    return assets
+
+
+def available_hwp_picture_ocr_backend() -> str | None:
+    if shutil.which("tesseract"):
+        return "tesseract"
+    return None
+
+
+def run_tesseract_ocr(image_path: Path) -> str | None:
+    result = subprocess.run(
+        [
+            "tesseract",
+            str(image_path),
+            "stdout",
+            "-l",
+            "kor+eng",
+            "--psm",
+            "6",
+            "quiet",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def format_hwp_picture_ocr_lines(text: str) -> list[str]:
+    normalized_lines: list[str] = []
+    for raw_line in text.splitlines():
+        normalized = normalize_hwp_line(raw_line)
+        if not normalized:
+            continue
+        if normalized_lines and normalized_lines[-1] == normalized:
+            continue
+        normalized_lines.append(normalized)
+
+    if not normalized_lines:
+        return []
+
+    visible_text = re.sub(r"\s+", "", "".join(normalized_lines))
+    if len(visible_text) < PICTURE_OCR_MIN_VISIBLE_CHARS:
+        return []
+
+    if not re.search(r"[가-힣]", "".join(normalized_lines)) and len(re.findall(r"[A-Za-z0-9]", visible_text)) < 12:
+        return []
+
+    return [f"{PICTURE_OCR_PREFIX}{line}" for line in normalized_lines[:PICTURE_OCR_MAX_LINES]]
+
+
+def build_hwp_picture_ocr_lines_by_bindata_id(hwp_path: Path, xml_path: Path) -> dict[int, list[str]]:
+    backend = available_hwp_picture_ocr_backend()
+    if backend is None:
+        return {}
+
+    if olefile is None:
+        return {}
+
+    root = ET.parse(xml_path).getroot()
+    bindata_refs = extract_hwp_bindata_refs(root)
+    if not bindata_refs:
+        return {}
+
+    assets = extract_hwp_picture_assets(hwp_path, bindata_refs)
+    if not assets:
+        return {}
+
+    recovered_lines: dict[int, list[str]] = {}
+    with tempfile.TemporaryDirectory() as tempdir:
+        tempdir_path = Path(tempdir)
+        for bindata_id, asset in assets.items():
+            image_path = tempdir_path / f"{asset.storage_id}.{asset.ext}"
+            image_path.write_bytes(asset.data)
+            if backend == "tesseract":
+                ocr_text = run_tesseract_ocr(image_path)
+            else:  # pragma: no cover - unreachable until a second backend is added
+                ocr_text = None
+            if not ocr_text:
+                continue
+            formatted_lines = format_hwp_picture_ocr_lines(ocr_text)
+            if formatted_lines:
+                recovered_lines[bindata_id] = formatted_lines
+    return recovered_lines
+
+
 def append_hwp_text_line(text_parts: list[str], output: list[str]) -> None:
     text = normalize_hwp_line("".join(text_parts))
     text_parts.clear()
@@ -439,7 +641,10 @@ def append_hwp_text_line(text_parts: list[str], output: list[str]) -> None:
     output.append(text)
 
 
-def extract_hwp_paragraph_lines(paragraph: ET.Element) -> list[str]:
+def extract_hwp_paragraph_lines(
+    paragraph: ET.Element,
+    picture_ocr_by_bindata_id: dict[int, list[str]] | None = None,
+) -> list[str]:
     lines: list[str] = []
     for child in paragraph:
         if xml_local_name(child.tag) != "LineSeg":
@@ -459,11 +664,18 @@ def extract_hwp_paragraph_lines(paragraph: ET.Element) -> list[str]:
                 continue
             append_hwp_text_line(text_parts, lines)
             lines.append(placeholder)
+            if placeholder == "<그림>" and picture_ocr_by_bindata_id:
+                bindata_id = hwp_picture_bindata_id(node)
+                if bindata_id is not None:
+                    lines.extend(picture_ocr_by_bindata_id.get(bindata_id, []))
         append_hwp_text_line(text_parts, lines)
     return lines
 
 
-def extract_hwp_lines_from_xml(xml_path: Path) -> list[str]:
+def extract_hwp_lines_from_xml(
+    xml_path: Path,
+    picture_ocr_by_bindata_id: dict[int, list[str]] | None = None,
+) -> list[str]:
     tree = ET.parse(xml_path)
     root = tree.getroot()
     body = next((node for node in root if xml_local_name(node.tag) == "BodyText"), None)
@@ -474,7 +686,10 @@ def extract_hwp_lines_from_xml(xml_path: Path) -> list[str]:
     for paragraph in body.iter():
         if xml_local_name(paragraph.tag) != "Paragraph":
             continue
-        paragraph_lines = extract_hwp_paragraph_lines(paragraph)
+        paragraph_lines = extract_hwp_paragraph_lines(
+            paragraph,
+            picture_ocr_by_bindata_id=picture_ocr_by_bindata_id,
+        )
         if not paragraph_lines:
             continue
         lines.extend(paragraph_lines)
@@ -497,7 +712,13 @@ def format_hwp_text(hwp_path: Path) -> str:
     with tempfile.TemporaryDirectory() as tempdir:
         xml_path = Path(tempdir) / f"{hwp_path.stem}.xml"
         dump_hwp_xml(hwp_path, xml_path)
-        return format_exam_lines(extract_hwp_lines_from_xml(xml_path))
+        picture_ocr_by_bindata_id = build_hwp_picture_ocr_lines_by_bindata_id(hwp_path, xml_path)
+        return format_exam_lines(
+            extract_hwp_lines_from_xml(
+                xml_path,
+                picture_ocr_by_bindata_id=picture_ocr_by_bindata_id,
+            )
+        )
 
 
 def format_source_text(source_path: Path) -> str:

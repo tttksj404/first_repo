@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+import zlib
 from unittest import mock
 from pathlib import Path
 
@@ -13,13 +14,19 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.leet_official_textify import (
+    HwpBinDataRef,
+    HwpPictureAsset,
+    build_hwp_picture_ocr_lines_by_bindata_id,
     collect_supported_official_sources,
+    decompress_hwp_embedded_data,
     derive_official_output_path,
     export_hwp,
     export_pdf,
+    extract_hwp_bindata_refs,
     extract_hwp_lines_from_xml,
     extract_hwp_paragraph_lines,
     extract_text_lines,
+    format_hwp_picture_ocr_lines,
     format_exam_lines,
     is_supported_official_source,
 )
@@ -351,6 +358,108 @@ class LeetOfficialTextifyTests(unittest.TestCase):
         )
 
         self.assertEqual(extract_hwp_paragraph_lines(paragraph), ["<그림>"])
+
+    def test_extract_hwp_paragraph_lines_appends_picture_ocr_lines_for_matching_bindata(self) -> None:
+        paragraph = ET.fromstring(
+            """
+            <Paragraph>
+              <LineSeg>
+                <GShapeObjectControl>
+                  <ShapeComponent chid="$pic" />
+                  <ShapePicture>
+                    <PictureInfo bindata-id="7" />
+                  </ShapePicture>
+                </GShapeObjectControl>
+              </LineSeg>
+            </Paragraph>
+            """
+        )
+
+        self.assertEqual(
+            extract_hwp_paragraph_lines(
+                paragraph,
+                picture_ocr_by_bindata_id={7: ["◦ OCR: 개혁의 이득", "◦ OCR: 신규 시장 부문 행위자"]},
+            ),
+            ["<그림>", "◦ OCR: 개혁의 이득", "◦ OCR: 신규 시장 부문 행위자"],
+        )
+
+    def test_extract_hwp_bindata_refs_uses_docinfo_order_as_bindata_id(self) -> None:
+        root = ET.fromstring(
+            """
+            <HwpDoc>
+              <DocInfo>
+                <BinData>
+                  <BinDataEmbedding storage-id="BIN0001" ext="jpg" />
+                </BinData>
+                <BinData>
+                  <BinDataEmbedding storage-id="BIN0002" ext="png" />
+                </BinData>
+              </DocInfo>
+            </HwpDoc>
+            """
+        )
+
+        self.assertEqual(
+            extract_hwp_bindata_refs(root),
+            {
+                1: HwpBinDataRef(bindata_id=1, storage_id="BIN0001", ext="jpg"),
+                2: HwpBinDataRef(bindata_id=2, storage_id="BIN0002", ext="png"),
+            },
+        )
+
+    def test_decompress_hwp_embedded_data_handles_raw_deflate_payload(self) -> None:
+        payload = b"\xff\xd8fake-jpeg"
+        compressed = zlib.compressobj(wbits=-15)
+        encoded = compressed.compress(payload) + compressed.flush()
+
+        self.assertEqual(decompress_hwp_embedded_data(encoded), payload)
+        self.assertEqual(decompress_hwp_embedded_data(payload), payload)
+
+    def test_format_hwp_picture_ocr_lines_rejects_short_label_only_text(self) -> None:
+        self.assertEqual(format_hwp_picture_ocr_lines("A\nB\nC"), [])
+
+    def test_build_hwp_picture_ocr_lines_by_bindata_id_formats_tesseract_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            xml_path = Path(tempdir) / "sample.xml"
+            xml_path.write_text(
+                """
+                <HwpDoc>
+                  <DocInfo>
+                    <BinData>
+                      <BinDataEmbedding storage-id="BIN0001" ext="jpg" />
+                    </BinData>
+                  </DocInfo>
+                </HwpDoc>
+                """,
+                encoding="utf-8",
+            )
+
+            with mock.patch(
+                "scripts.leet_official_textify.available_hwp_picture_ocr_backend",
+                return_value="tesseract",
+            ), mock.patch(
+                "scripts.leet_official_textify.extract_hwp_picture_assets",
+                return_value={
+                    1: HwpPictureAsset(
+                        bindata_id=1,
+                        storage_id="BIN0001",
+                        ext="jpg",
+                        data=b"jpeg-bytes",
+                    )
+                },
+            ), mock.patch(
+                "scripts.leet_official_textify.run_tesseract_ocr",
+                return_value="개혁의 이득\n신규 시장 부문 행위자\n",
+            ):
+                self.assertEqual(
+                    build_hwp_picture_ocr_lines_by_bindata_id(Path("sample.hwp"), xml_path),
+                    {
+                        1: [
+                            "◦ OCR: 개혁의 이득",
+                            "◦ OCR: 신규 시장 부문 행위자",
+                        ]
+                    },
+                )
 
     def test_extract_hwp_lines_from_xml_recovers_nested_table_text_without_placeholder(self) -> None:
         xml = """
