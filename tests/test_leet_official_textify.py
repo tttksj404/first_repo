@@ -15,12 +15,53 @@ from scripts.leet_official_textify import (
     collect_supported_official_sources,
     derive_official_output_path,
     export_pdf,
+    extract_text_lines,
     format_exam_lines,
     is_supported_official_source,
 )
 
 
 class LeetOfficialTextifyTests(unittest.TestCase):
+    def test_extract_text_lines_uses_layout_gap_spacing_recovery(self) -> None:
+        class FakeCrop:
+            def __init__(self) -> None:
+                self.calls: list[dict[str, int]] = []
+
+            def extract_text_lines(self, **kwargs: int) -> list[dict[str, object]]:
+                self.calls.append(kwargs)
+                return [
+                    {
+                        "text": "기간을 사병과 동일한 수준으로 단축하는 내용의 ｢병역법｣ 개정안이",
+                        "top": 100.0,
+                    },
+                    {
+                        "text": "국방의 의무를 수행하는 성격과 헌법상 직업의 자유를 실현하는",
+                        "top": 112.0,
+                    },
+                ]
+
+        class FakePage:
+            def __init__(self, crop: FakeCrop) -> None:
+                self.crop = crop
+
+            def within_bbox(self, _bbox: tuple[float, float, float, float]) -> FakeCrop:
+                return self.crop
+
+        crop = FakeCrop()
+        lines = extract_text_lines(FakePage(crop), (0.0, 0.0, 100.0, 100.0))
+
+        self.assertEqual(
+            crop.calls,
+            [{"x_tolerance": 2, "y_tolerance": 3}],
+        )
+        self.assertEqual(
+            lines,
+            [
+                "기간을 사병과 동일한 수준으로 단축하는 내용의 ｢병역법｣ 개정안이",
+                "국방의 의무를 수행하는 성격과 헌법상 직업의 자유를 실현하는",
+            ],
+        )
+
     def test_restores_question_bogi_and_choices(self) -> None:
         lines = [
             "1. 다음 논쟁에 대한 분석으로 옳은 것만을 <보 기>에서 있는 대로 고른",
@@ -68,6 +109,28 @@ class LeetOfficialTextifyTests(unittest.TestCase):
             "부모는 미성년 자녀의 교육 과정에 참여할 권리가 있으므로 학교가 학생에게 불리한 조치를 할 경우 이에 대한 의견을 제시할 권리도 갖는다.",
             formatted,
         )
+
+    def test_keeps_recovered_question_header_spacing_without_regressing_structure(self) -> None:
+        lines = [
+            "3. 다음으로부터 추론한 것으로 옳은 것만을 <보기>에서 있는 대로 고른",
+            "것은?",
+            "<보기>",
+            "ㄱ. 첫 번째 진술",
+            "ㄴ. 두 번째 진술",
+            "① ㄱ ② ㄴ ③ ㄱ, ㄴ",
+            "갑: 첫 번째 발화",
+            "을: 두 번째 발화",
+        ]
+
+        formatted = format_exam_lines(lines)
+
+        self.assertIn(
+            "3. 다음으로부터 추론한 것으로 옳은 것만을 <보기>에서 있는 대로 고른 것은?",
+            formatted,
+        )
+        self.assertIn("\n<보기>\nㄱ. 첫 번째 진술\nㄴ. 두 번째 진술\n", formatted)
+        self.assertIn("\n① ㄱ\n② ㄴ\n③ ㄱ, ㄴ\n", formatted)
+        self.assertIn("갑: 첫 번째 발화\n을: 두 번째 발화", formatted)
 
     def test_maps_supported_official_pdf_into_textified_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
