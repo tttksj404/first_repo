@@ -21,7 +21,16 @@ mkdir -p "$LOG_DIR"
 export EXCHANGE="bitget"
 export STRATEGY_PROFILE="${STRATEGY_PROFILE:-live-ultra-aggressive}"
 export STRATEGY_OVERRIDE_PATH="${STRATEGY_OVERRIDE_PATH:-$OUTPUT_BASE/artifacts/strategy_override.approved.json}"
-export MACRO_INPUTS_PATH="${MACRO_INPUTS_PATH:-$OUTPUT_BASE/artifacts/news_macro_inputs.json}"
+DEFAULT_MACRO_INPUTS_PATH="$OUTPUT_BASE/artifacts/news_macro_inputs.json"
+MANUAL_MACRO_INPUTS_PATH="$OUTPUT_BASE/artifacts/news_macro_inputs.manual.json"
+if [ -z "${MACRO_INPUTS_PATH:-}" ]; then
+  if [ -f "$MANUAL_MACRO_INPUTS_PATH" ]; then
+    export MACRO_INPUTS_PATH="$MANUAL_MACRO_INPUTS_PATH"
+    export QUANT_DISABLE_NEWS_MACRO_LOOP="${QUANT_DISABLE_NEWS_MACRO_LOOP:-1}"
+  else
+    export MACRO_INPUTS_PATH="$DEFAULT_MACRO_INPUTS_PATH"
+  fi
+fi
 export TELEGRAM_REPORT_ONLY="${TELEGRAM_REPORT_ONLY:-1}"
 
 cd "$(dirname "$0")/.."
@@ -69,6 +78,10 @@ start_report_loop() {
 }
 
 start_news_loop() {
+  if [ "${QUANT_DISABLE_NEWS_MACRO_LOOP:-0}" = "1" ]; then
+    printf '[SUPERVISOR] news macro loop disabled; using MACRO_INPUTS_PATH=%s at %s\n' "$MACRO_INPUTS_PATH" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    return 0
+  fi
   sh scripts/quant_news_macro_signal_cycle.sh "$OUTPUT_BASE" 900 >>"$SUPERVISOR_LOG" 2>&1 &
   NEWS_PID=$!
   printf '[SUPERVISOR] started news macro loop pid=%s at %s\n' "$NEWS_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"

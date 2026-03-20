@@ -11,19 +11,19 @@
     "pyramid_min_roe_percent": 0.75,
     "pyramid_max_adds_per_symbol": 2,
     "pyramid_size_multiplier": 0.35,
-    "min_entry_net_edge_bps": 0.0,
-    "reduced_entry_net_edge_bps": -1.5,
+    "min_entry_net_edge_bps": -6.0,
+    "reduced_entry_net_edge_bps": -6.0,
     "macro_support_min": 0.42,
     "macro_score_relaxation": 14.0,
     "macro_liquidity_relaxation": 0.28,
     "macro_overheat_relaxation": 0.28,
     "macro_volatility_relaxation": 0.24,
-    "macro_min_entry_net_edge_bps": -2.0,
-    "macro_edge_to_cost_multiple_min": 0.35,
+    "macro_min_entry_net_edge_bps": -8.0,
+    "macro_edge_to_cost_multiple_min": -0.1,
     "macro_allow_caution": true,
     "priority_score_relaxation": 14.0,
-    "priority_min_entry_net_edge_bps": -2.5,
-    "priority_edge_to_cost_multiple_min": 0.3,
+    "priority_min_entry_net_edge_bps": -8.0,
+    "priority_edge_to_cost_multiple_min": -0.25,
     "priority_volatility_relaxation": 0.28,
     "priority_allow_caution": true,
     "soft_liquidity_floor": 0.24,
@@ -99,5 +99,9 @@
     "min_score_advantage_to_replace": 0.0,
     "min_net_edge_advantage_bps": 0.0,
     "min_incremental_pnl_usd": 0.0
+  },
+  "macro_gates": {
+    "futures_block_penalty": 1.05,
+    "spot_block_penalty": 1.05
   }
 }
