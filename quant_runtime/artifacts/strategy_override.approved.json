@@ -1,7 +1,6 @@
 {
   "futures_exposure": {
     "priority_symbols": [
-      "BTCUSDT",
       "ETHUSDT",
       "SOLUSDT",
       "DOGEUSDT",
@@ -14,24 +13,38 @@
     "pyramid_size_multiplier": 0.35
   },
   "live_position_risk": {
-    "disable_standard_stop_loss_exits": true,
-    "portfolio_full_exit_only": true,
+    "disable_standard_stop_loss_exits": false,
+    "portfolio_full_exit_only": false,
     "portfolio_full_exit_profit_ratio": 0.15,
     "major_drawdown_grace_enabled": true,
-    "major_drawdown_grace_minutes": 360,
-    "major_drawdown_abort_roe_percent": -35.0,
+    "major_drawdown_grace_minutes": 180,
+    "major_drawdown_abort_roe_percent": -20.0,
     "major_drawdown_predictability_min": 48.0,
     "major_drawdown_net_edge_min_bps": -2.0,
     "major_drawdown_liquidity_min": 0.25,
-    "major_drawdown_signal_max_age_minutes": 120,
-    "major_low_signal_max_holding_minutes": 0,
-    "major_low_signal_min_unrealized_usd": 0.0,
-    "major_low_signal_min_roe_percent": 0.0,
+    "major_drawdown_signal_max_age_minutes": 60,
+    "major_low_signal_max_holding_minutes": 120,
+    "major_low_signal_min_unrealized_usd": 1.0,
+    "major_low_signal_min_roe_percent": 0.75,
     "major_reentry_cooldown_minutes": 90,
-    "major_reversal_confirmation_cycles": 8,
-    "major_reversal_min_holding_minutes": 240,
+    "major_reversal_confirmation_cycles": 4,
+    "major_reversal_min_holding_minutes": 90,
     "major_loss_reentry_cooldown_minutes": 240,
-    "major_loss_reentry_trigger_usd": 2.0
+    "major_loss_reentry_trigger_usd": 2.0,
+    "profit_flip_take_profit_fraction": 0.35,
+    "position_unrealized_profit_arm_usd": 5.0,
+    "position_unrealized_profit_retrace_usd": 2.0,
+    "position_unrealized_take_profit_fraction": 0.35,
+    "portfolio_unrealized_profit_arm_ratio": 0.01,
+    "portfolio_unrealized_profit_retrace_ratio": 0.0035,
+    "portfolio_profit_lock_take_profit_fraction": 0.35,
+    "major_partial_exit_fraction": 0.6,
+    "major_profit_protection_arm_roe_percent": 8.0,
+    "major_profit_protection_retrace_roe_percent": 2.5,
+    "non_core_take_profit_roe_percent": 0.75,
+    "non_core_take_profit_fraction": 1.0,
+    "non_core_take_profit_min_usd": 0.75,
+    "partial_exit_min_interval_minutes": 10
   },
   "loss_combo_downgrade": {
     "enabled": true,
@@ -43,7 +56,6 @@
     "cooldown_minutes": 360
   },
   "universe": [
-    "BTCUSDT",
     "ETHUSDT",
     "SOLUSDT"
   ]
