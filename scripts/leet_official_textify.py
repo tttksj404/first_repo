@@ -390,6 +390,47 @@ def normalize_hwp_line(line: str) -> str:
     return normalized
 
 
+def iter_hwp_control_text(control: ET.Element) -> Iterable[str]:
+    for node in control.iter():
+        if node is control:
+            continue
+        if xml_local_name(node.tag) != "Text":
+            continue
+        text = normalize_hwp_line(node.text or "")
+        if text:
+            yield text
+
+
+def gshape_component_kind(control: ET.Element) -> str | None:
+    for node in control.iter():
+        if xml_local_name(node.tag) != "ShapeComponent":
+            continue
+        kind = node.attrib.get("chid")
+        if kind:
+            return kind
+    return None
+
+
+def hwp_control_placeholder(control: ET.Element) -> str | None:
+    local_name = xml_local_name(control.tag)
+    placeholder = PLACEHOLDER_BY_TAG.get(local_name)
+    if placeholder is None:
+        return None
+
+    if local_name == "TableControl":
+        return None if any(iter_hwp_control_text(control)) else placeholder
+
+    if local_name == "GShapeObjectControl":
+        kind = gshape_component_kind(control)
+        if kind == "$lin":
+            return None
+        if kind != "$pic" and any(iter_hwp_control_text(control)):
+            return None
+        return placeholder
+
+    return placeholder
+
+
 def append_hwp_text_line(text_parts: list[str], output: list[str]) -> None:
     text = normalize_hwp_line("".join(text_parts))
     text_parts.clear()
@@ -413,7 +454,7 @@ def extract_hwp_paragraph_lines(paragraph: ET.Element) -> list[str]:
                 if node.attrib.get("name") in SPACE_CONTROL_NAMES:
                     text_parts.append(" ")
                 continue
-            placeholder = PLACEHOLDER_BY_TAG.get(local_name)
+            placeholder = hwp_control_placeholder(node)
             if placeholder is None:
                 continue
             append_hwp_text_line(text_parts, lines)
