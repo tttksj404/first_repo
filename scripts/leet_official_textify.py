@@ -275,6 +275,11 @@ def merge_wrapped_question_headers(lines: Sequence[str]) -> list[str]:
     index = 0
     while index < len(lines):
         current = normalize_line_text(lines[index])
+        if not current:
+            if merged and merged[-1] != "":
+                merged.append("")
+            index += 1
+            continue
         if line_kind(current) not in {"question", "range"}:
             merged.append(current)
             index += 1
@@ -297,10 +302,25 @@ def merge_wrapped_question_headers(lines: Sequence[str]) -> list[str]:
     return merged
 
 
+def prepare_exam_lines(lines: Iterable[str]) -> list[str]:
+    prepared: list[str] = []
+    for raw_line in lines:
+        normalized = normalize_line_text(raw_line)
+        if normalized:
+            prepared.append(normalized)
+            continue
+        if prepared and prepared[-1] != "":
+            prepared.append("")
+    return prepared
+
+
 def format_exam_lines(lines: Iterable[str]) -> str:
-    prepared_lines = merge_wrapped_question_headers([line for line in lines if normalize_line_text(line)])
+    prepared_lines = merge_wrapped_question_headers(prepare_exam_lines(lines))
     expanded_lines: list[str] = []
     for line in prepared_lines:
+        if not line:
+            expanded_lines.append("")
+            continue
         expanded_lines.extend(expand_structured_line(line))
     output: list[str] = []
     paragraph: list[str] = []
