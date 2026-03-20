@@ -3,6 +3,9 @@ from __future__ import annotations
 
 import argparse
 import re
+import tempfile
+import xml.etree.ElementTree as ET
+from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
 from statistics import median
@@ -10,9 +13,18 @@ from typing import Iterable, Sequence
 
 import pdfplumber
 
+try:
+    from hwp5.xmlmodel import Hwp5File
+except ImportError as exc:  # pragma: no cover - dependency presence varies by machine
+    Hwp5File = None
+    HWP5_IMPORT_ERROR = exc
+else:
+    HWP5_IMPORT_ERROR = None
+
 DEFAULT_VAULT_ROOT = Path("/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note")
 OFFICIAL_PAST_EXAMS_REL = Path("02. Resources/LEET/00. Official_Past_Exams")
 OFFICIAL_TEXTIFIED_REL = Path("02. Resources/LEET/01. Official_Textified")
+SUPPORTED_SOURCE_SUFFIXES = {".pdf", ".hwp"}
 QUESTION_RE = re.compile(r"^\d+\.\s")
 RANGE_RE = re.compile(r"^\[\d+(?:~\d+)?\]\s")
 CHOICE_RE = re.compile(r"^[①-⑤]\s")
@@ -24,6 +36,16 @@ TEXT_LINE_Y_TOLERANCE = 3
 NOISE_LINE_RE = re.compile(
     r"^(?:\d+|제\s+\d\s+교시|성명(?:\s+수.*)?|수험번호|홀\s*수형|짝\s*수형|언어이해|추리논증|호)$"
 )
+SPACE_CONTROL_NAMES = {
+    "FIXWIDTH_SPACE",
+    "NONBREAK_SPACE",
+    "HARD_SPACE",
+    "TAB",
+}
+PLACEHOLDER_BY_TAG = {
+    "TableControl": "<표>",
+    "GShapeObjectControl": "<그림>",
+}
 
 
 @dataclass(frozen=True)
@@ -47,18 +69,18 @@ def official_textified_root(vault_root: Path, override_root: Path | None = None)
     return override_root or (vault_root / OFFICIAL_TEXTIFIED_REL)
 
 
-def official_relative_pdf_path(source_path: Path, vault_root: Path) -> Path | None:
+def official_relative_source_path(source_path: Path, vault_root: Path) -> Path | None:
     try:
         relative_path = source_path.relative_to(official_past_exams_root(vault_root))
     except ValueError:
         return None
-    if source_path.suffix.lower() != ".pdf":
+    if source_path.suffix.lower() not in SUPPORTED_SOURCE_SUFFIXES:
         return None
     return relative_path
 
 
 def is_supported_official_source(source_path: Path, vault_root: Path) -> bool:
-    return official_relative_pdf_path(source_path, vault_root) is not None
+    return official_relative_source_path(source_path, vault_root) is not None
 
 
 def derive_official_output_path(
@@ -66,17 +88,21 @@ def derive_official_output_path(
     vault_root: Path,
     textified_root_override: Path | None = None,
 ) -> Path:
-    relative_pdf_path = official_relative_pdf_path(source_path, vault_root)
-    if relative_pdf_path is None:
+    relative_source_path = official_relative_source_path(source_path, vault_root)
+    if relative_source_path is None:
         raise ValueError(f"Unsupported official source path: {source_path}")
-    return official_textified_root(vault_root, textified_root_override) / relative_pdf_path.with_suffix(".md")
+    return official_textified_root(vault_root, textified_root_override) / relative_source_path.with_suffix(".md")
 
 
 def collect_supported_official_sources(paths: Sequence[Path], vault_root: Path) -> list[Path]:
     collected: list[Path] = []
     seen: set[Path] = set()
     for path in paths:
-        candidates = sorted(path.rglob("*.pdf")) if path.is_dir() else [path]
+        candidates = (
+            sorted(candidate for candidate in path.rglob("*") if candidate.suffix.lower() in SUPPORTED_SOURCE_SUFFIXES)
+            if path.is_dir()
+            else [path]
+        )
         for candidate in candidates:
             if not is_supported_official_source(candidate, vault_root):
                 continue
@@ -333,6 +359,95 @@ def format_pdf_text(pdf_path: Path) -> str:
     return format_exam_lines(page_lines)
 
 
+def xml_local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def normalize_hwp_line(line: str) -> str:
+    normalized = normalize_line_text(line)
+    if normalized == "<보 기>":
+        return "<보기>"
+    return normalized
+
+
+def append_hwp_text_line(text_parts: list[str], output: list[str]) -> None:
+    text = normalize_hwp_line("".join(text_parts))
+    text_parts.clear()
+    if not text or NOISE_LINE_RE.match(text):
+        return
+    output.append(text)
+
+
+def extract_hwp_paragraph_lines(paragraph: ET.Element) -> list[str]:
+    lines: list[str] = []
+    for child in paragraph:
+        if xml_local_name(child.tag) != "LineSeg":
+            continue
+        text_parts: list[str] = []
+        for node in child:
+            local_name = xml_local_name(node.tag)
+            if local_name == "Text":
+                text_parts.append(node.text or "")
+                continue
+            if local_name == "ControlChar":
+                if node.attrib.get("name") in SPACE_CONTROL_NAMES:
+                    text_parts.append(" ")
+                continue
+            placeholder = PLACEHOLDER_BY_TAG.get(local_name)
+            if placeholder is None:
+                continue
+            append_hwp_text_line(text_parts, lines)
+            lines.append(placeholder)
+        append_hwp_text_line(text_parts, lines)
+    return lines
+
+
+def extract_hwp_lines_from_xml(xml_path: Path) -> list[str]:
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    body = next((node for node in root if xml_local_name(node.tag) == "BodyText"), None)
+    if body is None:
+        return []
+
+    lines: list[str] = []
+    for paragraph in body.iter():
+        if xml_local_name(paragraph.tag) != "Paragraph":
+            continue
+        paragraph_lines = extract_hwp_paragraph_lines(paragraph)
+        if not paragraph_lines:
+            continue
+        lines.extend(paragraph_lines)
+        lines.append("")
+    return lines
+
+
+def dump_hwp_xml(hwp_path: Path, xml_path: Path) -> None:
+    if Hwp5File is None:
+        raise RuntimeError(
+            "HWP support requires the optional 'hwp5' package, which is not installed on this machine."
+        ) from HWP5_IMPORT_ERROR
+
+    with closing(Hwp5File(str(hwp_path))) as hwp5_file:
+        with xml_path.open("wb") as stream:
+            hwp5_file.xmlevents(embedbin=False).dump(stream)
+
+
+def format_hwp_text(hwp_path: Path) -> str:
+    with tempfile.TemporaryDirectory() as tempdir:
+        xml_path = Path(tempdir) / f"{hwp_path.stem}.xml"
+        dump_hwp_xml(hwp_path, xml_path)
+        return format_exam_lines(extract_hwp_lines_from_xml(xml_path))
+
+
+def format_source_text(source_path: Path) -> str:
+    suffix = source_path.suffix.lower()
+    if suffix == ".pdf":
+        return format_pdf_text(source_path)
+    if suffix == ".hwp":
+        return format_hwp_text(source_path)
+    raise ValueError(f"Unsupported source format: {source_path}")
+
+
 def build_source_link(source_path: Path, vault_root: Path) -> str:
     try:
         rel = source_path.relative_to(vault_root)
@@ -342,19 +457,19 @@ def build_source_link(source_path: Path, vault_root: Path) -> str:
         return source_path.as_posix()
 
 
-def build_markdown(pdf_path: Path, body_text: str, vault_root: Path) -> str:
+def build_markdown(source_path: Path, body_text: str, vault_root: Path) -> str:
     return (
-        f"# {pdf_path.stem}\n\n"
-        f"- 원본 파일: {build_source_link(pdf_path, vault_root)}\n"
-        f"- 형식: {pdf_path.suffix.lstrip('.')}\n\n"
+        f"# {source_path.stem}\n\n"
+        f"- 원본 파일: {build_source_link(source_path, vault_root)}\n"
+        f"- 형식: {source_path.suffix.lstrip('.')}\n\n"
         "## 추출 텍스트\n\n"
         f"{body_text}"
     )
 
 
-def render_markdown(pdf_path: Path, vault_root: Path) -> str:
-    body_text = format_pdf_text(pdf_path)
-    return build_markdown(pdf_path, body_text, vault_root)
+def render_markdown(source_path: Path, vault_root: Path) -> str:
+    body_text = format_source_text(source_path)
+    return build_markdown(source_path, body_text, vault_root)
 
 
 def write_markdown_output(output_path: Path, markdown: str) -> bool:
@@ -377,6 +492,29 @@ def export_pdf(
     return GenerationResult(source_path=pdf_path, output_path=output_path, changed=changed)
 
 
+def export_hwp(
+    hwp_path: Path,
+    vault_root: Path,
+    output_path: Path,
+) -> GenerationResult:
+    markdown = render_markdown(hwp_path, vault_root)
+    changed = write_markdown_output(output_path, markdown)
+    return GenerationResult(source_path=hwp_path, output_path=output_path, changed=changed)
+
+
+def export_source(
+    source_path: Path,
+    vault_root: Path,
+    output_path: Path,
+) -> GenerationResult:
+    suffix = source_path.suffix.lower()
+    if suffix == ".pdf":
+        return export_pdf(source_path, vault_root, output_path)
+    if suffix == ".hwp":
+        return export_hwp(source_path, vault_root, output_path)
+    raise ValueError(f"Unsupported source format: {source_path}")
+
+
 def export_supported_official_sources(
     paths: Sequence[Path],
     vault_root: Path,
@@ -384,10 +522,10 @@ def export_supported_official_sources(
 ) -> list[GenerationResult]:
     sources = collect_supported_official_sources(paths, vault_root)
     if not sources:
-        raise SystemExit("No supported official PDF sources were found under the provided path(s).")
+        raise SystemExit("No supported official PDF/HWP sources were found under the provided path(s).")
     return [
-        export_pdf(
-            pdf_path=source_path,
+        export_source(
+            source_path=source_path,
             vault_root=vault_root,
             output_path=derive_official_output_path(source_path, vault_root, textified_root_override),
         )
@@ -397,9 +535,9 @@ def export_supported_official_sources(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Format LEET official PDFs into exam-like markdown."
+        description="Format LEET official PDFs/HWPs into exam-like markdown."
     )
-    parser.add_argument("inputs", nargs="+", type=Path, help="Source PDF path(s) or supported official tree directories")
+    parser.add_argument("inputs", nargs="+", type=Path, help="Source PDF/HWP path(s) or supported official tree directories")
     parser.add_argument(
         "-o",
         "--output",
@@ -415,7 +553,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--official-textified-root",
         type=Path,
-        help="Override the destination root used when mirroring supported official exam PDFs into Official_Textified markdown",
+        help="Override the destination root used when mirroring supported official exam sources into Official_Textified markdown",
     )
     return parser.parse_args()
 
@@ -441,17 +579,17 @@ def main() -> None:
         return
 
     input_path = inputs[0]
-    if input_path.suffix.lower() != ".pdf":
-        raise SystemExit("Only PDF inputs are supported by this formatter.")
+    if input_path.suffix.lower() not in SUPPORTED_SOURCE_SUFFIXES:
+        raise SystemExit("Only PDF and HWP inputs are supported by this formatter.")
 
     if args.output:
-        result = export_pdf(input_path, args.vault_root, args.output)
+        result = export_source(input_path, args.vault_root, args.output)
         print(result.output_path)
         return
 
     if is_supported_official_source(input_path, args.vault_root):
-        result = export_pdf(
-            pdf_path=input_path,
+        result = export_source(
+            source_path=input_path,
             vault_root=args.vault_root,
             output_path=derive_official_output_path(
                 input_path,

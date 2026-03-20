@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest import mock
 from pathlib import Path
 
@@ -14,7 +15,9 @@ if str(ROOT) not in sys.path:
 from scripts.leet_official_textify import (
     collect_supported_official_sources,
     derive_official_output_path,
+    export_hwp,
     export_pdf,
+    extract_hwp_paragraph_lines,
     extract_text_lines,
     format_exam_lines,
     is_supported_official_source,
@@ -149,20 +152,37 @@ class LeetOfficialTextifyTests(unittest.TestCase):
             self.assertTrue(is_supported_official_source(source_path, vault_root))
             self.assertEqual(derive_official_output_path(source_path, vault_root), expected_output)
 
-    def test_collects_only_supported_official_pdfs_from_batch_inputs(self) -> None:
+    def test_maps_supported_official_hwp_into_textified_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            vault_root = Path(tempdir)
+            source_path = (
+                vault_root
+                / "02. Resources/LEET/00. Official_Past_Exams/2010학년도 추리논증 문제 및 정답/2010_LEET_추리논증(홀수형).hwp"
+            )
+            expected_output = (
+                vault_root
+                / "02. Resources/LEET/01. Official_Textified/2010학년도 추리논증 문제 및 정답/2010_LEET_추리논증(홀수형).md"
+            )
+            source_path.parent.mkdir(parents=True, exist_ok=True)
+            source_path.write_text("placeholder", encoding="utf-8")
+
+            self.assertTrue(is_supported_official_source(source_path, vault_root))
+            self.assertEqual(derive_official_output_path(source_path, vault_root), expected_output)
+
+    def test_collects_supported_official_pdf_and_hwp_from_batch_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             vault_root = Path(tempdir)
             official_root = vault_root / "02. Resources/LEET/00. Official_Past_Exams"
             good_pdf = official_root / "2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해(홀수형).pdf"
-            ignored_hwp = official_root / "2020학년도 언어이해 문제 및 정답/2020_LEET_언어이해(홀수형).hwp"
+            good_hwp = official_root / "2020학년도 언어이해 문제 및 정답/2020_LEET_언어이해(홀수형).hwp"
             outside_pdf = vault_root / "misc/sample.pdf"
-            for path in (good_pdf, ignored_hwp, outside_pdf):
+            for path in (good_pdf, good_hwp, outside_pdf):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("placeholder", encoding="utf-8")
 
             collected = collect_supported_official_sources([official_root, outside_pdf], vault_root)
 
-            self.assertEqual(collected, [good_pdf])
+            self.assertEqual(collected, [good_hwp, good_pdf])
 
     def test_export_pdf_writes_once_and_skips_identical_rewrite(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -188,6 +208,64 @@ class LeetOfficialTextifyTests(unittest.TestCase):
             self.assertTrue(first.changed)
             self.assertFalse(second.changed)
             self.assertIn("# 2025_LEET_추리논증(홀수형)", output_path.read_text(encoding="utf-8"))
+
+    def test_extract_hwp_paragraph_lines_preserves_placeholders_and_spacing(self) -> None:
+        paragraph = ET.fromstring(
+            """
+            <Paragraph>
+              <LineSeg>
+                <Text>1. 다음 설명으로 옳은 것은?</Text>
+                <ControlChar name="PARAGRAPH_BREAK" />
+              </LineSeg>
+              <LineSeg>
+                <GShapeObjectControl />
+              </LineSeg>
+              <LineSeg>
+                <Text>①</Text>
+                <ControlChar name="NONBREAK_SPACE" />
+                <Text>첫 번째 선택지</Text>
+              </LineSeg>
+              <LineSeg>
+                <TableControl />
+              </LineSeg>
+            </Paragraph>
+            """
+        )
+
+        self.assertEqual(
+            extract_hwp_paragraph_lines(paragraph),
+            [
+                "1. 다음 설명으로 옳은 것은?",
+                "<그림>",
+                "① 첫 번째 선택지",
+                "<표>",
+            ],
+        )
+
+    def test_export_hwp_writes_once_and_skips_identical_rewrite(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            vault_root = Path(tempdir)
+            source_path = (
+                vault_root
+                / "02. Resources/LEET/00. Official_Past_Exams/2010학년도 언어이해 문제 및 정답/2010_LEET_언어이해(홀수형).hwp"
+            )
+            output_path = (
+                vault_root
+                / "02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010_LEET_언어이해(홀수형).md"
+            )
+            source_path.parent.mkdir(parents=True, exist_ok=True)
+            source_path.write_text("placeholder", encoding="utf-8")
+
+            with mock.patch(
+                "scripts.leet_official_textify.format_hwp_text",
+                return_value="1. 테스트 문항\n\n① 정답\n",
+            ):
+                first = export_hwp(source_path, vault_root, output_path)
+                second = export_hwp(source_path, vault_root, output_path)
+
+            self.assertTrue(first.changed)
+            self.assertFalse(second.changed)
+            self.assertIn("# 2010_LEET_언어이해(홀수형)", output_path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
