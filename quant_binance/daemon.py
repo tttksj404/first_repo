@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -181,6 +182,13 @@ def _apply_persisted_runtime_policy_guards(
     major_symbols: tuple[str, ...],
 ) -> tuple[set[str], list[str], dict[str, object]]:
     adjusted_eligible = set(eligible_symbols)
+    if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
+        hydration = build_runtime_universe_hydration(
+            policy_state={},
+            configured_symbols=sorted(adjusted_eligible | set(str(symbol) for symbol in observe_only_symbols if str(symbol))),
+            major_symbols=major_symbols,
+        )
+        return adjusted_eligible, list(observe_only_symbols), hydration
     adjusted_observe_only = set(str(symbol) for symbol in observe_only_symbols if str(symbol))
     hydration = build_runtime_universe_hydration(
         policy_state=policy_state,
