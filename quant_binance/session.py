@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 import asyncio
@@ -1095,6 +1096,8 @@ class LivePaperSession:
             or decision.side not in {"long", "short"}
             or decision.order_intent_notional_usd <= 0.0
         ):
+            return decision
+        if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
             return decision
         context = self._policy_runtime_context()
         auto_mode = dict(context.get("auto_mode", {}) or {})
