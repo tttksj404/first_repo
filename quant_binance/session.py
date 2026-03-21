@@ -1478,12 +1478,19 @@ class LivePaperSession:
                 )
             max_notional = max(0.0, available * (1.0 - reserve_fraction))
         elif decision.final_mode == "futures":
-            available = float(
+            execution_available = float(
                 self.capital_report.get(
                     "futures_execution_balance_usd",
                     self.capital_report.get("futures_available_balance_usd", 0.0),
                 )
             )
+            total_reusable_available = float(
+                self.capital_report.get(
+                    "futures_total_reusable_balance_usd",
+                    self.capital_report.get("futures_recognized_balance_usd", execution_available),
+                )
+            )
+            available = max(execution_available, total_reusable_available)
             available += max(extra_futures_execution_balance_usd, 0.0)
             leverage = select_futures_leverage(
                 symbol=decision.symbol,
