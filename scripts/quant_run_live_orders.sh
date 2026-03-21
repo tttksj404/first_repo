@@ -36,6 +36,7 @@ if [ -z "${MACRO_INPUTS_PATH:-}" ]; then
   fi
 fi
 export TELEGRAM_REPORT_ONLY="${TELEGRAM_REPORT_ONLY:-1}"
+export QUANT_BYPASS_POLICY_GUARDRAILS="${QUANT_BYPASS_POLICY_GUARDRAILS:-1}"
 
 cd "$(dirname "$0")/.."
 
