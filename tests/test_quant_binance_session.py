@@ -6167,6 +6167,56 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.closed_trades[0]["exit_reason"], "CAPITAL_REALLOCATION")
         self.assertEqual(session.futures_reallocation_cooldown_until, now + timedelta(minutes=10))
 
+    def test_futures_entry_uses_total_reusable_balance_when_execution_balance_is_low(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(MarketStateStore()),
+            paper_service=PaperTradingService(self.settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=self.settings.decision_engine.decision_interval_minutes,
+        )
+        session = LivePaperSession(runtime=runtime, equity_usd=10000.0, remaining_portfolio_capacity_usd=5000.0)
+        session.capital_report = {
+            "futures_available_balance_usd": 1.0,
+            "futures_execution_balance_usd": 1.0,
+            "futures_total_reusable_balance_usd": 120.0,
+            "futures_recognized_balance_usd": 120.0,
+            "can_trade_futures_any": True,
+            "futures_requirements": [{"symbol": "ETHUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001}],
+        }
+        decision = DecisionIntent(
+            decision_id="d-reusable-balance",
+            decision_hash="hash-reusable-balance",
+            snapshot_id="s-reusable-balance",
+            config_version="2026-03-21.v1",
+            timestamp=datetime(2026, 3, 21, 4, 0, tzinfo=timezone.utc),
+            symbol="ETHUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.75,
+            liquidity_score=0.84,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=86.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=95.0,
+            stop_distance_bps=45.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=2500.0)
+
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertGreater(capped.order_intent_notional_usd, 0.0)
+        self.assertNotIn("INSUFFICIENT_EXECUTION_BALANCE", capped.rejection_reasons)
+        self.assertNotIn("FUTURES_COLLATERAL_AVAILABLE", capped.rejection_reasons)
+
     def test_futures_reallocation_replaces_multiple_weakest_positions_until_capacity_is_sufficient(self) -> None:
         settings = replace(
             self._focus_settings(futures_top_n=2),
