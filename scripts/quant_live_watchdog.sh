@@ -32,7 +32,8 @@ SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 PID_PATH="$LOG_DIR/live_supervisor.pid"
 WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
 SUMMARY_PATH="$OUTPUT_BASE/output/paper-live-shell/latest/summary.state.json"
-START_CMD="env QUANT_TELEGRAM_NOTIFICATIONS=${QUANT_TELEGRAM_NOTIFICATIONS:-0} QUANT_BYPASS_POLICY_GUARDRAILS=${QUANT_BYPASS_POLICY_GUARDRAILS:-1} PYTHON_BIN="$PYTHON_BIN" sh scripts/quant_run_live_orders.sh $OUTPUT_BASE"
+QUANT_TELEGRAM_NOTIFICATIONS_VALUE="${QUANT_TELEGRAM_NOTIFICATIONS:-0}"
+QUANT_BYPASS_POLICY_GUARDRAILS_VALUE="${QUANT_BYPASS_POLICY_GUARDRAILS:-1}"
 
 mkdir -p "$LOG_DIR"
 cd "$(dirname "$0")/.."
@@ -56,7 +57,9 @@ supervisor_alive() {
   fi
   pid="$(cat "$PID_PATH" 2>/dev/null || true)"
   [ -n "$pid" ] || return 1
-  kill -0 "$pid" 2>/dev/null
+  kill -0 "$pid" 2>/dev/null || return 1
+  cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
+  printf '%s' "$cmd" | grep -F "scripts/quant_run_live_orders.sh $OUTPUT_BASE" >/dev/null 2>&1
 }
 
 summary_fresh() {
@@ -83,8 +86,8 @@ PY
 }
 
 restart_supervisor() {
-  log "restarting supervisor"
-  nohup sh -c "$START_CMD" >>"$SUPERVISOR_LOG" 2>&1 &
+  log "restarting supervisor python_bin=$PYTHON_BIN"
+  nohup env     QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS_VALUE"     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS_VALUE"     PYTHON_BIN="$PYTHON_BIN"     sh scripts/quant_run_live_orders.sh "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
   sleep "$RESTART_COOLDOWN_SECONDS"
 }
 
