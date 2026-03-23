@@ -53,14 +53,21 @@ log() {
 }
 
 supervisor_alive() {
-  if [ ! -f "$PID_PATH" ]; then
-    return 1
+  pid=""
+  if [ -f "$PID_PATH" ]; then
+    pid="$(cat "$PID_PATH" 2>/dev/null || true)"
   fi
-  pid="$(cat "$PID_PATH" 2>/dev/null || true)"
-  [ -n "$pid" ] || return 1
-  kill -0 "$pid" 2>/dev/null || return 1
-  cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
-  printf '%s' "$cmd" | grep -F "scripts/quant_run_live_orders.sh $OUTPUT_BASE" >/dev/null 2>&1
+  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
+    if printf '%s' "$cmd" | grep -F "scripts/quant_run_live_orders.sh $OUTPUT_BASE" >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+  fallback_pid="$(pgrep -f "sh scripts/quant_run_live_orders.sh $OUTPUT_BASE" | head -n 1 || true)"
+  [ -n "$fallback_pid" ] || return 1
+  printf '%s
+' "$fallback_pid" >"$PID_PATH"
+  return 0
 }
 
 summary_fresh() {
@@ -87,8 +94,8 @@ PY
 }
 
 restart_supervisor() {
-  log "restarting supervisor python_bin=$PYTHON_BIN"
-  nohup env     QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS_VALUE"     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS_VALUE"     PYTHON_BIN="$PYTHON_BIN"     sh scripts/quant_run_live_orders.sh "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
+  log "restarting supervisor python_bin=$PYTHON_BIN pwd=$(pwd)"
+  nohup env     PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"     QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS_VALUE"     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS_VALUE"     PYTHON_BIN="$PYTHON_BIN"     sh scripts/quant_run_live_orders.sh "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
   sleep "$RESTART_COOLDOWN_SECONDS"
 }
 
