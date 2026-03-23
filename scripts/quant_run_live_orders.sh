@@ -1,6 +1,25 @@
 #!/bin/sh
 set -eu
 
+resolve_python_bin() {
+  if [ -n "${PYTHON_BIN:-}" ] && [ -x "${PYTHON_BIN}" ]; then
+    printf '%s
+' "$PYTHON_BIN"
+    return 0
+  fi
+  for candidate in "$(command -v python3 2>/dev/null || true)"                    "$(command -v python 2>/dev/null || true)"                    /Library/Frameworks/Python.framework/Versions/3.14/bin/python3                    /opt/homebrew/bin/python3                    /usr/local/bin/python3                    /usr/bin/python3; do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+      printf '%s
+' "$candidate"
+      return 0
+    fi
+  done
+  printf '%s
+' python3
+}
+
+PYTHON_BIN="$(resolve_python_bin)"
+
 OUTPUT_BASE="${1:-quant_runtime}"
 SYNC_INTERVAL_SECONDS="${SYNC_INTERVAL_SECONDS:-15}"
 WATCHDOG_POLL_SECONDS="${QUANT_LIVE_WATCHDOG_POLL_SECONDS:-30}"
@@ -19,6 +38,8 @@ fi
 LOG_DIR="$OUTPUT_BASE"
 SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 HEALTH_STATE_PATH="$LOG_DIR/live_supervisor_health.json"
+SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
+SUPERVISOR_WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
 
 mkdir -p "$LOG_DIR"
 
@@ -45,6 +66,7 @@ REPORT_PID=""
 NEWS_PID=""
 
 cleanup() {
+  rm -f "$SUPERVISOR_PID_PATH"
   if [ -n "${REPORT_PID:-}" ] && kill -0 "$REPORT_PID" 2>/dev/null; then
     kill "$REPORT_PID" 2>/dev/null || true
     wait "$REPORT_PID" 2>/dev/null || true
@@ -55,7 +77,7 @@ cleanup() {
   fi
   if [ -n "${CHILD_PID:-}" ] && kill -0 "$CHILD_PID" 2>/dev/null; then
     if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-      python3 scripts/quant_notify_runtime_event.py stopped "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
+      "$PYTHON_BIN" scripts/quant_notify_runtime_event.py stopped "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
     fi
     kill "$CHILD_PID" 2>/dev/null || true
     wait "$CHILD_PID" 2>/dev/null || true
@@ -63,7 +85,8 @@ cleanup() {
   exit 0
 }
 
-trap cleanup INT TERM
+printf '%s\n' "$$" >"$SUPERVISOR_PID_PATH"
+trap cleanup INT TERM EXIT
 
 run_report_cycle() {
   printf '[SUPERVISOR] running strategy advisor cycle provider=%s mode=%s send_flag=%s at %s\n' "$REPORT_PROVIDER" "$REPORT_MODE" "$REPORT_SEND_FLAG" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
@@ -99,7 +122,7 @@ start_news_loop() {
 }
 
 run_child() {
-  python3 -m quant_binance.runtime \
+  "$PYTHON_BIN" -m quant_binance.runtime \
     --mode live-auto-trade-daemon \
     --exchange "bitget" \
     --output-base "$OUTPUT_BASE" \
@@ -108,14 +131,14 @@ run_child() {
     --ack-live-risk I_UNDERSTAND_LIVE_TRADING \
     --sync-interval-seconds "$SYNC_INTERVAL_SECONDS" >>"$SUPERVISOR_LOG" 2>&1 &
   CHILD_PID=$!
-  printf '[SUPERVISOR] started child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  printf '[SUPERVISOR] started child pid=%s supervisor_pid=%s at %s\n' "$CHILD_PID" "$$" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-    python3 scripts/quant_notify_runtime_event.py started "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
+    "$PYTHON_BIN" scripts/quant_notify_runtime_event.py started "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
   fi
 }
 
 health_check() {
-  python3 - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH"
+  "$PYTHON_BIN" - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH"
 import json
 import sys
 from datetime import datetime, timezone
@@ -191,7 +214,7 @@ while :; do
   while kill -0 "$CHILD_PID" 2>/dev/null; do
     sleep "$WATCHDOG_POLL_SECONDS"
     if ! health_check; then
-      HEALTH_REASON="$(python3 - <<'PY' "$HEALTH_STATE_PATH"
+      HEALTH_REASON="$("$PYTHON_BIN" - <<'PY' "$HEALTH_STATE_PATH"
 import json, sys
 from pathlib import Path
 path = Path(sys.argv[1])
@@ -204,7 +227,7 @@ PY
 )"
       printf '[SUPERVISOR] restarting unhealthy child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
       if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-        python3 scripts/quant_notify_runtime_event.py unhealthy "$OUTPUT_BASE" "child_pid=$CHILD_PID" "reason=$HEALTH_REASON" >>"$SUPERVISOR_LOG" 2>&1 || true
+        "$PYTHON_BIN" scripts/quant_notify_runtime_event.py unhealthy "$OUTPUT_BASE" "child_pid=$CHILD_PID" "reason=$HEALTH_REASON" >>"$SUPERVISOR_LOG" 2>&1 || true
       fi
       kill "$CHILD_PID" 2>/dev/null || true
       wait "$CHILD_PID" 2>/dev/null || true
@@ -215,7 +238,7 @@ PY
   wait "$CHILD_PID" 2>/dev/null || CHILD_EXIT_CODE=$?
   printf '[SUPERVISOR] child exited, restarting in %ss at %s\n' "$RESTART_SLEEP_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-    python3 scripts/quant_notify_runtime_event.py exited "$OUTPUT_BASE" "child_pid=$CHILD_PID" "exit_code=$CHILD_EXIT_CODE" >>"$SUPERVISOR_LOG" 2>&1 || true
+    "$PYTHON_BIN" scripts/quant_notify_runtime_event.py exited "$OUTPUT_BASE" "child_pid=$CHILD_PID" "exit_code=$CHILD_EXIT_CODE" >>"$SUPERVISOR_LOG" 2>&1 || true
   fi
   sleep "$RESTART_SLEEP_SECONDS"
 done

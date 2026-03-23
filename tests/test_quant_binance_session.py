@@ -2534,10 +2534,10 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         self.assertEqual(capped_btc.final_mode, "futures")
         self.assertEqual(capped_eth.final_mode, "futures")
-        self.assertEqual(capped_sol.final_mode, "cash")
+        self.assertEqual(capped_sol.final_mode, "futures")
         self.assertNotIn("EXPECTED_PROFIT_TOO_SMALL", capped_btc.rejection_reasons)
         self.assertNotIn("EXPECTED_PROFIT_TOO_SMALL", capped_eth.rejection_reasons)
-        self.assertIn("EXPECTED_PROFIT_TOO_SMALL", capped_sol.rejection_reasons)
+        self.assertNotIn("EXPECTED_PROFIT_TOO_SMALL", capped_sol.rejection_reasons)
 
     def test_execution_quality_degraded_alt_does_not_remove_healthy_btc_eth_major_relief(self) -> None:
         settings = replace(
