@@ -14,6 +14,7 @@
       "major_reallocation_score_advantage_relaxation": 2.0,
       "major_size_boost_multiplier": 1.4,
       "major_symbols": [
+        "BTCUSDT",
         "ETHUSDT",
         "SOLUSDT"
       ],
@@ -23,6 +24,7 @@
       "priority_min_entry_net_edge_bps": -12.0,
       "priority_score_relaxation": 20.0,
       "priority_symbols": [
+        "BTCUSDT",
         "ETHUSDT",
         "SOLUSDT",
         "DOGEUSDT",
@@ -102,6 +104,7 @@
     },
     "strategy_profile": "live-ultra-aggressive",
     "universe": [
+      "BTCUSDT",
       "ETHUSDT",
       "SOLUSDT"
     ]

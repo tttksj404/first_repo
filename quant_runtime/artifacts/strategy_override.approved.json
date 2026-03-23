@@ -1,6 +1,7 @@
 {
   "futures_exposure": {
     "priority_symbols": [
+      "BTCUSDT",
       "ETHUSDT",
       "SOLUSDT",
       "DOGEUSDT",
@@ -31,6 +32,7 @@
     "soft_overheat_penalty_max": 1.0,
     "reduced_size_multiplier": 0.65,
     "major_symbols": [
+      "BTCUSDT",
       "ETHUSDT",
       "SOLUSDT"
     ],
@@ -83,6 +85,7 @@
     "cooldown_minutes": 360
   },
   "universe": [
+    "BTCUSDT",
     "ETHUSDT",
     "SOLUSDT"
   ],
