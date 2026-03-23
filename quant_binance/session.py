@@ -2602,17 +2602,36 @@ class LivePaperSession:
         until: datetime,
         timestamp: datetime,
         extend_active: bool = True,
+        source: str = "manual",
     ) -> None:
         current = self.manual_symbol_cooldowns.get(symbol)
+        action = "noop"
         if current is None or current <= timestamp:
             self.manual_symbol_cooldowns[symbol] = until
-            return
-        if extend_active and until > current:
+            action = "set"
+        elif extend_active and until > current:
             self.manual_symbol_cooldowns[symbol] = until
+            action = "extend"
+        elif current is not None and current > timestamp:
+            action = "skip_active"
+        if self.log_store is not None:
+            self.log_store.append(
+                "manual_symbol_cooldown",
+                {
+                    "timestamp": timestamp,
+                    "symbol": symbol,
+                    "source": source,
+                    "action": action,
+                    "extend_active": extend_active,
+                    "current_until": current,
+                    "new_until": until,
+                    "effective_until": self.manual_symbol_cooldowns.get(symbol),
+                },
+            )
 
     def _apply_preflight_symbol_cooldown(self, *, symbol: str, timestamp: datetime, seconds: int = 120) -> None:
         until = timestamp + timedelta(seconds=max(seconds, 60))
-        self._set_manual_symbol_cooldown(symbol=symbol, until=until, timestamp=timestamp, extend_active=False)
+        self._set_manual_symbol_cooldown(symbol=symbol, until=until, timestamp=timestamp, extend_active=False, source="PREFLIGHT_SYMBOL_COOLDOWN")
 
     def _wallet_transfer_cooldown_key(self, *, source_market: str, target_market: str, asset: str) -> str:
         return f"{source_market}->{target_market}:{asset.upper()}"
@@ -3360,7 +3379,7 @@ class LivePaperSession:
             )
         self._cancel_symbol_open_orders(symbol=symbol)
         cooldown_until = self._manual_reentry_cooldown_until(now)
-        self._set_manual_symbol_cooldown(symbol=symbol, until=cooldown_until, timestamp=now, extend_active=False)
+        self._set_manual_symbol_cooldown(symbol=symbol, until=cooldown_until, timestamp=now, extend_active=False, source=reason)
         self.self_healing.record_mismatch_recovery(
             now=now,
             symbol=symbol,
@@ -4364,7 +4383,7 @@ class LivePaperSession:
         )
         if position.market == "futures" and exit_reason == "CAPITAL_REALLOCATION":
             cooldown_until = self._manual_reentry_cooldown_until(timestamp)
-            self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp)
+            self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp, source=exit_reason)
         if (
             position.market == "futures"
             and self._is_major_futures_symbol(position.symbol)
@@ -4378,7 +4397,7 @@ class LivePaperSession:
                 cooldown_until = timestamp + timedelta(
                     minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
                 )
-            self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp)
+            self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp, source=exit_reason)
         if (
             position.market == "futures"
             and self._is_major_futures_symbol(position.symbol)
