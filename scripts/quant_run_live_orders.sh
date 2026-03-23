@@ -3,22 +3,25 @@ set -eu
 
 resolve_python_bin() {
   if [ -n "${PYTHON_BIN:-}" ] && [ -x "${PYTHON_BIN}" ]; then
-    printf '%s
-' "$PYTHON_BIN"
+    printf '%s\n' "$PYTHON_BIN"
     return 0
   fi
-  for candidate in "$(command -v python3 2>/dev/null || true)"                    "$(command -v python 2>/dev/null || true)"                    /Library/Frameworks/Python.framework/Versions/3.14/bin/python3                    /opt/homebrew/bin/python3                    /usr/local/bin/python3                    /usr/bin/python3; do
+
+  c1="$(command -v python3 2>/dev/null || true)"
+  c2="$(command -v python 2>/dev/null || true)"
+  for candidate in "$c1" "$c2" /Library/Frameworks/Python.framework/Versions/3.14/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 /usr/bin/python3
+  do
     if [ -n "$candidate" ] && [ -x "$candidate" ]; then
-      printf '%s
-' "$candidate"
+      printf '%s\n' "$candidate"
       return 0
     fi
   done
-  printf '%s
-' python3
+
+  printf '%s\n' python3
 }
 
 PYTHON_BIN="$(resolve_python_bin)"
+export PYTHON_BIN
 
 OUTPUT_BASE="${1:-quant_runtime}"
 SYNC_INTERVAL_SECONDS="${SYNC_INTERVAL_SECONDS:-15}"
@@ -42,6 +45,13 @@ SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
 SUPERVISOR_WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
 
 mkdir -p "$LOG_DIR"
+if [ -f "$SUPERVISOR_PID_PATH" ]; then
+  EXISTING_SUPERVISOR_PID="$(cat "$SUPERVISOR_PID_PATH" 2>/dev/null || true)"
+  if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+    printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
+fi
 
 export EXCHANGE="bitget"
 export STRATEGY_PROFILE="${STRATEGY_PROFILE:-live-ultra-aggressive}"
@@ -86,6 +96,7 @@ cleanup() {
 }
 
 printf '%s\n' "$$" >"$SUPERVISOR_PID_PATH"
+printf '[SUPERVISOR] python_bin=%s at %s\n' "$PYTHON_BIN" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 trap cleanup INT TERM EXIT
 
 run_report_cycle() {
