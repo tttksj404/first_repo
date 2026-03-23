@@ -8,6 +8,8 @@ if [ -x "$HOST_PYTHON_DEFAULT" ]; then
   PYTHON_BIN="$HOST_PYTHON_DEFAULT"
 elif [ -x /usr/bin/python3 ]; then
   PYTHON_BIN="/usr/bin/python3"
+elif PATH_PYTHON_BIN="$(command -v python3 2>/dev/null || true)" && [ -n "$PATH_PYTHON_BIN" ] && [ -x "$PATH_PYTHON_BIN" ]; then
+  PYTHON_BIN="$PATH_PYTHON_BIN"
 else
   printf '[BOOT] fixed python bootstrap failed in %s at %s PATH=%s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$PATH" >&2
   exit 1
@@ -36,8 +38,13 @@ SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
 SUPERVISOR_WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
 
 mkdir -p "$LOG_DIR"
+slot_pid() {
+  slot_path="$1"
+  awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
+}
+
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
-  EXISTING_SUPERVISOR_PID="$(cat "$SUPERVISOR_PID_PATH" 2>/dev/null || true)"
+  EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
   if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
     printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
@@ -67,7 +74,7 @@ REPORT_PID=""
 NEWS_PID=""
 
 cleanup() {
-  current_supervisor_pid="$(cat "$SUPERVISOR_PID_PATH" 2>/dev/null || true)"
+  current_supervisor_pid="$(slot_pid "$SUPERVISOR_PID_PATH")"
   if [ "$current_supervisor_pid" = "$$" ]; then
     rm -f "$SUPERVISOR_PID_PATH"
   fi
@@ -89,7 +96,7 @@ cleanup() {
   exit 0
 }
 
-printf '%s\n' "$$" >"$SUPERVISOR_PID_PATH"
+printf '%s %s\n' "$$" "v1:$(cksum "$0" | awk '{print $1}')" >"$SUPERVISOR_PID_PATH"
 printf '[SUPERVISOR] python_bin=%s at %s\n' "$PYTHON_BIN" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 trap cleanup INT TERM EXIT
 
