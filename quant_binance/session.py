@@ -758,7 +758,7 @@ class LivePaperSession:
         if (
             self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
             and decision.final_mode == "futures"
-            and decision.symbol in {"BTCUSDT", "ETHUSDT"}
+            and self._is_major_futures_symbol(decision.symbol)
         ):
             return min(base_threshold, 0.1)
         return base_threshold
@@ -770,7 +770,7 @@ class LivePaperSession:
             floor = max(floor + self._execution_quality_entry_floor_adjustment_bps(decision), 0.0)
         if (
             self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
-            and symbol in {"BTCUSDT", "ETHUSDT"}
+            and self._is_major_futures_symbol(symbol)
         ):
             return min(floor, 60.0) if floor > 0.0 else 60.0
         return floor
