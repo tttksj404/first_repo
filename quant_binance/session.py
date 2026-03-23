@@ -519,14 +519,22 @@ class LivePaperSession:
             validation_runner_context,
         )
         comparison_report_path = run_dir / "policy_comparison.json"
-        write_policy_comparison_validation_artifact(
-            current_policy_state=previous_policy_state,
-            candidate_policy=summary.get("candidate_policy", {}),
-            base_dir=base_dir,
-            output_path=comparison_report_path,
-            current_runtime_summary=summary,
-        )
-        comparison_evidence = load_validation_runner_evidence(comparison_report_path)
+        comparison_evidence: dict[str, Any] = {}
+        try:
+            write_policy_comparison_validation_artifact(
+                current_policy_state=previous_policy_state,
+                candidate_policy=summary.get("candidate_policy", {}),
+                base_dir=base_dir,
+                output_path=comparison_report_path,
+                current_runtime_summary=summary,
+            )
+            comparison_evidence = load_validation_runner_evidence(comparison_report_path)
+        except Exception as exc:
+            summary["policy_comparison_error"] = {
+                "type": type(exc).__name__,
+                "message": str(exc),
+                "output_path": str(comparison_report_path),
+            }
         checkpoint_auto_judge = dict(comparison_evidence.get("checkpoint_auto_judge", {}) or {})
         if checkpoint_auto_judge:
             (run_dir / "checkpoint_auto_judge.json").write_text(
