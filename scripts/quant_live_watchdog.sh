@@ -8,6 +8,8 @@ if [ -x "$HOST_PYTHON_DEFAULT" ]; then
   PYTHON_BIN="$HOST_PYTHON_DEFAULT"
 elif [ -x /usr/bin/python3 ]; then
   PYTHON_BIN="/usr/bin/python3"
+elif PATH_PYTHON_BIN="$(command -v python3 2>/dev/null || true)" && [ -n "$PATH_PYTHON_BIN" ] && [ -x "$PATH_PYTHON_BIN" ]; then
+  PYTHON_BIN="$PATH_PYTHON_BIN"
 else
   printf '[BOOT] fixed python bootstrap failed in %s at %s PATH=%s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$PATH" >&2
   exit 1
@@ -16,7 +18,7 @@ export PYTHON_BIN
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-RUN_SUPERVISOR_SCRIPT="$REPO_ROOT/scripts/quant_run_live_orders.sh"
+RUN_SUPERVISOR_SCRIPT="${QUANT_RUN_SUPERVISOR_SCRIPT:-$REPO_ROOT/scripts/quant_run_live_orders.sh}"
 
 OUTPUT_BASE="${1:-quant_runtime}"
 CHECK_INTERVAL_SECONDS="${QUANT_SUPERVISOR_WATCHDOG_INTERVAL_SECONDS:-60}"
@@ -30,22 +32,60 @@ WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
 SUMMARY_PATH="$OUTPUT_BASE/output/paper-live-shell/latest/summary.state.json"
 QUANT_TELEGRAM_NOTIFICATIONS_VALUE="${QUANT_TELEGRAM_NOTIFICATIONS:-0}"
 QUANT_BYPASS_POLICY_GUARDRAILS_VALUE="${QUANT_BYPASS_POLICY_GUARDRAILS:-1}"
+WATCHDOG_SLOT_VERSION="v2:$(cksum "$0" | awk '{print $1}')"
 
 mkdir -p "$LOG_DIR"
 cd "$REPO_ROOT"
 SELF_PID="$$"
+
+slot_pid() {
+  slot_path="$1"
+  awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
+}
+
+slot_version() {
+  slot_path="$1"
+  awk 'NR == 1 { print $2; exit }' "$slot_path" 2>/dev/null || true
+}
+
+write_slot() {
+  slot_path="$1"
+  printf '%s %s\n' "$SELF_PID" "$WATCHDOG_SLOT_VERSION" >"$slot_path"
+}
+
+stop_pid() {
+  target_pid="$1"
+  if [ -z "$target_pid" ] || ! kill -0 "$target_pid" 2>/dev/null; then
+    return 0
+  fi
+  kill "$target_pid" 2>/dev/null || true
+  tries=0
+  while kill -0 "$target_pid" 2>/dev/null && [ "$tries" -lt 20 ]; do
+    sleep 0.1
+    tries=$((tries + 1))
+  done
+  if kill -0 "$target_pid" 2>/dev/null; then
+    kill -9 "$target_pid" 2>/dev/null || true
+  fi
+}
+
 if [ -f "$WATCHDOG_PID_PATH" ]; then
-  EXISTING_WATCHDOG_PID="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
+  EXISTING_WATCHDOG_PID="$(slot_pid "$WATCHDOG_PID_PATH")"
+  EXISTING_WATCHDOG_VERSION="$(slot_version "$WATCHDOG_PID_PATH")"
   if [ -n "$EXISTING_WATCHDOG_PID" ] && [ "$EXISTING_WATCHDOG_PID" != "$SELF_PID" ] && kill -0 "$EXISTING_WATCHDOG_PID" 2>/dev/null; then
-    printf '[WATCHDOG] existing watchdog pid=%s already running at %s
+    if [ "$EXISTING_WATCHDOG_VERSION" = "$WATCHDOG_SLOT_VERSION" ]; then
+      printf '[WATCHDOG] existing watchdog pid=%s already running at %s
 ' "$EXISTING_WATCHDOG_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
-    exit 0
+      exit 0
+    fi
+    printf '[WATCHDOG] replacing legacy watchdog pid=%s slot_version=%s at %s
+' "$EXISTING_WATCHDOG_PID" "${EXISTING_WATCHDOG_VERSION:-legacy}" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    stop_pid "$EXISTING_WATCHDOG_PID"
   fi
 fi
-printf '%s
-' "$SELF_PID" >"$WATCHDOG_PID_PATH"
+write_slot "$WATCHDOG_PID_PATH"
 cleanup_pid_file() {
-  current="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
+  current="$(slot_pid "$WATCHDOG_PID_PATH")"
   if [ "$current" = "$SELF_PID" ]; then
     rm -f "$WATCHDOG_PID_PATH"
   fi
@@ -57,7 +97,7 @@ log() {
 }
 
 owns_watchdog_slot() {
-  current="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
+  current="$(slot_pid "$WATCHDOG_PID_PATH")"
   [ "$current" = "$SELF_PID" ]
 }
 
@@ -103,10 +143,10 @@ restart_supervisor() {
   sleep "$RESTART_COOLDOWN_SECONDS"
 }
 
-log "watchdog started pid=$$ interval=${CHECK_INTERVAL_SECONDS}s stale=${STALE_SECONDS}s python_bin=$PYTHON_BIN"
+log "watchdog started pid=$$ interval=${CHECK_INTERVAL_SECONDS}s stale=${STALE_SECONDS}s python_bin=$PYTHON_BIN slot_version=$WATCHDOG_SLOT_VERSION"
 while :; do
   if ! owns_watchdog_slot; then
-    log "watchdog slot lost to pid=$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true); exiting"
+    log "watchdog slot lost to pid=$(slot_pid "$WATCHDOG_PID_PATH"); exiting"
     exit 0
   fi
   if child_alive; then
@@ -119,7 +159,7 @@ while :; do
         continue
       fi
       log "summary stale or missing"
-      pid="$(cat "$PID_PATH" 2>/dev/null || true)"
+      pid="$(slot_pid "$PID_PATH")"
       if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
         kill "$pid" 2>/dev/null || true
         sleep 2
@@ -136,7 +176,7 @@ while :; do
         continue
       fi
       log "child missing and summary stale or missing"
-      pid="$(cat "$PID_PATH" 2>/dev/null || true)"
+      pid="$(slot_pid "$PID_PATH")"
       if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
         kill "$pid" 2>/dev/null || true
         sleep 2
