@@ -1,6 +1,25 @@
 #!/bin/sh
 set -eu
 
+slot_pid() {
+  slot_path="$1"
+  awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
+}
+
+OUTPUT_BASE="${1:-quant_runtime}"
+LOG_DIR="$OUTPUT_BASE"
+SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
+SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
+
+mkdir -p "$LOG_DIR"
+if [ -f "$SUPERVISOR_PID_PATH" ]; then
+  EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
+  if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+    printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
+fi
+
 HOST_PYTHON_DEFAULT="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 export PATH
@@ -16,7 +35,6 @@ else
 fi
 export PYTHON_BIN
 
-OUTPUT_BASE="${1:-quant_runtime}"
 SYNC_INTERVAL_SECONDS="${SYNC_INTERVAL_SECONDS:-15}"
 WATCHDOG_POLL_SECONDS="${QUANT_LIVE_WATCHDOG_POLL_SECONDS:-30}"
 WATCHDOG_STALE_SECONDS="${QUANT_LIVE_WATCHDOG_STALE_SECONDS:-150}"
@@ -31,17 +49,41 @@ REPORT_SEND_FLAG="${QUANT_REPORT_SEND_FLAG:-}"
 if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ] && [ -z "$REPORT_SEND_FLAG" ]; then
   REPORT_SEND_FLAG="--send-telegram"
 fi
-LOG_DIR="$OUTPUT_BASE"
-SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 HEALTH_STATE_PATH="$LOG_DIR/live_supervisor_health.json"
-SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
 SUPERVISOR_WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
+SUPERVISOR_LOCK_DIR="$LOG_DIR/live_supervisor.lock"
 
-mkdir -p "$LOG_DIR"
-slot_pid() {
-  slot_path="$1"
-  awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
+acquire_supervisor_lock() {
+  if mkdir "$SUPERVISOR_LOCK_DIR" 2>/dev/null; then
+    printf '%s\n' "$$" >"$SUPERVISOR_LOCK_DIR/pid"
+    return 0
+  fi
+
+  if [ -f "$SUPERVISOR_PID_PATH" ]; then
+    EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
+    if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+      printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+      exit 0
+    fi
+  fi
+
+  LOCK_OWNER_PID="$(slot_pid "$SUPERVISOR_LOCK_DIR/pid")"
+  if [ -n "$LOCK_OWNER_PID" ] && kill -0 "$LOCK_OWNER_PID" 2>/dev/null; then
+    printf '[SUPERVISOR] supervisor lock held by pid=%s at %s\n' "$LOCK_OWNER_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
+
+  rm -rf "$SUPERVISOR_LOCK_DIR"
+  if mkdir "$SUPERVISOR_LOCK_DIR" 2>/dev/null; then
+    printf '%s\n' "$$" >"$SUPERVISOR_LOCK_DIR/pid"
+    return 0
+  fi
+
+  printf '[SUPERVISOR] could not acquire supervisor lock at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  exit 0
 }
+
+acquire_supervisor_lock
 
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
   EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
@@ -74,6 +116,10 @@ REPORT_PID=""
 NEWS_PID=""
 
 cleanup() {
+  lock_owner_pid="$(slot_pid "$SUPERVISOR_LOCK_DIR/pid")"
+  if [ "$lock_owner_pid" = "$$" ]; then
+    rm -rf "$SUPERVISOR_LOCK_DIR"
+  fi
   current_supervisor_pid="$(slot_pid "$SUPERVISOR_PID_PATH")"
   if [ "$current_supervisor_pid" = "$$" ]; then
     rm -f "$SUPERVISOR_PID_PATH"
@@ -99,6 +145,20 @@ cleanup() {
 printf '%s %s\n' "$$" "v1:$(cksum "$0" | awk '{print $1}')" >"$SUPERVISOR_PID_PATH"
 printf '[SUPERVISOR] python_bin=%s at %s\n' "$PYTHON_BIN" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 trap cleanup INT TERM EXIT
+
+start_watchdog() {
+  if [ "${QUANT_ENABLE_SUPERVISOR_WATCHDOG:-1}" != "1" ]; then
+    printf '[SUPERVISOR] watchdog autostart disabled at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    return 0
+  fi
+  /usr/bin/nohup env \
+    PATH="$PATH" \
+    QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS" \
+    QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS" \
+    PYTHON_BIN="$PYTHON_BIN" \
+    "$PYTHON_BIN" scripts/quant_live_watchdog.py "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
+  printf '[SUPERVISOR] requested watchdog start at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+}
 
 run_report_cycle() {
   printf '[SUPERVISOR] running strategy advisor cycle provider=%s mode=%s send_flag=%s at %s\n' "$REPORT_PROVIDER" "$REPORT_MODE" "$REPORT_SEND_FLAG" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
@@ -220,6 +280,7 @@ PY
 
 start_report_loop
 start_news_loop
+start_watchdog
 
 while :; do
   run_child
