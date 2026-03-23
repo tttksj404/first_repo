@@ -5852,6 +5852,40 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertNotIn("LOSS_COMBO_PRUNE", session.decisions[-1].rejection_reasons)
         self.assertIn("BTCUSDT", session.paper_positions)
 
+    def test_preflight_symbol_cooldown_does_not_slide_while_active(self) -> None:
+        session = self._build_session()
+        first = datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc)
+        session._apply_preflight_symbol_cooldown(symbol="BTCUSDT", timestamp=first, seconds=120)
+
+        self.assertEqual(
+            session.manual_symbol_cooldowns["BTCUSDT"],
+            first + timedelta(seconds=120),
+        )
+
+        second = first + timedelta(seconds=30)
+        session._apply_preflight_symbol_cooldown(symbol="BTCUSDT", timestamp=second, seconds=120)
+
+        self.assertEqual(
+            session.manual_symbol_cooldowns["BTCUSDT"],
+            first + timedelta(seconds=120),
+        )
+
+    def test_cleanup_missing_on_exchange_position_does_not_slide_active_manual_cooldown(self) -> None:
+        session = self._build_session()
+        first = datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc)
+        session.manual_symbol_cooldowns["BTCUSDT"] = first + timedelta(minutes=5)
+
+        session._cleanup_missing_on_exchange_position(
+            symbol="BTCUSDT",
+            now=first + timedelta(minutes=1),
+            reason="MANUAL_CLOSE_SYNCED",
+        )
+
+        self.assertEqual(
+            session.manual_symbol_cooldowns["BTCUSDT"],
+            first + timedelta(minutes=5),
+        )
+
     def test_major_futures_signal_reversal_applies_reentry_cooldown(self) -> None:
         settings = replace(
             self.settings,
