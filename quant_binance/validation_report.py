@@ -3552,17 +3552,26 @@ def _baseline_control_bucket_replay_entry(
         _safe_int(execution_metrics.get("run_count")),
     )
     available = bool(bucket) or _replay_summary_available(summary)
+    replay_requirement_values = {
+        "decision_count": decision_count,
+        "total_tested_order_count": total_tested_order_count,
+        "total_live_order_count": total_live_order_count,
+        "total_closed_trade_count": total_closed_trade_count,
+        "run_count": run_count,
+    }
     missing_surfaces = [
         label.lower()
         for metric_name, label in _BASELINE_CONTROL_BUCKET_REPLAY_REQUIREMENTS
-        if _safe_int(locals()[metric_name]) <= 0
+        if _safe_int(replay_requirement_values.get(metric_name)) <= 0
     ]
     bucket_replay_ready = bool(available) and not missing_surfaces
     if bucket_replay_ready:
         bucket_replay_reason = "BASELINE_CONTROL_BUCKET_REPLAY_READY"
     elif available:
         bucket_replay_reason = "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_" + "_AND_".join(
-            label for metric_name, label in _BASELINE_CONTROL_BUCKET_REPLAY_REQUIREMENTS if _safe_int(locals()[metric_name]) <= 0
+            label
+            for metric_name, label in _BASELINE_CONTROL_BUCKET_REPLAY_REQUIREMENTS
+            if _safe_int(replay_requirement_values.get(metric_name)) <= 0
         )
     else:
         bucket_replay_reason = "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE"
