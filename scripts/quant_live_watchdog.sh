@@ -32,14 +32,21 @@ QUANT_BYPASS_POLICY_GUARDRAILS_VALUE="${QUANT_BYPASS_POLICY_GUARDRAILS:-1}"
 
 mkdir -p "$LOG_DIR"
 cd "$REPO_ROOT"
+SELF_PID="$$"
 if [ -f "$WATCHDOG_PID_PATH" ]; then
   EXISTING_WATCHDOG_PID="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
-  if [ -n "$EXISTING_WATCHDOG_PID" ] && kill -0 "$EXISTING_WATCHDOG_PID" 2>/dev/null; then
+  if [ -n "$EXISTING_WATCHDOG_PID" ] && [ "$EXISTING_WATCHDOG_PID" != "$SELF_PID" ] && kill -0 "$EXISTING_WATCHDOG_PID" 2>/dev/null; then
     printf '[WATCHDOG] existing watchdog pid=%s already running at %s\n' "$EXISTING_WATCHDOG_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
 fi
-printf '%s\n' "$$" >"$WATCHDOG_PID_PATH"
+OTHER_WATCHDOG_PID="$(pgrep -fo "/bin/sh .*/quant_live_watchdog.sh $OUTPUT_BASE|quant_live_watchdog.sh $OUTPUT_BASE" || true)"
+if [ -n "$OTHER_WATCHDOG_PID" ] && [ "$OTHER_WATCHDOG_PID" != "$SELF_PID" ] && kill -0 "$OTHER_WATCHDOG_PID" 2>/dev/null; then
+  printf '[WATCHDOG] discovered existing watchdog pid=%s via process scan at %s\n' "$OTHER_WATCHDOG_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  printf '%s\n' "$OTHER_WATCHDOG_PID" >"$WATCHDOG_PID_PATH"
+  exit 0
+fi
+printf '%s\n' "$SELF_PID" >"$WATCHDOG_PID_PATH"
 trap 'rm -f "$WATCHDOG_PID_PATH"' INT TERM EXIT
 
 log() {
