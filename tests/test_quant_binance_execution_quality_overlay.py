@@ -128,7 +128,8 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         )
 
         decision = state.apply_overlay(
-            make_decision(timestamp=datetime(2026, 3, 16, 0, 10, tzinfo=timezone.utc))
+            make_decision(timestamp=datetime(2026, 3, 16, 0, 10, tzinfo=timezone.utc)),
+            now=datetime(2026, 3, 16, 0, 10, tzinfo=timezone.utc),
         )
 
         self.assertEqual(decision.final_mode, "futures")
@@ -136,7 +137,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         self.assertEqual(decision.net_expected_edge_bps, 18.0)
         self.assertEqual(decision.execution_quality_sample_size, 2)
 
-    def test_overlay_reduces_size_and_restrains_when_quality_is_degraded(self) -> None:
+    def test_overlay_reduces_size_without_halt_at_minimum_sample_size_when_quality_is_degraded(self) -> None:
         state = ExecutionQualityState()
         for minute in range(3):
             state.record(
@@ -153,6 +154,35 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         restrained = state.apply_overlay(
             make_decision(timestamp=datetime(2026, 3, 16, 1, 20, tzinfo=timezone.utc)),
             exchange_id="binance",
+            now=datetime(2026, 3, 16, 1, 20, tzinfo=timezone.utc),
+        )
+
+        self.assertEqual(restrained.final_mode, "futures")
+        self.assertEqual(restrained.side, "long")
+        self.assertGreater(restrained.order_intent_notional_usd, 0.0)
+        self.assertEqual(restrained.execution_quality_trade_restraint, "none")
+        self.assertNotIn("EXECUTION_QUALITY_RESTRAINT", restrained.rejection_reasons)
+        self.assertLess(restrained.execution_quality_size_multiplier, 1.0)
+
+    def test_overlay_halts_when_bad_execution_persists_beyond_minimum_sample_size(self) -> None:
+        state = ExecutionQualityState()
+        base = datetime(2026, 3, 16, 1, 0, tzinfo=timezone.utc)
+        for minute in range(5):
+            state.record(
+                symbol="BTCUSDT",
+                outcome="timeout",
+                fill_ratio=0.0,
+                slippage_bps=None,
+                realized_edge_bps=0.0,
+                timestamp=base + timedelta(minutes=minute * 5),
+                market="futures",
+                exchange_id="binance",
+            )
+
+        restrained = state.apply_overlay(
+            make_decision(timestamp=base + timedelta(minutes=30)),
+            exchange_id="binance",
+            now=base + timedelta(minutes=30),
         )
 
         self.assertEqual(restrained.final_mode, "cash")
@@ -181,8 +211,9 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             exchange_id="binance",
             now=base + timedelta(minutes=20),
         )
-        self.assertEqual(degraded.final_mode, "cash")
-        self.assertEqual(degraded.execution_quality_trade_restraint, "execution_quality_halt")
+        self.assertEqual(degraded.final_mode, "futures")
+        self.assertEqual(degraded.execution_quality_trade_restraint, "none")
+        self.assertLess(degraded.execution_quality_size_multiplier, 1.0)
 
         for index in range(8):
             state.record(
@@ -278,8 +309,9 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             now=base + timedelta(minutes=10),
         )
 
-        self.assertEqual(futures_binance.final_mode, "cash")
-        self.assertEqual(futures_binance.execution_quality_trade_restraint, "execution_quality_halt")
+        self.assertEqual(futures_binance.final_mode, "futures")
+        self.assertEqual(futures_binance.execution_quality_trade_restraint, "none")
+        self.assertLess(futures_binance.execution_quality_size_multiplier, 1.0)
         self.assertEqual(spot_binance.final_mode, "spot")
         self.assertEqual(spot_binance.execution_quality_trade_restraint, "none")
         self.assertEqual(spot_binance.execution_quality_sample_size, 0)
@@ -331,7 +363,8 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             now=base + timedelta(minutes=20),
         )
 
-        self.assertEqual(active_overlay.trade_restraint, "execution_quality_halt")
+        self.assertEqual(active_overlay.trade_restraint, "none")
+        self.assertLess(active_overlay.size_multiplier, 1.0)
         self.assertEqual(staged_overlay.trade_restraint, "none")
         self.assertGreaterEqual(staged_overlay.sample_size, 3)
 
@@ -428,7 +461,9 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             now=base + timedelta(minutes=10),
         )
 
-        self.assertEqual(degraded_btc.final_mode, "cash")
+        self.assertEqual(degraded_btc.final_mode, "futures")
+        self.assertEqual(degraded_btc.execution_quality_trade_restraint, "none")
+        self.assertLess(degraded_btc.execution_quality_size_multiplier, 1.0)
         self.assertEqual(healthy_eth.final_mode, "futures")
         self.assertEqual(healthy_eth.execution_quality_trade_restraint, "none")
         self.assertEqual(healthy_eth.execution_quality_size_multiplier, 1.0)
@@ -481,7 +516,8 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
                 now=base + timedelta(minutes=20),
             )
 
-            self.assertEqual(futures_overlay.trade_restraint, "execution_quality_halt")
+            self.assertEqual(futures_overlay.trade_restraint, "none")
+            self.assertLess(futures_overlay.size_multiplier, 1.0)
             self.assertEqual(spot_overlay.trade_restraint, "none")
             self.assertGreaterEqual(spot_overlay.sample_size, 3)
 
@@ -525,13 +561,14 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             staged_key = "BTCUSDT|market=futures|exchange=binance|policy_bucket=staged_candidate"
             self.assertIn(active_key, bucket_contexts["active_policy"]["contexts"])
             self.assertIn(staged_key, bucket_contexts["staged_candidate"]["contexts"])
-            self.assertIn(active_key, bucket_contexts["active_policy"]["degraded_overlays"])
+            self.assertEqual(bucket_contexts["active_policy"]["degraded_overlays"], {})
             self.assertEqual(
-                bucket_contexts["active_policy"]["degraded_overlays"][active_key]["trade_restraint"],
-                "execution_quality_halt",
+                bucket_contexts["active_policy"]["contexts"][active_key]["overlay"]["trade_restraint"],
+                "none",
             )
+            self.assertEqual(bucket_contexts["staged_candidate"]["active_overlays"], {})
             self.assertEqual(
-                bucket_contexts["staged_candidate"]["active_overlays"][staged_key]["trade_restraint"],
+                bucket_contexts["staged_candidate"]["contexts"][staged_key]["overlay"]["trade_restraint"],
                 "none",
             )
 

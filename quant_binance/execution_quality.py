@@ -552,11 +552,11 @@ class ExecutionQualityState:
 
         trade_restraint = "none"
         if (
-            reject_timeout_rate >= 0.6
-            or effective.avg_fill_ratio < 0.35
+            (rounded_sample_size >= 5 and reject_timeout_rate >= 0.6)
+            or (rounded_sample_size >= 5 and effective.avg_fill_ratio < 0.35)
             or effective.avg_slippage_bps > 20.0
-            or (effective_attempts >= 5.0 and effective.avg_realized_edge_bps < -2.0)
-            or (effective_attempts >= 5.0 and effective.protection_degraded_rate >= 0.75)
+            or (rounded_sample_size >= 5 and effective.avg_realized_edge_bps < -2.0)
+            or (rounded_sample_size >= 5 and effective.protection_degraded_rate >= 0.75)
         ):
             trade_restraint = "execution_quality_halt"
             size_multiplier = 0.0
