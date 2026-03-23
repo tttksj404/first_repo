@@ -43,10 +43,21 @@ if [ -f "$WATCHDOG_PID_PATH" ]; then
 fi
 printf '%s
 ' "$SELF_PID" >"$WATCHDOG_PID_PATH"
-trap 'rm -f "$WATCHDOG_PID_PATH"' INT TERM EXIT
+cleanup_pid_file() {
+  current="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
+  if [ "$current" = "$SELF_PID" ]; then
+    rm -f "$WATCHDOG_PID_PATH"
+  fi
+}
+trap 'cleanup_pid_file' INT TERM EXIT
 
 log() {
   printf '[WATCHDOG] %s at %s\n' "$1" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+}
+
+owns_watchdog_slot() {
+  current="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
+  [ "$current" = "$SELF_PID" ]
 }
 
 child_alive() {
@@ -85,6 +96,10 @@ restart_supervisor() {
 
 log "watchdog started pid=$$ interval=${CHECK_INTERVAL_SECONDS}s stale=${STALE_SECONDS}s python_bin=$PYTHON_BIN"
 while :; do
+  if ! owns_watchdog_slot; then
+    log "watchdog slot lost to pid=$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true); exiting"
+    exit 0
+  fi
   if child_alive; then
     if summary_fresh; then
       :
