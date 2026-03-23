@@ -22,6 +22,7 @@ OUTPUT_BASE="${1:-quant_runtime}"
 CHECK_INTERVAL_SECONDS="${QUANT_SUPERVISOR_WATCHDOG_INTERVAL_SECONDS:-60}"
 STALE_SECONDS="${QUANT_SUPERVISOR_WATCHDOG_STALE_SECONDS:-240}"
 RESTART_COOLDOWN_SECONDS="${QUANT_SUPERVISOR_WATCHDOG_RESTART_COOLDOWN_SECONDS:-45}"
+STARTUP_GRACE_SECONDS="${QUANT_LIVE_STARTUP_GRACE_SECONDS:-120}"
 LOG_DIR="$OUTPUT_BASE"
 SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 PID_PATH="$LOG_DIR/live_supervisor.pid"
@@ -60,29 +61,37 @@ owns_watchdog_slot() {
   [ "$current" = "$SELF_PID" ]
 }
 
+started_at_epoch="$(date +%s)"
+within_startup_grace() {
+  now_epoch="$(date +%s)"
+  elapsed=$((now_epoch - started_at_epoch))
+  [ "$elapsed" -lt "$STARTUP_GRACE_SECONDS" ]
+}
+
 child_alive() {
   child_pid="$(pgrep -f "quant_binance.runtime --mode live-auto-trade-daemon --exchange bitget --output-base $OUTPUT_BASE" | head -n 1 || true)"
   [ -n "$child_pid" ]
 }
 
 summary_fresh() {
-  "$PYTHON_BIN" - <<'PY' "$SUMMARY_PATH" "$STALE_SECONDS"
+  "$PYTHON_BIN" - <<'PY' "$SUMMARY_PATH" "$STALE_SECONDS" "$STARTUP_GRACE_SECONDS"
 import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 path = Path(sys.argv[1])
 stale_seconds = int(sys.argv[2])
+startup_grace_seconds = int(sys.argv[3])
 if not path.exists():
-    raise SystemExit(1)
+    raise SystemExit(0 if startup_grace_seconds > 0 else 1)
 try:
     data = json.loads(path.read_text(encoding='utf-8'))
     raw = data.get('updated_at')
     if not isinstance(raw, str):
-        raise SystemExit(1)
+        raise SystemExit(0 if startup_grace_seconds > 0 else 1)
     updated = datetime.fromisoformat(raw)
 except Exception:
-    raise SystemExit(1)
+    raise SystemExit(0 if startup_grace_seconds > 0 else 1)
 age = (datetime.now(timezone.utc) - updated).total_seconds()
 raise SystemExit(0 if age <= stale_seconds else 1)
 PY
@@ -104,6 +113,11 @@ while :; do
     if summary_fresh; then
       :
     else
+      if within_startup_grace; then
+        log "summary stale or missing during startup grace; waiting"
+        sleep "$CHECK_INTERVAL_SECONDS"
+        continue
+      fi
       log "summary stale or missing"
       pid="$(cat "$PID_PATH" 2>/dev/null || true)"
       if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
@@ -116,6 +130,11 @@ while :; do
     if summary_fresh; then
       log "child missing but summary still fresh; waiting"
     else
+      if within_startup_grace; then
+        log "child missing and summary stale or missing during startup grace; waiting"
+        sleep "$CHECK_INTERVAL_SECONDS"
+        continue
+      fi
       log "child missing and summary stale or missing"
       pid="$(cat "$PID_PATH" 2>/dev/null || true)"
       if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
