@@ -17,7 +17,8 @@ resolve_python_bin() {
     fi
   done
 
-  printf '%s\n' python3
+  printf '[BOOT] python resolver failed in %s at %s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >&2
+  exit 1
 }
 
 PYTHON_BIN="$(resolve_python_bin)"
