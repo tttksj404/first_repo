@@ -49,23 +49,6 @@ log() {
   printf '[WATCHDOG] %s at %s\n' "$1" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 }
 
-supervisor_alive() {
-  pid=""
-  if [ -f "$PID_PATH" ]; then
-    pid="$(cat "$PID_PATH" 2>/dev/null || true)"
-  fi
-  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-    cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
-    if printf '%s' "$cmd" | grep -F "quant_run_live_orders.sh" >/dev/null 2>&1; then
-      return 0
-    fi
-  fi
-  fallback_pid="$(pgrep -f "(/bin/sh|sh) .*/quant_run_live_orders.sh $OUTPUT_BASE|quant_run_live_orders.sh $OUTPUT_BASE" | head -n 1 || true)"
-  [ -n "$fallback_pid" ] || return 1
-  printf '%s\n' "$fallback_pid" >"$PID_PATH"
-  return 0
-}
-
 child_alive() {
   child_pid="$(pgrep -f "quant_binance.runtime --mode live-auto-trade-daemon --exchange bitget --output-base $OUTPUT_BASE" | head -n 1 || true)"
   [ -n "$child_pid" ]
@@ -102,23 +85,30 @@ restart_supervisor() {
 
 log "watchdog started pid=$$ interval=${CHECK_INTERVAL_SECONDS}s stale=${STALE_SECONDS}s python_bin=$PYTHON_BIN"
 while :; do
-  if ! supervisor_alive; then
-    if child_alive && summary_fresh; then
-      log "supervisor pid missing but child+summary are healthy; skipping restart"
-    elif summary_fresh; then
-      log "supervisor pid missing but summary still fresh; skipping restart"
+  if child_alive; then
+    if summary_fresh; then
+      :
     else
-      log "supervisor missing"
+      log "summary stale or missing"
+      pid="$(cat "$PID_PATH" 2>/dev/null || true)"
+      if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null || true
+        sleep 2
+      fi
       restart_supervisor
     fi
-  elif ! summary_fresh; then
-    log "summary stale or missing"
-    pid="$(cat "$PID_PATH" 2>/dev/null || true)"
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-      kill "$pid" 2>/dev/null || true
-      sleep 2
+  else
+    if summary_fresh; then
+      log "child missing but summary still fresh; waiting"
+    else
+      log "child missing and summary stale or missing"
+      pid="$(cat "$PID_PATH" 2>/dev/null || true)"
+      if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null || true
+        sleep 2
+      fi
+      restart_supervisor
     fi
-    restart_supervisor
   fi
   sleep "$CHECK_INTERVAL_SECONDS"
 done
