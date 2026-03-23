@@ -3,19 +3,22 @@ set -eu
 
 resolve_python_bin() {
   if [ -n "${PYTHON_BIN:-}" ] && [ -x "${PYTHON_BIN}" ]; then
-    printf '%s
-' "$PYTHON_BIN"
+    printf '%s\n' "$PYTHON_BIN"
     return 0
   fi
-  for candidate in "$(command -v python3 2>/dev/null || true)"                    "$(command -v python 2>/dev/null || true)"                    /Library/Frameworks/Python.framework/Versions/3.14/bin/python3                    /opt/homebrew/bin/python3                    /usr/local/bin/python3                    /usr/bin/python3; do
+
+  c1="$(command -v python3 2>/dev/null || true)"
+  c2="$(command -v python 2>/dev/null || true)"
+  for candidate in "$c1" "$c2" /Library/Frameworks/Python.framework/Versions/3.14/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 /usr/bin/python3
+  do
     if [ -n "$candidate" ] && [ -x "$candidate" ]; then
-      printf '%s
-' "$candidate"
+      printf '%s\n' "$candidate"
       return 0
     fi
   done
-  printf '%s
-' python3
+
+  printf '[BOOT] python resolver failed in %s at %s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >&2
+  exit 1
 }
 
 PYTHON_BIN="$(resolve_python_bin)"
