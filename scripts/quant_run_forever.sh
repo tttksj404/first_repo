@@ -7,17 +7,15 @@ resolve_python_bin() {
     return 0
   fi
 
-  c1="$(command -v python3 2>/dev/null || true)"
-  c2="$(command -v python 2>/dev/null || true)"
-  for candidate in "$c1" "$c2" /Library/Frameworks/Python.framework/Versions/3.14/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 /usr/bin/python3
+  for candidate in /Library/Frameworks/Python.framework/Versions/3.14/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 /usr/bin/python3
   do
-    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+    if [ -x "$candidate" ]; then
       printf '%s\n' "$candidate"
       return 0
     fi
   done
 
-  printf '[BOOT] python resolver failed in %s at %s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >&2
+  printf '[BOOT] python resolver failed in %s at %s env_PYTHON_BIN=%s PATH=%s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" "${PYTHON_BIN:-}" "$PATH" >&2
   exit 1
 }
 
