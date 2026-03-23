@@ -100,8 +100,12 @@ restart_supervisor() {
 log "watchdog started pid=$$ interval=${CHECK_INTERVAL_SECONDS}s stale=${STALE_SECONDS}s python_bin=$PYTHON_BIN"
 while :; do
   if ! supervisor_alive; then
-    log "supervisor missing"
-    restart_supervisor
+    if summary_fresh; then
+      log "supervisor pid missing but summary still fresh; skipping restart"
+    else
+      log "supervisor missing"
+      restart_supervisor
+    fi
   elif ! summary_fresh; then
     log "summary stale or missing"
     pid="$(cat "$PID_PATH" 2>/dev/null || true)"
