@@ -14,6 +14,10 @@ else
 fi
 export PYTHON_BIN
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+RUN_SUPERVISOR_SCRIPT="$REPO_ROOT/scripts/quant_run_live_orders.sh"
+
 OUTPUT_BASE="${1:-quant_runtime}"
 CHECK_INTERVAL_SECONDS="${QUANT_SUPERVISOR_WATCHDOG_INTERVAL_SECONDS:-60}"
 STALE_SECONDS="${QUANT_SUPERVISOR_WATCHDOG_STALE_SECONDS:-240}"
@@ -27,7 +31,7 @@ QUANT_TELEGRAM_NOTIFICATIONS_VALUE="${QUANT_TELEGRAM_NOTIFICATIONS:-0}"
 QUANT_BYPASS_POLICY_GUARDRAILS_VALUE="${QUANT_BYPASS_POLICY_GUARDRAILS:-1}"
 
 mkdir -p "$LOG_DIR"
-cd "$(dirname "$0")/.."
+cd "$REPO_ROOT"
 if [ -f "$WATCHDOG_PID_PATH" ]; then
   EXISTING_WATCHDOG_PID="$(cat "$WATCHDOG_PID_PATH" 2>/dev/null || true)"
   if [ -n "$EXISTING_WATCHDOG_PID" ] && kill -0 "$EXISTING_WATCHDOG_PID" 2>/dev/null; then
@@ -49,15 +53,19 @@ supervisor_alive() {
   fi
   if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
     cmd="$(ps -p "$pid" -o command= 2>/dev/null || true)"
-    if printf '%s' "$cmd" | grep -F "scripts/quant_run_live_orders.sh $OUTPUT_BASE" >/dev/null 2>&1; then
+    if printf '%s' "$cmd" | grep -F "quant_run_live_orders.sh" >/dev/null 2>&1; then
       return 0
     fi
   fi
-  fallback_pid="$(pgrep -f "sh scripts/quant_run_live_orders.sh $OUTPUT_BASE" | head -n 1 || true)"
+  fallback_pid="$(pgrep -f "(/bin/sh|sh) .*/quant_run_live_orders.sh $OUTPUT_BASE|quant_run_live_orders.sh $OUTPUT_BASE" | head -n 1 || true)"
   [ -n "$fallback_pid" ] || return 1
-  printf '%s
-' "$fallback_pid" >"$PID_PATH"
+  printf '%s\n' "$fallback_pid" >"$PID_PATH"
   return 0
+}
+
+child_alive() {
+  child_pid="$(pgrep -f "quant_binance.runtime --mode live-auto-trade-daemon --exchange bitget --output-base $OUTPUT_BASE" | head -n 1 || true)"
+  [ -n "$child_pid" ]
 }
 
 summary_fresh() {
@@ -84,15 +92,17 @@ PY
 }
 
 restart_supervisor() {
-  log "restarting supervisor python_bin=$PYTHON_BIN pwd=$(pwd)"
-  nohup env     PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"     QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS_VALUE"     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS_VALUE"     PYTHON_BIN="$PYTHON_BIN"     sh scripts/quant_run_live_orders.sh "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
+  log "restarting supervisor python_bin=$PYTHON_BIN run_script=$RUN_SUPERVISOR_SCRIPT pwd=$(pwd)"
+  /usr/bin/nohup env     PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"     QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS_VALUE"     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS_VALUE"     PYTHON_BIN="$PYTHON_BIN"     /bin/sh "$RUN_SUPERVISOR_SCRIPT" "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
   sleep "$RESTART_COOLDOWN_SECONDS"
 }
 
 log "watchdog started pid=$$ interval=${CHECK_INTERVAL_SECONDS}s stale=${STALE_SECONDS}s python_bin=$PYTHON_BIN"
 while :; do
   if ! supervisor_alive; then
-    if summary_fresh; then
+    if child_alive && summary_fresh; then
+      log "supervisor pid missing but child+summary are healthy; skipping restart"
+    elif summary_fresh; then
       log "supervisor pid missing but summary still fresh; skipping restart"
     else
       log "supervisor missing"
