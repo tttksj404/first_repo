@@ -67,7 +67,10 @@ REPORT_PID=""
 NEWS_PID=""
 
 cleanup() {
-  rm -f "$SUPERVISOR_PID_PATH"
+  current_supervisor_pid="$(cat "$SUPERVISOR_PID_PATH" 2>/dev/null || true)"
+  if [ "$current_supervisor_pid" = "$$" ]; then
+    rm -f "$SUPERVISOR_PID_PATH"
+  fi
   if [ -n "${REPORT_PID:-}" ] && kill -0 "$REPORT_PID" 2>/dev/null; then
     kill "$REPORT_PID" 2>/dev/null || true
     wait "$REPORT_PID" 2>/dev/null || true
