@@ -2078,12 +2078,21 @@ class LivePaperSession:
                 targets.append(position)
         return targets
 
+    def _major_cross_symbol_realign_safe(self, *, position: PaperPosition) -> bool:
+        if position.market != "futures" or position.side not in {"long", "short"}:
+            return False
+        reward_bps = self._reward_bps(position=position, price=position.current_price if position.current_price > 0 else position.entry_price)
+        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
+        return current_roe_percent > 0.0
+
     def _should_force_major_reversal_alignment(self, *, position: PaperPosition, decision: DecisionIntent, holding_minutes: float) -> bool:
         if position.market != "futures" or decision.final_mode != "futures":
             return False
         if not self._is_major_futures_symbol(position.symbol) or not self._is_major_futures_symbol(decision.symbol):
             return False
         if position.side == decision.side or decision.side not in {"long", "short"}:
+            return False
+        if not self._major_cross_symbol_realign_safe(position=position):
             return False
         if decision.net_expected_edge_bps <= max(position.entry_net_expected_edge_bps * 0.5, 8.0):
             return False
@@ -2094,6 +2103,8 @@ class LivePaperSession:
     def _align_major_cross_symbol_positions(self, *, decision: DecisionIntent, price_map: dict[str, float], timestamp: datetime) -> tuple[list[str], bool]:
         closed_symbols: list[str] = []
         for position in self._major_cross_symbol_alignment_targets(decision):
+            if not self._major_cross_symbol_realign_safe(position=position):
+                continue
             exit_price = price_map.get(position.symbol, position.current_price if position.current_price > 0 else position.entry_price)
             self._close_position(position=position, exit_price=exit_price, timestamp=timestamp, exit_reason="MAJOR_CROSS_SYMBOL_REALIGN")
             self.manual_symbol_cooldowns.pop(decision.symbol, None)
@@ -4577,12 +4588,14 @@ class LivePaperSession:
                 and self._is_major_futures_symbol(position.symbol)
                 and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT"}
             ):
-                force_alignment = self._should_force_major_reversal_alignment(position=position, decision=decision, holding_minutes=holding_minutes)
+                realign_safe = self._major_cross_symbol_realign_safe(position=position)
+                force_alignment = realign_safe and self._should_force_major_reversal_alignment(position=position, decision=decision, holding_minutes=holding_minutes)
                 if holding_minutes < self.runtime.paper_service.settings.live_position_risk.major_reversal_min_holding_minutes and not force_alignment:
                     return
                 required_confirmation_cycles = max(
                     required_confirmation_cycles,
                     1 if force_alignment else self.runtime.paper_service.settings.live_position_risk.major_reversal_confirmation_cycles,
+                    2 if not realign_safe else 1,
                 )
             if position.last_exit_signal_reason == exit_reason:
                 position.exit_confirmation_count += 1
