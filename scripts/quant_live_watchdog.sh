@@ -1,6 +1,14 @@
 #!/bin/sh
 set -eu
 
+HOST_PYTHON_DEFAULT="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
+PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
+export PATH
+if [ -z "${PYTHON_BIN:-}" ] && [ -x "$HOST_PYTHON_DEFAULT" ]; then
+  PYTHON_BIN="$HOST_PYTHON_DEFAULT"
+  export PYTHON_BIN
+fi
+
 resolve_python_bin() {
   if [ -n "${PYTHON_BIN:-}" ] && [ -x "${PYTHON_BIN}" ]; then
     printf '%s\n' "$PYTHON_BIN"
