@@ -88,3 +88,127 @@ def with_policy_evidence_buckets(
         for bucket_name, bucket_payload in dict(buckets or {}).items()
     }
     return updated
+
+
+def replay_summary_provenance(summary: dict[str, Any] | None) -> dict[str, object]:
+    """Classify the provenance of a replay summary for diagnostic purposes."""
+    payload = dict(summary or {})
+    source = str(payload.get("source", "") or "")
+    bucket_name = str(payload.get("bucket_name", "") or "")
+    runtime_anchor = dict(payload.get("runtime_summary_anchor", {}) or {})
+
+    has_bucket_reference = bool(bucket_name and bucket_name != "not_available")
+    anchor_source = str(runtime_anchor.get("source", "") or "")
+    has_runtime_summary_anchor = bool(anchor_source and anchor_source != "artifact_only")
+
+    uses_direct_bucket_replay = "bucket_replay" in source or has_bucket_reference
+    uses_mixed_root_summary_fallback = "mixed" in source or "fallback" in source
+    uses_projected_evidence = not uses_direct_bucket_replay
+
+    if uses_direct_bucket_replay:
+        classification = "bucket_replay_evidence"
+        reason_code = "DIRECT_BUCKET_REPLAY_SOURCE"
+        decision_surface = bucket_name or "policy_bucket"
+    elif uses_projected_evidence:
+        classification = "projected_evidence"
+        reason_code = "PROJECTED_RUNTIME_REPLAY_SOURCE"
+        decision_surface = "staged_candidate"
+    else:
+        classification = "runtime_artifact_evidence"
+        reason_code = "RUNTIME_ARTIFACT_REPLAY_SOURCE"
+        decision_surface = "runtime_artifact"
+
+    policy_bucket = bucket_name if has_bucket_reference else "not_available"
+    return {
+        "classification": classification,
+        "decision_surface": decision_surface,
+        "has_bucket_reference": has_bucket_reference,
+        "has_runtime_summary_anchor": has_runtime_summary_anchor,
+        "policy_bucket": policy_bucket,
+        "reason_code": reason_code,
+        "source": source,
+        "summary": f"{classification}:{reason_code}",
+        "uses_direct_bucket_replay": uses_direct_bucket_replay,
+        "uses_mixed_root_summary_fallback": uses_mixed_root_summary_fallback,
+        "uses_projected_evidence": uses_projected_evidence,
+    }
+
+
+def baseline_control_replay_provenance(payload: dict[str, Any] | None) -> dict[str, object]:
+    """Classify the provenance of a baseline control replay for diagnostic purposes."""
+    p = dict(payload or {})
+    source = str(p.get("evidence_source", "") or p.get("source", "") or "")
+    current_bucket_replay = dict(p.get("current_policy_bucket_replay", {}) or {})
+    staged_bucket_replay = dict(p.get("staged_candidate_bucket_replay", {}) or {})
+    runtime_anchor = dict(p.get("runtime_summary_anchor", {}) or {})
+
+    has_bucket_reference = bool(
+        current_bucket_replay.get("available") or staged_bucket_replay.get("available")
+    )
+    anchor_source = str(runtime_anchor.get("source", "") or "")
+    has_runtime_summary_anchor = bool(anchor_source and anchor_source != "artifact_only")
+    uses_direct_bucket_replay = has_bucket_reference
+    uses_mixed_root_summary_fallback = "mixed" in source or "fallback" in source
+    uses_projected_evidence = not has_bucket_reference
+
+    if uses_direct_bucket_replay:
+        classification = "bucket_replay_evidence"
+        reason_code = "BASELINE_BUCKET_REPLAY_SOURCE"
+    else:
+        classification = "projected_evidence"
+        reason_code = "PROJECTED_BASELINE_REPLAY_SOURCE"
+
+    policy_bucket = "baseline_control" if has_bucket_reference else "not_available"
+    return {
+        "classification": classification,
+        "decision_surface": "baseline_control",
+        "has_bucket_reference": has_bucket_reference,
+        "has_runtime_summary_anchor": has_runtime_summary_anchor,
+        "policy_bucket": policy_bucket,
+        "reason_code": reason_code,
+        "source": source,
+        "summary": f"{classification}:{reason_code}",
+        "uses_direct_bucket_replay": uses_direct_bucket_replay,
+        "uses_mixed_root_summary_fallback": uses_mixed_root_summary_fallback,
+        "uses_projected_evidence": uses_projected_evidence,
+    }
+
+
+def checkpoint_replay_provenance(info: dict[str, Any] | None) -> dict[str, object]:
+    """Classify the provenance of a checkpoint replay for diagnostic purposes."""
+    p = dict(info or {})
+    evidence_source = str(p.get("evidence_source", "") or "")
+    evidence_policy_bucket = str(p.get("evidence_policy_bucket", "not_available") or "not_available")
+
+    has_bucket_reference = (
+        evidence_source == "policy_bucket" and evidence_policy_bucket != "not_available"
+    )
+    uses_direct_bucket_replay = has_bucket_reference
+    uses_projected_evidence = not has_bucket_reference
+    uses_mixed_root_summary_fallback = "mixed" in evidence_source or "fallback" in evidence_source
+    has_runtime_summary_anchor = (
+        "runtime_summary" in evidence_source or "summary_artifact" in evidence_source
+    )
+
+    if uses_direct_bucket_replay:
+        classification = "bucket_replay_evidence"
+        reason_code = "CHECKPOINT_BUCKET_REPLAY_SOURCE"
+        decision_surface = evidence_policy_bucket
+    else:
+        classification = "projected_evidence"
+        reason_code = "PROJECTED_CHECKPOINT_REPLAY_SOURCE"
+        decision_surface = "staged_candidate"
+
+    return {
+        "classification": classification,
+        "decision_surface": decision_surface,
+        "has_bucket_reference": has_bucket_reference,
+        "has_runtime_summary_anchor": has_runtime_summary_anchor,
+        "policy_bucket": evidence_policy_bucket,
+        "reason_code": reason_code,
+        "source": evidence_source,
+        "summary": f"{classification}:{reason_code}",
+        "uses_direct_bucket_replay": uses_direct_bucket_replay,
+        "uses_mixed_root_summary_fallback": uses_mixed_root_summary_fallback,
+        "uses_projected_evidence": uses_projected_evidence,
+    }
