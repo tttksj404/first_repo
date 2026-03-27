@@ -10,6 +10,8 @@ from quant_binance.observability.log_store import JsonlLogStore
 
 
 KNOWN_BITGET_COMPATIBILITY_CODES = frozenset({"40762", "40774", "40893"})
+# Rate-limit codes: 40100 = too many requests, 40101 = API frequency limit, 40791 = system busy
+KNOWN_BITGET_RATE_LIMIT_CODES = frozenset({"40100", "40101", "40791", "429"})
 KNOWN_CATEGORY_DAEMON_STALLED = "daemon_stalled"
 KNOWN_CATEGORY_FUTURES_MISMATCH = "persistent_futures_mismatch"
 KNOWN_CATEGORY_BITGET_LIVE_ORDER = "bitget_live_order_compatibility"
@@ -61,6 +63,23 @@ def classify_runtime_issue(
     normalized = error_message.lower()
     code = parse_error_code(error_message)
     is_bitget = exchange_id == "bitget" or "bitget" in normalized
+    # Rate limit: HTTP 429 or Bitget-specific rate-limit codes
+    rate_limited_marker = (
+        "rate limit" in normalized
+        or "too many requests" in normalized
+        or "429" in normalized
+        or "request frequency" in normalized
+        or "system busy" in normalized
+    )
+    if code in KNOWN_BITGET_RATE_LIMIT_CODES or (is_bitget and rate_limited_marker):
+        return {
+            "category": "bitget_rate_limited",
+            "known": True,
+            "error_code": code,
+            "stage": stage or "live_order",
+            "summary": "Bitget API rate limit or system busy; backoff already applied in HTTP layer",
+            "automatic_action": "cooldown_and_wait_for_rate_limit",
+        }
     order_mode_marker = (
         "unilateral position" in normalized
         or "one-way position" in normalized
