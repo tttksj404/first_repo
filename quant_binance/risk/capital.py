@@ -307,7 +307,7 @@ def _exchange_supports_internal_transfer(
     if normalized_exchange == "binance":
         return bool(normalized_asset)
     if normalized_exchange == "bitget":
-        return normalized_asset == "USDT"
+        return True  # allow non-USDT spot↔futures transfers (collateral candidates)
     return normalized_asset == "USDT"
 
 
@@ -827,6 +827,8 @@ def build_capital_adequacy_report(
     )
     futures_total_reusable_balance_usd = (
         futures_recognized
+        + existing_futures_collateral_candidate_balance_usd  # pre-existing non-USDT collateral in futures
+        + existing_futures_manual_handling_balance_usd        # pre-existing non-USDT manual assets in futures (e.g. BTC)
         + futures_transferable_execution_balance_usd
         + max(futures_collateral_candidate_balance_usd - existing_futures_collateral_candidate_balance_usd, 0.0)
         + max(futures_manual_handling_balance_usd - existing_futures_manual_handling_balance_usd, 0.0)
