@@ -646,7 +646,9 @@
         "pyramid_min_trend_strength": 0.5,
         "pyramid_min_volume_confirmation": 0.4,
         "pyramid_max_adds_per_symbol": 1,
-        "pyramid_size_multiplier": 0.4
+        "pyramid_size_multiplier": 0.4,
+        "demoted_symbols": ["BTCUSDT"],
+        "demoted_symbol_size_cap": 0.45
       },
       "portfolio_focus": {
         "enabled": true,
