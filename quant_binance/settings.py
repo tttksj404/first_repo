@@ -209,6 +209,8 @@ class FuturesExposureConfig:
     alt_liquidity_penalty_without_macro: float = 0.0
     alt_min_entry_net_edge_bps_without_macro: float = 0.0
     alt_reduced_size_multiplier: float = 0.0
+    demoted_symbols: tuple[str, ...] = ()
+    demoted_symbol_size_cap: float = 0.45
     major_reallocation_score_advantage_relaxation: float = 0.0
     major_reallocation_edge_advantage_relaxation_bps: float = 0.0
     major_reallocation_incremental_pnl_relaxation_usd: float = 0.0
@@ -389,6 +391,7 @@ class Settings:
         futures_exposure_raw = dict(raw["futures_exposure"])
         futures_exposure_raw["priority_symbols"] = tuple(futures_exposure_raw.get("priority_symbols", ()))
         futures_exposure_raw["major_symbols"] = tuple(futures_exposure_raw.get("major_symbols", ()))
+        futures_exposure_raw["demoted_symbols"] = tuple(futures_exposure_raw.get("demoted_symbols", ()))
         exit_rules_raw = dict(raw["exit_rules"])
         exit_rules_raw["futures_proactive_take_profit_roe_thresholds_percent"] = tuple(
             exit_rules_raw.get("futures_proactive_take_profit_roe_thresholds_percent", ())

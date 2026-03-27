@@ -719,6 +719,8 @@ def _futures_entry_plan(
     if boosted_size_multiplier > size_multiplier:
         size_multiplier = boosted_size_multiplier
         size_boost_reasons.append(BTC_ETH_STRONG_SIZE_BOOST_REASON)
+    if symbol in set(exposure.demoted_symbols) and exposure.demoted_symbol_size_cap > 0.0:
+        size_multiplier = min(size_multiplier, exposure.demoted_symbol_size_cap)
     return True, reasons, size_multiplier, tuple(relaxed_reasons), tuple(size_boost_reasons)
 
 
