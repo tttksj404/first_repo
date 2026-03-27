@@ -769,10 +769,15 @@ class BitgetRestClient:
                     crossed_max_available = _optional_float(item.get("crossedMaxAvailable"))
                     union_available = _optional_float(item.get("unionAvailable"))
                     break
-            if crossed_max_available is not None and crossed_max_available > 0:
+            # Use the larger of crossedMaxAvailable and unionAvailable so that
+            # non-USDT collateral (haircut value included in unionAvailable) is
+            # recognised as execution capital.
+            if crossed_max_available is not None and union_available is not None:
+                execution_available = max(crossed_max_available, union_available)
+            elif crossed_max_available is not None and crossed_max_available > 0:
                 execution_available = crossed_max_available
             elif union_available is not None and union_available > 0:
-                execution_available = min(available, union_available) if available is not None and available > 0 else union_available
+                execution_available = union_available
             elif available is not None and available > 0:
                 execution_available = available
             else:
