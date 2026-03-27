@@ -5,6 +5,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Exit reasons that indicate a position was manually closed by an operator
+# (as opposed to being closed by the strategy's own exit logic).
+_INHERITED_MANUAL_CLOSE_EXIT_REASONS: frozenset[str] = frozenset(
+    {"MANUAL_CLOSE_SYNCED", "MANUAL_CLOSE"}
+)
 
 
 @dataclass(frozen=True)
@@ -14,6 +23,47 @@ class ClosedTradeAggregate:
     exit_reason_counts: dict[str, int]
     symbol_performance: list[dict[str, object]]
     by_symbol: dict[str, dict[str, object]]
+
+
+def is_inherited_manual_close(trade: dict[str, Any]) -> bool:
+    """Return True if this trade is an inherited position from a previous session
+    that was manually closed — NOT a strategy decision in the current session.
+
+    These trades have two distinguishing marks:
+    - ``entry_policy_bucket_available = false``: the strategy had no active policy
+      context when the position was entered (i.e., it was opened in a prior run).
+    - ``exit_reason`` is a manual-close variant: the position was closed by an
+      operator or sync process, not by the strategy's own exit logic.
+
+    Including such trades in policy validation contaminates the performance signal
+    with noise that has nothing to do with the current strategy's decision quality.
+    """
+    entry_bucket_available = bool(trade.get("entry_policy_bucket_available"))
+    exit_reason = str(trade.get("exit_reason", "") or "")
+    return (
+        not entry_bucket_available
+        and exit_reason in _INHERITED_MANUAL_CLOSE_EXIT_REASONS
+    )
+
+
+def filter_inherited_trades(
+    trades: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split *trades* into ``(clean_trades, inherited_trades)``.
+
+    Inherited trades are positions from previous sessions that were manually
+    closed at session start.  They must be excluded from policy validation
+    because they skew PnL / drawdown metrics without reflecting current
+    strategy performance.
+
+    Returns a ``(clean, inherited)`` tuple so callers can log / count the
+    filtered-out entries without re-scanning the list.
+    """
+    clean: list[dict[str, Any]] = []
+    inherited: list[dict[str, Any]] = []
+    for trade in trades:
+        (inherited if is_inherited_manual_close(trade) else clean).append(trade)
+    return clean, inherited
 
 
 def load_closed_trades_jsonl(path: str | Path) -> list[dict[str, Any]]:

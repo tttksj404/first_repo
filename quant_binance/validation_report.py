@@ -8,7 +8,11 @@ from pathlib import Path
 from typing import Any
 
 from quant_binance.auto_mode import build_regime_aware_auto_mode
-from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
+from quant_binance.closed_trade_metrics import (
+    aggregate_closed_trades,
+    filter_inherited_trades,
+    load_closed_trades_jsonl,
+)
 from quant_binance.performance_report import build_runtime_performance_report, build_runtime_performance_report_from_rows
 from quant_binance.policy_evidence import (
     baseline_control_replay_provenance,
@@ -348,14 +352,16 @@ def _runtime_summary_closed_trade_metrics(
     run_dir: Path | None = None,
 ) -> tuple[int, float]:
     payload = dict(runtime_summary or {})
-    closed_trades = list(payload.get("closed_trades", []) or [])
-    if closed_trades:
-        aggregate = aggregate_closed_trades(closed_trades)
+    raw_trades = list(payload.get("closed_trades", []) or [])
+    if raw_trades:
+        clean_trades, _ = filter_inherited_trades(raw_trades)
+        aggregate = aggregate_closed_trades(clean_trades)
         return aggregate.closed_trade_count, aggregate.realized_pnl_usd
     if run_dir is not None:
         closed_trade_log = run_dir / "logs" / "closed_trades.jsonl"
         if closed_trade_log.exists():
-            aggregate = aggregate_closed_trades(load_closed_trades_jsonl(closed_trade_log))
+            clean_trades, _ = filter_inherited_trades(load_closed_trades_jsonl(closed_trade_log))
+            aggregate = aggregate_closed_trades(clean_trades)
             return aggregate.closed_trade_count, aggregate.realized_pnl_usd
     return (
         _safe_int(payload.get("closed_trade_count")),
