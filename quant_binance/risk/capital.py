@@ -418,6 +418,53 @@ def _futures_funding_assets(
                 margin_available=bool(row.get("marginAvailable", asset == "USDT")),
             )
         )
+    # Also extract non-USDT assets from Bitget's nested assetList (e.g. BTC collateral).
+    # These rows use "coin" instead of "asset"/"marginCoin" so they are skipped above.
+    seen_assets = {a.asset for a in assets}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        for sub in row.get("assetList", []) or []:
+            if not isinstance(sub, dict):
+                continue
+            sub_asset = str(sub.get("coin") or sub.get("asset") or "").upper()
+            if not sub_asset or sub_asset in seen_assets:
+                continue
+            sub_free = _optional_float(sub.get("available")) or 0.0
+            sub_total = _optional_float(sub.get("balance")) or sub_free
+            if sub_total <= 0.0:
+                continue
+            sub_total_usd = _futures_asset_total_usd(
+                row=sub,
+                asset=sub_asset,
+                supported_symbols=supported_symbols,
+                rest_client=rest_client,
+                price_by_symbol=price_by_symbol,
+            )
+            if sub_total_usd is None:
+                # Fall back to spot-price lookup
+                price = _spot_asset_usd_price(
+                    asset=sub_asset,
+                    supported_symbols=supported_symbols,
+                    rest_client=rest_client,
+                    price_by_symbol=price_by_symbol,
+                )
+                sub_total_usd = sub_total * price if price is not None else None
+            if sub_total_usd is None or sub_total_usd <= 0.0:
+                continue
+            sub_free_ratio = min(max(sub_free / sub_total, 0.0), 1.0) if sub_total > 0.0 else 0.0
+            assets.append(
+                FuturesFundingAsset(
+                    asset=sub_asset,
+                    free=round(sub_free, 8),
+                    locked=round(max(sub_total - sub_free, 0.0), 8),
+                    total=round(sub_total, 8),
+                    free_balance_usd=round(sub_total_usd * sub_free_ratio, 6),
+                    total_balance_usd=round(sub_total_usd, 6),
+                    margin_available=bool(sub.get("marginAvailable", False)),
+                )
+            )
+            seen_assets.add(sub_asset)
     assets.sort(key=lambda item: (-item.free_balance_usd, item.asset))
     return tuple(assets)
 
