@@ -755,11 +755,44 @@ class BitgetRestClient:
         data = payload.get("data") or {}
         return _optional_float(data.get("maxOpen"))
 
+    def _fetch_extra_futures_account_rows(self) -> list[dict[str, Any]]:
+        """Query COIN-FUTURES and USDC-FUTURES and return all non-USDT margin rows.
+
+        These product types are separate Bitget accounts (e.g. ETH-margined or
+        USDC-margined positions) that are invisible to a USDT-FUTURES-only query.
+        We merge them into the main accounts list so capital.py can price them.
+        """
+        extra_rows: list[dict[str, Any]] = []
+        primary_coin = self.contract_config.margin_coin.upper()
+        for product_type in ("COIN-FUTURES", "USDC-FUTURES"):
+            try:
+                req = self.build_signed_request(
+                    path="/api/v2/mix/account/accounts",
+                    method="GET",
+                    params={"productType": product_type},
+                )
+                resp = self.send(req)
+                for row in resp.get("data", []) or []:
+                    if not isinstance(row, dict):
+                        continue
+                    coin = str(row.get("marginCoin", "")).upper()
+                    if coin == primary_coin:
+                        continue  # already captured from primary query
+                    equity = _optional_float(row.get("usdtEquity") or row.get("accountEquity"))
+                    if equity is None or equity <= 0.0:
+                        continue
+                    extra_rows.append(row)
+            except Exception:
+                pass  # non-critical — missing product type is silently ignored
+        return extra_rows
+
     def get_account(self, *, market: str) -> dict[str, Any]:
         payload = self.send(self.build_account_request(market=market))
         rows = payload.get("data", [])
         if market == "futures":
-            data_rows = rows if isinstance(rows, list) else []
+            data_rows = list(rows) if isinstance(rows, list) else []
+            # Merge non-USDT coin-margined/USDC accounts (e.g. ETH in COIN-FUTURES)
+            data_rows.extend(self._fetch_extra_futures_account_rows())
             available: float | None = None
             crossed_max_available: float | None = None
             union_available: float | None = None
