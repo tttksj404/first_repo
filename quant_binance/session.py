@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import time
 import asyncio
+
+logger = logging.getLogger(__name__)
 from contextlib import suppress
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
@@ -1122,6 +1125,47 @@ class LivePaperSession:
             decision.symbol,
             major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
         )
+        # ------------------------------------------------------------------
+        # Deadlock detection: rollback verdict + waiting rejudge + zero real
+        # evidence.  This can happen when a prior session's positions are
+        # inherited and immediately manually-closed, leaving the policy
+        # validator with contaminated data (non-zero PnL loss from inherited
+        # manual-close trades) but zero actual live orders.  The system then
+        # issues a rollback verdict before the current session can generate any
+        # evidence, and the rejudge gate prevents new evidence from ever being
+        # accumulated — a chicken-and-egg deadlock.
+        #
+        # When this condition is detected we allow major symbols through with a
+        # reduced size cap so that the session can build enough real evidence to
+        # trigger a proper re-verdict.  Non-major symbols remain blocked because
+        # the rollback verdict still warrants caution outside the core universe.
+        # ------------------------------------------------------------------
+        live_snapshot = dict(live_evidence_rejudge.get("current_snapshot", {}) or {})
+        snap_closed_trades = int(live_snapshot.get("closed_trade_count", 0) or 0)
+        snap_live_orders = int(live_snapshot.get("live_order_count", 0) or 0)
+        _is_evidence_deadlocked = (
+            effective_verdict == "rollback"
+            and rejudge_status in {"waiting", "blocked"}
+            and snap_closed_trades == 0
+            and snap_live_orders == 0
+            and is_major_symbol
+        )
+        if _is_evidence_deadlocked:
+            logger.warning(
+                "[POLICY_DEADLOCK_DETECTED] symbol=%s verdict=%s rejudge_status=%s "
+                "snap_closed_trades=%d snap_live_orders=%d — "
+                "rollback verdict with zero live evidence on a major symbol. "
+                "Allowing bootstrap entry to break the deadlock (size will be capped). "
+                "If this was caused by contaminated inherited positions, check "
+                "closed_trades.jsonl for exit_reason=MANUAL_CLOSE_SYNCED entries "
+                "with entry_policy_bucket_available=false.",
+                decision.symbol,
+                effective_verdict,
+                rejudge_status,
+                snap_closed_trades,
+                snap_live_orders,
+            )
+
         rejection_reasons: list[str] = []
         if lifecycle_action in {"rollback", "hold", "re_review"}:
             rejection_reasons.append(f"SYMBOL_LIFECYCLE_{lifecycle_action.upper()}")
@@ -1129,11 +1173,11 @@ class LivePaperSession:
             rejection_reasons.append("POLICY_BUCKET_OBSERVE_ONLY")
         elif not bool(runtime_universe_row.get("allow_bootstrap", True)):
             rejection_reasons.append("POLICY_BUCKET_BOOTSTRAP_EXCLUDED")
-        if effective_verdict == "rollback":
+        if effective_verdict == "rollback" and not _is_evidence_deadlocked:
             rejection_reasons.append("EXECUTIVE_OPERATING_VERDICT_ROLLBACK")
         elif effective_verdict in {"tighten", "rebuild_evidence"} and not is_major_symbol:
             rejection_reasons.append("EXECUTIVE_MAJORS_ONLY_CONSERVATIVE_GATE")
-        if effective_verdict in {"rollback", "tighten", "rebuild_evidence"} and rejudge_status in {"waiting", "blocked"}:
+        if effective_verdict in {"rollback", "tighten", "rebuild_evidence"} and rejudge_status in {"waiting", "blocked"} and not _is_evidence_deadlocked:
             rejection_reasons.append(f"LIVE_EVIDENCE_REJUDGE_{rejudge_status.upper()}")
         if (
             str(auto_mode.get("mode", "normal") or "normal") == "tighter"
@@ -1158,6 +1202,31 @@ class LivePaperSession:
                 order_intent_notional_usd=0.0,
                 stop_distance_bps=0.0,
                 rejection_reasons=tuple(sorted(set(decision.rejection_reasons + tuple(rejection_reasons)))),
+            )
+        # Deadlock bootstrap: pass the decision through but cap size at 50% so
+        # the session can accumulate real evidence without overexposing.
+        if _is_evidence_deadlocked:
+            base_risk = float(self.runtime.paper_service.settings.risk.per_trade_equity_risk)
+            effective_risk = self._effective_per_trade_equity_risk()
+            risk_scale = min(max(effective_risk / base_risk, 0.0), 0.5) if base_risk > 0.0 else 0.5
+            scaled_notional = round(decision.order_intent_notional_usd * risk_scale, 6)
+            if scaled_notional <= 0.0:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(sorted(set(
+                        decision.rejection_reasons + ("DEADLOCK_BOOTSTRAP_ZERO_SCALED_SIZE",)
+                    ))),
+                )
+            return replace(
+                decision,
+                order_intent_notional_usd=scaled_notional,
+                rejection_reasons=tuple(sorted(set(
+                    decision.rejection_reasons + ("DEADLOCK_BOOTSTRAP_SIZE_CAPPED",)
+                ))),
             )
         if effective_verdict not in {"tighten", "rebuild_evidence"}:
             return decision
