@@ -2063,7 +2063,7 @@ class LivePaperSession:
             reference_price=reference_price,
             extra_spot_available_balance_usd=amount if target_market == "spot" else 0.0,
             extra_spot_transfer_asset=transfer_asset if target_market == "spot" else "",
-            extra_futures_execution_balance_usd=amount if target_market == "futures" and transfer_asset == "USDT" else 0.0,
+            extra_futures_execution_balance_usd=amount if target_market == "futures" else 0.0,
         )
 
     def _normalize_live_position_side(self, position: dict[str, Any]) -> str:
