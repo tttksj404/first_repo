@@ -274,8 +274,8 @@ def run_live_paper_daemon(
                     base_dir=output_base_dir,
                     output_path=cost_calibration_path,
                 )
-            except Exception:
-                pass
+            except Exception as _cost_cal_exc:
+                print(f"[daemon] cost calibration refresh failed (non-fatal, using cached/defaults): {_cost_cal_exc}")
         store = seed_market_store_from_rest(
             client=rest_client,
             symbols=settings.universe,

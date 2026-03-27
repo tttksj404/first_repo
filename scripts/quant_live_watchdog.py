@@ -8,6 +8,7 @@ import signal
 import subprocess
 import sys
 import time
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +39,15 @@ class QuantLiveWatchdog:
             0,
         )
         self.startup_grace_seconds = max(int(os.environ.get("QUANT_LIVE_STARTUP_GRACE_SECONDS", "120")), 0)
+        # Circuit breaker: pause watchdog restarts after too many in a short window
+        self.max_restarts_per_window = max(int(os.environ.get("QUANT_WATCHDOG_MAX_RESTARTS_PER_WINDOW", "5")), 1)
+        self.restart_window_seconds = max(int(os.environ.get("QUANT_WATCHDOG_RESTART_WINDOW_SECONDS", "600")), 60)
+        self.circuit_breaker_pause_seconds = max(int(os.environ.get("QUANT_WATCHDOG_CIRCUIT_BREAKER_PAUSE_SECONDS", "900")), 60)
+        self._restart_times: deque[float] = deque()
+        self._circuit_broken_until: float = 0.0
+        # Log rotation: rotate supervisor_log at this size (bytes), keep N backups
+        self.log_max_bytes = max(int(os.environ.get("QUANT_WATCHDOG_LOG_MAX_BYTES", str(50 * 1024 * 1024))), 1024 * 1024)
+        self.log_backup_count = max(int(os.environ.get("QUANT_WATCHDOG_LOG_BACKUP_COUNT", "5")), 1)
         self.python_bin = self._resolve_python_bin()
         self.log_dir = self.output_base
         self.supervisor_log = self.log_dir / "live_supervisor.log"
@@ -57,8 +67,27 @@ class QuantLiveWatchdog:
                 return str(candidate)
         raise RuntimeError("python interpreter unavailable for watchdog restarts")
 
+    def _rotate_log_if_needed(self) -> None:
+        try:
+            if not self.supervisor_log.exists():
+                return
+            if self.supervisor_log.stat().st_size < self.log_max_bytes:
+                return
+            # Rotate: shift .1 → .2 → ... → .N (drop oldest), rename current → .1
+            for i in range(self.log_backup_count - 1, 0, -1):
+                src = self.supervisor_log.with_suffix(f".log.{i}" if i > 0 else "")
+                if i == 1:
+                    src = Path(str(self.supervisor_log) + ".1")
+                dst = Path(str(self.supervisor_log) + f".{i + 1}")
+                if src.exists():
+                    src.rename(dst)
+            self.supervisor_log.rename(Path(str(self.supervisor_log) + ".1"))
+        except OSError:
+            pass  # rotation failure is non-fatal
+
     def log(self, message: str) -> None:
         self.log_dir.mkdir(parents=True, exist_ok=True)
+        self._rotate_log_if_needed()
         with self.supervisor_log.open("a", encoding="utf-8") as handle:
             handle.write(f"[WATCHDOG] {message} at {time.strftime('%Y-%m-%d %H:%M:%S %Z')}\n")
 
@@ -169,15 +198,41 @@ class QuantLiveWatchdog:
             return False
         return bool(proc.stdout.strip())
 
+    def _check_circuit_breaker(self) -> bool:
+        """Return True if circuit is broken (too many recent restarts). Prune stale times."""
+        now = time.time()
+        # If currently paused, check if pause expired
+        if self._circuit_broken_until > now:
+            remaining = int(self._circuit_broken_until - now)
+            self.log(f"circuit breaker active; pausing restarts for {remaining}s more")
+            return True
+        # Prune times outside the window
+        cutoff = now - self.restart_window_seconds
+        while self._restart_times and self._restart_times[0] < cutoff:
+            self._restart_times.popleft()
+        if len(self._restart_times) >= self.max_restarts_per_window:
+            self._circuit_broken_until = now + self.circuit_breaker_pause_seconds
+            self.log(
+                f"circuit breaker triggered: {len(self._restart_times)} restarts in "
+                f"{self.restart_window_seconds}s window; pausing for {self.circuit_breaker_pause_seconds}s"
+            )
+            return True
+        return False
+
     def restart_supervisor(self) -> None:
+        if self._check_circuit_breaker():
+            return
+
         env = os.environ.copy()
         env["PATH"] = "/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         env["PYTHON_BIN"] = self.python_bin
         env["QUANT_TELEGRAM_NOTIFICATIONS"] = env.get("QUANT_TELEGRAM_NOTIFICATIONS", "0")
         env["QUANT_BYPASS_POLICY_GUARDRAILS"] = env.get("QUANT_BYPASS_POLICY_GUARDRAILS", "1")
 
+        self._restart_times.append(time.time())
         self.log(
-            f"restarting supervisor python_bin={self.python_bin} run_script={self.run_supervisor_script} pwd={self.repo_root}"
+            f"restarting supervisor python_bin={self.python_bin} run_script={self.run_supervisor_script} "
+            f"pwd={self.repo_root} (restart #{len(self._restart_times)} in window)"
         )
         with self.supervisor_log.open("ab") as handle:
             subprocess.Popen(

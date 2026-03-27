@@ -951,11 +951,35 @@ class BitgetRestClient:
         context = None
         if self.allow_insecure_ssl:
             context = ssl._create_unverified_context()
-        try:
-            with urlopen(request, timeout=10, context=context) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
-        except URLError as exc:
-            raise RuntimeError(_transport_error_message(request=request, exc=exc)) from exc
+
+        _RETRYABLE_5XX = {500, 502, 503, 504}
+        _BACKOFF_DELAYS = (2.0, 4.0, 8.0)  # up to 3 retries for 5xx/transport
+
+        last_exc: Exception | None = None
+        for attempt in range(4):  # attempt 0 + up to 3 retries
+            try:
+                with urlopen(request, timeout=15, context=context) as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                if exc.code == 429:
+                    # Rate limited: wait 65s then retry (up to 2 times)
+                    if attempt < 2:
+                        time.sleep(65.0)
+                        last_exc = RuntimeError(f"Bitget HTTP 429 (rate limited): {body}")
+                        continue
+                    raise RuntimeError(f"Bitget HTTP 429 (rate limited, exhausted retries): {body}") from exc
+                if exc.code in _RETRYABLE_5XX:
+                    if attempt < len(_BACKOFF_DELAYS):
+                        time.sleep(_BACKOFF_DELAYS[attempt])
+                        last_exc = RuntimeError(f"Bitget HTTP {exc.code}: {body}")
+                        continue
+                raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
+            except (URLError, socket.timeout, TimeoutError, OSError) as exc:
+                if attempt < len(_BACKOFF_DELAYS):
+                    time.sleep(_BACKOFF_DELAYS[attempt])
+                    last_exc = RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error: {exc}")
+                    continue
+                raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
+
+        raise last_exc or RuntimeError("Bitget request failed (exhausted retries)")
