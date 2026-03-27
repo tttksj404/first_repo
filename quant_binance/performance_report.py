@@ -6,7 +6,15 @@ from math import floor
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from quant_binance.closed_trade_metrics import aggregate_closed_trades, load_closed_trades_jsonl
+from quant_binance.closed_trade_metrics import (
+    aggregate_closed_trades,
+    filter_inherited_trades,
+    load_closed_trades_jsonl,
+)
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -81,7 +89,17 @@ def _score_bucket_label(score: float) -> str:
 def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerformanceReport:
     root = Path(run_dir)
     summary_path = root / "summary.json"
-    closed_trades = load_closed_trades_jsonl(root / "logs" / "closed_trades.jsonl")
+    _raw_closed_trades = load_closed_trades_jsonl(root / "logs" / "closed_trades.jsonl")
+    closed_trades, _inherited = filter_inherited_trades(_raw_closed_trades)
+    if _inherited:
+        logger.warning(
+            "[POLICY_VALIDATION_CONTAMINATION] %d inherited manual-close trade(s) excluded "
+            "from policy validation — these positions were entered in a prior session and "
+            "closed via MANUAL_CLOSE_SYNCED, not by the current strategy. "
+            "Symbols: %s. Excluding to prevent false rollback verdict.",
+            len(_inherited),
+            sorted({str(t.get("symbol", "?")) for t in _inherited}),
+        )
     decisions = load_closed_trades_jsonl(root / "logs" / "decisions.jsonl")
     closed_trade_metrics = aggregate_closed_trades(closed_trades)
 
