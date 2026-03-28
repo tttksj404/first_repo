@@ -36,7 +36,9 @@ class OnlineEdgeLearner:
                 else None
             )
             if realized_bps is None:
-                realized_bps = decision.gross_expected_edge_bps
+                # Skip: do NOT inject prediction as realized value.
+                # Real observations come from ingest_closed_trade() instead.
+                continue
             self.lookup.add_observation(
                 symbol=decision.symbol,
                 mode=decision.final_mode,
@@ -46,6 +48,27 @@ class OnlineEdgeLearner:
             )
             count += 1
         return count
+
+    def ingest_closed_trade(
+        self,
+        *,
+        symbol: str,
+        mode: str,
+        side: str,
+        entry_predictability_score: float,
+        realized_return_bps: float,
+    ) -> None:
+        """Feed actual realized return from a closed trade into the edge lookup."""
+        if mode not in {"spot", "futures"}:
+            return
+        trend_direction = 1 if side == "long" else -1
+        self.lookup.add_observation(
+            symbol=symbol,
+            mode=mode,
+            predictability_score=entry_predictability_score,
+            trend_direction=trend_direction,
+            forward_return_bps=realized_return_bps,
+        )
 
     def export(self, path: str | Path) -> LearningUpdate:
         output_path = Path(path)
@@ -68,6 +91,7 @@ class OnlineEdgeLearner:
                 {
                     "observation_count": observation_count,
                     "symbols": symbol_rows,
+                    "diagnostics": self.lookup.diagnostics(),
                 },
                 indent=2,
                 sort_keys=True,

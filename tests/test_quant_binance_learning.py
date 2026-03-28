@@ -67,14 +67,43 @@ class QuantBinanceLearningTests(unittest.TestCase):
             make_decision("d2", "BTCUSDT", "futures", 12.0),
             make_decision("d3", "ETHUSDT", "spot", 10.0),
         )
-        count = learner.ingest_decisions(decisions)
+        # Provide realized returns via override (simulates actual trade data)
+        overrides = {"d1": 24.0, "d2": 24.0, "d3": 8.0}
+        count = learner.ingest_decisions(decisions, realized_return_override_bps=overrides)
         self.assertEqual(count, 3)
         update = learner.export(self.edge_path)
         self.assertEqual(update.observation_count, 3)
         payload = json.loads(self.edge_path.read_text(encoding="utf-8"))
         self.assertIn("BTCUSDT", payload["symbols"])
+        self.assertIn("diagnostics", payload)
         btc_rows = payload["symbols"]["BTCUSDT"]
         self.assertEqual(btc_rows[0]["median_bps"], 24.0)
+
+    def test_ingest_decisions_skips_without_realized(self) -> None:
+        learner = OnlineEdgeLearner(min_observations=1)
+        decisions = (
+            make_decision("d1", "BTCUSDT", "futures", 14.0),
+            make_decision("d2", "BTCUSDT", "futures", 12.0),
+        )
+        # Without override, predictions should NOT be injected as realized
+        count = learner.ingest_decisions(decisions)
+        self.assertEqual(count, 0)  # all skipped
+        self.assertEqual(len(learner.lookup._symbol_buckets), 0)
+
+    def test_ingest_closed_trade_feeds_real_data(self) -> None:
+        learner = OnlineEdgeLearner(min_observations=1)
+        learner.ingest_closed_trade(
+            symbol="BTCUSDT",
+            mode="futures",
+            side="long",
+            entry_predictability_score=78.0,
+            realized_return_bps=15.5,
+        )
+        edge = learner.lookup.expected_edge_bps(
+            symbol="BTCUSDT", mode="futures",
+            predictability_score=78.0, trend_direction=1,
+        )
+        self.assertAlmostEqual(edge, 15.5)
 
 
 if __name__ == "__main__":
