@@ -182,8 +182,8 @@ class DecisionLiveOrderAdapter:
         try:
             info = getter(market=market)
         except Exception:
-            cache[symbol] = {}
-            return cache[symbol]
+            # Do NOT cache on failure — allow retry on next call
+            return {}
         for row in info.get("symbols", []):
             row_symbol = str(row.get("symbol", ""))
             if not row_symbol:
@@ -430,16 +430,17 @@ class DecisionLiveOrderAdapter:
             if not self._uses_spot_quote_notional(decision):
                 return ()
             size = f"{quantity:.8f}"
+            spot_symbol = self._execution_symbol(decision)
             return (
                 (
                     "spot",
                     {
-                        "symbol": execution_symbol,
+                        "symbol": spot_symbol,
                         "side": "sell",
                         "triggerPrice": self.format_trigger_price(
                             value=take_profit,
                             market="spot",
-                            symbol=self._execution_symbol(decision),
+                            symbol=spot_symbol,
                         ),
                         "triggerType": "market_price",
                         "orderType": "market",
@@ -451,12 +452,12 @@ class DecisionLiveOrderAdapter:
                 (
                     "spot",
                     {
-                        "symbol": execution_symbol,
+                        "symbol": spot_symbol,
                         "side": "sell",
                         "triggerPrice": self.format_trigger_price(
                             value=stop_loss,
                             market="spot",
-                            symbol=self._execution_symbol(decision),
+                            symbol=spot_symbol,
                         ),
                         "triggerType": "market_price",
                         "orderType": "market",
