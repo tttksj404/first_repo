@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 
 SSL_CONTEXT = ssl._create_unverified_context()
 HTTP_TIMEOUT_SECONDS = 20
+FEAR_GREED_API_URL = "https://api.alternative.me/fng/?limit=1&format=json"
 SEOUL = ZoneInfo("Asia/Seoul")
 GOOGLE_NEWS_TEMPLATE = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
 DEFAULT_QUERIES: tuple[tuple[str, str], ...] = (
@@ -138,6 +139,18 @@ class RefreshDecision:
 def _fetch_text(url: str) -> str:
     with urlopen(url, timeout=HTTP_TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
         return response.read().decode("utf-8", errors="replace")
+
+
+def fetch_fear_greed_index(*, fetcher=_fetch_text) -> tuple[int, str]:
+    """Fetch Crypto Fear & Greed Index. Returns (value 0-100, classification).
+    Defaults to (50, "Neutral") on any failure."""
+    try:
+        raw = fetcher(FEAR_GREED_API_URL)
+        payload = json.loads(raw)
+        entry = payload["data"][0]
+        return int(entry["value"]), str(entry["value_classification"])
+    except Exception:
+        return 50, "Neutral"
 
 
 def _parse_pub_date(raw: str) -> datetime | None:
@@ -334,6 +347,7 @@ def build_signal(
     next_scheduled_refresh_at: datetime,
     headlines: tuple[NewsHeadline, ...],
     official_events: tuple[dict[str, object], ...],
+    fear_greed: tuple[int, str] = (50, "Neutral"),
 ) -> NewsMacroSignal:
     bullish = sum(item.bullish_score for item in headlines)
     bearish = sum(item.bearish_score for item in headlines)
@@ -415,6 +429,8 @@ def build_signal(
         "news_majors_only_bias": 1.0 if majors_bias == "majors_only" else 0.0,
         "directional_bearish_score": round(directional_bearish_score, 6),
         "execution_risk_score": round(execution_risk_score, 6),
+        "fear_greed_index": float(fear_greed[0]),
+        "fear_greed_category": fear_greed[1],
     }
 
     return NewsMacroSignal(
@@ -470,6 +486,7 @@ def write_news_macro_signal(
     ).hexdigest()
 
     if decision.should_refresh:
+        fear_greed = fetch_fear_greed_index(fetcher=fetcher)
         signal = build_signal(
             now=now,
             refresh_reason=decision.reason,
@@ -477,6 +494,7 @@ def write_news_macro_signal(
             next_scheduled_refresh_at=decision.next_scheduled_refresh_at,
             headlines=headlines,
             official_events=official_events,
+            fear_greed=fear_greed,
         )
         payload = signal.as_dict()
         payload["headline_hash"] = headline_hash
