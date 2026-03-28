@@ -2351,6 +2351,15 @@ class LivePaperSession:
             realized_pnl_usd=float(trade["realized_pnl_usd_estimate"]),
         )
         self._release_portfolio_capacity(exit_notional_usd=exit_price * quantity_closed)
+        # Feed actual realized return back to online learner
+        if self.learner is not None:
+            self.learner.ingest_closed_trade(
+                symbol=position.symbol,
+                mode=position.market,
+                side=position.side,
+                entry_predictability_score=position.entry_predictability_score,
+                realized_return_bps=return_bps,
+            )
         if self.log_store is not None:
             self.log_store.append("closed_trades", trade)
         self._send_trade_alert(trade)
