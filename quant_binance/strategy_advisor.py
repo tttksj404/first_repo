@@ -11,7 +11,7 @@ from typing import Any
 
 from quant_binance.execution_quality_report import build_execution_quality_report
 from quant_binance.macro_event_calendar import OfficialMacroEvent, fetch_official_macro_events
-from quant_binance.overlays import load_macro_inputs
+from quant_binance.overlays import MacroInputs, load_macro_inputs
 from quant_binance.performance_report import build_runtime_performance_report
 from quant_binance.telegram_notify import send_telegram_message
 from quant_binance.validation_report import build_weekly_validation_report
@@ -61,6 +61,8 @@ class StrategyAdvisorContext:
     macro_event_windows: tuple[MacroEventWindow, ...]
     official_macro_events: tuple[OfficialMacroEvent, ...]
     reference_documents: tuple[ReferenceDocument, ...]
+    bull_case_inputs: dict[str, Any] | None = None
+    bear_case_inputs: dict[str, Any] | None = None
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -80,6 +82,8 @@ class StrategyAdvisorContext:
             "macro_event_windows": [item.as_dict() for item in self.macro_event_windows],
             "official_macro_events": [item.as_dict() for item in self.official_macro_events],
             "reference_documents": [item.as_dict() for item in self.reference_documents],
+            "bull_case_inputs": self.bull_case_inputs,
+            "bear_case_inputs": self.bear_case_inputs,
         }
 
 
@@ -202,6 +206,44 @@ def load_reference_documents(*, max_chars_per_file: int = 6000) -> tuple[Referen
     return tuple(rows)
 
 
+def _build_bull_case(macro_inputs: MacroInputs | None) -> dict[str, Any]:
+    points: list[str] = []
+    if macro_inputs is None:
+        return {"points": points}
+    fgi = macro_inputs.fear_greed_index
+    if fgi <= 30:
+        points.append(f"Fear & Greed={int(fgi)} ({macro_inputs.fear_greed_category}) -> 역발상 강세 시그널")
+    if macro_inputs.news_bullish_score > macro_inputs.news_bearish_score:
+        points.append(f"뉴스 감성 순강세 (bullish={macro_inputs.news_bullish_score:.2f} > bearish={macro_inputs.news_bearish_score:.2f})")
+    if macro_inputs.fed_liquidity_score >= 0.6:
+        points.append(f"Fed 유동성 우호적 ({macro_inputs.fed_liquidity_score:.2f})")
+    if macro_inputs.policy_easing_score >= 0.5:
+        points.append(f"정책 완화 기조 ({macro_inputs.policy_easing_score:.2f})")
+    if macro_inputs.btc_safe_haven_score >= 0.6:
+        points.append(f"BTC 안전자산 수요 ({macro_inputs.btc_safe_haven_score:.2f})")
+    return {"points": points}
+
+
+def _build_bear_case(macro_inputs: MacroInputs | None) -> dict[str, Any]:
+    points: list[str] = []
+    if macro_inputs is None:
+        return {"points": points}
+    fgi = macro_inputs.fear_greed_index
+    if fgi >= 75:
+        points.append(f"Fear & Greed={int(fgi)} ({macro_inputs.fear_greed_category}) -> 역발상 약세 주의")
+    if macro_inputs.news_bearish_score > macro_inputs.news_bullish_score:
+        points.append(f"뉴스 감성 순약세 (bearish={macro_inputs.news_bearish_score:.2f} > bullish={macro_inputs.news_bullish_score:.2f})")
+    if macro_inputs.event_risk_score >= 0.5:
+        points.append(f"이벤트 리스크 상승 ({macro_inputs.event_risk_score:.2f})")
+    if macro_inputs.directional_bearish_score >= 0.4:
+        points.append(f"방향성 약세 압력 ({macro_inputs.directional_bearish_score:.2f})")
+    if macro_inputs.news_uncertainty_score >= 0.5:
+        points.append(f"불확실성 높음 ({macro_inputs.news_uncertainty_score:.2f})")
+    if macro_inputs.official_high_impact_window >= 0.5:
+        points.append("고영향 거시 이벤트 윈도우 활성")
+    return {"points": points}
+
+
 def build_strategy_advisor_context(
     *,
     base_dir: str | Path = "quant_runtime",
@@ -241,6 +283,8 @@ def build_strategy_advisor_context(
         macro_event_windows=load_macro_event_windows(),
         official_macro_events=fetch_official_macro_events(),
         reference_documents=load_reference_documents(),
+        bull_case_inputs=_build_bull_case(macro_inputs),
+        bear_case_inputs=_build_bear_case(macro_inputs),
     )
 
 
@@ -276,7 +320,7 @@ def build_strategy_advisor_prompt(
         "반드시 한국어로만 답하고, 수익성 중심으로 분석하세요.\n"
         "중요: 전략을 자동 적용하라고 지시하지 말고 제안만 하세요.\n"
         f"읽어야 할 핵심 컨텍스트 파일: {path}\n"
-        "이 파일에는 최신 런타임 상태, 성과 리포트, 실행 품질, 현재 override, 거시 입력, 거시 이벤트 윈도우, 공식 거시 일정, 참고문서가 들어 있습니다.\n"
+        "이 파일에는 최신 런타임 상태, 성과 리포트, 실행 품질, 현재 override, 거시 입력(Fear & Greed Index 포함), 거시 이벤트 윈도우, 공식 거시 일정, 강세/약세 논거 입력, 참고문서가 들어 있습니다.\n"
         "참고문서가 있으면 그 내용도 함께 반영하세요.\n"
         "\n"
         "리포트 작성 원칙:\n"
@@ -295,6 +339,10 @@ def build_strategy_advisor_prompt(
         "6. 그 이후 기간 전략 제안\n"
         "7. 지금 당장 건드리지 말아야 할 것\n"
         "8. 다음 개선 후보 3개\n"
+        "9. 강세/약세 논거\n"
+        "   - 강세 근거 (bull case): Fear & Greed 지수, 뉴스 감성, 유동성, 기술적 지표 등에서 상승 논거\n"
+        "   - 약세 근거 (bear case): Fear & Greed 지수, 이벤트 리스크, 약세 압력 등에서 하락 논거\n"
+        "   - 현재 편향(net bias)과 확신도(confidence)를 명시할 것\n"
         "\n"
         "형식:\n"
         "- 제목 포함 한국어 전략 리포트\n"

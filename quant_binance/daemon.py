@@ -313,7 +313,7 @@ def run_live_paper_daemon(
             features = extractor.enrich_feature_vector(state=state, features=features)
             features = apply_macro_overlay(features, macro_inputs)
             features = apply_altcoin_overlay(features, symbol=symbol, altcoin_inputs=altcoin_inputs)
-            features = apply_sentiment_overlay(features)
+            features = apply_sentiment_overlay(features, macro_inputs)
             spot_features = apply_score_and_costs(features, settings, "spot")
             if observe_only_reasons(spot_features, settings, symbol):
                 observe_only_symbols.append(symbol)

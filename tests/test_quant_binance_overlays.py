@@ -208,5 +208,67 @@ class QuantBinanceOverlayTests(unittest.TestCase):
         self.assertIn(enriched.macro_trade_restraint, {"risk_off_reduce", "halt_high_impact_window", "pre_event_reduce"})
 
 
+    def _neutral_features(self) -> FeatureVector:
+        """Neutral-ish features for Fear & Greed tests."""
+        return FeatureVector(
+            spread_bps_norm=0.5, probe_slippage_bps_norm=0.5, depth_10bps_norm=0.5,
+            ret_rank_1h=0.5, ret_rank_4h=0.5, breakout_norm=0.5, ema_stack_score=0.5,
+            vol_z_5m_norm=0.5, vol_z_1h_norm=0.5, taker_imbalance_norm=0.5,
+            book_stability_norm=0.5, realized_vol_1h_norm=0.4, realized_vol_4h_norm=0.4,
+            vol_shock_norm=0.3, funding_abs_percentile=0.3, oi_surge_percentile=0.3,
+            basis_stretch_percentile=0.3, regime_alignment=0.5, trend_direction=0,
+            trend_strength=0.3, volume_confirmation=0.4, liquidity_score=0.5,
+            volatility_penalty=0.35, overheat_penalty=0.3, gross_expected_edge_bps=10.0,
+            estimated_round_trip_cost_bps=5.0, support_alignment=0.4, resistance_penalty=0.4,
+        )
+
+    def _macro_with_fgi(self, fgi: float, category: str = "Neutral") -> MacroInputs:
+        return MacroInputs(
+            truflation_yoy=2.2, us10y_yield=4.2, oil_momentum_pct=2.0,
+            tga_drain_score=0.4, fed_balance_sheet_30d_pct=0.1,
+            mmf_30d_pct=-0.05, labor_stress_score=0.35,
+            fear_greed_index=fgi, fear_greed_category=category,
+        )
+
+    def test_sentiment_overlay_extreme_fear_boosts(self) -> None:
+        features = self._neutral_features()
+        baseline = apply_sentiment_overlay(features)
+        boosted = apply_sentiment_overlay(features, self._macro_with_fgi(10, "Extreme Fear"))
+        self.assertGreater(boosted.sentiment_support_score, baseline.sentiment_support_score)
+
+    def test_sentiment_overlay_extreme_greed_penalizes(self) -> None:
+        features = self._neutral_features()
+        baseline = apply_sentiment_overlay(features)
+        penalized = apply_sentiment_overlay(features, self._macro_with_fgi(90, "Extreme Greed"))
+        self.assertLess(penalized.sentiment_support_score, baseline.sentiment_support_score)
+
+    def test_sentiment_overlay_extreme_greed_forces_caution(self) -> None:
+        # Strong uptrend features that would normally be risk_on
+        features = FeatureVector(
+            spread_bps_norm=0.5, probe_slippage_bps_norm=0.5, depth_10bps_norm=0.5,
+            ret_rank_1h=0.8, ret_rank_4h=0.8, breakout_norm=0.8, ema_stack_score=1.0,
+            vol_z_5m_norm=0.7, vol_z_1h_norm=0.7, taker_imbalance_norm=0.7,
+            book_stability_norm=0.8, realized_vol_1h_norm=0.3, realized_vol_4h_norm=0.3,
+            vol_shock_norm=0.2, funding_abs_percentile=0.2, oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.2, regime_alignment=1.0, trend_direction=1,
+            trend_strength=0.8, volume_confirmation=0.7, liquidity_score=0.7,
+            volatility_penalty=0.3, overheat_penalty=0.2, gross_expected_edge_bps=30.0,
+            estimated_round_trip_cost_bps=10.0, support_alignment=0.5, resistance_penalty=0.3,
+        )
+        result = apply_sentiment_overlay(features, self._macro_with_fgi(90, "Extreme Greed"))
+        self.assertEqual(result.sentiment_regime, "caution")
+
+    def test_sentiment_overlay_neutral_fgi_no_change(self) -> None:
+        features = self._neutral_features()
+        baseline = apply_sentiment_overlay(features)
+        with_neutral = apply_sentiment_overlay(features, self._macro_with_fgi(50, "Neutral"))
+        self.assertAlmostEqual(baseline.sentiment_support_score, with_neutral.sentiment_support_score, places=5)
+
+    def test_sentiment_overlay_backward_compatible(self) -> None:
+        features = self._neutral_features()
+        result = apply_sentiment_overlay(features)  # no macro_inputs
+        self.assertIn(result.sentiment_regime, {"bottoming", "risk_on", "caution", "neutral"})
+
+
 if __name__ == "__main__":
     unittest.main()
