@@ -79,6 +79,7 @@ def position_notional_and_stop_bps(
     stop_distance_bps = max(
         settings.sizing.atr_multiple_for_stop * atr_14_1h_bps,
         settings.sizing.stop_floor_bps,
+        1.0,  # absolute minimum: 1 bps to prevent division by zero
     )
     risk_dollars = equity_usd * settings.risk.per_trade_equity_risk
     adjusted_size_multiplier = max(size_multiplier, 0.0)

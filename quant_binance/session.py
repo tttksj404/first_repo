@@ -645,6 +645,19 @@ class LivePaperSession:
         write_runtime_overview(overview_path, overview)
         if self.learner is not None and self.learner_output_path is not None:
             self.learner.export(self.learner_output_path)
+        # Window in-memory lists to prevent unbounded growth in long-running sessions.
+        # Full history is already persisted to JSONL log files.
+        _MAX_DECISIONS = 500
+        _MAX_ORDERS = 200
+        _MAX_ALERTS = 100
+        if len(self.decisions) > _MAX_DECISIONS:
+            self.decisions = self.decisions[-_MAX_DECISIONS:]
+        if len(self.tested_orders) > _MAX_ORDERS:
+            self.tested_orders = self.tested_orders[-_MAX_ORDERS:]
+        if len(self.live_orders) > _MAX_ORDERS:
+            self.live_orders = self.live_orders[-_MAX_ORDERS:]
+        if len(self.telegram_alerts) > _MAX_ALERTS:
+            self.telegram_alerts = self.telegram_alerts[-_MAX_ALERTS:]
         return summary
 
     def _self_healing_mismatch_snapshot(self) -> tuple[bool, dict[str, list[str]]]:
@@ -3626,7 +3639,8 @@ class LivePaperSession:
             return
         try:
             pending = self.rest_client.get_futures_pending_plan_orders(symbol=symbol, plan_type="profit_loss")
-        except Exception:
+        except Exception as _plan_exc:
+            print(f"[session] plan order query failed for {symbol} (non-fatal, skipping cleanup): {_plan_exc}")
             return
         rows = pending.get("orders", []) if isinstance(pending, dict) else []
         relevant = [
@@ -4349,13 +4363,14 @@ class LivePaperSession:
         price: float,
     ) -> None:
         exposure = self.runtime.paper_service.settings.futures_exposure
-        if decision.order_intent_notional_usd <= 0 or price <= 0:
+        if decision.order_intent_notional_usd <= 0 or price <= 0.01:
             return
         added_notional = decision.order_intent_notional_usd * max(exposure.pyramid_size_multiplier, 0.0)
         if added_notional <= 0.0:
             return
         added_quantity = added_notional / price
-        if added_quantity <= 0.0:
+        if added_quantity <= 0.0 or added_quantity > position.quantity_opened * 2.0:
+            # Guard: pyramid add should never exceed 2x original position
             return
         previous_quantity_opened = position.quantity_opened
         new_quantity_opened = previous_quantity_opened + added_quantity
