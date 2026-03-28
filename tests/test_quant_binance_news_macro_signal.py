@@ -158,5 +158,40 @@ class QuantBinanceNewsMacroSignalTests(unittest.TestCase):
 
 
 
+    def test_fetch_fear_greed_index_success(self) -> None:
+        from quant_binance.news_macro_signal import fetch_fear_greed_index
+
+        def mock_fetcher(_url: str) -> str:
+            return '{"name":"Fear and Greed Index","data":[{"value":"22","value_classification":"Extreme Fear","timestamp":"1711584000"}]}'
+
+        value, category = fetch_fear_greed_index(fetcher=mock_fetcher)
+        self.assertEqual(value, 22)
+        self.assertEqual(category, "Extreme Fear")
+
+    def test_fetch_fear_greed_index_failure_returns_default(self) -> None:
+        from quant_binance.news_macro_signal import fetch_fear_greed_index
+
+        def failing_fetcher(_url: str) -> str:
+            raise ConnectionError("network down")
+
+        value, category = fetch_fear_greed_index(fetcher=failing_fetcher)
+        self.assertEqual(value, 50)
+        self.assertEqual(category, "Neutral")
+
+    def test_build_signal_includes_fear_greed(self) -> None:
+        now = datetime(2026, 3, 28, 12, 0, tzinfo=UTC)
+        signal = build_signal(
+            now=now,
+            refresh_reason="test",
+            trigger_reasons=("TEST",),
+            next_scheduled_refresh_at=now,
+            headlines=(),
+            official_events=(),
+            fear_greed=(15, "Extreme Fear"),
+        )
+        self.assertEqual(signal.macro_inputs["fear_greed_index"], 15.0)
+        self.assertEqual(signal.macro_inputs["fear_greed_category"], "Extreme Fear")
+
+
 if __name__ == "__main__":
     unittest.main()

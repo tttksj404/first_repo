@@ -32,6 +32,8 @@ class MacroInputs:
     official_high_impact_window: float = 0.0
     directional_bearish_score: float = 0.0
     execution_risk_score: float = 0.0
+    fear_greed_index: float = 50.0
+    fear_greed_category: str = "Neutral"
 
 
 @dataclass(frozen=True)
@@ -227,7 +229,7 @@ def apply_macro_overlay(features: FeatureVector, macro_inputs: MacroInputs | Non
     )
 
 
-def apply_sentiment_overlay(features: FeatureVector) -> FeatureVector:
+def apply_sentiment_overlay(features: FeatureVector, macro_inputs: MacroInputs | None = None) -> FeatureVector:
     score = 0.0
     if features.trend_direction == 1 and features.volume_confirmation >= 0.60 and features.liquidity_score >= 0.60:
         score += 0.40
@@ -241,6 +243,15 @@ def apply_sentiment_overlay(features: FeatureVector) -> FeatureVector:
         score -= 0.30
 
     support_score = clamp(0.5 + score, 0.0, 1.0)
+
+    # Fear & Greed contrarian adjustment (max +0.12 / -0.10)
+    if macro_inputs is not None:
+        fgi = macro_inputs.fear_greed_index
+        if fgi <= 25.0:
+            support_score = clamp(support_score + 0.12 * (1.0 - fgi / 25.0), 0.0, 1.0)
+        elif fgi >= 75.0:
+            support_score = clamp(support_score - 0.10 * ((fgi - 75.0) / 25.0), 0.0, 1.0)
+
     if features.support_alignment >= 0.67 and features.overheat_penalty <= 0.35 and features.volatility_penalty < 0.55:
         regime = "bottoming"
     elif features.trend_direction == 1 and features.volume_confirmation >= 0.65 and features.liquidity_score >= 0.65 and features.overheat_penalty <= 0.35:
@@ -249,6 +260,10 @@ def apply_sentiment_overlay(features: FeatureVector) -> FeatureVector:
         regime = "caution"
     else:
         regime = "neutral"
+
+    # Extreme greed override: force caution regardless of technicals
+    if macro_inputs is not None and macro_inputs.fear_greed_index >= 85.0 and regime not in ("caution",):
+        regime = "caution"
 
     return FeatureVector(
         **{
