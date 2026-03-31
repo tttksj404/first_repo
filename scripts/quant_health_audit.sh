@@ -1,11 +1,13 @@
 #!/bin/bash
-# 코인 매매 프로그램 4시간 정기 전수조사
+# 코인 매매 프로그램 4시간 정기 전수조사 + 자동 수정
 # crontab: 17 */4 * * * /Users/tttksj/first_repo/scripts/quant_health_audit.sh >> /Users/tttksj/first_repo/quant_runtime/health_audit.log 2>&1
 
 set -euo pipefail
 REPO="/Users/tttksj/first_repo"
 RUNTIME="$REPO/quant_runtime"
 PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
+CLAUDE="/Users/tttksj/.local/bin/claude"
+AUDIT_RESULT_FILE="$RUNTIME/health_audit_latest.txt"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 
 echo "============================================"
@@ -177,11 +179,60 @@ echo ""
 echo "============================================"
 echo "[RESULT] CRITICAL=$CRITICALS WARNING=$WARNINGS"
 if [ "$CRITICALS" -gt 0 ]; then
-    echo "[ACTION] 즉시 확인 필요!"
+    echo "[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행"
 elif [ "$WARNINGS" -gt 2 ]; then
-    echo "[ACTION] 점검 권장"
+    echo "[ACTION] WARNING 다수 — Claude Code 자동 수정 실행"
 else
-    echo "[STATUS] 정상"
+    echo "[STATUS] 정상 — 수정 불필요"
 fi
 echo "============================================"
 echo ""
+
+# --- 6. Claude Code 자동 수정 ---
+if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -gt 2 ]; then
+    # audit 결과를 파일로 저장 (Claude에 전달용)
+    AUDIT_SUMMARY="health audit at $TIMESTAMP found CRITICAL=$CRITICALS WARNING=$WARNINGS."
+
+    # 프로세스 없으면 재시작 프롬프트
+    if [ "$PROCS" -lt 1 ]; then
+        AUDIT_SUMMARY="$AUDIT_SUMMARY Process dead: restart needed."
+    fi
+
+    # 로그 크기 문제
+    if [ -f "$RUNTIME/live_supervisor.log" ]; then
+        LOG_MB_CHECK=$(du -m "$RUNTIME/live_supervisor.log" | cut -f1)
+        if [ "$LOG_MB_CHECK" -gt 200 ]; then
+            AUDIT_SUMMARY="$AUDIT_SUMMARY supervisor.log=${LOG_MB_CHECK}MB (>200MB, needs rotation)."
+        fi
+    fi
+
+    echo "[CLAUDE] 자동 수정 시작: $AUDIT_SUMMARY"
+
+    # Claude Code 비대화형 실행 — 진단 + 수정 + 재검증
+    CLAUDE_PROMPT="코인 매매 프로그램 정기 health audit 결과:
+
+${AUDIT_SUMMARY}
+
+다음을 수행해줘:
+1. 위 문제의 근본 원인을 코드에서 찾아서 수정
+2. 프로세스가 죽었으면 재시작 (bash scripts/quant_run_live_orders.sh quant_runtime)
+3. supervisor.log 200MB 넘으면 수동 로테이션 (mv → .bak, 새 로그 시작)
+4. 수정 후 테스트 실행 (python3 -m unittest tests.test_quant_binance_learning tests.test_quant_binance_overlays -v)
+5. 문제 없으면 커밋
+6. 수정 결과를 $RUNTIME/health_audit_fix_result.txt 에 기록
+
+주의: 불필요한 변경 금지. 확실한 버그만 수정. 데몬은 watchdog이 관리하므로 kill 후 watchdog에 맡기거나 직접 재시작."
+
+    if [ -x "$CLAUDE" ]; then
+        echo "$CLAUDE_PROMPT" | timeout 600 "$CLAUDE" --dangerously-skip-permissions -p - --output-format text \
+            >> "$RUNTIME/health_audit_claude.log" 2>&1 &
+        CLAUDE_PID=$!
+        echo "[CLAUDE] PID=$CLAUDE_PID 로 백그라운드 실행 시작"
+    else
+        echo "[CLAUDE] claude CLI not found at $CLAUDE — 수동 확인 필요"
+    fi
+
+    # 재검증은 Claude가 완료 후 자체적으로 수행
+else
+    echo "[SKIP] 정상 상태 — Claude Code 실행 불필요"
+fi
