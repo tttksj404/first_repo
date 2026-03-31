@@ -177,8 +177,8 @@ echo "============================================"
 echo "[RESULT] CRITICAL=$CRITICALS WARNING=$WARNINGS"
 if [ "$CRITICALS" -gt 0 ]; then
     echo "[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행"
-elif [ "$WARNINGS" -gt 2 ]; then
-    echo "[ACTION] WARNING 다수 — Claude Code 자동 수정 실행"
+elif [ "$WARNINGS" -ge 1 ]; then
+    echo "[ACTION] WARNING 발견 — Claude Code 자동 수정 실행"
 else
     echo "[STATUS] 정상 — 수정 불필요"
 fi
@@ -186,7 +186,7 @@ echo "============================================"
 echo ""
 
 # --- 6. Claude Code 자동 수정 ---
-if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -gt 2 ]; then
+if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; then
     # audit 결과를 파일로 저장 (Claude에 전달용)
     AUDIT_SUMMARY="health audit at $TIMESTAMP found CRITICAL=$CRITICALS WARNING=$WARNINGS."
 
