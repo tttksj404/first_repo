@@ -44,6 +44,8 @@ class MarketStateStore:
         bucket = state.klines.setdefault(bar.interval, [])
         bucket.append(bar)
         state.last_update_time = bar.close_time
+        if bar.close_price > 0:
+            state.last_trade_price = bar.close_price
         return state
 
     def apply_mark_price(
