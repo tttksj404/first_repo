@@ -14,6 +14,7 @@ class MissingMarketStateError(KeyError):
 class MarketStateStore:
     def __init__(self) -> None:
         self._states: dict[str, SymbolMarketState] = {}
+        self._event_counter: int = 0
 
     def get(self, symbol: str) -> SymbolMarketState | None:
         return self._states.get(symbol)
@@ -41,13 +42,15 @@ class MarketStateStore:
 
     def apply_kline(self, bar: KlineBar) -> SymbolMarketState:
         state = self._require_state(bar.symbol)
-        if bar.interval not in state.klines:
-            from collections import deque
-            state.klines[bar.interval] = deque(maxlen=500)
-        state.klines[bar.interval].append(bar)
+        bucket = state.klines.setdefault(bar.interval, [])
+        bucket.append(bar)
         state.last_update_time = bar.close_time
         if bar.close_price > 0:
             state.last_trade_price = bar.close_price
+        # Periodic memory pruning (every 500 kline events)
+        self._event_counter += 1
+        if self._event_counter % 500 == 0:
+            state.prune_samples()
         return state
 
     def apply_mark_price(

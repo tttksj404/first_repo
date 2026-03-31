@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -47,12 +46,29 @@ class SymbolMarketState:
     open_interest: float
     basis_bps: float
     last_update_time: datetime
-    trades: deque[SpotTrade] = field(default_factory=lambda: deque(maxlen=500))
-    klines: dict[str, deque[KlineBar]] = field(default_factory=dict)
-    order_book_imbalance_samples: deque[float] = field(default_factory=lambda: deque(maxlen=1000))
-    funding_rate_samples: deque[float] = field(default_factory=lambda: deque(maxlen=500))
-    basis_bps_samples: deque[float] = field(default_factory=lambda: deque(maxlen=500))
-    open_interest_samples: deque[float] = field(default_factory=lambda: deque(maxlen=500))
+    trades: list[SpotTrade] = field(default_factory=list)
+    klines: dict[str, list[KlineBar]] = field(default_factory=dict)
+    order_book_imbalance_samples: list[float] = field(default_factory=list)
+    funding_rate_samples: list[float] = field(default_factory=list)
+    basis_bps_samples: list[float] = field(default_factory=list)
+    open_interest_samples: list[float] = field(default_factory=list)
+
+    # Memory bounds — trimmed in prune_samples()
+    _MAX_TRADES: int = field(default=500, repr=False)
+    _MAX_KLINES_PER_INTERVAL: int = field(default=500, repr=False)
+    _MAX_SAMPLES: int = field(default=1000, repr=False)
+
+    def prune_samples(self) -> None:
+        """Trim all unbounded lists to prevent memory leaks during long runs."""
+        if len(self.trades) > self._MAX_TRADES:
+            self.trades[:] = self.trades[-self._MAX_TRADES:]
+        for interval, bars in self.klines.items():
+            if len(bars) > self._MAX_KLINES_PER_INTERVAL:
+                self.klines[interval] = bars[-self._MAX_KLINES_PER_INTERVAL:]
+        for samples in (self.order_book_imbalance_samples, self.funding_rate_samples,
+                        self.basis_bps_samples, self.open_interest_samples):
+            if len(samples) > self._MAX_SAMPLES:
+                samples[:] = samples[-self._MAX_SAMPLES:]
 
     def freshness_ms(self, now: datetime) -> int:
         return int((now - self.last_update_time).total_seconds() * 1000)
