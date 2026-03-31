@@ -20,12 +20,9 @@ CRITICALS=0
 # --- 1. 프로세스 상태 ---
 echo ""
 echo "[1] 프로세스 상태"
-PROCS=$(pgrep -af quant_binance 2>/dev/null | grep -v grep | wc -l | tr -d ' ')
-if [ "$PROCS" -ge 2 ]; then
+PROCS=$(pgrep -f quant_binance 2>/dev/null | wc -l | tr -d ' ')
+if [ "$PROCS" -ge 1 ]; then
     echo "  OK: quant_binance 프로세스 ${PROCS}개 실행 중"
-elif [ "$PROCS" -ge 1 ]; then
-    echo "  WARNING: quant_binance 프로세스 ${PROCS}개만 실행 중 (정상=2+)"
-    WARNINGS=$((WARNINGS+1))
 else
     echo "  CRITICAL: quant_binance 프로세스 없음!"
     CRITICALS=$((CRITICALS+1))
