@@ -41,8 +41,10 @@ class MarketStateStore:
 
     def apply_kline(self, bar: KlineBar) -> SymbolMarketState:
         state = self._require_state(bar.symbol)
-        bucket = state.klines.setdefault(bar.interval, [])
-        bucket.append(bar)
+        if bar.interval not in state.klines:
+            from collections import deque
+            state.klines[bar.interval] = deque(maxlen=500)
+        state.klines[bar.interval].append(bar)
         state.last_update_time = bar.close_time
         if bar.close_price > 0:
             state.last_trade_price = bar.close_price
