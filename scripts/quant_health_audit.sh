@@ -1,13 +1,12 @@
 #!/bin/bash
-# 코인 매매 프로그램 4시간 정기 전수조사 + 자동 수정
-# crontab: 17 */4 * * * /Users/tttksj/first_repo/scripts/quant_health_audit.sh >> /Users/tttksj/first_repo/quant_runtime/health_audit.log 2>&1
+# 코인 매매 프로그램 정기 전수조사 + 자동 수정
+# crontab: 17 0,2,4,6,9,12,14,16,18 * * * ...
 
-set -euo pipefail
+set -uo pipefail
 REPO="/Users/tttksj/first_repo"
 RUNTIME="$REPO/quant_runtime"
 PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 CLAUDE="/Users/tttksj/.local/bin/claude"
-AUDIT_RESULT_FILE="$RUNTIME/health_audit_latest.txt"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 
 echo "============================================"
@@ -16,16 +15,30 @@ echo "============================================"
 
 WARNINGS=0
 CRITICALS=0
+ISSUES=""
 
-# --- 1. 프로세스 상태 ---
+warn() { echo "  WARNING: $1"; WARNINGS=$((WARNINGS+1)); ISSUES="$ISSUES [W] $1"; }
+crit() { echo "  CRITICAL: $1"; CRITICALS=$((CRITICALS+1)); ISSUES="$ISSUES [C] $1"; }
+
+# ============================================
+# 1. 프로세스 상태
+# ============================================
 echo ""
 echo "[1] 프로세스 상태"
+
 PROCS=$(pgrep -f quant_binance 2>/dev/null | wc -l | tr -d ' ')
 if [ "$PROCS" -ge 1 ]; then
-    echo "  OK: quant_binance 프로세스 ${PROCS}개 실행 중"
+    echo "  OK: quant_binance ${PROCS}개 실행 중"
 else
-    echo "  CRITICAL: quant_binance 프로세스 없음!"
-    CRITICALS=$((CRITICALS+1))
+    crit "quant_binance 프로세스 없음"
+fi
+
+# Watchdog 프로세스
+WD=$(pgrep -f "quant_live_watchdog.py" 2>/dev/null | wc -l | tr -d ' ')
+if [ "$WD" -ge 1 ]; then
+    echo "  OK: watchdog ${WD}개 실행 중"
+else
+    warn "watchdog 프로세스 없음 — 자동 재시작 보호 없음"
 fi
 
 # Health file
@@ -33,37 +46,74 @@ if [ -f "$RUNTIME/live_supervisor_health.json" ]; then
     STATUS=$($PYTHON -c "import json; d=json.load(open('$RUNTIME/live_supervisor_health.json')); print(d.get('status','unknown'))" 2>/dev/null || echo "parse_error")
     echo "  Health status: $STATUS"
     if [ "$STATUS" != "healthy" ]; then
-        echo "  WARNING: health status is $STATUS"
-        WARNINGS=$((WARNINGS+1))
+        warn "health status=$STATUS"
     fi
 else
-    echo "  WARNING: health file missing"
-    WARNINGS=$((WARNINGS+1))
+    warn "health file missing"
+fi
+
+# Health file 갱신 시간
+if [ -f "$RUNTIME/live_supervisor_health.json" ]; then
+    $PYTHON -c "
+import json, sys
+from datetime import datetime, timezone
+d = json.load(open('$RUNTIME/live_supervisor_health.json'))
+updated = d.get('updated_at','')
+if updated:
+    t = datetime.fromisoformat(updated)
+    age_min = (datetime.now(tz=timezone.utc) - t).total_seconds() / 60
+    print(f'  Health 갱신: {age_min:.0f}분 전')
+    if age_min > 30:
+        print(f'  WARNING: health 파일 {age_min:.0f}분 미갱신 — 데몬 stall 가능')
+        sys.exit(1)
+" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        warn "health 파일 30분 이상 미갱신"
+    fi
 fi
 
 # Recent errors in supervisor log
 if [ -f "$RUNTIME/live_supervisor.log" ]; then
     ERROR_COUNT=$(tail -200 "$RUNTIME/live_supervisor.log" | grep -ci "error\|traceback\|exception" 2>/dev/null; true)
     ERROR_COUNT=${ERROR_COUNT:-0}
-    echo "  Recent errors in log (last 200 lines): $ERROR_COUNT"
-    if [ "$ERROR_COUNT" -gt 10 ]; then
-        echo "  WARNING: high error rate in supervisor log"
-        WARNINGS=$((WARNINGS+1))
+    echo "  Recent errors (last 200 lines): $ERROR_COUNT"
+    if [ "$ERROR_COUNT" -gt 20 ]; then
+        crit "에러 폭발 ($ERROR_COUNT건/200줄)"
+    elif [ "$ERROR_COUNT" -gt 10 ]; then
+        warn "에러 다수 ($ERROR_COUNT건/200줄)"
     fi
 fi
 
-# --- 2. 데이터 품질 ---
+# Heartbeat recency — 마지막 HEARTBEAT 시간
+if [ -f "$RUNTIME/live_supervisor.log" ]; then
+    LAST_HB=$(tail -100 "$RUNTIME/live_supervisor.log" | grep "HEARTBEAT" | tail -1 2>/dev/null || true)
+    if [ -n "$LAST_HB" ]; then
+        echo "  마지막 heartbeat: $(echo "$LAST_HB" | head -c 80)"
+    else
+        warn "최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능"
+    fi
+fi
+
+# ============================================
+# 2. 데이터 품질
+# ============================================
 echo ""
 echo "[2] 데이터 품질"
 $PYTHON -c "
-import json
+import json, sys
 from pathlib import Path
-from collections import Counter
+from datetime import datetime, timezone
 
 summary_path = Path('$RUNTIME/output/paper-live-shell/latest/summary.json')
 if not summary_path.exists():
     print('  WARNING: summary.json not found')
-    exit(1)
+    sys.exit(1)
+
+# summary.json 갱신 시간
+age_min = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(summary_path.stat().st_mtime, tz=timezone.utc)).total_seconds() / 60
+print(f'  summary.json 갱신: {age_min:.0f}분 전')
+if age_min > 60:
+    print(f'  WARNING: summary.json {age_min:.0f}분 미갱신')
 
 s = json.loads(summary_path.read_text())
 closed = s.get('closed_trades', [])
@@ -78,9 +128,9 @@ if strat:
     ratio = len(zero_bps) / len(strat) * 100
     print(f'  전략 0bps 비율: {len(zero_bps)}/{len(strat)} ({ratio:.0f}%)')
     if ratio > 50:
-        print(f'  CRITICAL: 0bps 비율 {ratio:.0f}% — last_trade_price 갱신 버그 재발 가능!')
+        print(f'  CRITICAL: 0bps 비율 {ratio:.0f}% — last_trade_price 버그 재발!')
     elif ratio > 20:
-        print(f'  WARNING: 0bps 비율 {ratio:.0f}% — 모니터링 필요')
+        print(f'  WARNING: 0bps 비율 {ratio:.0f}%')
     else:
         print(f'  OK: 0bps 비율 정상')
 
@@ -88,31 +138,96 @@ if strat:
 valid = [t for t in strat if (t.get('entry_predictability_score', 0) or 0) > 0]
 valid_with_pnl = [t for t in valid if abs(t.get('realized_return_bps_estimate', 0) or 0) >= 0.01]
 print(f'  학습 가능 데이터: {len(valid)}건 / 50건 임계치 ({len(valid)/50*100:.0f}%)')
-print(f'  유효 PnL 데이터(!=0bps): {len(valid_with_pnl)}/{len(valid)}건', end='')
+print(f'  유효 PnL 데이터(!=0bps): {len(valid_with_pnl)}/{max(len(valid),1)}건', end='')
 if valid:
     eff = len(valid_with_pnl) / len(valid) * 100
     print(f' ({eff:.0f}%)')
     if eff < 50:
-        print(f'  WARNING: 유효 PnL 비율 {eff:.0f}% — 데이터 품질 불량, last_trade_price 갱신 확인 필요')
+        print(f'  WARNING: 유효 PnL 비율 {eff:.0f}% — last_trade_price 갱신 확인 필요')
     else:
         print(f'  OK: 유효 데이터 정상 축적 중')
 else:
     print()
     if len(strat) >= 5:
         print(f'  WARNING: 전략 진입 {len(strat)}건인데 학습 가능 0건 — score 기록 안됨')
-" 2>/dev/null || echo "  WARNING: data quality check failed"
 
-# --- 3. 리소스 ---
+# 전략 진입 속도 (최근 24시간)
+if strat:
+    from datetime import timedelta
+    now = datetime.now(tz=timezone.utc)
+    recent = [t for t in strat if t.get('entry_time') and (now - datetime.fromisoformat(t['entry_time'])).total_seconds() < 86400]
+    print(f'  최근 24h 전략 진입: {len(recent)}건')
+    if len(recent) == 0 and len(strat) > 0:
+        print(f'  WARNING: 24시간 동안 전략 진입 0건 — 진입 조건 너무 엄격하거나 데몬 문제')
+" 2>/dev/null || { warn "data quality check failed"; }
+
+# ============================================
+# 3. 상태 파일 무결성
+# ============================================
 echo ""
-echo "[3] 리소스"
+echo "[3] 상태 파일 무결성"
+$PYTHON -c "
+import json, sys
+from pathlib import Path
+from datetime import datetime, timezone
+
+# state file
+state_path = Path('$RUNTIME/output/paper-live-shell/latest/summary.state.json')
+if not state_path.exists():
+    print('  WARNING: state file missing')
+    sys.exit(1)
+
+size_mb = state_path.stat().st_size / 1024 / 1024
+print(f'  state file: {size_mb:.1f}MB')
+if size_mb > 50:
+    print(f'  WARNING: state file {size_mb:.0f}MB — 비정상적으로 큼')
+
+try:
+    st = json.loads(state_path.read_text())
+    pp = st.get('paper_positions', [])
+    print(f'  활성 paper 포지션: {len(pp)}건')
+
+    # Check for corrupt positions
+    for p in pp:
+        entry = p.get('entry_price', 0)
+        qty = p.get('quantity_remaining', p.get('quantity_opened', 0))
+        if entry <= 0:
+            print(f'  CRITICAL: entry_price=0 포지션 발견: {p.get(\"symbol\")}')
+        if qty <= 0:
+            print(f'  WARNING: quantity=0 포지션 발견: {p.get(\"symbol\")}')
+except json.JSONDecodeError:
+    print('  CRITICAL: state file JSON 파싱 실패 — 파일 손상!')
+" 2>/dev/null || { warn "state file check failed"; }
+
+# cost calibration freshness
+if [ -f "$RUNTIME/artifacts/cost_calibration.json" ]; then
+    CAL_AGE_HR=$($PYTHON -c "
+from pathlib import Path
+from datetime import datetime, timezone
+p = Path('$RUNTIME/artifacts/cost_calibration.json')
+age = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(p.stat().st_mtime, tz=timezone.utc)).total_seconds() / 3600
+print(f'{age:.0f}')
+" 2>/dev/null || echo "999")
+    echo "  cost_calibration.json: ${CAL_AGE_HR}시간 전"
+    if [ "$CAL_AGE_HR" -gt 48 ]; then
+        warn "cost calibration ${CAL_AGE_HR}시간 미갱신"
+    fi
+else
+    warn "cost_calibration.json 없음"
+fi
+
+# ============================================
+# 4. 리소스
+# ============================================
+echo ""
+echo "[4] 리소스"
 
 # Supervisor log size
 if [ -f "$RUNTIME/live_supervisor.log" ]; then
     LOG_MB=$(du -m "$RUNTIME/live_supervisor.log" | cut -f1)
     echo "  supervisor.log: ${LOG_MB}MB"
     if [ "$LOG_MB" -gt 200 ]; then
-        echo "  WARNING: supervisor.log > 200MB"
-        WARNINGS=$((WARNINGS+1))
+        warn "supervisor.log ${LOG_MB}MB (>200MB)"
     fi
 fi
 
@@ -120,25 +235,58 @@ fi
 OUTPUT_MB=$(du -sm "$RUNTIME/output" 2>/dev/null | cut -f1 || echo "0")
 echo "  output 디렉토리: ${OUTPUT_MB}MB"
 if [ "$OUTPUT_MB" -gt 5000 ]; then
-    echo "  WARNING: output > 5GB"
-    WARNINGS=$((WARNINGS+1))
+    warn "output ${OUTPUT_MB}MB (>5GB)"
+fi
+
+# Health audit log rotation
+if [ -f "$RUNTIME/health_audit.log" ]; then
+    AUDIT_LOG_MB=$(du -m "$RUNTIME/health_audit.log" | cut -f1)
+    echo "  health_audit.log: ${AUDIT_LOG_MB}MB"
+    if [ "$AUDIT_LOG_MB" -gt 50 ]; then
+        warn "health_audit.log ${AUDIT_LOG_MB}MB (>50MB)"
+    fi
 fi
 
 # Memory usage
 MEM_INFO=$(ps aux | grep "quant_binance" | grep -v grep | awk '{sum+=$6} END {printf "%.0f", sum/1024}' 2>/dev/null || echo "0")
 echo "  quant_binance 메모리: ${MEM_INFO}MB"
-if [ "$MEM_INFO" -gt 1000 ]; then
-    echo "  WARNING: 메모리 사용량 > 1GB"
-    WARNINGS=$((WARNINGS+1))
+if [ "$MEM_INFO" -gt 2000 ]; then
+    crit "메모리 ${MEM_INFO}MB (>2GB) — 메모리 누수 가능"
+elif [ "$MEM_INFO" -gt 1000 ]; then
+    warn "메모리 ${MEM_INFO}MB (>1GB)"
 fi
 
-# --- 4. self_healing ---
+# Disk space
+DISK_AVAIL=$(df -g "$REPO" | tail -1 | awk '{print $4}')
+echo "  디스크 여유: ${DISK_AVAIL}GB"
+if [ "$DISK_AVAIL" -lt 5 ]; then
+    crit "디스크 여유 ${DISK_AVAIL}GB (<5GB)"
+elif [ "$DISK_AVAIL" -lt 20 ]; then
+    warn "디스크 여유 ${DISK_AVAIL}GB (<20GB)"
+fi
+
+# CPU usage
+CPU=$($PYTHON -c "
+import subprocess
+out = subprocess.check_output(['ps', 'aux']).decode()
+total = sum(float(line.split()[2]) for line in out.strip().split('\n')[1:] if 'quant_binance' in line)
+print(f'{total:.0f}')
+" 2>/dev/null || echo "0")
+echo "  quant_binance CPU: ${CPU}%"
+if [ "$CPU" -gt 90 ]; then
+    warn "CPU ${CPU}% (>90%) — 과부하"
+fi
+
+# ============================================
+# 5. self_healing 이벤트
+# ============================================
 echo ""
-echo "[4] Self-healing"
+echo "[5] Self-healing"
 $PYTHON -c "
-import json
+import json, sys
 from pathlib import Path
 from collections import Counter
+from datetime import datetime, timezone, timedelta
 
 events = []
 for f in Path('$RUNTIME/output/paper-live-shell').rglob('self_healing.jsonl'):
@@ -152,13 +300,28 @@ if events:
     print(f'  총 이벤트: {len(events)}건, 최근 20건:')
     for c, n in cats.most_common(5):
         print(f'    {c}: {n}건')
+
+    # 반복 에러 패턴 감지
+    unknown = [e for e in recent if e.get('category') == 'unknown_runtime_error']
+    if len(unknown) >= 15:
+        print(f'  CRITICAL: unknown_runtime_error 폭발 ({len(unknown)}/20건)')
+    elif len(unknown) >= 5:
+        print(f'  WARNING: unknown_runtime_error 반복 ({len(unknown)}/20건)')
+    stalled = [e for e in recent if e.get('category') == 'daemon_stalled']
+    if len(stalled) >= 3:
+        print(f'  WARNING: daemon_stalled 반복 ({len(stalled)}/20건)')
+    mismatch = [e for e in recent if e.get('category') == 'persistent_futures_mismatch']
+    if len(mismatch) >= 10:
+        print(f'  WARNING: futures mismatch 반복 ({len(mismatch)}/20건)')
 else:
     print('  이벤트 없음')
 " 2>/dev/null || echo "  self_healing check skipped"
 
-# --- 5. API 에러 ---
+# ============================================
+# 6. Bitget API 상태
+# ============================================
 echo ""
-echo "[5] Bitget API"
+echo "[6] Bitget API"
 $PYTHON -c "
 import json
 from pathlib import Path
@@ -170,21 +333,120 @@ for log_name in ['live_orders', 'tested_orders']:
     print(f'  {log_name}: {total}건')
 " 2>/dev/null || echo "  API check skipped"
 
-# Check for 429/5xx in supervisor log
+# 429/5xx in supervisor log
 if [ -f "$RUNTIME/live_supervisor.log" ]; then
     RATE_LIMIT=$(tail -500 "$RUNTIME/live_supervisor.log" | grep -ci "429\|rate.limit" 2>/dev/null; true)
     RATE_LIMIT=${RATE_LIMIT:-0}
     SERVER_ERR=$(tail -500 "$RUNTIME/live_supervisor.log" | grep -ci "HTTP 50[0-9]" 2>/dev/null; true)
     SERVER_ERR=${SERVER_ERR:-0}
+    TRANSPORT_ERR=$(tail -500 "$RUNTIME/live_supervisor.log" | grep -ci "transport error\|DNS resolution\|connection reset" 2>/dev/null; true)
+    TRANSPORT_ERR=${TRANSPORT_ERR:-0}
     echo "  최근 429 에러: ${RATE_LIMIT}건"
     echo "  최근 5xx 에러: ${SERVER_ERR}건"
+    echo "  최근 transport 에러: ${TRANSPORT_ERR}건"
     if [ "$RATE_LIMIT" -gt 5 ]; then
-        echo "  WARNING: rate limit 빈발"
-        WARNINGS=$((WARNINGS+1))
+        warn "rate limit 빈발 (${RATE_LIMIT}건)"
+    fi
+    if [ "$SERVER_ERR" -gt 10 ]; then
+        warn "서버 에러 빈발 (${SERVER_ERR}건)"
+    fi
+    if [ "$TRANSPORT_ERR" -gt 10 ]; then
+        warn "네트워크 에러 빈발 (${TRANSPORT_ERR}건)"
     fi
 fi
 
-# --- 결과 ---
+# API connectivity quick check
+$PYTHON -c "
+import ssl
+from urllib.request import urlopen, Request
+try:
+    ctx = ssl._create_unverified_context()
+    r = urlopen('https://api.bitget.com/api/v2/public/time', timeout=10, context=ctx)
+    print(f'  Bitget API: OK (HTTP {r.status})')
+except Exception as e:
+    print(f'  WARNING: Bitget API 연결 실패 — {e}')
+" 2>/dev/null || warn "Bitget API 연결 실패"
+
+# ============================================
+# 7. 의사결정 흐름
+# ============================================
+echo ""
+echo "[7] 의사결정 흐름"
+$PYTHON -c "
+import json
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from collections import Counter
+
+decs = []
+for f in Path('$RUNTIME/output/paper-live-shell').rglob('decisions.jsonl'):
+    for line in f.open():
+        try: decs.append(json.loads(line))
+        except: pass
+
+print(f'  총 의사결정: {len(decs)}건')
+if decs:
+    modes = Counter(d.get('final_mode', d.get('mode','?')) for d in decs)
+    print(f'  모드: {dict(modes)}')
+
+    # Recent decisions (last 6 hours)
+    now = datetime.now(tz=timezone.utc)
+    recent = [d for d in decs if d.get('timestamp') and (now - datetime.fromisoformat(d['timestamp'])).total_seconds() < 21600]
+    print(f'  최근 6h 의사결정: {len(recent)}건')
+    if len(recent) == 0:
+        print(f'  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재')
+
+    # cash ratio (전체 대비)
+    cash_count = modes.get('cash', 0)
+    if len(decs) > 20:
+        cash_pct = cash_count / len(decs) * 100
+        print(f'  cash(미진입) 비율: {cash_pct:.0f}%')
+        if cash_pct > 95:
+            print(f'  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적')
+" 2>/dev/null || echo "  decision flow check skipped"
+
+# ============================================
+# 8. 포지션 sync 상태
+# ============================================
+echo ""
+echo "[8] 포지션 sync"
+$PYTHON -c "
+import json
+from pathlib import Path
+
+syncs = []
+for f in Path('$RUNTIME/output/paper-live-shell').rglob('account_sync.jsonl'):
+    for line in f.open():
+        try: syncs.append(json.loads(line))
+        except: pass
+
+print(f'  account_sync 이벤트: {len(syncs)}건')
+if syncs:
+    recent = syncs[-10:]
+    mismatches = [s for s in recent if s.get('missing_in_paper') or s.get('missing_on_exchange')]
+    if mismatches:
+        print(f'  WARNING: 최근 10건 중 {len(mismatches)}건 포지션 불일치')
+    else:
+        print(f'  OK: 최근 sync 정상')
+" 2>/dev/null || echo "  sync check skipped"
+
+# ============================================
+# 9. git 상태
+# ============================================
+echo ""
+echo "[9] Git 상태"
+cd "$REPO"
+BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+DIRTY=$(git status --porcelain -- quant_binance/ scripts/ tests/ 2>/dev/null | wc -l | tr -d ' ')
+echo "  브랜치: $BRANCH"
+echo "  소스코드 uncommitted 변경: ${DIRTY}건"
+if [ "$DIRTY" -gt 10 ]; then
+    warn "소스코드 uncommitted 변경 ${DIRTY}건 — 커밋 필요"
+fi
+
+# ============================================
+# 결과
+# ============================================
 echo ""
 echo "============================================"
 echo "[RESULT] CRITICAL=$CRITICALS WARNING=$WARNINGS"
@@ -198,27 +460,14 @@ fi
 echo "============================================"
 echo ""
 
-# --- 6. Claude Code 자동 수정 ---
+# ============================================
+# 10. Claude Code 자동 수정
+# ============================================
 if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; then
-    # audit 결과를 파일로 저장 (Claude에 전달용)
-    AUDIT_SUMMARY="health audit at $TIMESTAMP found CRITICAL=$CRITICALS WARNING=$WARNINGS."
+    AUDIT_SUMMARY="health audit at $TIMESTAMP: CRITICAL=$CRITICALS WARNING=$WARNINGS.$ISSUES"
 
-    # 프로세스 없으면 재시작 프롬프트
-    if [ "$PROCS" -lt 1 ]; then
-        AUDIT_SUMMARY="$AUDIT_SUMMARY Process dead: restart needed."
-    fi
+    echo "[CLAUDE] 자동 수정 시작: CRITICAL=$CRITICALS WARNING=$WARNINGS"
 
-    # 로그 크기 문제
-    if [ -f "$RUNTIME/live_supervisor.log" ]; then
-        LOG_MB_CHECK=$(du -m "$RUNTIME/live_supervisor.log" | cut -f1)
-        if [ "$LOG_MB_CHECK" -gt 200 ]; then
-            AUDIT_SUMMARY="$AUDIT_SUMMARY supervisor.log=${LOG_MB_CHECK}MB (>200MB, needs rotation)."
-        fi
-    fi
-
-    echo "[CLAUDE] 자동 수정 시작: $AUDIT_SUMMARY"
-
-    # Claude Code 비대화형 실행 — 진단 + 수정 + 재검증
     CLAUDE_PROMPT="코인 매매 프로그램 정기 health audit 결과:
 
 ${AUDIT_SUMMARY}
@@ -226,23 +475,23 @@ ${AUDIT_SUMMARY}
 다음을 수행해줘:
 1. 위 문제의 근본 원인을 코드에서 찾아서 수정
 2. 프로세스가 죽었으면 재시작 (bash scripts/quant_run_live_orders.sh quant_runtime)
-3. supervisor.log 200MB 넘으면 수동 로테이션 (mv → .bak, 새 로그 시작)
-4. 수정 후 테스트 실행 (python3 -m unittest tests.test_quant_binance_learning tests.test_quant_binance_overlays -v)
-5. 문제 없으면 커밋
-6. 수정 결과를 $RUNTIME/health_audit_fix_result.txt 에 기록
+3. supervisor.log 200MB 넘으면 수동 로테이션 (mv → .bak)
+4. 메모리 2GB 넘으면 데몬 재시작
+5. 수정 후 테스트 실행 (python3 -m unittest tests.test_quant_binance_learning tests.test_quant_binance_overlays -v)
+6. 문제 없으면 커밋
+7. 수정 결과를 $RUNTIME/health_audit_fix_result.txt 에 기록
+8. 재검증 (이 스크립트 다시 실행해서 WARNING=0 확인)
 
-주의: 불필요한 변경 금지. 확실한 버그만 수정. 데몬은 watchdog이 관리하므로 kill 후 watchdog에 맡기거나 직접 재시작."
+주의: 불필요한 변경 금지. 확실한 버그만 수정."
 
     if [ -x "$CLAUDE" ]; then
         echo "$CLAUDE_PROMPT" | timeout 600 "$CLAUDE" --dangerously-skip-permissions -p - --output-format text \
             >> "$RUNTIME/health_audit_claude.log" 2>&1 &
         CLAUDE_PID=$!
-        echo "[CLAUDE] PID=$CLAUDE_PID 로 백그라운드 실행 시작"
+        echo "[CLAUDE] PID=$CLAUDE_PID 백그라운드 실행"
     else
         echo "[CLAUDE] claude CLI not found at $CLAUDE — 수동 확인 필요"
     fi
-
-    # 재검증은 Claude가 완료 후 자체적으로 수행
 else
-    echo "[SKIP] 정상 상태 — Claude Code 실행 불필요"
+    echo "[SKIP] 정상 — Claude Code 실행 불필요"
 fi
