@@ -472,17 +472,33 @@ if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; then
 
 ${AUDIT_SUMMARY}
 
-다음을 수행해줘:
-1. 위 문제의 근본 원인을 코드에서 찾아서 수정
-2. 프로세스가 죽었으면 재시작 (bash scripts/quant_run_live_orders.sh quant_runtime)
-3. supervisor.log 200MB 넘으면 수동 로테이션 (mv → .bak)
-4. 메모리 2GB 넘으면 데몬 재시작
-5. 수정 후 테스트 실행 (python3 -m unittest tests.test_quant_binance_learning tests.test_quant_binance_overlays -v)
-6. 문제 없으면 커밋
-7. 수정 결과를 $RUNTIME/health_audit_fix_result.txt 에 기록
-8. 재검증 (이 스크립트 다시 실행해서 WARNING=0 확인)
+다음을 순서대로 수행해줘:
 
-주의: 불필요한 변경 금지. 확실한 버그만 수정."
+## 1단계: 진단
+- 위 WARNING/CRITICAL의 근본 원인을 코드에서 찾기
+- 프로세스 죽었으면: pgrep -f quant_binance 확인
+
+## 2단계: 수정
+- 코드 버그면: 최소한의 수정만 (확실한 것만)
+- 프로세스 죽었으면: kill 후 nohup bash scripts/quant_run_live_orders.sh quant_runtime > /dev/null 2>&1 &
+- supervisor.log 200MB 넘으면: mv quant_runtime/live_supervisor.log quant_runtime/live_supervisor.log.old
+- 메모리 2GB 넘으면: 프로세스 kill → 재시작
+- watchdog 없으면: supervisor가 자동 재시작하므로 전체 재시작
+
+## 3단계: 검증
+- 코드 수정했으면: python3 -m unittest tests.test_quant_binance_learning tests.test_quant_binance_overlays tests.test_quant_binance_news_macro_signal -v
+- 테스트 통과하면 git commit
+- 코드 수정 + 커밋했으면: 데몬 재시작 (기존 kill → nohup bash scripts/quant_run_live_orders.sh quant_runtime)
+
+## 4단계: 재검증
+- bash scripts/quant_health_audit.sh 2>&1 | grep RESULT 실행
+- WARNING=0 확인될 때까지 반복 (최대 2회)
+- 결과를 $RUNTIME/health_audit_fix_result.txt 에 기록
+
+## 규칙
+- 불필요한 변경 금지. 확실한 버그만 수정
+- 데몬 재시작은 반드시 watchdog 포함 (quant_run_live_orders.sh 사용)
+- 재검증에서 WARNING 남으면 그것도 고치기"
 
     if [ -x "$CLAUDE" ]; then
         echo "$CLAUDE_PROMPT" | timeout 600 "$CLAUDE" --dangerously-skip-permissions -p - --output-format text \

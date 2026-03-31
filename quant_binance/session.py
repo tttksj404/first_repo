@@ -9,6 +9,7 @@ import asyncio
 
 logger = logging.getLogger(__name__)
 from contextlib import suppress
+from collections import deque
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
@@ -280,7 +281,7 @@ class LivePaperSession:
     observe_only_symbols: list[str] = field(default_factory=list)
     last_executed_fingerprint_by_symbol: dict[str, str] = field(default_factory=dict)
     paper_positions: dict[str, PaperPosition] = field(default_factory=dict)
-    closed_trades: list[dict[str, object]] = field(default_factory=list)
+    closed_trades: deque[dict[str, object]] = field(default_factory=lambda: deque(maxlen=2000))
     telegram_alerts: list[dict[str, object]] = field(default_factory=list)
     sent_alert_keys: set[str] = field(default_factory=set)
     live_positions_snapshot: list[dict[str, object]] = field(default_factory=list)
@@ -4517,6 +4518,30 @@ class LivePaperSession:
             if current is None or cooldown_until > current:
                 self.manual_symbol_cooldowns[position.symbol] = cooldown_until
         self.paper_positions.pop(position.symbol, None)
+        # Cleanup identity-keyed dicts to prevent memory leaks
+        self._cleanup_identity_state(position)
+
+    def _cleanup_identity_state(self, position: PaperPosition) -> None:
+        """Remove stale identity-keyed entries when a position closes."""
+        identity = f"{position.symbol}|{position.market}|{position.side}|{position.entry_price}"
+        for d in (
+            self.live_peak_roe_by_identity,
+            self.live_worst_roe_by_identity,
+            self.live_peak_unrealized_pnl_by_identity,
+            self.live_partial_exit_last_at_by_identity,
+            self.live_partial_exit_mode_by_identity,
+            self.live_major_drawdown_grace_started_at_by_identity,
+        ):
+            d.pop(identity, None)
+        for s in (
+            self.sent_alert_keys,
+            self.live_proactive_take_profit_keys,
+            self.live_profit_protection_keys,
+            self.live_turnaround_take_profit_keys,
+            self.live_unrealized_take_profit_keys,
+        ):
+            to_remove = {k for k in s if k.startswith(f"{position.symbol}|")}
+            s -= to_remove
 
     def _update_paper_position(
         self,
