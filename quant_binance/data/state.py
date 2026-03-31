@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -46,12 +47,12 @@ class SymbolMarketState:
     open_interest: float
     basis_bps: float
     last_update_time: datetime
-    trades: list[SpotTrade] = field(default_factory=list)
-    klines: dict[str, list[KlineBar]] = field(default_factory=dict)
-    order_book_imbalance_samples: list[float] = field(default_factory=list)
-    funding_rate_samples: list[float] = field(default_factory=list)
-    basis_bps_samples: list[float] = field(default_factory=list)
-    open_interest_samples: list[float] = field(default_factory=list)
+    trades: deque[SpotTrade] = field(default_factory=lambda: deque(maxlen=500))
+    klines: dict[str, deque[KlineBar]] = field(default_factory=dict)
+    order_book_imbalance_samples: deque[float] = field(default_factory=lambda: deque(maxlen=1000))
+    funding_rate_samples: deque[float] = field(default_factory=lambda: deque(maxlen=500))
+    basis_bps_samples: deque[float] = field(default_factory=lambda: deque(maxlen=500))
+    open_interest_samples: deque[float] = field(default_factory=lambda: deque(maxlen=500))
 
     def freshness_ms(self, now: datetime) -> int:
         return int((now - self.last_update_time).total_seconds() * 1000)

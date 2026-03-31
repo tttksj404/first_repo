@@ -286,6 +286,13 @@ while :; do
   run_child
   while kill -0 "$CHILD_PID" 2>/dev/null; do
     sleep "$WATCHDOG_POLL_SECONDS"
+    # Auto-restart watchdog if it died
+    if [ "${QUANT_ENABLE_SUPERVISOR_WATCHDOG:-1}" = "1" ]; then
+      if ! pgrep -f "quant_live_watchdog.py" >/dev/null 2>&1; then
+        printf '[SUPERVISOR] watchdog died, restarting at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+        start_watchdog
+      fi
+    fi
     if ! health_check; then
       HEALTH_REASON="$("$PYTHON_BIN" - <<'PY' "$HEALTH_STATE_PATH"
 import json, sys
