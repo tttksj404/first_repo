@@ -86,7 +86,20 @@ if strat:
 
 # Learning data
 valid = [t for t in strat if (t.get('entry_predictability_score', 0) or 0) > 0]
+valid_with_pnl = [t for t in valid if abs(t.get('realized_return_bps_estimate', 0) or 0) >= 0.01]
 print(f'  학습 가능 데이터: {len(valid)}건 / 50건 임계치 ({len(valid)/50*100:.0f}%)')
+print(f'  유효 PnL 데이터(!=0bps): {len(valid_with_pnl)}/{len(valid)}건', end='')
+if valid:
+    eff = len(valid_with_pnl) / len(valid) * 100
+    print(f' ({eff:.0f}%)')
+    if eff < 50:
+        print(f'  WARNING: 유효 PnL 비율 {eff:.0f}% — 데이터 품질 불량, last_trade_price 갱신 확인 필요')
+    else:
+        print(f'  OK: 유효 데이터 정상 축적 중')
+else:
+    print()
+    if len(strat) >= 5:
+        print(f'  WARNING: 전략 진입 {len(strat)}건인데 학습 가능 0건 — score 기록 안됨')
 " 2>/dev/null || echo "  WARNING: data quality check failed"
 
 # --- 3. 리소스 ---
