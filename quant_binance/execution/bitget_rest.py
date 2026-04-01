@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import json
+import random
 import socket
 import ssl
 import time
@@ -953,7 +954,7 @@ class BitgetRestClient:
             context = ssl._create_unverified_context()
 
         _RETRYABLE_5XX = {500, 502, 503, 504}
-        _BACKOFF_DELAYS = (2.0, 4.0, 8.0)  # up to 3 retries for 5xx/transport
+        _BACKOFF_DELAYS = (2.0, 4.0, 8.0)  # up to 3 retries for 5xx/transport (jitter added below)
 
         last_exc: Exception | None = None
         for attempt in range(4):  # attempt 0 + up to 3 retries
@@ -963,21 +964,21 @@ class BitgetRestClient:
             except HTTPError as exc:
                 body = exc.read().decode("utf-8", errors="replace")
                 if exc.code == 429:
-                    # Rate limited: wait 65s then retry (up to 2 times)
+                    # Rate limited: wait 60-75s with jitter then retry (up to 2 times)
                     if attempt < 2:
-                        time.sleep(65.0)
+                        time.sleep(60.0 + random.uniform(0, 15))
                         last_exc = RuntimeError(f"Bitget HTTP 429 (rate limited): {body}")
                         continue
                     raise RuntimeError(f"Bitget HTTP 429 (rate limited, exhausted retries): {body}") from exc
                 if exc.code in _RETRYABLE_5XX:
                     if attempt < len(_BACKOFF_DELAYS):
-                        time.sleep(_BACKOFF_DELAYS[attempt])
+                        time.sleep(_BACKOFF_DELAYS[attempt] + random.uniform(0, 1))
                         last_exc = RuntimeError(f"Bitget HTTP {exc.code}: {body}")
                         continue
                 raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
             except (URLError, socket.timeout, TimeoutError, OSError) as exc:
                 if attempt < len(_BACKOFF_DELAYS):
-                    time.sleep(_BACKOFF_DELAYS[attempt])
+                    time.sleep(_BACKOFF_DELAYS[attempt] + random.uniform(0, 1))
                     last_exc = RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error: {exc}")
                     continue
                 raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
