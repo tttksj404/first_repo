@@ -20,6 +20,44 @@ class OnlineEdgeLearner:
     def __init__(self, *, min_observations: int = 5) -> None:
         self.lookup = ConditionalEdgeLookup(min_observations=min_observations)
 
+    def load_from_export(self, path: str | Path) -> int:
+        """Restore learning state from a previous edge_table.json export.
+        Returns number of observations restored."""
+        export_path = Path(path)
+        if not export_path.exists():
+            return 0
+        try:
+            data = json.loads(export_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return 0
+        symbols = data.get("symbols", {})
+        if not isinstance(symbols, dict):
+            return 0
+        restored = 0
+        for symbol, rows in symbols.items():
+            if not isinstance(rows, list):
+                continue
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                mode = row.get("mode", "")
+                bucket = row.get("bucket", 0)
+                direction = row.get("trend_direction", 1)
+                observations = row.get("observations", [])
+                if not isinstance(observations, list) or not mode:
+                    continue
+                for obs in observations:
+                    if isinstance(obs, (int, float)):
+                        self.lookup.add_observation(
+                            symbol=symbol,
+                            mode=mode,
+                            predictability_score=bucket * 10 + 5,  # bucket midpoint
+                            trend_direction=direction,
+                            forward_return_bps=float(obs),
+                        )
+                        restored += 1
+        return restored
+
     def ingest_decisions(
         self,
         decisions: list[DecisionIntent] | tuple[DecisionIntent, ...],
