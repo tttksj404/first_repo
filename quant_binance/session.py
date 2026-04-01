@@ -319,6 +319,7 @@ class LivePaperSession:
     _last_sync_at: datetime | None = None
     _last_flush_at: datetime | None = None
     _execution_quality_state: ExecutionQualityState = field(init=False, repr=False)
+    session_start_equity_usdt: float | None = field(default=None, init=False)
 
     def __post_init__(self) -> None:
         if self.max_portfolio_capacity_usd is None:
@@ -463,8 +464,23 @@ class LivePaperSession:
             self._evaluate_live_positions()
         self._last_sync_at = datetime.now(tz=timezone.utc)
 
+    def _extract_total_usdt_equity(self) -> float | None:
+        accounts = self.account_snapshot.get("accounts", [])
+        if not accounts:
+            return None
+        total = sum(
+            float(row.get("usdtEquity") or row.get("accountEquity") or 0.0)
+            for row in accounts
+            if isinstance(row, dict)
+        )
+        return total if total > 0.0 else None
+
     def sync_account(self) -> None:
         self._refresh_account_state(evaluate_live_positions=True)
+        if self.session_start_equity_usdt is None:
+            equity = self._extract_total_usdt_equity()
+            if equity is not None and equity > 0.0:
+                self.session_start_equity_usdt = equity
 
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
         self.summary_path = summary_path
@@ -505,6 +521,14 @@ class LivePaperSession:
         )
         summary["macro_runtime"] = macro_runtime
         summary["execution_quality"] = self._execution_quality_snapshot()
+        current_equity = self._extract_total_usdt_equity()
+        summary["session_start_equity_usdt"] = self.session_start_equity_usdt
+        summary["session_current_equity_usdt"] = current_equity
+        summary["session_equity_delta_usdt"] = (
+            round(current_equity - self.session_start_equity_usdt, 6)
+            if self.session_start_equity_usdt is not None and current_equity is not None
+            else None
+        )
         run_dir = Path(summary_path).parent
         base_dir = run_dir.parents[2] if len(run_dir.parents) >= 3 else run_dir
         write_runtime_summary(summary_path, summary)
@@ -2325,6 +2349,11 @@ class LivePaperSession:
         else:
             realized = (exit_price - position.entry_price) * quantity_closed
             return_bps = (exit_price - position.entry_price) / position.entry_price * 10000.0 if position.entry_price > 0 else 0.0
+        fee_bps = self._live_position_exit_fee_bps(symbol=position.symbol)
+        entry_notional = position.entry_price * quantity_closed
+        exit_notional = exit_price * quantity_closed
+        round_trip_fee_usd = (entry_notional + exit_notional) * (fee_bps / 10000.0)
+        realized_net = realized - round_trip_fee_usd
         loss_combo_bucket_start = self._loss_combo_bucket_start(position.entry_time)
         loss_combo_key = self._loss_combo_key(
             symbol=position.symbol,
@@ -2341,6 +2370,8 @@ class LivePaperSession:
             "exit_price": round(exit_price, 6),
             "quantity": round(quantity_closed, 8),
             "realized_pnl_usd_estimate": round(realized, 6),
+            "realized_pnl_net_usd_estimate": round(realized_net, 6),
+            "estimated_round_trip_fee_usd": round(round_trip_fee_usd, 6),
             "realized_return_bps_estimate": round(return_bps, 6),
             "entry_predictability_score": round(position.entry_predictability_score, 6),
             "latest_predictability_score": round(position.latest_predictability_score or position.entry_predictability_score, 6),
