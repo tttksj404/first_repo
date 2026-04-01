@@ -27,11 +27,19 @@ class OnlineEdgeLearner:
         if not export_path.exists():
             return 0
         try:
-            data = json.loads(export_path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
+            raw = export_path.read_text(encoding="utf-8")
+            if not raw.strip():
+                return 0
+            data = json.loads(raw)
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            return 0
+        if not isinstance(data, dict):
             return 0
         symbols = data.get("symbols", {})
         if not isinstance(symbols, dict):
+            return 0
+        # Sanity check: observation_count should be positive
+        if int(data.get("observation_count", 0) or 0) <= 0:
             return 0
         restored = 0
         for symbol, rows in symbols.items():

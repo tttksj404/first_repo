@@ -587,10 +587,19 @@ ${AUDIT_SUMMARY}
 - WARNING=0 확인될 때까지 반복 (최대 2회)
 - 결과를 $RUNTIME/health_audit_fix_result.txt 에 기록
 
-## 규칙
+## 규칙 (절대 위반 금지)
 - 불필요한 변경 금지. 확실한 버그만 수정
 - 데몬 재시작은 반드시 watchdog 포함 (quant_run_live_orders.sh 사용)
-- 재검증에서 WARNING 남으면 그것도 고치기"
+- 재검증에서 WARNING 남으면 그것도 고치기
+
+## 수정 금지 영역 (변경통제)
+- strategy/ 디렉토리: 전략 로직 절대 수정 금지
+- settings.py: 설정 구조체 수정 금지
+- strategy_override.approved.json: 파라미터 값 변경 금지 (autotuner 전용)
+- risk/ 디렉토리: 리스크 한도/사이징 로직 수정 금지
+- overlays.py: 시그널 가중치/오버레이 로직 수정 금지
+- autotuner/: 자동 튜닝 로직 수정 금지
+- 수정 허용: 인프라 버그(프로세스, 로그, 네트워크, 메모리), 데이터 파이프라인 버그만"
 
     if [ -x "$CLAUDE" ]; then
         echo "$CLAUDE_PROMPT" | timeout 600 "$CLAUDE" --dangerously-skip-permissions -p - --output-format text \
