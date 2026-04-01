@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
@@ -40,6 +41,8 @@ from quant_binance.strategy.scorer import apply_score_and_costs
 from quant_binance.overlays import apply_altcoin_overlay, apply_macro_overlay, apply_sentiment_overlay, load_altcoin_inputs, load_macro_inputs
 from quant_binance.features.primitive import build_feature_vector_from_primitives
 from quant_binance.runtime_universe import build_runtime_universe_hydration
+
+_log = logging.getLogger(__name__)
 
 
 def _next_decision_boundary(timestamp, interval_minutes: int):
@@ -170,6 +173,7 @@ def _read_json_payload(path: Path | None) -> dict[str, object]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
+        _log.warning("failed to read runtime policy payload %s", path, exc_info=True)
         return {}
     return payload if isinstance(payload, dict) else {}
 

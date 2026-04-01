@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import logging
 import shutil
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+
+_log = logging.getLogger(__name__)
 
 from quant_binance.auto_mode import (
     auto_mode_blocks_non_major_positive,
@@ -1917,6 +1920,7 @@ def load_validation_runner_evidence(base_path: str | Path | None) -> dict[str, o
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
+            _log.warning("failed to read validation report %s — skipping", path, exc_info=True)
             continue
         if not isinstance(payload, dict):
             continue

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 import re
 from decimal import Decimal, ROUND_HALF_UP
 from dataclasses import dataclass
 from typing import Any, Protocol
+
+_log = logging.getLogger(__name__)
 
 from quant_binance.models import DecisionIntent
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
@@ -182,6 +185,7 @@ class DecisionLiveOrderAdapter:
         try:
             info = getter(market=market)
         except Exception:
+            _log.warning("exchange info fetch failed for market=%s symbol=%s — skipping cache", market, symbol, exc_info=True)
             # Do NOT cache on failure — allow retry on next call
             return {}
         for row in info.get("symbols", []):

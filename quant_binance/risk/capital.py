@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Protocol
+
+_log = logging.getLogger(__name__)
 
 from quant_binance.settings import Settings
 
@@ -236,6 +239,7 @@ def _spot_asset_usd_price(
         try:
             ticker = rest_client.get_book_ticker(market="spot", symbol=price_symbol)
         except Exception:
+            _log.warning("price fetch failed for %s — treating as unavailable", price_symbol, exc_info=True)
             price_by_symbol[price_symbol] = None
             return None
         bid_price = _optional_float(ticker.get("bidPrice"))
