@@ -803,6 +803,20 @@ class LivePaperSession:
             return str(getattr(self.order_tester.client, "exchange_id", "") or "")
         return str(getattr(self.rest_client, "exchange_id", "") or "")
 
+    def _safe_execution_quality_snapshot(self, symbol: str) -> dict[str, float]:
+        """Safe extraction of execution quality metrics for closed trade logging."""
+        try:
+            snap = self._execution_quality_state.snapshot()
+            return {
+                "avg_edge_retention_ratio": round(float(snap.get("avg_edge_retention_ratio", 0.0) or 0.0), 4),
+                "avg_slippage_bps": round(float(snap.get("avg_slippage_bps", 0.0) or 0.0), 4),
+                "avg_fill_ratio": round(float(snap.get("avg_fill_ratio", 0.0) or 0.0), 4),
+                "reject_rate": round(float(snap.get("reject_rate", 0.0) or 0.0), 4),
+                "sample_size": int(snap.get("sample_size", 0) or 0),
+            }
+        except Exception:
+            return {}
+
     def _market_capital_allowed(self, decision: DecisionIntent) -> bool:
         if not self.capital_report:
             return True
@@ -2410,6 +2424,18 @@ class LivePaperSession:
             side=position.side,
             timestamp=position.entry_time,
         )
+        holding_minutes = (exit_time - position.entry_time).total_seconds() / 60.0 if exit_time and position.entry_time else 0.0
+        entry_hour_utc = position.entry_time.hour if position.entry_time else -1
+        # Price movement context
+        best_return_bps = 0.0
+        worst_return_bps = 0.0
+        if position.entry_price > 0:
+            if position.side == "short":
+                best_return_bps = (position.entry_price - position.worst_price) / position.entry_price * 10000.0
+                worst_return_bps = (position.entry_price - position.best_price) / position.entry_price * 10000.0
+            else:
+                best_return_bps = (position.best_price - position.entry_price) / position.entry_price * 10000.0
+                worst_return_bps = (position.worst_price - position.entry_price) / position.entry_price * 10000.0
         trade = {
             "symbol": position.symbol,
             "market": position.market,
@@ -2431,6 +2457,23 @@ class LivePaperSession:
             "loss_combo_time_bucket_utc": loss_combo_bucket_start.strftime("%H:%M"),
             "position_origin": position.origin,
             "position_adoption_source": position.adoption_source,
+            # Learning context: price action during hold
+            "holding_minutes": round(holding_minutes, 1),
+            "entry_hour_utc": entry_hour_utc,
+            "best_price": round(position.best_price, 6),
+            "worst_price": round(position.worst_price, 6),
+            "best_return_bps": round(best_return_bps, 2),
+            "worst_return_bps": round(worst_return_bps, 2),
+            "peak_roe_percent": round(position.peak_roe_percent, 4),
+            # Learning context: entry signal quality
+            "stop_distance_bps": round(position.stop_distance_bps, 2),
+            "entry_net_expected_edge_bps": round(position.entry_net_expected_edge_bps, 2),
+            "entry_estimated_round_trip_cost_bps": round(position.entry_estimated_round_trip_cost_bps, 2),
+            "entry_liquidity_score": round(position.entry_liquidity_score, 4),
+            "latest_liquidity_score": round(position.latest_liquidity_score, 4),
+            "latest_net_expected_edge_bps": round(position.latest_net_expected_edge_bps, 2),
+            "entry_planned_leverage": position.entry_planned_leverage,
+            # Policy context
             "entry_policy_context_source": position.entry_policy_context_source,
             "entry_policy_bucket": position.entry_policy_bucket,
             "entry_policy_bucket_available": position.entry_policy_bucket_available,
@@ -2438,6 +2481,8 @@ class LivePaperSession:
             "entry_policy_bucket_alignment_status": position.entry_policy_bucket_alignment_status,
             "entry_policy_execution_phase": position.entry_policy_execution_phase,
             "entry_policy_lineage": dict(position.entry_policy_lineage),
+            # Execution quality snapshot at close time
+            "execution_quality_snapshot": self._safe_execution_quality_snapshot(position.symbol),
         }
         self.closed_trades.append(trade)
         self._update_loss_combo_downgrade_state(
@@ -5651,11 +5696,16 @@ class LivePaperSession:
         if self.learner is not None:
             self.learner.ingest_decisions((managed_decision,))
         if self.log_store is not None:
+            reference_price = 0.0
+            if state is not None:
+                reference_price = float(getattr(state, "last_trade_price", 0.0) or 0.0)
             self.log_store.append(
                 "decisions",
                 {
                     **managed_decision.as_dict(),
                     **policy_entry_context,
+                    "reference_price": reference_price,
+                    "rejected": bool(managed_decision.rejection_reasons),
                 },
             )
         if bootstrap:
