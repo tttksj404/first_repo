@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -68,6 +69,10 @@ class QuantLiveWatchdog:
         self.equity_drop_threshold_pct = float(os.environ.get("QUANT_WATCHDOG_EQUITY_DROP_PCT", "5.0"))
         self._last_strategy_check: float = 0.0
         self._equity_history: deque[tuple[float, float]] = deque(maxlen=12)
+        # Disk cleanup: run once at start then every 24h
+        self._cleanup_interval_seconds = int(os.environ.get("QUANT_WATCHDOG_CLEANUP_INTERVAL_SECONDS", str(24 * 3600)))
+        self._last_cleanup: float = 0.0
+        self._disk_usage_mb: float = 0.0
         self.policy_state_path = self.output_base / "output" / "paper-live-shell" / "latest" / "policy_state.json"
         self.closed_trades_path = self.output_base / "output" / "paper-live-shell" / "latest" / "logs" / "closed_trades.jsonl"
         self.strategy_override_path = self.output_base / "artifacts" / "strategy_override.approved.json"
@@ -493,12 +498,106 @@ class QuantLiveWatchdog:
             self.log(f"[WARNING] failed to set force_auto_mode=normal: {exc}")
             return False
 
+    # ------------------------------------------------------------------
+    # Disk cleanup
+    # ------------------------------------------------------------------
+
+    _PROTECTED_NAMES: frozenset[str] = frozenset(
+        {"closed_trades.jsonl", "health_status.json", "policy_state.json"}
+    )
+    _LOG_NUMBERED_RE = re.compile(r"\.log\.[1-5]$")
+
+    def _is_protected(self, path: Path) -> bool:
+        name = path.name
+        if name in self._PROTECTED_NAMES:
+            return True
+        if name.startswith("strategy_override") and name.endswith(".json"):
+            return True
+        return False
+
+    def _dir_size_bytes(self) -> int:
+        total = 0
+        try:
+            for p in self.output_base.rglob("*"):
+                if p.is_file():
+                    try:
+                        total += p.stat().st_size
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+        return total
+
+    def _cleanup_disk(self) -> None:
+        """Delete stale log files. Runs once at startup then every 24h."""
+        now = time.time()
+        if now - self._last_cleanup < self._cleanup_interval_seconds:
+            return
+        self._last_cleanup = now
+
+        deleted_bytes = 0
+        deleted_files: list[str] = []
+
+        # 1. Delete all *.log.old files
+        try:
+            for p in self.output_base.rglob("*.log.old"):
+                if not p.is_file() or self._is_protected(p):
+                    continue
+                try:
+                    size = p.stat().st_size
+                    p.unlink()
+                    deleted_bytes += size
+                    deleted_files.append(f"{p.name}({size // 1024}KB)")
+                except OSError:
+                    pass
+        except OSError:
+            pass
+
+        # 2. If total size > 500MB, delete numbered log backups (*.log.1~.5) oldest first
+        total_bytes = self._dir_size_bytes()
+        if total_bytes > 500 * 1024 * 1024:
+            numbered: list[tuple[float, Path]] = []
+            try:
+                for p in self.output_base.rglob("*"):
+                    if not p.is_file() or self._is_protected(p):
+                        continue
+                    if self._LOG_NUMBERED_RE.search(p.name):
+                        try:
+                            numbered.append((p.stat().st_mtime, p))
+                        except OSError:
+                            pass
+            except OSError:
+                pass
+            numbered.sort()  # oldest first
+            for _, p in numbered:
+                try:
+                    size = p.stat().st_size
+                    p.unlink()
+                    deleted_bytes += size
+                    deleted_files.append(f"{p.name}({size // 1024}KB)")
+                except OSError:
+                    pass
+
+        # Update cached disk usage
+        after_bytes = self._dir_size_bytes()
+        self._disk_usage_mb = round(after_bytes / (1024 * 1024), 1)
+
+        if deleted_files:
+            self.log(
+                f"[CLEANUP] deleted {len(deleted_files)} file(s) ({deleted_bytes // 1024}KB): "
+                + ", ".join(deleted_files)
+                + f"; disk_usage={self._disk_usage_mb}MB"
+            )
+        else:
+            self.log(f"[CLEANUP] no stale files found; disk_usage={self._disk_usage_mb}MB")
+
     def _write_strategy_health(self, overall: str, checks: dict, auto_actions: list[str]) -> None:
         payload = {
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "overall_severity": overall,
             "checks": checks,
             "auto_actions": auto_actions,
+            "disk_usage_mb": self._disk_usage_mb,
         }
         try:
             self._write_json_atomic(self.strategy_health_path, payload)
@@ -506,6 +605,9 @@ class QuantLiveWatchdog:
             self.log(f"[WARNING] failed to write health_status.json: {exc}")
 
     def _run_strategy_health_check(self) -> None:
+        # Disk cleanup: runs on first call and every 24h thereafter
+        self._cleanup_disk()
+
         policy_state = self._load_json_safe(self.policy_state_path)
         summary_state = self._load_json_safe(self.summary_path)
         current_force_mode = self._read_current_force_mode()
