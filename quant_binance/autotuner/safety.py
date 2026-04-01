@@ -46,7 +46,7 @@ class RevertMonitorState:
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
 
-REVERT_TRADE_THRESHOLD = 15
+REVERT_TRADE_THRESHOLD = 30
 
 
 class RevertMonitor:
