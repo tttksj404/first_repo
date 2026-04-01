@@ -342,19 +342,37 @@ class LivePaperSession:
         self.last_event_timestamp = timestamp
         self.self_healing.note_progress(timestamp=timestamp, heartbeat_count=self.heartbeat_count)
         if self._should_sync(timestamp):
-            self.sync_account()
-            self._last_sync_at = timestamp
-            if self.verbose:
-                print(f"[SYNC] {timestamp.isoformat()} account/open-order snapshot refreshed", flush=True)
-            if self.log_store is not None:
-                self.log_store.append(
-                    "account_sync",
-                    {
-                        "timestamp": timestamp,
-                        "account_snapshot": self.account_snapshot,
-                        "open_orders_snapshot": self.open_orders_snapshot,
-                    },
+            try:
+                self.sync_account()
+                self._last_sync_at = timestamp
+                if self.verbose:
+                    print(f"[SYNC] {timestamp.isoformat()} account/open-order snapshot refreshed", flush=True)
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "account_sync",
+                        {
+                            "timestamp": timestamp,
+                            "account_snapshot": self.account_snapshot,
+                            "open_orders_snapshot": self.open_orders_snapshot,
+                        },
+                    )
+            except Exception as sync_exc:
+                # REST sync failure must not crash the decision cycle.
+                # Keep the previous account_snapshot so equity / balance remain
+                # available from the last successful sync.
+                print(
+                    f"[SYNC_ERROR] {timestamp.isoformat()} account sync failed, keeping prior snapshot: {sync_exc}",
+                    flush=True,
                 )
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "account_sync",
+                        {
+                            "timestamp": timestamp,
+                            "status": "failed",
+                            "error": repr(sync_exc),
+                        },
+                    )
         event_payload: dict[str, Any] = {"timestamp": timestamp, "payload": payload}
         try:
             decision = self.runtime.on_payload(
@@ -565,10 +583,13 @@ class LivePaperSession:
             }
         checkpoint_auto_judge = dict(comparison_evidence.get("checkpoint_auto_judge", {}) or {})
         if checkpoint_auto_judge:
-            (run_dir / "checkpoint_auto_judge.json").write_text(
-                json.dumps(checkpoint_auto_judge, indent=2, sort_keys=True),
-                encoding="utf-8",
-            )
+            try:
+                (run_dir / "checkpoint_auto_judge.json").write_text(
+                    json.dumps(checkpoint_auto_judge, indent=2, sort_keys=True),
+                    encoding="utf-8",
+                )
+            except Exception as exc:
+                print(f"[CHECKPOINT_WRITE_ERROR] {exc}", flush=True)
         summary["checkpoint_auto_judge"] = checkpoint_auto_judge
         summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), comparison_evidence)
         summary["policy_validation"] = build_policy_validation(
@@ -928,17 +949,23 @@ class LivePaperSession:
         path = self._policy_state_path()
         if path is None or not path.exists():
             return {}
-        return json.loads(path.read_text(encoding="utf-8"))
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
 
     def _write_persisted_policy_state(self, policy_state: dict[str, object]) -> None:
         path = self._policy_state_path()
         history_path = self._policy_history_path()
         if path is None or history_path is None:
             return
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(policy_state, indent=2, sort_keys=True), encoding="utf-8")
-        with history_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(build_policy_history_entry(policy_state), sort_keys=True) + "\n")
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(policy_state, indent=2, sort_keys=True), encoding="utf-8")
+            with history_path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(build_policy_history_entry(policy_state), sort_keys=True) + "\n")
+        except Exception as exc:
+            print(f"[POLICY_STATE_WRITE_ERROR] {exc}", flush=True)
 
     def _current_operational_verdict(self) -> dict[str, object]:
         return build_operational_verdict(build_runtime_summary(decisions=[], live_orders=self.live_orders))
