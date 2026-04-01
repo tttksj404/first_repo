@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import ssl
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
@@ -14,6 +15,7 @@ from urllib.request import urlopen
 from zoneinfo import ZoneInfo
 
 
+_log = logging.getLogger(__name__)
 SSL_CONTEXT = ssl._create_unverified_context()
 HTTP_TIMEOUT_SECONDS = 20
 FEAR_GREED_API_URL = "https://api.alternative.me/fng/?limit=1&format=json"
@@ -150,6 +152,7 @@ def fetch_fear_greed_index(*, fetcher=_fetch_text) -> tuple[int, str]:
         entry = payload["data"][0]
         return int(entry["value"]), str(entry["value_classification"])
     except Exception:
+        _log.warning("Fear & Greed index fetch failed — using neutral default (50)", exc_info=True)
         return 50, "Neutral"
 
 
@@ -259,7 +262,10 @@ def _current_schedule_label(now: datetime) -> str:
 def _load_json(path: Path) -> dict[str, object] | None:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return None
     except Exception:
+        _log.warning("failed to read news signal cache %s", path, exc_info=True)
         return None
 
 

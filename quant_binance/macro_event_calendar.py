@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import logging
 import re
 import ssl
 from dataclasses import asdict, dataclass
@@ -11,7 +12,7 @@ from typing import Callable
 from urllib.request import urlopen
 from zoneinfo import ZoneInfo
 
-
+_log = logging.getLogger(__name__)
 SSL_CONTEXT = ssl._create_unverified_context()
 EASTERN = ZoneInfo("America/New_York")
 HTTP_TIMEOUT_SECONDS = 30
@@ -124,6 +125,7 @@ def fetch_bls_macro_events(fetcher: Callable[[str], str] = _fetch_text) -> tuple
                 fetcher=fetcher,
             )
         except Exception:
+            _log.warning("BLS macro event fetch failed for %s — skipping", name, exc_info=True)
             event = None
         if event is not None:
             events.append(event)
@@ -170,6 +172,7 @@ def fetch_bea_macro_events(fetcher: Callable[[str], str] = _fetch_text) -> tuple
     try:
         raw = fetcher(url)
     except Exception:
+        _log.warning("BEA macro events fetch failed — returning empty", exc_info=True)
         return ()
     rows = _parse_bea_release_lines(_clean_html_text(raw))
     events: list[OfficialMacroEvent] = []
@@ -212,6 +215,7 @@ def fetch_fomc_events(fetcher: Callable[[str], str] = _fetch_text) -> tuple[Offi
     try:
         raw = fetcher(url)
     except Exception:
+        _log.warning("FOMC events fetch failed — returning empty", exc_info=True)
         return ()
     text = _clean_html_text(raw)
     block_match = re.search(r"For 2026:(.*?)The Committee releases a policy statement", text, flags=re.DOTALL)

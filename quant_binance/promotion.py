@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import shutil
 import subprocess
 from pathlib import Path
@@ -15,7 +16,7 @@ from quant_binance.policy_evidence import (
 )
 from quant_binance.policy_lineage import build_policy_state_lineage_snapshot, policy_lineage_alignment
 
-
+_log = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "quant_binance" / "config.example.json"
 _MAJOR_PRIORITY_SYMBOLS = {"BTCUSDT", "ETHUSDT"}
@@ -234,6 +235,7 @@ def _read_json(path: Path | None) -> dict[str, Any]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
+        _log.warning("failed to read promotion data %s", path, exc_info=True)
         return {}
     return payload if isinstance(payload, dict) else {}
 
