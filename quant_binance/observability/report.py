@@ -3920,6 +3920,14 @@ def build_runtime_summary(
     symbol_performance = closed_trade_aggregate.symbol_performance
     exit_reason_counts = closed_trade_aggregate.exit_reason_counts
     realized_total = closed_trade_aggregate.realized_pnl_usd
+    realized_net_total = round(
+        sum(float(t.get("realized_pnl_net_usd_estimate", t.get("realized_pnl_usd_estimate", 0.0))) for t in (closed_trades or [])),
+        6,
+    )
+    total_round_trip_fee = round(
+        sum(float(t.get("estimated_round_trip_fee_usd", 0.0)) for t in (closed_trades or [])),
+        6,
+    )
     unrealized_spot_total = round(
         sum(float(position.get("unrealized_pnl_usd_estimate", 0.0)) for position in (open_spot_positions or [])),
         6,
@@ -3987,6 +3995,8 @@ def build_runtime_summary(
         "exit_reason_counts": exit_reason_counts,
         "symbol_performance": symbol_performance,
         "realized_pnl_usd_estimate": realized_total,
+        "realized_pnl_net_usd_estimate": realized_net_total,
+        "estimated_round_trip_fee_usd": total_round_trip_fee,
         "unrealized_pnl_usd_estimate": round(unrealized_spot_total + unrealized_futures_total, 6),
         "unrealized_spot_pnl_usd_estimate": unrealized_spot_total,
         "unrealized_futures_pnl_usd_estimate": unrealized_futures_total,
