@@ -3252,7 +3252,9 @@ class LivePaperSession:
             return False
         return True
 
-    def _build_reconciled_paper_position(self, *, position: dict[str, Any]) -> PaperPosition | None:
+    def _build_reconciled_paper_position(
+        self, *, position: dict[str, Any], startup_recovery: bool = False
+    ) -> PaperPosition | None:
         symbol = str(position.get("symbol", ""))
         if not symbol:
             return None
@@ -3268,9 +3270,20 @@ class LivePaperSession:
         side = self._normalize_live_position_side(position)
         leverage = max(int(float(position.get("leverage") or 1.0)), 1)
         entry_time = self._parse_live_position_timestamp(position) or datetime.now(tz=timezone.utc)
-        adopted_at = entry_time
         best_price = max(entry_price, current_price)
         worst_price = min(entry_price, current_price)
+        # startup_recovery=True: state was lost across restart; treat as strategy-owned (not external manual).
+        # startup_recovery=False: new unknown position appeared at runtime; treat as external manual adoption.
+        if startup_recovery:
+            origin = "strategy_recovered"
+            adoption_source = ""
+            adopted_at_val: datetime | None = None
+            adoption_grace_until_val: datetime | None = None
+        else:
+            origin = "adopted"
+            adoption_source = "manual_exchange_external"
+            adopted_at_val = entry_time
+            adoption_grace_until_val = self._manual_position_adoption_grace_until(adopted_at=entry_time)
         return PaperPosition(
             symbol=symbol,
             market="futures",
@@ -3294,10 +3307,10 @@ class LivePaperSession:
             latest_net_expected_edge_bps=0.0,
             latest_estimated_round_trip_cost_bps=0.0,
             exchange_synced=True,
-            origin="adopted",
-            adoption_source="manual_exchange_external",
-            adopted_at=adopted_at,
-            adoption_grace_until=self._manual_position_adoption_grace_until(adopted_at=adopted_at),
+            origin=origin,
+            adoption_source=adoption_source,
+            adopted_at=adopted_at_val,
+            adoption_grace_until=adoption_grace_until_val,
         )
 
     def _reserve_capacity_for_reconciled_position(self, position: PaperPosition) -> None:
@@ -3470,9 +3483,13 @@ class LivePaperSession:
             restored += 1
         active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
         for symbol in sorted(live_symbols - active_paper_symbols):
+            # startup_recovery=True: these positions exist on exchange but are not in our persisted
+            # state — most likely strategy positions whose state was lost (crash / state corruption).
+            # They must NOT be marked as external manual adoptions.
             self._reconcile_missing_in_paper_position(
                 position=live_positions_by_symbol[symbol],
                 persisted_cycles=0,
+                startup_recovery=True,
             )
             restored += 1
         active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
@@ -3488,8 +3505,16 @@ class LivePaperSession:
         }
         return restored
 
-    def _reconcile_missing_in_paper_position(self, *, position: dict[str, Any], persisted_cycles: int) -> None:
-        if self.runtime.paper_service.settings.disable_position_adoption:
+    def _reconcile_missing_in_paper_position(
+        self,
+        *,
+        position: dict[str, Any],
+        persisted_cycles: int,
+        startup_recovery: bool = False,
+    ) -> None:
+        # startup_recovery bypasses disable_position_adoption: positions found on exchange at startup
+        # whose state was lost are strategy-owned, not external manual positions.
+        if not startup_recovery and self.runtime.paper_service.settings.disable_position_adoption:
             symbol = str(position.get("symbol", ""))
             if self.log_store is not None:
                 self.log_store.append(
@@ -3503,7 +3528,9 @@ class LivePaperSession:
                     },
                 )
             return
-        paper_position = self._build_reconciled_paper_position(position=position)
+        paper_position = self._build_reconciled_paper_position(
+            position=position, startup_recovery=startup_recovery
+        )
         if paper_position is None:
             return
         existing = self.paper_positions.get(paper_position.symbol)
@@ -3518,12 +3545,15 @@ class LivePaperSession:
             persisted_cycles=persisted_cycles,
         )
         if self.log_store is not None:
+            log_action = (
+                "STARTUP_STATE_RECOVERY" if startup_recovery else "ADOPT_EXTERNAL_MANUAL_POSITION"
+            )
             self.log_store.append(
                 "futures_position_reconciliation",
                 {
                     "timestamp": datetime.now(tz=timezone.utc),
                     "symbol": paper_position.symbol,
-                    "action": "ADOPT_EXTERNAL_MANUAL_POSITION",
+                    "action": log_action,
                     "persisted_cycles": persisted_cycles,
                     "side": paper_position.side,
                     "entry_price": paper_position.entry_price,
