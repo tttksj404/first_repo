@@ -319,20 +319,36 @@ def _futures_asset_total_usd(
     rest_client: SupportsCapitalPricing,
     price_by_symbol: dict[str, float | None],
 ) -> float | None:
-    for key in ("usdtEquity", "accountEquity", "equity"):
-        parsed = _optional_float(row.get(key))
-        if parsed is not None and parsed > 0.0:
-            return parsed
-    balance_keys = (
+    # usdtEquity is always USDT-denominated regardless of the margin coin — trust it first.
+    usd_equity = _optional_float(row.get("usdtEquity"))
+    if usd_equity is not None and usd_equity > 0.0:
+        return usd_equity
+    if asset == "USDT":
+        # USDT-margined account: accountEquity/equity are also USD-denominated.
+        for key in ("accountEquity", "equity"):
+            parsed = _optional_float(row.get(key))
+            if parsed is not None and parsed > 0.0:
+                return parsed
+    # For non-USDT coin-margined accounts (COIN-FUTURES), equity/accountEquity are
+    # coin-denominated (e.g. 0.01 BTC) — NOT USD. Collect the coin amount and
+    # convert to USD via the spot price.
+    coin_candidates = (
         row.get("marginBalance"),
         row.get("walletBalance"),
         row.get("crossWalletBalance"),
+        row.get("equity"),        # coin-denominated for COIN-FUTURES
+        row.get("accountEquity"), # coin-denominated for COIN-FUTURES
         row.get("availableBalance"),
         row.get("maxWithdrawAmount"),
     )
-    amount = next((parsed for parsed in (_optional_float(value) for value in balance_keys) if parsed is not None and parsed > 0.0), None)
+    amount = next(
+        (parsed for parsed in (_optional_float(value) for value in coin_candidates) if parsed is not None and parsed > 0.0),
+        None,
+    )
     if amount is None:
         return None
+    if asset == "USDT":
+        return amount
     price = _spot_asset_usd_price(
         asset=asset,
         supported_symbols=supported_symbols,
@@ -490,6 +506,13 @@ def _recognized_futures_balance_usd(futures_account: dict[str, Any]) -> float:
         found = False
         for item in rows:
             if not isinstance(item, dict):
+                continue
+            # Only sum USDT-margined rows directly. Non-USDT (COIN-FUTURES) rows hold
+            # equity in coin units (e.g. 0.01 BTC ≠ $0.01). Their USD value is computed
+            # separately via _futures_funding_assets to avoid both under-valuation and
+            # double-counting.
+            margin_coin = str(item.get("marginCoin") or item.get("asset") or item.get("currency") or "").upper()
+            if margin_coin and margin_coin != "USDT":
                 continue
             for key in ("usdtEquity", "accountEquity", "equity", "marginBalance", "walletBalance"):
                 parsed = _optional_float(item.get(key))
