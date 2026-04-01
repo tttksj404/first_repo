@@ -187,6 +187,8 @@ def apply_score_and_costs(
 
 
 def passes_cost_gate(features: FeatureVector, settings: Settings) -> bool:
+    if features.estimated_round_trip_cost_bps <= 0:
+        return False
     return (
         features.gross_expected_edge_bps
         >= settings.cost_gate.edge_to_cost_multiple_min

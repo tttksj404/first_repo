@@ -321,6 +321,8 @@ class DecisionLiveOrderAdapter:
         filled = self._filled_measure(market=market, order_params=order_params, response=response)
         if requested > 0.0 and filled > 0.0:
             return max(0.0, min(filled / requested, 1.0))
+        if requested <= 0.0:
+            return 0.0
         return 1.0
 
     def _avg_fill_price(
