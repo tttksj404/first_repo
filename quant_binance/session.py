@@ -952,6 +952,7 @@ class LivePaperSession:
         try:
             return json.loads(path.read_text(encoding="utf-8"))
         except Exception:
+            logger.warning("failed to read persisted policy state %s", path, exc_info=True)
             return {}
 
     def _write_persisted_policy_state(self, policy_state: dict[str, object]) -> None:
