@@ -238,9 +238,10 @@ def _macro_futures_risk_controls(features: FeatureVector, *, symbol: str) -> tup
     size_multiplier = max(features.macro_size_multiplier, 0.0)
     leverage_cap = max(int(features.macro_leverage_cap), 0)
     if _macro_event_halt(features):
+        effective_cap = leverage_cap if leverage_cap > 0 else 1
         if is_alt_symbol(symbol):
-            return False, reasons, 0.0, max(leverage_cap, 1)
-        return True, [], min(size_multiplier if size_multiplier > 0.0 else 0.35, 0.35), max(leverage_cap, 1)
+            return False, reasons, 0.0, effective_cap
+        return True, [], min(size_multiplier if size_multiplier > 0.0 else 0.35, 0.35), effective_cap
     if _macro_risk_off(features):
         if is_alt_symbol(symbol):
             return False, reasons, 0.0, max(leverage_cap, 2)

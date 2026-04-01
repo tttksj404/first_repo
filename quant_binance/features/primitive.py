@@ -89,17 +89,17 @@ def build_feature_vector_from_primitives(
         * 0.5
         + 0.5
     )
-    spread_bps_norm = clamp(inputs.spread_bps / thresholds.spread_bps_ceiling)
-    probe_slippage_bps_norm = clamp(inputs.probe_slippage_bps / thresholds.slippage_bps_ceiling)
-    depth_10bps_norm = clamp(inputs.depth_usd_within_10bps / thresholds.depth_usd_target)
+    spread_bps_norm = clamp(inputs.spread_bps / max(thresholds.spread_bps_ceiling, 1e-6))
+    probe_slippage_bps_norm = clamp(inputs.probe_slippage_bps / max(thresholds.slippage_bps_ceiling, 1e-6))
+    depth_10bps_norm = clamp(inputs.depth_usd_within_10bps / max(thresholds.depth_usd_target, 1e-6))
     book_stability_norm = 1.0 - clamp(
-        inputs.order_book_imbalance_std / thresholds.order_book_imbalance_std_ceiling
+        inputs.order_book_imbalance_std / max(thresholds.order_book_imbalance_std_ceiling, 1e-6)
     )
     realized_vol_1h_norm = midpoint_percentile_rank(inputs.realized_vol_1h, history.realized_vol_1h)
     realized_vol_4h_norm = midpoint_percentile_rank(inputs.realized_vol_4h, history.realized_vol_4h)
     vol_shock_norm = clamp(
         max(inputs.realized_vol_1h / max(inputs.median_realized_vol_1h_30d, 1e-9) - 1.0, 0.0)
-        / thresholds.vol_shock_ceiling
+        / max(thresholds.vol_shock_ceiling, 1e-6)
     )
     funding_abs_percentile = midpoint_percentile_rank(abs(inputs.funding_rate), history.funding_abs)
     oi_surge_value = max(inputs.open_interest / max(inputs.open_interest_ema, 1e-9) - 1.0, 0.0)
