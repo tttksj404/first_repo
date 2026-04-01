@@ -265,6 +265,98 @@ elif [ "$DISK_AVAIL" -lt 20 ]; then
     warn "디스크 여유 ${DISK_AVAIL}GB (<20GB)"
 fi
 
+# ---- Auto disk cleanup ----
+echo ""
+echo "[4b] 자동 디스크 정리"
+CLEANED=0
+
+# 1. supervisor.log 200MB 넘으면 로테이션
+if [ -f "$RUNTIME/live_supervisor.log" ]; then
+    LOG_SZ=$(du -m "$RUNTIME/live_supervisor.log" | cut -f1)
+    if [ "$LOG_SZ" -gt 200 ]; then
+        mv "$RUNTIME/live_supervisor.log" "$RUNTIME/live_supervisor.log.old" 2>/dev/null
+        echo "  supervisor.log ${LOG_SZ}MB → rotated"
+        CLEANED=$((CLEANED+1))
+    fi
+fi
+
+# 2. 이전 로테이션 .old/.1 파일 삭제 (7일 이상)
+find "$RUNTIME" -maxdepth 1 -name "live_supervisor.log.*" -mtime +7 -delete 2>/dev/null
+OLD_DELETED=$(find "$RUNTIME" -maxdepth 1 -name "live_supervisor.log.*" -mtime +7 2>/dev/null | wc -l | tr -d ' ')
+
+# 3. health_audit.log / autotuner.log 50MB 넘으면 truncate
+for LOGFILE in "$RUNTIME/health_audit.log" "$RUNTIME/autotuner.log" "$RUNTIME/health_audit_claude.log"; do
+    if [ -f "$LOGFILE" ]; then
+        LSZMB=$(du -m "$LOGFILE" | cut -f1)
+        if [ "$LSZMB" -gt 50 ]; then
+            tail -10000 "$LOGFILE" > "$LOGFILE.tmp" && mv "$LOGFILE.tmp" "$LOGFILE"
+            echo "  $(basename $LOGFILE) ${LSZMB}MB → truncated to last 10k lines"
+            CLEANED=$((CLEANED+1))
+        fi
+    fi
+done
+
+# 4. 7일 이상 된 이전 세션 run 디렉토리 삭제 (latest 제외)
+$PYTHON -c "
+import shutil
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+
+cutoff = datetime.now(tz=timezone.utc) - timedelta(days=7)
+base = Path('$RUNTIME/output/paper-live-shell')
+removed = 0
+for d in sorted(base.iterdir()):
+    if not d.is_dir() or d.name == 'latest':
+        continue
+    try:
+        mtime = datetime.fromtimestamp(d.stat().st_mtime, tz=timezone.utc)
+        if mtime < cutoff:
+            shutil.rmtree(d)
+            removed += 1
+    except: pass
+if removed:
+    print(f'  오래된 run 디렉토리 {removed}개 삭제')
+" 2>/dev/null
+
+# 5. git worktree 정리 (30일 이상)
+$PYTHON -c "
+import shutil
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+
+cutoff = datetime.now(tz=timezone.utc) - timedelta(days=30)
+wt_base = Path('$REPO/.claude/worktrees')
+if wt_base.exists():
+    removed = 0
+    for d in sorted(wt_base.iterdir()):
+        if not d.is_dir():
+            continue
+        try:
+            mtime = datetime.fromtimestamp(d.stat().st_mtime, tz=timezone.utc)
+            if mtime < cutoff:
+                shutil.rmtree(d)
+                removed += 1
+        except: pass
+    if removed:
+        print(f'  오래된 worktree {removed}개 삭제')
+" 2>/dev/null
+
+# 6. 디스크 위험 수준이면 추가 정리
+if [ "$DISK_AVAIL" -lt 10 ]; then
+    echo "  디스크 위험! 추가 정리 실행..."
+    # 오래된 .old 로그 전부 삭제
+    find "$RUNTIME" -name "*.old" -delete 2>/dev/null
+    find "$RUNTIME" -name "*.bak" -delete 2>/dev/null
+    # edge_table.json 중 오래된 것 삭제
+    find "$RUNTIME/output" -name "edge_table.json" -mtime +7 -delete 2>/dev/null
+    echo "  추가 정리 완료"
+    CLEANED=$((CLEANED+1))
+fi
+
+if [ "$CLEANED" -eq 0 ]; then
+    echo "  정리 불필요"
+fi
+
 # CPU usage
 CPU=$($PYTHON -c "
 import subprocess
