@@ -104,11 +104,26 @@ def format_runtime_telegram_report(
             f"qty={latest_live_order.get('quantity')} orderId={latest_live_order.get('order_id')}"
         )
 
+    gross_pnl = float(summary.get("realized_pnl_usd_estimate") or state.get("realized_pnl_usd_estimate") or 0.0)
+    net_pnl = float(summary.get("realized_pnl_net_usd_estimate") or state.get("realized_pnl_net_usd_estimate") or gross_pnl)
+    total_fee = float(summary.get("estimated_round_trip_fee_usd") or state.get("estimated_round_trip_fee_usd") or 0.0)
+    equity_delta = summary.get("session_equity_delta_usdt") or state.get("session_equity_delta_usdt")
+    start_equity = summary.get("session_start_equity_usdt") or state.get("session_start_equity_usdt")
+    current_equity = summary.get("session_current_equity_usdt") or state.get("session_current_equity_usdt")
+    closed_count = int(summary.get("closed_trade_count") or state.get("closed_trade_count") or 0)
+    if closed_count > 0:
+        lines.append(f"세션 손익 [Gross추정]: {gross_pnl:+.4f} USDT (수수료 제외)")
+        lines.append(f"세션 손익 [Net추정]:   {net_pnl:+.4f} USDT (수수료 ~{total_fee:.4f} 차감)")
+    if equity_delta is not None:
+        start_str = f"{float(start_equity):.2f}" if start_equity is not None else "?"
+        current_str = f"{float(current_equity):.2f}" if current_equity is not None else "?"
+        lines.append(f"실계좌 변화:           {float(equity_delta):+.4f} USDT ({start_str}→{current_str})")
+
     if latest_closed_trade:
-        pnl = float(latest_closed_trade.get("realized_pnl_usd_estimate", 0.0))
+        pnl = float(latest_closed_trade.get("realized_pnl_net_usd_estimate", latest_closed_trade.get("realized_pnl_usd_estimate", 0.0)))
         lines.append(
             "최근 종료 거래: "
-            f"{latest_closed_trade.get('symbol')} {latest_closed_trade.get('exit_reason')} pnl={pnl:.4f}"
+            f"{latest_closed_trade.get('symbol')} {latest_closed_trade.get('exit_reason')} net_pnl={pnl:.4f}"
         )
 
     if latest_order_error:
