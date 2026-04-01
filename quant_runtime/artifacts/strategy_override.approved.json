@@ -92,6 +92,7 @@
   ],
   "strategy_profile": "live-ultra-aggressive",
   "force_auto_mode": "normal",
+  "disable_position_adoption": true,
   "risk": {
     "per_trade_equity_risk": 0.0055,
     "max_symbol_notional_fraction": 0.32,

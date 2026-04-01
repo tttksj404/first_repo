@@ -367,6 +367,7 @@ class Settings:
     housekeeping: HousekeepingConfig
     strategy_profile: str
     force_auto_mode: str = ""
+    disable_position_adoption: bool = False
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -438,4 +439,5 @@ class Settings:
             housekeeping=HousekeepingConfig(**raw["housekeeping"]),
             strategy_profile=raw["strategy_profile"],
             force_auto_mode=str(raw.get("force_auto_mode", "") or ""),
+            disable_position_adoption=bool(raw.get("disable_position_adoption", False)),
         )

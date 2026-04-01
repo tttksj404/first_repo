@@ -3489,6 +3489,20 @@ class LivePaperSession:
         return restored
 
     def _reconcile_missing_in_paper_position(self, *, position: dict[str, Any], persisted_cycles: int) -> None:
+        if self.runtime.paper_service.settings.disable_position_adoption:
+            symbol = str(position.get("symbol", ""))
+            if self.log_store is not None:
+                self.log_store.append(
+                    "futures_position_reconciliation",
+                    {
+                        "timestamp": datetime.now(tz=timezone.utc),
+                        "symbol": symbol,
+                        "action": "ADOPTION_BLOCKED_BY_CONFIG",
+                        "persisted_cycles": persisted_cycles,
+                        "reason": "disable_position_adoption=true",
+                    },
+                )
+            return
         paper_position = self._build_reconciled_paper_position(position=position)
         if paper_position is None:
             return
