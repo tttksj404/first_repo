@@ -139,8 +139,11 @@ class RefreshDecision:
 
 
 def _fetch_text(url: str) -> str:
-    with urlopen(url, timeout=HTTP_TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
-        return response.read().decode("utf-8", errors="replace")
+    try:
+        with urlopen(url, timeout=HTTP_TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
+            return response.read().decode("utf-8", errors="replace")
+    except Exception:
+        return ""
 
 
 def fetch_fear_greed_index(*, fetcher=_fetch_text) -> tuple[int, str]:
@@ -203,8 +206,13 @@ def fetch_google_news_headlines(
     rows: list[NewsHeadline] = []
     seen_signatures: set[str] = set()
     for query, label in queries:
-        xml_text = fetcher(GOOGLE_NEWS_TEMPLATE.format(query=quote(query)))
-        root = ET.fromstring(xml_text)
+        try:
+            xml_text = fetcher(GOOGLE_NEWS_TEMPLATE.format(query=quote(query)))
+            if not xml_text:
+                continue
+            root = ET.fromstring(xml_text)
+        except (ET.ParseError, Exception):
+            continue
         for item in root.findall("./channel/item"):
             title = (item.findtext("title") or "").strip()
             if not title:

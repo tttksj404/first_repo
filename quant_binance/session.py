@@ -2405,6 +2405,7 @@ class LivePaperSession:
         exit_time: datetime,
         exit_reason: str,
     ) -> None:
+        quantity_closed = min(quantity_closed, position.quantity_remaining)
         if quantity_closed <= 0:
             return
         if position.side == "short":
@@ -3875,7 +3876,7 @@ class LivePaperSession:
 
     def _live_portfolio_unrealized_ratio(self) -> float:
         total_unrealized = sum(self._position_unrealized_pnl_usd(position) for position in self.live_positions_snapshot)
-        return total_unrealized / max(self.equity_usd, 1e-9)
+        return total_unrealized / self.equity_usd if self.equity_usd > 0 else 0.0
 
     def _realized_pnl_total(self) -> float:
         return round(
@@ -3885,7 +3886,7 @@ class LivePaperSession:
 
     def _live_portfolio_profit_ratio(self) -> float:
         total_unrealized = sum(self._position_unrealized_pnl_usd(position) for position in self.live_positions_snapshot)
-        return (self._realized_pnl_total() + total_unrealized) / max(self.equity_usd, 1e-9)
+        return (self._realized_pnl_total() + total_unrealized) / self.equity_usd if self.equity_usd > 0 else 0.0
 
     def _standard_stop_loss_exits_enabled(self) -> bool:
         return not self.runtime.paper_service.settings.live_position_risk.disable_standard_stop_loss_exits
@@ -4407,7 +4408,9 @@ class LivePaperSession:
         position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
 
     def _paper_portfolio_profit_ratio(self) -> float:
-        return (self._realized_pnl_total() + self._current_unrealized_total()) / max(self.equity_usd, 1e-9)
+        if self.equity_usd <= 0:
+            return 0.0
+        return (self._realized_pnl_total() + self._current_unrealized_total()) / self.equity_usd
 
     def _realized_loss_ratio(self, *, now: datetime, scope: str) -> float:
         realized_loss = 0.0
@@ -4427,7 +4430,9 @@ class LivePaperSession:
             pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
             if pnl < 0:
                 realized_loss += abs(pnl)
-        return realized_loss / max(self.equity_usd, 1e-9)
+        if self.equity_usd <= 0:
+            return 0.0
+        return realized_loss / self.equity_usd
 
     def _intraday_drawdown_ratio(self, *, now: datetime) -> float:
         realized_today = 0.0
@@ -4437,7 +4442,7 @@ class LivePaperSession:
                 continue
             realized_today += float(trade.get("realized_pnl_usd_estimate", 0.0))
         combined = realized_today + self._current_unrealized_total()
-        return abs(min(combined, 0.0)) / max(self.equity_usd, 1e-9)
+        return abs(min(combined, 0.0)) / self.equity_usd if self.equity_usd > 0 else 0.0
 
     def _enforce_risk_limits(self, now: datetime) -> None:
         risk = self.runtime.paper_service.settings.risk
@@ -4574,6 +4579,8 @@ class LivePaperSession:
         if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
             return False
         if price <= 0 or decision.order_intent_notional_usd <= 0:
+            return False
+        if decision.order_intent_notional_usd > self.remaining_portfolio_capacity_usd and self.remaining_portfolio_capacity_usd > 0:
             return False
         quantity = decision.order_intent_notional_usd / price
         leverage = 1
