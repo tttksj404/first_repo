@@ -72,6 +72,12 @@ class QuantLiveWatchdog:
         self.closed_trades_path = self.output_base / "output" / "paper-live-shell" / "latest" / "logs" / "closed_trades.jsonl"
         self.strategy_override_path = self.output_base / "artifacts" / "strategy_override.approved.json"
         self.strategy_health_path = self.log_dir / "health_status.json"
+        # Disk cleanup
+        self.disk_limit_mb = int(os.environ.get("QUANT_WATCHDOG_DISK_LIMIT_MB", "500"))
+        self.disk_cleanup_interval_seconds = 7 * 24 * 3600  # weekly
+        self._last_disk_cleanup: float = 0.0
+        # Paths that must never be deleted
+        self._protected_names = frozenset({"closed_trades.jsonl"})
 
     def _resolve_python_bin(self) -> str:
         requested = os.environ.get("PYTHON_BIN")
@@ -493,17 +499,119 @@ class QuantLiveWatchdog:
             self.log(f"[WARNING] failed to set force_auto_mode=normal: {exc}")
             return False
 
-    def _write_strategy_health(self, overall: str, checks: dict, auto_actions: list[str]) -> None:
+    def _write_strategy_health(
+        self, overall: str, checks: dict, auto_actions: list[str], disk_info: dict | None = None
+    ) -> None:
         payload = {
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "overall_severity": overall,
             "checks": checks,
             "auto_actions": auto_actions,
+            "disk": disk_info or {"dir_size_mb": None},
         }
         try:
             self._write_json_atomic(self.strategy_health_path, payload)
         except Exception as exc:
             self.log(f"[WARNING] failed to write health_status.json: {exc}")
+
+    # ------------------------------------------------------------------
+    # Disk cleanup
+    # ------------------------------------------------------------------
+
+    def _dir_size_mb(self, path: Path) -> float:
+        total = 0
+        try:
+            for p in path.rglob("*"):
+                try:
+                    if p.is_file():
+                        total += p.stat().st_size
+                except OSError:
+                    pass
+        except OSError:
+            pass
+        return total / (1024 * 1024)
+
+    def _is_protected(self, path: Path) -> bool:
+        return path.name in self._protected_names
+
+    def _delete_log_old_files(self) -> list[str]:
+        """Remove *.log.old files left by manual rotation or legacy tools."""
+        deleted = []
+        try:
+            for p in self.output_base.rglob("*.log.old"):
+                if self._is_protected(p):
+                    continue
+                try:
+                    size_mb = p.stat().st_size / (1024 * 1024)
+                    p.unlink()
+                    deleted.append(f"{p.name}({size_mb:.1f}MB)")
+                except OSError as exc:
+                    self.log(f"[WARNING] disk_cleanup: could not delete {p}: {exc}")
+        except OSError:
+            pass
+        return deleted
+
+    def _prune_old_logs_for_space(self, target_mb: float) -> list[str]:
+        """Delete oldest deletable log files until dir size is under target_mb."""
+        # Gather deletable files: .log.N backups and rotated logs, never protected names
+        candidates: list[tuple[float, Path]] = []
+        try:
+            for p in self.output_base.rglob("*"):
+                if not p.is_file():
+                    continue
+                if self._is_protected(p):
+                    continue
+                name = p.name
+                # Only prune rotated/backup log files, not active runtime files
+                is_rotated_log = (
+                    name.endswith(".log.old")
+                    or ((".log." in name) and name.split(".log.")[-1].isdigit())
+                )
+                if not is_rotated_log:
+                    continue
+                try:
+                    mtime = p.stat().st_mtime
+                    candidates.append((mtime, p))
+                except OSError:
+                    pass
+        except OSError:
+            pass
+
+        candidates.sort()  # oldest first
+        deleted = []
+        for _, p in candidates:
+            current_mb = self._dir_size_mb(self.output_base)
+            if current_mb <= target_mb:
+                break
+            try:
+                size_mb = p.stat().st_size / (1024 * 1024)
+                p.unlink()
+                deleted.append(f"{p.name}({size_mb:.1f}MB)")
+                self.log(f"[WARNING] disk_cleanup: pruned rotated log {p.name} ({size_mb:.1f}MB) to free space")
+            except OSError as exc:
+                self.log(f"[WARNING] disk_cleanup: could not prune {p}: {exc}")
+        return deleted
+
+    def run_disk_cleanup(self, startup: bool = False) -> dict:
+        label = "startup" if startup else "scheduled"
+        results: dict[str, object] = {"trigger": label, "deleted_old": [], "pruned_for_space": []}
+
+        deleted_old = self._delete_log_old_files()
+        if deleted_old:
+            self.log(f"[WARNING] disk_cleanup({label}): removed .log.old files: {deleted_old}")
+        results["deleted_old"] = deleted_old
+
+        size_mb = self._dir_size_mb(self.output_base)
+        results["dir_size_mb"] = round(size_mb, 1)
+
+        if size_mb > self.disk_limit_mb:
+            pruned = self._prune_old_logs_for_space(target_mb=self.disk_limit_mb * 0.8)
+            if pruned:
+                results["pruned_for_space"] = pruned
+            size_mb = self._dir_size_mb(self.output_base)
+            results["dir_size_mb"] = round(size_mb, 1)
+
+        return results
 
     def _run_strategy_health_check(self) -> None:
         policy_state = self._load_json_safe(self.policy_state_path)
@@ -528,6 +636,14 @@ class QuantLiveWatchdog:
                     "auto-set force_auto_mode=normal in strategy_override.approved.json"
                 )
 
+        # Weekly disk cleanup
+        now = time.time()
+        if now - self._last_disk_cleanup >= self.disk_cleanup_interval_seconds:
+            disk_info = self.run_disk_cleanup(startup=False)
+            self._last_disk_cleanup = now
+        else:
+            disk_info = {"dir_size_mb": round(self._dir_size_mb(self.output_base), 1)}
+
         severities = [c["severity"] for c in checks.values()]
         overall = "CRITICAL" if "CRITICAL" in severities else ("WARNING" if "WARNING" in severities else "OK")
 
@@ -535,7 +651,7 @@ class QuantLiveWatchdog:
             if check["severity"] != "OK":
                 self.log(f"[{check['severity']}] strategy_health:{name} — {check['message']}")
 
-        self._write_strategy_health(overall, checks, auto_actions)
+        self._write_strategy_health(overall, checks, auto_actions, disk_info)
 
     def step(self) -> None:
         if not self.owns_watchdog_slot():
@@ -591,6 +707,17 @@ class QuantLiveWatchdog:
             f"pid={self.self_pid} interval={self.check_interval_seconds}s stale={self.stale_seconds}s "
             f"python_bin={self.python_bin} slot_version={self.slot_version}"
         )
+        # Run disk cleanup once at startup, then weekly via strategy health check loop
+        try:
+            startup_disk = self.run_disk_cleanup(startup=True)
+            self._last_disk_cleanup = time.time()
+            self.log(
+                f"disk_cleanup(startup): dir_size={startup_disk.get('dir_size_mb')}MB "
+                f"deleted_old={startup_disk.get('deleted_old')} "
+                f"pruned={startup_disk.get('pruned_for_space')}"
+            )
+        except Exception as exc:
+            self.log(f"[WARNING] startup disk cleanup failed: {exc}")
         while True:
             self.step()
             time.sleep(self.check_interval_seconds)
