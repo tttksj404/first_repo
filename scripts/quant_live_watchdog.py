@@ -59,6 +59,19 @@ class QuantLiveWatchdog:
         digest = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
         self.slot_version = f"v3:{digest}"
         self.self_pid = os.getpid()
+        # Strategy health check (every 5 min)
+        self.strategy_check_interval_seconds = max(
+            int(os.environ.get("QUANT_WATCHDOG_STRATEGY_CHECK_INTERVAL", "300")), 60
+        )
+        self.adopted_ratio_threshold = float(os.environ.get("QUANT_WATCHDOG_ADOPTED_RATIO_THRESHOLD", "0.90"))
+        self.strategy_entry_lookback_hours = int(os.environ.get("QUANT_WATCHDOG_ENTRY_LOOKBACK_HOURS", "6"))
+        self.equity_drop_threshold_pct = float(os.environ.get("QUANT_WATCHDOG_EQUITY_DROP_PCT", "5.0"))
+        self._last_strategy_check: float = 0.0
+        self._equity_history: deque[tuple[float, float]] = deque(maxlen=12)
+        self.policy_state_path = self.output_base / "output" / "paper-live-shell" / "latest" / "policy_state.json"
+        self.closed_trades_path = self.output_base / "output" / "paper-live-shell" / "latest" / "logs" / "closed_trades.jsonl"
+        self.strategy_override_path = self.output_base / "artifacts" / "strategy_override.approved.json"
+        self.strategy_health_path = self.log_dir / "health_status.json"
 
     def _resolve_python_bin(self) -> str:
         requested = os.environ.get("PYTHON_BIN")
@@ -269,11 +282,196 @@ class QuantLiveWatchdog:
         self.write_slot(self.watchdog_pid_path, self.slot_version)
         return True
 
+    # ------------------------------------------------------------------
+    # Strategy health checks
+    # ------------------------------------------------------------------
+
+    def _load_json_safe(self, path: Path) -> dict:
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+
+    def _load_jsonl_records(self, path: Path) -> list[dict]:
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except Exception:
+            return []
+        records = []
+        for raw in lines:
+            line = raw.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(obj, dict):
+                records.append(obj)
+        return records
+
+    def _check_adopted_ratio(self, trades: list[dict]) -> dict:
+        if not trades:
+            return {"severity": "OK", "message": "no trades yet", "value": 0.0}
+        adopted = sum(
+            1 for t in trades
+            if str(t.get("source") or t.get("entry_source") or "") == "manual_exchange_external"
+        )
+        ratio = adopted / len(trades)
+        if ratio >= self.adopted_ratio_threshold:
+            return {
+                "severity": "WARNING",
+                "message": f"adopted ratio {ratio:.1%} >= {self.adopted_ratio_threshold:.0%} ({adopted}/{len(trades)} trades); strategy data thin",
+                "value": round(ratio, 4),
+            }
+        return {"severity": "OK", "message": f"adopted ratio {ratio:.1%}", "value": round(ratio, 4)}
+
+    def _check_tighter_mode(self, policy_state: dict) -> dict:
+        auto_mode = dict(policy_state.get("auto_mode", {}) or {})
+        mode = str(auto_mode.get("mode") or "")
+        blocked = bool(auto_mode.get("expansion_blocked", False))
+        reason_codes = list(auto_mode.get("reason_codes") or [])
+        if mode == "tighter" and blocked:
+            return {
+                "severity": "WARNING",
+                "message": f"auto_mode=tighter + expansion_blocked=True; strategy entries suppressed. reasons={reason_codes}",
+                "value": {"mode": mode, "expansion_blocked": blocked},
+            }
+        return {
+            "severity": "OK",
+            "message": f"auto_mode={mode or 'unknown'} expansion_blocked={blocked}",
+            "value": {"mode": mode, "expansion_blocked": blocked},
+        }
+
+    def _check_strategy_entries(self, trades: list[dict]) -> dict:
+        if not trades:
+            return {"severity": "OK", "message": "no trades yet", "value": 0}
+        cutoff = time.time() - self.strategy_entry_lookback_hours * 3600
+        recent_pure = 0
+        for t in trades:
+            source = str(t.get("source") or t.get("entry_source") or "")
+            if source == "manual_exchange_external":
+                continue
+            ts_raw = t.get("closed_at") or t.get("entry_time") or t.get("timestamp") or ""
+            try:
+                ts = datetime.fromisoformat(str(ts_raw)).timestamp() if ts_raw else 0.0
+            except ValueError:
+                ts = 0.0
+            if ts >= cutoff:
+                recent_pure += 1
+        if recent_pure == 0:
+            return {
+                "severity": "WARNING",
+                "message": f"0 pure strategy entries in last {self.strategy_entry_lookback_hours}h; entries fully stalled",
+                "value": 0,
+            }
+        return {
+            "severity": "OK",
+            "message": f"{recent_pure} pure strategy entries in last {self.strategy_entry_lookback_hours}h",
+            "value": recent_pure,
+        }
+
+    def _check_equity_drop(self, summary_state: dict) -> dict:
+        equity_raw = summary_state.get("session_current_equity_usdt") or summary_state.get("session_start_equity_usdt")
+        if equity_raw is None:
+            return {"severity": "OK", "message": "equity data unavailable", "value": None}
+        try:
+            equity = float(equity_raw)
+        except (TypeError, ValueError):
+            return {"severity": "OK", "message": "equity parse error", "value": None}
+        now = time.time()
+        self._equity_history.append((now, equity))
+        if len(self._equity_history) < 2:
+            return {"severity": "OK", "message": f"equity={equity:.2f} (accumulating history)", "value": equity}
+        baseline = self._equity_history[0][1]
+        if baseline <= 0:
+            return {"severity": "OK", "message": "equity baseline invalid", "value": equity}
+        drop_pct = (baseline - equity) / baseline * 100.0
+        if drop_pct >= self.equity_drop_threshold_pct:
+            return {
+                "severity": "CRITICAL",
+                "message": f"equity dropped {drop_pct:.2f}% from {baseline:.2f} to {equity:.2f} USDT (threshold {self.equity_drop_threshold_pct:.1f}%)",
+                "value": round(drop_pct, 4),
+            }
+        return {
+            "severity": "OK",
+            "message": f"equity {equity:.2f} USDT (delta {-drop_pct:+.2f}% from session baseline {baseline:.2f})",
+            "value": round(drop_pct, 4),
+        }
+
+    def _apply_force_auto_mode_normal(self) -> bool:
+        try:
+            raw = self._load_json_safe(self.strategy_override_path)
+            if raw.get("force_auto_mode") == "normal":
+                return False  # already set
+            raw["force_auto_mode"] = "normal"
+            self.strategy_override_path.parent.mkdir(parents=True, exist_ok=True)
+            self.strategy_override_path.write_text(
+                json.dumps(raw, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+            )
+            return True
+        except Exception as exc:
+            self.log(f"[WARNING] failed to set force_auto_mode=normal: {exc}")
+            return False
+
+    def _write_strategy_health(self, overall: str, checks: dict, auto_actions: list[str]) -> None:
+        payload = {
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "overall_severity": overall,
+            "checks": checks,
+            "auto_actions": auto_actions,
+        }
+        try:
+            self.strategy_health_path.parent.mkdir(parents=True, exist_ok=True)
+            self.strategy_health_path.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+            )
+        except Exception as exc:
+            self.log(f"[WARNING] failed to write health_status.json: {exc}")
+
+    def _run_strategy_health_check(self) -> None:
+        trades = self._load_jsonl_records(self.closed_trades_path)
+        policy_state = self._load_json_safe(self.policy_state_path)
+        summary_state = self._load_json_safe(self.summary_path)
+
+        auto_actions: list[str] = []
+        checks: dict[str, dict] = {}
+
+        checks["adopted_ratio"] = self._check_adopted_ratio(trades)
+        checks["tighter_mode"] = self._check_tighter_mode(policy_state)
+        checks["strategy_entries"] = self._check_strategy_entries(trades)
+        checks["equity_drop"] = self._check_equity_drop(summary_state)
+
+        # Auto-response: if tighter mode detected, force normal
+        if checks["tighter_mode"]["severity"] in ("WARNING", "CRITICAL"):
+            applied = self._apply_force_auto_mode_normal()
+            if applied:
+                auto_actions.append("set_force_auto_mode_normal")
+                self.log("[WARNING] strategy_health:tighter_mode detected; auto-set force_auto_mode=normal in strategy_override.approved.json")
+
+        severities = [c["severity"] for c in checks.values()]
+        overall = "CRITICAL" if "CRITICAL" in severities else ("WARNING" if "WARNING" in severities else "OK")
+
+        for name, check in checks.items():
+            if check["severity"] != "OK":
+                self.log(f"[{check['severity']}] strategy_health:{name} — {check['message']}")
+
+        self._write_strategy_health(overall, checks, auto_actions)
+
     def step(self) -> None:
         if not self.owns_watchdog_slot():
             current_pid, current_version = self.read_slot(self.watchdog_pid_path)
             self.log(f"watchdog slot lost to pid={current_pid} {current_version or ''}".strip())
             raise SystemExit(0)
+
+        # Strategy health check every 5 min (independent of process liveness check)
+        now = time.time()
+        if now - self._last_strategy_check >= self.strategy_check_interval_seconds:
+            try:
+                self._run_strategy_health_check()
+            except Exception as exc:
+                self.log(f"[WARNING] strategy health check failed: {exc}")
+            self._last_strategy_check = now
 
         supervisor_pid, _ = self.read_slot(self.supervisor_pid_path)
         supervisor_alive = self.pid_alive(supervisor_pid)
