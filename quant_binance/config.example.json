@@ -249,7 +249,10 @@
     "partial_take_profit_r": 1.5,
     "futures_profit_protection_arm_roe_percent": 8.0,
     "futures_profit_protection_retrace_roe_percent": 3.0,
-    "futures_proactive_take_profit_roe_thresholds_percent": [10.0, 14.0],
+    "futures_proactive_take_profit_roe_thresholds_percent": [
+      10.0,
+      14.0
+    ],
     "futures_proactive_take_profit_fraction": 0.25,
     "post_tp_stop_mode": "breakeven",
     "futures_max_holding_minutes": 1440,
@@ -647,7 +650,9 @@
         "pyramid_min_volume_confirmation": 0.4,
         "pyramid_max_adds_per_symbol": 1,
         "pyramid_size_multiplier": 0.4,
-        "demoted_symbols": ["BTCUSDT"],
+        "demoted_symbols": [
+          "BTCUSDT"
+        ],
         "demoted_symbol_size_cap": 0.45
       },
       "portfolio_focus": {
@@ -681,7 +686,8 @@
         "partial_exit_min_expected_after_fee_usd": 1.0,
         "partial_exit_min_interval_minutes": 60,
         "major_partial_exit_fraction": 0.75
-      }
+      },
+      "disable_position_adoption": true
     },
     "autoresearch-futures-active": {
       "mode_thresholds": {
