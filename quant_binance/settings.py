@@ -366,6 +366,7 @@ class Settings:
     portfolio_focus: PortfolioFocusConfig
     housekeeping: HousekeepingConfig
     strategy_profile: str
+    force_auto_mode: str = ""
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -436,4 +437,5 @@ class Settings:
             portfolio_focus=PortfolioFocusConfig(**raw["portfolio_focus"]),
             housekeeping=HousekeepingConfig(**raw["housekeeping"]),
             strategy_profile=raw["strategy_profile"],
+            force_auto_mode=str(raw.get("force_auto_mode", "") or ""),
         )

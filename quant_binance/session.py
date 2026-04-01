@@ -960,6 +960,16 @@ class LivePaperSession:
             policy_state.get("rollout_progression", active_policy.get("rollout_progression", {})) or {}
         )
 
+    def _apply_force_auto_mode(self, auto_mode: dict[str, object]) -> dict[str, object]:
+        forced = str(self.runtime.paper_service.settings.force_auto_mode or "").strip().lower()
+        if forced not in {"normal", "tighter", "cautiously_expanded"}:
+            return auto_mode
+        result = dict(auto_mode)
+        result["mode"] = forced
+        if forced == "normal":
+            result["expansion_blocked"] = False
+        return result
+
     def _policy_runtime_context(self) -> dict[str, object]:
         policy_state = self._read_persisted_policy_state()
         if not policy_state:
@@ -1004,7 +1014,9 @@ class LivePaperSession:
             "adjustments": adjustments,
             "source": source,
             "execution_phase": str(rollout_progression.get("execution_phase", "baseline") or "baseline"),
-            "auto_mode": dict(policy_state.get("auto_mode", active_policy.get("auto_mode", {})) or {}),
+            "auto_mode": self._apply_force_auto_mode(
+                dict(policy_state.get("auto_mode", active_policy.get("auto_mode", {})) or {})
+            ),
             "live_evidence_rejudge": dict(
                 policy_state.get("live_evidence_rejudge", active_policy.get("live_evidence_rejudge", {})) or {}
             ),
