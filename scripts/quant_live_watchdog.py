@@ -292,14 +292,65 @@ class QuantLiveWatchdog:
         except Exception:
             return {}
 
-    def _load_jsonl_records(self, path: Path) -> list[dict]:
+    def _write_json_atomic(self, path: Path, data: dict) -> None:
+        """Write JSON atomically via temp file + rename to avoid partial reads."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
         try:
-            lines = path.read_text(encoding="utf-8").splitlines()
+            tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            tmp.rename(path)
         except Exception:
+            try:
+                tmp.unlink(missing_ok=True)
+            except Exception:
+                pass
+            raise
+
+    def _count_trades_by_source(self, path: Path) -> tuple[int, int]:
+        """Stream-scan JSONL to count (total, adopted) without loading full file into memory."""
+        total = 0
+        adopted = 0
+        try:
+            with path.open("r", encoding="utf-8") as fh:
+                for raw in fh:
+                    line = raw.strip()
+                    if not line:
+                        continue
+                    try:
+                        obj = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if not isinstance(obj, dict):
+                        continue
+                    total += 1
+                    source = str(obj.get("source") or obj.get("entry_source") or "")
+                    if source == "manual_exchange_external":
+                        adopted += 1
+        except OSError:
+            pass
+        return total, adopted
+
+    def _load_jsonl_tail(self, path: Path, max_lines: int = 500) -> list[dict]:
+        """Read only the last max_lines records from a JSONL file (memory-efficient)."""
+        try:
+            size = path.stat().st_size
+        except OSError:
             return []
+        # Estimate ~600 bytes/line; read 2x to ensure we capture max_lines full lines
+        read_bytes = min(max_lines * 600 * 2, size)
+        try:
+            with path.open("rb") as fh:
+                fh.seek(max(0, size - read_bytes))
+                raw = fh.read().decode("utf-8", errors="replace")
+        except OSError:
+            return []
+        lines = raw.splitlines()
+        # Drop potentially partial first line when we seeked mid-file
+        if size > read_bytes:
+            lines = lines[1:]
         records = []
-        for raw in lines:
-            line = raw.strip()
+        for line in lines[-max_lines:]:
+            line = line.strip()
             if not line:
                 continue
             try:
@@ -310,31 +361,44 @@ class QuantLiveWatchdog:
                 records.append(obj)
         return records
 
-    def _check_adopted_ratio(self, trades: list[dict]) -> dict:
-        if not trades:
+    def _check_adopted_ratio(self) -> dict:
+        total, adopted = self._count_trades_by_source(self.closed_trades_path)
+        if total == 0:
             return {"severity": "OK", "message": "no trades yet", "value": 0.0}
-        adopted = sum(
-            1 for t in trades
-            if str(t.get("source") or t.get("entry_source") or "") == "manual_exchange_external"
-        )
-        ratio = adopted / len(trades)
+        ratio = adopted / total
         if ratio >= self.adopted_ratio_threshold:
             return {
                 "severity": "WARNING",
-                "message": f"adopted ratio {ratio:.1%} >= {self.adopted_ratio_threshold:.0%} ({adopted}/{len(trades)} trades); strategy data thin",
+                "message": (
+                    f"adopted ratio {ratio:.1%} >= {self.adopted_ratio_threshold:.0%} "
+                    f"({adopted}/{total} trades); strategy data thin"
+                ),
                 "value": round(ratio, 4),
             }
         return {"severity": "OK", "message": f"adopted ratio {ratio:.1%}", "value": round(ratio, 4)}
 
-    def _check_tighter_mode(self, policy_state: dict) -> dict:
+    def _check_tighter_mode(self, policy_state: dict, current_force_mode: str) -> dict:
         auto_mode = dict(policy_state.get("auto_mode", {}) or {})
         mode = str(auto_mode.get("mode") or "")
         blocked = bool(auto_mode.get("expansion_blocked", False))
         reason_codes = list(auto_mode.get("reason_codes") or [])
         if mode == "tighter" and blocked:
+            if current_force_mode == "normal":
+                # force_auto_mode already active — policy computes tighter but session overrides to normal
+                return {
+                    "severity": "OK",
+                    "message": (
+                        f"policy computes tighter+blocked but force_auto_mode=normal is active; "
+                        f"session running as normal. reasons={reason_codes}"
+                    ),
+                    "value": {"mode": mode, "expansion_blocked": blocked, "force_override": "normal"},
+                }
             return {
                 "severity": "WARNING",
-                "message": f"auto_mode=tighter + expansion_blocked=True; strategy entries suppressed. reasons={reason_codes}",
+                "message": (
+                    f"auto_mode=tighter + expansion_blocked=True; strategy entries suppressed. "
+                    f"reasons={reason_codes}"
+                ),
                 "value": {"mode": mode, "expansion_blocked": blocked},
             }
         return {
@@ -343,12 +407,14 @@ class QuantLiveWatchdog:
             "value": {"mode": mode, "expansion_blocked": blocked},
         }
 
-    def _check_strategy_entries(self, trades: list[dict]) -> dict:
-        if not trades:
+    def _check_strategy_entries(self) -> dict:
+        # Use tail read — only need recent records for time-window check
+        recent_trades = self._load_jsonl_tail(self.closed_trades_path, max_lines=200)
+        if not recent_trades:
             return {"severity": "OK", "message": "no trades yet", "value": 0}
         cutoff = time.time() - self.strategy_entry_lookback_hours * 3600
         recent_pure = 0
-        for t in trades:
+        for t in recent_trades:
             source = str(t.get("source") or t.get("entry_source") or "")
             if source == "manual_exchange_external":
                 continue
@@ -372,13 +438,18 @@ class QuantLiveWatchdog:
         }
 
     def _check_equity_drop(self, summary_state: dict) -> dict:
-        equity_raw = summary_state.get("session_current_equity_usdt") or summary_state.get("session_start_equity_usdt")
+        # Use explicit None check — float 0.0 is valid equity and must not fall back
+        equity_raw = summary_state.get("session_current_equity_usdt")
+        if equity_raw is None:
+            equity_raw = summary_state.get("session_start_equity_usdt")
         if equity_raw is None:
             return {"severity": "OK", "message": "equity data unavailable", "value": None}
         try:
             equity = float(equity_raw)
         except (TypeError, ValueError):
             return {"severity": "OK", "message": "equity parse error", "value": None}
+        if equity <= 0.0:
+            return {"severity": "OK", "message": f"equity={equity:.2f} (zero or negative, skip)", "value": None}
         now = time.time()
         self._equity_history.append((now, equity))
         if len(self._equity_history) < 2:
@@ -390,25 +461,33 @@ class QuantLiveWatchdog:
         if drop_pct >= self.equity_drop_threshold_pct:
             return {
                 "severity": "CRITICAL",
-                "message": f"equity dropped {drop_pct:.2f}% from {baseline:.2f} to {equity:.2f} USDT (threshold {self.equity_drop_threshold_pct:.1f}%)",
+                "message": (
+                    f"equity dropped {drop_pct:.2f}% from {baseline:.2f} to {equity:.2f} USDT "
+                    f"(threshold {self.equity_drop_threshold_pct:.1f}%)"
+                ),
                 "value": round(drop_pct, 4),
             }
         return {
             "severity": "OK",
-            "message": f"equity {equity:.2f} USDT (delta {-drop_pct:+.2f}% from session baseline {baseline:.2f})",
+            "message": f"equity {equity:.2f} USDT (delta {-drop_pct:+.2f}% from baseline {baseline:.2f})",
             "value": round(drop_pct, 4),
         }
+
+    def _read_current_force_mode(self) -> str:
+        """Read force_auto_mode from override file (may differ from daemon's loaded settings)."""
+        try:
+            raw = self._load_json_safe(self.strategy_override_path)
+            return str(raw.get("force_auto_mode", "") or "").strip().lower()
+        except Exception:
+            return ""
 
     def _apply_force_auto_mode_normal(self) -> bool:
         try:
             raw = self._load_json_safe(self.strategy_override_path)
             if raw.get("force_auto_mode") == "normal":
-                return False  # already set
+                return False  # already set, no-op
             raw["force_auto_mode"] = "normal"
-            self.strategy_override_path.parent.mkdir(parents=True, exist_ok=True)
-            self.strategy_override_path.write_text(
-                json.dumps(raw, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-            )
+            self._write_json_atomic(self.strategy_override_path, raw)
             return True
         except Exception as exc:
             self.log(f"[WARNING] failed to set force_auto_mode=normal: {exc}")
@@ -422,32 +501,32 @@ class QuantLiveWatchdog:
             "auto_actions": auto_actions,
         }
         try:
-            self.strategy_health_path.parent.mkdir(parents=True, exist_ok=True)
-            self.strategy_health_path.write_text(
-                json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-            )
+            self._write_json_atomic(self.strategy_health_path, payload)
         except Exception as exc:
             self.log(f"[WARNING] failed to write health_status.json: {exc}")
 
     def _run_strategy_health_check(self) -> None:
-        trades = self._load_jsonl_records(self.closed_trades_path)
         policy_state = self._load_json_safe(self.policy_state_path)
         summary_state = self._load_json_safe(self.summary_path)
+        current_force_mode = self._read_current_force_mode()
 
         auto_actions: list[str] = []
         checks: dict[str, dict] = {}
 
-        checks["adopted_ratio"] = self._check_adopted_ratio(trades)
-        checks["tighter_mode"] = self._check_tighter_mode(policy_state)
-        checks["strategy_entries"] = self._check_strategy_entries(trades)
+        checks["adopted_ratio"] = self._check_adopted_ratio()
+        checks["tighter_mode"] = self._check_tighter_mode(policy_state, current_force_mode)
+        checks["strategy_entries"] = self._check_strategy_entries()
         checks["equity_drop"] = self._check_equity_drop(summary_state)
 
-        # Auto-response: if tighter mode detected, force normal
+        # Auto-response: tighter mode detected AND force not already set → apply
         if checks["tighter_mode"]["severity"] in ("WARNING", "CRITICAL"):
             applied = self._apply_force_auto_mode_normal()
             if applied:
                 auto_actions.append("set_force_auto_mode_normal")
-                self.log("[WARNING] strategy_health:tighter_mode detected; auto-set force_auto_mode=normal in strategy_override.approved.json")
+                self.log(
+                    "[WARNING] strategy_health:tighter_mode detected; "
+                    "auto-set force_auto_mode=normal in strategy_override.approved.json"
+                )
 
         severities = [c["severity"] for c in checks.values()]
         overall = "CRITICAL" if "CRITICAL" in severities else ("WARNING" if "WARNING" in severities else "OK")

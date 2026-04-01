@@ -961,7 +961,17 @@ class LivePaperSession:
         )
 
     def _apply_force_auto_mode(self, auto_mode: dict[str, object]) -> dict[str, object]:
+        # First check settings (loaded at startup), then re-read override file live so
+        # watchdog-written changes take effect without a daemon restart.
         forced = str(self.runtime.paper_service.settings.force_auto_mode or "").strip().lower()
+        if not forced:
+            override_path_str = os.environ.get("STRATEGY_OVERRIDE_PATH", "")
+            if override_path_str:
+                try:
+                    raw = json.loads(Path(override_path_str).read_text(encoding="utf-8"))
+                    forced = str(raw.get("force_auto_mode", "") or "").strip().lower()
+                except Exception:
+                    pass
         if forced not in {"normal", "tighter", "cautiously_expanded"}:
             return auto_mode
         result = dict(auto_mode)
