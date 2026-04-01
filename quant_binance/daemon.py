@@ -294,6 +294,12 @@ def run_live_paper_daemon(
         learner = OnlineEdgeLearner(
             min_observations=max(20, settings.feature_thresholds.min_expected_edge_observations)
         )
+        # Restore learning state from previous session's edge_table.json
+        previous_edge_table = latest_runtime_artifact_path(output_base_dir, filename="edge_table.json")
+        if previous_edge_table is not None:
+            restored = learner.load_from_export(previous_edge_table)
+            if restored > 0:
+                print(f"[daemon] restored {restored} learning observations from {previous_edge_table}")
         extractor = MarketFeatureExtractor(
             settings,
             edge_lookup=learner.lookup,
