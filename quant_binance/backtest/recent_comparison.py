@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 from pathlib import Path
 from statistics import mean, pstdev
 from typing import Any
@@ -113,7 +113,7 @@ def _event_timestamp(payload: dict[str, Any], fallback: datetime) -> datetime:
     for key in ("E", "time", "T", "t"):
         raw = data.get(key)
         if raw is not None:
-            return datetime.fromtimestamp(float(raw) / 1000.0, tz=UTC)
+            return datetime.fromtimestamp(float(raw) / 1000.0, tz=timezone.utc)
     return fallback
 
 
@@ -244,8 +244,8 @@ def _load_closed_5m_klines(path: Path) -> dict[str, list[KlineBar]]:
             symbol = data.get("s")
             if not symbol:
                 continue
-            start_time = datetime.fromtimestamp(int(kline["t"]) / 1000.0, tz=UTC)
-            close_time = datetime.fromtimestamp(int(kline["T"]) / 1000.0, tz=UTC)
+            start_time = datetime.fromtimestamp(int(kline["t"]) / 1000.0, tz=timezone.utc)
+            close_time = datetime.fromtimestamp(int(kline["T"]) / 1000.0, tz=timezone.utc)
             bars_by_symbol[symbol][start_time] = KlineBar(
                 symbol=symbol,
                 interval="5m",
