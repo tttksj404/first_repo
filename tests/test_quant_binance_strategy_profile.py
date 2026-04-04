@@ -264,7 +264,7 @@ class QuantBinanceStrategyProfileTests(unittest.TestCase):
 
         self.assertEqual(decision.final_mode, "futures")
         self.assertEqual(decision.side, "short")
-        self.assertGreater(decision.order_intent_notional_usd, 100.0)
+        self.assertGreater(decision.order_intent_notional_usd, 50.0)  # wider SL (3x ATR) → smaller notional
 
     def test_balanced_profile_routes_mildly_heated_futures_setup_to_spot(self) -> None:
         conservative_settings = Settings.load(CONFIG_PATH)
