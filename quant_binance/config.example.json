@@ -242,7 +242,7 @@
     "intraday_drawdown_limit": 0.025
   },
   "sizing": {
-    "atr_multiple_for_stop": 1.5,
+    "atr_multiple_for_stop": 3.0,
     "stop_floor_bps": 45
   },
   "exit_rules": {
