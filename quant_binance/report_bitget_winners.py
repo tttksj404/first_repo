@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 from pathlib import Path
 
 from quant_binance.bitget_history_report import build_bitget_realized_winner_report, write_bitget_history_report
@@ -26,7 +26,7 @@ def main(argv: list[str] | None = None) -> int:
         allow_insecure_ssl=True,
         allow_missing_credentials=False,
     )
-    end_time = datetime.now(UTC)
+    end_time = datetime.now(timezone.utc)
     start_time = end_time - timedelta(days=max(int(args.days), 1))
     report = build_bitget_realized_winner_report(
         client=client,

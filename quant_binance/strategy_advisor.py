@@ -5,7 +5,7 @@ import os
 import subprocess
 import tempfile
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import Any
 
@@ -267,7 +267,7 @@ def build_strategy_advisor_context(
     summary.setdefault("recent_decision_rows", _load_latest_jsonl_rows(latest_run_dir / "logs" / "decisions.jsonl", limit=25))
 
     return StrategyAdvisorContext(
-        generated_at=datetime.now(UTC).isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
         base_dir=str(base.resolve()),
         latest_run_dir=str(latest_run_dir.resolve()),
         strategy_profile=str(approved_override.get("strategy_profile") or _load_env_file_value("STRATEGY_PROFILE") or "live-ultra-aggressive"),
