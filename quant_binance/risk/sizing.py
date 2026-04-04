@@ -62,13 +62,14 @@ def select_futures_leverage(
         or net_expected_edge_bps < max(exposure.reduced_entry_net_edge_bps, 4.0)
         or edge_to_cost_multiple < max(1.25, settings.cost_gate.edge_to_cost_multiple_min - 0.1)
     )
-    # ADX-based dynamic leverage: ADX 28→target, ADX 45→max
-    # Backtested: 2-3x range yielded +4% return with MC ruin 0%
+    # ADX-based dynamic leverage: 374d validated for ETH+SOL only
+    adx_floor = 30.0 if symbol == "ETHUSDT" else 28.0
     adx_cross_aligned = (
-        adx_1h >= 28
+        symbol in {"ETHUSDT", "SOLUSDT"}
+        and adx_1h >= adx_floor
         and ema_cross_signal != 0
         and ema_cross_signal == trend_direction
-        and symbol not in {"XRPUSDT"}
+        and (trend_direction > 0 or symbol != "ETHUSDT")  # ETH: long-only
     )
     if adx_cross_aligned:
         adx_norm = min((adx_1h - 28) / 17.0, 1.0)  # 0 at 28, 1 at 45

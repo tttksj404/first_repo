@@ -527,19 +527,31 @@ def _btc_eth_strong_size_boost_multiplier(
     return round(max(base_size_multiplier, boosted_multiplier), 6)
 
 
-def _adx_cross_signal_strength(features: FeatureVector) -> float:
+def _adx_cross_signal_strength(features: FeatureVector, *, symbol: str = "") -> float:
     """Return a signal quality score [0, 1] based on ADX + EMA cross alignment.
 
-    ADX >= 28 with aligned EMA cross is the strongest signal discovered in
-    forward-return backtesting (PF 2-32 across BTC/ETH/SOL/XRP).
+    374-day validated thresholds:
+    - ETH: ADX >= 30 (best at 35), long-only
+    - SOL: ADX >= 28, both directions
     """
     adx = features.adx_1h
     cross = features.ema_cross_signal
     td = features.trend_direction
 
-    if adx < 15:
+    # Per-symbol ADX floor from 374d grid search
+    if symbol == "ETHUSDT":
+        adx_floor = 30.0  # validated: PF 3.12 at ADX≥35, still good at ≥30
+        # ETH long-only: short direction degrades PF
+        if td < 0:
+            return 0.0
+    elif symbol == "SOLUSDT":
+        adx_floor = 28.0  # validated: PF 3.50
+    else:
+        adx_floor = 28.0  # default
+
+    if adx < adx_floor:
         return 0.0
-    adx_score = min((adx - 15) / 25.0, 1.0)  # 0 at ADX=15, 1 at ADX=40
+    adx_score = min((adx - adx_floor) / 20.0, 1.0)
     cross_aligned = (cross != 0 and cross == td)
     cross_bonus = 0.3 if cross_aligned else 0.0
     return min(adx_score + cross_bonus, 1.0)
@@ -562,17 +574,18 @@ def _futures_entry_plan(
     alt_symbol = is_alt_symbol(symbol)
 
     # ── ADX + EMA Cross signal quality ──────────────
-    # XRP excluded: MC ruin 82% in stress test, all combos FAIL
-    adx_excluded_symbols = frozenset({"XRPUSDT"})
-    if symbol in adx_excluded_symbols:
+    # 374-day grid search: only ETH+SOL passed all gates (walk-forward, MC, stress)
+    # BTC+XRP: no strategy survived 374d → ADX disabled, use base regime logic
+    adx_enabled_symbols = frozenset({"ETHUSDT", "SOLUSDT"})
+    if symbol not in adx_enabled_symbols:
         adx_signal = 0.0
     else:
-        adx_signal = _adx_cross_signal_strength(features)
-    # Strong ADX+cross signal relaxes score and trend thresholds
-    # Halved for alt symbols to preserve risk guardrails
+        adx_signal = _adx_cross_signal_strength(features, symbol=symbol)
+    # 374d validated: ETH needs ADX≥35, SOL needs ADX≥28 (already in signal fn)
+    # ETH: long-only performed best (PF 3.12); SOL: both sides (PF 3.50)
     adx_dampener = 0.5 if is_alt_symbol(symbol) else 1.0
-    adx_score_relax = 5.0 * adx_signal * adx_dampener  # up to 5pt score relaxation
-    adx_trend_relax = 0.08 * adx_signal * adx_dampener  # up to 0.08 trend_strength relaxation
+    adx_score_relax = 5.0 * adx_signal * adx_dampener
+    adx_trend_relax = 0.08 * adx_signal * adx_dampener
 
     directional_bearish_macro = (
         _is_btc_eth_symbol(symbol)
@@ -740,13 +753,12 @@ def _futures_entry_plan(
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
     strong_setup = _is_objectively_strong_futures_setup(features, settings)
-    # ADX+cross confirms strong trend: boost size (majors only, XRP excluded)
+    # ADX+cross confirms strong trend: size boost for ETH/SOL only
     adx_strong_trend = (
-        features.adx_1h >= 28
+        symbol in adx_enabled_symbols
+        and adx_signal > 0.5
         and features.ema_cross_signal != 0
         and features.ema_cross_signal == features.trend_direction
-        and not is_alt_symbol(symbol)
-        and symbol not in adx_excluded_symbols
     )
     if adx_strong_trend and not reduced_size:
         strong_setup = True  # ADX-confirmed trend qualifies as strong
@@ -765,8 +777,8 @@ def _futures_entry_plan(
     if symbol in set(exposure.demoted_symbols) and exposure.demoted_symbol_size_cap > 0.0:
         size_multiplier = min(size_multiplier, exposure.demoted_symbol_size_cap)
     # Volatility scaling: higher vol → moderately larger size (trend breakouts)
-    # Backtested: +1.3% return, PF 4.0. Majors only, boost only (no dampen).
-    if symbol in BTC_ETH_SYMBOLS and features.volatility_penalty > 0.5 and not reduced_size:
+    # 374d validated for ETH only (BTC excluded from ADX strategy).
+    if symbol == "ETHUSDT" and features.volatility_penalty > 0.5 and not reduced_size:
         vol_boost = min((features.volatility_penalty - 0.5) * 2.0, 0.5)  # up to +0.5x
         size_multiplier = round(size_multiplier * (1.0 + vol_boost), 6)
     return True, reasons, size_multiplier, tuple(relaxed_reasons), tuple(size_boost_reasons)
