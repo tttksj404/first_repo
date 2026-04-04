@@ -6,7 +6,7 @@ import logging
 import ssl
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime, timedelta, time
+from datetime import timezone, datetime, timedelta, time
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Iterable
@@ -167,8 +167,8 @@ def _parse_pub_date(raw: str) -> datetime | None:
     except Exception:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 def _headline_signature(title: str, source: str, published_at: datetime | None) -> str:
     base = "|".join((title.strip().lower(), source.strip().lower(), published_at.isoformat() if published_at else ""))
@@ -201,7 +201,7 @@ def fetch_google_news_headlines(
     fetcher=_fetch_text,
     now: datetime | None = None,
 ) -> tuple[NewsHeadline, ...]:
-    now = now or datetime.now(tz=UTC)
+    now = now or datetime.now(tz=timezone.utc)
     cutoff = now - timedelta(hours=36)
     rows: list[NewsHeadline] = []
     seen_signatures: set[str] = set()
@@ -258,8 +258,8 @@ def _next_schedule(now: datetime) -> datetime:
     ]
     for candidate in windows:
         if candidate > local:
-            return candidate.astimezone(UTC)
-    return windows[-1].astimezone(UTC)
+            return candidate.astimezone(timezone.utc)
+    return windows[-1].astimezone(timezone.utc)
 
 
 def _current_schedule_label(now: datetime) -> str:
@@ -295,8 +295,8 @@ def _minutes_until(target_iso: str, *, now: datetime) -> float | None:
     except Exception:
         return None
     if target.tzinfo is None:
-        target = target.replace(tzinfo=UTC)
-    return (target.astimezone(UTC) - now).total_seconds() / 60.0
+        target = target.replace(tzinfo=timezone.utc)
+    return (target.astimezone(timezone.utc) - now).total_seconds() / 60.0
 
 def decide_refresh(
     *,
@@ -345,7 +345,7 @@ def decide_refresh(
         try:
             refreshed_at = datetime.fromisoformat(str(refreshed_at_raw))
             if refreshed_at.tzinfo is None:
-                refreshed_at = refreshed_at.replace(tzinfo=UTC)
+                refreshed_at = refreshed_at.replace(tzinfo=timezone.utc)
         except Exception:
             refreshed_at = now - timedelta(hours=24)
         if now - refreshed_at >= timedelta(hours=18):
@@ -476,7 +476,7 @@ def write_news_macro_signal(
     now: datetime | None = None,
     force: bool = False,
 ) -> tuple[Path, Path, str]:
-    now = now or datetime.now(tz=UTC)
+    now = now or datetime.now(tz=timezone.utc)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     macro_inputs_output_path.parent.mkdir(parents=True, exist_ok=True)
     if state_path is None:
