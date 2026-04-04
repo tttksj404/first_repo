@@ -246,14 +246,15 @@
     "stop_floor_bps": 45
   },
   "exit_rules": {
-    "partial_take_profit_r": 1.5,
-    "futures_profit_protection_arm_roe_percent": 8.0,
-    "futures_profit_protection_retrace_roe_percent": 3.0,
+    "partial_take_profit_r": 1.0,
+    "futures_profit_protection_arm_roe_percent": 6.0,
+    "futures_profit_protection_retrace_roe_percent": 2.5,
     "futures_proactive_take_profit_roe_thresholds_percent": [
+      6.0,
       10.0,
       14.0
     ],
-    "futures_proactive_take_profit_fraction": 0.25,
+    "futures_proactive_take_profit_fraction": 0.5,
     "post_tp_stop_mode": "breakeven",
     "futures_max_holding_minutes": 1440,
     "spot_max_holding_minutes": 4320,

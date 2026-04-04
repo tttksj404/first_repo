@@ -527,6 +527,24 @@ def _btc_eth_strong_size_boost_multiplier(
     return round(max(base_size_multiplier, boosted_multiplier), 6)
 
 
+def _adx_cross_signal_strength(features: FeatureVector) -> float:
+    """Return a signal quality score [0, 1] based on ADX + EMA cross alignment.
+
+    ADX >= 28 with aligned EMA cross is the strongest signal discovered in
+    forward-return backtesting (PF 2-32 across BTC/ETH/SOL/XRP).
+    """
+    adx = features.adx_1h
+    cross = features.ema_cross_signal
+    td = features.trend_direction
+
+    if adx < 15:
+        return 0.0
+    adx_score = min((adx - 15) / 25.0, 1.0)  # 0 at ADX=15, 1 at ADX=40
+    cross_aligned = (cross != 0 and cross == td)
+    cross_bonus = 0.3 if cross_aligned else 0.0
+    return min(adx_score + cross_bonus, 1.0)
+
+
 def _futures_entry_plan(
     features: FeatureVector,
     settings: Settings,
@@ -542,6 +560,20 @@ def _futures_entry_plan(
     reduced_size = False
     priority_symbol = symbol in set(exposure.priority_symbols)
     alt_symbol = is_alt_symbol(symbol)
+
+    # ── ADX + EMA Cross signal quality ──────────────
+    # XRP excluded: MC ruin 82% in stress test, all combos FAIL
+    adx_excluded_symbols = frozenset({"XRPUSDT"})
+    if symbol in adx_excluded_symbols:
+        adx_signal = 0.0
+    else:
+        adx_signal = _adx_cross_signal_strength(features)
+    # Strong ADX+cross signal relaxes score and trend thresholds
+    # Halved for alt symbols to preserve risk guardrails
+    adx_dampener = 0.5 if is_alt_symbol(symbol) else 1.0
+    adx_score_relax = 5.0 * adx_signal * adx_dampener  # up to 5pt score relaxation
+    adx_trend_relax = 0.08 * adx_signal * adx_dampener  # up to 0.08 trend_strength relaxation
+
     directional_bearish_macro = (
         _is_btc_eth_symbol(symbol)
         and features.trend_direction < 0
@@ -564,7 +596,7 @@ def _futures_entry_plan(
     bearish_trend = features.trend_direction < 0
     futures_score_min = thresholds.futures_score_min - (
         exposure.macro_score_relaxation if supportive_macro else 0.0
-    )
+    ) - adx_score_relax
     if alt_symbol and not supportive_macro:
         futures_score_min += exposure.alt_score_penalty_without_macro
     if bearish_trend:
@@ -601,7 +633,7 @@ def _futures_entry_plan(
         reasons.append("SCORE_TOO_LOW")
     if abs(features.trend_direction) != 1:
         reasons.append("DIRECTION_CONFLICT")
-    if features.trend_strength < thresholds.futures_trend_strength_min - (0.06 if bearish_trend else 0.0):
+    if features.trend_strength < thresholds.futures_trend_strength_min - (0.06 if bearish_trend else 0.0) - adx_trend_relax:
         reasons.append("SCORE_TOO_LOW")
     if features.liquidity_score < futures_liquidity_min:
         if features.liquidity_score < exposure.soft_liquidity_floor:
@@ -708,6 +740,16 @@ def _futures_entry_plan(
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
     strong_setup = _is_objectively_strong_futures_setup(features, settings)
+    # ADX+cross confirms strong trend: boost size (majors only, XRP excluded)
+    adx_strong_trend = (
+        features.adx_1h >= 28
+        and features.ema_cross_signal != 0
+        and features.ema_cross_signal == features.trend_direction
+        and not is_alt_symbol(symbol)
+        and symbol not in adx_excluded_symbols
+    )
+    if adx_strong_trend and not reduced_size:
+        strong_setup = True  # ADX-confirmed trend qualifies as strong
     if not reduced_size and strong_setup:
         size_multiplier = max(size_multiplier, _strong_futures_size_multiplier(features, settings))
     boosted_size_multiplier = _btc_eth_strong_size_boost_multiplier(
@@ -890,7 +932,7 @@ def evaluate_snapshot(
             planned_leverage = min(planned_leverage, futures_features.macro_leverage_cap)
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
-            atr_14_1h_bps=snapshot.feature_values.realized_vol_1h_norm * 100.0,
+            atr_14_1h_bps=snapshot.feature_values.atr_14_1h_bps if snapshot.feature_values.atr_14_1h_bps > 0 else snapshot.feature_values.realized_vol_1h_norm * 100.0,
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
@@ -938,7 +980,7 @@ def evaluate_snapshot(
     if spot_ok:
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
-            atr_14_1h_bps=snapshot.feature_values.realized_vol_1h_norm * 100.0,
+            atr_14_1h_bps=snapshot.feature_values.atr_14_1h_bps if snapshot.feature_values.atr_14_1h_bps > 0 else snapshot.feature_values.realized_vol_1h_norm * 100.0,
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,

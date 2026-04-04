@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 from pathlib import Path
 from statistics import median
 from typing import Any
@@ -86,12 +86,12 @@ def _collect_live_order_references(*, base_dir: Path, lookback_hours: int) -> di
     mode_root = base_dir / "output" / "paper-live-shell"
     if not mode_root.exists():
         return {}
-    threshold = datetime.now(UTC) - timedelta(hours=lookback_hours)
+    threshold = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
     refs: dict[str, dict[str, float | str]] = {}
     for run_dir in mode_root.iterdir():
         if not run_dir.is_dir() or run_dir.name == "latest":
             continue
-        modified = datetime.fromtimestamp(run_dir.stat().st_mtime, tz=UTC)
+        modified = datetime.fromtimestamp(run_dir.stat().st_mtime, tz=timezone.utc)
         if modified < threshold:
             continue
         for row in _load_jsonl(run_dir / "logs" / "live_orders.jsonl"):
@@ -154,7 +154,7 @@ def build_cost_calibration(
         for symbol in symbols
     )
     return CostCalibration(
-        generated_at=datetime.now(UTC).isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
         lookback_hours=lookback_hours,
         global_empirical_fee_bps=round(median(global_fee_samples), 6) if global_fee_samples else 0.0,
         global_empirical_entry_slippage_bps=round(median(global_slip_samples), 6) if global_slip_samples else 0.0,
