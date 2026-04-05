@@ -84,6 +84,9 @@ class DecisionLiveOrderAdapter:
         return payload
 
     def _target_futures_leverage(self, decision: DecisionIntent) -> int:
+        # Use pre-computed leverage from regime evaluation (includes ADX/coin profiles)
+        if decision.planned_leverage > 0:
+            return decision.planned_leverage
         if self.settings is None:
             return 1
         return select_futures_leverage(
