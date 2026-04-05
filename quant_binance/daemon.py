@@ -350,7 +350,7 @@ def run_live_paper_daemon(
         )
         session = LivePaperSession(
             runtime=runtime,
-            equity_usd=10000.0,
+            equity_usd=10000.0,  # overridden after sync_account() below
             remaining_portfolio_capacity_usd=5000.0,
             sync_interval_seconds=sync_interval_seconds,
             flush_interval_seconds=min(sync_interval_seconds, 15),
@@ -379,6 +379,24 @@ def run_live_paper_daemon(
         )
         if supports_private_reads:
             session.sync_account()
+            # Auto-detect actual account equity so position sizing reflects real capital.
+            # session_start_equity_usdt is populated by sync_account() from exchange accounts.
+            # Fallback to futures_available_balance if total equity is unavailable.
+            _detected_equity = session.session_start_equity_usdt
+            if _detected_equity is None or _detected_equity <= 0.0:
+                _detected_equity = float(session.capital_report.get("futures_available_balance_usd", 0.0) or 0.0)
+            if _detected_equity > 0.0:
+                _leverage_cap = max(session.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
+                _capacity = round(_detected_equity * _leverage_cap, 6)
+                print(
+                    f"[daemon] equity auto-detected: ${_detected_equity:.2f} USDT "
+                    f"→ capacity: ${_capacity:.2f} (was $10,000 / $5,000 defaults)"
+                )
+                session.equity_usd = _detected_equity
+                session.remaining_portfolio_capacity_usd = _capacity
+                session.max_portfolio_capacity_usd = _capacity
+            else:
+                print("[daemon] WARNING: could not detect account equity — keeping $10,000 default. Check API credentials.")
             previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
             session.restore_futures_state_from_runtime(
                 state_payload=previous_state,
