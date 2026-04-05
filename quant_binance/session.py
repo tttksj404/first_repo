@@ -298,6 +298,7 @@ class LivePaperSession:
     live_major_drawdown_grace_started_at_by_identity: dict[str, datetime] = field(default_factory=dict)
     live_entry_starvation_attempts_by_symbol: dict[str, int] = field(default_factory=dict)
     live_entry_starvation_last_at_by_symbol: dict[str, datetime] = field(default_factory=dict)
+    live_trailing_stop_prices: dict[str, float] = field(default_factory=dict)  # identity → current trailing SL price
     live_portfolio_peak_unrealized_ratio: float = 0.0
     live_portfolio_profit_lock_taken: bool = False
     live_portfolio_full_exit_taken: bool = False
@@ -4636,6 +4637,11 @@ class LivePaperSession:
             peak_unrealized_pnl = self.live_peak_unrealized_pnl_by_identity.get(identity, unrealized_pnl)
             peak_unrealized_pnl = max(peak_unrealized_pnl, unrealized_pnl)
             self.live_peak_unrealized_pnl_by_identity[identity] = peak_unrealized_pnl
+            # ── Trailing Stop: lock in profits by moving SL up ──
+            self._update_trailing_stop(
+                position=position, identity=identity, roe=roe, peak_roe=peak_roe,
+                hold_side=hold_side, symbol=symbol,
+            )
             if self._standard_stop_loss_exits_enabled() and roe <= cfg.stop_loss_roe_percent:
                 self._close_live_position(position=position, reason="LIVE_POSITION_STOP_LOSS")
                 continue
@@ -4796,6 +4802,88 @@ class LivePaperSession:
                     reason="LIVE_PORTFOLIO_PROFIT_LOCK",
                     fraction=cfg.portfolio_profit_lock_take_profit_fraction,
                 )
+
+    # ── Trailing Stop Implementation ──────────────────────────────
+    # Activates when ROE >= 1.5%. Locks in 50% of peak profit.
+    # Example: peak ROE 4% → trailing SL at breakeven + 2% ROE
+    # Updates Bitget plan order SL price every sync cycle.
+    _TRAILING_ACTIVATION_ROE = 1.5   # activate at 1.5% ROE
+    _TRAILING_LOCK_RATIO = 0.50      # lock 50% of peak profit
+    _TRAILING_MIN_MOVE_BPS = 10      # minimum move to update (avoid spam)
+
+    def _update_trailing_stop(
+        self,
+        *,
+        position: dict[str, Any],
+        identity: str,
+        roe: float,
+        peak_roe: float,
+        hold_side: str,
+        symbol: str,
+    ) -> None:
+        if peak_roe < self._TRAILING_ACTIVATION_ROE:
+            return
+        if self.rest_client is None:
+            return
+        mark_price = float(position.get("markPrice") or 0.0)
+        entry_price = float(position.get("openPriceAvg") or 0.0)
+        leverage = int(position.get("leverage") or 1)
+        if mark_price <= 0 or entry_price <= 0 or leverage <= 0:
+            return
+
+        # Calculate trailing SL price
+        # Lock _TRAILING_LOCK_RATIO of peak profit
+        locked_roe = peak_roe * self._TRAILING_LOCK_RATIO
+        if locked_roe <= 0:
+            return
+
+        # ROE to price: for long, SL = entry * (1 + locked_roe% / leverage)
+        if hold_side == "long":
+            new_sl = entry_price * (1.0 + locked_roe / 100.0 / leverage)
+            # SL must be below current price
+            if new_sl >= mark_price:
+                return
+        else:
+            new_sl = entry_price * (1.0 - locked_roe / 100.0 / leverage)
+            if new_sl <= mark_price:
+                return
+
+        # Check if SL improved enough to warrant update
+        current_sl = self.live_trailing_stop_prices.get(identity, 0.0)
+        if hold_side == "long":
+            if new_sl <= current_sl:
+                return  # SL didn't improve
+            move_bps = abs(new_sl - current_sl) / entry_price * 10000
+        else:
+            if current_sl > 0 and new_sl >= current_sl:
+                return
+            move_bps = abs(current_sl - new_sl) / entry_price * 10000 if current_sl > 0 else self._TRAILING_MIN_MOVE_BPS + 1
+
+        if move_bps < self._TRAILING_MIN_MOVE_BPS:
+            return
+
+        # Update Bitget SL via place-pos-tpsl
+        try:
+            tpsl_params: dict[str, Any] = {
+                "symbol": symbol,
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "holdSide": hold_side,
+                "stopLossTriggerPrice": f"{new_sl:.10g}",
+                "stopLossTriggerType": "mark_price",
+            }
+            self.rest_client.place_futures_position_tpsl(order_params=tpsl_params)
+            self.live_trailing_stop_prices[identity] = new_sl
+            if self.verbose:
+                direction = "↑" if hold_side == "long" else "↓"
+                print(
+                    f"[TRAILING_STOP] {symbol} {hold_side} SL {direction} "
+                    f"${current_sl:.2f}→${new_sl:.2f} "
+                    f"(peak ROE {peak_roe:.1f}% → lock {locked_roe:.1f}%)"
+                )
+        except Exception as exc:
+            if self.verbose:
+                print(f"[TRAILING_STOP] {symbol} update failed: {exc}")
 
     def _current_unrealized_total(self) -> float:
         return round(sum(position.unrealized_pnl_usd_estimate() for position in self.paper_positions.values()), 6)
