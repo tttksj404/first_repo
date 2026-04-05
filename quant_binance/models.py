@@ -227,6 +227,7 @@ class DecisionIntent:
     exit_reason_code: str = ""
     divergence_code: str = ""
     execution_symbol: str = ""
+    planned_leverage: int = 0
     spot_base_asset: str = ""
     spot_quote_asset: str = ""
     spot_funding_asset: str = ""

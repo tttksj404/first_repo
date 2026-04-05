@@ -99,4 +99,5 @@ def decision_from_portfolio_intent(*, intent: PortfolioIntent) -> DecisionIntent
         macro_symbol_bias=intent.macro_symbol_bias,
         rejection_reasons=intent.rejection_reasons,
         divergence_code=intent.divergence_code,
+        planned_leverage=int(intent.target_leverage),
     )
