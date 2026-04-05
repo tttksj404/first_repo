@@ -142,6 +142,21 @@ def check_and_fix():
     # ═══════════════════════════════════════════
     # 3. Strategy Override 한탕 설정 검증
     # ═══════════════════════════════════════════
+    # 2b. Execution quality floor 위반 체크
+    if EQ_STATE_PATH.exists():
+        try:
+            eq = json.loads(EQ_STATE_PATH.read_text())
+            for key, overlay in (eq.get("active_overlays", eq) or {}).items():
+                if isinstance(overlay, dict):
+                    sz = overlay.get("size_multiplier", 1)
+                    lv = overlay.get("leverage_multiplier", 1)
+                    if sz < 0.85 or lv < 0.85:
+                        EQ_STATE_PATH.write_text("{}")
+                        fix(f"exec_quality floor 위반 (size={sz:.2f} lev={lv:.2f}) → 리셋")
+                        break
+        except:
+            pass
+
     log("3. Strategy Override 설정 검증")
     if OVERRIDE_PATH.exists():
         override = json.loads(OVERRIDE_PATH.read_text())
