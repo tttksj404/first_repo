@@ -4869,7 +4869,7 @@ class LivePaperSession:
                 "productType": "USDT-FUTURES",
                 "marginCoin": "USDT",
                 "holdSide": hold_side,
-                "stopLossTriggerPrice": f"{new_sl:.10g}",
+                "stopLossTriggerPrice": f"{new_sl:.2f}",
                 "stopLossTriggerType": "mark_price",
             }
             self.rest_client.place_futures_position_tpsl(order_params=tpsl_params)
