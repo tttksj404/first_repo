@@ -11,6 +11,7 @@ from quant_binance.settings import Settings
 from quant_binance.strategy.scorer import compute_predictability_score
 from quant_binance.strategy.edge import ConditionalEdgeLookup
 from quant_binance.strategy.normalize import clamp
+from quant_binance.strategy.coin_profiles import get_profile
 
 
 def _pct_returns(bars: list[KlineBar]) -> list[float]:
@@ -48,6 +49,86 @@ def _ema(values: list[float], period: int) -> float:
 def _recent_closed_bars(state: SymbolMarketState, interval: str, limit: int) -> list[KlineBar]:
     bars = [bar for bar in state.klines.get(interval, []) if bar.is_closed]
     return bars[-limit:]
+
+
+def _adx_from_bars(bars_1h: list[KlineBar], period: int = 14) -> float:
+    """Compute ADX from 1h bars. Returns 0.0 if insufficient data."""
+    if len(bars_1h) < 2 * period + 2:
+        return 0.0
+    highs = [b.high_price for b in bars_1h]
+    lows = [b.low_price for b in bars_1h]
+    closes = [b.close_price for b in bars_1h]
+    n = len(closes)
+
+    plus_dm: list[float] = []
+    minus_dm: list[float] = []
+    tr_list: list[float] = []
+    for i in range(1, n):
+        up = highs[i] - highs[i - 1]
+        down = lows[i - 1] - lows[i]
+        plus_dm.append(up if up > down and up > 0 else 0.0)
+        minus_dm.append(down if down > up and down > 0 else 0.0)
+        tr_list.append(max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i - 1]),
+            abs(lows[i] - closes[i - 1]),
+        ))
+
+    if len(tr_list) < 2 * period:
+        return 0.0
+
+    sm_tr = sum(tr_list[:period])
+    sm_plus = sum(plus_dm[:period])
+    sm_minus = sum(minus_dm[:period])
+    for i in range(period, len(tr_list)):
+        sm_tr = sm_tr - sm_tr / period + tr_list[i]
+        sm_plus = sm_plus - sm_plus / period + plus_dm[i]
+        sm_minus = sm_minus - sm_minus / period + minus_dm[i]
+
+    if sm_tr == 0:
+        return 0.0
+    pdi = 100.0 * sm_plus / sm_tr
+    mdi = 100.0 * sm_minus / sm_tr
+    denom = pdi + mdi
+    dx = 100.0 * abs(pdi - mdi) / denom if denom > 0 else 0.0
+
+    # Smooth DX into ADX (one more period of smoothing)
+    dx_values: list[float] = []
+    sm_tr2 = sum(tr_list[:period])
+    sm_plus2 = sum(plus_dm[:period])
+    sm_minus2 = sum(minus_dm[:period])
+    for i in range(period, len(tr_list)):
+        sm_tr2 = sm_tr2 - sm_tr2 / period + tr_list[i]
+        sm_plus2 = sm_plus2 - sm_plus2 / period + plus_dm[i]
+        sm_minus2 = sm_minus2 - sm_minus2 / period + minus_dm[i]
+        if sm_tr2 > 0:
+            p = 100.0 * sm_plus2 / sm_tr2
+            m = 100.0 * sm_minus2 / sm_tr2
+            d = p + m
+            dx_values.append(100.0 * abs(p - m) / d if d > 0 else 0.0)
+
+    if len(dx_values) < period:
+        return dx_values[-1] if dx_values else 0.0
+    adx_val = mean(dx_values[:period])
+    for i in range(period, len(dx_values)):
+        adx_val = (adx_val * (period - 1) + dx_values[i]) / period
+    return round(adx_val, 2)
+
+
+def _ema_cross_signal(closes_1h: list[float], fast_period: int = 9, slow_period: int = 21) -> int:
+    """Detect EMA cross on 1h bars. Returns +1 (bullish cross), -1 (bearish), 0 (none)."""
+    if len(closes_1h) < slow_period + 2:
+        return 0
+    ema_fast_now = _ema(closes_1h[-fast_period:], fast_period)
+    ema_slow_now = _ema(closes_1h[-slow_period:], slow_period)
+    ema_fast_prev = _ema(closes_1h[-fast_period - 1:-1], fast_period)
+    ema_slow_prev = _ema(closes_1h[-slow_period - 1:-1], slow_period)
+
+    if ema_fast_prev <= ema_slow_prev and ema_fast_now > ema_slow_now:
+        return 1
+    if ema_fast_prev >= ema_slow_prev and ema_fast_now < ema_slow_now:
+        return -1
+    return 0
 
 
 def _intraday_trend_signal(
@@ -200,6 +281,10 @@ class MarketFeatureExtractor:
         realized_vol_4h = pstdev(returns_4h[-20:]) if len(returns_4h) > 1 else 0.0
         median_realized_vol_1h_30d = median(abs(value) for value in returns_1h[-30:]) if returns_1h else 0.0
         open_interest_ema = _ema(state.open_interest_samples[-self.settings.feature_thresholds.oi_ema_hours :], min(self.settings.feature_thresholds.oi_ema_hours, len(state.open_interest_samples[-self.settings.feature_thresholds.oi_ema_hours :]))) if state.open_interest_samples else state.open_interest
+        adx_1h = _adx_from_bars(bars_1h)
+        _cp = get_profile(state.symbol)
+        ema_cross = _ema_cross_signal(closes_1h, fast_period=_cp.ema_fast, slow_period=_cp.ema_slow)
+
         gross_expected_edge_bps = 0.0
         if self.edge_lookup is not None:
             score_hint = 80.0 if trend_direction != 0 else 50.0
@@ -238,6 +323,8 @@ class MarketFeatureExtractor:
             gross_expected_edge_bps=gross_expected_edge_bps,
             intraday_trend_direction=intraday_bias,
             intraday_trend_strength=intraday_strength,
+            adx_1h=adx_1h,
+            ema_cross_signal=ema_cross,
         )
 
     def enrich_feature_vector(self, *, state: SymbolMarketState, features: FeatureVector) -> FeatureVector:

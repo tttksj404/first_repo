@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -107,13 +107,13 @@ def _resolve_recent_runs(*, base_dir: Path, lookback_days: int) -> list[Path]:
     mode_root = base_dir / "output" / "paper-live-shell"
     if not mode_root.exists():
         return []
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     threshold = now - timedelta(days=lookback_days)
     runs: list[Path] = []
     for candidate in mode_root.iterdir():
         if not candidate.is_dir() or candidate.name == "latest":
             continue
-        modified = datetime.fromtimestamp(candidate.stat().st_mtime, tz=UTC)
+        modified = datetime.fromtimestamp(candidate.stat().st_mtime, tz=timezone.utc)
         if modified >= threshold:
             runs.append(candidate)
     runs.sort(key=lambda p: p.stat().st_mtime)
@@ -2403,7 +2403,7 @@ def _execution_replay_summary_from_bucket_evidence(
 def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> WeeklyValidationReport:
     root = Path(base_dir)
     runs = _resolve_recent_runs(base_dir=root, lookback_days=lookback_days)
-    generated_at = datetime.now(UTC).isoformat()
+    generated_at = datetime.now(timezone.utc).isoformat()
     if not runs:
         return WeeklyValidationReport(
             base_dir=str(root),
@@ -2600,8 +2600,8 @@ def build_weekly_validation_report(*, base_dir: str | Path = "quant_runtime", lo
         generated_at=generated_at,
         lookback_days=lookback_days,
         run_count=len(runs),
-        period_start=datetime.fromtimestamp(runs[0].stat().st_mtime, tz=UTC).isoformat(),
-        period_end=datetime.fromtimestamp(runs[-1].stat().st_mtime, tz=UTC).isoformat(),
+        period_start=datetime.fromtimestamp(runs[0].stat().st_mtime, tz=timezone.utc).isoformat(),
+        period_end=datetime.fromtimestamp(runs[-1].stat().st_mtime, tz=timezone.utc).isoformat(),
         total_closed_trade_count=total_closed_trade_count,
         total_realized_pnl_usd=round(total_realized_pnl, 6),
         total_live_order_count=total_live_orders,
@@ -4313,7 +4313,7 @@ def build_policy_comparison_validation_artifact(*,
     current_policy_direct_bucket_evidence = _policy_context_bucket_direct_evidence(
         base_dir=base_dir,
         lookback_days=lookback_days,
-        generated_at=str(raw_runner.get("generated_at", datetime.now(UTC).isoformat()) or datetime.now(UTC).isoformat()),
+        generated_at=str(raw_runner.get("generated_at", datetime.now(timezone.utc).isoformat()) or datetime.now(timezone.utc).isoformat()),
         run_snapshots=current_policy_run_snapshots,
         bucket_name="active_policy",
     )
@@ -4321,7 +4321,7 @@ def build_policy_comparison_validation_artifact(*,
         base_dir=base_dir,
         run_snapshots=filtered_validation_runs,
         lookback_days=lookback_days,
-        generated_at=str(raw_runner.get("generated_at", datetime.now(UTC).isoformat()) or datetime.now(UTC).isoformat()),
+        generated_at=str(raw_runner.get("generated_at", datetime.now(timezone.utc).isoformat()) or datetime.now(timezone.utc).isoformat()),
         baseline_control_comparison=dict(raw_runner.get("baseline_control_comparison", {}) or {}),
         lineage_attribution={
             **dict(lineage_attribution or {}),
@@ -4659,7 +4659,7 @@ def build_policy_validation_runner_artifact(*, base_dir: str | Path = "quant_run
         base_dir=base_dir,
         run_snapshots=run_snapshots,
         lookback_days=lookback_days,
-        generated_at=datetime.now(UTC).isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
         baseline_control_comparison=baseline_control_comparison,
         lineage_attribution={
             "applied": False,
