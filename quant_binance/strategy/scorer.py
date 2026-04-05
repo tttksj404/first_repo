@@ -125,6 +125,17 @@ def estimate_live_fallback_edge_bps(
         raw = 0.0
     if mode == "spot" and features.trend_direction < 0:
         raw = 0.0
+
+    # ADX + EMA cross bonus: backtested PF 2-32 when ADX >= 28 + aligned cross
+    # Conservative bonus here; regime.py gates apply additional symbol-level logic
+    adx = features.adx_1h
+    cross_aligned = (features.ema_cross_signal != 0 and features.ema_cross_signal == features.trend_direction)
+    if adx >= 25 and cross_aligned:
+        adx_bonus = min((adx - 25) / 15.0, 1.0) * 6.0  # up to +6 bps edge
+        raw += adx_bonus
+    elif adx >= 22:
+        raw += min((adx - 22) / 18.0, 1.0) * 2.0  # modest +2 bps for decent ADX
+
     return round(max(raw, 0.0), 6)
 
 

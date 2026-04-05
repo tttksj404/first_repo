@@ -6,7 +6,7 @@ import logging
 import re
 import ssl
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import Callable
 from urllib.request import urlopen
@@ -51,7 +51,7 @@ def _clean_html_text(raw: str) -> str:
 def _parse_bls_release_datetime(date_text: str, time_text: str) -> datetime:
     normalized = time_text.replace("A.M.", "AM").replace("P.M.", "PM").replace("a.m.", "AM").replace("p.m.", "PM")
     parsed = datetime.strptime(f"{date_text} {normalized}", "%B %d, %Y %I:%M %p")
-    return parsed.replace(tzinfo=EASTERN).astimezone(UTC)
+    return parsed.replace(tzinfo=EASTERN).astimezone(timezone.utc)
 
 
 def _build_bls_event(
@@ -164,7 +164,7 @@ def _parse_bea_release_lines(text: str) -> list[tuple[str, str, str]]:
 
 def _parse_bea_release_datetime(date_text: str, time_text: str) -> datetime:
     parsed = datetime.strptime(f"{date_text} 2026 {time_text}", "%B %d %Y %I:%M %p")
-    return parsed.replace(tzinfo=EASTERN).astimezone(UTC)
+    return parsed.replace(tzinfo=EASTERN).astimezone(timezone.utc)
 
 
 def fetch_bea_macro_events(fetcher: Callable[[str], str] = _fetch_text) -> tuple[OfficialMacroEvent, ...]:
@@ -233,8 +233,8 @@ def fetch_fomc_events(fetcher: Callable[[str], str] = _fetch_text) -> tuple[Offi
         events.append(
             OfficialMacroEvent(
                 name="FOMC",
-                start=start_dt.astimezone(UTC).isoformat(),
-                end=end_dt.astimezone(UTC).isoformat(),
+                start=start_dt.astimezone(timezone.utc).isoformat(),
+                end=end_dt.astimezone(timezone.utc).isoformat(),
                 impact="high",
                 source=url,
                 summary_ko="FOMC는 금리·유동성 기대를 직접 바꾸는 메이저 코인 최상위 거시 이벤트입니다.",
@@ -270,7 +270,7 @@ def write_official_macro_events(
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        json.dumps({"generated_at": datetime.now(UTC).isoformat(), "events": [row.as_dict() for row in rows]}, indent=2, ensure_ascii=False),
+        json.dumps({"generated_at": datetime.now(timezone.utc).isoformat(), "events": [row.as_dict() for row in rows]}, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
     return target
