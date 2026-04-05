@@ -48,6 +48,8 @@ class PrimitiveInputs:
     gross_expected_edge_bps: float
     intraday_trend_direction: int = 0
     intraday_trend_strength: float = 0.0
+    adx_1h: float = 0.0
+    ema_cross_signal: int = 0
 
 
 def _safe_mean(values: tuple[float, ...]) -> float:
@@ -181,5 +183,13 @@ def build_feature_vector_from_primitives(
         overheat_penalty=overheat_penalty,
         intraday_trend_direction=inputs.intraday_trend_direction,
         intraday_trend_strength=inputs.intraday_trend_strength,
+        adx_1h=inputs.adx_1h,
+        ema_cross_signal=inputs.ema_cross_signal,
+        atr_14_1h_bps=round(
+            (inputs.atr_14_1h_price / inputs.last_trade_price * 10000.0)
+            if inputs.last_trade_price > 0 and inputs.atr_14_1h_price > 0
+            else 0.0,
+            6,
+        ),
         gross_expected_edge_bps=inputs.gross_expected_edge_bps,
     )

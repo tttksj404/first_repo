@@ -9,6 +9,7 @@ from quant_binance.policy.portfolio import build_portfolio_intent, decision_from
 from quant_binance.risk.sizing import position_notional_and_stop_bps, select_futures_leverage
 from quant_binance.overlays import is_alt_symbol
 from quant_binance.settings import Settings
+from quant_binance.strategy.coin_profiles import get_profile, is_profiled
 from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gate
 
 
@@ -527,6 +528,28 @@ def _btc_eth_strong_size_boost_multiplier(
     return round(max(base_size_multiplier, boosted_multiplier), 6)
 
 
+def _adx_cross_signal_strength(features: FeatureVector, *, symbol: str = "") -> float:
+    """Return a signal quality score [0, 1] based on ADX + EMA cross alignment.
+
+    374-day validated per-coin profiles from $100 micro-capital scan.
+    """
+    adx = features.adx_1h
+    cross = features.ema_cross_signal
+    td = features.trend_direction
+    cp = get_profile(symbol)
+
+    # Side filter: long-only coins reject short direction
+    if cp.side_filter == "long" and td < 0:
+        return 0.0
+
+    if adx < cp.adx_floor:
+        return 0.0
+    adx_score = min((adx - cp.adx_floor) / 20.0, 1.0)
+    cross_aligned = (cross != 0 and cross == td)
+    cross_bonus = 0.3 if cross_aligned else 0.0
+    return min(adx_score + cross_bonus, 1.0)
+
+
 def _futures_entry_plan(
     features: FeatureVector,
     settings: Settings,
@@ -542,6 +565,17 @@ def _futures_entry_plan(
     reduced_size = False
     priority_symbol = symbol in set(exposure.priority_symbols)
     alt_symbol = is_alt_symbol(symbol)
+
+    # ── ADX + EMA Cross signal quality ──────────────
+    # 374-day validated per-coin profiles (9 coins, $100 micro-capital optimized)
+    if is_profiled(symbol):
+        adx_signal = _adx_cross_signal_strength(features, symbol=symbol)
+    else:
+        adx_signal = 0.0
+    adx_dampener = 0.5 if is_alt_symbol(symbol) else 1.0
+    adx_score_relax = 5.0 * adx_signal * adx_dampener
+    adx_trend_relax = 0.08 * adx_signal * adx_dampener
+
     directional_bearish_macro = (
         _is_btc_eth_symbol(symbol)
         and features.trend_direction < 0
@@ -564,7 +598,7 @@ def _futures_entry_plan(
     bearish_trend = features.trend_direction < 0
     futures_score_min = thresholds.futures_score_min - (
         exposure.macro_score_relaxation if supportive_macro else 0.0
-    )
+    ) - adx_score_relax
     if alt_symbol and not supportive_macro:
         futures_score_min += exposure.alt_score_penalty_without_macro
     if bearish_trend:
@@ -601,7 +635,7 @@ def _futures_entry_plan(
         reasons.append("SCORE_TOO_LOW")
     if abs(features.trend_direction) != 1:
         reasons.append("DIRECTION_CONFLICT")
-    if features.trend_strength < thresholds.futures_trend_strength_min - (0.06 if bearish_trend else 0.0):
+    if features.trend_strength < thresholds.futures_trend_strength_min - (0.06 if bearish_trend else 0.0) - adx_trend_relax:
         reasons.append("SCORE_TOO_LOW")
     if features.liquidity_score < futures_liquidity_min:
         if features.liquidity_score < exposure.soft_liquidity_floor:
@@ -708,6 +742,15 @@ def _futures_entry_plan(
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
     strong_setup = _is_objectively_strong_futures_setup(features, settings)
+    # ADX+cross confirms strong trend: size boost for ETH/SOL only
+    adx_strong_trend = (
+        symbol in adx_enabled_symbols
+        and adx_signal > 0.5
+        and features.ema_cross_signal != 0
+        and features.ema_cross_signal == features.trend_direction
+    )
+    if adx_strong_trend and not reduced_size:
+        strong_setup = True  # ADX-confirmed trend qualifies as strong
     if not reduced_size and strong_setup:
         size_multiplier = max(size_multiplier, _strong_futures_size_multiplier(features, settings))
     boosted_size_multiplier = _btc_eth_strong_size_boost_multiplier(
@@ -722,6 +765,11 @@ def _futures_entry_plan(
         size_boost_reasons.append(BTC_ETH_STRONG_SIZE_BOOST_REASON)
     if symbol in set(exposure.demoted_symbols) and exposure.demoted_symbol_size_cap > 0.0:
         size_multiplier = min(size_multiplier, exposure.demoted_symbol_size_cap)
+    # Volatility scaling: higher vol → moderately larger size (trend breakouts)
+    # 374d validated for ETH only (BTC excluded from ADX strategy).
+    if symbol == "ETHUSDT" and features.volatility_penalty > 0.5 and not reduced_size:
+        vol_boost = min((features.volatility_penalty - 0.5) * 2.0, 0.5)  # up to +0.5x
+        size_multiplier = round(size_multiplier * (1.0 + vol_boost), 6)
     return True, reasons, size_multiplier, tuple(relaxed_reasons), tuple(size_boost_reasons)
 
 
@@ -885,17 +933,21 @@ def evaluate_snapshot(
             net_expected_edge_bps=futures_features.net_expected_edge_bps,
             estimated_round_trip_cost_bps=futures_features.estimated_round_trip_cost_bps,
             settings=settings,
+            adx_1h=futures_features.adx_1h,
+            ema_cross_signal=futures_features.ema_cross_signal,
+            trend_direction=futures_features.trend_direction,
         )
         if futures_features.macro_leverage_cap > 0:
             planned_leverage = min(planned_leverage, futures_features.macro_leverage_cap)
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
-            atr_14_1h_bps=snapshot.feature_values.realized_vol_1h_norm * 100.0,
+            atr_14_1h_bps=snapshot.feature_values.atr_14_1h_bps if snapshot.feature_values.atr_14_1h_bps > 0 else snapshot.feature_values.realized_vol_1h_norm * 100.0,
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
             size_multiplier=futures_size_multiplier,
             leverage_multiplier=planned_leverage,
+            symbol=symbol,
         )
         required_margin_usd = notional / max(float(planned_leverage), 1.0)
         if equity_usd > 0 and (equity_usd - required_margin_usd) / equity_usd < cash_reserve_fraction:
@@ -938,10 +990,11 @@ def evaluate_snapshot(
     if spot_ok:
         notional, stop_distance_bps = position_notional_and_stop_bps(
             last_trade_price=snapshot.last_trade_price,
-            atr_14_1h_bps=snapshot.feature_values.realized_vol_1h_norm * 100.0,
+            atr_14_1h_bps=snapshot.feature_values.atr_14_1h_bps if snapshot.feature_values.atr_14_1h_bps > 0 else snapshot.feature_values.realized_vol_1h_norm * 100.0,
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
+            symbol=symbol,
         )
         if equity_usd > 0 and (equity_usd - notional) / equity_usd < cash_reserve_fraction:
             spot_ok = False

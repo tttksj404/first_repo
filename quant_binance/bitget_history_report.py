@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -51,7 +51,7 @@ def _as_iso_utc(value_ms: Any) -> str:
         return ""
     if raw >= 1_000_000_000_000:
         raw /= 1000.0
-    return datetime.fromtimestamp(raw, tz=UTC).isoformat()
+    return datetime.fromtimestamp(raw, tz=timezone.utc).isoformat()
 
 
 def build_bitget_realized_winner_report(
@@ -94,7 +94,7 @@ def build_bitget_realized_winner_report(
         )
     winners.sort(key=lambda item: item.net_profit_usd, reverse=True)
     return BitgetHistoryReport(
-        generated_at=datetime.now(UTC).isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
         start_time=start_time.isoformat(),
         end_time=end_time.isoformat(),
         min_realized_pnl_usd=min_realized_pnl_usd,
