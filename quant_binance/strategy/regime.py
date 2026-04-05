@@ -684,7 +684,7 @@ def _futures_entry_plan(
         if _btc_eth_futures_sentiment_relaxation_allowed(
             features,
             settings,
-            symbol=snapshot.symbol,
+            symbol=symbol,
             futures_score_min=futures_score_min,
             futures_liquidity_min=futures_liquidity_min,
         ):
