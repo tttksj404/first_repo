@@ -157,6 +157,7 @@ def _futures_decision(
         remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
         settings=settings,
         leverage_multiplier=float(leverage),
+        symbol=cycle.symbol,
     )
     payload = {
         "snapshot_id": f"{strategy_name}:{cycle.symbol}:{cycle.decision_time.isoformat()}",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -102,12 +102,12 @@ def _resolve_recent_runs(*, base_dir: Path, lookback_days: int) -> list[Path]:
     mode_root = base_dir / "output" / "paper-live-shell"
     if not mode_root.exists():
         return []
-    threshold = datetime.now(UTC) - timedelta(days=lookback_days)
+    threshold = datetime.now(timezone.utc) - timedelta(days=lookback_days)
     runs: list[Path] = []
     for candidate in mode_root.iterdir():
         if not candidate.is_dir() or candidate.name == "latest":
             continue
-        modified = datetime.fromtimestamp(candidate.stat().st_mtime, tz=UTC)
+        modified = datetime.fromtimestamp(candidate.stat().st_mtime, tz=timezone.utc)
         if modified >= threshold:
             runs.append(candidate)
     runs.sort(key=lambda p: p.stat().st_mtime)
@@ -219,7 +219,7 @@ def _summarize_execution_bucket(*, label: str, bucket: dict[str, float | int], l
 def build_execution_quality_report(*, base_dir: str | Path = "quant_runtime", lookback_days: int = 7) -> ExecutionQualityReport:
     root = Path(base_dir)
     runs = _resolve_recent_runs(base_dir=root, lookback_days=lookback_days)
-    generated_at = datetime.now(UTC).isoformat()
+    generated_at = datetime.now(timezone.utc).isoformat()
 
     live_order_count = 0
     tested_order_count = 0
