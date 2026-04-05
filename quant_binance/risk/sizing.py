@@ -116,6 +116,7 @@ def position_notional_and_stop_bps(
     adjusted_leverage_multiplier = max(leverage_multiplier, 1.0)
     raw_notional_usd = (
         risk_dollars / (stop_distance_bps / 10000.0) * adjusted_size_multiplier
+        * adjusted_leverage_multiplier
     )
     symbol_cap_multiplier = max(adjusted_size_multiplier, 1.0)
     capped_notional = min(
