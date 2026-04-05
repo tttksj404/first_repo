@@ -595,16 +595,35 @@ ${AUDIT_SUMMARY}
 ## 수정 금지 영역 (변경통제)
 - strategy/ 디렉토리: 전략 로직 절대 수정 금지
 - settings.py: 설정 구조체 수정 금지
-- strategy_override.approved.json: 파라미터 값 변경 금지 (autotuner 전용)
+- strategy_override.approved.json: 절대 수정 금지. _lock 필드 확인. data_collection_mode=true 동안 어떤 파라미터도 변경 불가
 - risk/ 디렉토리: 리스크 한도/사이징 로직 수정 금지
 - overlays.py: 시그널 가중치/오버레이 로직 수정 금지
 - autotuner/: 자동 튜닝 로직 수정 금지
 - 수정 허용: 인프라 버그(프로세스, 로그, 네트워크, 메모리), 데이터 파이프라인 버그만"
 
+    # ── 한탕 모드 자동 health check + 수정 ──
+    echo ""
+    echo "[YOLO] 한탕 모드 자동 점검"
+    $PYTHON "$REPO/scripts/yolo_health_check.py" 2>&1
+    YOLO_EXIT=$?
+    if [ "$YOLO_EXIT" -eq 1 ]; then
+        echo "[YOLO] 자동 수정 완료 — 봇 재시작"
+        pkill -f 'quant_binance.runtime --mode live-auto-trade-daemon' 2>/dev/null || true
+        sleep 3
+        nohup bash "$REPO/scripts/quant_run_live_orders.sh" > /dev/null 2>&1 &
+        echo "[YOLO] 봇 재시작됨 (PID: $!)"
+    elif [ "$YOLO_EXIT" -eq 2 ]; then
+        crit "한탕 모드 수동 개입 필요"
+    else
+        echo "[YOLO] 정상 — 수정 불필요"
+    fi
+
     if [ -x "$CLAUDE" ]; then
-        echo "$CLAUDE_PROMPT" | timeout 600 "$CLAUDE" --dangerously-skip-permissions -p - --output-format text \
+        echo "$CLAUDE_PROMPT" | "$CLAUDE" --dangerously-skip-permissions -p - --output-format text \
             >> "$RUNTIME/health_audit_claude.log" 2>&1 &
         CLAUDE_PID=$!
+        # macOS에는 timeout 명령 없음 — 백그라운드 kill timer로 대체
+        ( sleep 600 && kill "$CLAUDE_PID" 2>/dev/null ) &
         echo "[CLAUDE] PID=$CLAUDE_PID 백그라운드 실행"
     else
         echo "[CLAUDE] claude CLI not found at $CLAUDE — 수동 확인 필요"
