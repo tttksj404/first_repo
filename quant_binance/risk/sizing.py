@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 
 from quant_binance.settings import Settings
+from quant_binance.strategy.coin_profiles import get_profile, is_profiled
 
 
 def _edge_to_cost_multiple(net_expected_edge_bps: float, estimated_round_trip_cost_bps: float) -> float:
@@ -32,7 +33,12 @@ def select_futures_leverage(
     risk = settings.risk
     target_leverage = max(1, min(int(math.ceil(risk.target_futures_leverage)), int(math.ceil(risk.max_futures_leverage))))
     max_leverage = max(target_leverage, int(math.ceil(risk.max_futures_leverage)))
-    if settings.strategy_profile == "live-ultra-aggressive":
+    # Per-coin optimal leverage from $100 MC validation (374d)
+    cp = get_profile(symbol)
+    if is_profiled(symbol):
+        max_leverage = max(max_leverage, cp.optimal_leverage)
+        target_leverage = max(target_leverage, min(cp.optimal_leverage, max_leverage))
+    elif settings.strategy_profile == "live-ultra-aggressive":
         if symbol == "ETHUSDT":
             target_leverage = min(target_leverage + 2, max_leverage)
         elif symbol == "BTCUSDT":
@@ -62,17 +68,16 @@ def select_futures_leverage(
         or net_expected_edge_bps < max(exposure.reduced_entry_net_edge_bps, 4.0)
         or edge_to_cost_multiple < max(1.25, settings.cost_gate.edge_to_cost_multiple_min - 0.1)
     )
-    # ADX-based dynamic leverage: 374d validated for ETH+SOL only
-    adx_floor = 30.0 if symbol == "ETHUSDT" else 28.0
+    # ADX-based dynamic leverage: 374d validated per-coin profiles
     adx_cross_aligned = (
-        symbol in {"ETHUSDT", "SOLUSDT"}
-        and adx_1h >= adx_floor
+        is_profiled(symbol)
+        and adx_1h >= cp.adx_floor
         and ema_cross_signal != 0
         and ema_cross_signal == trend_direction
-        and (trend_direction > 0 or symbol != "ETHUSDT")  # ETH: long-only
+        and (trend_direction > 0 or cp.side_filter != "long")
     )
     if adx_cross_aligned:
-        adx_norm = min((adx_1h - 28) / 17.0, 1.0)  # 0 at 28, 1 at 45
+        adx_norm = min((adx_1h - cp.adx_floor) / 17.0, 1.0)
         adx_leverage = target_leverage + int(round((max_leverage - target_leverage) * adx_norm))
         adx_leverage = max(target_leverage, min(adx_leverage, max_leverage))
     else:
@@ -96,9 +101,13 @@ def position_notional_and_stop_bps(
     settings: Settings,
     size_multiplier: float = 1.0,
     leverage_multiplier: float = 1.0,
+    symbol: str = "",
 ) -> tuple[float, float]:
+    # Per-coin SL ATR multiplier from 374d validation
+    cp = get_profile(symbol)
+    sl_mult = cp.sl_atr_mult if is_profiled(symbol) else settings.sizing.atr_multiple_for_stop
     stop_distance_bps = max(
-        settings.sizing.atr_multiple_for_stop * atr_14_1h_bps,
+        sl_mult * atr_14_1h_bps,
         settings.sizing.stop_floor_bps,
         1.0,  # absolute minimum: 1 bps to prevent division by zero
     )

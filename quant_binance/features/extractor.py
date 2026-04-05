@@ -11,6 +11,7 @@ from quant_binance.settings import Settings
 from quant_binance.strategy.scorer import compute_predictability_score
 from quant_binance.strategy.edge import ConditionalEdgeLookup
 from quant_binance.strategy.normalize import clamp
+from quant_binance.strategy.coin_profiles import get_profile
 
 
 def _pct_returns(bars: list[KlineBar]) -> list[float]:
@@ -281,7 +282,8 @@ class MarketFeatureExtractor:
         median_realized_vol_1h_30d = median(abs(value) for value in returns_1h[-30:]) if returns_1h else 0.0
         open_interest_ema = _ema(state.open_interest_samples[-self.settings.feature_thresholds.oi_ema_hours :], min(self.settings.feature_thresholds.oi_ema_hours, len(state.open_interest_samples[-self.settings.feature_thresholds.oi_ema_hours :]))) if state.open_interest_samples else state.open_interest
         adx_1h = _adx_from_bars(bars_1h)
-        ema_cross = _ema_cross_signal(closes_1h)
+        _cp = get_profile(state.symbol)
+        ema_cross = _ema_cross_signal(closes_1h, fast_period=_cp.ema_fast, slow_period=_cp.ema_slow)
 
         gross_expected_edge_bps = 0.0
         if self.edge_lookup is not None:
