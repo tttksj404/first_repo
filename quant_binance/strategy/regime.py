@@ -684,7 +684,7 @@ def _futures_entry_plan(
         if _btc_eth_futures_sentiment_relaxation_allowed(
             features,
             settings,
-            symbol=symbol,
+            symbol=snapshot.symbol,
             futures_score_min=futures_score_min,
             futures_liquidity_min=futures_liquidity_min,
         ):
@@ -947,7 +947,7 @@ def evaluate_snapshot(
             settings=settings,
             size_multiplier=futures_size_multiplier,
             leverage_multiplier=planned_leverage,
-            symbol=symbol,
+            symbol=snapshot.symbol,
         )
         required_margin_usd = notional / max(float(planned_leverage), 1.0)
         if equity_usd > 0 and (equity_usd - required_margin_usd) / equity_usd < cash_reserve_fraction:
@@ -994,7 +994,7 @@ def evaluate_snapshot(
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
-            symbol=symbol,
+            symbol=snapshot.symbol,
         )
         if equity_usd > 0 and (equity_usd - notional) / equity_usd < cash_reserve_fraction:
             spot_ok = False
