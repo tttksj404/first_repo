@@ -742,9 +742,9 @@ def _futures_entry_plan(
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
     strong_setup = _is_objectively_strong_futures_setup(features, settings)
-    # ADX+cross confirms strong trend: size boost for ETH/SOL only
+    # ADX+cross confirms strong trend: size boost for profiled coins
     adx_strong_trend = (
-        symbol in adx_enabled_symbols
+        is_profiled(symbol)
         and adx_signal > 0.5
         and features.ema_cross_signal != 0
         and features.ema_cross_signal == features.trend_direction
