@@ -9,6 +9,7 @@ from quant_binance.policy.portfolio import build_portfolio_intent, decision_from
 from quant_binance.risk.sizing import position_notional_and_stop_bps, select_futures_leverage
 from quant_binance.overlays import is_alt_symbol
 from quant_binance.settings import Settings
+from quant_binance.strategy.coin_profiles import get_profile, is_profiled
 from quant_binance.strategy.scorer import apply_score_and_costs, passes_cost_gate
 
 
@@ -530,28 +531,20 @@ def _btc_eth_strong_size_boost_multiplier(
 def _adx_cross_signal_strength(features: FeatureVector, *, symbol: str = "") -> float:
     """Return a signal quality score [0, 1] based on ADX + EMA cross alignment.
 
-    374-day validated thresholds:
-    - ETH: ADX >= 30 (best at 35), long-only
-    - SOL: ADX >= 28, both directions
+    374-day validated per-coin profiles from $100 micro-capital scan.
     """
     adx = features.adx_1h
     cross = features.ema_cross_signal
     td = features.trend_direction
+    cp = get_profile(symbol)
 
-    # Per-symbol ADX floor from 374d grid search
-    if symbol == "ETHUSDT":
-        adx_floor = 30.0  # validated: PF 3.12 at ADX≥35, still good at ≥30
-        # ETH long-only: short direction degrades PF
-        if td < 0:
-            return 0.0
-    elif symbol == "SOLUSDT":
-        adx_floor = 28.0  # validated: PF 3.50
-    else:
-        adx_floor = 28.0  # default
-
-    if adx < adx_floor:
+    # Side filter: long-only coins reject short direction
+    if cp.side_filter == "long" and td < 0:
         return 0.0
-    adx_score = min((adx - adx_floor) / 20.0, 1.0)
+
+    if adx < cp.adx_floor:
+        return 0.0
+    adx_score = min((adx - cp.adx_floor) / 20.0, 1.0)
     cross_aligned = (cross != 0 and cross == td)
     cross_bonus = 0.3 if cross_aligned else 0.0
     return min(adx_score + cross_bonus, 1.0)
@@ -574,15 +567,11 @@ def _futures_entry_plan(
     alt_symbol = is_alt_symbol(symbol)
 
     # ── ADX + EMA Cross signal quality ──────────────
-    # 374-day grid search: only ETH+SOL passed all gates (walk-forward, MC, stress)
-    # BTC+XRP: no strategy survived 374d → ADX disabled, use base regime logic
-    adx_enabled_symbols = frozenset({"ETHUSDT", "SOLUSDT"})
-    if symbol not in adx_enabled_symbols:
-        adx_signal = 0.0
-    else:
+    # 374-day validated per-coin profiles (9 coins, $100 micro-capital optimized)
+    if is_profiled(symbol):
         adx_signal = _adx_cross_signal_strength(features, symbol=symbol)
-    # 374d validated: ETH needs ADX≥35, SOL needs ADX≥28 (already in signal fn)
-    # ETH: long-only performed best (PF 3.12); SOL: both sides (PF 3.50)
+    else:
+        adx_signal = 0.0
     adx_dampener = 0.5 if is_alt_symbol(symbol) else 1.0
     adx_score_relax = 5.0 * adx_signal * adx_dampener
     adx_trend_relax = 0.08 * adx_signal * adx_dampener
@@ -958,6 +947,7 @@ def evaluate_snapshot(
             settings=settings,
             size_multiplier=futures_size_multiplier,
             leverage_multiplier=planned_leverage,
+            symbol=symbol,
         )
         required_margin_usd = notional / max(float(planned_leverage), 1.0)
         if equity_usd > 0 and (equity_usd - required_margin_usd) / equity_usd < cash_reserve_fraction:
@@ -1004,6 +994,7 @@ def evaluate_snapshot(
             equity_usd=equity_usd,
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
+            symbol=symbol,
         )
         if equity_usd > 0 and (equity_usd - notional) / equity_usd < cash_reserve_fraction:
             spot_ok = False
