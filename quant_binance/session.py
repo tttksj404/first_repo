@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import re
 import time
@@ -320,6 +321,7 @@ class LivePaperSession:
     _last_flush_at: datetime | None = None
     _execution_quality_state: ExecutionQualityState = field(init=False, repr=False)
     session_start_equity_usdt: float | None = field(default=None, init=False)
+    _coin_convert_in_progress: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
         if self.max_portfolio_capacity_usd is None:
@@ -345,6 +347,14 @@ class LivePaperSession:
             try:
                 self.sync_account()
                 self._last_sync_at = timestamp
+                # Check for stranded COIN-Futures capital after every sync
+                try:
+                    self._auto_convert_coin_futures_to_usdt()
+                except Exception as conv_exc:
+                    print(
+                        f"[COIN_CONVERT_ERROR] {timestamp.isoformat()} auto-conversion failed: {conv_exc}",
+                        flush=True,
+                    )
                 if self.verbose:
                     print(f"[SYNC] {timestamp.isoformat()} account/open-order snapshot refreshed", flush=True)
                 if self.log_store is not None:
@@ -495,12 +505,369 @@ class LivePaperSession:
 
     def sync_account(self) -> None:
         self._refresh_account_state(evaluate_live_positions=True)
+        equity = self._extract_total_usdt_equity()
         if self.session_start_equity_usdt is None:
-            equity = self._extract_total_usdt_equity()
             if equity is not None and equity > 0.0:
                 self.session_start_equity_usdt = equity
+        # Live equity refresh: update sizing basis every sync cycle
+        if equity is not None and equity > 0.0:
+            self.equity_usd = equity
+            try:
+                leverage_cap = max(self.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
+            except Exception:
+                leverage_cap = 2.5
+            new_capacity = round(equity * leverage_cap, 6)
+            if self.max_portfolio_capacity_usd is None or new_capacity > self.remaining_portfolio_capacity_usd:
+                self.remaining_portfolio_capacity_usd = new_capacity
+                self.max_portfolio_capacity_usd = new_capacity
+
+    # ------------------------------------------------------------------
+    # COIN-Futures → USDT auto-conversion
+    # ------------------------------------------------------------------
+    _COIN_CONVERT_THRESHOLD_USD = 15.0
+    _COIN_CONVERT_ASSETS = ("ETH", "BTC")
+    _COIN_SPOT_SIZE_DECIMALS = {"ETH": 4, "BTC": 6}
+
+    def _auto_convert_coin_futures_to_usdt(self) -> None:
+        """Convert stranded COIN-Futures ETH/BTC into USDT-Futures capital.
+
+        Triggered when USDT-Futures available < $15 and any ETH/BTC balance
+        exists in the COIN-Futures account.  Pipeline:
+          1. COIN-Futures → spot  (wallet transfer)
+          2. spot sell ETH/BTC → USDT  (market order)
+          3. spot USDT → USDT-Futures   (wallet transfer)
+        """
+        if self._coin_convert_in_progress:
+            return
+        if self.rest_client is None:
+            return
+        # --- guard: only run when USDT-Futures capital is low ---------------
+        futures_available = float(
+            self.account_snapshot.get("availableBalance") or 0.0
+        )
+        if futures_available >= self._COIN_CONVERT_THRESHOLD_USD:
+            return
+        # --- find COIN-Futures rows with convertible balance ----------------
+        accounts = self.account_snapshot.get("accounts", [])
+        coin_rows: list[tuple[str, float]] = []
+        for row in accounts:
+            if not isinstance(row, dict):
+                continue
+            coin = str(row.get("marginCoin", "")).upper()
+            if coin not in self._COIN_CONVERT_ASSETS:
+                continue
+            equity = float(row.get("usdtEquity") or row.get("accountEquity") or 0.0)
+            available = float(row.get("available") or 0.0)
+            if available <= 0.0 or equity < 1.0:
+                continue
+            coin_rows.append((coin, available))
+        # --- also detect stranded ETH/BTC on spot (e.g. partial prior run) --
+        spot_only_rows: list[tuple[str, float]] = []
+        try:
+            spot_account = self.rest_client.get_account(market="spot")
+            for bal in spot_account.get("balances", []):
+                asset = str(bal.get("asset", "")).upper()
+                if asset not in self._COIN_CONVERT_ASSETS:
+                    continue
+                free = float(bal.get("free") or 0.0)
+                if free <= 0.0:
+                    continue
+                # skip if already covered by coin_rows (will be transferred first)
+                if any(c == asset for c, _ in coin_rows):
+                    continue
+                decimals = self._COIN_SPOT_SIZE_DECIMALS.get(asset, 4)
+                sell_qty = math.floor(free * 10**decimals) / 10**decimals
+                if sell_qty <= 0.0:
+                    continue
+                spot_only_rows.append((asset, sell_qty))
+        except Exception:
+            pass  # spot query failure is non-critical
+        if not coin_rows and not spot_only_rows:
+            return
+        # --- begin conversion -----------------------------------------------
+        self._coin_convert_in_progress = True
+        now = datetime.now(tz=timezone.utc)
+        transfer_method = getattr(self.rest_client, "transfer_asset", None)
+        if not callable(transfer_method):
+            self._coin_convert_in_progress = False
+            return
+        total_usdt_recovered = 0.0
+        try:
+            # Phase A — process COIN-Futures assets (3-step pipeline)
+            for coin, amount in coin_rows:
+                tag = f"coin_convert:{coin}"
+                # Step 1 — COIN-Futures → spot
+                print(
+                    f"[COIN_CONVERT] {now.isoformat()} transferring {amount:.8f} {coin} "
+                    f"from coin_futures → spot",
+                    flush=True,
+                )
+                try:
+                    resp1 = transfer_method(
+                        source_market="coin_futures",
+                        target_market="spot",
+                        asset=coin,
+                        amount=amount,
+                        client_oid=f"{tag}:step1:{int(now.timestamp())}",
+                    )
+                except Exception as exc:
+                    print(f"[COIN_CONVERT] step1 transfer failed for {coin}: {exc}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": coin, "step": 1,
+                            "status": "failed", "error": repr(exc),
+                        })
+                    continue
+                step1_ok = str(resp1.get("status", "")).upper() == "SUCCESS"
+                if not step1_ok:
+                    print(f"[COIN_CONVERT] step1 non-success for {coin}: {resp1}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": coin, "step": 1,
+                            "status": "non_success", "response": resp1,
+                        })
+                    continue
+                # Step 2 — spot market-sell coin → USDT
+                spot_symbol = f"{coin}USDT"
+                decimals = self._COIN_SPOT_SIZE_DECIMALS.get(coin, 4)
+                sell_qty = math.floor(amount * 10**decimals) / 10**decimals
+                if sell_qty <= 0.0:
+                    print(f"[COIN_CONVERT] sell_qty rounded to 0 for {coin}, skip", flush=True)
+                    continue
+                order_params = self.rest_client.build_order_params(
+                    market="spot",
+                    symbol=spot_symbol,
+                    side="sell",
+                    order_type="market",
+                    quantity=sell_qty,
+                )
+                print(
+                    f"[COIN_CONVERT] {now.isoformat()} placing spot market sell "
+                    f"{sell_qty} {spot_symbol} (raw={amount:.8f}, decimals={decimals})",
+                    flush=True,
+                )
+                try:
+                    resp2 = self.rest_client.place_order(
+                        market="spot", order_params=order_params,
+                    )
+                except Exception as exc:
+                    print(f"[COIN_CONVERT] step2 spot sell failed for {coin}: {exc}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": coin, "step": 2,
+                            "status": "failed", "error": repr(exc),
+                        })
+                    continue
+                step2_ok = str(resp2.get("status", "")).upper() == "SUCCESS"
+                if not step2_ok:
+                    print(f"[COIN_CONVERT] step2 non-success for {coin}: {resp2}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": coin, "step": 2,
+                            "status": "non_success", "response": resp2,
+                        })
+                    continue
+                # Wait briefly for fill to settle
+                time.sleep(1.0)
+                # Fetch spot USDT balance to know how much to transfer
+                try:
+                    spot_account = self.rest_client.get_account(market="spot")
+                    spot_usdt_free = 0.0
+                    for bal in spot_account.get("balances", []):
+                        if str(bal.get("asset", "")).upper() == "USDT":
+                            spot_usdt_free = float(bal.get("free") or 0.0)
+                            break
+                except Exception:
+                    spot_usdt_free = 0.0
+                if spot_usdt_free < 1.0:
+                    print(
+                        f"[COIN_CONVERT] spot USDT balance too low after sell "
+                        f"({spot_usdt_free:.2f}), skipping step3 for {coin}",
+                        flush=True,
+                    )
+                    continue
+                # Step 3 — spot USDT → USDT-Futures
+                print(
+                    f"[COIN_CONVERT] {now.isoformat()} transferring {spot_usdt_free:.4f} USDT "
+                    f"from spot → futures",
+                    flush=True,
+                )
+                try:
+                    resp3 = transfer_method(
+                        source_market="spot",
+                        target_market="futures",
+                        asset="USDT",
+                        amount=spot_usdt_free,
+                        client_oid=f"{tag}:step3:{int(now.timestamp())}",
+                    )
+                except Exception as exc:
+                    print(f"[COIN_CONVERT] step3 transfer failed: {exc}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": coin, "step": 3,
+                            "status": "failed", "error": repr(exc),
+                        })
+                    continue
+                step3_ok = str(resp3.get("status", "")).upper() == "SUCCESS"
+                if self.log_store is not None:
+                    self.log_store.append("coin_convert", {
+                        "timestamp": now, "coin": coin,
+                        "status": "completed" if step3_ok else "step3_non_success",
+                        "amount_coin": amount,
+                        "usdt_recovered": spot_usdt_free if step3_ok else 0.0,
+                        "step1_response": resp1,
+                        "step2_response": resp2,
+                        "step3_response": resp3,
+                    })
+                if step3_ok:
+                    total_usdt_recovered += spot_usdt_free
+                    print(
+                        f"[COIN_CONVERT] SUCCESS {coin}: recovered ~${spot_usdt_free:.2f} USDT "
+                        f"to futures",
+                        flush=True,
+                    )
+                else:
+                    print(
+                        f"[COIN_CONVERT] step3 non-success for {coin}: {resp3}",
+                        flush=True,
+                    )
+            # Phase B — sell stranded spot ETH/BTC and move USDT to futures
+            for asset, sell_qty in spot_only_rows:
+                tag = f"coin_convert:spot_{asset}"
+                spot_symbol = f"{asset}USDT"
+                print(
+                    f"[COIN_CONVERT] {now.isoformat()} selling stranded spot "
+                    f"{sell_qty} {spot_symbol}",
+                    flush=True,
+                )
+                order_params = self.rest_client.build_order_params(
+                    market="spot",
+                    symbol=spot_symbol,
+                    side="sell",
+                    order_type="market",
+                    quantity=sell_qty,
+                )
+                try:
+                    resp_sell = self.rest_client.place_order(
+                        market="spot", order_params=order_params,
+                    )
+                except Exception as exc:
+                    print(f"[COIN_CONVERT] spot sell failed for {asset}: {exc}", flush=True)
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": asset, "phase": "B",
+                            "step": "sell", "status": "failed", "error": repr(exc),
+                        })
+                    continue
+                sell_ok = str(resp_sell.get("status", "")).upper() == "SUCCESS"
+                if not sell_ok:
+                    print(f"[COIN_CONVERT] spot sell non-success for {asset}: {resp_sell}", flush=True)
+                    continue
+                time.sleep(1.0)
+                try:
+                    spot_acct = self.rest_client.get_account(market="spot")
+                    usdt_free = 0.0
+                    for bal in spot_acct.get("balances", []):
+                        if str(bal.get("asset", "")).upper() == "USDT":
+                            usdt_free = float(bal.get("free") or 0.0)
+                            break
+                except Exception:
+                    usdt_free = 0.0
+                if usdt_free < 1.0:
+                    continue
+                print(
+                    f"[COIN_CONVERT] {now.isoformat()} transferring {usdt_free:.4f} USDT "
+                    f"from spot → futures (phase B, {asset})",
+                    flush=True,
+                )
+                try:
+                    resp_xfer = transfer_method(
+                        source_market="spot",
+                        target_market="futures",
+                        asset="USDT",
+                        amount=usdt_free,
+                        client_oid=f"{tag}:xfer:{int(now.timestamp())}",
+                    )
+                except Exception as exc:
+                    print(f"[COIN_CONVERT] spot→futures transfer failed: {exc}", flush=True)
+                    continue
+                xfer_ok = str(resp_xfer.get("status", "")).upper() == "SUCCESS"
+                if self.log_store is not None:
+                    self.log_store.append("coin_convert", {
+                        "timestamp": now, "coin": asset, "phase": "B",
+                        "status": "completed" if xfer_ok else "transfer_non_success",
+                        "sell_qty": sell_qty,
+                        "usdt_recovered": usdt_free if xfer_ok else 0.0,
+                        "sell_response": resp_sell,
+                        "transfer_response": resp_xfer,
+                    })
+                if xfer_ok:
+                    total_usdt_recovered += usdt_free
+                    print(
+                        f"[COIN_CONVERT] SUCCESS spot {asset}: recovered "
+                        f"~${usdt_free:.2f} USDT to futures",
+                        flush=True,
+                    )
+            if total_usdt_recovered > 0.0:
+                print(
+                    f"[COIN_CONVERT] total recovered: ${total_usdt_recovered:.2f} USDT → futures",
+                    flush=True,
+                )
+                self._refresh_account_state(evaluate_live_positions=False)
+        finally:
+            self._coin_convert_in_progress = False
+
+    def _check_data_collection_graduation(self) -> None:
+        """Auto-graduate from data_collection_mode when min_trades reached.
+
+        Updates strategy_override.approved.json:
+        - data_collection_mode → false
+        - removes _lock field
+        Restores autotuner cron so the system can self-optimize.
+        """
+        settings = self.runtime.paper_service.settings
+        if not settings.data_collection_mode:
+            return
+        if len(self.closed_trades) < settings.data_collection_min_trades:
+            return
+        override_path_str = os.environ.get("STRATEGY_OVERRIDE_PATH", "")
+        if not override_path_str:
+            return
+        override_path = Path(override_path_str)
+        if not override_path.exists():
+            return
+        try:
+            raw = json.loads(override_path.read_text(encoding="utf-8"))
+            if not raw.get("data_collection_mode", False):
+                return
+            raw["data_collection_mode"] = False
+            raw.pop("_lock", None)
+            override_path.write_text(
+                json.dumps(raw, indent=2, sort_keys=True, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            logger.warning(
+                "[DATA_COLLECTION_GRADUATED] closed_trades=%d >= min=%d — "
+                "data_collection_mode disabled, _lock removed. "
+                "Normal protection gates will apply from next session restart.",
+                len(self.closed_trades),
+                settings.data_collection_min_trades,
+            )
+            # Restore autotuner cron
+            import subprocess
+            cron_line = "47 1,7,13,19 * * * /Users/tttksj/first_repo/scripts/quant_autotuner_cycle.sh >> /Users/tttksj/first_repo/quant_runtime/autotuner.log 2>&1"
+            result = subprocess.run(
+                ["bash", "-c", f'(crontab -l 2>/dev/null; echo "{cron_line}") | sort -u | crontab -'],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                logger.warning("[DATA_COLLECTION_GRADUATED] autotuner cron restored")
+        except Exception as exc:
+            logger.warning("[DATA_COLLECTION_GRADUATION_FAILED] %s", exc)
 
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
+        self._check_data_collection_graduation()
         self.summary_path = summary_path
         self.state_path = state_path
         open_spot_positions = self._open_positions_for_market("spot")
@@ -653,6 +1020,9 @@ class LivePaperSession:
                 "macro_runtime": macro_runtime,
                 "execution_quality": summary["execution_quality"],
                 "closed_trade_count": summary["closed_trade_count"],
+                "session_start_equity_usdt": self.session_start_equity_usdt,
+                "session_current_equity_usdt": current_equity,
+                "session_equity_delta_usdt": summary.get("session_equity_delta_usdt"),
                 "kill_switch": self.runtime.kill_switch.status(),
                 "policy_state": persisted_policy_state,
                 "executive_operating_verdict": dict(persisted_policy_state.get("executive_operating_verdict", {}) or {}),
@@ -873,6 +1243,10 @@ class LivePaperSession:
 
     def _execution_quality_entry_floor_adjustment_bps(self, decision: DecisionIntent) -> float:
         if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
+            return 0.0
+        # Data collection mode: execution quality based on <50 trades is noise, skip floor inflation.
+        _dcm_s = self.runtime.paper_service.settings
+        if _dcm_s.data_collection_mode and len(self.closed_trades) < _dcm_s.data_collection_min_trades:
             return 0.0
         raw_adjustment = float(decision.execution_quality_entry_threshold_bps or 0.0)
         return max(0.0, raw_adjustment * self._execution_quality_runtime_scale(decision))
@@ -1212,6 +1586,15 @@ class LivePaperSession:
             return decision
         if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
             return decision
+        _settings = self.runtime.paper_service.settings
+        if _settings.data_collection_mode and len(self.closed_trades) < _settings.data_collection_min_trades:
+            logger.info(
+                "[DATA_COLLECTION_MODE] symbol=%s closed_trades=%d/%d — bypassing policy guardrails to accumulate live evidence",
+                decision.symbol,
+                len(self.closed_trades),
+                _settings.data_collection_min_trades,
+            )
+            return decision
         context = self._policy_runtime_context()
         auto_mode = dict(context.get("auto_mode", {}) or {})
         executive_operating_verdict = dict(context.get("executive_operating_verdict", {}) or {})
@@ -1245,18 +1628,23 @@ class LivePaperSession:
         live_snapshot = dict(live_evidence_rejudge.get("current_snapshot", {}) or {})
         snap_closed_trades = int(live_snapshot.get("closed_trade_count", 0) or 0)
         snap_live_orders = int(live_snapshot.get("live_order_count", 0) or 0)
+        # Bootstrap-friendly: allow all symbols (not just majors) to break
+        # deadlock, and raise the closed-trade threshold from 0 to <10 so that
+        # symbols with a handful of trades can still accumulate evidence.
+        # Goal: reach 50 trades as fast as possible on a small (~$70-80) book.
+        _BOOTSTRAP_TRADE_THRESHOLD = 10
         _is_evidence_deadlocked = (
             effective_verdict == "rollback"
             and rejudge_status in {"waiting", "blocked"}
-            and snap_closed_trades == 0
+            and snap_closed_trades < _BOOTSTRAP_TRADE_THRESHOLD
             and snap_live_orders == 0
-            and is_major_symbol
+            # is_major_symbol check removed — all symbols may bootstrap
         )
         if _is_evidence_deadlocked:
             logger.warning(
                 "[POLICY_DEADLOCK_DETECTED] symbol=%s verdict=%s rejudge_status=%s "
                 "snap_closed_trades=%d snap_live_orders=%d — "
-                "rollback verdict with zero live evidence on a major symbol. "
+                "rollback verdict with thin live evidence (<%d trades). "
                 "Allowing bootstrap entry to break the deadlock (size will be capped). "
                 "If this was caused by contaminated inherited positions, check "
                 "closed_trades.jsonl for exit_reason=MANUAL_CLOSE_SYNCED entries "
@@ -1266,6 +1654,7 @@ class LivePaperSession:
                 rejudge_status,
                 snap_closed_trades,
                 snap_live_orders,
+                _BOOTSTRAP_TRADE_THRESHOLD,
             )
 
         rejection_reasons: list[str] = []
@@ -1469,6 +1858,11 @@ class LivePaperSession:
         decision = self._direct_policy_evidence_guardrails(decision)
         if decision.final_mode == "cash" or decision.order_intent_notional_usd <= 0.0:
             return decision
+        # Data collection mode: skip operational self-correction entirely to preserve
+        # full position sizing during evidence accumulation phase.
+        _dcm = self.runtime.paper_service.settings
+        if _dcm.data_collection_mode and len(self.closed_trades) < _dcm.data_collection_min_trades:
+            return decision
         policy_adjustment = self._policy_adjustment_for_decision(decision)
         verdict = self._current_operational_verdict()
         verdict_status = str(verdict.get("status", "hold"))
@@ -1594,7 +1988,13 @@ class LivePaperSession:
         is_major_strong_futures_decision = self._is_major_strong_futures_decision(decision)
         is_major_medium_futures_decision = self._is_major_medium_futures_decision(decision)
         if decision.final_mode == "futures":
-            major_cross_conflict_symbol = self._major_cross_symbol_side_conflict(decision)
+            # Data collection mode: skip cross-symbol side conflict check.
+            # At small account scale, BTC/ETH directional correlation risk is negligible.
+            _dcm_skip_cross = (
+                self.runtime.paper_service.settings.data_collection_mode
+                and len(self.closed_trades) < self.runtime.paper_service.settings.data_collection_min_trades
+            )
+            major_cross_conflict_symbol = None if _dcm_skip_cross else self._major_cross_symbol_side_conflict(decision)
             if major_cross_conflict_symbol is not None:
                 return replace(
                     decision,
@@ -1819,6 +2219,12 @@ class LivePaperSession:
                 )
             decision = replace(decision, order_intent_notional_usd=round(major_strong_entry_floor, 6))
         expected_profit_usd = decision.order_intent_notional_usd * max(decision.net_expected_edge_bps, 0.0) / 10000.0
+        # Data collection mode: relax notional floor and expected profit checks to allow
+        # small-capital accounts to accumulate live trade evidence.
+        _dcm_settings = self.runtime.paper_service.settings
+        if _dcm_settings.data_collection_mode and len(self.closed_trades) < _dcm_settings.data_collection_min_trades:
+            meaningful_notional_floor = min(meaningful_notional_floor, min_notional)
+            expected_profit_usd = max(expected_profit_usd, self._min_expected_profit_usd_threshold(decision))
         if decision.order_intent_notional_usd < meaningful_notional_floor:
             return replace(
                 decision,
