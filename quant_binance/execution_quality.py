@@ -509,7 +509,11 @@ class ExecutionQualityState:
         leverage_reduction += _quality_scale(effective.avg_slippage_bps, start=6.0, span=14.0, cap=0.12)
         leverage_reduction += _quality_scale(retention_gap, start=0.15, span=0.6, cap=0.18)
         leverage_reduction += _quality_scale(effective.protection_degraded_rate, start=0.18, span=0.52, cap=0.16)
-        leverage_multiplier = _clamp(1.0 - leverage_reduction, 0.55, 1.0)
+        # Floor: never reduce below 85% to protect minimum viable position size
+        _SIZE_FLOOR = 0.85
+        _LEVERAGE_FLOOR = 0.85
+        size_multiplier = max(size_multiplier, _SIZE_FLOOR)
+        leverage_multiplier = _clamp(1.0 - leverage_reduction, _LEVERAGE_FLOOR, 1.0)
         if effective.protection_degraded_rate >= 0.35 or retention_gap >= 0.4:
             leverage_multiplier = min(leverage_multiplier, 0.75)
         if reject_timeout_rate >= 0.4 or effective.avg_slippage_bps > 14.0:
@@ -551,12 +555,15 @@ class ExecutionQualityState:
         expected_profit_floor_bps = round(min(expected_profit_floor_bps, 60.0), 6)
 
         trade_restraint = "none"
+        # Bootstrap-friendly thresholds: require larger sample (>=20) and much
+        # worse metrics before halting.  This prevents the chicken-and-egg
+        # deadlock where the system halts before it can accumulate 50 trades.
         if (
-            (rounded_sample_size >= 5 and reject_timeout_rate >= 0.6)
-            or (rounded_sample_size >= 5 and effective.avg_fill_ratio < 0.35)
-            or effective.avg_slippage_bps > 20.0
-            or (rounded_sample_size >= 5 and effective.avg_realized_edge_bps < -2.0)
-            or (rounded_sample_size >= 5 and effective.protection_degraded_rate >= 0.75)
+            (rounded_sample_size >= 20 and reject_timeout_rate >= 0.85)
+            or (rounded_sample_size >= 20 and effective.avg_fill_ratio < 0.15)
+            or effective.avg_slippage_bps > 50.0
+            or (rounded_sample_size >= 20 and effective.avg_realized_edge_bps < -10.0)
+            or (rounded_sample_size >= 20 and effective.protection_degraded_rate >= 0.90)
         ):
             trade_restraint = "execution_quality_halt"
             size_multiplier = 0.0

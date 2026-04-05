@@ -127,6 +127,10 @@ def position_notional_and_stop_bps(
         * adjusted_leverage_multiplier,
         remaining_portfolio_capacity_usd,
     )
+    # Floor: minimum viable notional = equity × 50% × leverage (never go below)
+    if is_profiled(symbol) and adjusted_leverage_multiplier > 1:
+        notional_floor = equity_usd * 0.5 * adjusted_leverage_multiplier
+        capped_notional = max(capped_notional, min(notional_floor, remaining_portfolio_capacity_usd))
     return round(capped_notional, 6), round(stop_distance_bps, 6)
 
 
