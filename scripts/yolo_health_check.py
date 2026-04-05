@@ -179,10 +179,16 @@ def check_and_fix():
     # ═══════════════════════════════════════════
     # 4. 포지션 볼륨 검증
     # ═══════════════════════════════════════════
-    log("4. 포지션 볼륨 검증")
+    log("4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산")
     acct = client.get_account(market="futures")
     fdata = acct.get("raw", {}).get("data", [{}])[0]
     equity = float(fdata.get("accountEquity", 0))
+
+    # Load universe
+    override_uni = set()
+    if OVERRIDE_PATH.exists():
+        ov = json.loads(OVERRIDE_PATH.read_text())
+        override_uni = set(ov.get("universe", []))
 
     pos = client.get_positions()
     for p in pos.get("positions", []):
@@ -190,11 +196,49 @@ def check_and_fix():
         if qty <= 0:
             continue
         sym = p.get("symbol", "?")
+        side = p.get("holdSide", "long")
         mark = float(p.get("markPrice", 0))
         notional = qty * mark
         lev = int(p.get("leverage", 1))
 
-        expected_min = equity * 0.3 * lev  # 최소 30% × leverage
+        # Universe 밖 포지션 → 자동 청산
+        if override_uni and sym not in override_uni:
+            issue(f"{sym} universe 밖 포지션 — 청산 시도")
+            # Cancel TP/SL first
+            for pt in ["profit_loss", "normal_plan"]:
+                try:
+                    plans = client.get_futures_pending_plan_orders(symbol=sym, plan_type=pt)
+                    for o in plans.get("orders", []):
+                        try:
+                            client.cancel_futures_plan_orders(
+                                symbol=sym, order_id_list=[{"orderId": o["orderId"]}], plan_type=pt
+                            )
+                        except:
+                            pass
+                except:
+                    pass
+            time.sleep(0.5)
+            # Hedge mode close: buy to close long, sell to close short
+            close_side = "buy" if side == "long" else "sell"
+            try:
+                payload = {
+                    "symbol": sym,
+                    "productType": "USDT-FUTURES",
+                    "marginCoin": "USDT",
+                    "marginMode": "crossed",
+                    "side": close_side,
+                    "tradeSide": "close",
+                    "orderType": "market",
+                    "size": str(qty),
+                    "holdSide": side,
+                }
+                client.place_order(market="futures", order_params=payload)
+                fix(f"{sym} {side} qty={qty} 청산 완료")
+            except Exception as e:
+                issue(f"{sym} 청산 실패: {str(e)[:60]}")
+            continue
+
+        expected_min = equity * 0.3 * lev
         if notional < expected_min:
             issue(f"{sym} notional ${notional:.0f} < expected ${expected_min:.0f} (equity ${equity:.0f} × {lev}x × 30%)")
 
