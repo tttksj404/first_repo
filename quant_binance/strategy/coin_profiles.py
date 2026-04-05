@@ -28,6 +28,16 @@ class CoinProfile:
 # 374d grid search → $100 MC leverage validation
 # Sorted by optimal_leverage × median return
 COIN_PROFILES: dict[str, CoinProfile] = {
+    "BTCUSDT": CoinProfile(
+        ema_fast=10, ema_slow=21, adx_floor=33, sl_atr_mult=1.0, rr=0.5,
+        hold_bars=6, side_filter="long", optimal_leverage=20,
+        wr=0.89, pf=4.58,
+    ),
+    "XRPUSDT": CoinProfile(
+        ema_fast=10, ema_slow=21, adx_floor=40, sl_atr_mult=0.5, rr=0.5,
+        hold_bars=3, side_filter="both", optimal_leverage=20,
+        wr=1.00, pf=999.0,
+    ),
     "ADAUSDT": CoinProfile(
         ema_fast=12, ema_slow=26, adx_floor=30, sl_atr_mult=1.0, rr=1.0,
         hold_bars=12, side_filter="long", optimal_leverage=20,
