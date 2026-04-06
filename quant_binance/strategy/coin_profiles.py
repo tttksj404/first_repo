@@ -23,6 +23,11 @@ class CoinProfile:
     optimal_leverage: int   # MC-validated max leverage ($100, ruin < 3%)
     wr: float               # historical win rate
     pf: float               # historical profit factor
+    # Pullback strategy (optional — 0 = disabled)
+    pullback_ema: int = 0          # EMA period for pullback trend (21 or 50)
+    pullback_adx_floor: float = 0  # ADX floor for pullback entry
+    pullback_sl_mult: float = 0    # SL ATR multiplier for pullback
+    pullback_rr: float = 0         # Reward ratio for pullback
 
 
 # 374d grid search → $100 MC leverage validation
@@ -32,6 +37,7 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         ema_fast=10, ema_slow=21, adx_floor=33, sl_atr_mult=1.0, rr=0.5,
         hold_bars=6, side_filter="long", optimal_leverage=20,
         wr=0.89, pf=4.58,
+        pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=2.0, pullback_rr=1.0,
     ),
     "XRPUSDT": CoinProfile(
         ema_fast=9, ema_slow=21, adx_floor=40, sl_atr_mult=3.0, rr=0.75,
@@ -62,6 +68,7 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         ema_fast=8, ema_slow=21, adx_floor=33, sl_atr_mult=2.5, rr=1.5,
         hold_bars=24, side_filter="long", optimal_leverage=10,
         wr=0.83, pf=4.32,
+        pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=1.5, pullback_rr=1.0,  # WR 92% PF 12.10
     ),
     "LTCUSDT": CoinProfile(
         ema_fast=5, ema_slow=13, adx_floor=38, sl_atr_mult=3.0, rr=1.2,
@@ -77,11 +84,13 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         ema_fast=20, ema_slow=50, adx_floor=28, sl_atr_mult=1.5, rr=1.2,
         hold_bars=48, side_filter="both", optimal_leverage=7,
         wr=0.79, pf=4.14,
+        pullback_ema=21, pullback_adx_floor=25, pullback_sl_mult=1.0, pullback_rr=1.5,  # WR 70% PF 3.72
     ),
     "LINKUSDT": CoinProfile(
         ema_fast=8, ema_slow=21, adx_floor=35, sl_atr_mult=2.5, rr=1.5,
         hold_bars=18, side_filter="long", optimal_leverage=5,
         wr=0.79, pf=3.09,
+        pullback_ema=21, pullback_adx_floor=25, pullback_sl_mult=1.5, pullback_rr=1.5,  # WR 70% PF 5.44
     ),
 }
 

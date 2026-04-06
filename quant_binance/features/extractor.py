@@ -115,6 +115,46 @@ def _adx_from_bars(bars_1h: list[KlineBar], period: int = 14) -> float:
     return round(adx_val, 2)
 
 
+def _rsi(closes: list[float], period: int = 14) -> float:
+    """RSI on last `period+1` closes. Returns 0-100 or 50.0 if insufficient data."""
+    if len(closes) < period + 1:
+        return 50.0
+    recent = closes[-(period + 1):]
+    deltas = [recent[i + 1] - recent[i] for i in range(len(recent) - 1)]
+    gains = [d if d > 0 else 0.0 for d in deltas]
+    losses = [-d if d < 0 else 0.0 for d in deltas]
+    avg_gain = sum(gains) / period
+    avg_loss = sum(losses) / period
+    if avg_loss == 0:
+        return 100.0
+    rs = avg_gain / avg_loss
+    return 100.0 - 100.0 / (1.0 + rs)
+
+
+def _pullback_signal(closes_1h: list[float], ema_period: int = 21, rsi_entry: float = 40.0) -> int:
+    """Detect pullback entry on 1h bars.
+
+    Long: price > EMA50, EMA(p) > EMA50, RSI crosses up through rsi_entry (oversold recovery)
+    Short: price < EMA50, EMA(p) < EMA50, RSI crosses down through (100-rsi_entry)
+    Returns +1 (long pullback), -1 (short pullback), 0 (none).
+    """
+    if len(closes_1h) < 52:
+        return 0
+    ema_p_now = _ema(closes_1h[-ema_period:], ema_period)
+    ema50_now = _ema(closes_1h[-50:], 50)
+    rsi_now = _rsi(closes_1h, 14)
+    rsi_prev = _rsi(closes_1h[:-1], 14)
+    price = closes_1h[-1]
+
+    # Long pullback: uptrend + RSI recovers from oversold
+    if price > ema50_now and ema_p_now > ema50_now and rsi_prev < rsi_entry and rsi_now >= rsi_entry and rsi_now < 60:
+        return 1
+    # Short pullback: downtrend + RSI drops from overbought
+    if price < ema50_now and ema_p_now < ema50_now and rsi_prev > (100 - rsi_entry) and rsi_now <= (100 - rsi_entry) and rsi_now > 40:
+        return -1
+    return 0
+
+
 def _ema_cross_signal(closes_1h: list[float], fast_period: int = 9, slow_period: int = 21) -> int:
     """Detect EMA cross on 1h bars. Returns +1 (bullish cross), -1 (bearish), 0 (none)."""
     if len(closes_1h) < slow_period + 2:
@@ -284,6 +324,7 @@ class MarketFeatureExtractor:
         adx_1h = _adx_from_bars(bars_1h)
         _cp = get_profile(state.symbol)
         ema_cross = _ema_cross_signal(closes_1h, fast_period=_cp.ema_fast, slow_period=_cp.ema_slow)
+        pullback = _pullback_signal(closes_1h, ema_period=21, rsi_entry=40.0)
 
         gross_expected_edge_bps = 0.0
         if self.edge_lookup is not None:
@@ -325,6 +366,7 @@ class MarketFeatureExtractor:
             intraday_trend_strength=intraday_strength,
             adx_1h=adx_1h,
             ema_cross_signal=ema_cross,
+            pullback_signal=pullback,
         )
 
     def enrich_feature_vector(self, *, state: SymbolMarketState, features: FeatureVector) -> FeatureVector:

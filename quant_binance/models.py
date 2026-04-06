@@ -55,6 +55,7 @@ class FeatureVector:
     intraday_trend_strength: float = 0.0
     adx_1h: float = 0.0
     ema_cross_signal: int = 0  # +1 = fast crossed above slow, -1 = below, 0 = none
+    pullback_signal: int = 0   # +1 = long pullback (oversold recovery in uptrend), -1 = short, 0 = none
     atr_14_1h_bps: float = 0.0  # actual 1h ATR-14 in basis points
     predictability_score: float = 0.0
     gross_expected_edge_bps: float = 0.0

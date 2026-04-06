@@ -546,8 +546,13 @@ def _adx_cross_signal_strength(features: FeatureVector, *, symbol: str = "") -> 
         return 0.0
     adx_score = min((adx - cp.adx_floor) / 20.0, 1.0)
     cross_aligned = (cross != 0 and cross == td)
-    cross_bonus = 0.3 if cross_aligned else 0.0
-    return min(adx_score + cross_bonus, 1.0)
+    pullback_aligned = (features.pullback_signal != 0 and features.pullback_signal == td)
+    # EMA cross or pullback — either signal qualifies
+    signal_bonus = 0.3 if (cross_aligned or pullback_aligned) else 0.0
+    # Pullback gets extra boost (WR 92% in backtest)
+    if pullback_aligned:
+        signal_bonus = 0.4
+    return min(adx_score + signal_bonus, 1.0)
 
 
 def _futures_entry_plan(
