@@ -324,7 +324,6 @@ class MarketFeatureExtractor:
         adx_1h = _adx_from_bars(bars_1h)
         _cp = get_profile(state.symbol)
         ema_cross = _ema_cross_signal(closes_1h, fast_period=_cp.ema_fast, slow_period=_cp.ema_slow)
-        pullback = _pullback_signal(closes_1h, ema_period=21, rsi_entry=40.0)
 
         gross_expected_edge_bps = 0.0
         if self.edge_lookup is not None:
@@ -366,7 +365,6 @@ class MarketFeatureExtractor:
             intraday_trend_strength=intraday_strength,
             adx_1h=adx_1h,
             ema_cross_signal=ema_cross,
-            pullback_signal=pullback,
         )
 
     def enrich_feature_vector(self, *, state: SymbolMarketState, features: FeatureVector) -> FeatureVector:
@@ -394,11 +392,14 @@ class MarketFeatureExtractor:
         resistance_hits += 1 if abs(state.last_trade_price - local_high) / state.last_trade_price <= 0.012 else 0
         resistance_penalty = min(resistance_hits / 2.0, 1.0)
 
+        pullback = _pullback_signal(closes_1h, ema_period=21, rsi_entry=40.0)
+
         enriched = FeatureVector(
             **{
                 **features.as_dict(),
                 "support_alignment": round(support_alignment, 6),
                 "resistance_penalty": round(resistance_penalty, 6),
+                "pullback_signal": pullback,
             }
         )
         if self.cost_calibration is not None:
