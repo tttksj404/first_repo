@@ -1,7 +1,7 @@
 import requests
 import os
 
-NOTION_TOKEN = "REDACTED_NOTION_TOKEN"
+NOTION_TOKEN = os.environ.get("NOTION_TOKEN", "")
 PAGE_ID = "325eacc8175a811d8237c7414ef471ea"
 
 HEADERS = {
