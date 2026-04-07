@@ -4,18 +4,18 @@
   "exchange_live_futures_positions": [],
   "futures_available_balance_usd": 66.647868,
   "futures_collateral_candidate_balance_usd": 0,
-  "futures_execution_balance_usd": 84.195884,
-  "futures_manual_handling_balance_usd": 18.532046,
-  "futures_total_reusable_balance_usd": 85.186105,
+  "futures_execution_balance_usd": 84.209804,
+  "futures_manual_handling_balance_usd": 18.547637,
+  "futures_total_reusable_balance_usd": 85.201696,
   "futures_transferable_execution_balance_usd": 0.006191,
-  "heartbeat_count": 13918,
+  "heartbeat_count": 24973,
   "kill_switch": {
     "armed": false,
     "reasons": []
   },
   "last_decision_emitted_at": "2026-04-07T00:23:05.081304+00:00",
   "last_decision_timestamp": "2026-04-07T00:25:00+00:00",
-  "last_event_timestamp": "2026-04-07T00:24:52.334458+00:00",
+  "last_event_timestamp": "2026-04-07T00:25:52.444990+00:00",
   "live_order_count": 0,
   "realized_pnl_usd_estimate": 0.0,
   "recent_decisions": [
@@ -92,5 +92,5 @@
     "SUPPORT_NOT_CONFIRMED": 2
   },
   "unrealized_pnl_usd_estimate": 0,
-  "updated_at": "2026-04-07T00:24:52.413338+00:00"
+  "updated_at": "2026-04-07T00:25:52.515603+00:00"
 }

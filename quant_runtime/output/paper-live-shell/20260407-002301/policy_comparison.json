@@ -475,7 +475,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "demoted",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -497,9 +497,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "demoted",
         "pruning_recommendation": "keep",
@@ -530,7 +530,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "demoted",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -552,9 +552,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "demoted",
         "pruning_recommendation": "keep",
@@ -585,7 +585,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "demoted",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -607,9 +607,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "demoted",
         "pruning_recommendation": "keep",
@@ -640,7 +640,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -662,9 +662,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -694,7 +694,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -716,9 +716,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -748,7 +748,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -770,9 +770,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -802,7 +802,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -824,9 +824,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -856,7 +856,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -878,9 +878,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -910,7 +910,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -932,9 +932,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -964,7 +964,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -986,9 +986,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -1018,7 +1018,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -1040,9 +1040,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -1072,7 +1072,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -1094,9 +1094,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -2837,7 +2837,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "demoted",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -2859,9 +2859,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "demoted",
           "pruning_recommendation": "keep",
@@ -2892,7 +2892,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "demoted",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -2914,9 +2914,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "demoted",
           "pruning_recommendation": "keep",
@@ -2947,7 +2947,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "demoted",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -2969,9 +2969,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "demoted",
           "pruning_recommendation": "keep",
@@ -3002,7 +3002,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3024,9 +3024,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3056,7 +3056,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3078,9 +3078,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3110,7 +3110,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3132,9 +3132,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3164,7 +3164,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3186,9 +3186,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3218,7 +3218,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3240,9 +3240,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3272,7 +3272,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3294,9 +3294,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3326,7 +3326,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3348,9 +3348,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3380,7 +3380,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3402,9 +3402,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -3434,7 +3434,7 @@
           "baseline_verdict": "not_available",
           "checkpoint_verdict": "tighten",
           "current_state": "baseline",
-          "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+          "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
           "policy_context_alignment": {
             "aligned": true,
             "reason": "POLICY_LINEAGE_MATCH",
@@ -3456,9 +3456,9 @@
               "ETHUSDT",
               "SOLUSDT"
             ],
-            "updated_at": "2026-04-07T00:24:52.396994+00:00",
-            "version": 59048,
-            "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+            "updated_at": "2026-04-07T00:25:52.489443+00:00",
+            "version": 59049,
+            "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
           },
           "previous_state": "baseline",
           "pruning_recommendation": "keep",
@@ -4636,9 +4636,9 @@
         "ETHUSDT",
         "SOLUSDT"
       ],
-      "updated_at": "2026-04-07T00:24:37.332718+00:00",
-      "version": 59048,
-      "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+      "updated_at": "2026-04-07T00:24:52.402365+00:00",
+      "version": 59049,
+      "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
     },
     "current_policy_score": -3.75,
     "current_replay_summary": {
@@ -4796,9 +4796,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:37.332718+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:24:52.402365+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "aligned_run_count": 1,
       "applied": true,
@@ -4835,9 +4835,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:37.332718+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:24:52.402365+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "known_run_lineage_count": 3,
       "mismatched_run_count": 2,
@@ -5019,9 +5019,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:37.332718+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:24:52.402365+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "replay_summary": {},
         "source": "active_policy_evidence_unavailable"
@@ -5336,7 +5336,7 @@
               "baseline_verdict": "not_available",
               "checkpoint_verdict": "not_available",
               "current_state": "baseline",
-              "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+              "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
               "policy_context_alignment": {
                 "aligned": false,
                 "reason": "NO_OBSERVED_POLICY_LINEAGE",
@@ -5354,7 +5354,7 @@
                 "source": "active_policy_context",
                 "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                 "symbols": [],
-                "updated_at": "2026-04-07T00:24:52.396994+00:00",
+                "updated_at": "2026-04-07T00:25:52.489443+00:00",
                 "version": null,
                 "versioned_key": ""
               },
@@ -5386,7 +5386,7 @@
               "baseline_verdict": "not_available",
               "checkpoint_verdict": "not_available",
               "current_state": "baseline",
-              "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+              "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
               "policy_context_alignment": {
                 "aligned": false,
                 "reason": "NO_OBSERVED_POLICY_LINEAGE",
@@ -5404,7 +5404,7 @@
                 "source": "active_policy_context",
                 "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                 "symbols": [],
-                "updated_at": "2026-04-07T00:24:52.396994+00:00",
+                "updated_at": "2026-04-07T00:25:52.489443+00:00",
                 "version": null,
                 "versioned_key": ""
               },
@@ -5436,7 +5436,7 @@
               "baseline_verdict": "not_available",
               "checkpoint_verdict": "not_available",
               "current_state": "baseline",
-              "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+              "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
               "policy_context_alignment": {
                 "aligned": false,
                 "reason": "NO_OBSERVED_POLICY_LINEAGE",
@@ -5454,7 +5454,7 @@
                 "source": "active_policy_context",
                 "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                 "symbols": [],
-                "updated_at": "2026-04-07T00:24:52.396994+00:00",
+                "updated_at": "2026-04-07T00:25:52.489443+00:00",
                 "version": null,
                 "versioned_key": ""
               },
@@ -5828,7 +5828,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "demoted",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -5850,9 +5850,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "demoted",
         "pruning_recommendation": "keep",
@@ -5883,7 +5883,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "demoted",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -5905,9 +5905,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "demoted",
         "pruning_recommendation": "keep",
@@ -5938,7 +5938,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "demoted",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -5960,9 +5960,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "demoted",
         "pruning_recommendation": "keep",
@@ -5993,7 +5993,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6015,9 +6015,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6047,7 +6047,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6069,9 +6069,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6101,7 +6101,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6123,9 +6123,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6155,7 +6155,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6177,9 +6177,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6209,7 +6209,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6231,9 +6231,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6263,7 +6263,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6285,9 +6285,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6317,7 +6317,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6339,9 +6339,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6371,7 +6371,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6393,9 +6393,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6425,7 +6425,7 @@
         "baseline_verdict": "not_available",
         "checkpoint_verdict": "tighten",
         "current_state": "baseline",
-        "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+        "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
         "policy_context_alignment": {
           "aligned": true,
           "reason": "POLICY_LINEAGE_MATCH",
@@ -6447,9 +6447,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:52.396994+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:25:52.489443+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "previous_state": "baseline",
         "pruning_recommendation": "keep",
@@ -6518,9 +6518,9 @@
             "ETHUSDT",
             "SOLUSDT"
           ],
-          "updated_at": "2026-04-07T00:24:22.185940+00:00",
-          "version": 59048,
-          "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+          "updated_at": "2026-04-07T00:24:37.332718+00:00",
+          "version": 59049,
+          "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
         },
         "policy_lineage_alignment": {
           "aligned": true,
@@ -6662,7 +6662,7 @@
       }
     ]
   },
-  "generated_at": "2026-04-07T00:24:52.396994+00:00",
+  "generated_at": "2026-04-07T00:25:52.489443+00:00",
   "lineage_attribution": {
     "active_policy_lineage": {
       "adjustment_count": 3,
@@ -6678,9 +6678,9 @@
         "ETHUSDT",
         "SOLUSDT"
       ],
-      "updated_at": "2026-04-07T00:24:37.332718+00:00",
-      "version": 59048,
-      "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+      "updated_at": "2026-04-07T00:24:52.402365+00:00",
+      "version": 59049,
+      "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
     },
     "aligned_run_count": 1,
     "applied": true,
@@ -6717,9 +6717,9 @@
         "ETHUSDT",
         "SOLUSDT"
       ],
-      "updated_at": "2026-04-07T00:24:37.332718+00:00",
-      "version": 59048,
-      "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+      "updated_at": "2026-04-07T00:24:52.402365+00:00",
+      "version": 59049,
+      "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
     },
     "known_run_lineage_count": 3,
     "mismatched_run_count": 2,
@@ -6789,9 +6789,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:37.332718+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:24:52.402365+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "replay_summary": {},
       "source": "active_policy_evidence_unavailable"
@@ -7106,7 +7106,7 @@
             "baseline_verdict": "not_available",
             "checkpoint_verdict": "not_available",
             "current_state": "baseline",
-            "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+            "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
             "policy_context_alignment": {
               "aligned": false,
               "reason": "NO_OBSERVED_POLICY_LINEAGE",
@@ -7124,7 +7124,7 @@
               "source": "active_policy_context",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-07T00:24:52.396994+00:00",
+              "updated_at": "2026-04-07T00:25:52.489443+00:00",
               "version": null,
               "versioned_key": ""
             },
@@ -7156,7 +7156,7 @@
             "baseline_verdict": "not_available",
             "checkpoint_verdict": "not_available",
             "current_state": "baseline",
-            "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+            "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
             "policy_context_alignment": {
               "aligned": false,
               "reason": "NO_OBSERVED_POLICY_LINEAGE",
@@ -7174,7 +7174,7 @@
               "source": "active_policy_context",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-07T00:24:52.396994+00:00",
+              "updated_at": "2026-04-07T00:25:52.489443+00:00",
               "version": null,
               "versioned_key": ""
             },
@@ -7206,7 +7206,7 @@
             "baseline_verdict": "not_available",
             "checkpoint_verdict": "not_available",
             "current_state": "baseline",
-            "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+            "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
             "policy_context_alignment": {
               "aligned": false,
               "reason": "NO_OBSERVED_POLICY_LINEAGE",
@@ -7224,7 +7224,7 @@
               "source": "active_policy_context",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-07T00:24:52.396994+00:00",
+              "updated_at": "2026-04-07T00:25:52.489443+00:00",
               "version": null,
               "versioned_key": ""
             },
@@ -7519,7 +7519,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "demoted",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7541,9 +7541,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "demoted",
       "pruning_recommendation": "keep",
@@ -7574,7 +7574,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "demoted",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7596,9 +7596,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "demoted",
       "pruning_recommendation": "keep",
@@ -7629,7 +7629,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "demoted",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7651,9 +7651,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "demoted",
       "pruning_recommendation": "keep",
@@ -7684,7 +7684,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7706,9 +7706,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -7738,7 +7738,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7760,9 +7760,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -7792,7 +7792,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7814,9 +7814,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -7846,7 +7846,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7868,9 +7868,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -7900,7 +7900,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7922,9 +7922,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -7954,7 +7954,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -7976,9 +7976,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -8008,7 +8008,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -8030,9 +8030,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -8062,7 +8062,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -8084,9 +8084,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
@@ -8116,7 +8116,7 @@
       "baseline_verdict": "not_available",
       "checkpoint_verdict": "tighten",
       "current_state": "baseline",
-      "evidence_generated_at": "2026-04-07T00:24:52.396994+00:00",
+      "evidence_generated_at": "2026-04-07T00:25:52.489443+00:00",
       "policy_context_alignment": {
         "aligned": true,
         "reason": "POLICY_LINEAGE_MATCH",
@@ -8138,9 +8138,9 @@
           "ETHUSDT",
           "SOLUSDT"
         ],
-        "updated_at": "2026-04-07T00:24:52.396994+00:00",
-        "version": 59048,
-        "versioned_key": "0a5359e6c5054865d40611b53ff7c2f19e165f781d290ca86a597a58983d63c0"
+        "updated_at": "2026-04-07T00:25:52.489443+00:00",
+        "version": 59049,
+        "versioned_key": "cced78f6f64894f046b186c011dc3a3c382de3897731e213af57e55f0f086277"
       },
       "previous_state": "baseline",
       "pruning_recommendation": "keep",
