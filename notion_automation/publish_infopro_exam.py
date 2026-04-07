@@ -4,7 +4,7 @@ import json
 import time
 
 # Use the token found in .env
-NOTION_TOKEN = "REDACTED_NOTION_TOKEN"
+NOTION_TOKEN = os.environ.get("NOTION_TOKEN", "")
 PARENT_PAGE_ID = "31feacc8-175a-81ca-9422-e98484530d97" # 정보처리기사 실기 기출 해설
 
 HEADERS = {
