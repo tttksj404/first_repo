@@ -69,7 +69,7 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         wr=0.76, pf=4.04,
     ),
     "BNBUSDT": CoinProfile(
-        ema_fast=5, ema_slow=13, adx_floor=38, sl_atr_mult=4.0, rr=0.5,
+        ema_fast=5, ema_slow=13, adx_floor=38, sl_atr_mult=2.5, rr=0.5,
         hold_bars=72, side_filter="both", optimal_leverage=15,
         wr=0.86, pf=4.31,
         short_ema_fast=10, short_ema_slow=21, short_adx_floor=30, short_sl_mult=4.0, short_rr=0.75, short_hold_bars=24,
@@ -80,9 +80,9 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         wr=0.71, pf=3.70,
     ),
     "ETHUSDT": CoinProfile(
-        ema_fast=8, ema_slow=21, adx_floor=35, sl_atr_mult=4.0, rr=1.5,
-        hold_bars=48, side_filter="both", optimal_leverage=10,
-        wr=1.00, pf=999.0,
+        ema_fast=8, ema_slow=21, adx_floor=33, sl_atr_mult=3.0, rr=1.0,
+        hold_bars=24, side_filter="both", optimal_leverage=10,
+        wr=0.83, pf=4.13,
         pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=1.5, pullback_rr=1.0,
         short_ema_fast=10, short_ema_slow=21, short_adx_floor=25, short_sl_mult=4.0, short_rr=0.5, short_hold_bars=36,
     ),
