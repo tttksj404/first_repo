@@ -71,7 +71,7 @@ def main() -> None:
 
     client = build_client()
 
-    print(f"=== Bitget 5m kline download ===")
+    print(f"=== Bitget 5m kline download (incremental backfill) ===")
     print(f"  Market: {args.market}")
     print(f"  Interval: {interval}")
     print(f"  Period: {args.days} days")
@@ -83,17 +83,75 @@ def main() -> None:
     for i, symbol in enumerate(symbols, 1):
         print(f"[{i}/{len(symbols)}] {symbol}")
 
-        if not args.force:
-            cached = load_historical_klines(data_dir=OUTPUT_DIR, symbol=symbol, interval=interval)
-            if cached:
-                cached_start = int(cached[0]["open_time"])
-                cached_end = int(cached[-1]["open_time"])
-                cached_days = (cached_end - cached_start) / 86_400_000
-                if cached_days >= args.days * 0.9:
-                    print(f"  cached ({len(cached)} klines, {cached_days:.0f}d), skipping")
-                    total_klines += len(cached)
-                    continue
+        cached = load_historical_klines(data_dir=OUTPUT_DIR, symbol=symbol, interval=interval)
 
+        if not args.force and cached:
+            cached_start = int(cached[0]["open_time"])
+            cached_end = int(cached[-1]["open_time"])
+            cached_days = (cached_end - cached_start) / 86_400_000
+
+            if cached_days >= args.days * 0.9:
+                print(f"  cached ({len(cached)} klines, {cached_days:.0f}d), skipping")
+                total_klines += len(cached)
+                continue
+
+            # Incremental backfill: download only the gap before cached data
+            # Also fetch from cached_end to now for any recent gap
+            new_klines: list[dict] = []
+
+            if cached_start > start_ms:
+                gap_days = (cached_start - start_ms) / 86_400_000
+                print(f"  backfill: downloading {gap_days:.0f}d before cached start (history-candles)")
+                try:
+                    earlier = download_klines_range(
+                        client,
+                        market=args.market,
+                        symbol=symbol,
+                        interval=interval,
+                        start_ms=start_ms,
+                        end_ms=cached_start - 1,
+                        page_limit=200,
+                        sleep_between=1.2,
+                        use_history=True,
+                    )
+                    new_klines.extend(earlier)
+                except Exception as e:
+                    print(f"  ERROR (backfill): {e}")
+
+            if cached_end < now_ms - 600_000:  # >10min gap at the end
+                gap_days = (now_ms - cached_end) / 86_400_000
+                print(f"  forward-fill: downloading {gap_days:.1f}d after cached end")
+                try:
+                    later = download_klines_range(
+                        client,
+                        market=args.market,
+                        symbol=symbol,
+                        interval=interval,
+                        start_ms=cached_end + 1,
+                        end_ms=now_ms,
+                        page_limit=200,
+                        sleep_between=1.2,
+                    )
+                    new_klines.extend(later)
+                except Exception as e:
+                    print(f"  ERROR (forward-fill): {e}")
+
+            if new_klines:
+                # Merge: deduplicate by open_time
+                merged = {int(r["open_time"]): r for r in cached}
+                for r in new_klines:
+                    merged[int(r["open_time"])] = r
+                merged_list = sorted(merged.values(), key=lambda r: int(r["open_time"]))
+                path = save_historical_klines(merged_list, output_dir=OUTPUT_DIR, symbol=symbol, interval=interval)
+                range_days = (int(merged_list[-1]["open_time"]) - int(merged_list[0]["open_time"])) / 86_400_000
+                print(f"  merged: {len(cached)} + {len(new_klines)} new -> {len(merged_list)} klines ({range_days:.0f}d) -> {path}")
+                total_klines += len(merged_list)
+            else:
+                print(f"  no new data to backfill")
+                total_klines += len(cached)
+            continue
+
+        # No cache or force: full download
         try:
             klines = download_klines_range(
                 client,
