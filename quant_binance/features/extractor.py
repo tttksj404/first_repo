@@ -323,7 +323,11 @@ class MarketFeatureExtractor:
         open_interest_ema = _ema(state.open_interest_samples[-self.settings.feature_thresholds.oi_ema_hours :], min(self.settings.feature_thresholds.oi_ema_hours, len(state.open_interest_samples[-self.settings.feature_thresholds.oi_ema_hours :]))) if state.open_interest_samples else state.open_interest
         adx_1h = _adx_from_bars(bars_1h)
         _cp = get_profile(state.symbol)
+        # Main EMA cross (long direction)
         ema_cross = _ema_cross_signal(closes_1h, fast_period=_cp.ema_fast, slow_period=_cp.ema_slow)
+        # Also check short-specific EMA cross if profile has it
+        if ema_cross == 0 and _cp.short_ema_fast > 0:
+            ema_cross = _ema_cross_signal(closes_1h, fast_period=_cp.short_ema_fast, slow_period=_cp.short_ema_slow)
 
         gross_expected_edge_bps = 0.0
         if self.edge_lookup is not None:

@@ -24,10 +24,24 @@ class CoinProfile:
     wr: float               # historical win rate
     pf: float               # historical profit factor
     # Pullback strategy (optional — 0 = disabled)
-    pullback_ema: int = 0          # EMA period for pullback trend (21 or 50)
-    pullback_adx_floor: float = 0  # ADX floor for pullback entry
-    pullback_sl_mult: float = 0    # SL ATR multiplier for pullback
-    pullback_rr: float = 0         # Reward ratio for pullback
+    pullback_ema: int = 0
+    pullback_adx_floor: float = 0
+    pullback_sl_mult: float = 0
+    pullback_rr: float = 0
+    # Short-specific EMA params (optional — 0 = use main params)
+    short_ema_fast: int = 0
+    short_ema_slow: int = 0
+    short_adx_floor: float = 0
+    short_sl_mult: float = 0
+    short_rr: float = 0
+    short_hold_bars: int = 0
+    # Mirror strategy (optional — 0 = disabled)
+    mirror_rsi_ob: float = 0
+    mirror_rsi_os: float = 0
+    mirror_adx_max: float = 0
+    mirror_sl_mult: float = 0
+    mirror_rr: float = 0
+    mirror_hold_bars: int = 0
 
 
 # 374d grid search → $100 MC leverage validation
@@ -56,8 +70,9 @@ COIN_PROFILES: dict[str, CoinProfile] = {
     ),
     "BNBUSDT": CoinProfile(
         ema_fast=5, ema_slow=13, adx_floor=38, sl_atr_mult=4.0, rr=0.5,
-        hold_bars=48, side_filter="long", optimal_leverage=15,
-        wr=0.86, pf=4.09,
+        hold_bars=72, side_filter="both", optimal_leverage=15,
+        wr=0.86, pf=4.31,
+        short_ema_fast=10, short_ema_slow=21, short_adx_floor=30, short_sl_mult=4.0, short_rr=0.75, short_hold_bars=24,
     ),
     "DOGEUSDT": CoinProfile(
         ema_fast=9, ema_slow=21, adx_floor=38, sl_atr_mult=1.0, rr=1.5,
@@ -66,9 +81,10 @@ COIN_PROFILES: dict[str, CoinProfile] = {
     ),
     "ETHUSDT": CoinProfile(
         ema_fast=8, ema_slow=21, adx_floor=35, sl_atr_mult=4.0, rr=1.5,
-        hold_bars=48, side_filter="long", optimal_leverage=10,
+        hold_bars=48, side_filter="both", optimal_leverage=10,
         wr=1.00, pf=999.0,
         pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=1.5, pullback_rr=1.0,
+        short_ema_fast=10, short_ema_slow=21, short_adx_floor=25, short_sl_mult=4.0, short_rr=0.5, short_hold_bars=36,
     ),
     "LTCUSDT": CoinProfile(
         ema_fast=5, ema_slow=13, adx_floor=38, sl_atr_mult=3.0, rr=1.2,
@@ -79,6 +95,8 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         ema_fast=20, ema_slow=50, adx_floor=30, sl_atr_mult=4.0, rr=0.5,
         hold_bars=48, side_filter="both", optimal_leverage=15,
         wr=0.89, pf=6.37,
+        short_ema_fast=20, short_ema_slow=50, short_adx_floor=28, short_sl_mult=2.0, short_rr=1.0, short_hold_bars=48,
+        mirror_rsi_ob=75, mirror_rsi_os=20, mirror_adx_max=30, mirror_sl_mult=3.0, mirror_rr=0.75, mirror_hold_bars=36,
     ),
     "PEPEUSDT": CoinProfile(
         ema_fast=20, ema_slow=50, adx_floor=28, sl_atr_mult=1.5, rr=1.2,
