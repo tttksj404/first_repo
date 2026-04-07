@@ -1,0 +1,1409 @@
+[
+  {
+    "rank": 1,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 301.33,
+    "total_pnl_bps": 9642.64,
+    "total_pnl_usd": 31.82,
+    "profit_factor": 4.61,
+    "max_drawdown_bps": 1021.92,
+    "avg_hold_5m": 122.5,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 3285.68,
+        "avg_pnl_bps": 219.05
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5483.03,
+        "avg_pnl_bps": 456.92
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 873.93,
+        "avg_pnl_bps": 174.79
+      }
+    }
+  },
+  {
+    "rank": 2,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 502.22,
+    "total_pnl_bps": 16071.07,
+    "total_pnl_usd": 53.03,
+    "profit_factor": 4.61,
+    "max_drawdown_bps": 1703.2,
+    "avg_hold_5m": 122.5,
+    "best_bps": 2293.03,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 5476.14,
+        "avg_pnl_bps": 365.08
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 9138.38,
+        "avg_pnl_bps": 761.53
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 1456.55,
+        "avg_pnl_bps": 291.31
+      }
+    }
+  },
+  {
+    "rank": 3,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 283.57,
+    "total_pnl_bps": 9074.19,
+    "total_pnl_usd": 29.94,
+    "profit_factor": 4.4,
+    "max_drawdown_bps": 1021.92,
+    "avg_hold_5m": 123.7,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 3239.21,
+        "avg_pnl_bps": 215.95
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5246.01,
+        "avg_pnl_bps": 437.17
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 588.96,
+        "avg_pnl_bps": 117.79
+      }
+    }
+  },
+  {
+    "rank": 4,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 10,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 1004.44,
+    "total_pnl_bps": 32142.15,
+    "total_pnl_usd": 106.07,
+    "profit_factor": 4.61,
+    "max_drawdown_bps": 3406.39,
+    "avg_hold_5m": 122.5,
+    "best_bps": 4586.07,
+    "worst_bps": -2469.7,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 10952.27,
+        "avg_pnl_bps": 730.15
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 18276.77,
+        "avg_pnl_bps": 1523.06
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 2913.11,
+        "avg_pnl_bps": 582.62
+      }
+    }
+  },
+  {
+    "rank": 5,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 472.61,
+    "total_pnl_bps": 15123.64,
+    "total_pnl_usd": 49.91,
+    "profit_factor": 4.4,
+    "max_drawdown_bps": 1703.2,
+    "avg_hold_5m": 123.7,
+    "best_bps": 2293.03,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 5398.69,
+        "avg_pnl_bps": 359.91
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 8743.35,
+        "avg_pnl_bps": 728.61
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 981.6,
+        "avg_pnl_bps": 196.32
+      }
+    }
+  },
+  {
+    "rank": 6,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 15,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 1506.66,
+    "total_pnl_bps": 48213.22,
+    "total_pnl_usd": 159.1,
+    "profit_factor": 4.61,
+    "max_drawdown_bps": 5109.59,
+    "avg_hold_5m": 122.5,
+    "best_bps": 6879.1,
+    "worst_bps": -3704.55,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 16428.41,
+        "avg_pnl_bps": 1095.23
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 27415.15,
+        "avg_pnl_bps": 2284.6
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 4369.66,
+        "avg_pnl_bps": 873.93
+      }
+    }
+  },
+  {
+    "rank": 7,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 10,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 945.23,
+    "total_pnl_bps": 30247.29,
+    "total_pnl_usd": 99.82,
+    "profit_factor": 4.4,
+    "max_drawdown_bps": 3406.39,
+    "avg_hold_5m": 123.7,
+    "best_bps": 4586.07,
+    "worst_bps": -2469.7,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 10797.38,
+        "avg_pnl_bps": 719.83
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 17486.7,
+        "avg_pnl_bps": 1457.22
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 1963.21,
+        "avg_pnl_bps": 392.64
+      }
+    }
+  },
+  {
+    "rank": 8,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 258.28,
+    "total_pnl_bps": 4907.28,
+    "total_pnl_usd": 16.19,
+    "profit_factor": 4.14,
+    "max_drawdown_bps": 816.35,
+    "avg_hold_5m": 118.5,
+    "best_bps": 1186.54,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 2523.52,
+        "avg_pnl_bps": 252.35
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 2275.68,
+        "avg_pnl_bps": 379.28
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 108.08,
+        "avg_pnl_bps": 36.03
+      }
+    }
+  },
+  {
+    "rank": 9,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 430.46,
+    "total_pnl_bps": 8178.79,
+    "total_pnl_usd": 26.99,
+    "profit_factor": 4.14,
+    "max_drawdown_bps": 1360.59,
+    "avg_hold_5m": 118.5,
+    "best_bps": 1977.57,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 4205.87,
+        "avg_pnl_bps": 420.59
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 3792.8,
+        "avg_pnl_bps": 632.13
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 180.13,
+        "avg_pnl_bps": 60.04
+      }
+    }
+  },
+  {
+    "rank": 10,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 20,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 2008.88,
+    "total_pnl_bps": 64284.29,
+    "total_pnl_usd": 212.14,
+    "profit_factor": 4.61,
+    "max_drawdown_bps": 6812.79,
+    "avg_hold_5m": 122.5,
+    "best_bps": 9172.14,
+    "worst_bps": -4939.41,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 21904.55,
+        "avg_pnl_bps": 1460.3
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 36553.53,
+        "avg_pnl_bps": 3046.13
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 5826.22,
+        "avg_pnl_bps": 1165.24
+      }
+    }
+  },
+  {
+    "rank": 11,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 15,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 1417.84,
+    "total_pnl_bps": 45370.93,
+    "total_pnl_usd": 149.72,
+    "profit_factor": 4.4,
+    "max_drawdown_bps": 5109.59,
+    "avg_hold_5m": 123.7,
+    "best_bps": 6879.1,
+    "worst_bps": -3704.55,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 16196.07,
+        "avg_pnl_bps": 1079.74
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 26230.05,
+        "avg_pnl_bps": 2185.84
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 2944.81,
+        "avg_pnl_bps": 588.96
+      }
+    }
+  },
+  {
+    "rank": 12,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 35,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 47,
+    "wins": 32,
+    "win_rate": 0.6809,
+    "avg_pnl_bps": 278.45,
+    "total_pnl_bps": 13087.05,
+    "total_pnl_usd": 43.19,
+    "profit_factor": 3.94,
+    "max_drawdown_bps": 1542.14,
+    "avg_hold_5m": 117.3,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 24,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 3367.91,
+        "avg_pnl_bps": 140.33
+      },
+      "SOLUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 4444.59,
+        "avg_pnl_bps": 444.46
+      },
+      "ETHUSDT": {
+        "trades": 13,
+        "win_rate": 0.6154,
+        "total_pnl_bps": 5274.56,
+        "avg_pnl_bps": 405.74
+      }
+    }
+  },
+  {
+    "rank": 13,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 10,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 860.93,
+    "total_pnl_bps": 16357.59,
+    "total_pnl_usd": 53.98,
+    "profit_factor": 4.14,
+    "max_drawdown_bps": 2721.18,
+    "avg_hold_5m": 118.5,
+    "best_bps": 3955.14,
+    "worst_bps": -2469.7,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 8411.73,
+        "avg_pnl_bps": 841.17
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 7585.59,
+        "avg_pnl_bps": 1264.27
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 360.26,
+        "avg_pnl_bps": 120.09
+      }
+    }
+  },
+  {
+    "rank": 14,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 409.67,
+    "total_pnl_bps": 7783.76,
+    "total_pnl_usd": 25.69,
+    "profit_factor": 3.99,
+    "max_drawdown_bps": 1360.59,
+    "avg_hold_5m": 118.5,
+    "best_bps": 1977.57,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 4205.87,
+        "avg_pnl_bps": 420.59
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 3397.76,
+        "avg_pnl_bps": 566.29
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 180.13,
+        "avg_pnl_bps": 60.04
+      }
+    }
+  },
+  {
+    "rank": 15,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 35,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 47,
+    "wins": 32,
+    "win_rate": 0.6809,
+    "avg_pnl_bps": 464.08,
+    "total_pnl_bps": 21811.75,
+    "total_pnl_usd": 71.98,
+    "profit_factor": 3.94,
+    "max_drawdown_bps": 2570.23,
+    "avg_hold_5m": 117.3,
+    "best_bps": 2293.03,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 24,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5613.18,
+        "avg_pnl_bps": 233.88
+      },
+      "SOLUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 7407.64,
+        "avg_pnl_bps": 740.76
+      },
+      "ETHUSDT": {
+        "trades": 13,
+        "win_rate": 0.6154,
+        "total_pnl_bps": 8790.94,
+        "avg_pnl_bps": 676.23
+      }
+    }
+  },
+  {
+    "rank": 16,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 20,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 23,
+    "win_rate": 0.7188,
+    "avg_pnl_bps": 1890.46,
+    "total_pnl_bps": 60494.58,
+    "total_pnl_usd": 199.63,
+    "profit_factor": 4.4,
+    "max_drawdown_bps": 6812.79,
+    "avg_hold_5m": 123.7,
+    "best_bps": 9172.14,
+    "worst_bps": -4939.41,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.7333,
+        "total_pnl_bps": 21594.76,
+        "avg_pnl_bps": 1439.65
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 34973.4,
+        "avg_pnl_bps": 2914.45
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.8,
+        "total_pnl_bps": 3926.42,
+        "avg_pnl_bps": 785.28
+      }
+    }
+  },
+  {
+    "rank": 17,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 65,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 36,
+    "wins": 26,
+    "win_rate": 0.7222,
+    "avg_pnl_bps": 263.34,
+    "total_pnl_bps": 9480.17,
+    "total_pnl_usd": 31.28,
+    "profit_factor": 3.84,
+    "max_drawdown_bps": 1689.54,
+    "avg_hold_5m": 121.8,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 18,
+        "win_rate": 0.7222,
+        "total_pnl_bps": 2981.75,
+        "avg_pnl_bps": 165.65
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5483.03,
+        "avg_pnl_bps": 456.92
+      },
+      "SOLUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 1015.4,
+        "avg_pnl_bps": 169.23
+      }
+    }
+  },
+  {
+    "rank": 18,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 35,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 47,
+    "wins": 32,
+    "win_rate": 0.6809,
+    "avg_pnl_bps": 262.07,
+    "total_pnl_bps": 12317.16,
+    "total_pnl_usd": 40.65,
+    "profit_factor": 3.77,
+    "max_drawdown_bps": 1542.14,
+    "avg_hold_5m": 122.8,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 24,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 3120.0,
+        "avg_pnl_bps": 130.0
+      },
+      "SOLUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 4159.62,
+        "avg_pnl_bps": 415.96
+      },
+      "ETHUSDT": {
+        "trades": 13,
+        "win_rate": 0.6154,
+        "total_pnl_bps": 5037.54,
+        "avg_pnl_bps": 387.5
+      }
+    }
+  },
+  {
+    "rank": 19,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 245.8,
+    "total_pnl_bps": 4670.26,
+    "total_pnl_usd": 15.41,
+    "profit_factor": 3.99,
+    "max_drawdown_bps": 816.35,
+    "avg_hold_5m": 118.5,
+    "best_bps": 1186.54,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 2523.52,
+        "avg_pnl_bps": 252.35
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 2038.66,
+        "avg_pnl_bps": 339.78
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 108.08,
+        "avg_pnl_bps": 36.03
+      }
+    }
+  },
+  {
+    "rank": 20,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.75,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 21,
+    "win_rate": 0.6562,
+    "avg_pnl_bps": 291.13,
+    "total_pnl_bps": 9316.12,
+    "total_pnl_usd": 30.74,
+    "profit_factor": 3.8,
+    "max_drawdown_bps": 1240.9,
+    "avg_hold_5m": 133.9,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 3488.2,
+        "avg_pnl_bps": 232.55
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5635.46,
+        "avg_pnl_bps": 469.62
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.6,
+        "total_pnl_bps": 192.46,
+        "avg_pnl_bps": 38.49
+      }
+    }
+  },
+  {
+    "rank": 21,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 15,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 1291.39,
+    "total_pnl_bps": 24536.38,
+    "total_pnl_usd": 80.97,
+    "profit_factor": 4.14,
+    "max_drawdown_bps": 4081.77,
+    "avg_hold_5m": 118.5,
+    "best_bps": 5932.72,
+    "worst_bps": -3704.55,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 12617.6,
+        "avg_pnl_bps": 1261.76
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 11378.39,
+        "avg_pnl_bps": 1896.4
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 540.4,
+        "avg_pnl_bps": 180.13
+      }
+    }
+  },
+  {
+    "rank": 22,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 10,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 819.34,
+    "total_pnl_bps": 15567.52,
+    "total_pnl_usd": 51.37,
+    "profit_factor": 3.99,
+    "max_drawdown_bps": 2721.18,
+    "avg_hold_5m": 118.5,
+    "best_bps": 3955.14,
+    "worst_bps": -2469.7,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 8411.73,
+        "avg_pnl_bps": 841.17
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 6795.53,
+        "avg_pnl_bps": 1132.59
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 360.26,
+        "avg_pnl_bps": 120.09
+      }
+    }
+  },
+  {
+    "rank": 23,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 70,
+    "partial_levels": [
+      0.75,
+      1.5
+    ],
+    "trades": 32,
+    "wins": 21,
+    "win_rate": 0.6562,
+    "avg_pnl_bps": 485.21,
+    "total_pnl_bps": 15526.86,
+    "total_pnl_usd": 51.24,
+    "profit_factor": 3.8,
+    "max_drawdown_bps": 2068.17,
+    "avg_hold_5m": 133.9,
+    "best_bps": 2293.03,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 15,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5813.66,
+        "avg_pnl_bps": 387.58
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 9392.43,
+        "avg_pnl_bps": 782.7
+      },
+      "SOLUSDT": {
+        "trades": 5,
+        "win_rate": 0.6,
+        "total_pnl_bps": 320.77,
+        "avg_pnl_bps": 64.15
+      }
+    }
+  },
+  {
+    "rank": 24,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 35,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 47,
+    "wins": 32,
+    "win_rate": 0.6809,
+    "avg_pnl_bps": 436.78,
+    "total_pnl_bps": 20528.6,
+    "total_pnl_usd": 67.74,
+    "profit_factor": 3.77,
+    "max_drawdown_bps": 2570.23,
+    "avg_hold_5m": 122.8,
+    "best_bps": 2293.03,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 24,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5200.01,
+        "avg_pnl_bps": 216.67
+      },
+      "SOLUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 6932.69,
+        "avg_pnl_bps": 693.27
+      },
+      "ETHUSDT": {
+        "trades": 13,
+        "win_rate": 0.6154,
+        "total_pnl_bps": 8395.9,
+        "avg_pnl_bps": 645.84
+      }
+    }
+  },
+  {
+    "rank": 25,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 65,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 36,
+    "wins": 26,
+    "win_rate": 0.7222,
+    "avg_pnl_bps": 438.9,
+    "total_pnl_bps": 15800.29,
+    "total_pnl_usd": 52.14,
+    "profit_factor": 3.84,
+    "max_drawdown_bps": 2815.9,
+    "avg_hold_5m": 121.8,
+    "best_bps": 2293.03,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 18,
+        "win_rate": 0.7222,
+        "total_pnl_bps": 4969.58,
+        "avg_pnl_bps": 276.09
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 9138.38,
+        "avg_pnl_bps": 761.53
+      },
+      "SOLUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 1692.33,
+        "avg_pnl_bps": 282.06
+      }
+    }
+  },
+  {
+    "rank": 26,
+    "tp_type": "fixed",
+    "tp_r_mult": 0.5,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 5,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 375.95,
+    "total_pnl_bps": 7143.11,
+    "total_pnl_usd": 23.57,
+    "profit_factor": 3.74,
+    "max_drawdown_bps": 1360.59,
+    "avg_hold_5m": 88.9,
+    "best_bps": 1009.0,
+    "worst_bps": -1234.85,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 2552.8,
+        "avg_pnl_bps": 255.28
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 3362.11,
+        "avg_pnl_bps": 560.35
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 1228.2,
+        "avg_pnl_bps": 409.4
+      }
+    }
+  },
+  {
+    "rank": 27,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 20,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 1721.85,
+    "total_pnl_bps": 32715.18,
+    "total_pnl_usd": 107.96,
+    "profit_factor": 4.14,
+    "max_drawdown_bps": 5442.37,
+    "avg_hold_5m": 118.5,
+    "best_bps": 7910.29,
+    "worst_bps": -4939.41,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 16823.46,
+        "avg_pnl_bps": 1682.35
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 15171.19,
+        "avg_pnl_bps": 2528.53
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 720.53,
+        "avg_pnl_bps": 240.18
+      }
+    }
+  },
+  {
+    "rank": 28,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 3,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 65,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 36,
+    "wins": 26,
+    "win_rate": 0.7222,
+    "avg_pnl_bps": 247.55,
+    "total_pnl_bps": 8911.72,
+    "total_pnl_usd": 29.41,
+    "profit_factor": 3.67,
+    "max_drawdown_bps": 1689.54,
+    "avg_hold_5m": 122.9,
+    "best_bps": 1375.82,
+    "worst_bps": -740.91,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 18,
+        "win_rate": 0.7222,
+        "total_pnl_bps": 2935.28,
+        "avg_pnl_bps": 163.07
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 5246.01,
+        "avg_pnl_bps": 437.17
+      },
+      "SOLUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 730.43,
+        "avg_pnl_bps": 121.74
+      }
+    }
+  },
+  {
+    "rank": 29,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 15,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 40,
+    "score_min": 75,
+    "partial_levels": [
+      0.5,
+      1.5
+    ],
+    "trades": 19,
+    "wins": 15,
+    "win_rate": 0.7895,
+    "avg_pnl_bps": 1229.01,
+    "total_pnl_bps": 23351.28,
+    "total_pnl_usd": 77.06,
+    "profit_factor": 3.99,
+    "max_drawdown_bps": 4081.77,
+    "avg_hold_5m": 118.5,
+    "best_bps": 5932.72,
+    "worst_bps": -3704.55,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 12617.6,
+        "avg_pnl_bps": 1261.76
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "win_rate": 0.8333,
+        "total_pnl_bps": 10193.29,
+        "avg_pnl_bps": 1698.88
+      },
+      "SOLUSDT": {
+        "trades": 3,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 540.4,
+        "avg_pnl_bps": 180.13
+      }
+    }
+  },
+  {
+    "rank": 30,
+    "tp_type": "partial_ladder",
+    "tp_r_mult": 0.0,
+    "sl_atr_mult": 3.0,
+    "trail_pct": 0.0,
+    "leverage": 10,
+    "hold_bars_1h": 12,
+    "side_filter": "long",
+    "adx_min": 35,
+    "score_min": 70,
+    "partial_levels": [
+      0.5,
+      1.0
+    ],
+    "trades": 47,
+    "wins": 32,
+    "win_rate": 0.6809,
+    "avg_pnl_bps": 928.16,
+    "total_pnl_bps": 43623.51,
+    "total_pnl_usd": 143.96,
+    "profit_factor": 3.94,
+    "max_drawdown_bps": 5140.46,
+    "avg_hold_5m": 117.3,
+    "best_bps": 4586.07,
+    "worst_bps": -2469.7,
+    "symbol_stats": {
+      "BTCUSDT": {
+        "trades": 24,
+        "win_rate": 0.6667,
+        "total_pnl_bps": 11226.35,
+        "avg_pnl_bps": 467.76
+      },
+      "SOLUSDT": {
+        "trades": 10,
+        "win_rate": 0.8,
+        "total_pnl_bps": 14815.28,
+        "avg_pnl_bps": 1481.53
+      },
+      "ETHUSDT": {
+        "trades": 13,
+        "win_rate": 0.6154,
+        "total_pnl_bps": 17581.87,
+        "avg_pnl_bps": 1352.45
+      }
+    }
+  }
+]
