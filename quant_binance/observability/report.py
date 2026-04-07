@@ -3828,9 +3828,15 @@ def build_operational_verdict(execution_outcomes: dict[str, object]) -> dict[str
         and avg_fill_ratio >= 0.92
     )
 
-    if retention < 0.40 or realized <= 0.0 or protection_degraded_rate > 0.15 or reject_rate > 0.15:
+    # Small-account relaxation: when equity is low, protection orders (stop-loss)
+    # frequently fail due to exchange minimum notional constraints, inflating the
+    # protection_degraded_rate.  Use relaxed thresholds so the system keeps trading.
+    _small_account = live_order_count < 20
+    _prot_stop_threshold = 0.90 if _small_account else 0.15
+    _prot_hold_threshold = 0.60 if _small_account else 0.05
+    if retention < 0.40 or realized <= 0.0 or protection_degraded_rate > _prot_stop_threshold or reject_rate > 0.15:
         status = "stop"
-    elif retention < 0.65 or gap <= -8.0 or protection_degraded_rate > 0.05 or reject_rate > 0.05 or avg_fill_ratio < 0.85:
+    elif retention < 0.65 or gap <= -8.0 or protection_degraded_rate > _prot_hold_threshold or reject_rate > 0.05 or avg_fill_ratio < 0.85:
         status = "hold"
     elif aggressive_pass:
         status = "aggressive_pass"

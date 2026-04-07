@@ -1,0 +1,528 @@
+============================================
+[AUTOTUNER] 2026-04-02 01:47:01 KST
+============================================
+[AUTOTUNER] valid_trades=3 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-01T16:47:01.345970+00:00",
+  "total_trades": 3,
+  "valid_trades": 3
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-02 07:47:01 KST
+============================================
+[AUTOTUNER] valid_trades=4 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-01T22:47:01.353083+00:00",
+  "total_trades": 5,
+  "valid_trades": 4
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-02 13:47:01 KST
+============================================
+[AUTOTUNER] valid_trades=4 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-02T04:47:01.341548+00:00",
+  "total_trades": 5,
+  "valid_trades": 4
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-02 19:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=1 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-02T10:47:00.502969+00:00",
+  "total_trades": 1,
+  "valid_trades": 1
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-03 01:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=2 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-02T16:47:00.496837+00:00",
+  "total_trades": 2,
+  "valid_trades": 2
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-03 07:47:01 KST
+============================================
+[AUTOTUNER] valid_trades=5 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-02T22:47:01.375899+00:00",
+  "total_trades": 5,
+  "valid_trades": 5
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-03 13:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=87 >= 50: LIVE mode
+{
+  "action": "applied",
+  "change_id": "auto-20260403-044700-635b2b",
+  "deltas_approved": [
+    {
+      "confidence": 0.696,
+      "current_value": 75.0,
+      "delta_pct": 5.0,
+      "evidence": "bucket 70-79: n=56 win=30% avg=-4.8bps",
+      "min_trades": 50,
+      "path": [
+        "mode_thresholds",
+        "futures_score_min"
+      ],
+      "proposed_value": 78.75,
+      "risk_tier": "medium",
+      "sample_size": 56
+    },
+    {
+      "confidence": 0.61,
+      "current_value": 2.0,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=61% (36/59): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.1,
+      "risk_tier": "medium",
+      "sample_size": 59
+    }
+  ],
+  "deltas_proposed": [
+    {
+      "confidence": 0.696,
+      "current_value": 75.0,
+      "delta_pct": 5.0,
+      "evidence": "bucket 70-79: n=56 win=30% avg=-4.8bps",
+      "min_trades": 50,
+      "path": [
+        "mode_thresholds",
+        "futures_score_min"
+      ],
+      "proposed_value": 78.75,
+      "risk_tier": "medium",
+      "sample_size": 56
+    },
+    {
+      "confidence": 0.61,
+      "current_value": 2.0,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=61% (36/59): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.1,
+      "risk_tier": "medium",
+      "sample_size": 59
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.008,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.62 dd=$0.23 pnl=$-0.15: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00776,
+      "risk_tier": "high",
+      "sample_size": 87
+    }
+  ],
+  "dry_run": false,
+  "rejections": [
+    "mutual_exclusion: removed Tier3 (sizing) because Tier1 (entry) present"
+  ],
+  "timestamp": "2026-04-03T04:47:00.865527+00:00",
+  "total_trades": 87,
+  "valid_trades": 87
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-03 19:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=104 >= 50: LIVE mode
+{
+  "action": "applied",
+  "change_id": "auto-20260403-104700-6cd3bf",
+  "deltas_approved": [
+    {
+      "confidence": 0.677,
+      "current_value": 78.75,
+      "delta_pct": 5.0,
+      "evidence": "bucket 70-79: n=65 win=32% avg=-3.1bps",
+      "min_trades": 50,
+      "path": [
+        "mode_thresholds",
+        "futures_score_min"
+      ],
+      "proposed_value": 82.69,
+      "risk_tier": "medium",
+      "sample_size": 65
+    },
+    {
+      "confidence": 0.9,
+      "current_value": 2.1,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.205,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 240.0,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=26): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 228.0,
+      "risk_tier": "medium",
+      "sample_size": 26
+    }
+  ],
+  "deltas_proposed": [
+    {
+      "confidence": 0.677,
+      "current_value": 78.75,
+      "delta_pct": 5.0,
+      "evidence": "bucket 70-79: n=65 win=32% avg=-3.1bps",
+      "min_trades": 50,
+      "path": [
+        "mode_thresholds",
+        "futures_score_min"
+      ],
+      "proposed_value": 82.69,
+      "risk_tier": "medium",
+      "sample_size": 65
+    },
+    {
+      "confidence": 0.9,
+      "current_value": 2.1,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.205,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 240.0,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=26): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 228.0,
+      "risk_tier": "medium",
+      "sample_size": 26
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.008,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.84 dd=$0.08 pnl=$-0.07: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00776,
+      "risk_tier": "high",
+      "sample_size": 104
+    }
+  ],
+  "dry_run": false,
+  "rejections": [
+    "mutual_exclusion: removed Tier3 (sizing) because Tier1 (entry) present"
+  ],
+  "timestamp": "2026-04-03T10:47:00.888603+00:00",
+  "total_trades": 105,
+  "valid_trades": 104
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-04 01:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=109 >= 50: LIVE mode
+{
+  "action": "applied",
+  "change_id": "auto-20260403-164701-4d17a0",
+  "deltas_approved": [
+    {
+      "confidence": 0.9,
+      "current_value": 2.205,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.315,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 228.0,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=28): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 216.6,
+      "risk_tier": "medium",
+      "sample_size": 28
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.008,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.89 dd=$0.11 pnl=$-0.10: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00776,
+      "risk_tier": "high",
+      "sample_size": 109
+    }
+  ],
+  "deltas_proposed": [
+    {
+      "confidence": 0.9,
+      "current_value": 2.205,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.315,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 228.0,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=28): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 216.6,
+      "risk_tier": "medium",
+      "sample_size": 28
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.008,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.89 dd=$0.11 pnl=$-0.10: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00776,
+      "risk_tier": "high",
+      "sample_size": 109
+    }
+  ],
+  "dry_run": false,
+  "rejections": [],
+  "timestamp": "2026-04-03T16:47:01.244545+00:00",
+  "total_trades": 111,
+  "valid_trades": 109
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-04 07:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=109 >= 50: LIVE mode
+{
+  "action": "applied",
+  "change_id": "auto-20260403-224701-be3f44",
+  "deltas_approved": [
+    {
+      "confidence": 0.9,
+      "current_value": 2.315,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.431,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 216.6,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=28): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 205.8,
+      "risk_tier": "medium",
+      "sample_size": 28
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.00776,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.89 dd=$0.11 pnl=$-0.10: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00753,
+      "risk_tier": "high",
+      "sample_size": 109
+    }
+  ],
+  "deltas_proposed": [
+    {
+      "confidence": 0.9,
+      "current_value": 2.315,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.431,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 216.6,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=28): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 205.8,
+      "risk_tier": "medium",
+      "sample_size": 28
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.00776,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.89 dd=$0.11 pnl=$-0.10: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00753,
+      "risk_tier": "high",
+      "sample_size": 109
+    }
+  ],
+  "dry_run": false,
+  "rejections": [],
+  "timestamp": "2026-04-03T22:47:01.110195+00:00",
+  "total_trades": 111,
+  "valid_trades": 109
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-04 13:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=1 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-04T04:47:01.009258+00:00",
+  "total_trades": 1,
+  "valid_trades": 1
+}
+[AUTOTUNER] Cycle complete
+

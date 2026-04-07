@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 from math import floor
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 from quant_binance.closed_trade_metrics import (
     aggregate_closed_trades,
@@ -86,6 +87,40 @@ def _score_bucket_label(score: float) -> str:
     return f"{lower:02d}-{upper:02d}"
 
 
+def build_runtime_performance_report_from_rows(
+    *,
+    run_dir: str | Path,
+    summary_path: str | Path | None = None,
+    decisions: list[dict[str, Any]],
+    closed_trades: list[dict[str, Any]],
+) -> RuntimePerformanceReport:
+    """Build a RuntimePerformanceReport from pre-loaded row lists.
+
+    Callers that have already loaded decisions and closed_trades from their own
+    sources (e.g. filtered by policy bucket) can use this variant instead of
+    ``build_runtime_performance_report`` which always reads from disk.
+
+    Inherited manual-close trades are filtered out here as well.
+    """
+    root = Path(run_dir)
+    _summary_path = Path(summary_path) if summary_path is not None else root / "summary.json"
+    _raw_closed_trades = list(closed_trades)
+    clean_trades, _inherited = filter_inherited_trades(_raw_closed_trades)
+    if _inherited:
+        logger.warning(
+            "[POLICY_VALIDATION_CONTAMINATION] %d inherited manual-close trade(s) excluded "
+            "from policy validation (from_rows path) — Symbols: %s.",
+            len(_inherited),
+            sorted({str(t.get("symbol", "?")) for t in _inherited}),
+        )
+    return _build_report_from_clean_rows(
+        root=root,
+        summary_path=_summary_path,
+        decisions=list(decisions),
+        closed_trades=clean_trades,
+    )
+
+
 def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerformanceReport:
     root = Path(run_dir)
     summary_path = root / "summary.json"
@@ -101,6 +136,21 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
             sorted({str(t.get("symbol", "?")) for t in _inherited}),
         )
     decisions = load_closed_trades_jsonl(root / "logs" / "decisions.jsonl")
+    return _build_report_from_clean_rows(
+        root=root,
+        summary_path=summary_path,
+        decisions=decisions,
+        closed_trades=closed_trades,
+    )
+
+
+def _build_report_from_clean_rows(
+    *,
+    root: Path,
+    summary_path: Path,
+    decisions: list[dict[str, Any]],
+    closed_trades: list[dict[str, Any]],
+) -> RuntimePerformanceReport:
     closed_trade_metrics = aggregate_closed_trades(closed_trades)
 
     by_symbol: dict[str, dict[str, float | int]] = defaultdict(

@@ -1,0 +1,330 @@
+{
+  "baseline_control_comparison": {
+    "artifact_path": "",
+    "available": false,
+    "bucket_replay_ready": false,
+    "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_TESTED_ORDER_LOGS_AND_LIVE_ORDER_LOGS_AND_CLOSED_TRADE_LOGS",
+    "bucket_replay_reference_bucket": "active_policy",
+    "bucket_replay_required_for_expansion": true,
+    "current_policy_bucket_replay": {
+      "available": true,
+      "bucket_name": "active_policy",
+      "bucket_replay_ready": false,
+      "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_TESTED_ORDER_LOGS_AND_LIVE_ORDER_LOGS_AND_CLOSED_TRADE_LOGS",
+      "decision_count": 1,
+      "micro_live_status": "not_available",
+      "missing_surfaces": [
+        "tested_order_logs",
+        "live_order_logs",
+        "closed_trade_logs"
+      ],
+      "replay_source": "observed_runtime_policy_bucket_artifacts",
+      "run_count": 1,
+      "total_closed_trade_count": 0,
+      "total_live_order_count": 0,
+      "total_tested_order_count": 0
+    },
+    "evidence_source": "summary_artifact+policy_bucket_replay",
+    "lineage_scope_status": "aligned",
+    "reason": "NO_RECENT_BASELINE_CONTROL_ARTIFACT",
+    "replay_grounding": "strategy_comparison_recent_summary+policy_bucket_replay",
+    "replay_provenance": {
+      "classification": "mixed_root_summary_fallback",
+      "has_bucket_reference": true,
+      "has_runtime_summary_anchor": false,
+      "policy_bucket": "active_policy",
+      "reason_code": "SUMMARY_ARTIFACT_WITH_BUCKET_REPLAY_REFERENCE",
+      "runtime_summary_anchor_source": "not_available",
+      "source": "summary_artifact+policy_bucket_replay",
+      "summary": "mixed_root_summary_fallback:active_policy",
+      "uses_direct_bucket_replay": false,
+      "uses_mixed_root_summary_fallback": true,
+      "uses_projected_evidence": false
+    },
+    "staged_candidate_bucket_replay": {
+      "available": false,
+      "bucket_name": "staged_candidate",
+      "bucket_replay_ready": false,
+      "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE",
+      "decision_count": 0,
+      "micro_live_status": "not_available",
+      "missing_surfaces": [
+        "decision_logs",
+        "tested_order_logs",
+        "live_order_logs",
+        "closed_trade_logs"
+      ],
+      "replay_source": "",
+      "run_count": 0,
+      "total_closed_trade_count": 0,
+      "total_live_order_count": 0,
+      "total_tested_order_count": 0
+    },
+    "verdict": "not_available"
+  },
+  "comparison_score_delta": 0.0,
+  "comparison_verdict": "keep",
+  "confidence": "low",
+  "current_policy_status": "demote",
+  "evidence": {
+    "decision_count": 1,
+    "evidence_source": "policy_bucket",
+    "policy_bucket": "active_policy",
+    "run_count": 1,
+    "runner_avg_edge_retention_ratio": 0.0,
+    "runner_drawdown_to_pnl_ratio": 0.0,
+    "runner_positive_walk_forward_ratio": 1.0,
+    "runner_protection_degraded_rate": 0.0,
+    "runner_reject_rate": 0.0,
+    "runner_total_realized_pnl_usd": 0.0,
+    "total_closed_trade_count": 0,
+    "total_live_order_count": 0,
+    "total_tested_order_count": 0
+  },
+  "evidence_bucket_available": true,
+  "evidence_policy_bucket": "active_policy",
+  "evidence_source": "policy_bucket",
+  "policy_guardrails": {
+    "allow_alt_promotions": false,
+    "max_positive_symbols": 1,
+    "non_major_positive_bias": "observe_only",
+    "prefer_majors_only": true,
+    "promotion_intensity_cap": 0.8
+  },
+  "raw_verdict": "tighten",
+  "reason_codes": [
+    "CHECKPOINT_POLICY_BUCKET_ACTIVE_POLICY_USED",
+    "RUNNER_EXECUTION_EVIDENCE_REQUIRES_TIGHTENING",
+    "SAMPLE_QUALITY_WATCHDOG_THIN"
+  ],
+  "regime_actions": [],
+  "replay_provenance": {
+    "classification": "direct_bucket_aware_replay",
+    "has_bucket_reference": true,
+    "has_runtime_summary_anchor": false,
+    "policy_bucket": "active_policy",
+    "reason_code": "DIRECT_POLICY_BUCKET_REPLAY",
+    "runtime_summary_anchor_source": "not_available",
+    "source": "policy_bucket",
+    "summary": "direct_bucket_aware_replay:active_policy",
+    "uses_direct_bucket_replay": true,
+    "uses_mixed_root_summary_fallback": false,
+    "uses_projected_evidence": false
+  },
+  "sample_quality_watchdog_status": "thin",
+  "symbol_actions": [
+    {
+      "active_policy_action": "demote",
+      "lifecycle_action": "hold",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_NO_SYMBOL_EVIDENCE",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "keep",
+      "sample_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "BTCUSDT",
+      "trade_count": 0
+    },
+    {
+      "active_policy_action": "demote",
+      "lifecycle_action": "hold",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_NO_SYMBOL_EVIDENCE",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "keep",
+      "sample_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "trade_count": 0
+    }
+  ],
+  "symbol_lifecycle": [
+    {
+      "active_policy_action": "demote",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "demoted",
+      "evidence_generated_at": "2026-03-26T21:44:08.716146+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": false,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "53d2d9fdf002a9d3537d8c6ee8ad7e163d611f0e0502e71f9ef1bb6c551dc641",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "5000f2a01796aee8356df924071f53c62054df8efcc15c3168036734c3e35e15",
+        "symbols": [
+          "BTCUSDT",
+          "ETHUSDT"
+        ],
+        "updated_at": "2026-03-26T21:44:08.716146+00:00",
+        "version": 188,
+        "versioned_key": "20e207f2b8ba5fc043d8af1895b3b7c7ec944ddb3cc0b7c302aa98f85807991e"
+      },
+      "previous_state": "demoted",
+      "pruning_recommendation": "keep",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_NO_SYMBOL_EVIDENCE",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "keep",
+      "recommended_action": "hold",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "BTCUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "demoted",
+      "trade_count": 0,
+      "transition": "demoted_steady",
+      "validation_ready": true
+    },
+    {
+      "active_policy_action": "demote",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "demoted",
+      "evidence_generated_at": "2026-03-26T21:44:08.716146+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": false,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "53d2d9fdf002a9d3537d8c6ee8ad7e163d611f0e0502e71f9ef1bb6c551dc641",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "5000f2a01796aee8356df924071f53c62054df8efcc15c3168036734c3e35e15",
+        "symbols": [
+          "BTCUSDT",
+          "ETHUSDT"
+        ],
+        "updated_at": "2026-03-26T21:44:08.716146+00:00",
+        "version": 188,
+        "versioned_key": "20e207f2b8ba5fc043d8af1895b3b7c7ec944ddb3cc0b7c302aa98f85807991e"
+      },
+      "previous_state": "demoted",
+      "pruning_recommendation": "keep",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_NO_SYMBOL_EVIDENCE",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "keep",
+      "recommended_action": "hold",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "demoted",
+      "trade_count": 0,
+      "transition": "demoted_steady",
+      "validation_ready": true
+    },
+    {
+      "active_policy_action": "none",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "baseline",
+      "evidence_generated_at": "2026-03-26T21:44:08.716146+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": true,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "53d2d9fdf002a9d3537d8c6ee8ad7e163d611f0e0502e71f9ef1bb6c551dc641",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "5000f2a01796aee8356df924071f53c62054df8efcc15c3168036734c3e35e15",
+        "symbols": [
+          "BTCUSDT",
+          "ETHUSDT"
+        ],
+        "updated_at": "2026-03-26T21:44:08.716146+00:00",
+        "version": 188,
+        "versioned_key": "20e207f2b8ba5fc043d8af1895b3b7c7ec944ddb3cc0b7c302aa98f85807991e"
+      },
+      "previous_state": "baseline",
+      "pruning_recommendation": "keep",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN"
+      ],
+      "recommendation": "keep",
+      "recommended_action": "keep",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "SOLUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "baseline",
+      "trade_count": 0,
+      "transition": "baseline_steady",
+      "validation_ready": true
+    }
+  ],
+  "symbol_lifecycle_summary": {
+    "action_counts": {
+      "hold": 2,
+      "keep": 1
+    },
+    "actionable_symbol_count": 2,
+    "actionable_symbols": [
+      "BTCUSDT",
+      "ETHUSDT"
+    ],
+    "state_counts": {
+      "baseline": 1,
+      "demoted": 2
+    },
+    "symbol_count": 3
+  },
+  "verdict": "tighten"
+}

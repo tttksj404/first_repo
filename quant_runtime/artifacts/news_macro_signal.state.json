@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-03-20T07:39:02.835874+00:00",
+  "headline_hash": "6c0a2eb4ba4a9ae0674d081e39e648b209e2e7685cffb374ce717fde698cab99",
+  "next_scheduled_refresh_at": "2026-03-20T09:00:00+00:00",
+  "refresh_reason": "breaking_headline_shift",
+  "status": "refreshed",
+  "trigger_reasons": [
+    "BREAKING_HEADLINE_SHIFT"
+  ]
+}

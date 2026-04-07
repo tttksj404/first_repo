@@ -1,0 +1,5 @@
+{"key": "live-position-close:ETHUSDT:1775520003188:LIVE_POSITION_SOFT_STOP_LOSS:1.0000", "result": {"reason": "report_only_mode", "sent": false}, "text": "[LIVE_POSITION_SOFT_STOP_LOSS] ETHUSDT\nroe_percent=-12.32\nunrealized_pl=-9.13"}
+{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-07", "result": {"reason": "report_only_mode", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.1307 limit=0.0200"}
+{"key": "risk:WEEKLY_REALIZED_LOSS_LIMIT:2026-04-07", "result": {"reason": "report_only_mode", "sent": false}, "text": "[WEEKLY_REALIZED_LOSS_LIMIT] ratio=0.1307 limit=0.0500"}
+{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-07", "result": {"reason": "report_only_mode", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.1307 limit=0.0250"}
+{"key": "manual-close:ETHUSDT:2026-04-07T00:16:33.415683+00:00", "result": {"reason": "report_only_mode", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] ETHUSDT\nreentry_block_until=2026-04-07T00:21:33.415683+00:00"}

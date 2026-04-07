@@ -1,0 +1,5024 @@
+============================================
+[HEALTH_AUDIT] 2026-04-01 00:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 1분 전
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 20건 (전략=4, 채택=16)
+  전략 0bps 비율: 0/4 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 4건 / 50건 임계치 (8%)
+  유효 PnL 데이터(!=0bps): 4/4건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 4건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  output 디렉토리: 2637MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 419MB
+  디스크 여유: 56GB
+  quant_binance CPU: 100%
+  WARNING: CPU 100% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 777건, 최근 20건:
+    persistent_futures_mismatch: 16건
+    unknown_runtime_error: 4건
+  WARNING: futures mismatch 반복 (16/20건)
+
+[6] Bitget API
+  live_orders: 41건
+  tested_orders: 61건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 267건
+  모드: {'cash': 138, 'futures': 127, 'spot': 2}
+  최근 6h 의사결정: 133건
+  cash(미진입) 비율: 52%
+
+[8] 포지션 sync
+  account_sync 이벤트: 317건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=3
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=3
+[CLAUDE] PID=40907 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 0분 전
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 47건 (전략=4, 채택=43)
+  전략 0bps 비율: 0/4 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 4건 / 50건 임계치 (8%)
+  유효 PnL 데이터(!=0bps): 4/4건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 4건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  output 디렉토리: 2710MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 608MB
+  디스크 여유: 55GB
+  quant_binance CPU: 9%
+
+[5] Self-healing
+  총 이벤트: 804건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 41건
+  tested_orders: 61건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 315건
+  모드: {'cash': 115, 'futures': 198, 'spot': 2}
+  최근 6h 의사결정: 181건
+  cash(미진입) 비율: 37%
+
+[8] 포지션 sync
+  account_sync 이벤트: 433건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=72539 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 0분 전
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 70건 (전략=6, 채택=64)
+  전략 0bps 비율: 0/6 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 6건 / 50건 임계치 (12%)
+  유효 PnL 데이터(!=0bps): 6/6건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 6건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  output 디렉토리: 2792MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 738MB
+  디스크 여유: 54GB
+  quant_binance CPU: 105%
+  WARNING: CPU 105% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 826건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 43건
+  tested_orders: 63건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 316건
+  모드: {'cash': 122, 'futures': 188, 'spot': 6}
+  최근 6h 의사결정: 182건
+  cash(미진입) 비율: 39%
+
+[8] 포지션 sync
+  account_sync 이벤트: 422건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=3
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=3
+[CLAUDE] PID=4749 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 06:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 0분 전
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 83건 (전략=6, 채택=77)
+  전략 0bps 비율: 0/6 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 6건 / 50건 임계치 (12%)
+  유효 PnL 데이터(!=0bps): 6/6건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 6건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  output 디렉토리: 2888MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 824MB
+  디스크 여유: 54GB
+  quant_binance CPU: 108%
+  WARNING: CPU 108% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 839건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 43건
+  tested_orders: 63건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 285건
+  모드: {'cash': 121, 'futures': 162, 'spot': 2}
+  최근 6h 의사결정: 117건
+  cash(미진입) 비율: 42%
+
+[8] 포지션 sync
+  account_sync 이벤트: 423건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=3
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=3
+[CLAUDE] PID=37007 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 09:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1254275 decisions=500 live_orders=4 tested_orders=49
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 38건 (전략=1, 채택=37)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 8MB
+  output 디렉토리: 250MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 198MB
+  디스크 여유: 56GB
+  quant_binance CPU: 5%
+
+[5] Self-healing
+  총 이벤트: 130건, 최근 20건:
+    persistent_futures_mismatch: 10건
+    unknown_runtime_error: 10건
+  WARNING: unknown_runtime_error 반복 (10/20건)
+  WARNING: futures mismatch 반복 (10/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 49건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 131건
+  모드: {'cash': 53, 'futures': 77, 'spot': 1}
+  최근 6h 의사결정: 131건
+  cash(미진입) 비율: 40%
+
+[8] 포지션 sync
+  account_sync 이벤트: 178건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=86649 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 12:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=823575 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 27건 (전략=0, 채택=27)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.3MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 16MB
+  output 디렉토리: 347MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 167MB
+  디스크 여유: 55GB
+  quant_binance CPU: 13%
+
+[5] Self-healing
+  총 이벤트: 177건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 49건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 284건
+  모드: {'cash': 135, 'futures': 148, 'spot': 1}
+  최근 6h 의사결정: 284건
+  cash(미진입) 비율: 48%
+
+[8] 포지션 sync
+  account_sync 이벤트: 352건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=36276 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 14:17:03 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1800350 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 60건 (전략=0, 채택=60)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.3MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 4시간 전
+
+[4] 리소스
+  supervisor.log: 23MB
+  output 디렉토리: 413MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 228MB
+  디스크 여유: 54GB
+  quant_binance CPU: 3%
+
+[5] Self-healing
+  총 이벤트: 209건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 49건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 275건
+  모드: {'cash': 121, 'futures': 153, 'spot': 1}
+  최근 6h 의사결정: 211건
+  cash(미진입) 비율: 44%
+
+[8] 포지션 sync
+  account_sync 이벤트: 468건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=68821 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 16:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=841000 decisions=500 live_orders=5 tested_orders=7
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 17건 (전략=4, 채택=13)
+  전략 0bps 비율: 0/4 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 4건 / 50건 임계치 (8%)
+  유효 PnL 데이터(!=0bps): 4/4건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 4건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 29MB
+  output 디렉토리: 482MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 155MB
+  디스크 여유: 59GB
+  quant_binance CPU: 102%
+  WARNING: CPU 102% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 233건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 8건
+  tested_orders: 56건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 399건
+  모드: {'cash': 232, 'futures': 167}
+  최근 6h 의사결정: 245건
+  cash(미진입) 비율: 58%
+
+[8] 포지션 sync
+  account_sync 이벤트: 471건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=2274 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-01 18:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=140400 decisions=62 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 1분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 35MB
+  output 디렉토리: 297MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 59GB
+  quant_binance CPU: 8%
+
+[5] Self-healing
+  총 이벤트: 49건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 7건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 195건
+  모드: {'futures': 118, 'cash': 77}
+  최근 6h 의사결정: 195건
+  cash(미진입) 비율: 39%
+
+[8] 포지션 sync
+  account_sync 이벤트: 198건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 20건
+  WARNING: 소스코드 uncommitted 변경 20건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=1 WARNING=1
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=1
+[CLAUDE] PID=35410 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 00:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1026475 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 48MB
+  output 디렉토리: 246MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 156MB
+  디스크 여유: 57GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 6%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 139건
+  모드: {'futures': 92, 'cash': 34, 'spot': 13}
+  최근 6h 의사결정: 139건
+  cash(미진입) 비율: 24%
+
+[8] 포지션 sync
+  account_sync 이벤트: 98건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 21건
+  WARNING: 소스코드 uncommitted 변경 21건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=38083 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=2182175 decisions=500 live_orders=1 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 3건 (전략=3, 채택=0)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 4시간 전
+
+[4] 리소스
+  supervisor.log: 55MB
+  output 디렉토리: 343MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 225MB
+  디스크 여유: 55GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 5%
+
+[5] Self-healing
+  총 이벤트: 2건, 최근 20건:
+    unknown_runtime_error: 2건
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 99건
+  모드: {'futures': 97, 'cash': 2}
+  최근 6h 의사결정: 99건
+  cash(미진입) 비율: 2%
+
+[8] 포지션 sync
+  account_sync 이벤트: 214건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 21건
+  WARNING: 소스코드 uncommitted 변경 21건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=70806 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=3320250 decisions=500 live_orders=1 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 3건 (전략=3, 채택=0)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 6시간 전
+
+[4] 리소스
+  supervisor.log: 64MB
+  output 디렉토리: 439MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 296MB
+  디스크 여유: 55GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  총 이벤트: 2건, 최근 20건:
+    unknown_runtime_error: 2건
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 104건
+  모드: {'futures': 85, 'cash': 19}
+  최근 6h 의사결정: 104건
+  cash(미진입) 비율: 18%
+
+[8] 포지션 sync
+  account_sync 이벤트: 213건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 21건
+  WARNING: 소스코드 uncommitted 변경 21건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=3634 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 06:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=4288500 decisions=500 live_orders=1 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 3건 (전략=3, 채택=0)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 8시간 전
+
+[4] 리소스
+  supervisor.log: 81MB
+  output 디렉토리: 534MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 350MB
+  디스크 여유: 54GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 14%
+
+[5] Self-healing
+  총 이벤트: 2건, 최근 20건:
+    unknown_runtime_error: 2건
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 176건
+  모드: {'futures': 146, 'cash': 30}
+  최근 6h 의사결정: 144건
+  cash(미진입) 비율: 17%
+
+[8] 포지션 sync
+  account_sync 이벤트: 212건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 21건
+  WARNING: 소스코드 uncommitted 변경 21건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=36595 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=1122550 decisions=500 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=1, 채택=0)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 7MB
+  output 디렉토리: 668MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 155MB
+  디스크 여유: 55GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 10%
+
+[5] Self-healing
+  총 이벤트: 4건, 최근 20건:
+    unknown_runtime_error: 2건
+    persistent_futures_mismatch: 2건
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 4건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 279건
+  모드: {'futures': 153, 'spot': 16, 'cash': 110}
+  최근 6h 의사결정: 224건
+  cash(미진입) 비율: 39%
+
+[8] 포지션 sync
+  account_sync 이벤트: 266건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 21건
+  WARNING: 소스코드 uncommitted 변경 21건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=85951 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 12:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=1426075 decisions=500 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=1, 채택=0)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 8MB
+  output 디렉토리: 811MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 201MB
+  디스크 여유: 52GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 9건, 최근 20건:
+    unknown_runtime_error: 7건
+    persistent_futures_mismatch: 2건
+  WARNING: unknown_runtime_error 반복 (7/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 9건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 245건
+  모드: {'futures': 115, 'spot': 16, 'cash': 114}
+  최근 6h 의사결정: 129건
+  cash(미진입) 비율: 47%
+
+[8] 포지션 sync
+  account_sync 이벤트: 323건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 24건
+  WARNING: 소스코드 uncommitted 변경 24건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=35172 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 14:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=1426075 decisions=500 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=1, 채택=0)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 4시간 전
+
+[4] 리소스
+  supervisor.log: 8MB
+  output 디렉토리: 908MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 228MB
+  디스크 여유: 57GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 8%
+
+[5] Self-healing
+  총 이벤트: 29건, 최근 20건:
+    unknown_runtime_error: 19건
+    persistent_futures_mismatch: 1건
+  CRITICAL: unknown_runtime_error 폭발 (19/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 29건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 261건
+  모드: {'futures': 115, 'spot': 16, 'cash': 130}
+  최근 6h 의사결정: 110건
+  cash(미진입) 비율: 50%
+
+[8] 포지션 sync
+  account_sync 이벤트: 325건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 24건
+  WARNING: 소스코드 uncommitted 변경 24건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=67709 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 16:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=467125 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 10MB
+  output 디렉토리: 611MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 140MB
+  디스크 여유: 58GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  총 이벤트: 26건, 최근 20건:
+    unknown_runtime_error: 19건
+    persistent_futures_mismatch: 1건
+  CRITICAL: unknown_runtime_error 폭발 (19/20건)
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 27건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 235건
+  모드: {'cash': 199, 'futures': 36}
+  최근 6h 의사결정: 192건
+  cash(미진입) 비율: 85%
+
+[8] 포지션 sync
+  account_sync 이벤트: 198건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 24건
+  WARNING: 소스코드 uncommitted 변경 24건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=513 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-02 18:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1429875 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 16MB
+  output 디렉토리: 709MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 196MB
+  디스크 여유: 56GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 26건, 최근 20건:
+    unknown_runtime_error: 19건
+    persistent_futures_mismatch: 1건
+  CRITICAL: unknown_runtime_error 폭발 (19/20건)
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 27건
+  최근 429 에러: 38건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  WARNING: rate limit 빈발 (38건)
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 223건
+  모드: {'cash': 186, 'futures': 37}
+  최근 6h 의사결정: 156건
+  cash(미진입) 비율: 83%
+
+[8] 포지션 sync
+  account_sync 이벤트: 314건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 24건
+  WARNING: 소스코드 uncommitted 변경 24건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=33079 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 00:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=991800 decisions=528 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 2건 (전략=2, 채택=0)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 29MB
+  output 디렉토리: 223MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 145MB
+  디스크 여유: 52GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 95%
+  WARNING: CPU 95% (>90%) — 과부하
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 148건
+  모드: {'futures': 145, 'cash': 3}
+  최근 6h 의사결정: 148건
+  cash(미진입) 비율: 2%
+
+[8] 포지션 sync
+  account_sync 이벤트: 71건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=36033 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=2197675 decisions=500 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 2건 (전략=2, 채택=0)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 35MB
+  output 디렉토리: 338MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 223MB
+  디스크 여유: 50GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 5%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 166건
+  모드: {'futures': 163, 'cash': 3}
+  최근 6h 의사결정: 166건
+  cash(미진입) 비율: 2%
+
+[8] 포지션 sync
+  account_sync 이벤트: 186건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=69175 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=3237275 decisions=503 live_orders=3 tested_orders=3
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 3건 (전략=3, 채택=0)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 44MB
+  output 디렉토리: 434MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 288MB
+  디스크 여유: 45GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 1%
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    unknown_runtime_error: 1건
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 3건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 144건
+  모드: {'futures': 121, 'cash': 23}
+  최근 6h 의사결정: 144건
+  cash(미진입) 비율: 16%
+
+[8] 포지션 sync
+  account_sync 이벤트: 187건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=2728 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 06:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=4171125 decisions=500 live_orders=3 tested_orders=3
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 3건 (전략=3, 채택=0)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 0.7MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  supervisor.log: 59MB
+  output 디렉토리: 545MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 342MB
+  디스크 여유: 35GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    unknown_runtime_error: 1건
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 3건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 109건
+  모드: {'futures': 100, 'cash': 9}
+  최근 6h 의사결정: 87건
+  cash(미진입) 비율: 8%
+
+[8] 포지션 sync
+  account_sync 이벤트: 189건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=36261 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 08:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=631275 decisions=500 live_orders=4 tested_orders=3
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 9건 (전략=3, 채택=5)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 4MB
+  output 디렉토리: 619MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 157MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 1%
+
+[5] Self-healing
+  총 이벤트: 11건, 최근 20건:
+    persistent_futures_mismatch: 9건
+    unknown_runtime_error: 2건
+
+[6] Bitget API
+  live_orders: 6건
+  tested_orders: 6건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 322건
+  모드: {'cash': 58, 'futures': 264}
+  최근 6h 의사결정: 247건
+  cash(미진입) 비율: 18%
+
+[8] 포지션 sync
+  account_sync 이벤트: 308건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=69366 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1067700 decisions=500 live_orders=4 tested_orders=3
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 28건 (전략=3, 채택=24)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 1.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 7MB
+  output 디렉토리: 691MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 163MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 7%
+
+[5] Self-healing
+  총 이벤트: 30건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 6건
+  tested_orders: 6건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 366건
+  모드: {'cash': 63, 'futures': 303}
+  최근 6h 의사결정: 267건
+  cash(미진입) 비율: 17%
+
+[8] 포지션 sync
+  account_sync 이벤트: 366건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=86041 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 10:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=312050 decisions=482 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=1, 채택=0)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 1.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 9MB
+  output 디렉토리: 352MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 115MB
+  디스크 여유: 35GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 20%
+
+[5] Self-healing
+  총 이벤트: 35건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 236건
+  모드: {'cash': 79, 'futures': 157}
+  최근 6h 의사결정: 236건
+  cash(미진입) 비율: 33%
+
+[8] 포지션 sync
+  account_sync 이벤트: 201건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=2722 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 12:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1335375 decisions=500 live_orders=5 tested_orders=5
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 29건 (전략=5, 채택=24)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 1.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 14MB
+  output 디렉토리: 492MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 199MB
+  디스크 여유: 35GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 63건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 8건
+  tested_orders: 8건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 261건
+  모드: {'cash': 101, 'futures': 160}
+  최근 6h 의사결정: 261건
+  cash(미진입) 비율: 39%
+
+[8] 포지션 sync
+  account_sync 이벤트: 320건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=35220 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 14:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=2250425 decisions=500 live_orders=5 tested_orders=5
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 62건 (전략=5, 채택=57)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 1.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 22MB
+  output 디렉토리: 620MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 254MB
+  디스크 여유: 38GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 94%
+  WARNING: CPU 94% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 96건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 8건
+  tested_orders: 8건
+  최근 429 에러: 4건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 249건
+  모드: {'cash': 60, 'futures': 189}
+  최근 6h 의사결정: 183건
+  cash(미진입) 비율: 24%
+
+[8] 포지션 sync
+  account_sync 이벤트: 313건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=67803 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 16:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=3219150 decisions=500 live_orders=5 tested_orders=5
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 100건 (전략=5, 채택=95)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 1.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  supervisor.log: 33MB
+  output 디렉토리: 749MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 324MB
+  디스크 여유: 37GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 10%
+
+[5] Self-healing
+  총 이벤트: 134건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 8건
+  tested_orders: 8건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 296건
+  모드: {'cash': 81, 'futures': 215}
+  최근 6h 의사결정: 150건
+  cash(미진입) 비율: 27%
+
+[8] 포지션 sync
+  account_sync 이벤트: 315건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 28건
+  WARNING: 소스코드 uncommitted 변경 28건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=587 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-03 18:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=558500 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 41MB
+  output 디렉토리: 731MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 128MB
+  디스크 여유: 51GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 6%
+
+[5] Self-healing
+  총 이벤트: 105건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 252건
+  모드: {'cash': 170, 'futures': 82}
+  최근 6h 의사결정: 216건
+  cash(미진입) 비율: 67%
+
+[8] 포지션 sync
+  account_sync 이벤트: 276건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 29건
+  WARNING: 소스코드 uncommitted 변경 29건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=33334 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 00:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 6건 (전략=5, 채택=1)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 976MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 152MB
+  디스크 여유: 44GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 8%
+
+[5] Self-healing
+  총 이벤트: 111건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 10건
+  tested_orders: 10건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 247건
+  모드: {'cash': 131, 'futures': 105, 'spot': 11}
+  최근 6h 의사결정: 115건
+  cash(미진입) 비율: 53%
+
+[8] 포지션 sync
+  account_sync 이벤트: 395건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 29건
+  WARNING: 소스코드 uncommitted 변경 29건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=31900 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 6건 (전략=5, 채택=1)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 9시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 1040MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 167MB
+  디스크 여유: 39GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 3%
+
+[5] Self-healing
+  총 이벤트: 111건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 10건
+  tested_orders: 10건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 276건
+  모드: {'cash': 165, 'spot': 29, 'futures': 82}
+  최근 6h 의사결정: 120건
+  cash(미진입) 비율: 60%
+
+[8] 포지션 sync
+  account_sync 이벤트: 393건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 29건
+  WARNING: 소스코드 uncommitted 변경 29건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=64751 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 6건 (전략=5, 채택=1)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 11시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 1104MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 181MB
+  디스크 여유: 42GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  총 이벤트: 111건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 10건
+  tested_orders: 10건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 279건
+  모드: {'cash': 197, 'futures': 82}
+  최근 6h 의사결정: 99건
+  cash(미진입) 비율: 71%
+
+[8] 포지션 sync
+  account_sync 이벤트: 394건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 29건
+  WARNING: 소스코드 uncommitted 변경 29건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=97601 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 06:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 6건 (전략=5, 채택=1)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 13시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 1168MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 187MB
+  디스크 여유: 42GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 5%
+
+[5] Self-healing
+  총 이벤트: 111건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 10건
+  tested_orders: 10건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 275건
+  모드: {'cash': 140, 'spot': 53, 'futures': 82}
+  최근 6h 의사결정: 72건
+  cash(미진입) 비율: 51%
+
+[8] 포지션 sync
+  account_sync 이벤트: 394건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 29건
+  WARNING: 소스코드 uncommitted 변경 29건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=30699 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 08:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 6건 (전략=5, 채택=1)
+  전략 0bps 비율: 0/5 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 5건 / 50건 임계치 (10%)
+  유효 PnL 데이터(!=0bps): 5/5건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 5건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 15시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 1248MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 209MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 3%
+
+[5] Self-healing
+  총 이벤트: 111건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 10건
+  tested_orders: 10건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 262건
+  모드: {'cash': 180, 'futures': 82}
+  최근 6h 의사결정: 72건
+  cash(미진입) 비율: 69%
+
+[8] 포지션 sync
+  account_sync 이벤트: 394건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 29건
+  WARNING: 소스코드 uncommitted 변경 29건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=63373 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=14325 decisions=4 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 160MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 90MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 8%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 12건
+  모드: {'cash': 10, 'spot': 2}
+  최근 6h 의사결정: 12건
+
+[8] 포지션 sync
+  account_sync 이벤트: 5건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 30건
+  WARNING: 소스코드 uncommitted 변경 30건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=80763 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 10:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=417600 decisions=500 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 3MB
+  output 디렉토리: 213MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 101MB
+  디스크 여유: 35GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 94%
+  WARNING: CPU 94% (>90%) — 과부하
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 143건
+  모드: {'cash': 131, 'spot': 7, 'futures': 5}
+  최근 6h 의사결정: 143건
+  cash(미진입) 비율: 92%
+
+[8] 포지션 sync
+  account_sync 이벤트: 62건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 30건
+  WARNING: 소스코드 uncommitted 변경 30건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=97263 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 12:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1229575 decisions=644 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=1, 채택=0)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 9MB
+  output 디렉토리: 339MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 130MB
+  디스크 여유: 35GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 99%
+  WARNING: CPU 99% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    persistent_futures_mismatch: 1건
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 102건
+  모드: {'cash': 71, 'spot': 31}
+  최근 6h 의사결정: 102건
+  cash(미진입) 비율: 70%
+
+[8] 포지션 sync
+  account_sync 이벤트: 177건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 30건
+  WARNING: 소스코드 uncommitted 변경 30건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=29169 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 14:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=127100 decisions=277 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 6건 (전략=0, 채택=6)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 16MB
+  output 디렉토리: 459MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 138MB
+  디스크 여유: 11GB
+  WARNING: 디스크 여유 11GB (<20GB)
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 14%
+
+[5] Self-healing
+  총 이벤트: 7건, 최근 20건:
+    persistent_futures_mismatch: 7건
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 313건
+  모드: {'cash': 118, 'spot': 54, 'futures': 141}
+  최근 6h 의사결정: 313건
+  cash(미진입) 비율: 38%
+
+[8] 포지션 sync
+  account_sync 이벤트: 291건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 30건
+  WARNING: 소스코드 uncommitted 변경 30건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+[CLAUDE] PID=66247 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 16:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=200150 decisions=500 live_orders=1 tested_orders=1
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 4건 (전략=3, 채택=1)
+  전략 0bps 비율: 0/3 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 3건 / 50건 임계치 (6%)
+  유효 PnL 데이터(!=0bps): 3/3건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 3건
+
+[3] 상태 파일 무결성
+  state file: 1.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 20MB
+  output 디렉토리: 191MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 115MB
+  디스크 여유: 5GB
+  WARNING: 디스크 여유 5GB (<20GB)
+
+[4b] 자동 디스크 정리
+  디스크 위험! 추가 정리 실행...
+  추가 정리 완료
+  quant_binance CPU: 93%
+  WARNING: CPU 93% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 4건, 최근 20건:
+    persistent_futures_mismatch: 4건
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 1건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 250건
+  모드: {'futures': 187, 'cash': 55, 'spot': 8}
+  최근 6h 의사결정: 250건
+  cash(미진입) 비율: 22%
+
+[8] 포지션 sync
+  account_sync 이벤트: 31건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 30건
+  WARNING: 소스코드 uncommitted 변경 30건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=3
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=3
+[CLAUDE] PID=1750 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-04 18:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 3개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=765875 decisions=504 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 28건 (전략=0, 채택=28)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 25MB
+  output 디렉토리: 260MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 281MB
+  디스크 여유: 2GB
+  CRITICAL: 디스크 여유 2GB (<5GB)
+
+[4b] 자동 디스크 정리
+  디스크 위험! 추가 정리 실행...
+  추가 정리 완료
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  총 이벤트: 28건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 107건
+  모드: {'futures': 90, 'cash': 9, 'spot': 8}
+  최근 6h 의사결정: 107건
+  cash(미진입) 비율: 8%
+
+[8] 포지션 sync
+  account_sync 이벤트: 103건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 36건
+  WARNING: 소스코드 uncommitted 변경 36건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=1 WARNING=1
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=1
+[CLAUDE] PID=35370 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 00:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 235분 전
+  WARNING: health 파일 235분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 235분 전
+  WARNING: summary.json 235분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 0GB
+  CRITICAL: 디스크 여유 0GB (<5GB)
+
+[4b] 자동 디스크 정리
+  디스크 위험! 추가 정리 실행...
+  추가 정리 완료
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 226건
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=2 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=2 WARNING=3
+[CLAUDE] PID=90351 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 355분 전
+  WARNING: health 파일 355분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 355분 전
+  WARNING: summary.json 355분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 0GB
+  CRITICAL: 디스크 여유 0GB (<5GB)
+
+[4b] 자동 디스크 정리
+  디스크 위험! 추가 정리 실행...
+  추가 정리 완료
+  quant_binance CPU: 6%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 4건
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=2 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=2 WARNING=3
+[CLAUDE] PID=99307 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 475분 전
+  WARNING: health 파일 475분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 475분 전
+  WARNING: summary.json 475분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 9시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 0GB
+  CRITICAL: 디스크 여유 0GB (<5GB)
+
+[4b] 자동 디스크 정리
+  디스크 위험! 추가 정리 실행...
+  추가 정리 완료
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=2 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=2 WARNING=3
+[CLAUDE] PID=8579 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 06:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 595분 전
+  WARNING: health 파일 595분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 595분 전
+  WARNING: summary.json 595분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 11시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 29GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=1 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=3
+[CLAUDE] PID=18072 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 08:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 715분 전
+  WARNING: health 파일 715분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 715분 전
+  WARNING: summary.json 715분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 13시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 29GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=1 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=3
+[CLAUDE] PID=27166 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 775분 전
+  WARNING: health 파일 775분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 775분 전
+  WARNING: summary.json 775분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 14시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 29GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 7%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=1 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=3
+[CLAUDE] PID=32042 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 10:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 835분 전
+  WARNING: health 파일 835분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 8
+  마지막 heartbeat: [HEARTBEAT] events=583800 decisions=500 live_orders=7 tested_orders=4
+
+[2] 데이터 품질
+  summary.json 갱신: 835분 전
+  WARNING: summary.json 835분 미갱신
+  총 청산: 19건 (전략=2, 채택=14)
+  전략 0bps 비율: 0/2 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 2건 / 50건 임계치 (4%)
+  유효 PnL 데이터(!=0bps): 2/2건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 2건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 15시간 전
+
+[4] 리소스
+  supervisor.log: 31MB
+  output 디렉토리: 353MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 00MB
+  디스크 여유: 29GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 72건, 최근 20건:
+    persistent_futures_mismatch: 17건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+  WARNING: futures mismatch 반복 (17/20건)
+
+[6] Bitget API
+  live_orders: 5건
+  tested_orders: 5건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 137, 'futures': 196, 'spot': 1}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 41%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 39건
+  WARNING: 소스코드 uncommitted 변경 39건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=1 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=3
+[CLAUDE] PID=37090 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 12:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=177050 decisions=233 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 2건 (전략=1, 채택=1)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 33MB
+  output 디렉토리: 193MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 107MB
+  디스크 여유: 29GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 3%
+
+[5] Self-healing
+  총 이벤트: 2건, 최근 20건:
+    persistent_futures_mismatch: 2건
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 148건
+  모드: {'cash': 94, 'futures': 28, 'spot': 26}
+  최근 6h 의사결정: 148건
+  cash(미진입) 비율: 64%
+
+[8] 포지션 sync
+  account_sync 이벤트: 26건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 40건
+  WARNING: 소스코드 uncommitted 변경 40건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=49186 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 14:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=599625 decisions=526 live_orders=1 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 38MB
+  output 디렉토리: 246MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 90MB
+  디스크 여유: 29GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 11%
+
+[5] Self-healing
+  총 이벤트: 20건, 최근 20건:
+    persistent_futures_mismatch: 20건
+  WARNING: futures mismatch 반복 (20/20건)
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 288건
+  모드: {'cash': 234, 'spot': 2, 'futures': 52}
+  최근 6h 의사결정: 288건
+  cash(미진입) 비율: 81%
+
+[8] 포지션 sync
+  account_sync 이벤트: 120건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 40건
+  WARNING: 소스코드 uncommitted 변경 40건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=60503 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 16:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=1670875 decisions=648 live_orders=9 tested_orders=10
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 43건 (전략=10, 채택=32)
+  전략 0bps 비율: 0/10 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 10건 / 50건 임계치 (20%)
+  유효 PnL 데이터(!=0bps): 10/10건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 10건
+
+[3] 상태 파일 무결성
+  state file: 0.5MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 48MB
+  output 디렉토리: 302MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 115MB
+  디스크 여유: 28GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 44건, 최근 20건:
+    persistent_futures_mismatch: 13건
+    unknown_runtime_error: 7건
+  WARNING: unknown_runtime_error 반복 (7/20건)
+  WARNING: futures mismatch 반복 (13/20건)
+
+[6] Bitget API
+  live_orders: 8건
+  tested_orders: 10건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 334건
+  모드: {'cash': 236, 'spot': 53, 'futures': 45}
+  최근 6h 의사결정: 334건
+  cash(미진입) 비율: 71%
+
+[8] 포지션 sync
+  account_sync 이벤트: 228건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 40건
+  WARNING: 소스코드 uncommitted 변경 40건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+[CLAUDE] PID=71541 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-05 18:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 2
+  마지막 heartbeat: [HEARTBEAT] events=82850 decisions=55 live_orders=2 tested_orders=2
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.8MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 52MB
+  output 디렉토리: 181MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 104MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  총 이벤트: 2건, 최근 20건:
+    persistent_futures_mismatch: 2건
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 61건
+  모드: {'futures': 32, 'cash': 29}
+  최근 6h 의사결정: 61건
+  cash(미진입) 비율: 48%
+
+[8] 포지션 sync
+  account_sync 이벤트: 18건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 38건
+  WARNING: 소스코드 uncommitted 변경 38건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=14810 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 00:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=346375 decisions=500 live_orders=1 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 4MB
+  output 디렉토리: 245MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 118MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  총 이벤트: 7건, 최근 20건:
+    persistent_futures_mismatch: 4건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 3건
+  최근 429 에러: 4건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 283건
+  모드: {'cash': 226, 'futures': 57}
+  최근 6h 의사결정: 283건
+  cash(미진입) 비율: 80%
+
+[8] 포지션 sync
+  account_sync 이벤트: 107건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_ISSUE] SOLUSDT notional $8 < expected $301 (equity $67 × 15x × 30%)
+[YOLO_ISSUE] ETHUSDT notional $123 < expected $301 (equity $67 × 15x × 30%)
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=2 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=55035 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=1058000 decisions=500 live_orders=4 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.3MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 9MB
+  output 디렉토리: 317MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 131MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 3%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 5건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 3건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 259건
+  모드: {'cash': 246, 'futures': 13}
+  최근 6h 의사결정: 259건
+  cash(미진입) 비율: 95%
+
+[8] 포지션 sync
+  account_sync 이벤트: 221건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_ISSUE] ETHUSDT notional $21 < expected $303 (equity $67 × 15x × 30%)
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=65120 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=1686825 decisions=500 live_orders=4 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 16MB
+  output 디렉토리: 381MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 140MB
+  디스크 여유: 33GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 5건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 3건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 319건
+  모드: {'cash': 291, 'futures': 28}
+  최근 6h 의사결정: 319건
+  cash(미진입) 비율: 91%
+
+[8] 포지션 sync
+  account_sync 이벤트: 198건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_ISSUE] ETHUSDT notional $21 < expected $303 (equity $67 × 15x × 30%)
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=75072 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 06:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=58600 decisions=8 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.3MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 25MB
+  output 디렉토리: 385MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 104MB
+  디스크 여유: 33GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 75%
+
+[5] Self-healing
+  총 이벤트: 3건, 최근 20건:
+    persistent_futures_mismatch: 3건
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 192건
+  모드: {'futures': 8, 'cash': 184}
+  최근 6h 의사결정: 166건
+  cash(미진입) 비율: 96%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 267건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_ISSUE] ETHUSDT notional $21 < expected $303 (equity $67 × 15x × 30%)
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=85361 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 08:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=339050 decisions=280 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 28MB
+  output 디렉토리: 199MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 100MB
+  디스크 여유: 32GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 8%
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    persistent_futures_mismatch: 1건
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 102건
+  모드: {'cash': 78, 'futures': 24}
+  최근 6h 의사결정: 102건
+  cash(미진입) 비율: 76%
+
+[8] 포지션 sync
+  account_sync 이벤트: 47건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_ISSUE] exec_quality ETHUSDT: size=0.85 lev=0.70
+[YOLO_ISSUE] exec_quality ETHUSDT|market=futures|exchange=bitget|policy_bucket=active_policy: size=0.85 lev=0.70
+[YOLO_FIX] Execution quality state 리셋 (패널티 해제)
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=1 issues=2 manual=0
+[YOLO] 자동 수정 완료 — 봇 재시작
+[YOLO] 봇 재시작됨 (PID: 95311)
+[CLAUDE] PID=95313 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=424250 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.3MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 30MB
+  output 디렉토리: 223MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 125MB
+  디스크 여유: 32GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 197건
+  모드: {'cash': 146, 'futures': 51}
+  최근 6h 의사결정: 197건
+  cash(미진입) 비율: 74%
+
+[8] 포지션 sync
+  account_sync 이벤트: 90건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=814 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 10:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=813475 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.3MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 32MB
+  output 디렉토리: 255MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 130MB
+  디스크 여유: 32GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 0%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 228건
+  모드: {'futures': 68, 'cash': 160}
+  최근 6h 의사결정: 228건
+  cash(미진입) 비율: 70%
+
+[8] 포지션 sync
+  account_sync 이벤트: 148건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=5877 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 12:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=197750 decisions=268 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 36MB
+  output 디렉토리: 308MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 88MB
+  디스크 여유: 31GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 99%
+  WARNING: CPU 99% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 6건, 최근 20건:
+    persistent_futures_mismatch: 3건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 344건
+  모드: {'cash': 329, 'futures': 15}
+  최근 6h 의사결정: 344건
+  cash(미진입) 비율: 96%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 232건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=16205 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 14:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=881025 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.8MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 40MB
+  output 디렉토리: 434MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 96MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 11%
+
+[5] Self-healing
+  총 이벤트: 6건, 최근 20건:
+    persistent_futures_mismatch: 3건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 260건
+  모드: {'cash': 245, 'futures': 15}
+  최근 6h 의사결정: 260건
+  cash(미진입) 비율: 94%
+
+[8] 포지션 sync
+  account_sync 이벤트: 349건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=27238 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 16:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1585150 decisions=555 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 47MB
+  output 디렉토리: 547MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 101MB
+  디스크 여유: 34GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 99%
+  WARNING: CPU 99% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 6건, 최근 20건:
+    persistent_futures_mismatch: 3건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 304건
+  모드: {'cash': 288, 'futures': 16}
+  최근 6h 의사결정: 201건
+  cash(미진입) 비율: 95%
+
+[8] 포지션 sync
+  account_sync 이벤트: 465건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=2
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=2
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=39650 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-06 18:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=2294875 decisions=737 live_orders=1 tested_orders=1
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 2건 (전략=1, 채택=0)
+  전략 0bps 비율: 0/1 (0%)
+  OK: 0bps 비율 정상
+  학습 가능 데이터: 1건 / 50건 임계치 (2%)
+  유효 PnL 데이터(!=0bps): 1/1건 (100%)
+  OK: 유효 데이터 정상 축적 중
+  최근 24h 전략 진입: 1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  supervisor.log: 56MB
+  output 디렉토리: 650MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 107MB
+  디스크 여유: 33GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 5건
+    daemon_stalled: 3건
+  WARNING: daemon_stalled 반복 (3/20건)
+
+[6] Bitget API
+  live_orders: 3건
+  tested_orders: 3건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 331건
+  모드: {'cash': 317, 'futures': 14}
+  최근 6h 의사결정: 149건
+  cash(미진입) 비율: 96%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 441건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=48188 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-07 00:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=160575 decisions=127 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 1MB
+  output 디렉토리: 912MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 117MB
+  디스크 여유: 33GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 6건
+    daemon_stalled: 2건
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 252건
+  모드: {'cash': 252}
+  최근 6h 의사결정: 195건
+  cash(미진입) 비율: 100%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 305건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=75010 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-07 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=922025 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 6MB
+  output 디렉토리: 1034MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 123MB
+  디스크 여유: 31GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 4%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 6건
+    daemon_stalled: 2건
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 236건
+  모드: {'cash': 236}
+  최근 6h 의사결정: 155건
+  cash(미진입) 비율: 100%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 421건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=84777 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-07 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=1601150 decisions=500 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.8MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 4시간 전
+
+[4] 리소스
+  supervisor.log: 13MB
+  output 디렉토리: 1146MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 125MB
+  디스크 여유: 31GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 5%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 6건
+    daemon_stalled: 2건
+
+[6] Bitget API
+  live_orders: 2건
+  tested_orders: 2건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 291건
+  모드: {'cash': 291}
+  최근 6h 의사결정: 186건
+  cash(미진입) 비율: 100%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 536건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=94366 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-07 06:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=24525 decisions=3 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.8MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 21MB
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 90MB
+  디스크 여유: 31GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 6건
+  모드: {'cash': 6}
+  최근 6h 의사결정: 6건
+
+[8] 포지션 sync
+  account_sync 이벤트: 3건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=4540 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-07 08:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=52925 decisions=3 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.9MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 24MB
+  output 디렉토리: 305MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 108MB
+  디스크 여유: 31GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 3%
+
+[5] Self-healing
+  총 이벤트: 8건, 최근 20건:
+    persistent_futures_mismatch: 5건
+    daemon_stalled: 2건
+    unknown_runtime_error: 1건
+
+[6] Bitget API
+  live_orders: 4건
+  tested_orders: 5건
+  최근 429 에러: 4건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 117건
+  모드: {'cash': 94, 'futures': 23}
+  최근 6h 의사결정: 117건
+  cash(미진입) 비율: 80%
+
+[8] 포지션 sync
+  account_sync 이벤트: 122건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=14219 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-07 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 0
+  마지막 heartbeat: [HEARTBEAT] events=382725 decisions=500 live_orders=1 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 1건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 26MB
+  output 디렉토리: 230MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 115MB
+  디스크 여유: 30GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 16%
+
+[5] Self-healing
+  총 이벤트: 2건, 최근 20건:
+    persistent_futures_mismatch: 2건
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 1건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 158건
+  모드: {'cash': 156, 'futures': 2}
+  최근 6h 의사결정: 158건
+  cash(미진입) 비율: 99%
+  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적
+
+[8] 포지션 sync
+  account_sync 이벤트: 72건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: main
+  소스코드 uncommitted 변경: 37건
+  WARNING: 소스코드 uncommitted 변경 37건 — 커밋 필요
+
+============================================
+[RESULT] CRITICAL=0 WARNING=1
+[ACTION] WARNING 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=0 WARNING=1
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=19283 백그라운드 실행

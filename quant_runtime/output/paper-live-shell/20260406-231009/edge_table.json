@@ -1,0 +1,92 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 5,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 7,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 16
+  },
+  "observation_count": 16,
+  "symbols": {
+    "BTCUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 0.20784706125153915,
+        "mode": "futures",
+        "observations": [
+          0.20784706125153915,
+          -0.6215772613178331
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": -2.223928872569153,
+        "mode": "futures",
+        "observations": [
+          -2.223928872569153,
+          49.0846325223992,
+          -11.412286445065545,
+          -15.952973522295299,
+          38.44391024142146
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 6,
+        "median_bps": 9.0653164069491,
+        "mode": "futures",
+        "observations": [
+          -49.915009322945295,
+          157.66378976326826,
+          9.0653164069491
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 7,
+        "median_bps": 4.532996954462413,
+        "mode": "futures",
+        "observations": [
+          4.532996954462413
+        ],
+        "trend_direction": -1
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": -49.72852285989698,
+        "mode": "futures",
+        "observations": [
+          -49.72852285989698
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 7,
+        "median_bps": -3.6368044611469434,
+        "mode": "futures",
+        "observations": [
+          -51.294511707456,
+          330.4694377983945,
+          -3.6368044611469434
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 8,
+        "median_bps": 11.877066242193488,
+        "mode": "futures",
+        "observations": [
+          11.877066242193488
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}
