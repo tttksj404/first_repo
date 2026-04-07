@@ -138,12 +138,17 @@ def daily_note(day: date, offset: int) -> str:
 - [[01. Areas/LEET/Trackers/LEET Score Tracker]]
 '''
 
+def _write_if_missing(path: Path, content: str) -> None:
+    """파일이 없을 때만 생성 (이미 존재하면 스킵)"""
+    if not path.exists():
+        path.write_text(content, encoding='utf-8')
+
 def write_static_files() -> None:
-    (BASE / 'LEET_140_July_Execution_System.md').write_text('# LEET 140 July Execution System\n\n## 목표\n- 시험: 2026-07 LEET\n- 목표 점수: 140+\n- 핵심 전략: 기출 회독 + 생성 실전지문/실전문항 + 오답 논리 교정\n\n## 이번 시스템이 참고한 로컬 근거\n- `generated_leet/LEET_실전지문_51~70`\n- `generated_leet/LEET_실전지문_분야별_인덱스.md`\n- `notion_automation/core/leet_blueprint.json`\n- `notion_automation/analysis_guides/generate_leet_daily.py`\n- `_ai_context/reports/leet_52_60_validation_summary_20260305.md`\n- `_ai_context/reports/leet_option_logic_check_20260305.md`\n\n## 판단\n- 이전 생성물은 이미 기출형 구조 / 선지 함정 밀도 / Gemini 검증 흔적이 있다.\n- 이번 옵시디언 시스템은 그 자산을 매일 돌릴 수 있는 루틴으로 바꾸는 방향이다.\n', encoding='utf-8')
-    (PLANS / 'LEET Problem Writing Principles.md').write_text('# LEET Problem Writing Principles\n\n## 이 노트의 근거\n- 생성 언어이해 지문 51~70번 세트\n- 생성 추리논증 실전문항 01~30 세트\n- Gemini 교차검증 요약\n- 선지 함정 밀도 점검 리포트\n\n## 언어이해 지문 작성 원리\n- 5~7단락 수준의 밀도 유지\n- 통설→한계→대안 / 개념→조건→사례 / 쟁점→견해 비교→조건부 결론 구조\n- 문항은 일치/불일치, 추론, 사례 적용 중심\n- 오답 선지는 과잉일반화 / 조건 누락 / 범위 치환 / 입장 전도 중심\n\n## 추리논증 문항 작성 원리\n- 조건 제시형, 논증 분석형, 사례 판단형 혼합\n- 배경지식보다 조건 정리와 변수 통제 능력을 묻기\n- 함정은 필요충분조건 뒤집기, 조건부 독립 착각, 평균효과/부분집단 효과 혼동, 범주 이동, 강한 표현 남용 활용\n\n## 사용 원칙\n- 기출 대체 금지\n- 기출 회독 뒤 유사 논리 구조 추가 훈련에 사용\n- 하루 1~2세트만 투입\n', encoding='utf-8')
-    (PLANS / 'LEET July Roadmap.md').write_text(f'# LEET July Roadmap\n\n- 시작일: {START_DATE.isoformat()}\n- 시험일 가정: {EXAM_DATE.isoformat()}\n- 총 {TOTAL_DAYS}일\n\n## Phase 1 — 3/17 ~ 4/15\n- 스캐너 읽기 습관 만들기\n- 추리 변수 마킹 습관 만들기\n\n## Phase 2 — 4/16 ~ 5/31\n- 기출 회독 본격화\n- 생성 세트 병행\n\n## Phase 3 — 6/1 ~ 6/30\n- 시간 압박 훈련\n- 오답 로그 체계화\n\n## Phase 4 — 7/1 ~ 시험 전\n- 실전 세트 위주\n- 오답 회수 / 태도 고정 / 컨디션 관리\n', encoding='utf-8')
-    (TRACKERS / 'LEET Error Log.md').write_text('# LEET Error Log\n\n- 과잉추론 / 조건 누락 / 범위 확대 / 입장 전도 / 변수 관리 실패 / 시간 압박으로 근거 회수 실패 중 하나로 적기\n', encoding='utf-8')
-    (TRACKERS / 'LEET Score Tracker.md').write_text('# LEET Score Tracker\n\n- 날짜 / 언어이해 / 추리논증 / 총평 기록\n', encoding='utf-8')
+    _write_if_missing(BASE / 'LEET_140_July_Execution_System.md', '# LEET 140 July Execution System\n\n## 목표\n- 시험: 2026-07 LEET\n- 목표 점수: 140+\n- 핵심 전략: 기출 회독 + 생성 실전지문/실전문항 + 오답 논리 교정\n')
+    _write_if_missing(PLANS / 'LEET Problem Writing Principles.md', '# LEET Problem Writing Principles\n\n## 언어이해 지문 작성 원리\n- 5~7단락 수준의 밀도 유지\n- 통설→한계→대안 / 개념→조건→사례 / 쟁점→견해 비교→조건부 결론 구조\n\n## 추리논증 문항 작성 원리\n- 조건 제시형, 논증 분석형, 사례 판단형 혼합\n- 배경지식보다 조건 정리와 변수 통제 능력을 묻기\n')
+    _write_if_missing(PLANS / 'LEET July Roadmap.md', f'# LEET July Roadmap\n\n- 시작일: {START_DATE.isoformat()}\n- 시험일: {EXAM_DATE.isoformat()}\n- 총 {TOTAL_DAYS}일\n')
+    _write_if_missing(TRACKERS / 'LEET Error Log.md', '# LEET Error Log\n\n- 과잉추론 / 조건 누락 / 범위 확대 / 입장 전도 / 변수 관리 실패 / 시간 압박으로 근거 회수 실패 중 하나로 적기\n')
+    _write_if_missing(TRACKERS / 'LEET Score Tracker.md', '# LEET Score Tracker\n\n- 날짜 / 언어이해 / 추리논증 / 총평 기록\n')
 
 def write_daily_notes() -> None:
     for offset in range(TOTAL_DAYS):

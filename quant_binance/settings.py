@@ -368,6 +368,8 @@ class Settings:
     strategy_profile: str
     force_auto_mode: str = ""
     disable_position_adoption: bool = False
+    data_collection_mode: bool = False
+    data_collection_min_trades: int = 50
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -440,4 +442,6 @@ class Settings:
             strategy_profile=raw["strategy_profile"],
             force_auto_mode=str(raw.get("force_auto_mode", "") or ""),
             disable_position_adoption=bool(raw.get("disable_position_adoption", False)),
+            data_collection_mode=bool(raw.get("data_collection_mode", False)),
+            data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
         )

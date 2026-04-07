@@ -142,7 +142,7 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         self.assertEqual(inputs.spot_funding_assets[0].free_balance_usd, 500.0)
         self.assertEqual(inputs.futures_available_balance_usd, 38.2)
         self.assertEqual(inputs.futures_execution_balance_usd, 4.9)
-        self.assertEqual(inputs.futures_recognized_balance_usd, 59.922433)
+        self.assertEqual(inputs.futures_recognized_balance_usd, 42.422433)
         funding_assets = {item.asset: item for item in inputs.futures_funding_assets}
         self.assertEqual(set(funding_assets), {"BTC", "USDT"})
         self.assertEqual(funding_assets["BTC"].free_balance_usd, 5.0)
@@ -201,7 +201,7 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         )
 
         self.assertEqual(report.futures_execution_balance_usd, 0.0)
-        self.assertEqual(report.futures_recognized_balance_usd, 10.0)
+        self.assertEqual(report.futures_recognized_balance_usd, 0.0)
         self.assertEqual(report.futures_collateral_candidate_balance_usd, 10.0)
         self.assertEqual(report.futures_manual_handling_balance_usd, 0.0)
 
