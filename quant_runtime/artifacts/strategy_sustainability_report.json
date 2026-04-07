@@ -1,0 +1,103 @@
+{
+  "adopted_futures_position_count": 2,
+  "base_dir": "/Users/tttksj/first_repo/quant_runtime",
+  "blocked_opportunity_count": 177,
+  "blocked_reason_counts": [
+    {
+      "count": 126,
+      "reason": "MIN_MEANINGFUL_NOTIONAL"
+    },
+    {
+      "count": 51,
+      "reason": "EXPECTED_PROFIT_TOO_SMALL"
+    }
+  ],
+  "blocked_symbols": [
+    {
+      "count": 177,
+      "symbol": "SOLUSDT"
+    }
+  ],
+  "closed_trade_count": 431,
+  "deduped_closed_trade_count": 311,
+  "deduped_realized_pnl_usd": 22.220006,
+  "generated_at": "2026-03-26T12:57:35.181409+00:00",
+  "next_actions": [
+    "실행 전 차단된 기회를 실제 수익화로 전환해야 함",
+    "포지션 동기화 불일치를 먼저 줄여야 함",
+    "adopted 포지션과 전략 성과를 계속 분리해야 함"
+  ],
+  "reasons": [
+    "BLOCKED_PROFIT_OPPORTUNITIES_PRESENT",
+    "OPERATING_STATE_MISMATCH_PRESENT",
+    "ADOPTED_POSITIONS_STILL_OPEN"
+  ],
+  "run_dir": "/Users/tttksj/first_repo/quant_runtime/output/paper-live-shell/20260323-122414",
+  "self_healing_issue_counts": {
+    "persistent_futures_mismatch": 417
+  },
+  "strategy_avg_pnl_usd": 0.068591,
+  "strategy_closed_trade_count": 26,
+  "strategy_daily_pnl": [
+    {
+      "date": "2026-03-23",
+      "realized_pnl_usd": 1.344386
+    },
+    {
+      "date": "2026-03-24",
+      "realized_pnl_usd": 0.438968
+    },
+    {
+      "date": "2026-03-25",
+      "realized_pnl_usd": 0.0
+    }
+  ],
+  "strategy_exit_reason_pnl": [
+    {
+      "exit_reason": "SIGNAL_REVERSAL",
+      "realized_pnl_usd": 8.46676,
+      "trade_count": 11
+    },
+    {
+      "exit_reason": "PROACTIVE_PARTIAL_TAKE_PROFIT",
+      "realized_pnl_usd": 3.475355,
+      "trade_count": 1
+    },
+    {
+      "exit_reason": "MAJOR_CROSS_SYMBOL_REALIGN",
+      "realized_pnl_usd": 1.814482,
+      "trade_count": 3
+    },
+    {
+      "exit_reason": "MAX_HOLDING_TIME",
+      "realized_pnl_usd": 0.0,
+      "trade_count": 7
+    },
+    {
+      "exit_reason": "LIQUIDITY_DROP_EXIT",
+      "realized_pnl_usd": -1.092631,
+      "trade_count": 2
+    },
+    {
+      "exit_reason": "MANUAL_CLOSE_SYNCED",
+      "realized_pnl_usd": -10.880612,
+      "trade_count": 2
+    }
+  ],
+  "strategy_realized_pnl_usd": 1.783354,
+  "strategy_symbol_pnl": [
+    {
+      "realized_pnl_usd": 13.349075,
+      "symbol": "BTCUSDT",
+      "trade_count": 11
+    },
+    {
+      "realized_pnl_usd": -11.565721,
+      "symbol": "ETHUSDT",
+      "trade_count": 15
+    }
+  ],
+  "strategy_win_rate": 0.230769,
+  "total_realized_pnl_usd": -16.246433,
+  "verdict": "needs_work"
+}

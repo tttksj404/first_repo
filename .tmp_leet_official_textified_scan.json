@@ -1,0 +1,1091 @@
+{
+  "files_scanned": 115,
+  "findings": [
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(짝).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 40문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(짝).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2009학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 12,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 40문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 13,
+      "rule": "broken-eojeol",
+      "text": "시오."
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 367,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 379,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 391,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 403,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 415,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 언어이해 문제 및 정답/2009 법학적성시험 언어이해(홀).md",
+      "line": 590,
+      "rule": "ocr-noise-token",
+      "text": "◦ OCR: FASS SE"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(짝).md",
+      "line": 284,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(짝).md",
+      "line": 287,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(짝).md",
+      "line": 290,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(짝).md",
+      "line": 293,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(홀).md",
+      "line": 284,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(홀).md",
+      "line": 287,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(홀).md",
+      "line": 290,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 예비시험 추리논증 문제 및 정답/2009법학적성시험 예비 추리논증(홀).md",
+      "line": 293,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(짝).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 40문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(짝).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2009학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(짝).md",
+      "line": 363,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 12,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 40문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 13,
+      "rule": "broken-eojeol",
+      "text": "시오."
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 109,
+      "rule": "ocr-noise-token",
+      "text": "◦ OCR: A Baa 구간 BoB 구간 C"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 292,
+      "rule": "singleton-stack-token",
+      "text": "A"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 294,
+      "rule": "singleton-stack-token",
+      "text": "B"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 296,
+      "rule": "singleton-stack-token",
+      "text": "C"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 461,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 477,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 497,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 517,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 537,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 1042,
+      "rule": "singleton-stack-token",
+      "text": "A"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 1046,
+      "rule": "singleton-stack-token",
+      "text": "C"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 1048,
+      "rule": "singleton-stack-token",
+      "text": "B"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 1066,
+      "rule": "singleton-stack-token",
+      "text": "A"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 288,
+      "rule": "long-vertical-stack",
+      "text": "리더십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 461,
+      "rule": "long-vertical-stack",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 463,
+      "rule": "long-vertical-stack",
+      "text": "ⓐ+ⓑ+ⓒ+ⓓ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 465,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 467,
+      "rule": "long-vertical-stack",
+      "text": "ⓔ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 469,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 471,
+      "rule": "long-vertical-stack",
+      "text": "ⓕ+ⓖ+ⓗ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 473,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 475,
+      "rule": "long-vertical-stack",
+      "text": "ⓘ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 477,
+      "rule": "long-vertical-stack",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 479,
+      "rule": "long-vertical-stack",
+      "text": "ⓐ+ⓑ+ⓒ+ⓓ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 481,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 483,
+      "rule": "long-vertical-stack",
+      "text": "ⓔ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 485,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 487,
+      "rule": "long-vertical-stack",
+      "text": "ⓕ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 489,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 491,
+      "rule": "long-vertical-stack",
+      "text": "ⓖ+ⓗ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 493,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 495,
+      "rule": "long-vertical-stack",
+      "text": "ⓘ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 497,
+      "rule": "long-vertical-stack",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 499,
+      "rule": "long-vertical-stack",
+      "text": "ⓐ+ⓑ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 501,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 503,
+      "rule": "long-vertical-stack",
+      "text": "ⓒ+ⓓ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 505,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 507,
+      "rule": "long-vertical-stack",
+      "text": "ⓔ+ⓕ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 509,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 511,
+      "rule": "long-vertical-stack",
+      "text": "ⓖ+ⓗ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 513,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 515,
+      "rule": "long-vertical-stack",
+      "text": "ⓘ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 517,
+      "rule": "long-vertical-stack",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 519,
+      "rule": "long-vertical-stack",
+      "text": "ⓐ+ⓑ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 521,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 523,
+      "rule": "long-vertical-stack",
+      "text": "ⓒ+ⓓ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 525,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 527,
+      "rule": "long-vertical-stack",
+      "text": "ⓔ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 529,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 531,
+      "rule": "long-vertical-stack",
+      "text": "ⓕ+ⓖ+ⓗ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 533,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 535,
+      "rule": "long-vertical-stack",
+      "text": "ⓘ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 537,
+      "rule": "long-vertical-stack",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 539,
+      "rule": "long-vertical-stack",
+      "text": "ⓐ+ⓑ+ⓒ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 541,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 543,
+      "rule": "long-vertical-stack",
+      "text": "ⓓ+ⓔ+ⓕ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 545,
+      "rule": "long-vertical-stack",
+      "text": "↓"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 547,
+      "rule": "long-vertical-stack",
+      "text": "ⓖ"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 744,
+      "rule": "long-vertical-stack",
+      "text": "연도"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 746,
+      "rule": "long-vertical-stack",
+      "text": "자"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 748,
+      "rule": "long-vertical-stack",
+      "text": "축"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 750,
+      "rule": "long-vertical-stack",
+      "text": "인"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 752,
+      "rule": "long-vertical-stack",
+      "text": "묘"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 754,
+      "rule": "long-vertical-stack",
+      "text": "진"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 756,
+      "rule": "long-vertical-stack",
+      "text": "사"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 758,
+      "rule": "long-vertical-stack",
+      "text": "오"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 760,
+      "rule": "long-vertical-stack",
+      "text": "미"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2009학년도 추리논증 문제 및 정답/2009 법학적성시험 추리논증(홀).md",
+      "line": 762,
+      "rule": "long-vertical-stack",
+      "text": "신"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(짝).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(짝).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2010학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(짝).md",
+      "line": 204,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(짝).md",
+      "line": 207,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(짝).md",
+      "line": 210,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(짝).md",
+      "line": 213,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(홀).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(홀).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2010학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(홀).md",
+      "line": 204,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(홀).md",
+      "line": 207,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(홀).md",
+      "line": 210,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 언어이해 문제 및 정답/2010 법학적성시험 언어이해(홀).md",
+      "line": 213,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 추리논증 문제 및 정답/2010 법학적성시험 추리논증(짝).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 추리논증 문제 및 정답/2010 법학적성시험 추리논증(짝).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2010학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 추리논증 문제 및 정답/2010 법학적성시험 추리논증(홀).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2010학년도 추리논증 문제 및 정답/2010 법학적성시험 추리논증(홀).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2010학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 언어이해 문제 및 정답/2011 법학적성시험 언어이해(짝수형).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 언어이해 문제 및 정답/2011 법학적성시험 언어이해(짝수형).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2011학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 언어이해 문제 및 정답/2011 법학적성시험 언어이해(홀수형).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 언어이해 문제 및 정답/2011 법학적성시험 언어이해(홀수형).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2011학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 추리논증 문제 및 정답/2011 법학적성시험 추리논증(짝수형).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 추리논증 문제 및 정답/2011 법학적성시험 추리논증(짝수형).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2011학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 추리논증 문제 및 정답/2011 법학적성시험 추리논증(홀수형).md",
+      "line": 37,
+      "rule": "broken-eojeol",
+      "text": "◦ 이 문제지는 35문항으로 구성되어 있습니다. 문항 수를 확인하십"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2011학년도 추리논증 문제 및 정답/2011 법학적성시험 추리논증(홀수형).md",
+      "line": 38,
+      "rule": "broken-eojeol",
+      "text": "시오. 2011학년도 법학적성시험"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(짝수형).md",
+      "line": 517,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(짝수형).md",
+      "line": 520,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(짝수형).md",
+      "line": 523,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(짝수형).md",
+      "line": 526,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(짝수형).md",
+      "line": 529,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(홀수형).md",
+      "line": 517,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(홀수형).md",
+      "line": 520,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(홀수형).md",
+      "line": 523,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(홀수형).md",
+      "line": 526,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2020학년도 추리논증 문제 및 정답/2020_LEET 추리논증(홀수형).md",
+      "line": 529,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 11,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 14,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 17,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 20,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 23,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 26,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 29,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 32,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 35,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 41,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 44,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 47,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 50,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 53,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 56,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 59,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 62,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 65,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 언어이해 문제 및 정답/2026_LEET_언어이해_정답표.md",
+      "line": 68,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 10,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 12,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 14,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 16,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 18,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 20,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 22,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 24,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 26,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 30,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 32,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 34,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 36,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 38,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 40,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 42,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 44,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 46,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 50,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 52,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 54,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 56,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 58,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 60,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 62,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 64,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 66,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 70,
+      "rule": "singleton-stack-token",
+      "text": "①"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 72,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 74,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 76,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 78,
+      "rule": "singleton-stack-token",
+      "text": "②"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 80,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 82,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 84,
+      "rule": "singleton-stack-token",
+      "text": "③"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 86,
+      "rule": "singleton-stack-token",
+      "text": "⑤"
+    },
+    {
+      "path": "/Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/02. Resources/LEET/01. Official_Textified/2026학년도 추리논증 문제 및 정답/2026_LEET_추리논증_정답표.md",
+      "line": 88,
+      "rule": "singleton-stack-token",
+      "text": "④"
+    }
+  ]
+}

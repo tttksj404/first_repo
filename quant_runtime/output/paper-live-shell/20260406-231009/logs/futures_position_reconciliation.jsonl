@@ -1,0 +1,1 @@
+{"action": "STARTUP_STATE_RECOVERY", "adopted_at": null, "adoption_grace_until": null, "adoption_source": "", "current_price": 2100.55, "entry_planned_leverage": 14, "entry_price": 2097.76, "origin": "strategy_recovered", "persisted_cycles": 0, "quantity_remaining": 0.49, "side": "short", "symbol": "ETHUSDT", "timestamp": "2026-04-06T23:10:13.590648+00:00"}

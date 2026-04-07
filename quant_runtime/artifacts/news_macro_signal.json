@@ -1,0 +1,210 @@
+{
+  "bearish_score": 1.0,
+  "bullish_score": 0.2875,
+  "dominant_bias": "bearish",
+  "entry_policy_bias": "pre_event_reduce",
+  "event_types": [
+    "etf_flow",
+    "geopolitics",
+    "liquidity",
+    "macro",
+    "regulation"
+  ],
+  "generated_at": "2026-03-20T07:39:02.835874+00:00",
+  "headline_hash": "6c0a2eb4ba4a9ae0674d081e39e648b209e2e7685cffb374ce717fde698cab99",
+  "headlines": [
+    {
+      "bearish_score": 0.9,
+      "bullish_score": 0,
+      "categories": [
+        "macro",
+        "etf_flow",
+        "geopolitics"
+      ],
+      "published_at": "2026-03-20T07:32:33+00:00",
+      "query_label": "etf_flow",
+      "source": "The Economic Times",
+      "title": "Bitcoin hovers near $70K amid Middle East tensions and ETF outflows; CPI data key for next move - The Economic Times",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxNVVRMclVwTUxsQUE2T0VTTjZGdGk2LWtmcVFYVzlPRDl2YlAtNko5T3V1WGhmVldvaHU5RXBfeF9SV2hRdDhyWmNMWWREd3JmNTlKTFJFY2lpcWhEM2lvZ2hoN1hacFdzMlpYV2FtN0psUmhKRC1ad1Q2V1FmZEh1dWFKT1VDZjRhZ1Z5dFJIc0ZPa0tVUUdvQm53SHU4azNWVXduVDBlTy16UFltLXRHS3BEa2hlLXlqdm1Md1ZZdzVSNUxHNEJldllJQ3Z6bW56VlVFQ04xVGtPakVPaDFiaEdjQjVON3M1dFlZTHdsbnpBNHBNeHZodVVCWEJHdVXSAYQCQVVfeXFMUHJzZmRpWFVxUnlXMDcyTERRSnp6NHpfWThIT28wc3pGY21ReEJrSUhVOWVrSk1YRnNzVnpYTGwzUU5wT0w3Y3d5a0l2bDJDMnplWWtaZ01xSFBJVDQzeGR1WEJHRWlBSVpiTVpkdFM3MkVfSHJUd2JoYlZ5V1pIXzdWYkFIdTUxSDJxdm9xWEVhcW03TU9ObFFNTTlGVU9OZ3M5SWEwRTJ0NU0yWXRhdHRqV2gxdXJwUGtpbW13X2xNNHUzbGhKa1dsdElzUWtVZmxfRHVZS24yYkstX0tWTXZLVi1XNlRvYlJsX0lHenBPc0I5NlRLOXdCVVk3d2hQUFNhcWo?oc=5"
+    },
+    {
+      "bearish_score": 0.9,
+      "bullish_score": 0.8,
+      "categories": [
+        "etf_flow"
+      ],
+      "published_at": "2026-03-20T07:27:43+00:00",
+      "query_label": "etf_flow",
+      "source": "FinanceFeeds",
+      "title": "Crypto ETFs Reverse Course on March 19 as Institutional Outflows Break Inflow Streak - FinanceFeeds",
+      "uncertainty_score": 0.5,
+      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPcTg0X3R4TlNPNG9wRC1sbkw0ZmhKU2NWekRKRncwcWxjNmdwd0RETmdLRWE3WnNyWnBNUEd3RGp4a2NWU19NQXB4Uk5mUl9Ic0VJbWc5dDVlYng2emRJckJ6VElHSHYxLXVNODh5YjRicjBEYUVPbUwzVThESGhNUU9pODBOeXBYSlNkSlllNWhoSlp3dnNZVzZNMm5pZjk0TEVraHhERjNXd3VuS2hV?oc=5"
+    },
+    {
+      "bearish_score": 1.0,
+      "bullish_score": 0,
+      "categories": [
+        "macro"
+      ],
+      "published_at": "2026-03-20T07:26:18+00:00",
+      "query_label": "macro",
+      "source": "CNBC",
+      "title": "Gold set for third weekly fall on hawkish U.S. Fed, elevated dollar - CNBC",
+      "uncertainty_score": 0.0,
+      "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOeXlFOHBwMXR4WEZJWVBzNUJyS2x1V3I4a2RfZW92d1gxQnVmQlpwTGFqcW9DUXRqTm9lYnNkMkJrV0x6Z3BVZ1lMRXBaRXlpeHBwcDBDR2ppbXZUWGVmM1c2QS0zTDBkZllEUUU1TmRmS0o2LWNldDAwV3JoS1hqSW9KZ1ZSZjRNS2VXbW5NcEwxMmpQa285MWdRRkhwdkU2c3Yw0gGoAUFVX3lxTE1nM28tUWxyazNkRUEzeXB6YXBiOXdmZEVqYVdDcEtLSkxaUDY1ODhVcHY5UWk3TWFCRF90NDBKU3lONkswekl0MkU5bFZxeTB5a0RTdzdfSk01MGZfQ3MwMTZYZ0lIaGtjM2FyQ3B6NjN2WnVkaktlQTZyUkRBUEYxSXBEdHZkc0tsNmdPclhtUTBITFZtR2VEUUNkcFJfbTJiMG02SzdyeA?oc=5"
+    },
+    {
+      "bearish_score": 1.7,
+      "bullish_score": 0,
+      "categories": [
+        "macro",
+        "geopolitics"
+      ],
+      "published_at": "2026-03-20T07:19:55+00:00",
+      "query_label": "crypto_market",
+      "source": "MSN",
+      "title": "Bitcoin holding at $70,000 as Iran war stokes inflation concerns - MSN",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxNd3BfQjlWZE1Va0JqYVFOOXd1VWhlVjVSVHQ4aVBpOC1sZ3dONFg2dGh5SzZmaU9vX1F6aTVKYWVtVXdYN0o5aGN4UFNZbzlVRnh0cHV2V1FhOFc1aTJGa1NKWDRVRFVoUEtlSWZ1ZDJILWRUWktQZ3RoY3Q3Zzc5ZU1TRG4zckRISUpyXzhqOFJvU1dPMU56U3pobDMxSGZlMHl5WXJGeVphd2l5VFRURWxySm1sZV9QSVpJN0pWM3dySU01RVpIY1QtY2Z4WERsRE11WVhLd00?oc=5"
+    },
+    {
+      "bearish_score": 1.0,
+      "bullish_score": 0,
+      "categories": [],
+      "published_at": "2026-03-20T07:19:10+00:00",
+      "query_label": "crypto_market",
+      "source": "CoinDesk",
+      "title": "Bitcoin’s price action looks dangerously similar to the pattern that sent it crashing to $60,000 - CoinDesk",
+      "uncertainty_score": 0.0,
+      "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxOT1hoLWJLSkRxNFBfUHRPSEtHdlNYODNfbkVHejUzUzJxOVlHQnVLUzFWX0phZ19kZ1VqeEZ5ZVJDUWtvdFhCSVlFeEktRDdYVnBUVXVHU1hUTjhsS0pNTHpEdUt3N1dVU3dWRTgxRWx5RTcyUHBYc21BSGhrZmg0eFpxWEpqWkpCTU1UcFNFSkd1blI2WGhILTRac2x0SXdiTDJ0U1VmNVI5OVVmYlNLZU1mZ016eEhDTGhqYkVLc1lfNnNTUmFvNlpWRmtDX3d3dmFqcVdKNHA2UQ?oc=5"
+    },
+    {
+      "bearish_score": 0,
+      "bullish_score": 0,
+      "categories": [
+        "etf_flow",
+        "regulation"
+      ],
+      "published_at": "2026-03-20T07:18:33+00:00",
+      "query_label": "etf_flow",
+      "source": "CoinCentral",
+      "title": "Morgan Stanley Is Trying to Become the First Big U.S. Bank With Its Own Bitcoin ETF - CoinCentral",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxOMG1hcDlRRnE5NF81emc0dWVZTDhTVC1kbTBVQmw1V3dsQnJvS0xab0dWU1d6UlpQZHgxOFFDRjhQZEhKdmJmR2R6QWhhbmFUS1ZlY3JhXzFxUkVzS3VXUGNMMVlGbTRiblRERkdCOENmR09Nb2ZTcV96clhLUTlpS0d4Mmp6bEdQNUw4SW1RSHpPYkxtcWNvSUhNZVEzZFRUZ0o1ZjRUODlvTkU?oc=5"
+    },
+    {
+      "bearish_score": 0.6,
+      "bullish_score": 0,
+      "categories": [
+        "etf_flow",
+        "regulation"
+      ],
+      "published_at": "2026-03-20T06:58:36+00:00",
+      "query_label": "etf_flow",
+      "source": "AD HOC NEWS",
+      "title": "Bitcoin Price Breaks Key Support Amid SEC Clarity on Non-Security Status: What European Investors Ne - AD HOC NEWS",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPZjNoRmplMGtrNC12UVJHT3lsSUZnX29CWXBqNVRXNzk0Q1N0b3dHVjlkV0h5QjJrTjhHY0RyR2l5eWpPbzBTMXBfNG44ajdTSE93WTJvWUEya3RqVFYxcTJPNHBvMG96ZXIyNzJfNWZvdEVKQk9PcnI3SE5oNGk3a0NPaVdSY1B1YkhZMHlOa2dNS3hsTHhwUFc1NFp4djUxU0dMZEwyT1Ezdm5lc1plT2I2eUY0V0l0ZGMyZ21yaEhuMHRjQlphdnVJSQ?oc=5"
+    },
+    {
+      "bearish_score": 1.7,
+      "bullish_score": 0,
+      "categories": [
+        "geopolitics"
+      ],
+      "published_at": "2026-03-20T06:40:00+00:00",
+      "query_label": "geopolitics",
+      "source": "Bloomberg.com",
+      "title": "Oil Market’s Seaborne Buffer Runs Down Fast as Iran War Drags On - Bloomberg.com",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxNRnlrUWxFMlJUM3JmY201aWxUUzVYMFFqaDl6eVRqelFTUkJDZWZBT09TY3lFNlphUzhGeXNRVUFRcWt3My1sWk1vVzZsQ3dCNlVWNEotR3BMR2ZPSEExcUxxVHJXT203YlY0MVF4b2Vfc0lxLUR1Qmhmb3RqY3doZnZZSUxtS29NWUlSQTBzWUhtWC02ckpQYlR5eWtNdFY4NHNubjlnUEZyLS1BVkRDU2dvUzY5UQ?oc=5"
+    },
+    {
+      "bearish_score": 1.7,
+      "bullish_score": 0,
+      "categories": [
+        "macro",
+        "geopolitics"
+      ],
+      "published_at": "2026-03-20T06:37:00+00:00",
+      "query_label": "crypto_market",
+      "source": "Bloomberg.com",
+      "title": "Bitcoin Holding at $70,000 as Iran War Stokes Inflation Concerns - Bloomberg.com",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxNcWZ6X1BseG82N1JPY1lmMFVrR3hQYW9MR1M5Z2luaEJkRFhoQ21lS1VFMlNwWjYxb3dGS1hrSFFLcEh0QjNfLXhCdGdrcUZkM0xkMlFaYXF3ejlLSWpBMDBCVUZ2MUxSNXoxaDhGUDhUdU1mTnRXTnVEbXZfUnpxSGtSSWZDY25Zc3R5czBXVm5WYWp6eXliVzN2Ujc2eDdIMDBWQ0RwOWJva2k0bDh2SXVwSHI?oc=5"
+    },
+    {
+      "bearish_score": 0,
+      "bullish_score": 0,
+      "categories": [
+        "etf_flow"
+      ],
+      "published_at": "2026-03-20T06:34:01+00:00",
+      "query_label": "etf_flow",
+      "source": "FinanceFeeds",
+      "title": "Morgan Stanley Advances Spot Bitcoin ETF Plans With Updated S-1 Filing - FinanceFeeds",
+      "uncertainty_score": 0.25,
+      "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNd3RPNnl3TTJTZWNwS2JId1JvYnZySkdROXdmUF9mQVdFeVduNmZHVEo5ei1BckdGRG10bUlMcVpzME5mMzZDMWs0eU5mdV9OVDlvZ0UxMHNlZ09ZVU1YaG9BYWtGb3FxbmRlRHpuLTNiSnBlM0lRRkdmUUlZSVlFV2YtYlZjdzMtTWVjTXNta3daSFlMdXpmZUY2bEw?oc=5"
+    },
+    {
+      "bearish_score": 0,
+      "bullish_score": 0,
+      "categories": [
+        "geopolitics"
+      ],
+      "published_at": "2026-03-20T06:32:50+00:00",
+      "query_label": "geopolitics",
+      "source": "Fruitnet",
+      "title": "Middle East conflict impacts airfreight options for fresh produce - Fruitnet",
+      "uncertainty_score": 0.0,
+      "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPUzVrX3M2akg0d0RybGNmVWxaTXRhcUVhR2FLNjNtRkpXQmYwdmtSalhiZ25tcFpsbE9rVVhIS1ctOE9tblNYMWYxSkh0Nzd1aEgtNzhMczBpdmRYMW8yNlpJd19WeEZrSy1Va2dnV0VTUGp4QWJHTnZBTW5DeWc5YnhaQkdQbU5CZjVpUHZrOFd5QXBDbU9uTlVuX2hwUm9wdHZuU0NOQUFlOUFKMV9DaE5TbnhNZw?oc=5"
+    },
+    {
+      "bearish_score": 0,
+      "bullish_score": 0.5,
+      "categories": [
+        "liquidity"
+      ],
+      "published_at": "2026-03-20T06:29:00+00:00",
+      "query_label": "crypto_market",
+      "source": "BeInCrypto",
+      "title": "Bitcoin Price Faces 8% Drop as Macro Liquidity Tightens - BeInCrypto",
+      "uncertainty_score": 0.0,
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBHWUJEQ1d1cmY3cWhwRG1adWE2YVo0YXVfUU9sMVBBWHFfbWRhcWRndUk3clJ4MENEcU5INmVKZDYwRVV3UHAtNm5QSlpMWnMtcFd1Y2hFTzJGcnhSdWpEdEl3UWxFU09PeEFGOTZKNHFjbTdEcEE?oc=5"
+    }
+  ],
+  "last_schedule_label": "2026-03-20-am",
+  "leverage_cap": 2,
+  "macro_inputs": {
+    "btc_safe_haven_score": 0.35,
+    "directional_bearish_score": 0.985938,
+    "dxy_change_30d_pct": 0.6,
+    "event_risk_score": 0.65,
+    "execution_risk_score": 0.460938,
+    "fed_balance_sheet_30d_pct": -0.05,
+    "fed_liquidity_score": 0.35,
+    "labor_stress_score": 0.72,
+    "mmf_30d_pct": 0.05,
+    "news_bearish_score": 1.0,
+    "news_bullish_score": 0.2875,
+    "news_majors_only_bias": 1.0,
+    "news_uncertainty_score": 0.46875,
+    "official_high_impact_window": 0.0,
+    "oil_momentum_pct": 13.0,
+    "policy_easing_score": 0.2,
+    "tga_drain_score": 0.45,
+    "truflation_yoy": 2.9,
+    "us10y_change_30d_bps": 8.0,
+    "us10y_yield": 4.8
+  },
+  "majors_bias": "majors_only",
+  "next_scheduled_refresh_at": "2026-03-20T09:00:00+00:00",
+  "refresh_reason": "breaking_headline_shift",
+  "refreshed_at": "2026-03-20T07:39:02.835874+00:00",
+  "size_multiplier": 0.5,
+  "trigger_reasons": [
+    "BREAKING_HEADLINE_SHIFT"
+  ],
+  "uncertainty_score": 0.46875
+}

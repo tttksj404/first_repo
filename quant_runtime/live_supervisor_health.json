@@ -1,10 +1,10 @@
 {
-  "checked_at": "2026-03-16T13:12:27.991849+00:00",
-  "decision_age_seconds": 0.746,
-  "decision_count": 50669,
-  "heartbeat_count": 1949665,
-  "last_decision_emitted_at": "2026-03-16T13:12:27.245934+00:00",
+  "checked_at": "2026-04-07T00:24:31.392181+00:00",
+  "decision_age_seconds": 86.311,
+  "decision_count": 3,
+  "heartbeat_count": 12326,
+  "last_decision_emitted_at": "2026-04-07T00:23:05.081304+00:00",
   "status": "healthy",
-  "updated_age_seconds": 0.732,
-  "updated_at": "2026-03-16T13:12:27.260151+00:00"
+  "updated_age_seconds": 9.197,
+  "updated_at": "2026-04-07T00:24:22.194799+00:00"
 }
