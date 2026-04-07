@@ -2,9 +2,9 @@
   "config_version": "2026-03-10.v1",
   "snapshot_schema_version": "1.0.0",
   "universe": [
-    "BTCUSDT",
     "ETHUSDT",
-    "SOLUSDT"
+    "SOLUSDT",
+    "BNBUSDT"
   ],
   "klines": [
     "1m",

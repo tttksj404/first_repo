@@ -384,6 +384,7 @@ class BitgetRestClient:
         type_map = {
             ("spot", "futures"): ("spot", "usdt_futures"),
             ("futures", "spot"): ("usdt_futures", "spot"),
+            ("coin_futures", "spot"): ("coin_futures", "spot"),
         }
         from_type, to_type = type_map.get((source_market, target_market), ("", ""))
         if not from_type or not to_type:
@@ -851,9 +852,15 @@ class BitgetRestClient:
         symbol: str,
         interval: str,
         limit: int,
+        start_time: int | None = None,
+        end_time: int | None = None,
     ) -> list[dict[str, Any]]:
         path = "/api/v2/mix/market/candles" if market == "futures" else "/api/v2/spot/market/candles"
         params: dict[str, Any] = {"symbol": symbol, "granularity": _bitget_granularity(market=market, interval=interval), "limit": limit}
+        if start_time is not None:
+            params["startTime"] = str(start_time)
+        if end_time is not None:
+            params["endTime"] = str(end_time)
         if market == "futures":
             params["productType"] = self.contract_config.product_type
         payload = self.send(self.build_public_request(path=path, params=params))
@@ -925,6 +932,49 @@ class BitgetRestClient:
         if not isinstance(row, dict):
             raise RuntimeError("unexpected Bitget open interest response shape")
         return {"openInterest": row.get("size") or row.get("openInterest") or "0", "raw": row}
+
+    def get_historical_funding_rates(
+        self,
+        *,
+        symbol: str,
+        page_size: int = 100,
+        page_no: int = 1,
+    ) -> list[dict[str, Any]]:
+        """Fetch historical funding rates for a symbol.
+
+        Uses ``/api/v2/mix/market/history-fund-rate`` with pageNo pagination.
+
+        Returns a list of dicts with normalised keys:
+        ``funding_rate`` (float), ``funding_time`` (int ms), ``symbol`` (str).
+        """
+        params: dict[str, Any] = {
+            "symbol": symbol,
+            "productType": self.contract_config.product_type,
+            "pageSize": str(min(page_size, 100)),
+            "pageNo": str(page_no),
+        }
+
+        payload = self.send(
+            self.build_public_request(
+                path="/api/v2/mix/market/history-fund-rate",
+                params=params,
+            )
+        )
+        rows = payload.get("data", [])
+        if not isinstance(rows, list):
+            rows = []
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            result.append(
+                {
+                    "funding_rate": float(row.get("fundingRate") or 0),
+                    "funding_time": int(row.get("fundingTime") or row.get("settleTime") or 0),
+                    "symbol": str(row.get("symbol") or symbol),
+                }
+            )
+        return result
 
     def get_exchange_info(self, *, market: str) -> dict[str, Any]:
         path = "/api/v2/mix/market/contracts" if market == "futures" else "/api/v2/spot/public/symbols"

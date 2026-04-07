@@ -201,7 +201,8 @@ run_child() {
     --max-retries 999999 \
     --insecure-ssl \
     --ack-live-risk I_UNDERSTAND_LIVE_TRADING \
-    --sync-interval-seconds "$SYNC_INTERVAL_SECONDS" >>"$SUPERVISOR_LOG" 2>&1 &
+    --sync-interval-seconds "$SYNC_INTERVAL_SECONDS" \
+    --equity-usd 75 >>"$SUPERVISOR_LOG" 2>&1 &
   CHILD_PID=$!
   printf '[SUPERVISOR] started child pid=%s supervisor_pid=%s at %s\n' "$CHILD_PID" "$$" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
