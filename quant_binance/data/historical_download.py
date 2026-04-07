@@ -17,14 +17,21 @@ def download_klines_range(
     end_ms: int,
     page_limit: int = 200,
     sleep_between: float = 1.5,
+    use_history: bool = False,
 ) -> list[dict[str, Any]]:
-    """Paginate backward from end_ms to start_ms, return klines sorted ascending."""
+    """Paginate backward from end_ms to start_ms, return klines sorted ascending.
+
+    When *use_history* is True, uses the ``history-candles`` endpoint which
+    supports data older than ~31 days on Bitget.
+    """
     all_klines: dict[int, dict[str, Any]] = {}
     cursor_end = end_ms
     pages = 0
 
+    fetch = client.get_history_klines if use_history else client.get_klines
+
     while cursor_end > start_ms:
-        batch = client.get_klines(
+        batch = fetch(
             market=market,
             symbol=symbol,
             interval=interval,

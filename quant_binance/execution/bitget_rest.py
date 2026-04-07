@@ -884,6 +884,46 @@ class BitgetRestClient:
             )
         return normalized
 
+    def get_history_klines(
+        self,
+        *,
+        market: str,
+        symbol: str,
+        interval: str,
+        limit: int,
+        start_time: int | None = None,
+        end_time: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Fetch historical klines via history-candles endpoint (supports older data beyond ~31d)."""
+        path = "/api/v2/mix/market/history-candles" if market == "futures" else "/api/v2/spot/market/history-candles"
+        params: dict[str, Any] = {"symbol": symbol, "granularity": _bitget_granularity(market=market, interval=interval), "limit": limit}
+        if start_time is not None:
+            params["startTime"] = str(start_time)
+        if end_time is not None:
+            params["endTime"] = str(end_time)
+        if market == "futures":
+            params["productType"] = self.contract_config.product_type
+        payload = self.send(self.build_public_request(path=path, params=params))
+        rows = payload.get("data", [])
+        if not isinstance(rows, list):
+            raise RuntimeError("unexpected Bitget history kline response shape")
+        normalized: list[dict[str, Any]] = []
+        for row in rows:
+            if not isinstance(row, list) or len(row) < 7:
+                continue
+            normalized.append(
+                {
+                    "open_time": int(row[0]),
+                    "open_price": float(row[1]),
+                    "high_price": float(row[2]),
+                    "low_price": float(row[3]),
+                    "close_price": float(row[4]),
+                    "base_volume": float(row[5]),
+                    "quote_volume": float(row[6]),
+                }
+            )
+        return normalized
+
     def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, Any]:
         path = "/api/v2/mix/market/ticker" if market == "futures" else "/api/v2/spot/market/tickers"
         params: dict[str, Any] = {"symbol": symbol}
