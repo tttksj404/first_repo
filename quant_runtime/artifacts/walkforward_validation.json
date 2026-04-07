@@ -1,0 +1,40 @@
+{
+  "strategy": "ETH-only, Score>=85, ADX>=40, SL=4ATR, partial_ladder(0.5R,1R), 48h, 10x",
+  "full_period": {
+    "trades": 12,
+    "win_rate": 1.0,
+    "total_pnl_bps": 22025.876992092803
+  },
+  "monte_carlo": {
+    "ruin_pct": 0.0,
+    "avg_max_dd": 0.0,
+    "p95_max_dd": 0.0
+  },
+  "monthly": {
+    "2025-05": {
+      "trades": 4,
+      "wr": 1.0,
+      "pnl": 13178.876963763732
+    },
+    "2025-07": {
+      "trades": 4,
+      "wr": 1.0,
+      "pnl": 3498.7199615521213
+    },
+    "2025-08": {
+      "trades": 1,
+      "wr": 1.0,
+      "pnl": 2553.515310918646
+    },
+    "2025-09": {
+      "trades": 1,
+      "wr": 1.0,
+      "pnl": 1556.0045349331497
+    },
+    "2026-01": {
+      "trades": 2,
+      "wr": 1.0,
+      "pnl": 1238.760220925152
+    }
+  }
+}
