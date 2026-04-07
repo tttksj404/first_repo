@@ -1,0 +1,51 @@
+{
+  "coins_tested": 20,
+  "total_entries": 1333,
+  "cost_results": {
+    "BEST_16.0bps": {
+      "trades": 42,
+      "wins": 26,
+      "win_rate": 0.619,
+      "total_pnl_bps": -124.53
+    },
+    "RELAXED_16.0bps": {
+      "trades": 86,
+      "wins": 54,
+      "win_rate": 0.6279,
+      "total_pnl_bps": -904.15
+    },
+    "BEST_24.0bps": {
+      "trades": 42,
+      "wins": 26,
+      "win_rate": 0.619,
+      "total_pnl_bps": -1132.53
+    },
+    "RELAXED_24.0bps": {
+      "trades": 86,
+      "wins": 54,
+      "win_rate": 0.6279,
+      "total_pnl_bps": -2968.15
+    },
+    "BEST_32.0bps": {
+      "trades": 42,
+      "wins": 20,
+      "win_rate": 0.4762,
+      "total_pnl_bps": -2140.53
+    },
+    "RELAXED_32.0bps": {
+      "trades": 86,
+      "wins": 43,
+      "win_rate": 0.5,
+      "total_pnl_bps": -5032.15
+    }
+  },
+  "walk_forward": {},
+  "monte_carlo": {
+    "runs": 1000,
+    "ruin_pct": 0.0,
+    "avg_max_dd_bps": 2654.27,
+    "p95_max_dd_bps": 3919.38,
+    "avg_final_pnl_bps": -124.53,
+    "p5_final_pnl_bps": -124.53
+  }
+}
