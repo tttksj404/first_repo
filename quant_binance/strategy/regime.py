@@ -531,25 +531,40 @@ def _btc_eth_strong_size_boost_multiplier(
 def _adx_cross_signal_strength(features: FeatureVector, *, symbol: str = "") -> float:
     """Return a signal quality score [0, 1] based on ADX + EMA cross alignment.
 
-    374-day validated per-coin profiles from $100 micro-capital scan.
+    374-day validated per-coin profiles. Supports separate short params.
     """
     adx = features.adx_1h
     cross = features.ema_cross_signal
     td = features.trend_direction
     cp = get_profile(symbol)
 
-    # Side filter: long-only coins reject short direction
+    # Side filter
     if cp.side_filter == "long" and td < 0:
         return 0.0
-
-    if adx < cp.adx_floor:
+    if cp.side_filter == "short" and td > 0:
         return 0.0
-    adx_score = min((adx - cp.adx_floor) / 20.0, 1.0)
+
+    # Use short-specific ADX floor if available and direction is short
+    if td < 0 and cp.short_adx_floor > 0:
+        adx_floor = cp.short_adx_floor
+    else:
+        adx_floor = cp.adx_floor
+
+    # Mirror signal (横보장 역추세)
+    mirror_signal = False
+    if cp.mirror_adx_max > 0 and adx <= cp.mirror_adx_max:
+        # Mirror works in LOW ADX (no trend) — RSI extreme reversal
+        # This is checked separately, doesn't need ADX floor
+        if features.pullback_signal != 0 and features.pullback_signal == td:
+            mirror_signal = True
+            return 0.8  # Strong mirror signal
+
+    if adx < adx_floor:
+        return 0.0
+    adx_score = min((adx - adx_floor) / 20.0, 1.0)
     cross_aligned = (cross != 0 and cross == td)
     pullback_aligned = (features.pullback_signal != 0 and features.pullback_signal == td)
-    # EMA cross or pullback — either signal qualifies
     signal_bonus = 0.3 if (cross_aligned or pullback_aligned) else 0.0
-    # Pullback gets extra boost (WR 92% in backtest)
     if pullback_aligned:
         signal_bonus = 0.4
     return min(adx_score + signal_bonus, 1.0)
