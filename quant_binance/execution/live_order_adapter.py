@@ -385,10 +385,19 @@ class DecisionLiveOrderAdapter:
         decision: DecisionIntent,
         reference_price: float,
     ) -> tuple[float, float]:
+        from quant_binance.strategy.coin_profiles import get_profile
         stop_fraction = max(decision.stop_distance_bps, 0.0) / 10000.0
-        reward_fraction = stop_fraction
-        if self.settings is not None:
-            reward_fraction = stop_fraction * self.settings.exit_rules.partial_take_profit_r
+        # Use coin profile RR instead of global partial_take_profit_r
+        cp = get_profile(decision.symbol)
+        if decision.side == "short" and cp.short_rr > 0:
+            r_mult = cp.short_rr
+        elif cp.rr > 0:
+            r_mult = cp.rr
+        elif self.settings is not None:
+            r_mult = self.settings.exit_rules.partial_take_profit_r
+        else:
+            r_mult = 1.0
+        reward_fraction = stop_fraction * r_mult
         if decision.side == "short":
             take_profit = reference_price * max(0.0, 1.0 - reward_fraction)
             stop_loss = reference_price * (1.0 + stop_fraction)

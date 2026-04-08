@@ -102,10 +102,16 @@ def position_notional_and_stop_bps(
     size_multiplier: float = 1.0,
     leverage_multiplier: float = 1.0,
     symbol: str = "",
+    side: str = "long",
 ) -> tuple[float, float]:
-    # Per-coin SL ATR multiplier from 374d validation
+    # Per-coin SL ATR multiplier — use short-specific if available
     cp = get_profile(symbol)
-    sl_mult = cp.sl_atr_mult if is_profiled(symbol) else settings.sizing.atr_multiple_for_stop
+    if side == "short" and cp.short_sl_mult > 0:
+        sl_mult = cp.short_sl_mult
+    elif is_profiled(symbol):
+        sl_mult = cp.sl_atr_mult
+    else:
+        sl_mult = settings.sizing.atr_multiple_for_stop
     stop_distance_bps = max(
         sl_mult * atr_14_1h_bps,
         settings.sizing.stop_floor_bps,
