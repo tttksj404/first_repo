@@ -968,6 +968,7 @@ def evaluate_snapshot(
             size_multiplier=futures_size_multiplier,
             leverage_multiplier=planned_leverage,
             symbol=snapshot.symbol,
+            side=futures_side,
         )
         required_margin_usd = notional / max(float(planned_leverage), 1.0)
         if equity_usd > 0 and (equity_usd - required_margin_usd) / equity_usd < cash_reserve_fraction:
@@ -1015,6 +1016,7 @@ def evaluate_snapshot(
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             settings=settings,
             symbol=snapshot.symbol,
+            side="long",
         )
         if equity_usd > 0 and (equity_usd - notional) / equity_usd < cash_reserve_fraction:
             spot_ok = False
