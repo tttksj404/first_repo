@@ -151,5 +151,30 @@
   "universe": [
     "ETHUSDT",
     "SOLUSDT"
-  ]
+  ],
+  "funding_rate_strategy": {
+    "enabled": true,
+    "threshold": 0.00015,
+    "atr_stop_multiple": 1.0,
+    "atr_tp_multiple": 2.5,
+    "max_hold_hours": 8,
+    "symbols": ["SOLUSDT", "XRPUSDT", "ETHUSDT", "BTCUSDT"],
+    "notional_usd_per_trade": 50.0
+  },
+  "b3_msb_strategy": {
+    "enabled": true,
+    "optimized_at": "2026-04-04T11:20:42.839603+00:00",
+    "interval": "1h",
+    "lookback_days": 90,
+    "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"],
+    "swing_window": 15,
+    "atr_tp_multiple": 4.0,
+    "breakout_confirmation_pct": 0.1,
+    "trend_filter": "adx20",
+    "min_swing_size_atr": 0.5,
+    "backtest_pf": 2.0293,
+    "backtest_win_rate_pct": 65.6,
+    "backtest_n_trades": 87,
+    "note": "B3 MSB grid search optimized (90d 1h, 432 combos)"
+  }
 }
