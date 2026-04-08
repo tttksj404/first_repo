@@ -246,7 +246,7 @@
     "stop_floor_bps": 45
   },
   "exit_rules": {
-    "partial_take_profit_r": 1.0,
+    "partial_take_profit_r": 0.5,
     "futures_profit_protection_arm_roe_percent": 6.0,
     "futures_profit_protection_retrace_roe_percent": 2.5,
     "futures_proactive_take_profit_roe_thresholds_percent": [

@@ -54,9 +54,9 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=2.0, pullback_rr=1.0,
     ),
     "XRPUSDT": CoinProfile(
-        ema_fast=9, ema_slow=21, adx_floor=40, sl_atr_mult=3.0, rr=0.75,
-        hold_bars=36, side_filter="both", optimal_leverage=7,
-        wr=0.88, pf=4.19,
+        ema_fast=9, ema_slow=21, adx_floor=40, sl_atr_mult=4.0, rr=0.5,
+        hold_bars=48, side_filter="both", optimal_leverage=7,
+        wr=0.84, pf=1.68,
     ),
     "ADAUSDT": CoinProfile(
         ema_fast=12, ema_slow=26, adx_floor=30, sl_atr_mult=1.0, rr=1.0,
@@ -80,9 +80,9 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         wr=0.71, pf=3.70,
     ),
     "ETHUSDT": CoinProfile(
-        ema_fast=8, ema_slow=21, adx_floor=33, sl_atr_mult=3.0, rr=1.0,
-        hold_bars=24, side_filter="both", optimal_leverage=10,
-        wr=0.83, pf=4.13,
+        ema_fast=8, ema_slow=21, adx_floor=40, sl_atr_mult=4.0, rr=0.5,
+        hold_bars=48, side_filter="both", optimal_leverage=10,
+        wr=0.84, pf=1.68,
         pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=1.5, pullback_rr=1.0,
         short_ema_fast=10, short_ema_slow=21, short_adx_floor=25, short_sl_mult=6.0, short_rr=0.5, short_hold_bars=12,
     ),
