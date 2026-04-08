@@ -4804,12 +4804,12 @@ class LivePaperSession:
                 )
 
     # ── Trailing Stop Implementation ──────────────────────────────
-    # Activates when ROE >= 1.5%. Locks in 50% of peak profit.
-    # Example: peak ROE 4% → trailing SL at breakeven + 2% ROE
-    # Updates Bitget plan order SL price every sync cycle.
-    _TRAILING_ACTIVATION_ROE = 1.5   # activate at 1.5% ROE
-    _TRAILING_LOCK_RATIO = 0.50      # lock 50% of peak profit
-    _TRAILING_MIN_MOVE_BPS = 10      # minimum move to update (avoid spam)
+    # Activates when ROE >= threshold. Locks in 50% of peak profit.
+    # Short positions use tighter activation (scalp style).
+    _TRAILING_ACTIVATION_ROE_LONG = 3.0    # long: activate at 3% ROE
+    _TRAILING_ACTIVATION_ROE_SHORT = 1.5   # short: activate at 1.5% ROE (faster exit)
+    _TRAILING_LOCK_RATIO = 0.50            # lock 50% of peak profit
+    _TRAILING_MIN_MOVE_BPS = 10            # minimum move to update (avoid spam)
 
     def _update_trailing_stop(
         self,
@@ -4821,7 +4821,8 @@ class LivePaperSession:
         hold_side: str,
         symbol: str,
     ) -> None:
-        if peak_roe < self._TRAILING_ACTIVATION_ROE:
+        activation = self._TRAILING_ACTIVATION_ROE_SHORT if hold_side == "short" else self._TRAILING_ACTIVATION_ROE_LONG
+        if peak_roe < activation:
             return
         if self.rest_client is None:
             return
