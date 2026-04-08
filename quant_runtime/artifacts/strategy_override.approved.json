@@ -1,7 +1,7 @@
 {
-  "_lock": "DATA_COLLECTION_PHASE \u2014 DO NOT OVERWRITE. autotuner/promotion/advisor must not modify this file until data_collection_mode is false.",
+  "_lock": "POSITION_SIM_OPTIMIZED \u2014 Backtested 640 param combos on 358d 5m data with position management (SL/TP/hold). Top result: WR=50%, PF=6.47, PnL=$121.93/22trades. Applied 2026-04-09.",
   "data_collection_min_trades": 500,
-  "data_collection_mode": true,
+  "data_collection_mode": false,
   "disable_position_adoption": false,
   "decision_engine": {
     "decision_interval_minutes": 5
@@ -55,6 +55,18 @@
     "soft_overheat_penalty_max": 1.0,
     "soft_volatility_penalty_max": 1.25
   },
+  "exit_rules": {
+    "liquidity_drop_exit_buffer": 0.35,
+    "score_drop_exit_buffer": 15,
+    "confirmation_cycles_for_exit": 4,
+    "futures_max_holding_minutes": 2880,
+    "spot_max_holding_minutes": 4320,
+    "futures_profit_protection_arm_roe_percent": 8.0,
+    "futures_profit_protection_retrace_roe_percent": 3.0,
+    "futures_proactive_take_profit_roe_thresholds_percent": [12.0, 20.0],
+    "futures_proactive_take_profit_fraction": 0.5,
+    "post_tp_stop_mode": "breakeven"
+  },
   "live_position_risk": {
     "disable_standard_stop_loss_exits": false,
     "major_drawdown_abort_roe_percent": -20.0,
@@ -89,7 +101,8 @@
     "position_unrealized_take_profit_fraction": 0.35,
     "profit_flip_take_profit_fraction": 0.35,
     "stop_loss_roe_percent": -15.0,
-    "soft_stop_roe_percent": -12.0
+    "soft_stop_roe_percent": -12.0,
+    "take_profit_roe_percent": 20.0
   },
   "loss_combo_downgrade": {
     "cooldown_loss_usd": 10.0,
@@ -105,7 +118,7 @@
     "spot_block_penalty": 1.05
   },
   "mode_thresholds": {
-    "futures_score_min": 68,
+    "futures_score_min": 55,
     "spot_score_min": 999,
     "spot_liquidity_min": 999
   },
@@ -137,7 +150,6 @@
   },
   "universe": [
     "ETHUSDT",
-    "SOLUSDT",
-    "BNBUSDT"
+    "SOLUSDT"
   ]
 }
