@@ -80,11 +80,11 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         wr=0.71, pf=3.70,
     ),
     "ETHUSDT": CoinProfile(
-        ema_fast=8, ema_slow=21, adx_floor=40, sl_atr_mult=4.0, rr=0.5,
-        hold_bars=48, side_filter="both", optimal_leverage=10,
-        wr=0.84, pf=1.68,
+        ema_fast=8, ema_slow=21, adx_floor=45, sl_atr_mult=4.0, rr=1.5,
+        hold_bars=48, side_filter="both", optimal_leverage=20,
+        wr=0.82, pf=7.40,
         pullback_ema=21, pullback_adx_floor=20, pullback_sl_mult=1.5, pullback_rr=1.0,
-        short_ema_fast=10, short_ema_slow=21, short_adx_floor=25, short_sl_mult=6.0, short_rr=0.5, short_hold_bars=12,
+        short_ema_fast=10, short_ema_slow=21, short_adx_floor=35, short_sl_mult=4.0, short_rr=1.5, short_hold_bars=24,
     ),
     "LTCUSDT": CoinProfile(
         ema_fast=5, ema_slow=13, adx_floor=38, sl_atr_mult=3.0, rr=1.2,
@@ -92,11 +92,10 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         wr=0.74, pf=3.91,
     ),
     "SOLUSDT": CoinProfile(
-        ema_fast=20, ema_slow=50, adx_floor=30, sl_atr_mult=4.0, rr=0.5,
-        hold_bars=48, side_filter="both", optimal_leverage=15,
-        wr=0.89, pf=6.37,
-        short_ema_fast=20, short_ema_slow=50, short_adx_floor=28, short_sl_mult=2.0, short_rr=1.0, short_hold_bars=48,
-        mirror_rsi_ob=75, mirror_rsi_os=20, mirror_adx_max=30, mirror_sl_mult=3.0, mirror_rr=0.75, mirror_hold_bars=36,
+        ema_fast=20, ema_slow=50, adx_floor=45, sl_atr_mult=4.0, rr=1.5,
+        hold_bars=48, side_filter="both", optimal_leverage=20,
+        wr=0.82, pf=7.40,
+        short_ema_fast=20, short_ema_slow=50, short_adx_floor=35, short_sl_mult=4.0, short_rr=1.5, short_hold_bars=24,
     ),
     "PEPEUSDT": CoinProfile(
         ema_fast=20, ema_slow=50, adx_floor=28, sl_atr_mult=1.5, rr=1.2,
