@@ -1,0 +1,6752 @@
+[
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.661,
+    "pf": 1.56,
+    "pnl": 544.7,
+    "final_eq": 610.7,
+    "best": 169.12,
+    "worst": -347.39
+  },
+  {
+    "filter": "base",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 124,
+    "wr": 0.5806,
+    "pf": 1.55,
+    "pnl": 488.83,
+    "final_eq": 554.83,
+    "best": 123.69,
+    "worst": -56.71
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.6102,
+    "pf": 1.34,
+    "pnl": 452.09,
+    "final_eq": 518.09,
+    "best": 282.17,
+    "worst": -443.56
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 116,
+    "wr": 0.6466,
+    "pf": 1.36,
+    "pnl": 438.89,
+    "final_eq": 504.89,
+    "best": 147.1,
+    "worst": -264.31
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 92,
+    "wr": 0.663,
+    "pf": 1.49,
+    "pnl": 430.59,
+    "final_eq": 496.59,
+    "best": 103.25,
+    "worst": -124.16
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 116,
+    "wr": 0.6466,
+    "pf": 1.23,
+    "pnl": 427.19,
+    "final_eq": 493.19,
+    "best": 212.42,
+    "worst": -493.04
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 1.89,
+    "pnl": 425.25,
+    "final_eq": 491.25,
+    "best": 177.24,
+    "worst": -134.44
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 57,
+    "wr": 0.614,
+    "pf": 1.39,
+    "pnl": 420.43,
+    "final_eq": 486.43,
+    "best": 230.56,
+    "worst": -370.68
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.6,
+    "pnl": 412.67,
+    "final_eq": 478.67,
+    "best": 145.75,
+    "worst": -126.14
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.6102,
+    "pf": 1.33,
+    "pnl": 405.48,
+    "final_eq": 471.48,
+    "best": 251.19,
+    "worst": -394.86
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.45,
+    "pnl": 399.15,
+    "final_eq": 465.15,
+    "best": 205.92,
+    "worst": -179.19
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 2.03,
+    "pnl": 396.83,
+    "final_eq": 462.83,
+    "best": 119.17,
+    "worst": -88.92
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.59,
+    "pnl": 392.26,
+    "final_eq": 458.26,
+    "best": 173.82,
+    "worst": -120.77
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.58,
+    "pnl": 391.52,
+    "final_eq": 457.52,
+    "best": 138.07,
+    "worst": -116.04
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.56,
+    "pnl": 386.95,
+    "final_eq": 452.95,
+    "best": 136.69,
+    "worst": -114.88
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.44,
+    "pnl": 376.03,
+    "final_eq": 442.03,
+    "best": 239.99,
+    "worst": -170.28
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 2.12,
+    "pnl": 368.13,
+    "final_eq": 434.13,
+    "best": 107.15,
+    "worst": -66.73
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.661,
+    "pf": 1.69,
+    "pnl": 364.26,
+    "final_eq": 430.26,
+    "best": 90.86,
+    "worst": -162.35
+  },
+  {
+    "filter": "base",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 124,
+    "wr": 0.5806,
+    "pf": 1.35,
+    "pnl": 358.93,
+    "final_eq": 424.93,
+    "best": 112.26,
+    "worst": -90.2
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 125,
+    "wr": 0.584,
+    "pf": 1.29,
+    "pnl": 356.49,
+    "final_eq": 422.49,
+    "best": 102.76,
+    "worst": -113.09
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.45,
+    "pnl": 353.77,
+    "final_eq": 419.77,
+    "best": 110.54,
+    "worst": -172.16
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 92,
+    "wr": 0.663,
+    "pf": 1.6,
+    "pnl": 349.18,
+    "final_eq": 415.18,
+    "best": 79.68,
+    "worst": -71.73
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.49,
+    "pnl": 347.57,
+    "final_eq": 413.57,
+    "best": 102.63,
+    "worst": -159.85
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 2.06,
+    "pnl": 344.17,
+    "final_eq": 410.17,
+    "best": 101.23,
+    "worst": -63.05
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 67,
+    "wr": 0.6269,
+    "pf": 1.74,
+    "pnl": 343.25,
+    "final_eq": 409.25,
+    "best": 82.45,
+    "worst": -53.46
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 1.8,
+    "pnl": 341.87,
+    "final_eq": 407.87,
+    "best": 165.8,
+    "worst": -111.62
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 111,
+    "wr": 0.5676,
+    "pf": 1.25,
+    "pnl": 337.9,
+    "final_eq": 403.9,
+    "best": 147.55,
+    "worst": -218.8
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 1.93,
+    "pnl": 329.97,
+    "final_eq": 395.97,
+    "best": 115.8,
+    "worst": -76.07
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 55,
+    "wr": 0.5818,
+    "pf": 1.33,
+    "pnl": 321.86,
+    "final_eq": 387.86,
+    "best": 176.25,
+    "worst": -262.85
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.6102,
+    "pf": 1.46,
+    "pnl": 318.62,
+    "final_eq": 384.62,
+    "best": 133.28,
+    "worst": -195.55
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 40,
+    "wr": 0.65,
+    "pf": 1.73,
+    "pnl": 316.31,
+    "final_eq": 382.31,
+    "best": 82.0,
+    "worst": -87.95
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 125,
+    "wr": 0.584,
+    "pf": 1.26,
+    "pnl": 316.17,
+    "final_eq": 382.17,
+    "best": 81.07,
+    "worst": -115.75
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.66,
+    "pnl": 313.16,
+    "final_eq": 379.16,
+    "best": 71.14,
+    "worst": -108.4
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 133,
+    "wr": 0.5639,
+    "pf": 1.49,
+    "pnl": 304.22,
+    "final_eq": 370.22,
+    "best": 73.84,
+    "worst": -45.37
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.39,
+    "pnl": 294.7,
+    "final_eq": 360.7,
+    "best": 152.74,
+    "worst": -137.72
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 67,
+    "wr": 0.6269,
+    "pf": 1.69,
+    "pnl": 293.08,
+    "final_eq": 359.08,
+    "best": 77.32,
+    "worst": -50.73
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 57,
+    "wr": 0.614,
+    "pf": 1.52,
+    "pnl": 292.61,
+    "final_eq": 358.61,
+    "best": 111.71,
+    "worst": -167.89
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 133,
+    "wr": 0.5639,
+    "pf": 1.49,
+    "pnl": 291.72,
+    "final_eq": 357.72,
+    "best": 74.67,
+    "worst": -45.11
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.37,
+    "pnl": 291.1,
+    "final_eq": 357.1,
+    "best": 151.21,
+    "worst": -136.35
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 40,
+    "wr": 0.65,
+    "pf": 1.68,
+    "pnl": 290.55,
+    "final_eq": 356.55,
+    "best": 67.16,
+    "worst": -90.62
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.6102,
+    "pf": 1.45,
+    "pnl": 290.08,
+    "final_eq": 356.08,
+    "best": 121.24,
+    "worst": -177.89
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 111,
+    "wr": 0.5676,
+    "pf": 1.15,
+    "pnl": 273.62,
+    "final_eq": 339.62,
+    "best": 192.6,
+    "worst": -361.46
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.63,
+    "pnl": 272.67,
+    "final_eq": 338.67,
+    "best": 67.11,
+    "worst": -83.99
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.67,
+    "pnl": 269.25,
+    "final_eq": 335.25,
+    "best": 74.88,
+    "worst": -78.91
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 1.89,
+    "pnl": 266.02,
+    "final_eq": 332.02,
+    "best": 78.55,
+    "worst": -52.98
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 67,
+    "wr": 0.6269,
+    "pf": 1.79,
+    "pnl": 263.09,
+    "final_eq": 329.09,
+    "best": 54.87,
+    "worst": -33.44
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 125,
+    "wr": 0.584,
+    "pf": 1.16,
+    "pnl": 255.67,
+    "final_eq": 321.67,
+    "best": 125.96,
+    "worst": -204.25
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.619,
+    "pf": 2.04,
+    "pnl": 254.53,
+    "final_eq": 320.53,
+    "best": 71.06,
+    "worst": -61.91
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.42,
+    "pnl": 254.0,
+    "final_eq": 320.0,
+    "best": 86.41,
+    "worst": -141.38
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 85,
+    "wr": 0.6706,
+    "pf": 1.17,
+    "pnl": 253.06,
+    "final_eq": 319.06,
+    "best": 203.11,
+    "worst": -277.95
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 133,
+    "wr": 0.5639,
+    "pf": 1.34,
+    "pnl": 251.73,
+    "final_eq": 317.73,
+    "best": 77.25,
+    "worst": -78.47
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 2.21,
+    "pnl": 251.12,
+    "final_eq": 317.12,
+    "best": 68.71,
+    "worst": -41.55
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.44,
+    "pnl": 248.8,
+    "final_eq": 314.8,
+    "best": 80.17,
+    "worst": -132.81
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 1.85,
+    "pnl": 247.61,
+    "final_eq": 313.61,
+    "best": 74.19,
+    "worst": -50.04
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 55,
+    "wr": 0.5818,
+    "pf": 1.44,
+    "pnl": 246.25,
+    "final_eq": 312.25,
+    "best": 96.56,
+    "worst": -133.9
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 133,
+    "wr": 0.5639,
+    "pf": 1.34,
+    "pnl": 238.99,
+    "final_eq": 304.99,
+    "best": 77.35,
+    "worst": -78.05
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 2.16,
+    "pnl": 236.89,
+    "final_eq": 302.89,
+    "best": 65.62,
+    "worst": -39.69
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 1.84,
+    "pnl": 230.41,
+    "final_eq": 296.41,
+    "best": 68.56,
+    "worst": -50.51
+  },
+  {
+    "filter": "base",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 67,
+    "wr": 0.6269,
+    "pf": 1.75,
+    "pnl": 229.92,
+    "final_eq": 295.93,
+    "best": 52.97,
+    "worst": -31.14
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.6279,
+    "pf": 2.0,
+    "pnl": 225.11,
+    "final_eq": 291.11,
+    "best": 63.6,
+    "worst": -62.34
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.8,
+    "pnl": 224.94,
+    "final_eq": 290.94,
+    "best": 52.5,
+    "worst": -58.99
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 40,
+    "wr": 0.65,
+    "pf": 1.85,
+    "pnl": 223.52,
+    "final_eq": 289.52,
+    "best": 62.02,
+    "worst": -47.03
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 72,
+    "wr": 0.625,
+    "pf": 1.52,
+    "pnl": 220.87,
+    "final_eq": 286.87,
+    "best": 96.15,
+    "worst": -72.76
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 125,
+    "wr": 0.584,
+    "pf": 1.13,
+    "pnl": 216.81,
+    "final_eq": 282.81,
+    "best": 125.54,
+    "worst": -209.71
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 85,
+    "wr": 0.6706,
+    "pf": 1.09,
+    "pnl": 214.69,
+    "final_eq": 280.69,
+    "best": 330.84,
+    "worst": -501.56
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 40,
+    "wr": 0.65,
+    "pf": 1.79,
+    "pnl": 206.69,
+    "final_eq": 272.69,
+    "best": 48.99,
+    "worst": -48.15
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 54,
+    "wr": 0.5556,
+    "pf": 1.21,
+    "pnl": 205.13,
+    "final_eq": 271.13,
+    "best": 166.35,
+    "worst": -145.26
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.57,
+    "pnl": 200.18,
+    "final_eq": 266.18,
+    "best": 54.52,
+    "worst": -71.69
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 46,
+    "wr": 0.6522,
+    "pf": 1.58,
+    "pnl": 199.93,
+    "final_eq": 265.93,
+    "best": 59.89,
+    "worst": -62.91
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.59,
+    "pnl": 196.72,
+    "final_eq": 262.72,
+    "best": 55.09,
+    "worst": -68.05
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 1.99,
+    "pnl": 190.78,
+    "final_eq": 256.78,
+    "best": 53.13,
+    "worst": -34.62
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.34,
+    "pnl": 189.34,
+    "final_eq": 255.34,
+    "best": 73.88,
+    "worst": -128.99
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 54,
+    "wr": 0.5556,
+    "pf": 1.2,
+    "pnl": 187.44,
+    "final_eq": 253.44,
+    "best": 155.49,
+    "worst": -135.78
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 110,
+    "wr": 0.5455,
+    "pf": 1.12,
+    "pnl": 182.0,
+    "final_eq": 248.0,
+    "best": 148.42,
+    "worst": -167.26
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 110,
+    "wr": 0.5455,
+    "pf": 1.12,
+    "pnl": 181.33,
+    "final_eq": 247.33,
+    "best": 154.96,
+    "worst": -174.64
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 1.95,
+    "pnl": 179.25,
+    "final_eq": 245.25,
+    "best": 50.74,
+    "worst": -33.06
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5952,
+    "pf": 1.73,
+    "pnl": 176.39,
+    "final_eq": 242.39,
+    "best": 54.0,
+    "worst": -32.63
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.619,
+    "pf": 2.12,
+    "pnl": 175.86,
+    "final_eq": 241.86,
+    "best": 46.78,
+    "worst": -37.92
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 61,
+    "wr": 0.5902,
+    "pf": 1.11,
+    "pnl": 173.49,
+    "final_eq": 239.49,
+    "best": 216.1,
+    "worst": -302.66
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5952,
+    "pf": 1.71,
+    "pnl": 171.99,
+    "final_eq": 237.99,
+    "best": 52.96,
+    "worst": -32.47
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 54,
+    "wr": 0.5556,
+    "pf": 1.29,
+    "pnl": 169.2,
+    "final_eq": 235.2,
+    "best": 95.17,
+    "worst": -76.65
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5882,
+    "pf": 1.57,
+    "pnl": 168.95,
+    "final_eq": 234.95,
+    "best": 45.44,
+    "worst": -47.58
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 76,
+    "wr": 0.6447,
+    "pf": 1.21,
+    "pnl": 167.38,
+    "final_eq": 233.38,
+    "best": 76.91,
+    "worst": -102.59
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 1.94,
+    "pnl": 167.33,
+    "final_eq": 233.33,
+    "best": 47.11,
+    "worst": -33.26
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 132,
+    "wr": 0.5985,
+    "pf": 1.27,
+    "pnl": 166.54,
+    "final_eq": 232.54,
+    "best": 50.38,
+    "worst": -46.77
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 58,
+    "wr": 0.5345,
+    "pf": 1.28,
+    "pnl": 161.46,
+    "final_eq": 227.46,
+    "best": 57.04,
+    "worst": -61.3
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.49,
+    "pnl": 160.9,
+    "final_eq": 226.9,
+    "best": 47.35,
+    "worst": -66.45
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 58,
+    "wr": 0.5345,
+    "pf": 1.3,
+    "pnl": 160.5,
+    "final_eq": 226.5,
+    "best": 66.64,
+    "worst": -57.94
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 61,
+    "wr": 0.5902,
+    "pf": 1.2,
+    "pnl": 159.51,
+    "final_eq": 225.51,
+    "best": 121.05,
+    "worst": -153.75
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 61,
+    "wr": 0.5902,
+    "pf": 1.11,
+    "pnl": 157.97,
+    "final_eq": 223.97,
+    "best": 202.09,
+    "worst": -283.05
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.6279,
+    "pf": 2.08,
+    "pnl": 157.36,
+    "final_eq": 223.36,
+    "best": 42.51,
+    "worst": -38.18
+  },
+  {
+    "filter": "base",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 62,
+    "wr": 0.629,
+    "pf": 1.38,
+    "pnl": 156.85,
+    "final_eq": 222.85,
+    "best": 43.57,
+    "worst": -59.19
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 54,
+    "wr": 0.5556,
+    "pf": 1.28,
+    "pnl": 156.1,
+    "final_eq": 222.1,
+    "best": 89.88,
+    "worst": -72.38
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.6512,
+    "pf": 1.94,
+    "pnl": 154.59,
+    "final_eq": 220.59,
+    "best": 48.09,
+    "worst": -46.29
+  },
+  {
+    "filter": "base",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 62,
+    "wr": 0.629,
+    "pf": 1.25,
+    "pnl": 150.01,
+    "final_eq": 216.01,
+    "best": 56.45,
+    "worst": -90.66
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 46,
+    "wr": 0.6522,
+    "pf": 1.66,
+    "pnl": 148.77,
+    "final_eq": 214.77,
+    "best": 39.7,
+    "worst": -39.13
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 58,
+    "wr": 0.5345,
+    "pf": 1.17,
+    "pnl": 147.27,
+    "final_eq": 213.27,
+    "best": 99.8,
+    "worst": -107.18
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.35,
+    "pnl": 147.26,
+    "final_eq": 213.26,
+    "best": 55.57,
+    "worst": -79.56
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 61,
+    "wr": 0.5902,
+    "pf": 1.19,
+    "pnl": 147.14,
+    "final_eq": 213.14,
+    "best": 114.41,
+    "worst": -145.31
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5882,
+    "pf": 1.52,
+    "pnl": 147.14,
+    "final_eq": 213.14,
+    "best": 37.91,
+    "worst": -46.4
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 58,
+    "wr": 0.5345,
+    "pf": 1.18,
+    "pnl": 145.65,
+    "final_eq": 211.65,
+    "best": 93.33,
+    "worst": -100.24
+  },
+  {
+    "filter": "base",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 117,
+    "wr": 0.5726,
+    "pf": 1.18,
+    "pnl": 144.09,
+    "final_eq": 210.09,
+    "best": 57.32,
+    "worst": -84.84
+  },
+  {
+    "filter": "base",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 117,
+    "wr": 0.5726,
+    "pf": 1.19,
+    "pnl": 142.36,
+    "final_eq": 208.36,
+    "best": 54.15,
+    "worst": -80.15
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 25,
+    "wr": 0.72,
+    "pf": 1.88,
+    "pnl": 141.17,
+    "final_eq": 207.17,
+    "best": 35.92,
+    "worst": -62.68
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.33,
+    "pnl": 141.12,
+    "final_eq": 207.12,
+    "best": 111.11,
+    "worst": -106.9
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 83,
+    "wr": 0.5542,
+    "pf": 1.25,
+    "pnl": 140.85,
+    "final_eq": 206.86,
+    "best": 47.16,
+    "worst": -120.9
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.6829,
+    "pf": 1.39,
+    "pnl": 140.05,
+    "final_eq": 206.05,
+    "best": 43.08,
+    "worst": -80.27
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 76,
+    "wr": 0.6447,
+    "pf": 1.28,
+    "pnl": 138.04,
+    "final_eq": 204.04,
+    "best": 50.9,
+    "worst": -60.06
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 77,
+    "wr": 0.6494,
+    "pf": 1.41,
+    "pnl": 136.95,
+    "final_eq": 202.95,
+    "best": 64.54,
+    "worst": -53.48
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.32,
+    "pnl": 134.26,
+    "final_eq": 200.26,
+    "best": 107.43,
+    "worst": -103.36
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5278,
+    "pf": 1.23,
+    "pnl": 132.39,
+    "final_eq": 198.39,
+    "best": 118.45,
+    "worst": -69.36
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5952,
+    "pf": 1.81,
+    "pnl": 131.26,
+    "final_eq": 197.26,
+    "best": 38.42,
+    "worst": -21.78
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6571,
+    "pf": 1.64,
+    "pnl": 130.96,
+    "final_eq": 196.96,
+    "best": 37.15,
+    "worst": -53.47
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 93,
+    "wr": 0.6344,
+    "pf": 1.49,
+    "pnl": 130.77,
+    "final_eq": 196.77,
+    "best": 41.02,
+    "worst": -17.09
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 72,
+    "wr": 0.625,
+    "pf": 1.31,
+    "pnl": 130.56,
+    "final_eq": 196.56,
+    "best": 91.75,
+    "worst": -75.05
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.48,
+    "pnl": 128.48,
+    "final_eq": 194.48,
+    "best": 43.05,
+    "worst": -48.54
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5952,
+    "pf": 1.79,
+    "pnl": 128.13,
+    "final_eq": 194.13,
+    "best": 37.76,
+    "worst": -22.18
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5882,
+    "pf": 1.67,
+    "pnl": 126.78,
+    "final_eq": 192.78,
+    "best": 32.66,
+    "worst": -30.42
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 83,
+    "wr": 0.5542,
+    "pf": 1.33,
+    "pnl": 123.87,
+    "final_eq": 189.87,
+    "best": 38.07,
+    "worst": -70.37
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 110,
+    "wr": 0.5455,
+    "pf": 1.06,
+    "pnl": 122.77,
+    "final_eq": 188.77,
+    "best": 240.14,
+    "worst": -268.43
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 1.72,
+    "pnl": 122.54,
+    "final_eq": 188.54,
+    "best": 40.89,
+    "worst": -42.33
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.32,
+    "pnl": 122.43,
+    "final_eq": 188.43,
+    "best": 51.97,
+    "worst": -74.4
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 41,
+    "wr": 0.6829,
+    "pf": 1.53,
+    "pnl": 121.37,
+    "final_eq": 187.37,
+    "best": 38.41,
+    "worst": -50.57
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5143,
+    "pf": 1.51,
+    "pnl": 121.36,
+    "final_eq": 187.36,
+    "best": 56.85,
+    "worst": -51.88
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 110,
+    "wr": 0.5455,
+    "pf": 1.05,
+    "pnl": 121.29,
+    "final_eq": 187.29,
+    "best": 252.09,
+    "worst": -281.79
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.72,
+    "pnl": 121.04,
+    "final_eq": 187.04,
+    "best": 59.83,
+    "worst": -55.28
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.72,
+    "pnl": 121.04,
+    "final_eq": 187.04,
+    "best": 59.83,
+    "worst": -55.28
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.44,
+    "pnl": 120.88,
+    "final_eq": 186.88,
+    "best": 126.08,
+    "worst": -97.84
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 23,
+    "wr": 0.5217,
+    "pf": 1.4,
+    "pnl": 119.6,
+    "final_eq": 185.6,
+    "best": 64.78,
+    "worst": -83.86
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.5,
+    "pnl": 118.92,
+    "final_eq": 184.92,
+    "best": 107.54,
+    "worst": -95.45
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 1.88,
+    "pnl": 118.63,
+    "final_eq": 184.63,
+    "best": 62.75,
+    "worst": -66.51
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 1.88,
+    "pnl": 118.63,
+    "final_eq": 184.63,
+    "best": 62.75,
+    "worst": -66.51
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 50,
+    "wr": 0.54,
+    "pf": 1.2,
+    "pnl": 118.55,
+    "final_eq": 184.55,
+    "best": 109.79,
+    "worst": -90.4
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.6176,
+    "pf": 1.38,
+    "pnl": 117.1,
+    "final_eq": 183.1,
+    "best": 37.18,
+    "worst": -68.57
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.33,
+    "pnl": 116.74,
+    "final_eq": 182.74,
+    "best": 90.42,
+    "worst": -63.89
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 37,
+    "wr": 0.5676,
+    "pf": 1.35,
+    "pnl": 116.32,
+    "final_eq": 182.32,
+    "best": 38.4,
+    "worst": -44.34
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 31,
+    "wr": 0.5806,
+    "pf": 1.29,
+    "pnl": 115.95,
+    "final_eq": 181.95,
+    "best": 55.97,
+    "worst": -54.72
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.49,
+    "pnl": 115.75,
+    "final_eq": 181.75,
+    "best": 61.3,
+    "worst": -68.39
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.49,
+    "pnl": 115.75,
+    "final_eq": 181.75,
+    "best": 61.3,
+    "worst": -68.39
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 93,
+    "wr": 0.6344,
+    "pf": 1.39,
+    "pnl": 114.84,
+    "final_eq": 180.84,
+    "best": 47.97,
+    "worst": -20.8
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 139,
+    "wr": 0.6259,
+    "pf": 1.17,
+    "pnl": 114.73,
+    "final_eq": 180.73,
+    "best": 35.45,
+    "worst": -57.26
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5143,
+    "pf": 1.48,
+    "pnl": 114.64,
+    "final_eq": 180.64,
+    "best": 54.81,
+    "worst": -50.02
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.5349,
+    "pf": 1.21,
+    "pnl": 114.12,
+    "final_eq": 180.12,
+    "best": 97.31,
+    "worst": -97.93
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6857,
+    "pf": 1.64,
+    "pnl": 113.84,
+    "final_eq": 179.84,
+    "best": 33.37,
+    "worst": -49.2
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 50,
+    "wr": 0.54,
+    "pf": 1.2,
+    "pnl": 113.73,
+    "final_eq": 179.73,
+    "best": 106.93,
+    "worst": -88.04
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 20,
+    "wr": 0.65,
+    "pf": 2.39,
+    "pnl": 113.67,
+    "final_eq": 179.67,
+    "best": 33.82,
+    "worst": -16.71
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.6512,
+    "pf": 2.0,
+    "pnl": 113.59,
+    "final_eq": 179.59,
+    "best": 33.87,
+    "worst": -30.08
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5714,
+    "pf": 1.58,
+    "pnl": 113.22,
+    "final_eq": 179.22,
+    "best": 34.92,
+    "worst": -37.41
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 1.67,
+    "pnl": 112.81,
+    "final_eq": 178.81,
+    "best": 35.67,
+    "worst": -41.21
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5,
+    "pf": 1.2,
+    "pnl": 111.99,
+    "final_eq": 177.99,
+    "best": 111.31,
+    "worst": -91.87
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5882,
+    "pf": 1.62,
+    "pnl": 111.94,
+    "final_eq": 177.94,
+    "best": 27.28,
+    "worst": -29.22
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.49,
+    "pnl": 111.68,
+    "final_eq": 177.68,
+    "best": 102.44,
+    "worst": -91.71
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6,
+    "pf": 1.51,
+    "pnl": 111.39,
+    "final_eq": 177.39,
+    "best": 41.82,
+    "worst": -64.63
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.46,
+    "pnl": 111.09,
+    "final_eq": 177.09,
+    "best": 62.02,
+    "worst": -59.02
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 13,
+    "wr": 0.6154,
+    "pf": 1.51,
+    "pnl": 110.85,
+    "final_eq": 176.85,
+    "best": 109.08,
+    "worst": -95.71
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.32,
+    "pnl": 110.66,
+    "final_eq": 176.66,
+    "best": 49.6,
+    "worst": -67.01
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 96,
+    "wr": 0.7604,
+    "pf": 1.2,
+    "pnl": 110.63,
+    "final_eq": 176.63,
+    "best": 66.13,
+    "worst": -61.88
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 77,
+    "wr": 0.5844,
+    "pf": 1.08,
+    "pnl": 110.05,
+    "final_eq": 176.05,
+    "best": 104.83,
+    "worst": -144.36
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 37,
+    "wr": 0.5676,
+    "pf": 1.33,
+    "pnl": 109.68,
+    "final_eq": 175.68,
+    "best": 37.16,
+    "worst": -43.53
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.44,
+    "pnl": 109.56,
+    "final_eq": 175.56,
+    "best": 38.86,
+    "worst": -43.91
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5085,
+    "pf": 1.4,
+    "pnl": 108.53,
+    "final_eq": 174.53,
+    "best": 37.3,
+    "worst": -32.09
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.42,
+    "pnl": 107.51,
+    "final_eq": 173.51,
+    "best": 117.06,
+    "worst": -90.84
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 1.84,
+    "pnl": 107.49,
+    "final_eq": 173.49,
+    "best": 56.7,
+    "worst": -61.76
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 50,
+    "wr": 0.54,
+    "pf": 1.29,
+    "pnl": 107.39,
+    "final_eq": 173.39,
+    "best": 70.04,
+    "worst": -52.91
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5085,
+    "pf": 1.4,
+    "pnl": 106.57,
+    "final_eq": 172.57,
+    "best": 36.88,
+    "worst": -31.73
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 25,
+    "wr": 0.72,
+    "pf": 1.98,
+    "pnl": 106.22,
+    "final_eq": 172.22,
+    "best": 28.8,
+    "worst": -40.15
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.45,
+    "pnl": 106.06,
+    "final_eq": 172.06,
+    "best": 59.69,
+    "worst": -57.34
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 90,
+    "wr": 0.6667,
+    "pf": 1.44,
+    "pnl": 105.95,
+    "final_eq": 171.95,
+    "best": 36.34,
+    "worst": -33.03
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 1.84,
+    "pnl": 105.81,
+    "final_eq": 171.81,
+    "best": 56.15,
+    "worst": -61.16
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5278,
+    "pf": 1.32,
+    "pnl": 105.05,
+    "final_eq": 171.05,
+    "best": 68.12,
+    "worst": -40.58
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5,
+    "pf": 1.2,
+    "pnl": 103.74,
+    "final_eq": 169.74,
+    "best": 106.15,
+    "worst": -87.61
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 37,
+    "wr": 0.5676,
+    "pf": 1.22,
+    "pnl": 103.69,
+    "final_eq": 169.69,
+    "best": 61.84,
+    "worst": -79.36
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 50,
+    "wr": 0.54,
+    "pf": 1.29,
+    "pnl": 103.34,
+    "final_eq": 169.34,
+    "best": 68.41,
+    "worst": -51.68
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.5349,
+    "pf": 1.2,
+    "pnl": 102.45,
+    "final_eq": 168.45,
+    "best": 91.01,
+    "worst": -91.58
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 104,
+    "wr": 0.5288,
+    "pf": 1.11,
+    "pnl": 102.36,
+    "final_eq": 168.36,
+    "best": 117.25,
+    "worst": -144.0
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 23,
+    "wr": 0.5217,
+    "pf": 1.55,
+    "pnl": 101.49,
+    "final_eq": 167.49,
+    "best": 43.94,
+    "worst": -53.67
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 66,
+    "wr": 0.5606,
+    "pf": 1.16,
+    "pnl": 100.69,
+    "final_eq": 166.69,
+    "best": 80.55,
+    "worst": -109.31
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.44,
+    "pnl": 99.95,
+    "final_eq": 165.95,
+    "best": 55.4,
+    "worst": -62.98
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 77,
+    "wr": 0.5844,
+    "pf": 1.08,
+    "pnl": 99.79,
+    "final_eq": 165.79,
+    "best": 90.64,
+    "worst": -133.73
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.5349,
+    "pf": 1.3,
+    "pnl": 99.78,
+    "final_eq": 165.78,
+    "best": 62.34,
+    "worst": -56.04
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5254,
+    "pf": 1.2,
+    "pnl": 99.7,
+    "final_eq": 165.7,
+    "best": 69.02,
+    "worst": -53.24
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5085,
+    "pf": 1.35,
+    "pnl": 99.5,
+    "final_eq": 165.5,
+    "best": 41.95,
+    "worst": -30.43
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5714,
+    "pf": 1.54,
+    "pnl": 99.47,
+    "final_eq": 165.47,
+    "best": 29.75,
+    "worst": -35.46
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5278,
+    "pf": 1.2,
+    "pnl": 99.37,
+    "final_eq": 165.37,
+    "best": 96.76,
+    "worst": -57.82
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.5,
+    "pf": 1.61,
+    "pnl": 98.99,
+    "final_eq": 164.99,
+    "best": 41.84,
+    "worst": -46.89
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.64,
+    "pnl": 98.55,
+    "final_eq": 164.55,
+    "best": 51.67,
+    "worst": -49.05
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 31,
+    "wr": 0.5806,
+    "pf": 1.38,
+    "pnl": 98.45,
+    "final_eq": 164.45,
+    "best": 36.79,
+    "worst": -31.19
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.44,
+    "pnl": 98.34,
+    "final_eq": 164.34,
+    "best": 54.86,
+    "worst": -62.37
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 83,
+    "wr": 0.5422,
+    "pf": 1.14,
+    "pnl": 98.34,
+    "final_eq": 164.34,
+    "best": 64.26,
+    "worst": -100.93
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.43,
+    "pnl": 98.31,
+    "final_eq": 164.31,
+    "best": 35.52,
+    "worst": -40.46
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 13,
+    "wr": 0.6154,
+    "pf": 1.48,
+    "pnl": 98.2,
+    "final_eq": 164.2,
+    "best": 101.28,
+    "worst": -88.87
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 66,
+    "wr": 0.5606,
+    "pf": 1.09,
+    "pnl": 97.96,
+    "final_eq": 163.95,
+    "best": 128.77,
+    "worst": -191.55
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 31,
+    "wr": 0.5806,
+    "pf": 1.27,
+    "pnl": 97.65,
+    "final_eq": 163.65,
+    "best": 45.04,
+    "worst": -51.25
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5714,
+    "pf": 1.48,
+    "pnl": 97.54,
+    "final_eq": 163.54,
+    "best": 34.09,
+    "worst": -54.46
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.3,
+    "pnl": 97.26,
+    "final_eq": 163.26,
+    "best": 46.31,
+    "worst": -63.35
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6571,
+    "pf": 1.72,
+    "pnl": 97.15,
+    "final_eq": 163.15,
+    "best": 28.33,
+    "worst": -33.88
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.64,
+    "pnl": 96.96,
+    "final_eq": 162.96,
+    "best": 51.17,
+    "worst": -48.57
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.62,
+    "pnl": 96.93,
+    "final_eq": 162.93,
+    "best": 71.46,
+    "worst": -58.45
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5143,
+    "pf": 1.61,
+    "pnl": 96.92,
+    "final_eq": 162.92,
+    "best": 38.73,
+    "worst": -32.83
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.3,
+    "pnl": 96.87,
+    "final_eq": 162.87,
+    "best": 78.97,
+    "worst": -56.94
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 23,
+    "wr": 0.5217,
+    "pf": 1.36,
+    "pnl": 96.81,
+    "final_eq": 162.81,
+    "best": 60.15,
+    "worst": -73.57
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 62,
+    "wr": 0.629,
+    "pf": 1.14,
+    "pnl": 96.67,
+    "final_eq": 162.67,
+    "best": 63.71,
+    "worst": -71.58
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.6176,
+    "pf": 1.49,
+    "pnl": 96.61,
+    "final_eq": 162.61,
+    "best": 25.55,
+    "worst": -41.87
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 1.78,
+    "pnl": 96.39,
+    "final_eq": 162.39,
+    "best": 52.81,
+    "worst": -60.19
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 23,
+    "wr": 0.6087,
+    "pf": 1.52,
+    "pnl": 96.34,
+    "final_eq": 162.34,
+    "best": 35.99,
+    "worst": -38.56
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5254,
+    "pf": 1.28,
+    "pnl": 96.3,
+    "final_eq": 162.3,
+    "best": 45.89,
+    "worst": -35.36
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.25,
+    "pnl": 96.23,
+    "final_eq": 162.23,
+    "best": 93.12,
+    "worst": -82.03
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5085,
+    "pf": 1.34,
+    "pnl": 96.18,
+    "final_eq": 162.18,
+    "best": 41.11,
+    "worst": -29.82
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 66,
+    "wr": 0.5606,
+    "pf": 1.16,
+    "pnl": 95.95,
+    "final_eq": 161.95,
+    "best": 78.26,
+    "worst": -106.2
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5,
+    "pf": 1.3,
+    "pnl": 95.81,
+    "final_eq": 161.81,
+    "best": 63.39,
+    "worst": -53.93
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 37,
+    "wr": 0.5676,
+    "pf": 1.2,
+    "pnl": 95.55,
+    "final_eq": 161.55,
+    "best": 56.85,
+    "worst": -77.29
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 104,
+    "wr": 0.5288,
+    "pf": 1.1,
+    "pnl": 95.47,
+    "final_eq": 161.47,
+    "best": 112.46,
+    "worst": -138.11
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6571,
+    "pf": 1.54,
+    "pnl": 95.07,
+    "final_eq": 161.07,
+    "best": 33.86,
+    "worst": -40.36
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 17,
+    "wr": 0.5882,
+    "pf": 1.59,
+    "pnl": 94.77,
+    "final_eq": 160.77,
+    "best": 82.19,
+    "worst": -56.21
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 96,
+    "wr": 0.7604,
+    "pf": 1.12,
+    "pnl": 94.77,
+    "final_eq": 160.77,
+    "best": 93.83,
+    "worst": -96.78
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.6471,
+    "pf": 1.29,
+    "pnl": 94.69,
+    "final_eq": 160.69,
+    "best": 43.64,
+    "worst": -81.66
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 62,
+    "wr": 0.5161,
+    "pf": 1.36,
+    "pnl": 94.09,
+    "final_eq": 160.09,
+    "best": 39.97,
+    "worst": -29.44
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 83,
+    "wr": 0.5422,
+    "pf": 1.14,
+    "pnl": 93.9,
+    "final_eq": 159.9,
+    "best": 62.53,
+    "worst": -98.2
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 66,
+    "wr": 0.6515,
+    "pf": 1.26,
+    "pnl": 93.6,
+    "final_eq": 159.6,
+    "best": 32.82,
+    "worst": -40.44
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 19,
+    "wr": 0.6316,
+    "pf": 1.25,
+    "pnl": 93.58,
+    "final_eq": 159.58,
+    "best": 144.09,
+    "worst": -119.15
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 29,
+    "wr": 0.5862,
+    "pf": 1.47,
+    "pnl": 93.55,
+    "final_eq": 159.55,
+    "best": 53.77,
+    "worst": -57.48
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.67,
+    "pnl": 93.14,
+    "final_eq": 159.14,
+    "best": 62.15,
+    "worst": -53.04
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 23,
+    "wr": 0.6087,
+    "pf": 1.5,
+    "pnl": 93.02,
+    "final_eq": 159.02,
+    "best": 31.15,
+    "worst": -38.78
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.87,
+    "pnl": 92.89,
+    "final_eq": 158.89,
+    "best": 38.0,
+    "worst": -34.74
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.87,
+    "pnl": 92.89,
+    "final_eq": 158.89,
+    "best": 38.0,
+    "worst": -34.74
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 20,
+    "wr": 0.65,
+    "pf": 2.18,
+    "pnl": 92.84,
+    "final_eq": 158.84,
+    "best": 30.49,
+    "worst": -15.41
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 66,
+    "wr": 0.5606,
+    "pf": 1.09,
+    "pnl": 92.61,
+    "final_eq": 158.61,
+    "best": 124.58,
+    "worst": -185.31
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 63,
+    "wr": 0.6349,
+    "pf": 1.16,
+    "pnl": 92.3,
+    "final_eq": 158.3,
+    "best": 46.72,
+    "worst": -77.99
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5143,
+    "pf": 1.58,
+    "pnl": 92.21,
+    "final_eq": 158.21,
+    "best": 37.61,
+    "worst": -31.89
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 77,
+    "wr": 0.6494,
+    "pf": 1.25,
+    "pnl": 91.96,
+    "final_eq": 157.96,
+    "best": 72.83,
+    "worst": -60.85
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 79,
+    "wr": 0.6329,
+    "pf": 1.25,
+    "pnl": 91.95,
+    "final_eq": 157.95,
+    "best": 33.62,
+    "worst": -42.35
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 1.83,
+    "pnl": 91.83,
+    "final_eq": 157.83,
+    "best": 29.45,
+    "worst": -27.19
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.44,
+    "pnl": 91.74,
+    "final_eq": 157.74,
+    "best": 54.7,
+    "worst": -37.42
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 45,
+    "wr": 0.5778,
+    "pf": 1.16,
+    "pnl": 91.66,
+    "final_eq": 157.66,
+    "best": 79.48,
+    "worst": -72.04
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 25,
+    "wr": 0.64,
+    "pf": 1.92,
+    "pnl": 91.54,
+    "final_eq": 157.54,
+    "best": 32.3,
+    "worst": -19.11
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 20,
+    "wr": 0.65,
+    "pf": 2.19,
+    "pnl": 91.41,
+    "final_eq": 157.41,
+    "best": 29.68,
+    "worst": -15.15
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 95,
+    "wr": 0.5895,
+    "pf": 1.1,
+    "pnl": 91.19,
+    "final_eq": 157.19,
+    "best": 78.7,
+    "worst": -95.26
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 83,
+    "wr": 0.5422,
+    "pf": 1.21,
+    "pnl": 90.87,
+    "final_eq": 156.87,
+    "best": 48.89,
+    "worst": -58.45
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 43,
+    "wr": 0.5349,
+    "pf": 1.29,
+    "pnl": 90.68,
+    "final_eq": 156.68,
+    "best": 58.91,
+    "worst": -52.96
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 29,
+    "wr": 0.5862,
+    "pf": 1.47,
+    "pnl": 90.35,
+    "final_eq": 156.35,
+    "best": 52.69,
+    "worst": -56.32
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.61,
+    "pnl": 90.26,
+    "final_eq": 156.26,
+    "best": 40.6,
+    "worst": -40.97
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.61,
+    "pnl": 90.26,
+    "final_eq": 156.26,
+    "best": 40.6,
+    "worst": -40.97
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 31,
+    "wr": 0.6129,
+    "pf": 1.23,
+    "pnl": 90.05,
+    "final_eq": 156.05,
+    "best": 43.98,
+    "worst": -67.36
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.5,
+    "pf": 1.56,
+    "pnl": 89.89,
+    "final_eq": 155.89,
+    "best": 40.73,
+    "worst": -44.3
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6286,
+    "pf": 1.5,
+    "pnl": 89.85,
+    "final_eq": 155.85,
+    "best": 34.06,
+    "worst": -56.53
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5,
+    "pf": 1.29,
+    "pnl": 89.5,
+    "final_eq": 155.5,
+    "best": 60.35,
+    "worst": -51.83
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 13,
+    "wr": 0.6154,
+    "pf": 1.71,
+    "pnl": 88.95,
+    "final_eq": 154.95,
+    "best": 63.69,
+    "worst": -57.02
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 20,
+    "wr": 0.6,
+    "pf": 1.66,
+    "pnl": 88.93,
+    "final_eq": 154.93,
+    "best": 54.28,
+    "worst": -50.12
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 25,
+    "wr": 0.64,
+    "pf": 1.73,
+    "pnl": 88.76,
+    "final_eq": 154.76,
+    "best": 34.96,
+    "worst": -54.03
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 14,
+    "wr": 0.5714,
+    "pf": 1.82,
+    "pnl": 88.33,
+    "final_eq": 154.33,
+    "best": 53.57,
+    "worst": -49.93
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 14,
+    "wr": 0.5714,
+    "pf": 1.82,
+    "pnl": 88.33,
+    "final_eq": 154.33,
+    "best": 53.57,
+    "worst": -49.93
+  },
+  {
+    "filter": "+rsi30-50",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 62,
+    "wr": 0.629,
+    "pf": 1.14,
+    "pnl": 88.21,
+    "final_eq": 154.21,
+    "best": 53.22,
+    "worst": -66.75
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 45,
+    "wr": 0.5778,
+    "pf": 1.17,
+    "pnl": 88.09,
+    "final_eq": 154.09,
+    "best": 72.87,
+    "worst": -66.05
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6286,
+    "pf": 1.55,
+    "pnl": 87.88,
+    "final_eq": 153.88,
+    "best": 25.79,
+    "worst": -37.33
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.41,
+    "pnl": 87.86,
+    "final_eq": 153.86,
+    "best": 33.47,
+    "worst": -38.6
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.65,
+    "pnl": 87.83,
+    "final_eq": 153.83,
+    "best": 59.52,
+    "worst": -51.27
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.39,
+    "pnl": 87.4,
+    "final_eq": 153.4,
+    "best": 92.44,
+    "worst": -77.56
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 83,
+    "wr": 0.5422,
+    "pf": 1.21,
+    "pnl": 87.38,
+    "final_eq": 153.38,
+    "best": 47.8,
+    "worst": -57.15
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 2.07,
+    "pnl": 87.29,
+    "final_eq": 153.29,
+    "best": 39.2,
+    "worst": -39.92
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 18,
+    "wr": 0.6111,
+    "pf": 2.07,
+    "pnl": 87.29,
+    "final_eq": 153.29,
+    "best": 39.2,
+    "worst": -39.92
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5143,
+    "pf": 1.42,
+    "pnl": 87.21,
+    "final_eq": 153.21,
+    "best": 42.73,
+    "worst": -37.07
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 44,
+    "wr": 0.5227,
+    "pf": 1.21,
+    "pnl": 87.1,
+    "final_eq": 153.1,
+    "best": 71.82,
+    "worst": -73.49
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 32,
+    "wr": 0.5312,
+    "pf": 1.4,
+    "pnl": 87.09,
+    "final_eq": 153.09,
+    "best": 51.59,
+    "worst": -61.13
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 16,
+    "wr": 0.5625,
+    "pf": 1.59,
+    "pnl": 87.07,
+    "final_eq": 153.07,
+    "best": 67.14,
+    "worst": -54.91
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 65,
+    "wr": 0.5231,
+    "pf": 1.29,
+    "pnl": 86.64,
+    "final_eq": 152.64,
+    "best": 36.54,
+    "worst": -28.07
+  },
+  {
+    "filter": "+london_ny",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 114,
+    "wr": 0.5877,
+    "pf": 1.14,
+    "pnl": 86.46,
+    "final_eq": 152.46,
+    "best": 42.76,
+    "worst": -74.09
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 95,
+    "wr": 0.5684,
+    "pf": 1.13,
+    "pnl": 86.15,
+    "final_eq": 152.15,
+    "best": 48.81,
+    "worst": -106.51
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 95,
+    "wr": 0.5684,
+    "pf": 1.2,
+    "pnl": 86.12,
+    "final_eq": 152.12,
+    "best": 32.62,
+    "worst": -60.44
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 63,
+    "wr": 0.6349,
+    "pf": 1.15,
+    "pnl": 86.05,
+    "final_eq": 152.05,
+    "best": 46.32,
+    "worst": -79.83
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 45,
+    "wr": 0.5778,
+    "pf": 1.24,
+    "pnl": 85.91,
+    "final_eq": 151.91,
+    "best": 50.3,
+    "worst": -43.05
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 44,
+    "wr": 0.5455,
+    "pf": 1.24,
+    "pnl": 85.86,
+    "final_eq": 151.86,
+    "best": 65.35,
+    "worst": -57.58
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 20,
+    "wr": 0.6,
+    "pf": 1.65,
+    "pnl": 85.82,
+    "final_eq": 151.82,
+    "best": 53.2,
+    "worst": -49.11
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 13,
+    "wr": 0.6154,
+    "pf": 1.49,
+    "pnl": 85.34,
+    "final_eq": 151.34,
+    "best": 86.95,
+    "worst": -87.27
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5476,
+    "pf": 1.29,
+    "pnl": 85.33,
+    "final_eq": 151.33,
+    "best": 52.39,
+    "worst": -50.62
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5085,
+    "pf": 1.46,
+    "pnl": 85.21,
+    "final_eq": 151.21,
+    "best": 25.71,
+    "worst": -20.02
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 1.77,
+    "pnl": 85.15,
+    "final_eq": 151.15,
+    "best": 25.53,
+    "worst": -26.04
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.5714,
+    "pf": 1.66,
+    "pnl": 85.05,
+    "final_eq": 151.05,
+    "best": 24.24,
+    "worst": -24.39
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6857,
+    "pf": 1.72,
+    "pnl": 84.98,
+    "final_eq": 150.98,
+    "best": 25.77,
+    "worst": -31.72
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 21,
+    "wr": 0.5238,
+    "pf": 1.58,
+    "pnl": 84.88,
+    "final_eq": 150.88,
+    "best": 47.63,
+    "worst": -47.32
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5476,
+    "pf": 1.29,
+    "pnl": 84.72,
+    "final_eq": 150.72,
+    "best": 52.18,
+    "worst": -50.41
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 42,
+    "wr": 0.5476,
+    "pf": 1.3,
+    "pnl": 84.58,
+    "final_eq": 150.58,
+    "best": 46.55,
+    "worst": -51.1
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 31,
+    "wr": 0.5806,
+    "pf": 1.35,
+    "pnl": 84.54,
+    "final_eq": 150.54,
+    "best": 30.17,
+    "worst": -29.53
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5593,
+    "pf": 1.24,
+    "pnl": 84.52,
+    "final_eq": 150.52,
+    "best": 42.76,
+    "worst": -40.37
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 3.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 46,
+    "wr": 0.6522,
+    "pf": 1.32,
+    "pnl": 84.42,
+    "final_eq": 150.42,
+    "best": 38.3,
+    "worst": -44.66
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 19,
+    "wr": 0.6316,
+    "pf": 1.3,
+    "pnl": 84.39,
+    "final_eq": 150.39,
+    "best": 112.64,
+    "worst": -113.04
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 19,
+    "wr": 0.6316,
+    "pf": 1.4,
+    "pnl": 84.34,
+    "final_eq": 150.34,
+    "best": 78.83,
+    "worst": -66.2
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 23,
+    "wr": 0.5217,
+    "pf": 1.49,
+    "pnl": 84.29,
+    "final_eq": 150.29,
+    "best": 41.28,
+    "worst": -48.16
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 35,
+    "wr": 0.6,
+    "pf": 1.61,
+    "pnl": 84.28,
+    "final_eq": 150.28,
+    "best": 26.79,
+    "worst": -39.06
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 34,
+    "wr": 0.6471,
+    "pf": 1.4,
+    "pnl": 83.91,
+    "final_eq": 149.91,
+    "best": 29.29,
+    "worst": -51.72
+  },
+  {
+    "filter": "+atr_expand",
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 59,
+    "wr": 0.5085,
+    "pf": 1.46,
+    "pnl": 83.82,
+    "final_eq": 149.82,
+    "best": 25.47,
+    "worst": -19.84
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 17,
+    "wr": 0.5882,
+    "pf": 1.55,
+    "pnl": 83.79,
+    "final_eq": 149.79,
+    "best": 68.13,
+    "worst": -52.37
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 45,
+    "wr": 0.5778,
+    "pf": 1.24,
+    "pnl": 82.79,
+    "final_eq": 148.79,
+    "best": 46.83,
+    "worst": -40.07
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 1.25,
+    "pnl": 82.17,
+    "final_eq": 148.17,
+    "best": 66.05,
+    "worst": -115.5
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 19,
+    "wr": 0.6316,
+    "pf": 1.24,
+    "pnl": 82.16,
+    "final_eq": 148.16,
+    "best": 133.78,
+    "worst": -110.62
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 15,
+    "wr": 0.6,
+    "pf": 1.58,
+    "pnl": 82.0,
+    "final_eq": 148.0,
+    "best": 45.08,
+    "worst": -49.45
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 5.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 26,
+    "wr": 0.5769,
+    "pf": 1.36,
+    "pnl": 81.85,
+    "final_eq": 147.85,
+    "best": 53.4,
+    "worst": -51.65
+  },
+  {
+    "filter": "base",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 66,
+    "wr": 0.6515,
+    "pf": 1.17,
+    "pnl": 81.73,
+    "final_eq": 147.73,
+    "best": 45.28,
+    "worst": -65.72
+  },
+  {
+    "filter": "+vol_spike",
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 36,
+    "wr": 0.5278,
+    "pf": 1.28,
+    "pnl": 81.6,
+    "final_eq": 147.6,
+    "best": 55.89,
+    "worst": -35.02
+  },
+  {
+    "filter": "+london+vol",
+    "sl": 4.0,
+    "ladder": [
+      0.7,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 31,
+    "wr": 0.6129,
+    "pf": 1.33,
+    "pnl": 81.47,
+    "final_eq": 147.47,
+    "best": 29.73,
+    "worst": -42.24
+  },
+  {
+    "filter": "+vol+atr",
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "trades": 20,
+    "wr": 0.65,
+    "pf": 2.44,
+    "pnl": 81.22,
+    "final_eq": 147.22,
+    "best": 26.13,
+    "worst": -11.16
+  }
+]
