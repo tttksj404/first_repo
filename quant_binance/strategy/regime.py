@@ -945,7 +945,7 @@ def evaluate_snapshot(
         # 354K-combo exhaustive search validated (WR 82%, PF 7.40, 42bps costs):
         # Long: ATR expanding + RSI 30-50 + intraday aligned + ADX>=45
         # Short: TTM Squeeze + ADX>=35
-        futures_side = prediction.side
+        futures_side = prediction.futures.side
         if futures_side == "long" and is_profiled(snapshot.symbol):
             _intraday_td = snapshot.feature_values.intraday_trend_direction if hasattr(snapshot.feature_values, 'intraday_trend_direction') else 0
             _ema_stack = snapshot.feature_values.ema_stack_score if hasattr(snapshot.feature_values, 'ema_stack_score') else 0
