@@ -1,5 +1,5 @@
 {
-  "_lock": "POSITION_SIM_OPTIMIZED \u2014 Backtested 640 param combos on 358d 5m data with position management (SL/TP/hold). Top result: WR=50%, PF=6.47, PnL=$121.93/22trades. Applied 2026-04-09.",
+  "_lock": "EXHAUSTIVE_354K_VALIDATED — atr_exp+rsi30-50+intraday, WR 82%, PF 7.40, $1556/33trades. 42bps realistic costs. Applied 2026-04-09.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -63,9 +63,13 @@
     "spot_max_holding_minutes": 4320,
     "futures_profit_protection_arm_roe_percent": 8.0,
     "futures_profit_protection_retrace_roe_percent": 3.0,
-    "futures_proactive_take_profit_roe_thresholds_percent": [12.0, 20.0],
+    "futures_proactive_take_profit_roe_thresholds_percent": [
+      10.0,
+      25.0
+    ],
     "futures_proactive_take_profit_fraction": 0.5,
-    "post_tp_stop_mode": "breakeven"
+    "post_tp_stop_mode": "breakeven",
+    "partial_take_profit_r": 1.5
   },
   "live_position_risk": {
     "disable_standard_stop_loss_exits": false,
@@ -138,8 +142,8 @@
     "min_expected_profit_usd_per_trade": 0.001,
     "min_meaningful_futures_notional_usd": 5.0,
     "min_meaningful_spot_notional_usd": 1.0,
-    "per_trade_equity_risk": 0.15,
-    "target_futures_leverage": 15.0,
+    "per_trade_equity_risk": 0.3,
+    "target_futures_leverage": 20.0,
     "max_futures_leverage": 20.0
   },
   "strategy_profile": "live-ultra-aggressive",
@@ -158,7 +162,12 @@
     "atr_stop_multiple": 1.0,
     "atr_tp_multiple": 2.5,
     "max_hold_hours": 8,
-    "symbols": ["SOLUSDT", "XRPUSDT", "ETHUSDT", "BTCUSDT"],
+    "symbols": [
+      "SOLUSDT",
+      "XRPUSDT",
+      "ETHUSDT",
+      "BTCUSDT"
+    ],
     "notional_usd_per_trade": 50.0
   },
   "b3_msb_strategy": {
@@ -166,7 +175,12 @@
     "optimized_at": "2026-04-04T11:20:42.839603+00:00",
     "interval": "1h",
     "lookback_days": 90,
-    "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"],
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "XRPUSDT"
+    ],
     "swing_window": 15,
     "atr_tp_multiple": 4.0,
     "breakout_confirmation_pct": 0.1,
