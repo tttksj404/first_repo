@@ -4714,7 +4714,7 @@ class LivePaperSession:
                 _sl_mult = _cp.short_sl_mult if hold_side == "short" and _cp.short_sl_mult > 0 else _cp.sl_atr_mult
                 # Estimate stop distance in price %
                 _stop_pct = _sl_mult * 0.01 * 1.0  # rough ATR ~1% for majors
-                _r_levels = [0.2, 0.5]
+                _r_levels = [0.5, 1.5]
                 for _r_level in _r_levels:
                     _tp_roe = _r_level * _stop_pct * leverage * 100  # R-multiple → ROE%
                     _r_key = f"{identity}_R{_r_level}"
