@@ -1,0 +1,9002 @@
+[
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.6842,
+    "pf": 1.87,
+    "pnl": 3048.33,
+    "final_eq": 3114.33
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.7179,
+    "pf": 2.28,
+    "pnl": 2945.61,
+    "final_eq": 3011.61
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.6842,
+    "pf": 1.82,
+    "pnl": 2866.0,
+    "final_eq": 2932.0
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7727,
+    "pf": 2.24,
+    "pnl": 2204.54,
+    "final_eq": 2270.54
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.7241,
+    "pf": 4.44,
+    "pnl": 2158.96,
+    "final_eq": 2224.96
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.7179,
+    "pf": 2.18,
+    "pnl": 2152.34,
+    "final_eq": 2218.34
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7209,
+    "pf": 1.91,
+    "pnl": 2113.96,
+    "final_eq": 2179.96
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 7.9,
+    "pnl": 1925.24,
+    "final_eq": 1991.24
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.725,
+    "pf": 1.84,
+    "pnl": 1807.19,
+    "final_eq": 1873.19
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7209,
+    "pf": 1.89,
+    "pnl": 1755.9,
+    "final_eq": 1821.9
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.7241,
+    "pf": 4.18,
+    "pnl": 1678.02,
+    "final_eq": 1744.02
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.7586,
+    "pf": 8.32,
+    "pnl": 1652.35,
+    "final_eq": 1718.35
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.725,
+    "pf": 1.82,
+    "pnl": 1625.27,
+    "final_eq": 1691.27
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 55,
+    "wr": 0.6545,
+    "pf": 1.45,
+    "pnl": 1617.63,
+    "final_eq": 1683.63
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.7179,
+    "pf": 2.7,
+    "pnl": 1595.59,
+    "final_eq": 1661.59
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.6842,
+    "pf": 2.04,
+    "pnl": 1585.02,
+    "final_eq": 1651.02
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 55,
+    "wr": 0.6545,
+    "pf": 1.42,
+    "pnl": 1580.84,
+    "final_eq": 1646.84
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.8182,
+    "pf": 7.4,
+    "pnl": 1556.02,
+    "final_eq": 1622.02
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.6842,
+    "pf": 2.0,
+    "pnl": 1509.03,
+    "final_eq": 1575.03
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.43,
+    "pnl": 1481.39,
+    "final_eq": 1547.39
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 51,
+    "wr": 0.6863,
+    "pf": 4.75,
+    "pnl": 1375.8,
+    "final_eq": 1441.8
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 60,
+    "wr": 0.7667,
+    "pf": 1.57,
+    "pnl": 1285.89,
+    "final_eq": 1351.89
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.7179,
+    "pf": 2.55,
+    "pnl": 1224.53,
+    "final_eq": 1290.53
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7727,
+    "pf": 2.62,
+    "pnl": 1186.74,
+    "final_eq": 1252.74
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.7037,
+    "pf": 5.35,
+    "pnl": 1174.84,
+    "final_eq": 1240.84
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7209,
+    "pf": 2.2,
+    "pnl": 1133.36,
+    "final_eq": 1199.36
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 51,
+    "wr": 0.6863,
+    "pf": 4.06,
+    "pnl": 1093.75,
+    "final_eq": 1159.75
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.7037,
+    "pf": 5.08,
+    "pnl": 1091.96,
+    "final_eq": 1157.96
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.7872,
+    "pf": 1.71,
+    "pnl": 1080.53,
+    "final_eq": 1146.53
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 48,
+    "wr": 0.8125,
+    "pf": 2.98,
+    "pnl": 1052.8,
+    "final_eq": 1118.8
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.7241,
+    "pf": 4.74,
+    "pnl": 1045.28,
+    "final_eq": 1111.28
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.725,
+    "pf": 2.11,
+    "pnl": 1030.53,
+    "final_eq": 1096.53
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.6,
+    "pf": 1.56,
+    "pnl": 1008.29,
+    "final_eq": 1074.29
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 55,
+    "wr": 0.6545,
+    "pf": 1.62,
+    "pnl": 997.2,
+    "final_eq": 1063.2
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 55,
+    "wr": 0.6545,
+    "pf": 1.59,
+    "pnl": 980.06,
+    "final_eq": 1046.06
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.96,
+    "pnl": 977.57,
+    "final_eq": 1043.57
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.8077,
+    "pf": 5.32,
+    "pnl": 976.66,
+    "final_eq": 1042.66
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7209,
+    "pf": 2.16,
+    "pnl": 970.48,
+    "final_eq": 1036.48
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.6,
+    "pf": 1.75,
+    "pnl": 964.09,
+    "final_eq": 1030.09
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 56,
+    "wr": 0.6607,
+    "pf": 3.78,
+    "pnl": 951.58,
+    "final_eq": 1017.58
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.725,
+    "pf": 2.08,
+    "pnl": 943.09,
+    "final_eq": 1009.09
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 51,
+    "wr": 0.6863,
+    "pf": 4.24,
+    "pnl": 934.75,
+    "final_eq": 1000.75
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7045,
+    "pf": 1.94,
+    "pnl": 910.75,
+    "final_eq": 976.75
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 52,
+    "wr": 0.75,
+    "pf": 2.29,
+    "pnl": 877.77,
+    "final_eq": 943.77
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7045,
+    "pf": 1.88,
+    "pnl": 863.5,
+    "final_eq": 929.5
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 56,
+    "wr": 0.6607,
+    "pf": 3.47,
+    "pnl": 862.85,
+    "final_eq": 928.85
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.7241,
+    "pf": 4.4,
+    "pnl": 843.78,
+    "final_eq": 909.78
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 60,
+    "wr": 0.7667,
+    "pf": 1.76,
+    "pnl": 835.64,
+    "final_eq": 901.64
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.7586,
+    "pf": 6.99,
+    "pnl": 833.05,
+    "final_eq": 899.05
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.6452,
+    "pf": 3.06,
+    "pnl": 821.27,
+    "final_eq": 887.27
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.6,
+    "pf": 1.5,
+    "pnl": 815.76,
+    "final_eq": 881.76
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.6,
+    "pf": 1.68,
+    "pnl": 807.93,
+    "final_eq": 873.93
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.7,
+    "pf": 2.12,
+    "pnl": 789.37,
+    "final_eq": 855.37
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.8182,
+    "pf": 6.46,
+    "pnl": 782.91,
+    "final_eq": 848.91
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.83,
+    "pnl": 779.23,
+    "final_eq": 845.23
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 51,
+    "wr": 0.6863,
+    "pf": 3.73,
+    "pnl": 768.89,
+    "final_eq": 834.89
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6304,
+    "pf": 2.69,
+    "pnl": 729.69,
+    "final_eq": 795.69
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6304,
+    "pf": 2.62,
+    "pnl": 713.43,
+    "final_eq": 779.43
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 22,
+    "wr": 0.7273,
+    "pf": 4.99,
+    "pnl": 709.32,
+    "final_eq": 775.32
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 49,
+    "wr": 0.6327,
+    "pf": 2.17,
+    "pnl": 694.41,
+    "final_eq": 760.41
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 78,
+    "wr": 0.7308,
+    "pf": 1.66,
+    "pnl": 691.73,
+    "final_eq": 757.73
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.7895,
+    "pf": 3.76,
+    "pnl": 683.05,
+    "final_eq": 749.05
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 56,
+    "wr": 0.6607,
+    "pf": 3.47,
+    "pnl": 667.47,
+    "final_eq": 733.47
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6071,
+    "pf": 3.59,
+    "pnl": 662.04,
+    "final_eq": 728.04
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.7037,
+    "pf": 4.98,
+    "pnl": 661.07,
+    "final_eq": 727.07
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.7872,
+    "pf": 1.93,
+    "pnl": 649.43,
+    "final_eq": 715.43
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.7222,
+    "pf": 1.41,
+    "pnl": 639.36,
+    "final_eq": 705.36
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.72,
+    "pf": 3.38,
+    "pnl": 632.57,
+    "final_eq": 698.57
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.6452,
+    "pf": 2.77,
+    "pnl": 624.67,
+    "final_eq": 690.67
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.7037,
+    "pf": 4.76,
+    "pnl": 620.55,
+    "final_eq": 686.55
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 22,
+    "wr": 0.7273,
+    "pf": 4.48,
+    "pnl": 617.97,
+    "final_eq": 683.97
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 24,
+    "wr": 0.75,
+    "pf": 1.98,
+    "pnl": 613.66,
+    "final_eq": 679.66
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 56,
+    "wr": 0.6607,
+    "pf": 3.23,
+    "pnl": 613.3,
+    "final_eq": 679.3
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.7561,
+    "pf": 3.82,
+    "pnl": 606.89,
+    "final_eq": 672.89
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.6923,
+    "pf": 2.57,
+    "pnl": 592.03,
+    "final_eq": 658.03
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.7872,
+    "pf": 2.14,
+    "pnl": 586.68,
+    "final_eq": 652.68
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.7,
+    "pf": 2.01,
+    "pnl": 585.7,
+    "final_eq": 651.7
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7045,
+    "pf": 2.1,
+    "pnl": 582.59,
+    "final_eq": 648.59
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 48,
+    "wr": 0.8125,
+    "pf": 3.04,
+    "pnl": 567.83,
+    "final_eq": 633.83
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 2.16,
+    "pnl": 567.27,
+    "final_eq": 633.27
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 85,
+    "wr": 0.5765,
+    "pf": 1.46,
+    "pnl": 564.92,
+    "final_eq": 630.92
+  },
+  {
+    "combo": "rsi40-60+vwap-",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 73,
+    "wr": 0.8219,
+    "pf": 1.76,
+    "pnl": 564.65,
+    "final_eq": 630.65
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 49,
+    "wr": 0.7347,
+    "pf": 3.7,
+    "pnl": 564.05,
+    "final_eq": 630.05
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.72,
+    "pf": 3.19,
+    "pnl": 563.45,
+    "final_eq": 629.45
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.76,
+    "pf": 2.66,
+    "pnl": 561.78,
+    "final_eq": 627.78
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 66,
+    "wr": 0.6212,
+    "pf": 2.06,
+    "pnl": 561.12,
+    "final_eq": 627.12
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.7407,
+    "pf": 4.02,
+    "pnl": 556.13,
+    "final_eq": 622.13
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7045,
+    "pf": 2.04,
+    "pnl": 555.49,
+    "final_eq": 621.49
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 52,
+    "wr": 0.75,
+    "pf": 2.49,
+    "pnl": 552.34,
+    "final_eq": 618.34
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6071,
+    "pf": 3.16,
+    "pnl": 551.79,
+    "final_eq": 617.79
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 61,
+    "wr": 0.6393,
+    "pf": 1.23,
+    "pnl": 548.3,
+    "final_eq": 614.3
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 85,
+    "wr": 0.5765,
+    "pf": 1.6,
+    "pnl": 540.09,
+    "final_eq": 606.09
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 85,
+    "wr": 0.5765,
+    "pf": 1.44,
+    "pnl": 539.35,
+    "final_eq": 605.35
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 35,
+    "wr": 0.7429,
+    "pf": 3.23,
+    "pnl": 539.22,
+    "final_eq": 605.22
+  },
+  {
+    "combo": "mtf4+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 2.15,
+    "pnl": 538.25,
+    "final_eq": 604.25
+  },
+  {
+    "combo": "mtf3++mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 2.15,
+    "pnl": 538.25,
+    "final_eq": 604.25
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.7879,
+    "pf": 3.07,
+    "pnl": 528.97,
+    "final_eq": 594.97
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.8077,
+    "pf": 5.16,
+    "pnl": 526.12,
+    "final_eq": 592.12
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.8148,
+    "pf": 3.85,
+    "pnl": 524.79,
+    "final_eq": 590.79
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 24,
+    "wr": 0.75,
+    "pf": 1.94,
+    "pnl": 523.97,
+    "final_eq": 589.97
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 66,
+    "wr": 0.6212,
+    "pf": 2.03,
+    "pnl": 523.34,
+    "final_eq": 589.34
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.6923,
+    "pf": 2.49,
+    "pnl": 522.45,
+    "final_eq": 588.45
+  },
+  {
+    "combo": "atr_exp+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 107,
+    "wr": 0.5607,
+    "pf": 1.35,
+    "pnl": 519.58,
+    "final_eq": 585.58
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 85,
+    "wr": 0.5765,
+    "pf": 1.58,
+    "pnl": 519.03,
+    "final_eq": 585.03
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 60,
+    "wr": 0.6833,
+    "pf": 2.84,
+    "pnl": 518.65,
+    "final_eq": 584.65
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.7,
+    "pf": 2.44,
+    "pnl": 518.44,
+    "final_eq": 584.44
+  },
+  {
+    "combo": "atr_exp+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 107,
+    "wr": 0.5607,
+    "pf": 1.5,
+    "pnl": 513.76,
+    "final_eq": 579.76
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.6452,
+    "pf": 3.19,
+    "pnl": 507.61,
+    "final_eq": 573.61
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 49,
+    "wr": 0.6327,
+    "pf": 2.04,
+    "pnl": 506.96,
+    "final_eq": 572.96
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.7222,
+    "pf": 1.6,
+    "pnl": 506.07,
+    "final_eq": 572.07
+  },
+  {
+    "combo": "vwap++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 89,
+    "wr": 0.5955,
+    "pf": 1.46,
+    "pnl": 503.38,
+    "final_eq": 569.38
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 62,
+    "wr": 0.6774,
+    "pf": 1.42,
+    "pnl": 501.58,
+    "final_eq": 567.58
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 61,
+    "wr": 0.6393,
+    "pf": 1.21,
+    "pnl": 501.53,
+    "final_eq": 567.53
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 59,
+    "wr": 0.6271,
+    "pf": 1.17,
+    "pnl": 497.0,
+    "final_eq": 563.0
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.6176,
+    "pf": 1.75,
+    "pnl": 496.77,
+    "final_eq": 562.77
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 49,
+    "wr": 0.6327,
+    "pf": 2.39,
+    "pnl": 492.37,
+    "final_eq": 558.37
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.8,
+    "pf": 13.76,
+    "pnl": 491.22,
+    "final_eq": 557.22
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.6176,
+    "pf": 1.92,
+    "pnl": 488.97,
+    "final_eq": 554.97
+  },
+  {
+    "combo": "atr_exp+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 107,
+    "wr": 0.5607,
+    "pf": 1.46,
+    "pnl": 483.68,
+    "final_eq": 549.68
+  },
+  {
+    "combo": "atr_exp+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 107,
+    "wr": 0.5607,
+    "pf": 1.31,
+    "pnl": 483.06,
+    "final_eq": 549.06
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.6818,
+    "pf": 1.5,
+    "pnl": 482.6,
+    "final_eq": 548.6
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 8,
+    "wr": 0.75,
+    "pf": 63.64,
+    "pnl": 476.5,
+    "final_eq": 542.5
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 5.21,
+    "pnl": 475.88,
+    "final_eq": 541.88
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 5.21,
+    "pnl": 475.88,
+    "final_eq": 541.88
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 55,
+    "wr": 0.6545,
+    "pf": 4.0,
+    "pnl": 473.76,
+    "final_eq": 539.76
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 23,
+    "wr": 0.7391,
+    "pf": 3.61,
+    "pnl": 472.8,
+    "final_eq": 538.8
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 32,
+    "wr": 0.6562,
+    "pf": 2.94,
+    "pnl": 470.55,
+    "final_eq": 536.55
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.76,
+    "pf": 2.51,
+    "pnl": 469.59,
+    "final_eq": 535.59
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 61,
+    "wr": 0.6393,
+    "pf": 1.37,
+    "pnl": 468.28,
+    "final_eq": 534.28
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 23,
+    "wr": 0.7391,
+    "pf": 3.56,
+    "pnl": 468.27,
+    "final_eq": 534.27
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.78,
+    "pnl": 466.46,
+    "final_eq": 532.46
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.78,
+    "pnl": 466.46,
+    "final_eq": 532.46
+  },
+  {
+    "combo": "ttm+london+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6667,
+    "pf": 2.24,
+    "pnl": 464.57,
+    "final_eq": 530.57
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 59,
+    "wr": 0.6271,
+    "pf": 1.17,
+    "pnl": 461.63,
+    "final_eq": 527.63
+  },
+  {
+    "combo": "vwap++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 89,
+    "wr": 0.5955,
+    "pf": 1.28,
+    "pnl": 461.19,
+    "final_eq": 527.19
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.7895,
+    "pf": 3.68,
+    "pnl": 458.5,
+    "final_eq": 524.5
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 48,
+    "wr": 0.7292,
+    "pf": 2.75,
+    "pnl": 458.27,
+    "final_eq": 524.27
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 62,
+    "wr": 0.6774,
+    "pf": 1.4,
+    "pnl": 458.24,
+    "final_eq": 524.24
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.6176,
+    "pf": 1.73,
+    "pnl": 457.19,
+    "final_eq": 523.19
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.6176,
+    "pf": 1.9,
+    "pnl": 455.78,
+    "final_eq": 521.78
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6304,
+    "pf": 2.73,
+    "pnl": 450.29,
+    "final_eq": 516.29
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 59,
+    "wr": 0.6271,
+    "pf": 1.3,
+    "pnl": 449.28,
+    "final_eq": 515.28
+  },
+  {
+    "combo": "rsi40-60+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 101,
+    "wr": 0.5545,
+    "pf": 1.51,
+    "pnl": 446.66,
+    "final_eq": 512.66
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.7308,
+    "pf": 3.22,
+    "pnl": 445.43,
+    "final_eq": 511.43
+  },
+  {
+    "combo": "vwap++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 89,
+    "wr": 0.5955,
+    "pf": 1.41,
+    "pnl": 443.7,
+    "final_eq": 509.7
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 65,
+    "wr": 0.7692,
+    "pf": 1.31,
+    "pnl": 442.47,
+    "final_eq": 508.47
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 78,
+    "wr": 0.7308,
+    "pf": 1.75,
+    "pnl": 442.14,
+    "final_eq": 508.14
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 66,
+    "wr": 0.6212,
+    "pf": 1.79,
+    "pnl": 441.55,
+    "final_eq": 507.55
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 11,
+    "wr": 0.6364,
+    "pf": 3.75,
+    "pnl": 440.95,
+    "final_eq": 506.95
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6304,
+    "pf": 2.66,
+    "pnl": 440.07,
+    "final_eq": 506.07
+  },
+  {
+    "combo": "london",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 116,
+    "wr": 0.6466,
+    "pf": 1.36,
+    "pnl": 438.89,
+    "final_eq": 504.89
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 4.92,
+    "pnl": 438.71,
+    "final_eq": 504.71
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 4.92,
+    "pnl": 438.71,
+    "final_eq": 504.71
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 61,
+    "wr": 0.6393,
+    "pf": 1.35,
+    "pnl": 435.71,
+    "final_eq": 501.71
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.7317,
+    "pf": 2.77,
+    "pnl": 435.21,
+    "final_eq": 501.21
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6071,
+    "pf": 3.57,
+    "pnl": 434.03,
+    "final_eq": 500.03
+  },
+  {
+    "combo": "atr_exp",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 92,
+    "wr": 0.663,
+    "pf": 1.49,
+    "pnl": 430.59,
+    "final_eq": 496.59
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.6207,
+    "pf": 2.66,
+    "pnl": 430.52,
+    "final_eq": 496.52
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.39,
+    "pnl": 429.94,
+    "final_eq": 495.94
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.39,
+    "pnl": 429.94,
+    "final_eq": 495.94
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.75,
+    "pf": 6.39,
+    "pnl": 427.72,
+    "final_eq": 493.72
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6786,
+    "pf": 2.17,
+    "pnl": 427.39,
+    "final_eq": 493.39
+  },
+  {
+    "combo": "london",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 116,
+    "wr": 0.6466,
+    "pf": 1.23,
+    "pnl": 427.19,
+    "final_eq": 493.19
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 83,
+    "wr": 0.7349,
+    "pf": 1.38,
+    "pnl": 426.31,
+    "final_eq": 492.31
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 1.89,
+    "pnl": 425.25,
+    "final_eq": 491.25
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.6296,
+    "pf": 3.42,
+    "pnl": 424.33,
+    "final_eq": 490.33
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 58,
+    "wr": 0.6034,
+    "pf": 2.53,
+    "pnl": 424.21,
+    "final_eq": 490.21
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 36,
+    "wr": 0.75,
+    "pf": 2.54,
+    "pnl": 422.56,
+    "final_eq": 488.56
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 59,
+    "wr": 0.6271,
+    "pf": 1.3,
+    "pnl": 421.66,
+    "final_eq": 487.66
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.33,
+    "pnl": 421.01,
+    "final_eq": 487.01
+  },
+  {
+    "combo": "london+msb++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6739,
+    "pf": 2.07,
+    "pnl": 420.35,
+    "final_eq": 486.35
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 4.77,
+    "pnl": 419.28,
+    "final_eq": 485.28
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 62,
+    "wr": 0.6774,
+    "pf": 1.57,
+    "pnl": 417.04,
+    "final_eq": 483.04
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 22,
+    "wr": 0.7273,
+    "pf": 4.95,
+    "pnl": 416.61,
+    "final_eq": 482.61
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 8,
+    "wr": 0.75,
+    "pf": 54.92,
+    "pnl": 415.07,
+    "final_eq": 481.07
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 51,
+    "wr": 0.6667,
+    "pf": 1.73,
+    "pnl": 413.46,
+    "final_eq": 479.46
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.6,
+    "pnl": 412.67,
+    "final_eq": 478.67
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 37,
+    "wr": 0.7297,
+    "pf": 1.86,
+    "pnl": 411.64,
+    "final_eq": 477.64
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.7556,
+    "pf": 1.68,
+    "pnl": 411.18,
+    "final_eq": 477.18
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.23,
+    "pnl": 410.84,
+    "final_eq": 476.84
+  },
+  {
+    "combo": "london+msb++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6739,
+    "pf": 2.07,
+    "pnl": 410.61,
+    "final_eq": 476.61
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.6818,
+    "pf": 1.72,
+    "pnl": 410.56,
+    "final_eq": 476.56
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.5614,
+    "pf": 2.56,
+    "pnl": 406.5,
+    "final_eq": 472.5
+  },
+  {
+    "combo": "rsi30-50+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 66,
+    "wr": 0.6212,
+    "pf": 1.75,
+    "pnl": 403.49,
+    "final_eq": 469.49
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.6452,
+    "pf": 2.89,
+    "pnl": 400.8,
+    "final_eq": 466.8
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.7,
+    "pf": 2.28,
+    "pnl": 400.78,
+    "final_eq": 466.78
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 4.27,
+    "pnl": 400.25,
+    "final_eq": 466.25
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.45,
+    "pnl": 399.15,
+    "final_eq": 465.15
+  },
+  {
+    "combo": "mtf4+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.7556,
+    "pf": 1.68,
+    "pnl": 398.45,
+    "final_eq": 464.45
+  },
+  {
+    "combo": "mtf3++mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.7556,
+    "pf": 1.68,
+    "pnl": 398.45,
+    "final_eq": 464.45
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 24,
+    "wr": 0.75,
+    "pf": 2.26,
+    "pnl": 398.06,
+    "final_eq": 464.06
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.72,
+    "pf": 3.37,
+    "pnl": 397.13,
+    "final_eq": 463.13
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 2.03,
+    "pnl": 396.83,
+    "final_eq": 462.83
+  },
+  {
+    "combo": "ttm+london+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6667,
+    "pf": 2.09,
+    "pnl": 395.91,
+    "final_eq": 461.91
+  },
+  {
+    "combo": "ttm+rsi40-60",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 53,
+    "wr": 0.6226,
+    "pf": 3.69,
+    "pnl": 395.53,
+    "final_eq": 461.53
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 6.01,
+    "pnl": 395.41,
+    "final_eq": 461.41
+  },
+  {
+    "combo": "intraday",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 131,
+    "wr": 0.5725,
+    "pf": 1.57,
+    "pnl": 394.32,
+    "final_eq": 460.32
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 36,
+    "wr": 0.6389,
+    "pf": 2.48,
+    "pnl": 394.09,
+    "final_eq": 460.09
+  },
+  {
+    "combo": "rsi40-60+vwap-",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 73,
+    "wr": 0.8219,
+    "pf": 1.87,
+    "pnl": 392.93,
+    "final_eq": 458.93
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 2.08,
+    "pnl": 392.9,
+    "final_eq": 458.9
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 4.52,
+    "pnl": 392.88,
+    "final_eq": 458.88
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.59,
+    "pnl": 392.26,
+    "final_eq": 458.26
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 23,
+    "wr": 0.6522,
+    "pf": 3.52,
+    "pnl": 391.67,
+    "final_eq": 457.67
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.58,
+    "pnl": 391.52,
+    "final_eq": 457.52
+  },
+  {
+    "combo": "vwap++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 89,
+    "wr": 0.5955,
+    "pf": 1.24,
+    "pnl": 391.35,
+    "final_eq": 457.35
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.6923,
+    "pf": 2.65,
+    "pnl": 390.4,
+    "final_eq": 456.4
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.75,
+    "pf": 6.8,
+    "pnl": 389.79,
+    "final_eq": 455.79
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.75,
+    "pf": 6.8,
+    "pnl": 389.79,
+    "final_eq": 455.79
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.5965,
+    "pf": 2.6,
+    "pnl": 388.9,
+    "final_eq": 454.9
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.6818,
+    "pf": 1.42,
+    "pnl": 388.84,
+    "final_eq": 454.84
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 36,
+    "wr": 0.6389,
+    "pf": 2.48,
+    "pnl": 387.94,
+    "final_eq": 453.94
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.6207,
+    "pf": 2.51,
+    "pnl": 387.32,
+    "final_eq": 453.32
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.56,
+    "pnl": 386.95,
+    "final_eq": 452.95
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.76,
+    "pnl": 386.5,
+    "final_eq": 452.5
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.76,
+    "pnl": 386.5,
+    "final_eq": 452.5
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 7.64,
+    "pnl": 385.82,
+    "final_eq": 451.82
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 7.64,
+    "pnl": 385.82,
+    "final_eq": 451.82
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.5965,
+    "pf": 2.61,
+    "pnl": 385.48,
+    "final_eq": 451.48
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 62,
+    "wr": 0.6774,
+    "pf": 1.54,
+    "pnl": 385.15,
+    "final_eq": 451.15
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 5.84,
+    "pnl": 384.9,
+    "final_eq": 450.9
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.7561,
+    "pf": 3.57,
+    "pnl": 384.12,
+    "final_eq": 450.12
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.7692,
+    "pf": 3.04,
+    "pnl": 380.73,
+    "final_eq": 446.73
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.6296,
+    "pf": 3.17,
+    "pnl": 380.54,
+    "final_eq": 446.54
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6842,
+    "pf": 3.25,
+    "pnl": 380.45,
+    "final_eq": 446.45
+  },
+  {
+    "combo": "london+msb++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.6818,
+    "pf": 2.01,
+    "pnl": 379.88,
+    "final_eq": 445.88
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6786,
+    "pf": 2.07,
+    "pnl": 378.58,
+    "final_eq": 444.58
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 49,
+    "wr": 0.6327,
+    "pf": 2.22,
+    "pnl": 377.01,
+    "final_eq": 443.01
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.94,
+    "pnl": 376.98,
+    "final_eq": 442.98
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.94,
+    "pnl": 376.98,
+    "final_eq": 442.98
+  },
+  {
+    "combo": "atr_exp+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 65,
+    "wr": 0.7692,
+    "pf": 1.48,
+    "pnl": 376.95,
+    "final_eq": 442.95
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.7872,
+    "pf": 2.3,
+    "pnl": 376.25,
+    "final_eq": 442.25
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 71,
+    "wr": 0.5915,
+    "pf": 1.44,
+    "pnl": 376.03,
+    "final_eq": 442.03
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7059,
+    "pf": 4.07,
+    "pnl": 375.74,
+    "final_eq": 441.74
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 23,
+    "wr": 0.6522,
+    "pf": 3.41,
+    "pnl": 374.88,
+    "final_eq": 440.88
+  },
+  {
+    "combo": "rsi40-60+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 101,
+    "wr": 0.5545,
+    "pf": 1.47,
+    "pnl": 374.85,
+    "final_eq": 440.85
+  },
+  {
+    "combo": "intraday",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 131,
+    "wr": 0.5725,
+    "pf": 1.56,
+    "pnl": 374.7,
+    "final_eq": 440.7
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6087,
+    "pf": 2.06,
+    "pnl": 374.19,
+    "final_eq": 440.19
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.5614,
+    "pf": 2.67,
+    "pnl": 373.62,
+    "final_eq": 439.62
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.5614,
+    "pf": 2.47,
+    "pnl": 372.35,
+    "final_eq": 438.35
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 4.34,
+    "pnl": 371.54,
+    "final_eq": 437.54
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 4.34,
+    "pnl": 371.54,
+    "final_eq": 437.54
+  },
+  {
+    "combo": "london+msb++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.6818,
+    "pf": 2.01,
+    "pnl": 370.94,
+    "final_eq": 436.94
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 57,
+    "wr": 0.5614,
+    "pf": 2.67,
+    "pnl": 370.81,
+    "final_eq": 436.81
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 50,
+    "wr": 0.78,
+    "pf": 1.95,
+    "pnl": 369.87,
+    "final_eq": 435.87
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 22,
+    "wr": 0.7273,
+    "pf": 4.5,
+    "pnl": 369.33,
+    "final_eq": 435.33
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6071,
+    "pf": 3.19,
+    "pnl": 369.31,
+    "final_eq": 435.31
+  },
+  {
+    "combo": "london+vol_spike",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 2.12,
+    "pnl": 368.13,
+    "final_eq": 434.13
+  },
+  {
+    "combo": "atr_exp+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 36,
+    "wr": 0.6944,
+    "pf": 1.76,
+    "pnl": 367.87,
+    "final_eq": 433.87
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 5.17,
+    "pnl": 367.81,
+    "final_eq": 433.81
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 5.17,
+    "pnl": 367.81,
+    "final_eq": 433.81
+  },
+  {
+    "combo": "ttm+london+vol_spike",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.6667,
+    "pf": 18.46,
+    "pnl": 367.48,
+    "final_eq": 433.48
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6538,
+    "pf": 3.94,
+    "pnl": 367.37,
+    "final_eq": 433.37
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6538,
+    "pf": 3.94,
+    "pnl": 367.37,
+    "final_eq": 433.37
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 11,
+    "wr": 0.6364,
+    "pf": 3.63,
+    "pnl": 367.24,
+    "final_eq": 433.24
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.75,
+    "pf": 4.22,
+    "pnl": 366.12,
+    "final_eq": 432.12
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 37,
+    "wr": 0.7297,
+    "pf": 1.83,
+    "pnl": 364.11,
+    "final_eq": 430.11
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.6923,
+    "pf": 2.94,
+    "pnl": 363.58,
+    "final_eq": 429.58
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.4,
+    "pnl": 363.54,
+    "final_eq": 429.54
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.48,
+    "pnl": 361.74,
+    "final_eq": 427.74
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.48,
+    "pnl": 361.74,
+    "final_eq": 427.74
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.75,
+    "pf": 4.04,
+    "pnl": 360.77,
+    "final_eq": 426.77
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.8,
+    "pf": 7.63,
+    "pnl": 360.19,
+    "final_eq": 426.19
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.72,
+    "pf": 3.21,
+    "pnl": 359.25,
+    "final_eq": 425.25
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 7.22,
+    "pnl": 358.51,
+    "final_eq": 424.51
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 7.22,
+    "pnl": 358.51,
+    "final_eq": 424.51
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.62,
+    "pnl": 358.38,
+    "final_eq": 424.38
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.62,
+    "pnl": 358.38,
+    "final_eq": 424.38
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.62,
+    "pnl": 358.38,
+    "final_eq": 424.38
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.76,
+    "pf": 1.99,
+    "pnl": 358.37,
+    "final_eq": 424.37
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.33,
+    "pnl": 358.23,
+    "final_eq": 424.23
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6842,
+    "pf": 3.12,
+    "pnl": 357.43,
+    "final_eq": 423.43
+  },
+  {
+    "combo": "base",
+    "n_filters": 0,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 125,
+    "wr": 0.584,
+    "pf": 1.29,
+    "pnl": 356.49,
+    "final_eq": 422.49
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 42,
+    "wr": 0.619,
+    "pf": 1.56,
+    "pnl": 356.48,
+    "final_eq": 422.48
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 7.21,
+    "pnl": 354.55,
+    "final_eq": 420.55
+  },
+  {
+    "combo": "london+vol_spike",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.45,
+    "pnl": 353.77,
+    "final_eq": 419.77
+  },
+  {
+    "combo": "london+vol_spike+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.5641,
+    "pf": 2.09,
+    "pnl": 352.44,
+    "final_eq": 418.44
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.62,
+    "pnl": 351.68,
+    "final_eq": 417.68
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.62,
+    "pnl": 351.68,
+    "final_eq": 417.68
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.62,
+    "pnl": 351.68,
+    "final_eq": 417.68
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.76,
+    "pf": 2.86,
+    "pnl": 351.49,
+    "final_eq": 417.49
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.5,
+    "pnl": 350.2,
+    "final_eq": 416.2
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.5,
+    "pnl": 350.2,
+    "final_eq": 416.2
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.6923,
+    "pf": 2.56,
+    "pnl": 350.18,
+    "final_eq": 416.18
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.61,
+    "pnl": 349.95,
+    "final_eq": 415.95
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.61,
+    "pnl": 349.95,
+    "final_eq": 415.95
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 35,
+    "wr": 0.7429,
+    "pf": 3.2,
+    "pnl": 349.47,
+    "final_eq": 415.47
+  },
+  {
+    "combo": "atr_exp",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 92,
+    "wr": 0.663,
+    "pf": 1.6,
+    "pnl": 349.18,
+    "final_eq": 415.18
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 10.15,
+    "pnl": 348.31,
+    "final_eq": 414.31
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 10.15,
+    "pnl": 348.31,
+    "final_eq": 414.31
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7917,
+    "pf": 4.75,
+    "pnl": 348.3,
+    "final_eq": 414.3
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 24,
+    "wr": 0.75,
+    "pf": 2.19,
+    "pnl": 348.02,
+    "final_eq": 414.02
+  },
+  {
+    "combo": "london+vol_spike",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.5897,
+    "pf": 1.49,
+    "pnl": 347.57,
+    "final_eq": 413.57
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.49,
+    "pnl": 346.32,
+    "final_eq": 412.32
+  },
+  {
+    "combo": "london+vol_spike",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.561,
+    "pf": 2.06,
+    "pnl": 344.17,
+    "final_eq": 410.17
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.59,
+    "pnl": 343.99,
+    "final_eq": 409.99
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.59,
+    "pnl": 343.99,
+    "final_eq": 409.99
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.59,
+    "pnl": 343.99,
+    "final_eq": 409.99
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.23,
+    "pnl": 342.11,
+    "final_eq": 408.11
+  },
+  {
+    "combo": "msb++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.6774,
+    "pf": 1.85,
+    "pnl": 341.94,
+    "final_eq": 407.94
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 1.8,
+    "pnl": 341.87,
+    "final_eq": 407.87
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.6818,
+    "pf": 1.62,
+    "pnl": 341.19,
+    "final_eq": 407.19
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 4.92,
+    "pnl": 340.72,
+    "final_eq": 406.72
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 47,
+    "wr": 0.6596,
+    "pf": 1.55,
+    "pnl": 339.9,
+    "final_eq": 405.9
+  },
+  {
+    "combo": "london+atr_exp+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 15,
+    "wr": 0.8,
+    "pf": 13.09,
+    "pnl": 339.06,
+    "final_eq": 405.06
+  },
+  {
+    "combo": "london+atr_exp+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 15,
+    "wr": 0.8,
+    "pf": 13.09,
+    "pnl": 339.06,
+    "final_eq": 405.06
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.7407,
+    "pf": 1.45,
+    "pnl": 338.89,
+    "final_eq": 404.89
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 4.44,
+    "pnl": 338.86,
+    "final_eq": 404.86
+  },
+  {
+    "combo": "rsi40-60+vwap-",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 42,
+    "wr": 0.7143,
+    "pf": 2.75,
+    "pnl": 338.61,
+    "final_eq": 404.61
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.2,
+    "pnl": 338.19,
+    "final_eq": 404.19
+  },
+  {
+    "combo": "ttm+rsi40-60",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 52,
+    "wr": 0.5385,
+    "pf": 2.83,
+    "pnl": 338.06,
+    "final_eq": 404.06
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 4.86,
+    "pnl": 338.05,
+    "final_eq": 404.05
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 4.86,
+    "pnl": 338.05,
+    "final_eq": 404.05
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 51,
+    "wr": 0.6667,
+    "pf": 1.93,
+    "pnl": 337.81,
+    "final_eq": 403.81
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.7308,
+    "pf": 2.58,
+    "pnl": 337.8,
+    "final_eq": 403.8
+  },
+  {
+    "combo": "intraday",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 131,
+    "wr": 0.5725,
+    "pf": 1.43,
+    "pnl": 337.72,
+    "final_eq": 403.72
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.59,
+    "pnl": 337.53,
+    "final_eq": 403.53
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.59,
+    "pnl": 337.53,
+    "final_eq": 403.53
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.59,
+    "pnl": 337.53,
+    "final_eq": 403.53
+  },
+  {
+    "combo": "ttm+rsi40-60",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 52,
+    "wr": 0.5385,
+    "pf": 2.83,
+    "pnl": 337.16,
+    "final_eq": 403.16
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.7407,
+    "pf": 3.92,
+    "pnl": 336.36,
+    "final_eq": 402.36
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.12,
+    "pnl": 335.89,
+    "final_eq": 401.89
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 6.12,
+    "pnl": 335.89,
+    "final_eq": 401.89
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.61,
+    "pnl": 335.83,
+    "final_eq": 401.83
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.61,
+    "pnl": 335.83,
+    "final_eq": 401.83
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.61,
+    "pnl": 335.83,
+    "final_eq": 401.83
+  },
+  {
+    "combo": "london+msb++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 1.77,
+    "pnl": 335.18,
+    "final_eq": 401.18
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 6.97,
+    "pnl": 334.6,
+    "final_eq": 400.6
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.3,
+    "pnl": 334.46,
+    "final_eq": 400.46
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.6765,
+    "pf": 2.64,
+    "pnl": 334.04,
+    "final_eq": 400.04
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6087,
+    "pf": 1.94,
+    "pnl": 332.9,
+    "final_eq": 398.9
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 22,
+    "wr": 0.7273,
+    "pf": 3.29,
+    "pnl": 332.59,
+    "final_eq": 398.59
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 6.82,
+    "pnl": 332.44,
+    "final_eq": 398.44
+  },
+  {
+    "combo": "msb++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.6774,
+    "pf": 1.84,
+    "pnl": 331.31,
+    "final_eq": 397.31
+  },
+  {
+    "combo": "mtf3++vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 45,
+    "wr": 0.6667,
+    "pf": 1.54,
+    "pnl": 331.0,
+    "final_eq": 397.0
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 49,
+    "wr": 0.7347,
+    "pf": 3.49,
+    "pnl": 330.9,
+    "final_eq": 396.9
+  },
+  {
+    "combo": "atr_exp+vwap-",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 44,
+    "wr": 0.7045,
+    "pf": 1.84,
+    "pnl": 330.83,
+    "final_eq": 396.83
+  },
+  {
+    "combo": "mtf3++vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.6667,
+    "pf": 1.55,
+    "pnl": 330.42,
+    "final_eq": 396.42
+  },
+  {
+    "combo": "london+whale",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 10.97,
+    "pnl": 330.26,
+    "final_eq": 396.26
+  },
+  {
+    "combo": "london+vol_spike+whale",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 10.97,
+    "pnl": 330.26,
+    "final_eq": 396.26
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.6,
+    "pnl": 329.98,
+    "final_eq": 395.98
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.6,
+    "pnl": 329.98,
+    "final_eq": 395.98
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.6,
+    "pnl": 329.98,
+    "final_eq": 395.98
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 80,
+    "wr": 0.625,
+    "pf": 1.93,
+    "pnl": 329.97,
+    "final_eq": 395.97
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 2.29,
+    "pnl": 329.82,
+    "final_eq": 395.82
+  },
+  {
+    "combo": "london+vol_spike+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.5641,
+    "pf": 2.04,
+    "pnl": 329.34,
+    "final_eq": 395.34
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.3,
+    "pnl": 324.81,
+    "final_eq": 390.81
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.3,
+    "pnl": 324.81,
+    "final_eq": 390.81
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 7.08,
+    "pnl": 324.64,
+    "final_eq": 390.64
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 42,
+    "wr": 0.619,
+    "pf": 1.54,
+    "pnl": 323.6,
+    "final_eq": 389.6
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 11,
+    "wr": 0.6364,
+    "pf": 5.78,
+    "pnl": 323.31,
+    "final_eq": 389.31
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 9.59,
+    "pnl": 323.27,
+    "final_eq": 389.27
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 9.59,
+    "pnl": 323.27,
+    "final_eq": 389.27
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.7317,
+    "pf": 2.86,
+    "pnl": 322.59,
+    "final_eq": 388.59
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.58,
+    "pnl": 322.21,
+    "final_eq": 388.21
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.58,
+    "pnl": 322.21,
+    "final_eq": 388.21
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.58,
+    "pnl": 322.21,
+    "final_eq": 388.21
+  },
+  {
+    "combo": "mtf4+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 47,
+    "wr": 0.6596,
+    "pf": 1.54,
+    "pnl": 321.3,
+    "final_eq": 387.3
+  },
+  {
+    "combo": "mtf3++mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 47,
+    "wr": 0.6596,
+    "pf": 1.54,
+    "pnl": 321.3,
+    "final_eq": 387.3
+  },
+  {
+    "combo": "msb++intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6667,
+    "pf": 1.76,
+    "pnl": 320.81,
+    "final_eq": 386.81
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 4.72,
+    "pnl": 320.79,
+    "final_eq": 386.79
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.91,
+    "pnl": 320.65,
+    "final_eq": 386.65
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 6.62,
+    "pnl": 320.59,
+    "final_eq": 386.59
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.76,
+    "pf": 1.94,
+    "pnl": 319.85,
+    "final_eq": 385.85
+  },
+  {
+    "combo": "london+msb++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 1.76,
+    "pnl": 319.69,
+    "final_eq": 385.69
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 9.59,
+    "pnl": 319.63,
+    "final_eq": 385.63
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.7353,
+    "pf": 2.16,
+    "pnl": 319.47,
+    "final_eq": 385.47
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 4.67,
+    "pnl": 319.34,
+    "final_eq": 385.34
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.8148,
+    "pf": 3.82,
+    "pnl": 319.29,
+    "final_eq": 385.29
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.93,
+    "pnl": 318.99,
+    "final_eq": 384.99
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 6.89,
+    "pnl": 318.96,
+    "final_eq": 384.96
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 1.97,
+    "pnl": 318.75,
+    "final_eq": 384.75
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 32,
+    "wr": 0.6562,
+    "pf": 2.95,
+    "pnl": 318.45,
+    "final_eq": 384.45
+  },
+  {
+    "combo": "ttm+london+vol_spike",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.6667,
+    "pf": 16.07,
+    "pnl": 318.39,
+    "final_eq": 384.39
+  },
+  {
+    "combo": "atr_exp+msb+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 21,
+    "wr": 0.6667,
+    "pf": 1.46,
+    "pnl": 318.21,
+    "final_eq": 384.21
+  },
+  {
+    "combo": "atr_exp+msb++vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 21,
+    "wr": 0.6667,
+    "pf": 1.46,
+    "pnl": 318.21,
+    "final_eq": 384.21
+  },
+  {
+    "combo": "intraday",
+    "n_filters": 1,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 131,
+    "wr": 0.5725,
+    "pf": 1.42,
+    "pnl": 317.64,
+    "final_eq": 383.64
+  },
+  {
+    "combo": "london+mtf3++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.58,
+    "pnl": 317.0,
+    "final_eq": 383.0
+  },
+  {
+    "combo": "london+mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.58,
+    "pnl": 317.0,
+    "final_eq": 383.0
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.58,
+    "pnl": 316.56,
+    "final_eq": 382.56
+  },
+  {
+    "combo": "london+mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.58,
+    "pnl": 316.56,
+    "final_eq": 382.56
+  },
+  {
+    "combo": "london+mtf3++mtf4+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.675,
+    "pf": 1.58,
+    "pnl": 316.56,
+    "final_eq": 382.56
+  },
+  {
+    "combo": "london+vol_spike",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.65,
+    "pf": 1.73,
+    "pnl": 316.31,
+    "final_eq": 382.31
+  },
+  {
+    "combo": "base",
+    "n_filters": 0,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 125,
+    "wr": 0.584,
+    "pf": 1.26,
+    "pnl": 316.17,
+    "final_eq": 382.17
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 1.67,
+    "pnl": 315.64,
+    "final_eq": 381.64
+  },
+  {
+    "combo": "mtf4+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 2.28,
+    "pnl": 315.34,
+    "final_eq": 381.34
+  },
+  {
+    "combo": "mtf3++mtf4+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 47,
+    "wr": 0.6809,
+    "pf": 2.28,
+    "pnl": 315.34,
+    "final_eq": 381.34
+  },
+  {
+    "combo": "mtf4+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 45,
+    "wr": 0.6667,
+    "pf": 1.53,
+    "pnl": 312.81,
+    "final_eq": 378.81
+  },
+  {
+    "combo": "mtf3++mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 45,
+    "wr": 0.6667,
+    "pf": 1.53,
+    "pnl": 312.81,
+    "final_eq": 378.81
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.72,
+    "pnl": 312.36,
+    "final_eq": 378.36
+  },
+  {
+    "combo": "mtf4+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.6667,
+    "pf": 1.54,
+    "pnl": 312.25,
+    "final_eq": 378.25
+  },
+  {
+    "combo": "mtf3++mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.6667,
+    "pf": 1.54,
+    "pnl": 312.25,
+    "final_eq": 378.25
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.48,
+    "pnl": 311.5,
+    "final_eq": 377.5
+  },
+  {
+    "combo": "london+atr_exp+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 15,
+    "wr": 0.8,
+    "pf": 12.34,
+    "pnl": 311.28,
+    "final_eq": 377.28
+  },
+  {
+    "combo": "london+atr_exp+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 15,
+    "wr": 0.8,
+    "pf": 12.34,
+    "pnl": 311.28,
+    "final_eq": 377.28
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 8,
+    "wr": 0.75,
+    "pf": 11.85,
+    "pnl": 311.03,
+    "final_eq": 377.03
+  },
+  {
+    "combo": "london+mtf3++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.58,
+    "pnl": 310.96,
+    "final_eq": 376.96
+  },
+  {
+    "combo": "london+mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.58,
+    "pnl": 310.96,
+    "final_eq": 376.96
+  },
+  {
+    "combo": "atr_exp+rsi30-50",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 29,
+    "wr": 0.6207,
+    "pf": 2.78,
+    "pnl": 310.1,
+    "final_eq": 376.1
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 5.11,
+    "pnl": 310.03,
+    "final_eq": 376.03
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 83,
+    "wr": 0.7349,
+    "pf": 1.48,
+    "pnl": 309.55,
+    "final_eq": 375.55
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 25,
+    "wr": 0.68,
+    "pf": 1.67,
+    "pnl": 309.51,
+    "final_eq": 375.51
+  },
+  {
+    "combo": "atr_exp+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.7879,
+    "pf": 3.2,
+    "pnl": 309.48,
+    "final_eq": 375.48
+  },
+  {
+    "combo": "ttm+rsi30-50+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 41,
+    "wr": 0.6098,
+    "pf": 4.26,
+    "pnl": 308.88,
+    "final_eq": 374.88
+  },
+  {
+    "combo": "ttm+london+vol_spike",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 15,
+    "wr": 0.5333,
+    "pf": 2.95,
+    "pnl": 308.26,
+    "final_eq": 374.26
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 33,
+    "wr": 0.6667,
+    "pf": 4.51,
+    "pnl": 307.92,
+    "final_eq": 373.92
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 9.33,
+    "pnl": 307.68,
+    "final_eq": 373.68
+  },
+  {
+    "combo": "mtf3++vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 43,
+    "wr": 0.7442,
+    "pf": 1.35,
+    "pnl": 307.52,
+    "final_eq": 373.52
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 34,
+    "wr": 0.7647,
+    "pf": 2.06,
+    "pnl": 306.61,
+    "final_eq": 372.61
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 32,
+    "wr": 0.8125,
+    "pf": 1.93,
+    "pnl": 306.52,
+    "final_eq": 372.52
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 15,
+    "side": "both",
+    "trades": 60,
+    "wr": 0.6833,
+    "pf": 2.78,
+    "pnl": 306.14,
+    "final_eq": 372.14
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 69,
+    "wr": 0.7391,
+    "pf": 1.35,
+    "pnl": 306.08,
+    "final_eq": 372.08
+  },
+  {
+    "combo": "london+whale+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 7.32,
+    "pnl": 305.11,
+    "final_eq": 371.11
+  },
+  {
+    "combo": "london+vol_spike+whale+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 7.32,
+    "pnl": 305.11,
+    "final_eq": 371.11
+  },
+  {
+    "combo": "london+msb++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6216,
+    "pf": 1.46,
+    "pnl": 304.83,
+    "final_eq": 370.83
+  },
+  {
+    "combo": "ttm+london+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6667,
+    "pf": 2.41,
+    "pnl": 304.71,
+    "final_eq": 370.71
+  },
+  {
+    "combo": "atr_exp+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 36,
+    "wr": 0.6944,
+    "pf": 1.69,
+    "pnl": 304.57,
+    "final_eq": 370.57
+  },
+  {
+    "combo": "london+atr_exp+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 15,
+    "wr": 0.8,
+    "pf": 12.33,
+    "pnl": 304.49,
+    "final_eq": 370.49
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 2.48,
+    "pnl": 304.48,
+    "final_eq": 370.48
+  },
+  {
+    "combo": "base",
+    "n_filters": 0,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 133,
+    "wr": 0.5639,
+    "pf": 1.49,
+    "pnl": 304.22,
+    "final_eq": 370.22
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6333,
+    "pf": 4.32,
+    "pnl": 303.9,
+    "final_eq": 369.9
+  },
+  {
+    "combo": "ttm+london+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 27,
+    "wr": 0.8519,
+    "pf": 2.02,
+    "pnl": 303.66,
+    "final_eq": 369.66
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 26,
+    "wr": 0.7308,
+    "pf": 2.44,
+    "pnl": 303.59,
+    "final_eq": 369.59
+  },
+  {
+    "combo": "atr_exp+vwap+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 69,
+    "wr": 0.7391,
+    "pf": 1.2,
+    "pnl": 303.49,
+    "final_eq": 369.49
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 8,
+    "wr": 0.75,
+    "pf": 12.7,
+    "pnl": 303.49,
+    "final_eq": 369.49
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 23,
+    "wr": 0.6957,
+    "pf": 2.0,
+    "pnl": 303.38,
+    "final_eq": 369.38
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 2.89,
+    "pnl": 303.33,
+    "final_eq": 369.33
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.7407,
+    "pf": 1.62,
+    "pnl": 303.05,
+    "final_eq": 369.05
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 23,
+    "wr": 0.7391,
+    "pf": 3.69,
+    "pnl": 302.91,
+    "final_eq": 368.91
+  },
+  {
+    "combo": "rsi40-60+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 101,
+    "wr": 0.5545,
+    "pf": 1.33,
+    "pnl": 302.17,
+    "final_eq": 368.17
+  },
+  {
+    "combo": "london+msb++vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.6889,
+    "pf": 1.71,
+    "pnl": 301.79,
+    "final_eq": 367.79
+  },
+  {
+    "combo": "london+whale",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 10.82,
+    "pnl": 301.7,
+    "final_eq": 367.7
+  },
+  {
+    "combo": "london+vol_spike+whale",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 10.82,
+    "pnl": 301.7,
+    "final_eq": 367.7
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 6.87,
+    "pnl": 301.59,
+    "final_eq": 367.59
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.537,
+    "pf": 1.59,
+    "pnl": 301.12,
+    "final_eq": 367.12
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 25,
+    "wr": 0.76,
+    "pf": 2.69,
+    "pnl": 301.05,
+    "final_eq": 367.05
+  },
+  {
+    "combo": "rsi40-60+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 64,
+    "wr": 0.6406,
+    "pf": 1.79,
+    "pnl": 301.01,
+    "final_eq": 367.01
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.6786,
+    "pf": 2.29,
+    "pnl": 300.8,
+    "final_eq": 366.8
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.33,
+    "pnl": 300.63,
+    "final_eq": 366.63
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 23,
+    "wr": 0.7391,
+    "pf": 3.64,
+    "pnl": 299.98,
+    "final_eq": 365.98
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 9.04,
+    "pnl": 299.35,
+    "final_eq": 365.35
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 22,
+    "wr": 0.7273,
+    "pf": 3.07,
+    "pnl": 299.02,
+    "final_eq": 365.02
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 24,
+    "wr": 0.7083,
+    "pf": 2.79,
+    "pnl": 298.76,
+    "final_eq": 364.76
+  },
+  {
+    "combo": "ttm+vol_spike+rsi30-50+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 12,
+    "wr": 0.6667,
+    "pf": 4.79,
+    "pnl": 298.5,
+    "final_eq": 364.5
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 4.54,
+    "pnl": 298.21,
+    "final_eq": 364.21
+  },
+  {
+    "combo": "london+mtf3++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.55,
+    "pnl": 298.11,
+    "final_eq": 364.11
+  },
+  {
+    "combo": "london+mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.55,
+    "pnl": 298.11,
+    "final_eq": 364.11
+  },
+  {
+    "combo": "ttm+london+vol_spike+rsi30-50",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 8,
+    "wr": 0.75,
+    "pf": 12.01,
+    "pnl": 298.02,
+    "final_eq": 364.02
+  },
+  {
+    "combo": "atr_exp+rsi40-60+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 36,
+    "wr": 0.6944,
+    "pf": 1.95,
+    "pnl": 297.96,
+    "final_eq": 363.96
+  },
+  {
+    "combo": "mtf4+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 43,
+    "wr": 0.7442,
+    "pf": 1.35,
+    "pnl": 297.56,
+    "final_eq": 363.56
+  },
+  {
+    "combo": "mtf3++mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 43,
+    "wr": 0.7442,
+    "pf": 1.35,
+    "pnl": 297.56,
+    "final_eq": 363.56
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "long",
+    "trades": 23,
+    "wr": 0.6957,
+    "pf": 2.0,
+    "pnl": 297.45,
+    "final_eq": 363.45
+  },
+  {
+    "combo": "london+msb++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6216,
+    "pf": 1.46,
+    "pnl": 297.39,
+    "final_eq": 363.39
+  },
+  {
+    "combo": "msb++vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6667,
+    "pf": 1.74,
+    "pnl": 297.05,
+    "final_eq": 363.05
+  },
+  {
+    "combo": "london+mtf3++vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.57,
+    "pnl": 296.66,
+    "final_eq": 362.66
+  },
+  {
+    "combo": "london+mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.57,
+    "pnl": 296.66,
+    "final_eq": 362.66
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 37,
+    "wr": 0.7297,
+    "pf": 2.01,
+    "pnl": 296.45,
+    "final_eq": 362.45
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6333,
+    "pf": 4.18,
+    "pnl": 296.2,
+    "final_eq": 362.2
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 26,
+    "wr": 0.6923,
+    "pf": 4.88,
+    "pnl": 295.47,
+    "final_eq": 361.47
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.537,
+    "pf": 1.59,
+    "pnl": 295.33,
+    "final_eq": 361.33
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 15,
+    "side": "both",
+    "trades": 31,
+    "wr": 0.7097,
+    "pf": 2.3,
+    "pnl": 294.71,
+    "final_eq": 360.71
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.39,
+    "pnl": 294.7,
+    "final_eq": 360.7
+  },
+  {
+    "combo": "mtf3++vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7442,
+    "pf": 1.37,
+    "pnl": 294.6,
+    "final_eq": 360.6
+  },
+  {
+    "combo": "atr_exp+msb+",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 21,
+    "wr": 0.6667,
+    "pf": 1.45,
+    "pnl": 294.08,
+    "final_eq": 360.08
+  },
+  {
+    "combo": "atr_exp+msb++vwap+",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 21,
+    "wr": 0.6667,
+    "pf": 1.45,
+    "pnl": 294.08,
+    "final_eq": 360.08
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6333,
+    "pf": 2.04,
+    "pnl": 293.96,
+    "final_eq": 359.96
+  },
+  {
+    "combo": "london+mtf3++vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.55,
+    "pnl": 292.37,
+    "final_eq": 358.37
+  },
+  {
+    "combo": "london+mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6579,
+    "pf": 1.55,
+    "pnl": 292.37,
+    "final_eq": 358.37
+  },
+  {
+    "combo": "base",
+    "n_filters": 0,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 133,
+    "wr": 0.5639,
+    "pf": 1.49,
+    "pnl": 291.72,
+    "final_eq": 357.72
+  },
+  {
+    "combo": "london+mtf3++vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.57,
+    "pnl": 291.37,
+    "final_eq": 357.37
+  },
+  {
+    "combo": "london+mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 37,
+    "wr": 0.6486,
+    "pf": 1.57,
+    "pnl": 291.37,
+    "final_eq": 357.37
+  },
+  {
+    "combo": "ttm+vol_spike+rsi30-50+intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.7778,
+    "pf": 8.44,
+    "pnl": 291.25,
+    "final_eq": 357.25
+  },
+  {
+    "combo": "rsi30-50",
+    "n_filters": 1,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 68,
+    "wr": 0.5735,
+    "pf": 1.37,
+    "pnl": 291.1,
+    "final_eq": 357.1
+  },
+  {
+    "combo": "ttm",
+    "n_filters": 1,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 38,
+    "wr": 0.6316,
+    "pf": 2.69,
+    "pnl": 290.98,
+    "final_eq": 356.98
+  },
+  {
+    "combo": "ttm+london+vol_spike+intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 8,
+    "wr": 0.75,
+    "pf": 10.52,
+    "pnl": 290.63,
+    "final_eq": 356.63
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 24,
+    "wr": 0.625,
+    "pf": 6.58,
+    "pnl": 290.63,
+    "final_eq": 356.63
+  },
+  {
+    "combo": "london+vol_spike",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 40,
+    "wr": 0.65,
+    "pf": 1.68,
+    "pnl": 290.55,
+    "final_eq": 356.55
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 15,
+    "side": "both",
+    "trades": 48,
+    "wr": 0.7292,
+    "pf": 2.79,
+    "pnl": 290.54,
+    "final_eq": 356.54
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.7,
+    "pf": 8.79,
+    "pnl": 289.9,
+    "final_eq": 355.9
+  },
+  {
+    "combo": "mtf3++intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.33,
+    "pnl": 289.52,
+    "final_eq": 355.52
+  },
+  {
+    "combo": "mtf4+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.537,
+    "pf": 1.59,
+    "pnl": 289.37,
+    "final_eq": 355.37
+  },
+  {
+    "combo": "mtf3++mtf4+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 54,
+    "wr": 0.537,
+    "pf": 1.59,
+    "pnl": 289.37,
+    "final_eq": 355.37
+  },
+  {
+    "combo": "london+msb++intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 38,
+    "wr": 0.6053,
+    "pf": 1.45,
+    "pnl": 289.33,
+    "final_eq": 355.33
+  },
+  {
+    "combo": "mtf4+intraday",
+    "n_filters": 2,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.33,
+    "pnl": 289.29,
+    "final_eq": 355.29
+  },
+  {
+    "combo": "mtf3++mtf4+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.5294,
+    "pf": 1.33,
+    "pnl": 289.29,
+    "final_eq": 355.29
+  },
+  {
+    "combo": "ttm+london+vol_spike",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 9,
+    "wr": 0.6667,
+    "pf": 9.93,
+    "pnl": 287.95,
+    "final_eq": 353.95
+  },
+  {
+    "combo": "atr_exp+rsi30-50+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 20,
+    "wr": 0.75,
+    "pf": 4.83,
+    "pnl": 287.83,
+    "final_eq": 353.83
+  },
+  {
+    "combo": "msb++vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6667,
+    "pf": 1.73,
+    "pnl": 287.59,
+    "final_eq": 353.59
+  },
+  {
+    "combo": "london+msb++vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 20,
+    "side": "both",
+    "trades": 45,
+    "wr": 0.6889,
+    "pf": 1.7,
+    "pnl": 287.59,
+    "final_eq": 353.59
+  },
+  {
+    "combo": "atr_exp+vol_spike+intraday",
+    "n_filters": 3,
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 39,
+    "wr": 0.6923,
+    "pf": 1.86,
+    "pnl": 287.45,
+    "final_eq": 353.45
+  },
+  {
+    "combo": "rsi30-50+rsi40-60+vwap-",
+    "n_filters": 3,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 32,
+    "wr": 0.7188,
+    "pf": 3.39,
+    "pnl": 287.23,
+    "final_eq": 353.23
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap+",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 28,
+    "wr": 0.75,
+    "pf": 2.75,
+    "pnl": 287.04,
+    "final_eq": 353.04
+  },
+  {
+    "combo": "atr_exp+rsi30-50+vwap++intraday",
+    "n_filters": 4,
+    "sl": 5.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.6765,
+    "pf": 2.41,
+    "pnl": 286.91,
+    "final_eq": 352.91
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 30,
+    "wr": 0.6333,
+    "pf": 1.98,
+    "pnl": 286.61,
+    "final_eq": 352.61
+  },
+  {
+    "combo": "london+atr_exp+rsi40-60+vwap+",
+    "n_filters": 4,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 35,
+    "hold": 12,
+    "lev": 20,
+    "side": "long",
+    "trades": 15,
+    "wr": 0.8,
+    "pf": 11.61,
+    "pnl": 285.01,
+    "final_eq": 351.01
+  },
+  {
+    "combo": "mtf4+vwap++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7442,
+    "pf": 1.37,
+    "pnl": 284.98,
+    "final_eq": 350.98
+  },
+  {
+    "combo": "mtf3++mtf4+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 20,
+    "side": "both",
+    "trades": 43,
+    "wr": 0.7442,
+    "pf": 1.37,
+    "pnl": 284.98,
+    "final_eq": 350.98
+  },
+  {
+    "combo": "ttm+intraday",
+    "n_filters": 2,
+    "sl": 3.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 46,
+    "wr": 0.6304,
+    "pf": 2.68,
+    "pnl": 284.67,
+    "final_eq": 350.67
+  },
+  {
+    "combo": "atr_exp+rsi40-60+vwap++intraday",
+    "n_filters": 4,
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.5
+    ],
+    "adx": 35,
+    "hold": 24,
+    "lev": 20,
+    "side": "long",
+    "trades": 31,
+    "wr": 0.7742,
+    "pf": 2.63,
+    "pnl": 284.62,
+    "final_eq": 350.62
+  },
+  {
+    "combo": "ttm+vol_spike+intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      2.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 13,
+    "wr": 0.6923,
+    "pf": 3.65,
+    "pnl": 284.52,
+    "final_eq": 350.52
+  },
+  {
+    "combo": "london+mtf3++intraday",
+    "n_filters": 3,
+    "sl": 4.0,
+    "ladder": [
+      1.0,
+      3.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 20,
+    "side": "both",
+    "trades": 34,
+    "wr": 0.6176,
+    "pf": 1.6,
+    "pnl": 284.42,
+    "final_eq": 350.42
+  }
+]
