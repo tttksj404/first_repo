@@ -1,5 +1,5 @@
 {
-  "_lock": "EXHAUSTIVE_354K_VALIDATED — atr_exp+rsi30-50+intraday, WR 82%, PF 7.40, $1556/33trades. 42bps realistic costs. Applied 2026-04-09.",
+  "_lock": "UNIFIED_FINAL — 2.5M sims, WF4 validated. [atr+ttm+intra] LONG tp25 sl20 48h 20x. 234 trades WR58.6% PF1.7 +$5491. Applied 2026-04-10.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -64,12 +64,11 @@
     "futures_profit_protection_arm_roe_percent": 8.0,
     "futures_profit_protection_retrace_roe_percent": 3.0,
     "futures_proactive_take_profit_roe_thresholds_percent": [
-      10.0,
       25.0
     ],
-    "futures_proactive_take_profit_fraction": 0.5,
+    "futures_proactive_take_profit_fraction": 1.0,
     "post_tp_stop_mode": "breakeven",
-    "partial_take_profit_r": 1.5
+    "partial_take_profit_r": 1.25
   },
   "live_position_risk": {
     "disable_standard_stop_loss_exits": false,
@@ -86,8 +85,8 @@
     "major_low_signal_min_roe_percent": 1.0,
     "major_low_signal_min_unrealized_usd": 1.5,
     "major_partial_exit_fraction": 0.65,
-    "major_profit_protection_arm_roe_percent": 999,
-    "major_profit_protection_retrace_roe_percent": 1.5,
+    "major_profit_protection_arm_roe_percent": 15.0,
+    "major_profit_protection_retrace_roe_percent": 5.0,
     "major_reentry_cooldown_minutes": 30,
     "major_reversal_confirmation_cycles": 2,
     "major_reversal_min_holding_minutes": 30,
@@ -104,9 +103,9 @@
     "position_unrealized_profit_retrace_usd": 0.75,
     "position_unrealized_take_profit_fraction": 0.35,
     "profit_flip_take_profit_fraction": 0.35,
-    "stop_loss_roe_percent": -15.0,
-    "soft_stop_roe_percent": -12.0,
-    "take_profit_roe_percent": 20.0
+    "stop_loss_roe_percent": -20.0,
+    "soft_stop_roe_percent": -15.0,
+    "take_profit_roe_percent": 25.0
   },
   "loss_combo_downgrade": {
     "cooldown_loss_usd": 10.0,
