@@ -326,7 +326,7 @@ def run_sim(
             cb.record_trade(position)
 
         trades.append(position)
-        cooldown_until = (position.exit_time or dt) + timedelta(minutes=15)
+        cooldown_until = (position.exit_time or dt) + timedelta(minutes=5)
         position = None
 
     return trades
@@ -383,8 +383,13 @@ def main(argv=None):
 
     symbols = [s.strip() for s in args.symbols.split(",")]
 
-    os.environ.setdefault("STRATEGY_OVERRIDE_PATH",
-                          str(Path(args.output_base) / "artifacts" / "strategy_override.approved.json"))
+    # Use sniper backtest override (score_min=42 to allow all entries through service)
+    sniper_override = Path(args.output_base) / "artifacts" / "strategy_override.backtest_sniper.json"
+    if sniper_override.exists():
+        os.environ["STRATEGY_OVERRIDE_PATH"] = str(sniper_override)
+    else:
+        os.environ.setdefault("STRATEGY_OVERRIDE_PATH",
+                              str(Path(args.output_base) / "artifacts" / "strategy_override.approved.json"))
     os.environ.setdefault("STRATEGY_PROFILE", "live-ultra-aggressive")
     os.environ.setdefault("EXCHANGE", "bitget")
 
@@ -408,8 +413,8 @@ def main(argv=None):
     cache_dir = Path(args.output_base) / "output" / "_sim_cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    # Use last 90 days only for speed (no pickle — build in-memory)
-    RECENT_DAYS = 90
+    # Use full data (358 days)
+    RECENT_DAYS = 360
     cutoff_ms = int((datetime.now(tz=timezone.utc) - timedelta(days=RECENT_DAYS)).timestamp() * 1000)
 
     all_data: dict[str, tuple[list, list[dict]]] = {}
@@ -451,10 +456,10 @@ def main(argv=None):
 
     # ── Build parameter grid ──
     entry_filters = []
-    for score_min in [55, 62, 68, 75]:
-        for adx_min in [0, 20]:
-            for ts_min in [0, 0.4]:
-                for vc_min in [0, 0.4]:
+    for score_min in [42, 48, 55, 62, 68]:
+        for adx_min in [0, 15, 20]:
+            for ts_min in [0, 0.3, 0.5]:
+                for vc_min in [0, 0.3]:
                     for emx in [False, True]:
                         for iday in [False, True]:
                             for side in ["both", "short"]:
@@ -466,16 +471,14 @@ def main(argv=None):
                                 ))
 
     exit_params_list = []
-    for tp in [8, 12, 20]:
-        for sl in [10, 15, 20]:
-            for hold in [4, 12, 24]:
+    for tp in [5, 8, 12, 20]:
+        for sl in [8, 12, 15, 20]:
+            for hold in [2, 4, 8, 12, 24]:
                 for lev in [15, 20]:
-                    for trail in [999, 6]:  # 999=disabled, 6=trailing at 6% ROE
-                        exit_params_list.append(ExitParams(
-                            tp_roe_pct=tp, sl_roe_pct=sl,
-                            max_hold_hours=hold, leverage=lev,
-                            trailing_arm_roe=trail,
-                        ))
+                    exit_params_list.append(ExitParams(
+                        tp_roe_pct=tp, sl_roe_pct=sl,
+                        max_hold_hours=hold, leverage=lev,
+                    ))
 
     # Too many combos — smart sampling
     # First pass: test all entry filters with a fixed "good" exit config
@@ -504,9 +507,9 @@ def main(argv=None):
             print(f"  [{i+1}/{len(entry_filters)}] best so far: ${max(r[1] for r in entry_results):.2f}, "
                   f"ETA {eta/60:.1f}m")
 
-    # Keep top 30 entry filters
-    entry_results.sort(key=lambda x: x[1], reverse=True)
-    top_entries = [r[0] for r in entry_results[:30] if r[2] >= 5]  # min 5 trades
+    # Keep top 40 entry filters — sort by PnL but also boost high-count profitable ones
+    entry_results.sort(key=lambda x: x[1] * min(x[2] / 20, 3.0) if x[1] > 0 else x[1], reverse=True)
+    top_entries = [r[0] for r in entry_results[:40] if r[2] >= 3]  # min 3 trades
     print(f"\n  Phase 1 done in {(time.time()-t0)/60:.1f}m. Top 30 entry filters (min 5 trades):")
     for ef, pnl, n, wr in entry_results[:10]:
         print(f"    {ef.label:40s} {n:4d} trades, WR={wr*100:5.1f}%, PnL=${pnl:+8.2f}")
