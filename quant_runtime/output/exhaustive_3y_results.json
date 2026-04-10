@@ -1,0 +1,1802 @@
+[
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=False long tp2.5 sl1.5 h12 lv12",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=False long tp2.5 sl1.5 h12 lv15",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=True long tp2.5 sl1.5 h12 lv12",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=True long tp2.5 sl1.5 h12 lv15",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=False long tp2.5 sl1.5 h12 lv12",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=False long tp2.5 sl1.5 h12 lv15",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=True long tp2.5 sl1.5 h12 lv12",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=True long tp2.5 sl1.5 h12 lv15",
+    "n": 45,
+    "wr": 0.3556,
+    "pnl": 1.22,
+    "pf": 1.16,
+    "wf_v": true,
+    "wf_p": 4
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=False iday=False long tp2.5 sl1.5 h24 lv12",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=False iday=False long tp2.5 sl1.5 h24 lv15",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=False iday=True long tp2.5 sl1.5 h24 lv12",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=False iday=True long tp2.5 sl1.5 h24 lv15",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=True iday=False long tp2.5 sl1.5 h24 lv12",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=True iday=False long tp2.5 sl1.5 h24 lv15",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=True iday=True long tp2.5 sl1.5 h24 lv12",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=0 rsi=(0, 100) emx=True iday=True long tp2.5 sl1.5 h24 lv15",
+    "n": 48,
+    "wr": 0.3125,
+    "pnl": 0.07,
+    "pf": 1.01,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=False short tp1.9 sl1.0 h24 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=False short tp1.9 sl1.0 h48 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=True short tp1.9 sl1.0 h24 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=True short tp1.9 sl1.0 h48 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=False short tp1.9 sl1.0 h24 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=False short tp1.9 sl1.0 h48 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=True short tp1.9 sl1.0 h24 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=True short tp1.9 sl1.0 h48 lv12",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=False short tp1.9 sl1.0 h24 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=False short tp1.9 sl1.0 h48 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=True short tp1.9 sl1.0 h24 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=False iday=True short tp1.9 sl1.0 h48 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=False short tp1.9 sl1.0 h24 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=False short tp1.9 sl1.0 h48 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=True short tp1.9 sl1.0 h24 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(0, 100) emx=True iday=True short tp1.9 sl1.0 h48 lv15",
+    "n": 24,
+    "wr": 0.3333,
+    "pnl": -1.7,
+    "pf": 0.75,
+    "wf_v": true,
+    "wf_p": 3
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.93,
+    "pf": 9.17,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.76,
+    "pf": 8.68,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.74,
+    "pf": 8.64,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.6,
+    "pf": 4.74,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.59,
+    "pf": 8.23,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.0 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.0 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.42,
+    "pf": 4.48,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.0 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.0 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.41,
+    "pf": 4.46,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.5 h48 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp2.5 sl1.5 h48 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.31,
+    "pf": 7.42,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.0 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.5 sl1.0 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 4.25,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False both tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=False long tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True both tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.9 sl1.5 h24 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=True iday=True long tp1.9 sl1.5 h24 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.26,
+    "pf": 7.29,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.9 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False both tp1.9 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.9 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=False long tp1.9 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.9 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True both tp1.9 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.9 sl1.5 h12 lv12",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  },
+  {
+    "lb": "ttm=True adx=20 rsi=(45, 65) emx=False iday=True long tp1.9 sl1.5 h12 lv15",
+    "n": 6,
+    "wr": 0.6667,
+    "pnl": 2.07,
+    "pf": 6.76,
+    "wf_v": false,
+    "wf_p": 2
+  }
+]
