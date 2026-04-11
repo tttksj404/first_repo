@@ -942,34 +942,53 @@ def evaluate_snapshot(
         snapshot.symbol,
     )
     if futures_ok:
-        # PEPE 3X MOMENTUM: 3Y exhaustive, 20-coin validated, WF4/4, MC100%
-        # 7d momentum ±3%, vol-target sizing, scale-out, 3x leverage
-        # 1415t WR56.6% PF1.25 $75→$820. GPT-5.4 approved for live.
+        # DOGE PULLBACK 10x: 3Y verified, EV $8.83, ruin 3.9%, WR 47%, PF 2.61
+        # Donchian 55 breakout → 3-bar pullback entry, long only in uptrend
+        # 68t/3yr, fee-safe, WF 4/4. Claude+GPT-5.4 합작 설계.
         futures_side = prediction.futures.side
         _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
         if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
-            # 7-day (168h) momentum
             _price_now = _bars_1h[-1].close_price if _bars_1h else 0
             _price_7d = _bars_1h[-168].close_price if len(_bars_1h) >= 168 else _price_now
             _mom_7d = (_price_now - _price_7d) / _price_7d if _price_7d > 0 else 0
-            # Entry: abs(momentum) > 3%
-            if abs(_mom_7d) < 0.03:
+
+            # 1. 7d momentum > +3% (long only)
+            if _mom_7d < 0.03:
                 futures_ok = False
                 futures_reasons.append("MOMENTUM_TOO_WEAK")
             else:
-                # Override side based on momentum direction
                 from dataclasses import replace as _dc_replace
-                if _mom_7d > 0.03:
-                    futures_side = "long"
-                elif _mom_7d < -0.03:
-                    futures_side = "short"
-                # Update prediction side (frozen dataclass → use replace)
+                futures_side = "long"
                 prediction = _dc_replace(prediction,
                     futures=_dc_replace(prediction.futures, side=futures_side)
                 )
+
+                # 2. Check if current bar is a pullback after Donchian breakout
+                # Donchian 55-bar high
+                if len(_bars_1h) >= 55:
+                    _dc_high = max(b.high_price for b in _bars_1h[-56:-1])
+                    _at = sum(max(_bars_1h[-j].high_price - _bars_1h[-j].low_price,
+                                  abs(_bars_1h[-j].high_price - _bars_1h[-j-1].close_price),
+                                  abs(_bars_1h[-j].low_price - _bars_1h[-j-1].close_price))
+                              for j in range(1, 15)) / 14 if len(_bars_1h) > 14 else 0
+
+                    # Recent breakout in last 3 bars?
+                    _recent_breakout = any(
+                        _bars_1h[-k].close_price > _dc_high + 0.25 * _at
+                        for k in range(2, min(5, len(_bars_1h)))
+                    )
+                    # Current bar pulls back to breakout level?
+                    _pullback = _bars_1h[-1].low_price <= _dc_high + 0.5 * _at and _price_now > _dc_high
+
+                    if not (_recent_breakout and _pullback):
+                        futures_ok = False
+                        futures_reasons.append("NO_PULLBACK_SIGNAL")
+                else:
+                    futures_ok = False
+                    futures_reasons.append("INSUFFICIENT_BARS_FOR_DONCHIAN")
         elif len(_bars_1h) < 168:
             futures_ok = False
-            futures_reasons.append("INSUFFICIENT_BARS_FOR_7D_MOMENTUM")
+            futures_reasons.append("INSUFFICIENT_BARS")
 
     if futures_ok:
         planned_leverage = select_futures_leverage(
