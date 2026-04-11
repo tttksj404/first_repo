@@ -1,0 +1,749 @@
+{
+  "GRID_ETHUSDT_1.0_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 5.22,
+    "total_fees": 0.16,
+    "final_equity": 80.22,
+    "max_dd": 111.73,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_ETHUSDT_1.0_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 5.2,
+    "total_fees": 0.16,
+    "final_equity": 80.2,
+    "max_dd": 111.71,
+    "wf_folds": [
+      1.3411339759236682,
+      1.3411339759236682,
+      1.286662849834661,
+      1.2321917237456539
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_1.0_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 5.19,
+    "total_fees": 0.16,
+    "final_equity": 80.19,
+    "max_dd": 111.69,
+    "wf_folds": [
+      1.0729071807389374,
+      1.0729071807389374,
+      1.0729071807389374,
+      1.9715067579930405
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_1.5_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 5.22,
+    "total_fees": 0.16,
+    "final_equity": 80.22,
+    "max_dd": 111.73,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_ETHUSDT_1.5_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 5.2,
+    "total_fees": 0.16,
+    "final_equity": 80.2,
+    "max_dd": 111.71,
+    "wf_folds": [
+      1.3411339759236682,
+      1.3411339759236682,
+      1.286662849834661,
+      1.2321917237456539
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_1.5_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 5.19,
+    "total_fees": 0.16,
+    "final_equity": 80.19,
+    "max_dd": 111.69,
+    "wf_folds": [
+      1.0729071807389374,
+      1.0729071807389374,
+      1.0729071807389374,
+      1.9715067579930405
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_2.0_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 5.22,
+    "total_fees": 0.16,
+    "final_equity": 80.22,
+    "max_dd": 111.73,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_ETHUSDT_2.0_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 5.2,
+    "total_fees": 0.16,
+    "final_equity": 80.2,
+    "max_dd": 111.71,
+    "wf_folds": [
+      1.3411339759236682,
+      1.3411339759236682,
+      1.286662849834661,
+      1.2321917237456539
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_2.0_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 5.19,
+    "total_fees": 0.16,
+    "final_equity": 80.19,
+    "max_dd": 111.69,
+    "wf_folds": [
+      1.0729071807389374,
+      1.0729071807389374,
+      1.0729071807389374,
+      1.9715067579930405
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_3.0_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 5.22,
+    "total_fees": 0.16,
+    "final_equity": 80.22,
+    "max_dd": 111.73,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_ETHUSDT_3.0_8": {
+    "trades": 9,
+    "wins": 8,
+    "wr": 0.8888888888888888,
+    "total_pnl": 5.29,
+    "total_fees": 0.17,
+    "final_equity": 80.29,
+    "max_dd": 109.83,
+    "wf_folds": [
+      2.1140010186117593,
+      1.3411339759236682,
+      1.3411339759236682,
+      0.4979325240623407
+    ],
+    "wf_valid": true
+  },
+  "GRID_ETHUSDT_3.0_10": {
+    "trades": 11,
+    "wins": 10,
+    "wr": 0.9090909090909091,
+    "total_pnl": 5.26,
+    "total_fees": 0.17,
+    "final_equity": 80.26,
+    "max_dd": 110.19,
+    "wf_folds": [
+      1.6912008148894095,
+      1.0729071807389374,
+      1.0729071807389374,
+      1.427676299117599
+    ],
+    "wf_valid": true
+  },
+  "TREND_ETHUSDT_15": {
+    "trades": 359,
+    "wins": 113,
+    "wr": 0.3148,
+    "total_pnl": -29.5,
+    "pf": 0.8,
+    "final_equity": 45.5,
+    "max_dd": 33.39,
+    "avg_win": 1.05,
+    "avg_loss": 0.6,
+    "wf_folds": [
+      -12.1036,
+      -12.9666,
+      -5.618099999999999,
+      1.1910000000000007
+    ],
+    "wf_valid": false
+  },
+  "TREND_ETHUSDT_20": {
+    "trades": 281,
+    "wins": 85,
+    "wr": 0.3025,
+    "total_pnl": -28.0,
+    "pf": 0.78,
+    "final_equity": 47.0,
+    "max_dd": 38.78,
+    "avg_win": 1.17,
+    "avg_loss": 0.65,
+    "wf_folds": [
+      -16.6409,
+      -8.2588,
+      -11.8214,
+      8.7223
+    ],
+    "wf_valid": false
+  },
+  "TREND_ETHUSDT_30": {
+    "trades": 174,
+    "wins": 61,
+    "wr": 0.3506,
+    "total_pnl": 7.25,
+    "pf": 1.06,
+    "final_equity": 82.25,
+    "max_dd": 31.19,
+    "avg_win": 2.11,
+    "avg_loss": 1.08,
+    "wf_folds": [
+      -5.8369,
+      13.2889,
+      -19.8418,
+      19.639400000000002
+    ],
+    "wf_valid": false
+  },
+  "TREND_ETHUSDT_50": {
+    "trades": 117,
+    "wins": 37,
+    "wr": 0.3162,
+    "total_pnl": 10.31,
+    "pf": 1.09,
+    "final_equity": 85.31,
+    "max_dd": 28.8,
+    "avg_win": 3.42,
+    "avg_loss": 1.45,
+    "wf_folds": [
+      -6.3349,
+      13.4604,
+      1.7893999999999997,
+      1.3920999999999994
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_1.0_6": {
+    "trades": 12,
+    "wins": 12,
+    "wr": 1.0,
+    "total_pnl": 187.6,
+    "total_fees": 0.49,
+    "final_equity": 262.6,
+    "max_dd": 645.18,
+    "wf_folds": [
+      1.0395235219550685,
+      1.3795566644648662,
+      94.64472541720292,
+      90.53748423144691
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_1.0_8": {
+    "trades": 16,
+    "wins": 16,
+    "wr": 1.0,
+    "total_pnl": 187.53,
+    "total_fees": 0.49,
+    "final_equity": 262.53,
+    "max_dd": 645.09,
+    "wf_folds": [
+      1.1614468941671134,
+      1.2197271787249182,
+      94.20653086055307,
+      90.93995279852763
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_1.0_10": {
+    "trades": 21,
+    "wins": 21,
+    "wr": 1.0,
+    "total_pnl": 185.86,
+    "total_fees": 0.5,
+    "final_equity": 260.86,
+    "max_dd": 639.69,
+    "wf_folds": [
+      1.2346009174943386,
+      1.3615799796024826,
+      75.56862656914811,
+      107.69818054233792
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_1.5_6": {
+    "trades": 15,
+    "wins": 15,
+    "wr": 1.0,
+    "total_pnl": 185.32,
+    "total_fees": 0.56,
+    "final_equity": 260.32,
+    "max_dd": 633.0,
+    "wf_folds": [
+      1.3018496183877932,
+      2.651645834212866,
+      1.0999561344265132,
+      180.26957798461825
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_1.5_8": {
+    "trades": 18,
+    "wins": 18,
+    "wr": 1.0,
+    "total_pnl": 185.31,
+    "total_fees": 0.52,
+    "final_equity": 260.31,
+    "max_dd": 635.18,
+    "wf_folds": [
+      1.1614468941671134,
+      2.318147947215234,
+      48.62410730995821,
+      133.2019576811689
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_1.5_10": {
+    "trades": 22,
+    "wins": 22,
+    "wr": 1.0,
+    "total_pnl": 184.56,
+    "total_fees": 0.51,
+    "final_equity": 259.56,
+    "max_dd": 632.44,
+    "wf_folds": [
+      1.3270106954207055,
+      2.1000565859944356,
+      58.62852126710535,
+      122.50779920199439
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_2.0_6": {
+    "trades": 9,
+    "wins": 9,
+    "wr": 1.0,
+    "total_pnl": 186.75,
+    "total_fees": 0.41,
+    "final_equity": 261.75,
+    "max_dd": 644.92,
+    "wf_folds": [
+      1.1721609704127847,
+      32.463956026215975,
+      63.92893925061297,
+      89.18331850660152
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_2.0_8": {
+    "trades": 12,
+    "wins": 12,
+    "wr": 1.0,
+    "total_pnl": 185.0,
+    "total_fees": 0.41,
+    "final_equity": 260.0,
+    "max_dd": 639.06,
+    "wf_folds": [
+      1.9164517775224894,
+      48.32131923864183,
+      69.26162977215485,
+      65.50535486708009
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_2.0_10": {
+    "trades": 14,
+    "wins": 14,
+    "wr": 1.0,
+    "total_pnl": 185.83,
+    "total_fees": 0.4,
+    "final_equity": 260.83,
+    "max_dd": 642.25,
+    "wf_folds": [
+      1.53316142201799,
+      38.65705539091347,
+      57.0094844635597,
+      88.63490593620406
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_3.0_6": {
+    "trades": 7,
+    "wins": 7,
+    "wr": 1.0,
+    "total_pnl": 188.42,
+    "total_fees": 0.36,
+    "final_equity": 263.42,
+    "max_dd": 651.56,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_SOLUSDT_3.0_8": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 186.87,
+    "total_fees": 0.37,
+    "final_equity": 261.87,
+    "max_dd": 646.1,
+    "wf_folds": [
+      1.3185568192135868,
+      47.94670443795971,
+      47.94670443795971,
+      89.65770148152419
+    ],
+    "wf_valid": true
+  },
+  "GRID_SOLUSDT_3.0_10": {
+    "trades": 12,
+    "wins": 12,
+    "wr": 1.0,
+    "total_pnl": 186.41,
+    "total_fees": 0.37,
+    "final_equity": 261.41,
+    "max_dd": 644.49,
+    "wf_folds": [
+      20.683437136904764,
+      57.53604532555167,
+      57.0094844635597,
+      51.18042561732294
+    ],
+    "wf_valid": true
+  },
+  "TREND_SOLUSDT_15": {
+    "trades": 367,
+    "wins": 126,
+    "wr": 0.3433,
+    "total_pnl": 5.21,
+    "pf": 1.02,
+    "final_equity": 80.21,
+    "max_dd": 55.76,
+    "avg_win": 2.79,
+    "avg_loss": 1.44,
+    "wf_folds": [
+      30.624099999999995,
+      1.680900000000001,
+      7.247200000000003,
+      -34.3421
+    ],
+    "wf_valid": true
+  },
+  "TREND_SOLUSDT_20": {
+    "trades": 295,
+    "wins": 98,
+    "wr": 0.3322,
+    "total_pnl": 1.02,
+    "pf": 1.0,
+    "final_equity": 76.02,
+    "max_dd": 53.62,
+    "avg_win": 3.0,
+    "avg_loss": 1.49,
+    "wf_folds": [
+      22.685200000000002,
+      -0.7815999999999975,
+      -13.621900000000002,
+      -7.263000000000001
+    ],
+    "wf_valid": false
+  },
+  "TREND_SOLUSDT_30": {
+    "trades": 198,
+    "wins": 74,
+    "wr": 0.3737,
+    "total_pnl": 9.32,
+    "pf": 1.04,
+    "final_equity": 84.32,
+    "max_dd": 74.66,
+    "avg_win": 3.65,
+    "avg_loss": 2.1,
+    "wf_folds": [
+      24.4556,
+      20.8721,
+      -19.674799999999998,
+      -16.336
+    ],
+    "wf_valid": false
+  },
+  "TREND_SOLUSDT_50": {
+    "trades": 126,
+    "wins": 51,
+    "wr": 0.4048,
+    "total_pnl": 19.59,
+    "pf": 1.09,
+    "final_equity": 94.59,
+    "max_dd": 78.52,
+    "avg_win": 4.8,
+    "avg_loss": 3.0,
+    "wf_folds": [
+      36.2512,
+      21.4695,
+      -21.7975,
+      -16.334600000000002
+    ],
+    "wf_valid": false
+  },
+  "GRID_BTCUSDT_1.0_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 105.05,
+    "total_fees": 0.26,
+    "final_equity": 180.05,
+    "max_dd": 156.07,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_BTCUSDT_1.0_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 105.03,
+    "total_fees": 0.26,
+    "final_equity": 180.03,
+    "max_dd": 156.06,
+    "wf_folds": [
+      26.29159735435009,
+      26.29159735435009,
+      26.24667456107712,
+      26.201751767804154
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_1.0_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 105.02,
+    "total_fees": 0.26,
+    "final_equity": 180.02,
+    "max_dd": 156.05,
+    "wf_folds": [
+      21.033277883480075,
+      21.033277883480075,
+      21.033277883480075,
+      41.92280282848664
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_1.5_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 105.05,
+    "total_fees": 0.26,
+    "final_equity": 180.05,
+    "max_dd": 156.07,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_BTCUSDT_1.5_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 105.03,
+    "total_fees": 0.26,
+    "final_equity": 180.03,
+    "max_dd": 156.06,
+    "wf_folds": [
+      26.29159735435009,
+      26.29159735435009,
+      26.24667456107712,
+      26.201751767804154
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_1.5_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 105.02,
+    "total_fees": 0.26,
+    "final_equity": 180.02,
+    "max_dd": 156.05,
+    "wf_folds": [
+      21.033277883480075,
+      21.033277883480075,
+      21.033277883480075,
+      41.92280282848664
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_2.0_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 105.05,
+    "total_fees": 0.26,
+    "final_equity": 180.05,
+    "max_dd": 156.07,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_BTCUSDT_2.0_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 105.03,
+    "total_fees": 0.26,
+    "final_equity": 180.03,
+    "max_dd": 156.06,
+    "wf_folds": [
+      26.29159735435009,
+      26.29159735435009,
+      26.24667456107712,
+      26.201751767804154
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_2.0_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 105.02,
+    "total_fees": 0.26,
+    "final_equity": 180.02,
+    "max_dd": 156.05,
+    "wf_folds": [
+      21.033277883480075,
+      21.033277883480075,
+      21.033277883480075,
+      41.92280282848664
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_3.0_6": {
+    "trades": 6,
+    "wins": 6,
+    "wr": 1.0,
+    "total_pnl": 105.05,
+    "total_fees": 0.26,
+    "final_equity": 180.05,
+    "max_dd": 156.07,
+    "wf_folds": [],
+    "wf_valid": false
+  },
+  "GRID_BTCUSDT_3.0_8": {
+    "trades": 8,
+    "wins": 8,
+    "wr": 1.0,
+    "total_pnl": 105.03,
+    "total_fees": 0.26,
+    "final_equity": 180.03,
+    "max_dd": 156.06,
+    "wf_folds": [
+      26.29159735435009,
+      26.29159735435009,
+      26.24667456107712,
+      26.201751767804154
+    ],
+    "wf_valid": true
+  },
+  "GRID_BTCUSDT_3.0_10": {
+    "trades": 10,
+    "wins": 10,
+    "wr": 1.0,
+    "total_pnl": 105.02,
+    "total_fees": 0.26,
+    "final_equity": 180.02,
+    "max_dd": 156.05,
+    "wf_folds": [
+      21.033277883480075,
+      21.033277883480075,
+      21.033277883480075,
+      41.92280282848664
+    ],
+    "wf_valid": true
+  },
+  "TREND_BTCUSDT_15": {
+    "trades": 364,
+    "wins": 116,
+    "wr": 0.3187,
+    "total_pnl": -21.85,
+    "pf": 0.84,
+    "final_equity": 53.15,
+    "max_dd": 27.75,
+    "avg_win": 0.99,
+    "avg_loss": 0.55,
+    "wf_folds": [
+      -3.5454000000000003,
+      -5.7883000000000004,
+      2.3260999999999994,
+      -14.8452
+    ],
+    "wf_valid": false
+  },
+  "TREND_BTCUSDT_20": {
+    "trades": 288,
+    "wins": 94,
+    "wr": 0.3264,
+    "total_pnl": -21.14,
+    "pf": 0.83,
+    "final_equity": 53.86,
+    "max_dd": 23.32,
+    "avg_win": 1.07,
+    "avg_loss": 0.63,
+    "wf_folds": [
+      -7.7923,
+      -0.9506000000000001,
+      -0.3989000000000002,
+      -11.999699999999999
+    ],
+    "wf_valid": false
+  },
+  "TREND_BTCUSDT_30": {
+    "trades": 183,
+    "wins": 69,
+    "wr": 0.377,
+    "total_pnl": 0.89,
+    "pf": 1.01,
+    "final_equity": 75.89,
+    "max_dd": 20.26,
+    "avg_win": 1.43,
+    "avg_loss": 0.86,
+    "wf_folds": [
+      -10.224699999999999,
+      -0.4691000000000003,
+      11.9753,
+      -0.38779999999999937
+    ],
+    "wf_valid": false
+  },
+  "TREND_BTCUSDT_50": {
+    "trades": 117,
+    "wins": 48,
+    "wr": 0.4103,
+    "total_pnl": 21.45,
+    "pf": 1.24,
+    "final_equity": 96.45,
+    "max_dd": 25.41,
+    "avg_win": 2.3,
+    "avg_loss": 1.29,
+    "wf_folds": [
+      1.7894999999999999,
+      15.181899999999999,
+      6.2495,
+      -1.7719999999999998
+    ],
+    "wf_valid": true
+  }
+}
