@@ -1,5 +1,5 @@
 {
-  "_lock": "UNIFIED_FINAL — 2.5M sims, WF4 validated. [atr+ttm+intra] LONG tp25 sl20 48h 20x. 234 trades WR58.6% PF1.7 +$5491. Applied 2026-04-10.",
+  "_lock": "PEPE_3X_MOMENTUM — 3Y 20-coin exhaustive, WF4/4, MC 100% survival. PEPE 7d mom 3x voltarget scale. 1415t WR56.6% PF1.25 +$745. GPT-5.4 approved as paper-live candidate. Applied 2026-04-11.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -24,9 +24,7 @@
     "major_size_boost_multiplier": 1.4,
     "major_strong_min_entry_notional_usd": 5.0,
     "major_symbols": [
-      "BTCUSDT",
-      "ETHUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
     "min_entry_net_edge_bps": -5.0,
     "reduced_entry_net_edge_bps": -5.0,
@@ -35,11 +33,7 @@
     "priority_min_entry_net_edge_bps": -20.0,
     "priority_score_relaxation": 20.0,
     "priority_symbols": [
-      "BTCUSDT",
-      "ETHUSDT",
-      "SOLUSDT",
-      "DOGEUSDT",
-      "TRXUSDT"
+      "PEPEUSDT"
     ],
     "priority_volatility_relaxation": 0.36,
     "pyramid_enabled": true,
@@ -130,7 +124,7 @@
   },
   "portfolio_focus": {
     "enabled": true,
-    "futures_top_n": 4,
+    "futures_top_n": 1,
     "min_incremental_pnl_usd": 0.0,
     "min_net_edge_advantage_bps": 0.0,
     "min_score_advantage_to_replace": 0.0
@@ -141,9 +135,9 @@
     "min_expected_profit_usd_per_trade": 0.001,
     "min_meaningful_futures_notional_usd": 5.0,
     "min_meaningful_spot_notional_usd": 1.0,
-    "per_trade_equity_risk": 0.3,
-    "target_futures_leverage": 20.0,
-    "max_futures_leverage": 20.0
+    "per_trade_equity_risk": 0.15,
+    "target_futures_leverage": 3.0,
+    "max_futures_leverage": 5.0
   },
   "strategy_profile": "live-ultra-aggressive",
   "symbol_eligibility": {
@@ -152,8 +146,7 @@
     "observe_only_liquidity_max": 0.0
   },
   "universe": [
-    "ETHUSDT",
-    "SOLUSDT"
+    "PEPEUSDT"
   ],
   "funding_rate_strategy": {
     "enabled": true,
