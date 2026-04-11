@@ -1,0 +1,802 @@
+[
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_us_btcrf",
+    "n": 1067,
+    "wr": 0.4264,
+    "pnl": 664.39,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_fund_us_btcrf",
+    "n": 1067,
+    "wr": 0.4264,
+    "pnl": 664.39,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr4.0_voltarget_btcrf_scale",
+    "n": 1555,
+    "wr": 0.5389,
+    "pnl": 658.26,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr4.0_voltarget_fund_btcrf_scale",
+    "n": 1555,
+    "wr": 0.5389,
+    "pnl": 658.26,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr4.0_voltarget_scale",
+    "n": 1600,
+    "wr": 0.5356,
+    "pnl": 564.96,
+    "pf": 1.18,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr4.0_voltarget_fund_scale",
+    "n": 1600,
+    "wr": 0.5356,
+    "pnl": 564.96,
+    "pf": 1.18,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_fixed5_btcrf_scale",
+    "n": 840,
+    "wr": 0.6333,
+    "pnl": 533.34,
+    "pf": 1.19,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_fixed5_fund_btcrf_scale",
+    "n": 840,
+    "wr": 0.6333,
+    "pnl": 533.34,
+    "pf": 1.19,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_atr3.0_voltarget_btcrf_scale",
+    "n": 1835,
+    "wr": 0.5749,
+    "pnl": 483.8,
+    "pf": 1.16,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_atr3.0_voltarget_fund_btcrf_scale",
+    "n": 1835,
+    "wr": 0.5749,
+    "pnl": 483.8,
+    "pf": 1.16,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_atr3.0_voltarget_scale",
+    "n": 1896,
+    "wr": 0.5733,
+    "pnl": 458.82,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_atr3.0_voltarget_fund_scale",
+    "n": 1896,
+    "wr": 0.5733,
+    "pnl": 458.82,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_us_btcrf",
+    "n": 987,
+    "wr": 0.4215,
+    "pnl": 445.04,
+    "pf": 1.18,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_fund_us_btcrf",
+    "n": 987,
+    "wr": 0.4215,
+    "pnl": 445.04,
+    "pf": 1.18,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_fixed5_btcrf_scale",
+    "n": 538,
+    "wr": 0.6524,
+    "pnl": 429.84,
+    "pf": 1.41,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_fixed5_fund_btcrf_scale",
+    "n": 538,
+    "wr": 0.6524,
+    "pnl": 429.84,
+    "pf": 1.41,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_btcrf_scale",
+    "n": 2328,
+    "wr": 0.6194,
+    "pnl": 425.94,
+    "pf": 1.12,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_fund_btcrf_scale",
+    "n": 2328,
+    "wr": 0.6194,
+    "pnl": 425.94,
+    "pf": 1.12,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_atr3.0_voltarget_us_btcrf",
+    "n": 842,
+    "wr": 0.4216,
+    "pnl": 424.88,
+    "pf": 1.16,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_atr3.0_voltarget_fund_us_btcrf",
+    "n": 842,
+    "wr": 0.4216,
+    "pnl": 424.88,
+    "pf": 1.16,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr4.0_voltarget_btcrf_scale",
+    "n": 1407,
+    "wr": 0.5771,
+    "pnl": 414.95,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr4.0_voltarget_fund_btcrf_scale",
+    "n": 1407,
+    "wr": 0.5771,
+    "pnl": 414.95,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_voltarget_us_btcrf",
+    "n": 962,
+    "wr": 0.421,
+    "pnl": 411.93,
+    "pf": 1.17,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_voltarget_fund_us_btcrf",
+    "n": 962,
+    "wr": 0.421,
+    "pnl": 411.93,
+    "pf": 1.17,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_btcrf_scale",
+    "n": 2427,
+    "wr": 0.6143,
+    "pnl": 400.53,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_fund_btcrf_scale",
+    "n": 2427,
+    "wr": 0.6143,
+    "pnl": 400.53,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_scale",
+    "n": 2403,
+    "wr": 0.6184,
+    "pnl": 399.06,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_fund_scale",
+    "n": 2403,
+    "wr": 0.6184,
+    "pnl": 399.06,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_voltarget_btcrf_scale",
+    "n": 2255,
+    "wr": 0.62,
+    "pnl": 386.97,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_voltarget_fund_btcrf_scale",
+    "n": 2255,
+    "wr": 0.62,
+    "pnl": 386.97,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_fixed15_voltarget_us_btcrf_scale",
+    "n": 1379,
+    "wr": 0.7136,
+    "pnl": 385.42,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_fixed15_voltarget_fund_us_btcrf_scale",
+    "n": 1379,
+    "wr": 0.7136,
+    "pnl": 385.42,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr3.0_voltarget_us_btcrf",
+    "n": 825,
+    "wr": 0.417,
+    "pnl": 384.09,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr3.0_voltarget_fund_us_btcrf",
+    "n": 825,
+    "wr": 0.417,
+    "pnl": 384.09,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_us_btcrf_scale",
+    "n": 1647,
+    "wr": 0.6284,
+    "pnl": 379.95,
+    "pf": 1.17,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_fund_us_btcrf_scale",
+    "n": 1647,
+    "wr": 0.6284,
+    "pnl": 379.95,
+    "pf": 1.17,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_atr2.0_fixed15_voltarget_us_btcrf_scale",
+    "n": 1361,
+    "wr": 0.7112,
+    "pnl": 362.81,
+    "pf": 1.21,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_atr2.0_fixed15_voltarget_fund_us_btcrf_scale",
+    "n": 1361,
+    "wr": 0.7112,
+    "pnl": 362.81,
+    "pf": 1.21,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr2.0_fixed15_voltarget_scale",
+    "n": 1968,
+    "wr": 0.6992,
+    "pnl": 355.79,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr2.0_fixed15_voltarget_fund_scale",
+    "n": 1968,
+    "wr": 0.6992,
+    "pnl": 355.79,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_atr3.0_voltarget_us_btcrf_scale",
+    "n": 1317,
+    "wr": 0.6226,
+    "pnl": 349.84,
+    "pf": 1.18,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_atr3.0_voltarget_fund_us_btcrf_scale",
+    "n": 1317,
+    "wr": 0.6226,
+    "pnl": 349.84,
+    "pf": 1.18,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_atr3.0_voltarget_us_btcrf_scale",
+    "n": 1170,
+    "wr": 0.6684,
+    "pnl": 349.7,
+    "pf": 1.19,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_atr3.0_voltarget_fund_us_btcrf_scale",
+    "n": 1170,
+    "wr": 0.6684,
+    "pnl": 349.7,
+    "pf": 1.19,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_voltarget_us_btcrf_scale",
+    "n": 1491,
+    "wr": 0.6264,
+    "pnl": 347.13,
+    "pf": 1.18,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_voltarget_fund_us_btcrf_scale",
+    "n": 1491,
+    "wr": 0.6264,
+    "pnl": 347.13,
+    "pf": 1.18,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr4.0_voltarget_btcrf",
+    "n": 957,
+    "wr": 0.3783,
+    "pnl": 347.02,
+    "pf": 1.13,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr4.0_voltarget_fund_btcrf",
+    "n": 957,
+    "wr": 0.3783,
+    "pnl": 347.02,
+    "pf": 1.13,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m8_lv3_adx0_fixed8_fixed15_voltarget_us_btcrf",
+    "n": 491,
+    "wr": 0.4562,
+    "pnl": 338.8,
+    "pf": 1.37,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m8_lv3_adx0_fixed8_fixed15_voltarget_fund_us_btcrf",
+    "n": 491,
+    "wr": 0.4562,
+    "pnl": 338.8,
+    "pf": 1.37,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m8_lv3_adx0_fixed8_fixed15_voltarget_us",
+    "n": 491,
+    "wr": 0.4562,
+    "pnl": 338.36,
+    "pf": 1.37,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m8_lv3_adx0_fixed8_fixed15_voltarget_fund_us",
+    "n": 491,
+    "wr": 0.4562,
+    "pnl": 338.36,
+    "pf": 1.37,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr3.0_voltarget_us_btcrf",
+    "n": 941,
+    "wr": 0.3741,
+    "pnl": 338.06,
+    "pf": 1.13,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr3.0_voltarget_fund_us_btcrf",
+    "n": 941,
+    "wr": 0.3741,
+    "pnl": 338.06,
+    "pf": 1.13,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_atr4.0_voltarget_us_btcrf_scale",
+    "n": 1016,
+    "wr": 0.627,
+    "pnl": 336.14,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_atr4.0_voltarget_fund_us_btcrf_scale",
+    "n": 1016,
+    "wr": 0.627,
+    "pnl": 336.14,
+    "pf": 1.2,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_atr2.0_atr3.0_voltarget_us_btcrf",
+    "n": 742,
+    "wr": 0.469,
+    "pnl": 335.3,
+    "pf": 1.16,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_atr2.0_atr3.0_voltarget_fund_us_btcrf",
+    "n": 742,
+    "wr": 0.469,
+    "pnl": 335.3,
+    "pf": 1.16,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_fixed5_btcrf_scale",
+    "n": 527,
+    "wr": 0.6452,
+    "pnl": 334.87,
+    "pf": 1.37,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_fixed8_fixed15_fixed5_fund_btcrf_scale",
+    "n": 527,
+    "wr": 0.6452,
+    "pnl": 334.87,
+    "pf": 1.37,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_scale",
+    "n": 2509,
+    "wr": 0.6118,
+    "pnl": 333.75,
+    "pf": 1.1,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_fund_scale",
+    "n": 2509,
+    "wr": 0.6118,
+    "pnl": 333.75,
+    "pf": 1.1,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_atr1.5_atr3.0_voltarget_us_btcrf",
+    "n": 806,
+    "wr": 0.4169,
+    "pnl": 331.45,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx20_atr1.5_atr3.0_voltarget_fund_us_btcrf",
+    "n": 806,
+    "wr": 0.4169,
+    "pnl": 331.45,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr3.0_voltarget_us_btcrf_scale",
+    "n": 1267,
+    "wr": 0.6188,
+    "pnl": 330.81,
+    "pf": 1.17,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr3.0_voltarget_fund_us_btcrf_scale",
+    "n": 1267,
+    "wr": 0.6188,
+    "pnl": 330.81,
+    "pf": 1.17,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr2.0_fixed15_voltarget_btcrf_scale",
+    "n": 1912,
+    "wr": 0.6987,
+    "pnl": 329.23,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr2.0_fixed15_voltarget_fund_btcrf_scale",
+    "n": 1912,
+    "wr": 0.6987,
+    "pnl": 329.23,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m72_lv5_adx15_fixed8_atr4.0_voltarget_btcrf",
+    "n": 996,
+    "wr": 0.3223,
+    "pnl": 322.38,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m72_lv5_adx15_fixed8_atr4.0_voltarget_fund_btcrf",
+    "n": 996,
+    "wr": 0.3223,
+    "pnl": 322.38,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr4.0_voltarget_scale",
+    "n": 1447,
+    "wr": 0.5715,
+    "pnl": 318.23,
+    "pf": 1.13,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr4.0_voltarget_fund_scale",
+    "n": 1447,
+    "wr": 0.5715,
+    "pnl": 318.23,
+    "pf": 1.13,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_us_btcrf_scale",
+    "n": 1526,
+    "wr": 0.6258,
+    "pnl": 315.58,
+    "pf": 1.16,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_fixed8_fixed15_voltarget_fund_us_btcrf_scale",
+    "n": 1526,
+    "wr": 0.6258,
+    "pnl": 315.58,
+    "pf": 1.16,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m8_lv3_adx20_fixed8_fixed15_voltarget_us",
+    "n": 440,
+    "wr": 0.4614,
+    "pnl": 309.4,
+    "pf": 1.32,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m8_lv3_adx20_fixed8_fixed15_voltarget_us_btcrf",
+    "n": 440,
+    "wr": 0.4614,
+    "pnl": 309.4,
+    "pf": 1.32,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m8_lv3_adx20_fixed8_fixed15_voltarget_fund_us",
+    "n": 440,
+    "wr": 0.4614,
+    "pnl": 309.4,
+    "pf": 1.32,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m8_lv3_adx20_fixed8_fixed15_voltarget_fund_us_btcrf",
+    "n": 440,
+    "wr": 0.4614,
+    "pnl": 309.4,
+    "pf": 1.32,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_us_scale",
+    "n": 1695,
+    "wr": 0.6236,
+    "pnl": 303.37,
+    "pf": 1.16,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_fixed15_voltarget_fund_us_scale",
+    "n": 1695,
+    "wr": 0.6236,
+    "pnl": 303.37,
+    "pf": 1.16,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr3.0_voltarget_us_btcrf_scale",
+    "n": 1405,
+    "wr": 0.5808,
+    "pnl": 301.5,
+    "pf": 1.15,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr3.0_voltarget_fund_us_btcrf_scale",
+    "n": 1405,
+    "wr": 0.5808,
+    "pnl": 301.5,
+    "pf": 1.15,
+    "wf": 3
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr3.0_voltarget_btcrf_scale",
+    "n": 1907,
+    "wr": 0.5669,
+    "pnl": 300.05,
+    "pf": 1.12,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_fixed8_atr3.0_voltarget_fund_btcrf_scale",
+    "n": 1907,
+    "wr": 0.5669,
+    "pnl": 300.05,
+    "pf": 1.12,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_fixed15_voltarget_us_btcrf_scale",
+    "n": 1546,
+    "wr": 0.6688,
+    "pnl": 299.23,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_fixed15_voltarget_fund_us_btcrf_scale",
+    "n": 1546,
+    "wr": 0.6688,
+    "pnl": 299.23,
+    "pf": 1.15,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv3_adx0_atr1.5_atr3.0_voltarget_us_btcrf_scale",
+    "n": 1316,
+    "wr": 0.6223,
+    "pnl": 296.61,
+    "pf": 1.16,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv3_adx0_atr1.5_atr3.0_voltarget_fund_us_btcrf_scale",
+    "n": 1316,
+    "wr": 0.6223,
+    "pnl": 296.61,
+    "pf": 1.16,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr3.0_voltarget_btcrf_scale",
+    "n": 1683,
+    "wr": 0.6144,
+    "pnl": 296.42,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr1.5_atr3.0_voltarget_fund_btcrf_scale",
+    "n": 1683,
+    "wr": 0.6144,
+    "pnl": 296.42,
+    "pf": 1.11,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv3_adx15_atr2.0_atr3.0_voltarget_us_btcrf_scale",
+    "n": 1171,
+    "wr": 0.667,
+    "pnl": 295.2,
+    "pf": 1.17,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv3_adx15_atr2.0_atr3.0_voltarget_fund_us_btcrf_scale",
+    "n": 1171,
+    "wr": 0.667,
+    "pnl": 295.2,
+    "pf": 1.17,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv3_adx0_atr1.5_atr3.0_voltarget_us_btcrf",
+    "n": 844,
+    "wr": 0.4182,
+    "pnl": 294.1,
+    "pf": 1.14,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv3_adx0_atr1.5_atr3.0_voltarget_fund_us_btcrf",
+    "n": 844,
+    "wr": 0.4182,
+    "pnl": 294.1,
+    "pf": 1.14,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_fixed15_voltarget_btcrf_scale",
+    "n": 1876,
+    "wr": 0.701,
+    "pnl": 290.26,
+    "pf": 1.09,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx15_atr2.0_fixed15_voltarget_fund_btcrf_scale",
+    "n": 1876,
+    "wr": 0.701,
+    "pnl": 290.26,
+    "pf": 1.09,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_fixed15_voltarget_scale",
+    "n": 2183,
+    "wr": 0.6606,
+    "pnl": 286.07,
+    "pf": 1.1,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_fixed15_voltarget_fund_scale",
+    "n": 2183,
+    "wr": 0.6606,
+    "pnl": 286.07,
+    "pf": 1.1,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_atr3.0_voltarget_us",
+    "n": 870,
+    "wr": 0.4138,
+    "pnl": 284.53,
+    "pf": 1.13,
+    "wf": 4
+  },
+  {
+    "lb": "SOL_m168_lv5_adx0_atr1.5_atr3.0_voltarget_fund_us",
+    "n": 870,
+    "wr": 0.4138,
+    "pnl": 284.53,
+    "pf": 1.13,
+    "wf": 4
+  }
+]
