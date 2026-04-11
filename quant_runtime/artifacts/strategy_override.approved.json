@@ -1,5 +1,5 @@
 {
-  "_lock": "DOGE_PULLBACK_10x \u2014 3Y verified, EV $8.83, ruin 3.9%, WR 47%, PF 2.61, WF 4/4. Fee-safe. Applied 2026-04-11.",
+  "_lock": "DOGE_XRP_SOL_ROTATION_PULLBACK_10x \u2014 3Y verified, 354t WR58% PF1.61 PnL$625, ruin 4.9%, WF 4/4. Claude+GPT-5.4 approved. Applied 2026-04-11.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -24,7 +24,9 @@
     "major_size_boost_multiplier": 1.4,
     "major_strong_min_entry_notional_usd": 5.0,
     "major_symbols": [
-      "DOGEUSDT"
+      "DOGEUSDT",
+      "XRPUSDT",
+      "SOLUSDT"
     ],
     "min_entry_net_edge_bps": -5.0,
     "reduced_entry_net_edge_bps": -5.0,
@@ -33,7 +35,9 @@
     "priority_min_entry_net_edge_bps": -20.0,
     "priority_score_relaxation": 20.0,
     "priority_symbols": [
-      "DOGEUSDT"
+      "DOGEUSDT",
+      "XRPUSDT",
+      "SOLUSDT"
     ],
     "priority_volatility_relaxation": 0.36,
     "pyramid_enabled": true,
@@ -146,7 +150,9 @@
     "observe_only_liquidity_max": 0.0
   },
   "universe": [
-    "DOGEUSDT"
+    "DOGEUSDT",
+    "XRPUSDT",
+    "SOLUSDT"
   ],
   "funding_rate_strategy": {
     "enabled": true,
