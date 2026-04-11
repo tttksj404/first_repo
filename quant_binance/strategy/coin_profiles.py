@@ -75,9 +75,11 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         short_ema_fast=10, short_ema_slow=21, short_adx_floor=30, short_sl_mult=4.0, short_rr=0.75, short_hold_bars=24,
     ),
     "DOGEUSDT": CoinProfile(
-        ema_fast=9, ema_slow=21, adx_floor=38, sl_atr_mult=1.0, rr=1.5,
-        hold_bars=6, side_filter="both", optimal_leverage=15,
-        wr=0.71, pf=3.70,
+        # 3Y pullback: Donchian55 breakout + 3bar pullback, 10x, scale-out
+        # 68t WR47% PF2.61 EV$8.83 ruin3.9% fee-safe WF4/4
+        ema_fast=20, ema_slow=50, adx_floor=0, sl_atr_mult=2.0, rr=2.5,
+        hold_bars=48, side_filter="long", optimal_leverage=10,
+        wr=0.47, pf=2.61,
     ),
     "ETHUSDT": CoinProfile(
         ema_fast=8, ema_slow=21, adx_floor=45, sl_atr_mult=4.0, rr=1.5,
