@@ -98,10 +98,11 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         short_ema_fast=20, short_ema_slow=50, short_adx_floor=35, short_sl_mult=4.0, short_rr=1.5, short_hold_bars=24,
     ),
     "PEPEUSDT": CoinProfile(
-        ema_fast=20, ema_slow=50, adx_floor=28, sl_atr_mult=1.5, rr=1.2,
-        hold_bars=48, side_filter="both", optimal_leverage=7,
-        wr=0.79, pf=4.14,
-        pullback_ema=21, pullback_adx_floor=25, pullback_sl_mult=1.0, pullback_rr=1.5,  # WR 70% PF 3.72
+        # 3Y exhaustive (2023-2026): 7d momentum 3x, voltarget, scale-out
+        # 1415t WR56.6% PF1.25 $75→$820 WF4/4, MC100% survival, GPT-5.4 approved
+        ema_fast=20, ema_slow=50, adx_floor=0, sl_atr_mult=2.0, rr=4.0,
+        hold_bars=48, side_filter="both", optimal_leverage=3,
+        wr=0.57, pf=1.25,
     ),
     "LINKUSDT": CoinProfile(
         ema_fast=8, ema_slow=21, adx_floor=35, sl_atr_mult=2.5, rr=1.5,
