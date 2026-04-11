@@ -1,5 +1,5 @@
 {
-  "_lock": "PEPE_3X_MOMENTUM \u2014 3Y 20-coin exhaustive, WF4/4, MC 100% survival. PEPE 7d mom 3x voltarget scale. 1415t WR56.6% PF1.25 +$745. GPT-5.4 approved as paper-live candidate. Applied 2026-04-11.",
+  "_lock": "PEPE_15X_HANTANG \u2014 3Y verified, OOS PF2.35, MC ruin 1.8%, Bonferroni pass. PEPE 7d mom 15x margin50% TP150%ROE SL3%ROE. 1608t WR12.6% PF2.94. Applied 2026-04-11.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -55,10 +55,10 @@
     "confirmation_cycles_for_exit": 4,
     "futures_max_holding_minutes": 2880,
     "spot_max_holding_minutes": 4320,
-    "futures_profit_protection_arm_roe_percent": 8.0,
-    "futures_profit_protection_retrace_roe_percent": 3.0,
+    "futures_profit_protection_arm_roe_percent": 100.0,
+    "futures_profit_protection_retrace_roe_percent": 20.0,
     "futures_proactive_take_profit_roe_thresholds_percent": [
-      25.0
+      150.0
     ],
     "futures_proactive_take_profit_fraction": 1.0,
     "post_tp_stop_mode": "breakeven",
@@ -79,8 +79,8 @@
     "major_low_signal_min_roe_percent": 1.0,
     "major_low_signal_min_unrealized_usd": 1.5,
     "major_partial_exit_fraction": 0.65,
-    "major_profit_protection_arm_roe_percent": 15.0,
-    "major_profit_protection_retrace_roe_percent": 5.0,
+    "major_profit_protection_arm_roe_percent": 100.0,
+    "major_profit_protection_retrace_roe_percent": 20.0,
     "major_reentry_cooldown_minutes": 30,
     "major_reversal_confirmation_cycles": 2,
     "major_reversal_min_holding_minutes": 30,
@@ -97,9 +97,9 @@
     "position_unrealized_profit_retrace_usd": 0.75,
     "position_unrealized_take_profit_fraction": 0.35,
     "profit_flip_take_profit_fraction": 0.35,
-    "stop_loss_roe_percent": -20.0,
-    "soft_stop_roe_percent": -15.0,
-    "take_profit_roe_percent": 25.0
+    "stop_loss_roe_percent": -3.0,
+    "soft_stop_roe_percent": -2.0,
+    "take_profit_roe_percent": 150.0
   },
   "loss_combo_downgrade": {
     "cooldown_loss_usd": 10.0,
@@ -135,9 +135,9 @@
     "min_expected_profit_usd_per_trade": 0.001,
     "min_meaningful_futures_notional_usd": 5.0,
     "min_meaningful_spot_notional_usd": 1.0,
-    "per_trade_equity_risk": 0.15,
+    "per_trade_equity_risk": 0.50,
     "target_futures_leverage": 15.0,
-    "max_futures_leverage": 20.0
+    "max_futures_leverage": 15.0
   },
   "strategy_profile": "live-ultra-aggressive",
   "symbol_eligibility": {
