@@ -1,5 +1,5 @@
 {
-  "_lock": "PEPE_3X_MOMENTUM — 3Y 20-coin exhaustive, WF4/4, MC 100% survival. PEPE 7d mom 3x voltarget scale. 1415t WR56.6% PF1.25 +$745. GPT-5.4 approved as paper-live candidate. Applied 2026-04-11.",
+  "_lock": "PEPE_3X_MOMENTUM \u2014 3Y 20-coin exhaustive, WF4/4, MC 100% survival. PEPE 7d mom 3x voltarget scale. 1415t WR56.6% PF1.25 +$745. GPT-5.4 approved as paper-live candidate. Applied 2026-04-11.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -136,8 +136,8 @@
     "min_meaningful_futures_notional_usd": 5.0,
     "min_meaningful_spot_notional_usd": 1.0,
     "per_trade_equity_risk": 0.15,
-    "target_futures_leverage": 3.0,
-    "max_futures_leverage": 5.0
+    "target_futures_leverage": 15.0,
+    "max_futures_leverage": 20.0
   },
   "strategy_profile": "live-ultra-aggressive",
   "symbol_eligibility": {
