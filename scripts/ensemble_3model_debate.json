@@ -2,34 +2,45 @@
   "defaults": {
     "cwd": "/Users/tttksj/first_repo"
   },
-  "continue_on_error": true,
+  "continue_on_error": false,
   "input": {
-    "backtest_summary": "전수 조합 앙상블 백테스트 결과 (992개 설정, 20코인, 375일 1h 데이터)\n\n5 팩터: A(Vol-Momentum), B(Cross-Sectional Rank), C(Short-Term Reversal), D(Regime Gate), E(BTC-Residual)\n31개 팩터 조합 × 4 가중치(equal/mom_heavy/rev_heavy/alpha_mix) × 4 레버리지(5/10/15/20x) × 2 마진(50/75%)\n\n개별 팩터 베스트:\n  A: EV=$14.79 PF=2.88 WR=24.6% ruin=17.8% WF=3/4 20x\n  B: EV=$11.15 PF=2.32 WR=19.2% ruin=34.1% WF=2/4 20x\n  C: EV=$17.68 PF=3.33 WR=28.2% ruin=14.8% WF=4/4 20x (이전 세션 최강)\n  D: 단독 viable 없음\n  E: EV=$12.96 PF=2.57 WR=19.7% ruin=32.5% WF=3/4 20x\n\n앙상블 Top 5 (EV 기준):\n  1. CE equal 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.2% WF=4/4\n  2. CE mom_heavy 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.4% WF=4/4\n  3. CDE equal 20x 75%: EV=$26.51 PF=4.24 WR=21.7% ruin=19.8% WF=4/4\n  4. BC equal 20x 75%: EV=$25.47 PF=4.08 WR=21.1% ruin=19.7% WF=4/4\n  5. CE equal 20x 50%: EV=$18.35 PF=4.42 WR=23.2% ruin=9.5% WF=4/4\n\n주요 코인: MATIC(11), WIF(7), UNI(6), OP(5), ARB(5)\nMC 시뮬 2000회, 펀딩비 포함, SL -15% ROE, 7일 홀드, 쿨다운 48h",
-    "debate_prompt": "위 전수 조합 앙상블 백테스트 결과를 독립적으로 평가해주세요.\n\n반드시 답해야 할 질문:\n1. 최적 팩터 조합은? (CE, CDE, BCE, ABCDE 등) 이유는?\n2. 최적 레버리지/마진 설정은? 안전성 vs 수익성 트레이드오프\n3. ruin 9.5%(CE 20x 50%) vs ruin 18.2%(CE 20x 75%) — 어느 쪽이 프로덕션에 적합?\n4. 개별 C만 쓰는 것 대비 CE 앙상블의 실질적 이점이 있는가?\n5. 이 전략의 가장 큰 리스크 3가지\n6. 최종 추천 설정 1개와 그 이유\n\nJSON 형식으로 답해주세요:\n{\"best_combo\": \"...\", \"best_lev\": ..., \"best_margin\": ..., \"production_pick\": \"...\", \"reasoning\": \"...\", \"risks\": [...], \"confidence\": 0-100}"
+    "data": "전수 조합 앙상블 백테스트 992개 설정 (20코인, 375일 1h)\n팩터: A(Vol-Mom) B(XSect) C(Reversal) D(Regime) E(BTC-Resid)\n개별 베스트: C EV=$17.68 PF=3.33 ruin=14.8% WF=4/4\n앙상블 Top: CE 20x 75% EV=$27.53 PF=4.42 ruin=18.2% | CE 20x 50% EV=$18.35 ruin=9.5%\nCDE 20x 75% EV=$26.51 ruin=19.8% | BC 20x 75% EV=$25.47 ruin=19.7%\n69trades, WR23%, AvgWin$102 AvgLoss$7, 코인: MATIC WIF UNI OP ARB\n$75 자본, SL-15%ROE, 7d hold, 48h cooldown, MC2000, WF4fold"
   },
   "steps": [
     {
-      "id": "gpt54",
-      "node_type": "evaluator",
-      "label": "GPT-5.4 독립 평가",
+      "id": "round1_advocate",
+      "node_type": "advocate",
+      "label": "Round 1 — GPT-5.4 Advocate (찬성측)",
       "provider": "codex",
-      "json": true,
-      "prompt": "{{input.backtest_summary}}\n\n{{input.debate_prompt}}"
+      "prompt": "당신은 퀀트 전략 토론의 찬성측(Advocate)입니다.\n\n{{input.data}}\n\n위 백테스트 결과에서 가장 유망한 앙상블 조합을 주장하세요.\n- 왜 이 조합이 프로덕션에 적합한지 강하게 주장\n- 정량적 근거 제시 (EV, PF, ruin, WF)\n- 예상되는 반론에 대한 선제 방어\n- 구체적 추천: 팩터조합, 레버리지, 마진, 코인\n\n한국어로 답변. 확신을 갖고 주장하되 근거를 명확히."
     },
     {
-      "id": "gemini",
-      "node_type": "evaluator",
-      "label": "Gemini 3.1 Pro 독립 평가",
+      "id": "round1_critic",
+      "node_type": "critic",
+      "label": "Round 1 — Gemini Devil's Advocate (반대측)",
       "provider": "gemini",
-      "json": true,
-      "prompt": "{{input.backtest_summary}}\n\n{{input.debate_prompt}}"
+      "prompt": "당신은 퀀트 전략 토론의 반대측(Devil's Advocate)입니다. 찬성측의 주장을 공격하세요.\n\n[백테스트 데이터]\n{{input.data}}\n\n[찬성측(GPT-5.4) 주장]\n{{steps.round1_advocate.stdout}}\n\n위 찬성측 주장의 약점을 집중 공격하세요:\n- 오버피팅 가능성 (992개 설정에서 cherry-picking?)\n- 375일 데이터의 불충분성\n- ruin 확률이 실전에서 더 높을 수 있는 이유\n- WR 23%의 심리적/실전 리스크\n- 숨겨진 비용이나 가정의 허점\n- C팩터(Reversal)의 레짐 의존성\n\n모든 약점을 찾아내세요. 한국어로 답변."
     },
     {
-      "id": "consensus",
-      "node_type": "orchestrator",
-      "label": "Claude Opus 합의 도출",
+      "id": "round2_rebuttal",
+      "node_type": "rebuttal",
+      "label": "Round 2 — GPT-5.4 반론 (찬성측 재반박)",
+      "provider": "codex",
+      "prompt": "당신은 퀀트 전략 토론의 찬성측입니다. 반대측의 공격을 받았습니다.\n\n[백테스트 데이터]\n{{input.data}}\n\n[당신의 1차 주장]\n{{steps.round1_advocate.stdout}}\n\n[반대측(Gemini) 공격]\n{{steps.round1_critic.stdout}}\n\n반대측의 각 공격 포인트에 대해 재반박하세요:\n- 인정할 건 인정하고, 반박할 건 정량적 근거로 반박\n- 반대측이 놓친 긍정적 증거 추가 제시\n- 필요하면 원래 추천을 수정 (더 보수적으로)\n- 최종 수정된 추천안 제시\n\n한국어로 답변."
+    },
+    {
+      "id": "round2_final_attack",
+      "node_type": "final_attack",
+      "label": "Round 2 — Gemini 최종 공격",
       "provider": "gemini",
-      "prompt": "3모델 토론 합의를 도출해주세요.\n\nGPT-5.4 평가:\n{{steps.gpt54.stdout}}\n\nGemini 3.1 Pro 평가:\n{{steps.gemini.stdout}}\n\n위 두 모델의 독립 평가를 기반으로:\n1. 두 모델이 동의하는 부분 (합의)\n2. 의견이 갈리는 부분 (분쟁)\n3. 분쟁 해소 후 최종 추천 설정\n4. 3모델 합의 신뢰도 (0-100)\n\n최종 프로덕션 추천을 한 줄로 요약해주세요."
+      "prompt": "당신은 퀀트 전략 토론의 반대측(Devil's Advocate)입니다. 마지막 공격 기회입니다.\n\n[백테스트 데이터]\n{{input.data}}\n\n[찬성측 재반박]\n{{steps.round2_rebuttal.stdout}}\n\n찬성측이 여전히 해결하지 못한 핵심 리스크를 최종 지적하세요:\n- 찬성측이 인정한 약점들 중 치명적인 것\n- 실전 배포 시 반드시 해결해야 할 조건\n- 이 전략을 배포한다면 필수 안전장치 목록\n- 최종 판정: 배포 가능/불가능/조건부 가능\n\n한국어로 답변."
+    },
+    {
+      "id": "round3_judge",
+      "node_type": "judge",
+      "label": "Round 3 — Claude Opus 심판 (합의 도출)",
+      "provider": "gemini",
+      "prompt": "당신은 퀀트 전략 토론의 심판(Judge)입니다. 2라운드 토론을 종합하여 최종 판정을 내리세요.\n\n[찬성측(GPT-5.4) 1차 주장]\n{{steps.round1_advocate.stdout}}\n\n[반대측(Gemini) 1차 공격]\n{{steps.round1_critic.stdout}}\n\n[찬성측 재반박]\n{{steps.round2_rebuttal.stdout}}\n\n[반대측 최종 공격]\n{{steps.round2_final_attack.stdout}}\n\n심판으로서 판정:\n1. 찬성측과 반대측 중 누가 더 설득력 있었나?\n2. 양측이 합의한 포인트 (확실한 사실)\n3. 양측이 끝까지 대립한 포인트와 당신의 판정\n4. 최종 프로덕션 추천 설정 (팩터/레버리지/마진/조건)\n5. 필수 안전장치 목록\n6. 신뢰도 점수 (0-100)\n\n한국어로 답변. 중립적이고 정량적으로."
     }
   ]
 }
