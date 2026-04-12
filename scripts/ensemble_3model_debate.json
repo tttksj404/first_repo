@@ -1,0 +1,35 @@
+{
+  "defaults": {
+    "cwd": "/Users/tttksj/first_repo"
+  },
+  "continue_on_error": true,
+  "input": {
+    "backtest_summary": "전수 조합 앙상블 백테스트 결과 (992개 설정, 20코인, 375일 1h 데이터)\n\n5 팩터: A(Vol-Momentum), B(Cross-Sectional Rank), C(Short-Term Reversal), D(Regime Gate), E(BTC-Residual)\n31개 팩터 조합 × 4 가중치(equal/mom_heavy/rev_heavy/alpha_mix) × 4 레버리지(5/10/15/20x) × 2 마진(50/75%)\n\n개별 팩터 베스트:\n  A: EV=$14.79 PF=2.88 WR=24.6% ruin=17.8% WF=3/4 20x\n  B: EV=$11.15 PF=2.32 WR=19.2% ruin=34.1% WF=2/4 20x\n  C: EV=$17.68 PF=3.33 WR=28.2% ruin=14.8% WF=4/4 20x (이전 세션 최강)\n  D: 단독 viable 없음\n  E: EV=$12.96 PF=2.57 WR=19.7% ruin=32.5% WF=3/4 20x\n\n앙상블 Top 5 (EV 기준):\n  1. CE equal 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.2% WF=4/4\n  2. CE mom_heavy 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.4% WF=4/4\n  3. CDE equal 20x 75%: EV=$26.51 PF=4.24 WR=21.7% ruin=19.8% WF=4/4\n  4. BC equal 20x 75%: EV=$25.47 PF=4.08 WR=21.1% ruin=19.7% WF=4/4\n  5. CE equal 20x 50%: EV=$18.35 PF=4.42 WR=23.2% ruin=9.5% WF=4/4\n\n주요 코인: MATIC(11), WIF(7), UNI(6), OP(5), ARB(5)\nMC 시뮬 2000회, 펀딩비 포함, SL -15% ROE, 7일 홀드, 쿨다운 48h",
+    "debate_prompt": "위 전수 조합 앙상블 백테스트 결과를 독립적으로 평가해주세요.\n\n반드시 답해야 할 질문:\n1. 최적 팩터 조합은? (CE, CDE, BCE, ABCDE 등) 이유는?\n2. 최적 레버리지/마진 설정은? 안전성 vs 수익성 트레이드오프\n3. ruin 9.5%(CE 20x 50%) vs ruin 18.2%(CE 20x 75%) — 어느 쪽이 프로덕션에 적합?\n4. 개별 C만 쓰는 것 대비 CE 앙상블의 실질적 이점이 있는가?\n5. 이 전략의 가장 큰 리스크 3가지\n6. 최종 추천 설정 1개와 그 이유\n\nJSON 형식으로 답해주세요:\n{\"best_combo\": \"...\", \"best_lev\": ..., \"best_margin\": ..., \"production_pick\": \"...\", \"reasoning\": \"...\", \"risks\": [...], \"confidence\": 0-100}"
+  },
+  "steps": [
+    {
+      "id": "gpt54",
+      "node_type": "evaluator",
+      "label": "GPT-5.4 독립 평가",
+      "provider": "codex",
+      "json": true,
+      "prompt": "{{input.backtest_summary}}\n\n{{input.debate_prompt}}"
+    },
+    {
+      "id": "gemini",
+      "node_type": "evaluator",
+      "label": "Gemini 3.1 Pro 독립 평가",
+      "provider": "gemini",
+      "json": true,
+      "prompt": "{{input.backtest_summary}}\n\n{{input.debate_prompt}}"
+    },
+    {
+      "id": "consensus",
+      "node_type": "orchestrator",
+      "label": "Claude Opus 합의 도출",
+      "provider": "gemini",
+      "prompt": "3모델 토론 합의를 도출해주세요.\n\nGPT-5.4 평가:\n{{steps.gpt54.stdout}}\n\nGemini 3.1 Pro 평가:\n{{steps.gemini.stdout}}\n\n위 두 모델의 독립 평가를 기반으로:\n1. 두 모델이 동의하는 부분 (합의)\n2. 의견이 갈리는 부분 (분쟁)\n3. 분쟁 해소 후 최종 추천 설정\n4. 3모델 합의 신뢰도 (0-100)\n\n최종 프로덕션 추천을 한 줄로 요약해주세요."
+    }
+  ]
+}
