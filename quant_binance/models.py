@@ -57,6 +57,13 @@ class FeatureVector:
     ema_cross_signal: int = 0  # +1 = fast crossed above slow, -1 = below, 0 = none
     pullback_signal: int = 0   # +1 = long pullback (oversold recovery in uptrend), -1 = short, 0 = none
     atr_14_1h_bps: float = 0.0  # actual 1h ATR-14 in basis points
+    oi_divergence_score: float = 0.0  # -1 to +1: OI-price divergence (negative = fake breakout)
+    vwap_price: float = 0.0  # current session VWAP price
+    vwap_deviation_z: float = 0.0  # z-score of price deviation from VWAP (-4 to +4)
+    smc_fvg_score: float = 0.0  # 0-1: Fair Value Gap quality
+    smc_ob_score: float = 0.0  # 0-1: Order Block quality
+    smc_structure_score: float = 0.0  # 0-1: BOS/CHoCH confirmation
+    smc_composite_score: float = 0.0  # 0-1: weighted SMC composite
     predictability_score: float = 0.0
     gross_expected_edge_bps: float = 0.0
     net_expected_edge_bps: float = 0.0
