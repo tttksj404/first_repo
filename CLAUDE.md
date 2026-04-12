@@ -21,9 +21,25 @@
 
 **라운드 구조:**
 ```
-Round 1: Advocate 주장 → Devil's Advocate 공격
-Round 2: Advocate 재반박 → Devil's Advocate 최종 공격
-Round 3: Judge 종합 판정 (합의점/분쟁점/최종 추천/신뢰도)
+Round 1: 독립 주장 (3모델 동시)
+  - GPT-5.4: 자신의 최적안 제시 + 근거
+  - Gemini 3.1 Pro: 자신의 최적안 제시 + 근거
+  - Claude Opus: 자신의 최적안 제시 + 근거
+
+Round 2: 교차 비평 (각 모델이 다른 2모델의 주장을 공격)
+  - GPT-5.4: Gemini와 Claude 주장의 약점 지적
+  - Gemini: GPT와 Claude 주장의 약점 지적
+  - Claude: GPT와 Gemini 주장의 약점 지적
+
+Round 3: 방어 + 수정 (비평을 받고 자기 주장 수정/방어)
+  - GPT-5.4: 받은 비평에 대응, 필요시 주장 수정
+  - Gemini: 받은 비평에 대응, 필요시 주장 수정
+  - Claude: 받은 비평에 대응, 필요시 주장 수정
+
+Round 4: 합의 도출 (3모델 동시)
+  - 각 모델이 최종 수정안 + 다른 모델과의 합의점/분쟁점 정리
+  - 3모델 투표: 최종 추천 1개 선정
+  - 신뢰도 점수(0-100) 각 모델이 독립 부여 → 평균
 ```
 
 **핵심 원칙:**
