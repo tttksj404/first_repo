@@ -945,50 +945,47 @@ def evaluate_snapshot(
         # DOGE PULLBACK 10x: 3Y verified, EV $8.83, ruin 3.9%, WR 47%, PF 2.61
         # Donchian 55 breakout → 3-bar pullback entry, long only in uptrend
         # 68t/3yr, fee-safe, WF 4/4. Claude+GPT-5.4 합작 설계.
-        futures_side = prediction.futures.side
+        _futures_side = prediction.futures.side
         _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
-        if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
-            _price_now = _bars_1h[-1].close_price if _bars_1h else 0
-            _price_7d = _bars_1h[-168].close_price if len(_bars_1h) >= 168 else _price_now
-            _mom_7d = (_price_now - _price_7d) / _price_7d if _price_7d > 0 else 0
-
-            # 1. 7d momentum > +3% (long only)
-            if _mom_7d < 0.03:
+        if is_profiled(snapshot.symbol):
+            if len(_bars_1h) < 168:
                 futures_ok = False
-                futures_reasons.append("MOMENTUM_TOO_WEAK")
+                futures_reasons.append("INSUFFICIENT_BARS")
+            elif _futures_side != "long":
+                # Pullback strategy is long-only; reject shorts instead of forcing the side.
+                futures_ok = False
+                futures_reasons.append("PULLBACK_LONG_ONLY")
             else:
-                from dataclasses import replace as _dc_replace
-                futures_side = "long"
-                prediction = _dc_replace(prediction,
-                    futures=_dc_replace(prediction.futures, side=futures_side)
-                )
+                _price_now = _bars_1h[-1].close_price
+                _price_7d = _bars_1h[-168].close_price
+                _mom_7d = (_price_now - _price_7d) / _price_7d if _price_7d > 0 else 0
 
-                # 2. Check if current bar is a pullback after Donchian breakout
-                # Donchian 55-bar high
-                if len(_bars_1h) >= 55:
-                    _dc_high = max(b.high_price for b in _bars_1h[-56:-1])
+                # 1. 7d momentum > +3%
+                if _mom_7d < 0.03:
+                    futures_ok = False
+                    futures_reasons.append("MOMENTUM_TOO_WEAK")
+                else:
+                    # 2. Donchian 55 breakout in the prior 3 bars with current-bar pullback.
+                    # Exclude bars -2..-4 from the Donchian window — including them makes
+                    # `close > dc_high` trivially false (close ≤ high ≤ max(high)).
+                    _dc_high = max(b.high_price for b in _bars_1h[-60:-4])
                     _at = sum(max(_bars_1h[-j].high_price - _bars_1h[-j].low_price,
                                   abs(_bars_1h[-j].high_price - _bars_1h[-j-1].close_price),
                                   abs(_bars_1h[-j].low_price - _bars_1h[-j-1].close_price))
-                              for j in range(1, 15)) / 14 if len(_bars_1h) > 14 else 0
+                              for j in range(1, 15)) / 14
 
-                    # Recent breakout in last 3 bars?
                     _recent_breakout = any(
                         _bars_1h[-k].close_price > _dc_high + 0.25 * _at
-                        for k in range(2, min(5, len(_bars_1h)))
+                        for k in range(2, 5)
                     )
-                    # Current bar pulls back to breakout level?
-                    _pullback = _bars_1h[-1].low_price <= _dc_high + 0.5 * _at and _price_now > _dc_high
+                    _pullback = (
+                        _bars_1h[-1].low_price <= _dc_high + 0.5 * _at
+                        and _price_now > _dc_high
+                    )
 
                     if not (_recent_breakout and _pullback):
                         futures_ok = False
                         futures_reasons.append("NO_PULLBACK_SIGNAL")
-                else:
-                    futures_ok = False
-                    futures_reasons.append("INSUFFICIENT_BARS_FOR_DONCHIAN")
-        elif len(_bars_1h) < 168:
-            futures_ok = False
-            futures_reasons.append("INSUFFICIENT_BARS")
 
     if futures_ok:
         planned_leverage = select_futures_leverage(
