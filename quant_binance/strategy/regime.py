@@ -723,6 +723,15 @@ def _futures_entry_plan(
             reasons.append("ALT_FLOW_WEAK")
         if features.alt_rotation_penalty >= settings.altcoin_overlays.rotation_block_penalty:
             reasons.append("ALT_ROTATION_HEADWIND")
+    # ── OI-VWAP-SMC integrated gate ──────────────
+    from quant_binance.strategy.oi_vwap_smc_strategy import evaluate_entry as _oi_vwap_smc_eval
+    oi_vwap_smc = _oi_vwap_smc_eval(features, symbol)
+    if not oi_vwap_smc.entry_ok:
+        return False, list(oi_vwap_smc.reasons), 0.0, (), ()
+    if oi_vwap_smc.reasons:
+        reduced_size = True
+    size_multiplier = min(size_multiplier, oi_vwap_smc.size_multiplier)
+
     cost_gate_pass = passes_cost_gate(features, settings)
     macro_cost_multiple_min = exposure.macro_edge_to_cost_multiple_min
     if priority_symbol and supportive_macro:
@@ -785,6 +794,10 @@ def _futures_entry_plan(
         size_boost_reasons.append(BTC_ETH_STRONG_SIZE_BOOST_REASON)
     if symbol in set(exposure.demoted_symbols) and exposure.demoted_symbol_size_cap > 0.0:
         size_multiplier = min(size_multiplier, exposure.demoted_symbol_size_cap)
+    # OI-VWAP-SMC size boost: all signals aligned = confidence boost
+    if oi_vwap_smc.signal_quality == "strong" and not reduced_size:
+        size_multiplier = max(size_multiplier, oi_vwap_smc.size_multiplier)
+        size_boost_reasons.extend(oi_vwap_smc.boost_reasons)
     # Volatility scaling: higher vol → moderately larger size (trend breakouts)
     # 374d validated for ETH only (BTC excluded from ADX strategy).
     if symbol == "ETHUSDT" and features.volatility_penalty > 0.5 and not reduced_size:
@@ -1093,6 +1106,30 @@ def evaluate_snapshot(
             entry_relaxation_reasons=spot_relaxed_reasons,
             rejection_reasons=tuple(sorted(set(futures_reasons))),
             divergence_code="ENTRY_CONFIRMATION_REQUIRED" if confirmation_required else "",
+        )
+        return decision_from_portfolio_intent(intent=intent)
+
+    # ── Alpha sub-strategies: find trades the regime engine skips ──
+    from quant_binance.strategy.alpha_strategies import best_alpha_signal
+    alpha = best_alpha_signal(futures_features)
+    if alpha is not None and alpha.confidence >= 0.55:
+        alpha_leverage = min(alpha.leverage_cap, int(settings.risk.max_futures_leverage))
+        alpha_notional = (
+            equity_usd * settings.risk.per_trade_equity_risk
+            / max(alpha.stop_bps / 10000.0, 1e-6)
+            * alpha.size_fraction
+        )
+        alpha_notional = min(alpha_notional, remaining_portfolio_capacity_usd)
+        intent = build_portfolio_intent(
+            prediction=prediction,
+            selected_mode="futures",
+            side=alpha.side,
+            target_notional_usd=round(alpha_notional, 6),
+            stop_distance_bps=alpha.stop_bps,
+            target_leverage=float(alpha_leverage),
+            strategy_size_multiplier=alpha.size_fraction,
+            size_boost_reasons=(alpha.reason,),
+            entry_relaxation_reasons=("ALPHA_SUB_STRATEGY",),
         )
         return decision_from_portfolio_intent(intent=intent)
 
