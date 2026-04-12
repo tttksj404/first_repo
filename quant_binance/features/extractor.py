@@ -5,6 +5,11 @@ from pathlib import Path
 
 from quant_binance.cost_calibration import CostCalibration, load_cost_calibration
 from quant_binance.data.state import KlineBar, SymbolMarketState
+from quant_binance.features.advanced_signals import (
+    oi_divergence_from_state,
+    vwap_deviation_from_state,
+    smc_signals_from_state,
+)
 from quant_binance.features.primitive import FeatureHistoryContext, PrimitiveInputs
 from quant_binance.models import FeatureVector
 from quant_binance.settings import Settings
@@ -398,12 +403,24 @@ class MarketFeatureExtractor:
 
         pullback = _pullback_signal(closes_1h, ema_period=21, rsi_entry=40.0)
 
+        # --- Advanced signals ---
+        oi_div = oi_divergence_from_state(state, lookback=24)
+        vwap_price, vwap_dev_z = vwap_deviation_from_state(state)
+        smc = smc_signals_from_state(state, trend_direction=features.trend_direction)
+
         enriched = FeatureVector(
             **{
                 **features.as_dict(),
                 "support_alignment": round(support_alignment, 6),
                 "resistance_penalty": round(resistance_penalty, 6),
                 "pullback_signal": pullback,
+                "oi_divergence_score": oi_div,
+                "vwap_price": vwap_price,
+                "vwap_deviation_z": vwap_dev_z,
+                "smc_fvg_score": smc.fvg_score,
+                "smc_ob_score": smc.ob_score,
+                "smc_structure_score": smc.structure_score,
+                "smc_composite_score": smc.composite_score,
             }
         )
         if self.cost_calibration is not None:
