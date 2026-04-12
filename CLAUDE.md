@@ -32,18 +32,6 @@ Round 3: Judge 종합 판정 (합의점/분쟁점/최종 추천/신뢰도)
 - Judge는 중립적이며 정량적 근거로만 판정
 - 최종 결과에 신뢰도 점수(0-100) 필수
 
-### Cross-Validation 방식 (기존 .omx 패턴)
-
-`.omx/plans/test-spec-*.md` 에 정의된 기존 교차검증:
-```
-1. Codex 로컬 디자인 패스 (설계/구현 검토)
-2. Gemini 외부 비평 (APPROVE / REVISE 판정)
-3. 내부 critic/verifier 패스
-```
-- Gemini verdict = `APPROVE` 필수
-- 모든 reviewer가 blocking finding 없어야 release 가능
-- 결과물: `.omx/artifacts/gemini-*.md` 에 저장
-
 ### 실행 방법
 
 #### 로컬 환경 (codex/gemini CLI 사용 가능)
