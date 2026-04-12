@@ -1,0 +1,133 @@
+{
+  "timestamp": "2026-04-12T21:52:53.309347+00:00",
+  "settings": {
+    "equity": 75.0,
+    "lev": 15,
+    "mp": 0.35,
+    "sl_roe": 3
+  },
+  "signals": [
+    {
+      "symbol": "BTCUSDT",
+      "price": 71193.5,
+      "trend": "DN",
+      "mom_7d": 5.44,
+      "adx": 30.6,
+      "oi_div": -0.148,
+      "vwap_dev": -1.11,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "ETHUSDT",
+      "price": 2206.85,
+      "trend": "DN",
+      "mom_7d": 7.18,
+      "adx": 14.8,
+      "oi_div": 0.0,
+      "vwap_dev": -0.44,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "SOLUSDT",
+      "price": 82.63,
+      "trend": "DN",
+      "mom_7d": 3.69,
+      "adx": 22.3,
+      "oi_div": 0.158,
+      "vwap_dev": -0.91,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "XRPUSDT",
+      "price": 1.3351,
+      "trend": "DN",
+      "mom_7d": 2.7,
+      "adx": 20.0,
+      "oi_div": 0.173,
+      "vwap_dev": -0.51,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "WIFUSDT",
+      "price": 0.1906,
+      "trend": "DN",
+      "mom_7d": 8.73,
+      "adx": 33.1,
+      "oi_div": 0.156,
+      "vwap_dev": -2.59,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "NEARUSDT",
+      "price": 1.364,
+      "trend": "DN",
+      "mom_7d": 11.09,
+      "adx": 65.4,
+      "oi_div": 0.007,
+      "vwap_dev": 0.4,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "ARBUSDT",
+      "price": 0.1113,
+      "trend": "DN",
+      "mom_7d": 22.14,
+      "adx": 21.2,
+      "oi_div": 0.071,
+      "vwap_dev": 0.25,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "price": 9.148,
+      "trend": "DN",
+      "mom_7d": -3.27,
+      "adx": 34.6,
+      "oi_div": -0.011,
+      "vwap_dev": -1.23,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    },
+    {
+      "symbol": "DOTUSDT",
+      "price": 1.243,
+      "trend": "DN",
+      "mom_7d": -3.89,
+      "adx": 37.8,
+      "oi_div": 0.3,
+      "vwap_dev": -2.54,
+      "signal": "CASH",
+      "margin": 26.25,
+      "notional": 393.75,
+      "sl_dollar": 0.79
+    }
+  ],
+  "entries": [],
+  "summary": {
+    "entry_count": 0,
+    "cash_count": 9
+  }
+}
