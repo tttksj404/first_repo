@@ -1,0 +1,75 @@
+{
+  "individuals": {
+    "A_vc_squeeze_t": {
+      "trades": 83,
+      "wr": 0.3976,
+      "pf": 6.29,
+      "total": 1919.87,
+      "ev": 23.13,
+      "wf": 4,
+      "ruin_pct": 1.2
+    },
+    "B_mom_3d": {
+      "trades": 77,
+      "wr": 0.2987,
+      "pf": 6.54,
+      "total": 2217.18,
+      "ev": 28.79,
+      "wf": 4,
+      "ruin_pct": 2.3
+    },
+    "C_rev_rsi": {
+      "trades": 40,
+      "wr": 0.4,
+      "pf": 8.14,
+      "total": 1279.76,
+      "ev": 31.99,
+      "wf": 4,
+      "ruin_pct": 0.5
+    }
+  },
+  "overlaps": {
+    "AB": 3,
+    "AC": 0,
+    "BC": 0,
+    "ABC": 0
+  },
+  "ensemble": {
+    "trades": 200,
+    "wr": 0.36,
+    "pf": 6.75,
+    "total": 1805.6,
+    "ev": 9.03,
+    "wf": 4,
+    "ruin_pct": 0.0
+  },
+  "individual_split": {
+    "A": {
+      "trades": 83,
+      "wr": 0.3976,
+      "pf": 6.29,
+      "total": 639.96,
+      "ev": 7.71,
+      "wf": 4,
+      "ruin_pct": 0.0
+    },
+    "B": {
+      "trades": 77,
+      "wr": 0.2987,
+      "pf": 6.54,
+      "total": 739.06,
+      "ev": 9.6,
+      "wf": 4,
+      "ruin_pct": 0.0
+    },
+    "C": {
+      "trades": 40,
+      "wr": 0.4,
+      "pf": 8.14,
+      "total": 426.59,
+      "ev": 10.66,
+      "wf": 4,
+      "ruin_pct": 0.0
+    }
+  }
+}
