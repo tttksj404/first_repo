@@ -942,50 +942,55 @@ def evaluate_snapshot(
         snapshot.symbol,
     )
     if futures_ok:
-        # DOGE PULLBACK 10x: 3Y verified, EV $8.83, ruin 3.9%, WR 47%, PF 2.61
-        # Donchian 55 breakout → 3-bar pullback entry, long only in uptrend
-        # 68t/3yr, fee-safe, WF 4/4. Claude+GPT-5.4 합작 설계.
+        # ENSEMBLE TOP 3: WF 4/4, Ruin 0.0%, PF 6.75, \$1806/200 trades
+        # OR-logic: enter if ANY of the 3 signals fires. All long-only.
+        #   A) vc_squeeze_t: BB width <0.04 (48bar) + 1d mom >+1%
+        #   B) mom_3d:       3d mom >+3% (BTC trending)
+        #   C) rev_rsi:      3d mom <-5% + RSI<25 (oversold bounce)
+        import statistics as _stat
         futures_side = prediction.futures.side
         _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
-        if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
-            _price_now = _bars_1h[-1].close_price if _bars_1h else 0
-            _price_7d = _bars_1h[-168].close_price if len(_bars_1h) >= 168 else _price_now
-            _mom_7d = (_price_now - _price_7d) / _price_7d if _price_7d > 0 else 0
 
-            # 1. 7d momentum > +3% (long only)
-            if _mom_7d < 0.03:
+        def _mom1h(bars, p):
+            if len(bars) < p + 1: return 0
+            _p0 = bars[-1 - p].close_price
+            return (bars[-1].close_price / _p0 - 1) if _p0 > 0 else 0
+
+        def _rsi_1h(bars, p=14):
+            if len(bars) < p + 1: return 50
+            _gains, _losses = [], []
+            for _j in range(p):
+                _d = bars[-1 - _j].close_price - bars[-2 - _j].close_price
+                _gains.append(max(_d, 0)); _losses.append(max(-_d, 0))
+            _ag = sum(_gains) / p; _al = sum(_losses) / p
+            return 100 - 100 / (1 + _ag / _al) if _al > 0 else 100
+
+        def _bb_width(bars, p=48):
+            if len(bars) < p: return 1.0
+            _closes = [b.close_price for b in bars[-p:]]
+            _m = sum(_closes) / p
+            _s = _stat.stdev(_closes) if len(_closes) > 1 else 0
+            return (2 * _s) / _m if _m > 0 else 1.0
+
+        if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
+            _m1d = _mom1h(_bars_1h, 24)
+            _m3d = _mom1h(_bars_1h, 72)
+            _rsi14 = _rsi_1h(_bars_1h, 14)
+            _bw48 = _bb_width(_bars_1h, 48)
+
+            _sig_a = _bw48 < 0.04 and _m1d > 0.01
+            _sig_b = _m3d > 0.03
+            _sig_c = _m3d < -0.05 and _rsi14 < 25
+
+            if not (_sig_a or _sig_b or _sig_c):
                 futures_ok = False
-                futures_reasons.append("MOMENTUM_TOO_WEAK")
+                futures_reasons.append("NO_ENSEMBLE_SIGNAL")
             else:
                 from dataclasses import replace as _dc_replace
                 futures_side = "long"
                 prediction = _dc_replace(prediction,
                     futures=_dc_replace(prediction.futures, side=futures_side)
                 )
-
-                # 2. Check if current bar is a pullback after Donchian breakout
-                # Donchian 55-bar high
-                if len(_bars_1h) >= 55:
-                    _dc_high = max(b.high_price for b in _bars_1h[-56:-1])
-                    _at = sum(max(_bars_1h[-j].high_price - _bars_1h[-j].low_price,
-                                  abs(_bars_1h[-j].high_price - _bars_1h[-j-1].close_price),
-                                  abs(_bars_1h[-j].low_price - _bars_1h[-j-1].close_price))
-                              for j in range(1, 15)) / 14 if len(_bars_1h) > 14 else 0
-
-                    # Recent breakout in last 3 bars?
-                    _recent_breakout = any(
-                        _bars_1h[-k].close_price > _dc_high + 0.25 * _at
-                        for k in range(2, min(5, len(_bars_1h)))
-                    )
-                    # Current bar pulls back to breakout level?
-                    _pullback = _bars_1h[-1].low_price <= _dc_high + 0.5 * _at and _price_now > _dc_high
-
-                    if not (_recent_breakout and _pullback):
-                        futures_ok = False
-                        futures_reasons.append("NO_PULLBACK_SIGNAL")
-                else:
-                    futures_ok = False
-                    futures_reasons.append("INSUFFICIENT_BARS_FOR_DONCHIAN")
         elif len(_bars_1h) < 168:
             futures_ok = False
             futures_reasons.append("INSUFFICIENT_BARS")
