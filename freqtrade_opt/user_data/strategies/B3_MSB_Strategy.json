@@ -1,0 +1,34 @@
+{
+  "strategy_name": "B3_MSB_Strategy",
+  "params": {
+    "roi": {
+      "0": 0.1
+    },
+    "stoploss": {
+      "stoploss": -0.1
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 3
+    },
+    "buy": {
+      "adx_min": 4,
+      "atr_sl_mult": 2.8,
+      "atr_tp_mult": 4.2,
+      "breakout_buffer": 0.17,
+      "min_swing_atr": 0.4,
+      "rsi_lower": 22,
+      "rsi_upper": 60,
+      "swing_window": 13,
+      "use_ema_filter": false,
+      "vol_z_min": 0.8
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2026-04-13 13:25:20.208343+00:00"
+}

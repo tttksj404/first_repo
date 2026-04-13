@@ -336,6 +336,22 @@ class HousekeepingConfig:
 
 
 @dataclass(frozen=True)
+class B3MsbConfig:
+    enabled: bool = False
+    swing_window: int = 13
+    atr_tp_multiple: float = 4.2
+    atr_sl_multiple: float = 2.8
+    breakout_buffer_pct: float = 0.0017
+    adx_min: int = 4
+    min_swing_size_atr: float = 0.4
+    rsi_upper: int = 60
+    rsi_lower: int = 22
+    vol_z_min: float = 0.8
+    score_bonus: float = 12.0  # predictability_score 보너스 (시그널 활성 시)
+    edge_bonus_bps: float = 8.0  # gross_expected_edge 보너스 (bps)
+
+
+@dataclass(frozen=True)
 class Settings:
     config_version: str
     snapshot_schema_version: str
@@ -370,6 +386,7 @@ class Settings:
     disable_position_adoption: bool = False
     data_collection_mode: bool = False
     data_collection_min_trades: int = 50
+    b3_msb: B3MsbConfig = B3MsbConfig()
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -444,4 +461,5 @@ class Settings:
             disable_position_adoption=bool(raw.get("disable_position_adoption", False)),
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
             data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
+            b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
         )
