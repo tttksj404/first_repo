@@ -371,6 +371,111 @@ class MarketFeatureExtractor:
             ema_cross_signal=ema_cross,
         )
 
+    def _compute_b3_msb_signal(self, bars_1h: list[KlineBar], state: SymbolMarketState) -> tuple[int, float]:
+        """B3 Market Structure Break 시그널 계산.
+
+        Returns:
+            (signal, strength): signal은 -1/0/1, strength는 0~1.
+        """
+        cfg = self.settings.b3_msb
+        if not cfg.enabled:
+            return 0, 0.0
+
+        sw = cfg.swing_window
+        if len(bars_1h) < sw + 15:
+            return 0, 0.0
+
+        # 스윙 구간 (현재 봉 제외, 직전 sw개)
+        swing_bars = bars_1h[-(sw + 1):-1]
+        swing_high = max(bar.high_price for bar in swing_bars)
+        swing_low = min(bar.low_price for bar in swing_bars)
+        swing_range = swing_high - swing_low
+
+        # ATR 계산 (최근 14개 1h 바)
+        recent = bars_1h[-15:]
+        true_ranges = []
+        for i in range(1, len(recent)):
+            tr = max(
+                recent[i].high_price - recent[i].low_price,
+                abs(recent[i].high_price - recent[i - 1].close_price),
+                abs(recent[i].low_price - recent[i - 1].close_price),
+            )
+            true_ranges.append(tr)
+        atr = sum(true_ranges) / len(true_ranges) if true_ranges else 0.0
+
+        if atr <= 0:
+            return 0, 0.0
+
+        # 최소 스윙 크기 체크
+        if swing_range < cfg.min_swing_size_atr * atr:
+            return 0, 0.0
+
+        price = state.last_trade_price
+        buf = cfg.breakout_buffer_pct
+
+        # ADX 계산 (간이 - ADX가 이미 features에 없으므로 직접 계산)
+        # Hyperopt 결과 adx_min=4이므로 거의 항상 통과, 간이 체크
+        if cfg.adx_min > 0 and len(bars_1h) >= 28:
+            closes = [b.close_price for b in bars_1h[-28:]]
+            highs = [b.high_price for b in bars_1h[-28:]]
+            lows = [b.low_price for b in bars_1h[-28:]]
+            plus_dm_sum = 0.0
+            minus_dm_sum = 0.0
+            tr_sum = 0.0
+            for i in range(1, min(15, len(closes))):
+                up = highs[i] - highs[i - 1]
+                dn = lows[i - 1] - lows[i]
+                plus_dm_sum += up if (up > dn and up > 0) else 0.0
+                minus_dm_sum += dn if (dn > up and dn > 0) else 0.0
+                tr_sum += max(highs[i] - lows[i], abs(highs[i] - closes[i - 1]), abs(lows[i] - closes[i - 1]))
+            if tr_sum > 0:
+                pdi = 100 * plus_dm_sum / tr_sum
+                mdi = 100 * minus_dm_sum / tr_sum
+                denom = pdi + mdi
+                adx_approx = 100 * abs(pdi - mdi) / denom if denom > 0 else 0.0
+            else:
+                adx_approx = 0.0
+            if adx_approx < cfg.adx_min:
+                return 0, 0.0
+
+        # RSI 체크 (간이 RSI14)
+        closes_recent = [b.close_price for b in bars_1h[-15:]]
+        gains, losses = [], []
+        for i in range(1, len(closes_recent)):
+            diff = closes_recent[i] - closes_recent[i - 1]
+            gains.append(max(diff, 0))
+            losses.append(max(-diff, 0))
+        avg_gain = sum(gains) / len(gains) if gains else 0.0
+        avg_loss = sum(losses) / len(losses) if losses else 1e-9
+        rs = avg_gain / max(avg_loss, 1e-9)
+        rsi = 100 - (100 / (1 + rs))
+
+        # Volume z-score 체크
+        if cfg.vol_z_min > 0 and len(bars_1h) >= 21:
+            vols = [b.quote_volume for b in bars_1h[-21:]]
+            vol_mean = sum(vols[:-1]) / len(vols[:-1])
+            vol_std = (sum((v - vol_mean) ** 2 for v in vols[:-1]) / len(vols[:-1])) ** 0.5
+            vol_z = (vols[-1] - vol_mean) / max(vol_std, 1e-9)
+            if vol_z < cfg.vol_z_min:
+                return 0, 0.0
+
+        # 돌파 시그널
+        long_breakout = price > swing_high * (1.0 + buf)
+        short_breakout = price < swing_low * (1.0 - buf)
+
+        if long_breakout and rsi < cfg.rsi_upper:
+            # 강도: 돌파 거리 / ATR (클수록 강한 돌파)
+            breakout_dist = (price - swing_high * (1.0 + buf)) / atr
+            strength = min(breakout_dist / 2.0, 1.0)  # 2 ATR 이상이면 1.0
+            return 1, max(strength, 0.1)
+
+        if short_breakout and rsi > cfg.rsi_lower:
+            breakout_dist = (swing_low * (1.0 - buf) - price) / atr
+            strength = min(breakout_dist / 2.0, 1.0)
+            return -1, max(strength, 0.1)
+
+        return 0, 0.0
+
     def enrich_feature_vector(self, *, state: SymbolMarketState, features: FeatureVector) -> FeatureVector:
         bars_1h = _recent_closed_bars(state, "1h", 120)
         if len(bars_1h) < 50:
@@ -397,6 +502,7 @@ class MarketFeatureExtractor:
         resistance_penalty = min(resistance_hits / 2.0, 1.0)
 
         pullback = _pullback_signal(closes_1h, ema_period=21, rsi_entry=40.0)
+        b3_signal, b3_strength = self._compute_b3_msb_signal(bars_1h, state)
 
         enriched = FeatureVector(
             **{
@@ -404,6 +510,8 @@ class MarketFeatureExtractor:
                 "support_alignment": round(support_alignment, 6),
                 "resistance_penalty": round(resistance_penalty, 6),
                 "pullback_signal": pullback,
+                "b3_msb_signal": b3_signal,
+                "b3_msb_strength": round(b3_strength, 6),
             }
         )
         if self.cost_calibration is not None:

@@ -64,6 +64,8 @@ class FeatureVector:
     empirical_fee_bps: float = 0.0
     empirical_entry_slippage_bps: float = 0.0
     empirical_exit_slippage_bps: float = 0.0
+    b3_msb_signal: int = 0  # -1=short breakout, 0=no signal, 1=long breakout
+    b3_msb_strength: float = 0.0  # 0~1, breakout confidence
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
