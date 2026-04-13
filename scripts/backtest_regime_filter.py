@@ -24,7 +24,7 @@ os.environ.setdefault("STRATEGY_PROFILE", "live-ultra-aggressive")
 os.environ.setdefault("EXCHANGE", "bitget")
 
 from quant_binance.features.regime_filter import (
-    hurst_rs,
+    hurst_dfa,
     har_rv_forecast,
     classify_regime,
     vol_regime,
@@ -83,9 +83,9 @@ def main():
         # Evaluate every 12 bars (1h interval)
         step = 12
         for i in range(10000, len(b5), step):  # skip first 10000 bars (warmup)
-            prices_window = closes[i - 500:i]  # last 500 bars for Hurst
+            returns_window_short = returns[i - 500:i]  # 500 returns for Hurst
             returns_window = returns[i - 8640:i] if i >= 8640 else returns[:i]
-            hurst = hurst_rs(prices_window, min_lag=10, max_lag=100)
+            hurst = hurst_dfa(returns_window_short, min_lag=4, max_lag=64)
             rv_fc, rv_d, rv_w, rv_m = har_rv_forecast(returns_window)
             sig_list.append({
                 "ts": int(b5[i].close_time.timestamp() * 1000),
