@@ -1,5 +1,5 @@
 {
-  "_lock": "DOGE_XRP_SOL_ROTATION_PULLBACK_10x \u2014 3Y verified, 354t WR58% PF1.61 PnL$625, ruin 4.9%, WF 4/4. Claude+GPT-5.4 approved. Applied 2026-04-11.",
+  "_lock": "ENSEMBLE_TOP3 — vc_squeeze_t + mom_3d + rev_rsi. 200 tr/375d, WR 36%, PF 6.75, $1806, Ruin 0.0%, WF 4/4. Applied 2026-04-12.",
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "disable_position_adoption": false,
@@ -57,16 +57,14 @@
     "liquidity_drop_exit_buffer": 0.35,
     "score_drop_exit_buffer": 15,
     "confirmation_cycles_for_exit": 4,
-    "futures_max_holding_minutes": 2880,
+    "futures_max_holding_minutes": 4320,
     "spot_max_holding_minutes": 4320,
     "futures_profit_protection_arm_roe_percent": 100.0,
     "futures_profit_protection_retrace_roe_percent": 20.0,
-    "futures_proactive_take_profit_roe_thresholds_percent": [
-      999
-    ],
-    "futures_proactive_take_profit_fraction": 1.0,
+    "futures_proactive_take_profit_roe_thresholds_percent": [],
+    "futures_proactive_take_profit_fraction": 0.0,
     "post_tp_stop_mode": "breakeven",
-    "partial_take_profit_r": 1.25
+    "partial_take_profit_r": 999.0
   },
   "live_position_risk": {
     "disable_standard_stop_loss_exits": false,
@@ -83,7 +81,7 @@
     "major_low_signal_min_roe_percent": 1.0,
     "major_low_signal_min_unrealized_usd": 1.5,
     "major_partial_exit_fraction": 0.65,
-    "major_profit_protection_arm_roe_percent": 999,
+    "major_profit_protection_arm_roe_percent": 999.0,
     "major_profit_protection_retrace_roe_percent": 20.0,
     "major_reentry_cooldown_minutes": 30,
     "major_reversal_confirmation_cycles": 2,
@@ -101,9 +99,9 @@
     "position_unrealized_profit_retrace_usd": 0.75,
     "position_unrealized_take_profit_fraction": 0.35,
     "profit_flip_take_profit_fraction": 0.35,
-    "stop_loss_roe_percent": -15.0,
-    "soft_stop_roe_percent": -12.0,
-    "take_profit_roe_percent": 999
+    "stop_loss_roe_percent": -10.0,
+    "soft_stop_roe_percent": -8.0,
+    "take_profit_roe_percent": 999.0
   },
   "loss_combo_downgrade": {
     "cooldown_loss_usd": 10.0,
@@ -139,9 +137,9 @@
     "min_expected_profit_usd_per_trade": 0.001,
     "min_meaningful_futures_notional_usd": 5.0,
     "min_meaningful_spot_notional_usd": 1.0,
-    "per_trade_equity_risk": 0.75,
-    "target_futures_leverage": 10.0,
-    "max_futures_leverage": 10.0
+    "per_trade_equity_risk": 0.25,
+    "target_futures_leverage": 20.0,
+    "max_futures_leverage": 20.0
   },
   "strategy_profile": "live-ultra-aggressive",
   "symbol_eligibility": {
