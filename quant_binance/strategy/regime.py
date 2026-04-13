@@ -941,16 +941,15 @@ def evaluate_snapshot(
         settings,
         snapshot.symbol,
     )
-    if futures_ok:
-        # ENSEMBLE TOP 3: WF 4/4, Ruin 0.0%, PF 6.75, \$1806/200 trades
-        # OR-logic: enter if ANY of the 3 signals fires. All long-only.
-        #   A) vc_squeeze_t: BB width <0.04 (48bar) + 1d mom >+1%
-        #   B) mom_3d:       3d mom >+3% (BTC trending)
-        #   C) rev_rsi:      3d mom <-5% + RSI<25 (oversold bounce)
-        import statistics as _stat
-        futures_side = prediction.futures.side
-        _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
 
+    # ENSEMBLE TOP 3: evaluate FIRST, bypass base filters if signal fires
+    # Backtest: 200 tr/375d, WR 36%, PF 6.75, Ruin 0.0%, WF 4/4
+    import statistics as _stat
+    _ens_sig_fired = False
+    _ens_sig_name = ""
+    _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
+
+    if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
         def _mom1h(bars, p):
             if len(bars) < p + 1: return 0
             _p0 = bars[-1 - p].close_price
@@ -972,28 +971,33 @@ def evaluate_snapshot(
             _s = _stat.stdev(_closes) if len(_closes) > 1 else 0
             return (2 * _s) / _m if _m > 0 else 1.0
 
-        if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
-            _m1d = _mom1h(_bars_1h, 24)
-            _m3d = _mom1h(_bars_1h, 72)
-            _rsi14 = _rsi_1h(_bars_1h, 14)
-            _bw48 = _bb_width(_bars_1h, 48)
+        _m1d = _mom1h(_bars_1h, 24)
+        _m3d = _mom1h(_bars_1h, 72)
+        _rsi14 = _rsi_1h(_bars_1h, 14)
+        _bw48 = _bb_width(_bars_1h, 48)
 
-            _sig_a = _bw48 < 0.04 and _m1d > 0.01
-            _sig_b = _m3d > 0.03
-            _sig_c = _m3d < -0.05 and _rsi14 < 25
+        _sig_a = _bw48 < 0.04 and _m1d > 0.01
+        _sig_b = _m3d > 0.03
+        _sig_c = _m3d < -0.05 and _rsi14 < 25
 
-            if not (_sig_a or _sig_b or _sig_c):
-                futures_ok = False
-                futures_reasons.append("NO_ENSEMBLE_SIGNAL")
-            else:
-                from dataclasses import replace as _dc_replace
-                futures_side = "long"
-                prediction = _dc_replace(prediction,
-                    futures=_dc_replace(prediction.futures, side=futures_side)
-                )
-        elif len(_bars_1h) < 168:
-            futures_ok = False
-            futures_reasons.append("INSUFFICIENT_BARS")
+        if _sig_a or _sig_b or _sig_c:
+            _ens_sig_fired = True
+            _ens_sig_name = "A" if _sig_a else ("B" if _sig_b else "C")
+
+    # If ensemble fired, FORCE futures_ok = True (bypass base filters)
+    if _ens_sig_fired:
+        if not futures_ok:
+            futures_reasons = list(futures_reasons) + [f"ENSEMBLE_OVERRIDE_{_ens_sig_name}"]
+        futures_ok = True
+        from dataclasses import replace as _dc_replace
+        prediction = _dc_replace(prediction,
+            futures=_dc_replace(prediction.futures, side="long")
+        )
+    else:
+        # No ensemble signal: block regardless of base filter
+        if futures_ok:
+            futures_reasons = list(futures_reasons) + ["NO_ENSEMBLE_SIGNAL"]
+        futures_ok = False
 
     if futures_ok:
         planned_leverage = select_futures_leverage(
