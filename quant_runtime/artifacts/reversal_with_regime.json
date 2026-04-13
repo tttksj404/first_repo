@@ -1,0 +1,128 @@
+{
+  "A_NONE": {
+    "name": "A_NONE",
+    "trades": 38,
+    "wr": 0.3158,
+    "pf": 5.68,
+    "total": 873.14,
+    "avg_win": 88.32,
+    "avg_loss": 7.18,
+    "ev": 22.98,
+    "wf": 3,
+    "wf_folds": [
+      532.87,
+      -24.17,
+      228.09,
+      136.36
+    ],
+    "ruin_pct": 3.0
+  },
+  "B_HURST_REV": {
+    "name": "B_HURST_REV",
+    "trades": 5,
+    "wr": 0.2,
+    "pf": 1.18,
+    "total": 5.4,
+    "avg_win": 35.49,
+    "avg_loss": 7.52,
+    "ev": 1.08,
+    "wf": 1,
+    "wf_folds": [
+      -8.41,
+      -7.14,
+      35.49,
+      -14.54
+    ],
+    "ruin_pct": 0.0
+  },
+  "C_HURST_NOT_TREND": {
+    "name": "C_HURST_NOT_TREND",
+    "trades": 34,
+    "wr": 0.3235,
+    "pf": 5.72,
+    "total": 789.14,
+    "avg_win": 86.93,
+    "avg_loss": 7.26,
+    "ev": 23.21,
+    "wf": 3,
+    "wf_folds": [
+      530.25,
+      -17.79,
+      234.98,
+      41.7
+    ],
+    "ruin_pct": 3.8
+  },
+  "D_VOL_HIGH": {
+    "name": "D_VOL_HIGH",
+    "trades": 13,
+    "wr": 0.2308,
+    "pf": 4.02,
+    "total": 214.26,
+    "avg_win": 95.06,
+    "avg_loss": 7.09,
+    "ev": 16.48,
+    "wf": 2,
+    "wf_folds": [
+      191.1,
+      -20.93,
+      -4.58,
+      48.67
+    ],
+    "ruin_pct": 8.5
+  },
+  "E_VOL_NORMAL_UP": {
+    "name": "E_VOL_NORMAL_UP",
+    "trades": 32,
+    "wr": 0.2812,
+    "pf": 3.75,
+    "total": 451.14,
+    "avg_win": 68.38,
+    "avg_loss": 7.14,
+    "ev": 14.1,
+    "wf": 4,
+    "wf_folds": [
+      73.88,
+      156.9,
+      175.71,
+      44.66
+    ],
+    "ruin_pct": 5.6
+  },
+  "F_HURST_REV_VOL_UP": {
+    "name": "F_HURST_REV_VOL_UP",
+    "trades": 5,
+    "wr": 0.2,
+    "pf": 1.18,
+    "total": 5.4,
+    "avg_win": 35.49,
+    "avg_loss": 7.52,
+    "ev": 1.08,
+    "wf": 1,
+    "wf_folds": [
+      -8.41,
+      -7.14,
+      35.49,
+      -14.54
+    ],
+    "ruin_pct": 0.0
+  },
+  "G_HURST_ANY_VOL_HIGH": {
+    "name": "G_HURST_ANY_VOL_HIGH",
+    "trades": 11,
+    "wr": 0.2727,
+    "pf": 5.07,
+    "total": 229.61,
+    "avg_win": 95.33,
+    "avg_loss": 7.05,
+    "ev": 20.87,
+    "wf": 2,
+    "wf_folds": [
+      199.05,
+      -13.78,
+      -14.29,
+      58.63
+    ],
+    "ruin_pct": 3.4
+  }
+}
