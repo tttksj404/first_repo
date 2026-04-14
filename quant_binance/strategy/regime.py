@@ -994,10 +994,11 @@ def evaluate_snapshot(
             futures=_dc_replace(prediction.futures, side="long")
         )
     else:
-        # No ensemble signal: block regardless of base filter
+        # No ensemble signal: block only if ensemble_signal_required is set
         if futures_ok:
             futures_reasons = list(futures_reasons) + ["NO_ENSEMBLE_SIGNAL"]
-        futures_ok = False
+        if getattr(settings, "ensemble_signal_required", True):
+            futures_ok = False
 
     if futures_ok:
         planned_leverage = select_futures_leverage(
