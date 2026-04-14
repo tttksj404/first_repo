@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.exchange import ExchangeCredentials
 
 
@@ -444,7 +445,7 @@ class BitgetRestClient:
             "symbol": symbol,
             "productType": self.contract_config.product_type,
             "marginCoin": self.contract_config.margin_coin,
-            "marginMode": "crossed",
+            "marginMode": resolve_bitget_margin_mode(),
             "side": _bitget_futures_side(side=side, reduce_only=reduce_only),
             "tradeSide": "close" if reduce_only else "open",
             "orderType": order_type.lower(),
