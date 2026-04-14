@@ -1,0 +1,38 @@
+{
+  "generated_by": "strategy_execution_bundle",
+  "source": "/Users/tttksj/first_repo/quant_runtime/artifacts/strategy_candidate_ranked.json",
+  "carry_manifests": [
+    {
+      "rank": 1,
+      "path": "/Users/tttksj/first_repo/quant_runtime/artifacts/candidate_overrides/strategy_override.carry_top1.json",
+      "label": "SOLUSDT funding>=0.00015 basis>=5.0bps hold=8h stop=100 tp=160",
+      "score": 183.6762
+    },
+    {
+      "rank": 2,
+      "path": "/Users/tttksj/first_repo/quant_runtime/artifacts/candidate_overrides/strategy_override.carry_top2.json",
+      "label": "SOLUSDT funding>=0.00015 basis>=5.0bps hold=16h stop=100 tp=160",
+      "score": 121.1924
+    },
+    {
+      "rank": 3,
+      "path": "/Users/tttksj/first_repo/quant_runtime/artifacts/candidate_overrides/strategy_override.carry_top3.json",
+      "label": "SOLUSDT funding>=0.00015 basis>=5.0bps hold=24h stop=100 tp=160",
+      "score": 121.1924
+    }
+  ],
+  "rotation_manifests": [
+    {
+      "rank": 1,
+      "path": "/Users/tttksj/first_repo/quant_runtime/artifacts/candidate_overrides/rotation_review_top1.json",
+      "label": "majors lookback=168h rebalance=24h top_k=1 score=return pos=True ema=True",
+      "score": 51.8439
+    },
+    {
+      "rank": 2,
+      "path": "/Users/tttksj/first_repo/quant_runtime/artifacts/candidate_overrides/rotation_review_top2.json",
+      "label": "majors lookback=168h rebalance=24h top_k=1 score=return_over_vol pos=True ema=True",
+      "score": 19.2848
+    }
+  ]
+}

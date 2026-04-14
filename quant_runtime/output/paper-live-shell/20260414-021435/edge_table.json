@@ -1,0 +1,172 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 8,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 14,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 38
+  },
+  "observation_count": 38,
+  "symbols": {
+    "BTCUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 0.20784706125153915,
+        "mode": "futures",
+        "observations": [
+          0.20784706125153915,
+          -0.6215772613178331
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": -2.223928872569153,
+        "mode": "futures",
+        "observations": [
+          -2.223928872569153,
+          49.0846325223992,
+          -11.412286445065545,
+          -15.952973522295299,
+          38.44391024142146
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 6,
+        "median_bps": 9.0653164069491,
+        "mode": "futures",
+        "observations": [
+          -49.915009322945295,
+          157.66378976326826,
+          9.0653164069491
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 7,
+        "median_bps": 4.532996954462413,
+        "mode": "futures",
+        "observations": [
+          4.532996954462413,
+          -85.32911295858266,
+          13.427030319248892,
+          -0.4959176956944091
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 6,
+        "median_bps": 2.3645949573366174,
+        "mode": "futures",
+        "observations": [
+          2.3645949573366174,
+          -3.440430099634856
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 9,
+        "median_bps": -19.009164322656996,
+        "mode": "futures",
+        "observations": [
+          -103.89431992490697,
+          -19.009164322656996
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 8,
+        "median_bps": -7.619038108852965,
+        "mode": "futures",
+        "observations": [
+          -70.79646017699075,
+          -7.619038108852965
+        ],
+        "trend_direction": -1
+      }
+    ],
+    "PEPEUSDT": [
+      {
+        "bucket": 6,
+        "median_bps": -29.20641984923849,
+        "mode": "futures",
+        "observations": [
+          -29.20641984923849
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 5,
+        "median_bps": 1038.7499999999993,
+        "mode": "futures",
+        "observations": [
+          1038.7499999999993
+        ],
+        "trend_direction": -1
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "bucket": 5,
+        "median_bps": -49.72852285989698,
+        "mode": "futures",
+        "observations": [
+          -49.72852285989698
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 7,
+        "median_bps": -3.6368044611469434,
+        "mode": "futures",
+        "observations": [
+          -51.294511707456,
+          330.4694377983945,
+          -3.6368044611469434
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 8,
+        "median_bps": 11.877066242193488,
+        "mode": "futures",
+        "observations": [
+          11.877066242193488,
+          -23.802368215424355
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 6,
+        "median_bps": -6.075334143377541,
+        "mode": "futures",
+        "observations": [
+          -6.075334143377541,
+          39.54011801204315,
+          -1.2037913041972168,
+          5.136781746504857,
+          -50.74142171494202,
+          -119.69993887766906,
+          -6.849186537240498
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 7,
+        "median_bps": -35.693039857227504,
+        "mode": "futures",
+        "observations": [
+          -49.97135227199099,
+          -1.0712882836771782,
+          -35.693039857227504
+        ],
+        "trend_direction": -1
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "override_path": "quant_runtime/artifacts/candidate_overrides/strategy_override.carry_top3.json",
+  "config": {
+    "enabled": true,
+    "threshold": 0.00015,
+    "max_hold_hours": 24,
+    "symbols": [
+      "SOLUSDT"
+    ],
+    "notional_usd_per_trade": 50.0
+  },
+  "per_symbol": {
+    "SOLUSDT": {
+      "total_trades": 17,
+      "wins": 7,
+      "losses": 10,
+      "win_rate": 0.4118,
+      "total_pnl_usd": 2.319,
+      "open_positions": []
+    }
+  },
+  "portfolio": {
+    "total_trades": 17,
+    "total_pnl_usd": 2.319
+  }
+}

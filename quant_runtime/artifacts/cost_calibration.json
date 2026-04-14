@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-04-07T00:23:01.417316+00:00",
-  "global_empirical_entry_slippage_bps": 9.017735,
-  "global_empirical_exit_slippage_bps": 9.017735,
+  "generated_at": "2026-04-14T02:14:35.237289+00:00",
+  "global_empirical_entry_slippage_bps": 0.0,
+  "global_empirical_exit_slippage_bps": 0.0,
   "global_empirical_fee_bps": 4.0,
   "lookback_hours": 72,
   "symbol_calibrations": [
@@ -9,33 +9,33 @@
       "empirical_entry_slippage_bps": 0.0,
       "empirical_exit_slippage_bps": 0.0,
       "empirical_fee_bps": 4.0,
-      "fee_sample_count": 19,
+      "fee_sample_count": 2,
       "slippage_sample_count": 0,
-      "symbol": "BTCUSDT"
+      "symbol": "BNBUSDT"
     },
     {
-      "empirical_entry_slippage_bps": 9.017735,
-      "empirical_exit_slippage_bps": 9.017735,
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
       "empirical_fee_bps": 4.0,
-      "fee_sample_count": 54,
-      "slippage_sample_count": 3,
+      "fee_sample_count": 44,
+      "slippage_sample_count": 0,
       "symbol": "ETHUSDT"
     },
     {
       "empirical_entry_slippage_bps": 0.0,
       "empirical_exit_slippage_bps": 0.0,
       "empirical_fee_bps": 4.0,
-      "fee_sample_count": 17,
+      "fee_sample_count": 7,
       "slippage_sample_count": 0,
-      "symbol": "SOLUSDT"
+      "symbol": "PEPEUSDT"
     },
     {
       "empirical_entry_slippage_bps": 0.0,
       "empirical_exit_slippage_bps": 0.0,
       "empirical_fee_bps": 4.0,
-      "fee_sample_count": 10,
+      "fee_sample_count": 47,
       "slippage_sample_count": 0,
-      "symbol": "XRPUSDT"
+      "symbol": "SOLUSDT"
     }
   ]
 }

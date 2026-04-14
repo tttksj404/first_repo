@@ -525,7 +525,7 @@ class LivePaperSession:
     # ------------------------------------------------------------------
     # COIN-Futures → USDT auto-conversion
     # ------------------------------------------------------------------
-    _COIN_CONVERT_THRESHOLD_USD = 15.0
+    _COIN_CONVERT_THRESHOLD_USD = 9999.0  # Always convert non-USDT to USDT
     _COIN_CONVERT_ASSETS = ("ETH", "BTC")
     _COIN_SPOT_SIZE_DECIMALS = {"ETH": 4, "BTC": 6}
 
@@ -809,6 +809,117 @@ class LivePaperSession:
                         f"~${usdt_free:.2f} USDT to futures",
                         flush=True,
                     )
+            # Phase C — convert BTC/ETH sitting in USDT-Futures assetList
+            # These are non-USDT collateral in union/portfolio margin mode.
+            # Pipeline: futures→spot transfer, spot sell, spot USDT→futures.
+            for row in accounts:
+                if not isinstance(row, dict):
+                    continue
+                margin_coin = str(row.get("marginCoin", "")).upper()
+                if margin_coin != "USDT":
+                    continue
+                for asset_item in row.get("assetList", []):
+                    coin = str(asset_item.get("coin", "")).upper()
+                    if coin not in self._COIN_CONVERT_ASSETS:
+                        continue
+                    bal = float(asset_item.get("available") or asset_item.get("balance") or 0.0)
+                    if bal <= 0.0:
+                        continue
+                    decimals = self._COIN_SPOT_SIZE_DECIMALS.get(coin, 6)
+                    sell_qty = math.floor(bal * 10**decimals) / 10**decimals
+                    if sell_qty <= 0.0:
+                        continue
+                    tag = f"coin_convert:futures_asset_{coin}"
+                    # Step C1 — USDT-Futures → spot
+                    print(
+                        f"[COIN_CONVERT] Phase C: transferring {sell_qty} {coin} "
+                        f"from usdt_futures → spot",
+                        flush=True,
+                    )
+                    try:
+                        resp_c1 = transfer_method(
+                            source_market="futures",
+                            target_market="spot",
+                            asset=coin,
+                            amount=sell_qty,
+                            client_oid=f"{tag}:c1:{int(now.timestamp())}",
+                        )
+                    except Exception as exc:
+                        print(f"[COIN_CONVERT] Phase C step1 failed for {coin}: {exc}", flush=True)
+                        continue
+                    if str(resp_c1.get("status", "")).upper() != "SUCCESS":
+                        print(f"[COIN_CONVERT] Phase C step1 non-success for {coin}: {resp_c1}", flush=True)
+                        continue
+                    # Step C2 — spot sell
+                    spot_symbol = f"{coin}USDT"
+                    order_params = self.rest_client.build_order_params(
+                        market="spot",
+                        symbol=spot_symbol,
+                        side="sell",
+                        order_type="market",
+                        quantity=sell_qty,
+                    )
+                    print(
+                        f"[COIN_CONVERT] Phase C: selling {sell_qty} {spot_symbol} on spot",
+                        flush=True,
+                    )
+                    try:
+                        resp_c2 = self.rest_client.place_order(
+                            market="spot", order_params=order_params,
+                        )
+                    except Exception as exc:
+                        print(f"[COIN_CONVERT] Phase C sell failed for {coin}: {exc}", flush=True)
+                        continue
+                    if str(resp_c2.get("status", "")).upper() != "SUCCESS":
+                        print(f"[COIN_CONVERT] Phase C sell non-success: {resp_c2}", flush=True)
+                        continue
+                    time.sleep(1.0)
+                    # Step C3 — spot USDT → futures
+                    try:
+                        spot_acct = self.rest_client.get_account(market="spot")
+                        usdt_free = 0.0
+                        for bal_item in spot_acct.get("balances", []):
+                            if str(bal_item.get("asset", "")).upper() == "USDT":
+                                usdt_free = float(bal_item.get("free") or 0.0)
+                                break
+                    except Exception:
+                        usdt_free = 0.0
+                    if usdt_free < 1.0:
+                        continue
+                    # Floor to 2 decimals to avoid "exceeded max transferable"
+                    usdt_free = math.floor(usdt_free * 100) / 100
+                    print(
+                        f"[COIN_CONVERT] Phase C: transferring {usdt_free:.4f} USDT "
+                        f"spot → futures",
+                        flush=True,
+                    )
+                    try:
+                        resp_c3 = transfer_method(
+                            source_market="spot",
+                            target_market="futures",
+                            asset="USDT",
+                            amount=usdt_free,
+                            client_oid=f"{tag}:c3:{int(now.timestamp())}",
+                        )
+                    except Exception as exc:
+                        print(f"[COIN_CONVERT] Phase C transfer failed: {exc}", flush=True)
+                        continue
+                    c3_ok = str(resp_c3.get("status", "")).upper() == "SUCCESS"
+                    if c3_ok:
+                        total_usdt_recovered += usdt_free
+                        print(
+                            f"[COIN_CONVERT] Phase C SUCCESS {coin}: recovered "
+                            f"~${usdt_free:.2f} USDT to futures",
+                            flush=True,
+                        )
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": now, "coin": coin, "phase": "C",
+                            "status": "completed" if c3_ok else "failed",
+                            "sell_qty": sell_qty,
+                            "usdt_recovered": usdt_free if c3_ok else 0.0,
+                        })
+
             if total_usdt_recovered > 0.0:
                 print(
                     f"[COIN_CONVERT] total recovered: ${total_usdt_recovered:.2f} USDT → futures",
