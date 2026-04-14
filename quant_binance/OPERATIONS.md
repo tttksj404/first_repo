@@ -46,9 +46,43 @@ quant_runtime/
 
 Do not skip directly to a live order path.
 
+## Fast Start (New PC: macOS/Linux + Windows)
+
+After `git pull`, use the bootstrap script for your OS. This creates `.venv`, installs runtime deps, validates env vars, and runs the selected daemon mode.
+
+1. Copy `env.example` to `.env` and fill your real Bitget API values.
+2. Run one command:
+
+macOS/Linux:
+
+```bash
+sh scripts/quant_bootstrap_live.sh live-auto-trade-daemon quant_runtime
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/quant_bootstrap_live.ps1 -Mode live-auto-trade-daemon -OutputBase quant_runtime
+```
+
+Safer dry run (no live order):
+
+macOS/Linux:
+
+```bash
+sh scripts/quant_bootstrap_live.sh live-paper-daemon quant_runtime
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/quant_bootstrap_live.ps1 -Mode live-paper-daemon -OutputBase quant_runtime
+```
+
 ## Commands
 
 Before any private exchange run, set credentials in either your shell or the repository root `.env`.
+`env.example` is included as a template.
 
 Example:
 
