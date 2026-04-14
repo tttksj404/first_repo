@@ -27,17 +27,19 @@
     "major_size_boost_multiplier": 1.4,
     "major_strong_min_entry_notional_usd": 5.0,
     "major_symbols": [
+      "PEPEUSDT",
       "DOGEUSDT",
       "XRPUSDT",
       "SOLUSDT"
     ],
-    "min_entry_net_edge_bps": -5.0,
-    "reduced_entry_net_edge_bps": -5.0,
+    "min_entry_net_edge_bps": -12.0,
+    "reduced_entry_net_edge_bps": -12.0,
     "priority_allow_caution": true,
     "priority_edge_to_cost_multiple_min": -0.6,
     "priority_min_entry_net_edge_bps": -20.0,
-    "priority_score_relaxation": 20.0,
+    "priority_score_relaxation": 28.0,
     "priority_symbols": [
+      "PEPEUSDT",
       "DOGEUSDT",
       "XRPUSDT",
       "SOLUSDT"
@@ -52,9 +54,9 @@
     "alt_reduced_size_multiplier": 0.0,
     "demoted_symbols": [],
     "demoted_symbol_size_cap": 1.0,
-    "soft_liquidity_floor": 0.18,
+    "soft_liquidity_floor": 0.08,
     "soft_overheat_penalty_max": 1.0,
-    "soft_volatility_penalty_max": 1.25
+    "soft_volatility_penalty_max": 1.8
   },
   "exit_rules": {
     "liquidity_drop_exit_buffer": 0.35,
@@ -121,6 +123,10 @@
   },
   "mode_thresholds": {
     "futures_score_min": 55,
+    "futures_trend_strength_min": 0.2,
+    "futures_liquidity_min": 0.18,
+    "futures_volatility_penalty_max": 1.2,
+    "futures_overheat_penalty_max": 1.2,
     "spot_score_min": 999,
     "spot_liquidity_min": 999
   },
@@ -129,7 +135,7 @@
   },
   "portfolio_focus": {
     "enabled": true,
-    "futures_top_n": 1,
+    "futures_top_n": 2,
     "min_incremental_pnl_usd": 0.0,
     "min_net_edge_advantage_bps": 0.0,
     "min_score_advantage_to_replace": 0.0
@@ -151,6 +157,7 @@
     "observe_only_liquidity_max": 0.0
   },
   "universe": [
+    "PEPEUSDT",
     "DOGEUSDT",
     "XRPUSDT",
     "SOLUSDT"
