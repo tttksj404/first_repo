@@ -574,7 +574,7 @@ def _futures_entry_plan(
     features: FeatureVector,
     settings: Settings,
     symbol: str,
-) -> tuple[bool, list[str], float, tuple[str, ...], tuple[str, ...]]:
+) -> tuple[bool, list[str], float, tuple[str, ...], tuple[str, ...], int]:
     thresholds = settings.mode_thresholds
     macro_gates = settings.macro_gates
     exposure = settings.futures_exposure
@@ -583,6 +583,7 @@ def _futures_entry_plan(
     size_boost_reasons: list[str] = []
     size_multiplier = 1.0
     reduced_size = False
+    effective_direction = int(features.trend_direction)
     priority_symbol = symbol in set(exposure.priority_symbols)
     alt_symbol = is_alt_symbol(symbol)
 
@@ -610,12 +611,12 @@ def _futures_entry_plan(
     ) or directional_bearish_macro
     macro_allowed, macro_reasons, macro_size_multiplier, _macro_leverage_cap = _macro_futures_risk_controls(features, symbol=symbol)
     if not macro_allowed:
-        return False, macro_reasons, 0.0, (), ()
+        return False, macro_reasons, 0.0, (), (), effective_direction
     if macro_reasons:
         reasons.extend(macro_reasons)
-        return False, reasons, 0.0, (), ()
+        return False, reasons, 0.0, (), (), effective_direction
     size_multiplier = min(size_multiplier, macro_size_multiplier) if macro_size_multiplier > 0.0 else size_multiplier
-    bearish_trend = features.trend_direction < 0
+    bearish_trend = effective_direction < 0
     futures_score_min = thresholds.futures_score_min - (
         exposure.macro_score_relaxation if supportive_macro else 0.0
     ) - adx_score_relax
@@ -653,8 +654,15 @@ def _futures_entry_plan(
     )
     if features.predictability_score < futures_score_min:
         reasons.append("SCORE_TOO_LOW")
-    if abs(features.trend_direction) != 1:
-        reasons.append("DIRECTION_CONFLICT")
+    if abs(effective_direction) != 1:
+        if int(features.ema_cross_signal) in {-1, 1}:
+            effective_direction = int(features.ema_cross_signal)
+            relaxed_reasons.append("DIRECTION_FROM_EMA_CROSS")
+        elif int(features.pullback_signal) in {-1, 1}:
+            effective_direction = int(features.pullback_signal)
+            relaxed_reasons.append("DIRECTION_FROM_PULLBACK")
+        else:
+            reasons.append("DIRECTION_CONFLICT")
     if features.trend_strength < thresholds.futures_trend_strength_min - (0.06 if bearish_trend else 0.0) - adx_trend_relax:
         reasons.append("SCORE_TOO_LOW")
     if features.liquidity_score < futures_liquidity_min:
@@ -678,7 +686,7 @@ def _futures_entry_plan(
     if features.macro_risk_penalty >= macro_gates.futures_block_penalty:
         reasons.append("MACRO_RISK_HIGH")
     bearish_caution_override = (
-        features.trend_direction < 0
+        effective_direction < 0
         and features.predictability_score >= futures_score_min + 2.0
         and features.trend_strength >= thresholds.futures_trend_strength_min + 0.04
         and features.volume_confirmation >= 0.58
@@ -756,9 +764,9 @@ def _futures_entry_plan(
         else:
             reasons.append("EDGE_TOO_THIN")
     if reasons:
-        return False, reasons, 0.0, (), ()
+        return False, reasons, 0.0, (), (), effective_direction
     if reduced_size and features.net_expected_edge_bps < exposure.reduced_entry_net_edge_bps:
-        return False, ["EDGE_TOO_THIN"], 0.0, (), ()
+        return False, ["EDGE_TOO_THIN"], 0.0, (), (), effective_direction
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
     strong_setup = _is_objectively_strong_futures_setup(features, settings)
@@ -767,7 +775,7 @@ def _futures_entry_plan(
         is_profiled(symbol)
         and adx_signal > 0.5
         and features.ema_cross_signal != 0
-        and features.ema_cross_signal == features.trend_direction
+        and features.ema_cross_signal == effective_direction
     )
     if adx_strong_trend and not reduced_size:
         strong_setup = True  # ADX-confirmed trend qualifies as strong
@@ -790,7 +798,7 @@ def _futures_entry_plan(
     if symbol == "ETHUSDT" and features.volatility_penalty > 0.5 and not reduced_size:
         vol_boost = min((features.volatility_penalty - 0.5) * 2.0, 0.5)  # up to +0.5x
         size_multiplier = round(size_multiplier * (1.0 + vol_boost), 6)
-    return True, reasons, size_multiplier, tuple(relaxed_reasons), tuple(size_boost_reasons)
+    return True, reasons, size_multiplier, tuple(relaxed_reasons), tuple(size_boost_reasons), effective_direction
 
 
 def _spot_passes(features: FeatureVector, settings: Settings, symbol: str) -> tuple[bool, list[str], tuple[str, ...]]:
@@ -936,7 +944,7 @@ def evaluate_snapshot(
         )
         return decision_from_portfolio_intent(intent=intent)
 
-    futures_ok, futures_reasons, futures_size_multiplier, futures_relaxed_reasons, futures_size_boost_reasons = _futures_entry_plan(
+    futures_ok, futures_reasons, futures_size_multiplier, futures_relaxed_reasons, futures_size_boost_reasons, futures_direction = _futures_entry_plan(
         futures_features,
         settings,
         snapshot.symbol,
@@ -1001,6 +1009,11 @@ def evaluate_snapshot(
             futures_ok = False
 
     if futures_ok:
+        if futures_direction not in {-1, 1}:
+            futures_ok = False
+            futures_reasons = list(futures_reasons) + ["DIRECTION_CONFLICT"]
+    if futures_ok:
+        futures_side = "long" if futures_direction > 0 else "short"
         planned_leverage = select_futures_leverage(
             symbol=snapshot.symbol,
             predictability_score=futures_features.predictability_score,
@@ -1055,7 +1068,7 @@ def evaluate_snapshot(
         intent = build_portfolio_intent(
             prediction=prediction,
             selected_mode="futures",
-            side="long" if futures_features.trend_direction > 0 else "short",
+            side=futures_side,
             target_notional_usd=notional,
             stop_distance_bps=stop_distance_bps,
             target_leverage=planned_leverage,
