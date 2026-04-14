@@ -1,0 +1,2398 @@
+[
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 48,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 406,
+    "win_rate": 0.4015,
+    "profit_factor": 1.1072,
+    "total_return_bps": 5029.97,
+    "avg_return_bps": 12.39,
+    "max_drawdown_bps": 5412.65,
+    "sharpe_ratio": 0.0358
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 12
+    },
+    "total_trades": 710,
+    "win_rate": 0.4662,
+    "profit_factor": 1.0407,
+    "total_return_bps": 2779.33,
+    "avg_return_bps": 3.91,
+    "max_drawdown_bps": 4098.44,
+    "sharpe_ratio": 0.015
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24
+    },
+    "total_trades": 691,
+    "win_rate": 0.4182,
+    "profit_factor": 1.0243,
+    "total_return_bps": 1886.51,
+    "avg_return_bps": 2.73,
+    "max_drawdown_bps": 7761.81,
+    "sharpe_ratio": 0.009
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 24
+    },
+    "total_trades": 420,
+    "win_rate": 0.3929,
+    "profit_factor": 1.0121,
+    "total_return_bps": 555.66,
+    "avg_return_bps": 1.32,
+    "max_drawdown_bps": 5118.54,
+    "sharpe_ratio": 0.0045
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "adx_filter": 25.0
+    },
+    "total_trades": 147,
+    "win_rate": 0.449,
+    "profit_factor": 1.0083,
+    "total_return_bps": 146.77,
+    "avg_return_bps": 1.0,
+    "max_drawdown_bps": 3739.14,
+    "sharpe_ratio": 0.0033
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 156,
+    "win_rate": 0.4487,
+    "profit_factor": 0.9962,
+    "total_return_bps": -64.2,
+    "avg_return_bps": -0.41,
+    "max_drawdown_bps": 2392.41,
+    "sharpe_ratio": -0.0015
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12
+    },
+    "total_trades": 843,
+    "win_rate": 0.4353,
+    "profit_factor": 0.996,
+    "total_return_bps": -353.85,
+    "avg_return_bps": -0.42,
+    "max_drawdown_bps": 8005.16,
+    "sharpe_ratio": -0.0015
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 448,
+    "win_rate": 0.4062,
+    "profit_factor": 0.9929,
+    "total_return_bps": -362.06,
+    "avg_return_bps": -0.81,
+    "max_drawdown_bps": 5428.75,
+    "sharpe_ratio": -0.0026
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "vol_filter": true
+    },
+    "total_trades": 490,
+    "win_rate": 0.4102,
+    "profit_factor": 0.9875,
+    "total_return_bps": -701.05,
+    "avg_return_bps": -1.43,
+    "max_drawdown_bps": 7990.63,
+    "sharpe_ratio": -0.0046
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 24
+    },
+    "total_trades": 798,
+    "win_rate": 0.4035,
+    "profit_factor": 0.9779,
+    "total_return_bps": -2082.5,
+    "avg_return_bps": -2.61,
+    "max_drawdown_bps": 12974.25,
+    "sharpe_ratio": -0.0083
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 628,
+    "win_rate": 0.4331,
+    "profit_factor": 0.9598,
+    "total_return_bps": -2751.55,
+    "avg_return_bps": -4.38,
+    "max_drawdown_bps": 7684.32,
+    "sharpe_ratio": -0.0153
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 179,
+    "win_rate": 0.4078,
+    "profit_factor": 0.9474,
+    "total_return_bps": -567.88,
+    "avg_return_bps": -3.17,
+    "max_drawdown_bps": 1323.03,
+    "sharpe_ratio": -0.0212
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 30,
+      "hold_bars": 24,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 495,
+    "win_rate": 0.3535,
+    "profit_factor": 0.9438,
+    "total_return_bps": -3638.31,
+    "avg_return_bps": -7.35,
+    "max_drawdown_bps": 11578.41,
+    "sharpe_ratio": -0.0187
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        13,
+        21
+      ]
+    },
+    "total_trades": 416,
+    "win_rate": 0.4303,
+    "profit_factor": 0.9409,
+    "total_return_bps": -2683.14,
+    "avg_return_bps": -6.45,
+    "max_drawdown_bps": 6092.6,
+    "sharpe_ratio": -0.022
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 48
+    },
+    "total_trades": 420,
+    "win_rate": 0.3738,
+    "profit_factor": 0.9375,
+    "total_return_bps": -2951.7,
+    "avg_return_bps": -7.03,
+    "max_drawdown_bps": 5609.67,
+    "sharpe_ratio": -0.0246
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 548,
+    "win_rate": 0.4197,
+    "profit_factor": 0.9336,
+    "total_return_bps": -4053.87,
+    "avg_return_bps": -7.4,
+    "max_drawdown_bps": 6866.55,
+    "sharpe_ratio": -0.0251
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": false
+    },
+    "total_trades": 482,
+    "win_rate": 0.3589,
+    "profit_factor": 0.9266,
+    "total_return_bps": -4782.99,
+    "avg_return_bps": -9.92,
+    "max_drawdown_bps": 11990.72,
+    "sharpe_ratio": -0.0247
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": false
+    },
+    "total_trades": 495,
+    "win_rate": 0.396,
+    "profit_factor": 0.9256,
+    "total_return_bps": -4245.25,
+    "avg_return_bps": -8.58,
+    "max_drawdown_bps": 8551.91,
+    "sharpe_ratio": -0.0284
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 425,
+    "win_rate": 0.3459,
+    "profit_factor": 0.9211,
+    "total_return_bps": -4667.6,
+    "avg_return_bps": -10.98,
+    "max_drawdown_bps": 11654.78,
+    "sharpe_ratio": -0.0268
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 48,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 402,
+    "win_rate": 0.3582,
+    "profit_factor": 0.9202,
+    "total_return_bps": -5178.98,
+    "avg_return_bps": -12.88,
+    "max_drawdown_bps": 12444.32,
+    "sharpe_ratio": -0.0301
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 48,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 393,
+    "win_rate": 0.3308,
+    "profit_factor": 0.9185,
+    "total_return_bps": -4773.14,
+    "avg_return_bps": -12.15,
+    "max_drawdown_bps": 11862.41,
+    "sharpe_ratio": -0.0283
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 30,
+      "hold_bars": 24,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 511,
+    "win_rate": 0.409,
+    "profit_factor": 0.9153,
+    "total_return_bps": -5035.84,
+    "avg_return_bps": -9.85,
+    "max_drawdown_bps": 6952.64,
+    "sharpe_ratio": -0.0342
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 7,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 6
+    },
+    "total_trades": 1071,
+    "win_rate": 0.5089,
+    "profit_factor": 0.9083,
+    "total_return_bps": -8401.31,
+    "avg_return_bps": -7.84,
+    "max_drawdown_bps": 10146.13,
+    "sharpe_ratio": -0.0349
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 12
+    },
+    "total_trades": 235,
+    "win_rate": 0.5234,
+    "profit_factor": 0.907,
+    "total_return_bps": -3048.11,
+    "avg_return_bps": -12.97,
+    "max_drawdown_bps": 7547.45,
+    "sharpe_ratio": -0.0346
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24
+    },
+    "total_trades": 690,
+    "win_rate": 0.3812,
+    "profit_factor": 0.9029,
+    "total_return_bps": -6008.95,
+    "avg_return_bps": -8.71,
+    "max_drawdown_bps": 7806.17,
+    "sharpe_ratio": -0.036
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 24
+    },
+    "total_trades": 427,
+    "win_rate": 0.5902,
+    "profit_factor": 0.9017,
+    "total_return_bps": -6735.23,
+    "avg_return_bps": -15.77,
+    "max_drawdown_bps": 10398.89,
+    "sharpe_ratio": -0.0388
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 441,
+    "win_rate": 0.4014,
+    "profit_factor": 0.8941,
+    "total_return_bps": -6957.28,
+    "avg_return_bps": -15.78,
+    "max_drawdown_bps": 12478.78,
+    "sharpe_ratio": -0.0419
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0
+    },
+    "total_trades": 221,
+    "win_rate": 0.4253,
+    "profit_factor": 0.8933,
+    "total_return_bps": -2578.69,
+    "avg_return_bps": -11.67,
+    "max_drawdown_bps": 4964.48,
+    "sharpe_ratio": -0.0438
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 30,
+      "hold_bars": 24,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 539,
+    "win_rate": 0.3859,
+    "profit_factor": 0.8887,
+    "total_return_bps": -8763.24,
+    "avg_return_bps": -16.26,
+    "max_drawdown_bps": 13014.52,
+    "sharpe_ratio": -0.044
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "SOLUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 1975,
+    "win_rate": 0.3413,
+    "profit_factor": 0.8803,
+    "total_return_bps": -9133.63,
+    "avg_return_bps": -4.62,
+    "max_drawdown_bps": 10752.47,
+    "sharpe_ratio": -0.043
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "SOLUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 96,
+      "adx_filter": 20.0
+    },
+    "total_trades": 3589,
+    "win_rate": 0.3486,
+    "profit_factor": 0.8784,
+    "total_return_bps": -15960.61,
+    "avg_return_bps": -4.45,
+    "max_drawdown_bps": 15911.25,
+    "sharpe_ratio": -0.0446
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 577,
+    "win_rate": 0.4021,
+    "profit_factor": 0.8739,
+    "total_return_bps": -5756.98,
+    "avg_return_bps": -9.98,
+    "max_drawdown_bps": 9895.41,
+    "sharpe_ratio": -0.0483
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "SOLUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0
+    },
+    "total_trades": 3591,
+    "win_rate": 0.3484,
+    "profit_factor": 0.8739,
+    "total_return_bps": -16578.68,
+    "avg_return_bps": -4.62,
+    "max_drawdown_bps": 16528.64,
+    "sharpe_ratio": -0.0466
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "XRPUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 589,
+    "win_rate": 0.3735,
+    "profit_factor": 0.8688,
+    "total_return_bps": -2407.11,
+    "avg_return_bps": -4.09,
+    "max_drawdown_bps": 2852.74,
+    "sharpe_ratio": -0.0516
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12
+    },
+    "total_trades": 1126,
+    "win_rate": 0.5639,
+    "profit_factor": 0.8676,
+    "total_return_bps": -17288.19,
+    "avg_return_bps": -15.35,
+    "max_drawdown_bps": 18719.9,
+    "sharpe_ratio": -0.0524
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 24
+    },
+    "total_trades": 783,
+    "win_rate": 0.387,
+    "profit_factor": 0.8598,
+    "total_return_bps": -10024.57,
+    "avg_return_bps": -12.8,
+    "max_drawdown_bps": 10363.8,
+    "sharpe_ratio": -0.0555
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 1065,
+    "win_rate": 0.5606,
+    "profit_factor": 0.8572,
+    "total_return_bps": -17876.14,
+    "avg_return_bps": -16.79,
+    "max_drawdown_bps": 19799.19,
+    "sharpe_ratio": -0.0568
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 7,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 6
+    },
+    "total_trades": 1018,
+    "win_rate": 0.5442,
+    "profit_factor": 0.8569,
+    "total_return_bps": -11697.32,
+    "avg_return_bps": -11.49,
+    "max_drawdown_bps": 13091.51,
+    "sharpe_ratio": -0.0469
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 48,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 409,
+    "win_rate": 0.3888,
+    "profit_factor": 0.8553,
+    "total_return_bps": -5212.99,
+    "avg_return_bps": -12.75,
+    "max_drawdown_bps": 6260.4,
+    "sharpe_ratio": -0.0601
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "vol_filter": true
+    },
+    "total_trades": 457,
+    "win_rate": 0.3698,
+    "profit_factor": 0.8531,
+    "total_return_bps": -6424.72,
+    "avg_return_bps": -14.06,
+    "max_drawdown_bps": 8592.38,
+    "sharpe_ratio": -0.0554
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": false
+    },
+    "total_trades": 494,
+    "win_rate": 0.3927,
+    "profit_factor": 0.849,
+    "total_return_bps": -11693.68,
+    "avg_return_bps": -23.67,
+    "max_drawdown_bps": 16902.31,
+    "sharpe_ratio": -0.0624
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 437,
+    "win_rate": 0.524,
+    "profit_factor": 0.8467,
+    "total_return_bps": -8574.65,
+    "avg_return_bps": -19.62,
+    "max_drawdown_bps": 11620.2,
+    "sharpe_ratio": -0.0524
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12
+    },
+    "total_trades": 504,
+    "win_rate": 0.5198,
+    "profit_factor": 0.843,
+    "total_return_bps": -10239.62,
+    "avg_return_bps": -20.32,
+    "max_drawdown_bps": 11931.45,
+    "sharpe_ratio": -0.0626
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 12
+    },
+    "total_trades": 731,
+    "win_rate": 0.4008,
+    "profit_factor": 0.8408,
+    "total_return_bps": -8979.45,
+    "avg_return_bps": -12.28,
+    "max_drawdown_bps": 11802.53,
+    "sharpe_ratio": -0.0578
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 24
+    },
+    "total_trades": 1003,
+    "win_rate": 0.6171,
+    "profit_factor": 0.8397,
+    "total_return_bps": -20430.73,
+    "avg_return_bps": -20.37,
+    "max_drawdown_bps": 22197.54,
+    "sharpe_ratio": -0.0617
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 12
+    },
+    "total_trades": 292,
+    "win_rate": 0.5377,
+    "profit_factor": 0.8366,
+    "total_return_bps": -3731.89,
+    "avg_return_bps": -12.78,
+    "max_drawdown_bps": 3737.12,
+    "sharpe_ratio": -0.0652
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 24
+    },
+    "total_trades": 1039,
+    "win_rate": 0.6458,
+    "profit_factor": 0.8363,
+    "total_return_bps": -15107.65,
+    "avg_return_bps": -14.54,
+    "max_drawdown_bps": 15581.43,
+    "sharpe_ratio": -0.0574
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "SOLUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 2132,
+    "win_rate": 0.3447,
+    "profit_factor": 0.8314,
+    "total_return_bps": -13359.58,
+    "avg_return_bps": -6.27,
+    "max_drawdown_bps": 13309.54,
+    "sharpe_ratio": -0.0643
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 468,
+    "win_rate": 0.5235,
+    "profit_factor": 0.8313,
+    "total_return_bps": -10372.95,
+    "avg_return_bps": -22.16,
+    "max_drawdown_bps": 12185.71,
+    "sharpe_ratio": -0.0668
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0
+    },
+    "total_trades": 275,
+    "win_rate": 0.3818,
+    "profit_factor": 0.8253,
+    "total_return_bps": -4483.18,
+    "avg_return_bps": -16.3,
+    "max_drawdown_bps": 6395.14,
+    "sharpe_ratio": -0.0585
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12
+    },
+    "total_trades": 850,
+    "win_rate": 0.4047,
+    "profit_factor": 0.8244,
+    "total_return_bps": -12032.42,
+    "avg_return_bps": -14.16,
+    "max_drawdown_bps": 14914.63,
+    "sharpe_ratio": -0.0641
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 860,
+    "win_rate": 0.6093,
+    "profit_factor": 0.8181,
+    "total_return_bps": -12410.9,
+    "avg_return_bps": -14.43,
+    "max_drawdown_bps": 13501.6,
+    "sharpe_ratio": -0.0693
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12
+    },
+    "total_trades": 472,
+    "win_rate": 0.5254,
+    "profit_factor": 0.8168,
+    "total_return_bps": -11566.56,
+    "avg_return_bps": -24.51,
+    "max_drawdown_bps": 14998.59,
+    "sharpe_ratio": -0.0631
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 48
+    },
+    "total_trades": 443,
+    "win_rate": 0.3228,
+    "profit_factor": 0.8151,
+    "total_return_bps": -8528.03,
+    "avg_return_bps": -19.25,
+    "max_drawdown_bps": 9571.46,
+    "sharpe_ratio": -0.066
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.5,
+      "hold_bars": 12
+    },
+    "total_trades": 670,
+    "win_rate": 0.5269,
+    "profit_factor": 0.8141,
+    "total_return_bps": -15674.29,
+    "avg_return_bps": -23.39,
+    "max_drawdown_bps": 16626.95,
+    "sharpe_ratio": -0.0758
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        13,
+        21
+      ]
+    },
+    "total_trades": 411,
+    "win_rate": 0.3942,
+    "profit_factor": 0.8108,
+    "total_return_bps": -6309.45,
+    "avg_return_bps": -15.35,
+    "max_drawdown_bps": 9096.0,
+    "sharpe_ratio": -0.0732
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.5,
+      "hold_bars": 12
+    },
+    "total_trades": 684,
+    "win_rate": 0.5468,
+    "profit_factor": 0.8102,
+    "total_return_bps": -14710.99,
+    "avg_return_bps": -21.51,
+    "max_drawdown_bps": 17387.17,
+    "sharpe_ratio": -0.066
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 30,
+      "hold_bars": 24,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 510,
+    "win_rate": 0.3667,
+    "profit_factor": 0.8087,
+    "total_return_bps": -8461.32,
+    "avg_return_bps": -16.59,
+    "max_drawdown_bps": 9216.23,
+    "sharpe_ratio": -0.0808
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 448,
+    "win_rate": 0.3728,
+    "profit_factor": 0.8076,
+    "total_return_bps": -7451.01,
+    "avg_return_bps": -16.63,
+    "max_drawdown_bps": 8608.26,
+    "sharpe_ratio": -0.0818
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 193,
+    "win_rate": 0.4508,
+    "profit_factor": 0.8075,
+    "total_return_bps": -2747.16,
+    "avg_return_bps": -14.23,
+    "max_drawdown_bps": 4196.98,
+    "sharpe_ratio": -0.0807
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12
+    },
+    "total_trades": 869,
+    "win_rate": 0.3843,
+    "profit_factor": 0.8049,
+    "total_return_bps": -9463.26,
+    "avg_return_bps": -10.89,
+    "max_drawdown_bps": 10472.69,
+    "sharpe_ratio": -0.0827
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0
+    },
+    "total_trades": 249,
+    "win_rate": 0.3855,
+    "profit_factor": 0.8025,
+    "total_return_bps": -2990.3,
+    "avg_return_bps": -12.01,
+    "max_drawdown_bps": 3353.83,
+    "sharpe_ratio": -0.0862
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 1051,
+    "win_rate": 0.5728,
+    "profit_factor": 0.8017,
+    "total_return_bps": -21682.1,
+    "avg_return_bps": -20.63,
+    "max_drawdown_bps": 23816.32,
+    "sharpe_ratio": -0.0591
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "XRPUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 96,
+      "adx_filter": 20.0
+    },
+    "total_trades": 1128,
+    "win_rate": 0.352,
+    "profit_factor": 0.8013,
+    "total_return_bps": -6982.86,
+    "avg_return_bps": -6.19,
+    "max_drawdown_bps": 7431.35,
+    "sharpe_ratio": -0.0802
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0,
+      "vol_filter": true
+    },
+    "total_trades": 161,
+    "win_rate": 0.3727,
+    "profit_factor": 0.801,
+    "total_return_bps": -3059.86,
+    "avg_return_bps": -19.01,
+    "max_drawdown_bps": 5226.67,
+    "sharpe_ratio": -0.0777
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 666,
+    "win_rate": 0.3814,
+    "profit_factor": 0.8005,
+    "total_return_bps": -7547.94,
+    "avg_return_bps": -11.33,
+    "max_drawdown_bps": 8368.92,
+    "sharpe_ratio": -0.0861
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "XRPUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0
+    },
+    "total_trades": 1128,
+    "win_rate": 0.352,
+    "profit_factor": 0.8004,
+    "total_return_bps": -7012.79,
+    "avg_return_bps": -6.22,
+    "max_drawdown_bps": 7461.28,
+    "sharpe_ratio": -0.0806
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "SOLUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 5,
+      "slow": 13,
+      "hold_bars_5m": 36,
+      "adx_filter": 25.0
+    },
+    "total_trades": 4131,
+    "win_rate": 0.3394,
+    "profit_factor": 0.8004,
+    "total_return_bps": -32115.16,
+    "avg_return_bps": -7.77,
+    "max_drawdown_bps": 32253.81,
+    "sharpe_ratio": -0.0798
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 24
+    },
+    "total_trades": 393,
+    "win_rate": 0.6158,
+    "profit_factor": 0.7995,
+    "total_return_bps": -12801.51,
+    "avg_return_bps": -32.57,
+    "max_drawdown_bps": 17244.99,
+    "sharpe_ratio": -0.0685
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.5,
+      "hold_bars": 12
+    },
+    "total_trades": 744,
+    "win_rate": 0.5605,
+    "profit_factor": 0.7937,
+    "total_return_bps": -13839.14,
+    "avg_return_bps": -18.6,
+    "max_drawdown_bps": 15321.37,
+    "sharpe_ratio": -0.0789
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 7,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 6
+    },
+    "total_trades": 1052,
+    "win_rate": 0.5247,
+    "profit_factor": 0.7931,
+    "total_return_bps": -15817.84,
+    "avg_return_bps": -15.04,
+    "max_drawdown_bps": 16169.23,
+    "sharpe_ratio": -0.0786
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 24
+    },
+    "total_trades": 450,
+    "win_rate": 0.58,
+    "profit_factor": 0.7916,
+    "total_return_bps": -11600.59,
+    "avg_return_bps": -25.78,
+    "max_drawdown_bps": 12689.68,
+    "sharpe_ratio": -0.0859
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 12
+    },
+    "total_trades": 239,
+    "win_rate": 0.523,
+    "profit_factor": 0.7912,
+    "total_return_bps": -7177.76,
+    "avg_return_bps": -30.03,
+    "max_drawdown_bps": 10751.7,
+    "sharpe_ratio": -0.0724
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12
+    },
+    "total_trades": 1137,
+    "win_rate": 0.5858,
+    "profit_factor": 0.7884,
+    "total_return_bps": -21120.16,
+    "avg_return_bps": -18.58,
+    "max_drawdown_bps": 22045.48,
+    "sharpe_ratio": -0.0803
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 845,
+    "win_rate": 0.5527,
+    "profit_factor": 0.7815,
+    "total_return_bps": -22349.32,
+    "avg_return_bps": -26.45,
+    "max_drawdown_bps": 22670.32,
+    "sharpe_ratio": -0.0897
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 24
+    },
+    "total_trades": 435,
+    "win_rate": 0.577,
+    "profit_factor": 0.778,
+    "total_return_bps": -9542.38,
+    "avg_return_bps": -21.94,
+    "max_drawdown_bps": 9862.01,
+    "sharpe_ratio": -0.0934
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12
+    },
+    "total_trades": 1113,
+    "win_rate": 0.5768,
+    "profit_factor": 0.7754,
+    "total_return_bps": -26390.69,
+    "avg_return_bps": -23.71,
+    "max_drawdown_bps": 28475.46,
+    "sharpe_ratio": -0.0672
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 48
+    },
+    "total_trades": 438,
+    "win_rate": 0.3288,
+    "profit_factor": 0.7738,
+    "total_return_bps": -9534.71,
+    "avg_return_bps": -21.77,
+    "max_drawdown_bps": 12059.84,
+    "sharpe_ratio": -0.0906
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 567,
+    "win_rate": 0.3827,
+    "profit_factor": 0.7698,
+    "total_return_bps": -11353.66,
+    "avg_return_bps": -20.02,
+    "max_drawdown_bps": 11982.52,
+    "sharpe_ratio": -0.085
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "adx_filter": 25.0
+    },
+    "total_trades": 186,
+    "win_rate": 0.3602,
+    "profit_factor": 0.7651,
+    "total_return_bps": -4175.86,
+    "avg_return_bps": -22.45,
+    "max_drawdown_bps": 4358.73,
+    "sharpe_ratio": -0.1004
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 1083,
+    "win_rate": 0.5762,
+    "profit_factor": 0.7541,
+    "total_return_bps": -23835.5,
+    "avg_return_bps": -22.01,
+    "max_drawdown_bps": 24707.99,
+    "sharpe_ratio": -0.0946
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        13,
+        21
+      ]
+    },
+    "total_trades": 446,
+    "win_rate": 0.3475,
+    "profit_factor": 0.7515,
+    "total_return_bps": -6587.87,
+    "avg_return_bps": -14.77,
+    "max_drawdown_bps": 7308.27,
+    "sharpe_ratio": -0.1102
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 12
+    },
+    "total_trades": 731,
+    "win_rate": 0.3817,
+    "profit_factor": 0.7502,
+    "total_return_bps": -14520.01,
+    "avg_return_bps": -19.86,
+    "max_drawdown_bps": 15287.36,
+    "sharpe_ratio": -0.1065
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 586,
+    "win_rate": 0.3481,
+    "profit_factor": 0.7497,
+    "total_return_bps": -8688.38,
+    "avg_return_bps": -14.83,
+    "max_drawdown_bps": 9089.49,
+    "sharpe_ratio": -0.1115
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24
+    },
+    "total_trades": 702,
+    "win_rate": 0.3362,
+    "profit_factor": 0.7474,
+    "total_return_bps": -16542.09,
+    "avg_return_bps": -23.56,
+    "max_drawdown_bps": 18548.43,
+    "sharpe_ratio": -0.1096
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 582,
+    "win_rate": 0.3746,
+    "profit_factor": 0.7468,
+    "total_return_bps": -11588.88,
+    "avg_return_bps": -19.91,
+    "max_drawdown_bps": 11810.43,
+    "sharpe_ratio": -0.1094
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "XRPUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 666,
+    "win_rate": 0.3303,
+    "profit_factor": 0.7428,
+    "total_return_bps": -5567.8,
+    "avg_return_bps": -8.36,
+    "max_drawdown_bps": 5733.24,
+    "sharpe_ratio": -0.1067
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 24
+    },
+    "total_trades": 976,
+    "win_rate": 0.627,
+    "profit_factor": 0.7423,
+    "total_return_bps": -29164.27,
+    "avg_return_bps": -29.88,
+    "max_drawdown_bps": 30630.72,
+    "sharpe_ratio": -0.0752
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "adx_filter": 25.0
+    },
+    "total_trades": 259,
+    "win_rate": 0.444,
+    "profit_factor": 0.7418,
+    "total_return_bps": -5301.86,
+    "avg_return_bps": -20.47,
+    "max_drawdown_bps": 6627.46,
+    "sharpe_ratio": -0.1136
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12
+    },
+    "total_trades": 528,
+    "win_rate": 0.4886,
+    "profit_factor": 0.7412,
+    "total_return_bps": -15177.69,
+    "avg_return_bps": -28.75,
+    "max_drawdown_bps": 15723.26,
+    "sharpe_ratio": -0.1085
+  },
+  {
+    "strategy": "Momentum_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "lookback": 20,
+      "hold_bars": 24,
+      "adx_filter": 25.0,
+      "vol_filter": false
+    },
+    "total_trades": 495,
+    "win_rate": 0.3636,
+    "profit_factor": 0.7403,
+    "total_return_bps": -11346.07,
+    "avg_return_bps": -22.92,
+    "max_drawdown_bps": 12503.32,
+    "sharpe_ratio": -0.1148
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "XRPUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 5,
+      "slow": 13,
+      "hold_bars_5m": 36,
+      "adx_filter": 25.0
+    },
+    "total_trades": 1358,
+    "win_rate": 0.3255,
+    "profit_factor": 0.7353,
+    "total_return_bps": -12697.77,
+    "avg_return_bps": -9.35,
+    "max_drawdown_bps": 12809.07,
+    "sharpe_ratio": -0.1087
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 298,
+    "win_rate": 0.4664,
+    "profit_factor": 0.7324,
+    "total_return_bps": -6068.57,
+    "avg_return_bps": -20.36,
+    "max_drawdown_bps": 6135.73,
+    "sharpe_ratio": -0.1147
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 307,
+    "win_rate": 0.4886,
+    "profit_factor": 0.7305,
+    "total_return_bps": -8477.03,
+    "avg_return_bps": -27.61,
+    "max_drawdown_bps": 8968.56,
+    "sharpe_ratio": -0.1167
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12
+    },
+    "total_trades": 895,
+    "win_rate": 0.3888,
+    "profit_factor": 0.7277,
+    "total_return_bps": -18643.78,
+    "avg_return_bps": -20.83,
+    "max_drawdown_bps": 19460.38,
+    "sharpe_ratio": -0.1209
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 24
+    },
+    "total_trades": 448,
+    "win_rate": 0.3438,
+    "profit_factor": 0.7242,
+    "total_return_bps": -12403.12,
+    "avg_return_bps": -27.69,
+    "max_drawdown_bps": 12667.34,
+    "sharpe_ratio": -0.1108
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 695,
+    "win_rate": 0.3827,
+    "profit_factor": 0.7234,
+    "total_return_bps": -14912.85,
+    "avg_return_bps": -21.46,
+    "max_drawdown_bps": 15553.51,
+    "sharpe_ratio": -0.1238
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 24
+    },
+    "total_trades": 805,
+    "win_rate": 0.3615,
+    "profit_factor": 0.7222,
+    "total_return_bps": -14700.61,
+    "avg_return_bps": -18.26,
+    "max_drawdown_bps": 17035.32,
+    "sharpe_ratio": -0.1273
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 24
+    },
+    "total_trades": 1027,
+    "win_rate": 0.6183,
+    "profit_factor": 0.7219,
+    "total_return_bps": -19531.56,
+    "avg_return_bps": -19.02,
+    "max_drawdown_bps": 19478.74,
+    "sharpe_ratio": -0.1059
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12
+    },
+    "total_trades": 521,
+    "win_rate": 0.4645,
+    "profit_factor": 0.7212,
+    "total_return_bps": -11386.04,
+    "avg_return_bps": -21.85,
+    "max_drawdown_bps": 11512.84,
+    "sharpe_ratio": -0.1169
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 814,
+    "win_rate": 0.5725,
+    "profit_factor": 0.7208,
+    "total_return_bps": -22997.0,
+    "avg_return_bps": -28.25,
+    "max_drawdown_bps": 25263.55,
+    "sharpe_ratio": -0.0788
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 12,
+      "hour_filter": [
+        13,
+        21
+      ]
+    },
+    "total_trades": 431,
+    "win_rate": 0.3852,
+    "profit_factor": 0.7207,
+    "total_return_bps": -9140.3,
+    "avg_return_bps": -21.21,
+    "max_drawdown_bps": 9846.87,
+    "sharpe_ratio": -0.1233
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12
+    },
+    "total_trades": 1137,
+    "win_rate": 0.5479,
+    "profit_factor": 0.7184,
+    "total_return_bps": -21025.87,
+    "avg_return_bps": -18.49,
+    "max_drawdown_bps": 21387.56,
+    "sharpe_ratio": -0.1167
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 12
+    },
+    "total_trades": 718,
+    "win_rate": 0.39,
+    "profit_factor": 0.7151,
+    "total_return_bps": -11741.94,
+    "avg_return_bps": -16.35,
+    "max_drawdown_bps": 12302.88,
+    "sharpe_ratio": -0.1272
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 1089,
+    "win_rate": 0.5399,
+    "profit_factor": 0.7118,
+    "total_return_bps": -21074.13,
+    "avg_return_bps": -19.35,
+    "max_drawdown_bps": 21346.76,
+    "sharpe_ratio": -0.1206
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "ETHUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 5,
+      "slow": 13,
+      "hold_bars_5m": 36,
+      "adx_filter": 25.0
+    },
+    "total_trades": 3953,
+    "win_rate": 0.3031,
+    "profit_factor": 0.71,
+    "total_return_bps": -33993.52,
+    "avg_return_bps": -8.6,
+    "max_drawdown_bps": 34010.83,
+    "sharpe_ratio": -0.1197
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 500,
+    "win_rate": 0.48,
+    "profit_factor": 0.7071,
+    "total_return_bps": -16533.69,
+    "avg_return_bps": -33.07,
+    "max_drawdown_bps": 16965.87,
+    "sharpe_ratio": -0.1248
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "vol_filter": true
+    },
+    "total_trades": 540,
+    "win_rate": 0.3222,
+    "profit_factor": 0.7067,
+    "total_return_bps": -14931.71,
+    "avg_return_bps": -27.65,
+    "max_drawdown_bps": 16878.33,
+    "sharpe_ratio": -0.1335
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "ETHUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 1832,
+    "win_rate": 0.2986,
+    "profit_factor": 0.7055,
+    "total_return_bps": -16140.03,
+    "avg_return_bps": -8.81,
+    "max_drawdown_bps": 16614.84,
+    "sharpe_ratio": -0.1231
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "vol_filter": true
+    },
+    "total_trades": 490,
+    "win_rate": 0.4612,
+    "profit_factor": 0.7025,
+    "total_return_bps": -11635.08,
+    "avg_return_bps": -23.75,
+    "max_drawdown_bps": 11761.88,
+    "sharpe_ratio": -0.1255
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "XRPUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 249,
+    "win_rate": 0.4739,
+    "profit_factor": 0.7022,
+    "total_return_bps": -9968.61,
+    "avg_return_bps": -40.03,
+    "max_drawdown_bps": 12840.76,
+    "sharpe_ratio": -0.1047
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.0,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 852,
+    "win_rate": 0.5563,
+    "profit_factor": 0.6999,
+    "total_return_bps": -15515.23,
+    "avg_return_bps": -18.21,
+    "max_drawdown_bps": 15559.9,
+    "sharpe_ratio": -0.1284
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "ETHUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0
+    },
+    "total_trades": 3460,
+    "win_rate": 0.296,
+    "profit_factor": 0.6976,
+    "total_return_bps": -30034.84,
+    "avg_return_bps": -8.68,
+    "max_drawdown_bps": 30140.25,
+    "sharpe_ratio": -0.1268
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "ETHUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 96,
+      "adx_filter": 20.0
+    },
+    "total_trades": 3458,
+    "win_rate": 0.2958,
+    "profit_factor": 0.6973,
+    "total_return_bps": -30036.33,
+    "avg_return_bps": -8.69,
+    "max_drawdown_bps": 30115.58,
+    "sharpe_ratio": -0.127
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 24
+    },
+    "total_trades": 438,
+    "win_rate": 0.3402,
+    "profit_factor": 0.6919,
+    "total_return_bps": -12873.99,
+    "avg_return_bps": -29.39,
+    "max_drawdown_bps": 15085.77,
+    "sharpe_ratio": -0.1423
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "ETHUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 2233,
+    "win_rate": 0.2969,
+    "profit_factor": 0.6895,
+    "total_return_bps": -19897.44,
+    "avg_return_bps": -8.91,
+    "max_drawdown_bps": 20208.73,
+    "sharpe_ratio": -0.1304
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "vol_filter": true
+    },
+    "total_trades": 529,
+    "win_rate": 0.3629,
+    "profit_factor": 0.6831,
+    "total_return_bps": -11811.0,
+    "avg_return_bps": -22.33,
+    "max_drawdown_bps": 12966.86,
+    "sharpe_ratio": -0.1466
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "SOLUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 30,
+      "overbought": 70,
+      "hold_bars": 12,
+      "adx_filter": 30.0
+    },
+    "total_trades": 287,
+    "win_rate": 0.4808,
+    "profit_factor": 0.6778,
+    "total_return_bps": -13506.02,
+    "avg_return_bps": -47.06,
+    "max_drawdown_bps": 14101.67,
+    "sharpe_ratio": -0.1341
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars": 24
+    },
+    "total_trades": 813,
+    "win_rate": 0.3321,
+    "profit_factor": 0.6747,
+    "total_return_bps": -24278.36,
+    "avg_return_bps": -29.86,
+    "max_drawdown_bps": 24946.99,
+    "sharpe_ratio": -0.1501
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24
+    },
+    "total_trades": 679,
+    "win_rate": 0.3682,
+    "profit_factor": 0.6582,
+    "total_return_bps": -16153.44,
+    "avg_return_bps": -23.79,
+    "max_drawdown_bps": 17694.23,
+    "sharpe_ratio": -0.1614
+  },
+  {
+    "strategy": "BB_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 20,
+      "num_std": 2.5,
+      "hold_bars": 12
+    },
+    "total_trades": 715,
+    "win_rate": 0.4951,
+    "profit_factor": 0.6539,
+    "total_return_bps": -18123.74,
+    "avg_return_bps": -25.35,
+    "max_drawdown_bps": 18700.49,
+    "sharpe_ratio": -0.1519
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 7,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 6
+    },
+    "total_trades": 1039,
+    "win_rate": 0.4774,
+    "profit_factor": 0.6294,
+    "total_return_bps": -22199.17,
+    "avg_return_bps": -21.37,
+    "max_drawdown_bps": 22352.96,
+    "sharpe_ratio": -0.165
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "adx_filter": 25.0
+    },
+    "total_trades": 172,
+    "win_rate": 0.3779,
+    "profit_factor": 0.6008,
+    "total_return_bps": -5479.2,
+    "avg_return_bps": -31.86,
+    "max_drawdown_bps": 6439.3,
+    "sharpe_ratio": -0.1954
+  },
+  {
+    "strategy": "RSI_Rev_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "period": 14,
+      "oversold": 25,
+      "overbought": 75,
+      "hold_bars": 12
+    },
+    "total_trades": 267,
+    "win_rate": 0.4644,
+    "profit_factor": 0.5946,
+    "total_return_bps": -12782.58,
+    "avg_return_bps": -47.87,
+    "max_drawdown_bps": 13440.07,
+    "sharpe_ratio": -0.173
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "vol_filter": true
+    },
+    "total_trades": 2326,
+    "win_rate": 0.2747,
+    "profit_factor": 0.5905,
+    "total_return_bps": -22548.31,
+    "avg_return_bps": -9.69,
+    "max_drawdown_bps": 22525.41,
+    "sharpe_ratio": -0.1906
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 5,
+      "slow": 13,
+      "hold_bars_5m": 36,
+      "adx_filter": 25.0
+    },
+    "total_trades": 4096,
+    "win_rate": 0.281,
+    "profit_factor": 0.5904,
+    "total_return_bps": -41133.59,
+    "avg_return_bps": -10.04,
+    "max_drawdown_bps": 41185.16,
+    "sharpe_ratio": -0.1877
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "ETHUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 12,
+      "slow": 26,
+      "hold_bars": 24,
+      "adx_filter": 25.0
+    },
+    "total_trades": 179,
+    "win_rate": 0.2793,
+    "profit_factor": 0.581,
+    "total_return_bps": -8569.08,
+    "avg_return_bps": -47.87,
+    "max_drawdown_bps": 9305.5,
+    "sharpe_ratio": -0.1948
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0,
+      "hour_filter": [
+        8,
+        20
+      ]
+    },
+    "total_trades": 1946,
+    "win_rate": 0.2718,
+    "profit_factor": 0.58,
+    "total_return_bps": -20135.66,
+    "avg_return_bps": -10.35,
+    "max_drawdown_bps": 20130.11,
+    "sharpe_ratio": -0.1941
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 48
+    },
+    "total_trades": 446,
+    "win_rate": 0.3161,
+    "profit_factor": 0.5555,
+    "total_return_bps": -15669.3,
+    "avg_return_bps": -35.13,
+    "max_drawdown_bps": 17539.31,
+    "sharpe_ratio": -0.225
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 48,
+      "adx_filter": 20.0
+    },
+    "total_trades": 3599,
+    "win_rate": 0.2706,
+    "profit_factor": 0.551,
+    "total_return_bps": -38266.59,
+    "avg_return_bps": -10.63,
+    "max_drawdown_bps": 38253.6,
+    "sharpe_ratio": -0.2164
+  },
+  {
+    "strategy": "MTF_Trend",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m+1h",
+    "params": {
+      "fast": 9,
+      "slow": 21,
+      "hold_bars_5m": 96,
+      "adx_filter": 20.0
+    },
+    "total_trades": 3598,
+    "win_rate": 0.2707,
+    "profit_factor": 0.5509,
+    "total_return_bps": -38262.53,
+    "avg_return_bps": -10.63,
+    "max_drawdown_bps": 38249.54,
+    "sharpe_ratio": -0.2167
+  },
+  {
+    "strategy": "MA_Cross_1h",
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "params": {
+      "fast": 20,
+      "slow": 50,
+      "hold_bars": 24
+    },
+    "total_trades": 447,
+    "win_rate": 0.3221,
+    "profit_factor": 0.5335,
+    "total_return_bps": -16181.02,
+    "avg_return_bps": -36.2,
+    "max_drawdown_bps": 17638.04,
+    "sharpe_ratio": -0.2379
+  }
+]

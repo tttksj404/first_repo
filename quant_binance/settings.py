@@ -387,6 +387,7 @@ class Settings:
     data_collection_mode: bool = False
     data_collection_min_trades: int = 50
     b3_msb: B3MsbConfig = B3MsbConfig()
+    ensemble_signal_required: bool = True
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -462,4 +463,5 @@ class Settings:
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
             data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
             b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
+            ensemble_signal_required=bool(raw.get("ensemble_signal_required", True)),
         )

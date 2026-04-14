@@ -33,3 +33,10 @@ ENV/
 # Project Specific
 notion_automation/**/notion_key.txt
 notion_automation/**/notion_auth.py
+
+# Runtime artifacts / logs
+quant_runtime/**/*.log
+quant_runtime/**/*.log.*
+quant_runtime/**/*.pid
+quant_runtime/**/*.lock/pid
+quant_runtime/output/**/policy_history.jsonl

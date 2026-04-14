@@ -1,5 +1,6 @@
 {
   "_lock": "ENSEMBLE_TOP3 — vc_squeeze_t + mom_3d + rev_rsi. 200 tr/375d, WR 36%, PF 6.75, $1806, Ruin 0.0%, WF 4/4. Applied 2026-04-12.",
+  "ensemble_signal_required": false,
   "data_collection_min_trades": 500,
   "data_collection_mode": true,
   "decision_interval": "1m",

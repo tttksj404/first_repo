@@ -526,3 +526,51 @@
 }
 [AUTOTUNER] Cycle complete
 
+============================================
+[AUTOTUNER] 2026-04-14 01:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=1 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-13T16:47:00.610343+00:00",
+  "total_trades": 1,
+  "valid_trades": 1
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-14 07:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=0 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-13T22:47:00.892832+00:00",
+  "total_trades": 0,
+  "valid_trades": 0
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-14 13:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=0 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-14T04:47:01.033737+00:00",
+  "total_trades": 0,
+  "valid_trades": 0
+}
+[AUTOTUNER] Cycle complete
+

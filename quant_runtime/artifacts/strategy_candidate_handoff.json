@@ -1,0 +1,645 @@
+{
+  "generated_by": "strategy_candidate_handoff",
+  "rotation_source": "/Users/tttksj/first_repo/quant_runtime/artifacts/rotation_strategy_shortlist.json",
+  "carry_source": "/Users/tttksj/first_repo/quant_runtime/artifacts/carry_basis_strategy_scan.json",
+  "rotation_candidates": [
+    {
+      "universe": "majors",
+      "score_mode": "return",
+      "lookback_hours": 168,
+      "rebalance_hours": 24,
+      "top_k": 1,
+      "require_positive": true,
+      "ema_filter": true,
+      "symbols": [
+        "BNBUSDT",
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ],
+      "rebalance_count": 1077,
+      "average_turnover": 0.665738,
+      "total_return_pct": 201.9787,
+      "sharpe_like": 1.4258,
+      "profit_factor": 1.0648,
+      "max_drawdown_pct": 45.3305,
+      "final_equity": 3.019787
+    },
+    {
+      "universe": "majors",
+      "score_mode": "return_over_vol",
+      "lookback_hours": 168,
+      "rebalance_hours": 24,
+      "top_k": 1,
+      "require_positive": true,
+      "ema_filter": true,
+      "symbols": [
+        "BNBUSDT",
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ],
+      "rebalance_count": 1077,
+      "average_turnover": 0.663881,
+      "total_return_pct": 100.7862,
+      "sharpe_like": 1.2462,
+      "profit_factor": 1.058,
+      "max_drawdown_pct": 50.5321,
+      "final_equity": 2.007862
+    }
+  ],
+  "carry_candidates": [
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.00015,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 8,
+      "stop_bps": 100.0,
+      "tp_bps": 160.0,
+      "exit_mode": "time",
+      "trades": 7,
+      "win_rate": 0.8571,
+      "profit_factor": 6.4644,
+      "total_return_bps": 622.94,
+      "avg_trade_bps": 88.99,
+      "max_drawdown_bps": 114.0,
+      "avg_funding_capture_bps": 0.3,
+      "positive_folds": 4,
+      "stressed_profit_factor": 5.3349,
+      "stressed_total_return_bps": 552.94,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770886800000,
+          "side": "long",
+          "gross_pnl_bps": 160.49,
+          "net_pnl_bps": 146.49,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771117200000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771837200000,
+          "exit_time": 1771837200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771981200000,
+          "exit_time": 1771981200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1774630800000,
+          "exit_time": 1774630800000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.0001,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 24,
+      "stop_bps": 100.0,
+      "tp_bps": 160.0,
+      "exit_mode": "time",
+      "trades": 18,
+      "win_rate": 0.5556,
+      "profit_factor": 1.6086,
+      "total_return_bps": 553.71,
+      "avg_trade_bps": 30.76,
+      "max_drawdown_bps": 453.82,
+      "avg_funding_capture_bps": 0.32,
+      "positive_folds": 3,
+      "stressed_profit_factor": 1.3776,
+      "stressed_total_return_bps": 373.71,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770886800000,
+          "side": "long",
+          "gross_pnl_bps": 160.49,
+          "net_pnl_bps": 146.49,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1770915600000,
+          "exit_time": 1770915600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        },
+        {
+          "entry_time": 1771059600000,
+          "exit_time": 1771081200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771088400000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 162.05,
+          "net_pnl_bps": 148.05,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771434000000,
+          "exit_time": 1771437600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.00015,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 16,
+      "stop_bps": 100.0,
+      "tp_bps": 160.0,
+      "exit_mode": "time",
+      "trades": 7,
+      "win_rate": 0.7143,
+      "profit_factor": 3.2263,
+      "total_return_bps": 504.07,
+      "avg_trade_bps": 72.01,
+      "max_drawdown_bps": 226.42,
+      "avg_funding_capture_bps": 0.3,
+      "positive_folds": 4,
+      "stressed_profit_factor": 2.7615,
+      "stressed_total_return_bps": 434.07,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770886800000,
+          "side": "long",
+          "gross_pnl_bps": 160.49,
+          "net_pnl_bps": 146.49,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771117200000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771837200000,
+          "exit_time": 1771837200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771981200000,
+          "exit_time": 1771981200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1774630800000,
+          "exit_time": 1774630800000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.00015,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 24,
+      "stop_bps": 100.0,
+      "tp_bps": 160.0,
+      "exit_mode": "time",
+      "trades": 7,
+      "win_rate": 0.7143,
+      "profit_factor": 3.2263,
+      "total_return_bps": 504.07,
+      "avg_trade_bps": 72.01,
+      "max_drawdown_bps": 226.42,
+      "avg_funding_capture_bps": 0.3,
+      "positive_folds": 4,
+      "stressed_profit_factor": 2.7615,
+      "stressed_total_return_bps": 434.07,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770886800000,
+          "side": "long",
+          "gross_pnl_bps": 160.49,
+          "net_pnl_bps": 146.49,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771117200000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771837200000,
+          "exit_time": 1771837200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771981200000,
+          "exit_time": 1771981200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1774630800000,
+          "exit_time": 1774630800000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.0001,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 16,
+      "stop_bps": 100.0,
+      "tp_bps": 160.0,
+      "exit_mode": "time",
+      "trades": 18,
+      "win_rate": 0.5556,
+      "profit_factor": 1.503,
+      "total_return_bps": 457.66,
+      "avg_trade_bps": 25.43,
+      "max_drawdown_bps": 453.82,
+      "avg_funding_capture_bps": 0.32,
+      "positive_folds": 3,
+      "stressed_profit_factor": 1.2805,
+      "stressed_total_return_bps": 277.66,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770886800000,
+          "side": "long",
+          "gross_pnl_bps": 160.49,
+          "net_pnl_bps": 146.49,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1770915600000,
+          "exit_time": 1770915600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        },
+        {
+          "entry_time": 1771059600000,
+          "exit_time": 1771081200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771088400000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 162.05,
+          "net_pnl_bps": 148.05,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771434000000,
+          "exit_time": 1771437600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.0001,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 8,
+      "stop_bps": 100.0,
+      "tp_bps": 160.0,
+      "exit_mode": "time",
+      "trades": 18,
+      "win_rate": 0.5556,
+      "profit_factor": 1.5714,
+      "total_return_bps": 430.15,
+      "avg_trade_bps": 23.9,
+      "max_drawdown_bps": 264.82,
+      "avg_funding_capture_bps": 0.29,
+      "positive_folds": 4,
+      "stressed_profit_factor": 1.2984,
+      "stressed_total_return_bps": 250.15,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770886800000,
+          "side": "long",
+          "gross_pnl_bps": 160.49,
+          "net_pnl_bps": 146.49,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1770915600000,
+          "exit_time": 1770915600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        },
+        {
+          "entry_time": 1771059600000,
+          "exit_time": 1771081200000,
+          "side": "long",
+          "gross_pnl_bps": 160.0,
+          "net_pnl_bps": 146.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771088400000,
+          "exit_time": 1771117200000,
+          "side": "long",
+          "gross_pnl_bps": 22.04,
+          "net_pnl_bps": 8.04,
+          "exit_reason": "time"
+        },
+        {
+          "entry_time": 1771434000000,
+          "exit_time": 1771437600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.0001,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 16,
+      "stop_bps": 100.0,
+      "tp_bps": 80.0,
+      "exit_mode": "time",
+      "trades": 20,
+      "win_rate": 0.75,
+      "profit_factor": 1.7397,
+      "total_return_bps": 421.17,
+      "avg_trade_bps": 21.06,
+      "max_drawdown_bps": 389.4,
+      "avg_funding_capture_bps": 0.06,
+      "positive_folds": 3,
+      "stressed_profit_factor": 1.3571,
+      "stressed_total_return_bps": 221.17,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770858000000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1770915600000,
+          "exit_time": 1770915600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        },
+        {
+          "entry_time": 1771059600000,
+          "exit_time": 1771066800000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771088400000,
+          "exit_time": 1771106400000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771117200000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.0001,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 24,
+      "stop_bps": 100.0,
+      "tp_bps": 80.0,
+      "exit_mode": "time",
+      "trades": 20,
+      "win_rate": 0.75,
+      "profit_factor": 1.7397,
+      "total_return_bps": 421.17,
+      "avg_trade_bps": 21.06,
+      "max_drawdown_bps": 389.4,
+      "avg_funding_capture_bps": 0.06,
+      "positive_folds": 3,
+      "stressed_profit_factor": 1.3571,
+      "stressed_total_return_bps": 221.17,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770858000000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1770915600000,
+          "exit_time": 1770915600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        },
+        {
+          "entry_time": 1771059600000,
+          "exit_time": 1771066800000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771088400000,
+          "exit_time": 1771106400000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771117200000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        }
+      ]
+    },
+    {
+      "symbol": "SOLUSDT",
+      "funding_threshold": 0.0001,
+      "basis_threshold_bps": 5.0,
+      "hold_hours": 8,
+      "stop_bps": 100.0,
+      "tp_bps": 80.0,
+      "exit_mode": "time",
+      "trades": 20,
+      "win_rate": 0.7,
+      "profit_factor": 1.7606,
+      "total_return_bps": 399.18,
+      "avg_trade_bps": 19.96,
+      "max_drawdown_bps": 300.74,
+      "avg_funding_capture_bps": 0.06,
+      "positive_folds": 3,
+      "stressed_profit_factor": 1.3406,
+      "stressed_total_return_bps": 199.18,
+      "cost_stress": {
+        "baseline_bps": 14.0,
+        "stress_bps": 24.0
+      },
+      "sample_trades": [
+        {
+          "entry_time": 1770858000000,
+          "exit_time": 1770858000000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1770915600000,
+          "exit_time": 1770915600000,
+          "side": "long",
+          "gross_pnl_bps": -100.0,
+          "net_pnl_bps": -114.0,
+          "exit_reason": "stop"
+        },
+        {
+          "entry_time": 1771059600000,
+          "exit_time": 1771066800000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771088400000,
+          "exit_time": 1771106400000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        },
+        {
+          "entry_time": 1771117200000,
+          "exit_time": 1771128000000,
+          "side": "long",
+          "gross_pnl_bps": 80.0,
+          "net_pnl_bps": 66.0,
+          "exit_reason": "tp"
+        }
+      ]
+    }
+  ],
+  "next_actions": [
+    "rotation 후보는 majors-only 우선으로 recent comparison 또는 별도 walk-forward 재검증",
+    "carry 후보는 SOLUSDT 우선으로 최근 30일/60일 구간 재검증과 paper 모니터링",
+    "rotation과 carry를 동일 승격 게이트(PF/MDD/WF/cost stress)로 비교"
+  ]
+}
