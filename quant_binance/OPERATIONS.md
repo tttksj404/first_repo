@@ -79,6 +79,20 @@ Windows PowerShell:
 powershell -ExecutionPolicy Bypass -File scripts/quant_bootstrap_live.ps1 -Mode live-paper-daemon -OutputBase quant_runtime
 ```
 
+Optional profile switch (default behavior does not change unless you set this):
+
+```bash
+export STRATEGY_PROFILE=template-gamble-max
+# or
+export STRATEGY_PROFILE=template-structural-edge
+```
+
+```powershell
+$env:STRATEGY_PROFILE = "template-gamble-max"
+# or
+$env:STRATEGY_PROFILE = "template-structural-edge"
+```
+
 ## Commands
 
 Before any private exchange run, set credentials in either your shell or the repository root `.env`.
