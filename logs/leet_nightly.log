@@ -154,3 +154,16 @@
 [WARN] AppleScript stderr: 197:261: execution error: Calendar에 오류 발생: 응용 프로그램이 실행 중이 아닙니다. (-600)
 
 [OK] Review notification sent for 2026-04-07
+2026-04-14 00:00:00 [INFO] === Nightly review start: 2026-04-14 ===
+2026-04-14 00:00:00 [INFO] Completion: 0% (0/32), edited=False
+2026-04-14 00:00:00 [INFO] Errors total: 0, Scores total: 0
+2026-04-14 00:00:00 [INFO] Error trend: stable, Score rec: normal, Skip rec: simplify
+2026-04-14 00:00:00 [WARNING] FULL DEFERRAL: 32 tasks
+2026-04-14 00:00:00 [INFO] CBT generation: type=추리논증, topic=None, cmd=/Users/tttksj/.local/bin/claude -p --dangerously-skip-permissions --no-session-persistence...
+2026-04-14 00:00:05 [ERROR] Claude Code exit 1: 
+2026-04-14 00:00:06 [INFO] Injected adaptive content into 2026-04-15.md
+2026-04-14 00:00:49 [INFO] Calendar changes: ['전체 블록: 간소화 모드']
+2026-04-14 00:00:49 [INFO] Coach note saved: /Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/01. Areas/LEET/Daily/Coach Notes/2026-04-14_coach.md
+2026-04-14 00:00:50 [INFO] === Nightly review complete: 2026-04-14 ===
+[WARN] CBT generation failed: 
+[OK] Review notification sent for 2026-04-14
