@@ -660,6 +660,39 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(capped_params["size"], "0.00016772")
         self.assertLess(float(capped_params["size"]), float(uncapped_params["size"]))
 
+    def test_bitget_margin_mode_env_override_uses_isolated_for_futures_orders(self) -> None:
+        decision = self._decision(final_mode="futures")
+        live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
+        rest_client = BitgetRestClient(credentials=None)
+
+        with patch.dict(os.environ, {"BITGET_MARGIN_MODE": "isolated"}, clear=False):
+            built = live_adapter.build_order_params(decision=decision, reference_price=50000.0)
+            self.assertIsNotNone(built)
+            assert built is not None
+            _, params = built
+            self.assertEqual(params["marginMode"], "isolated")
+
+            rest_params = rest_client.build_order_params(
+                market="futures",
+                symbol="BTCUSDT",
+                side="BUY",
+                order_type="market",
+                quantity=0.01,
+                reduce_only=False,
+            )
+            self.assertEqual(rest_params["marginMode"], "isolated")
+
+    def test_bitget_margin_mode_env_override_falls_back_to_crossed_on_invalid_value(self) -> None:
+        decision = self._decision(final_mode="futures")
+        live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
+
+        with patch.dict(os.environ, {"BITGET_MARGIN_MODE": "invalid"}, clear=False):
+            built = live_adapter.build_order_params(decision=decision, reference_price=50000.0)
+            self.assertIsNotNone(built)
+            assert built is not None
+            _, params = built
+            self.assertEqual(params["marginMode"], "crossed")
+
     def test_bitget_paper_live_test_order_mode_runs_without_live_credentials(self) -> None:
         summary = run_paper_live_test_order_mode(
             config_path=CONFIG_PATH,
