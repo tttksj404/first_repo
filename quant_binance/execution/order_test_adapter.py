@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.models import DecisionIntent
 from quant_binance.risk.sizing import quantity_from_notional
 
@@ -75,7 +76,7 @@ class DecisionOrderTestAdapter:
             if market == "futures":
                 order_params["productType"] = "USDT-FUTURES"
                 order_params["marginCoin"] = "USDT"
-                order_params["marginMode"] = "crossed"
+                order_params["marginMode"] = resolve_bitget_margin_mode()
                 order_params["reduceOnly"] = "NO"
             return market, order_params
         order_params = {

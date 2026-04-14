@@ -8,6 +8,7 @@ from typing import Any, Protocol
 
 _log = logging.getLogger(__name__)
 
+from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.models import DecisionIntent
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
 from quant_binance.settings import Settings
@@ -585,7 +586,7 @@ class DecisionLiveOrderAdapter:
             if market == "futures":
                 params["productType"] = "USDT-FUTURES"
                 params["marginCoin"] = "USDT"
-                params["marginMode"] = "crossed"
+                params["marginMode"] = resolve_bitget_margin_mode()
                 params["tradeSide"] = "close" if decision.side == "flat" else "open"
                 if decision.side in {"long", "short"}:
                     take_profit, stop_loss = self._protection_prices(
