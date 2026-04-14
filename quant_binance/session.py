@@ -4809,8 +4809,8 @@ class LivePaperSession:
     # ── Trailing Stop Implementation ──────────────────────────────
     # Activates when ROE >= threshold. Locks in 50% of peak profit.
     # Short positions use tighter activation (scalp style).
-    _TRAILING_ACTIVATION_ROE_LONG = 3.0    # long: activate at 3% ROE
-    _TRAILING_ACTIVATION_ROE_SHORT = 1.5   # short: activate at 1.5% ROE (faster exit)
+    _TRAILING_ACTIVATION_ROE_LONG = 8.0    # long: activate at 8% ROE (20x: 0.4% price move)
+    _TRAILING_ACTIVATION_ROE_SHORT = 5.0   # short: activate at 5% ROE
     _TRAILING_LOCK_RATIO = 0.50            # lock 50% of peak profit
     _TRAILING_MIN_MOVE_BPS = 10            # minimum move to update (avoid spam)
 
@@ -4842,14 +4842,15 @@ class LivePaperSession:
             return
 
         # ROE to price: for long, SL = entry * (1 + locked_roe% / leverage)
+        # Buffer accounts for websocket markPrice staleness vs Bitget real-time validation
         if hold_side == "long":
             new_sl = entry_price * (1.0 + locked_roe / 100.0 / leverage)
-            # SL must be below current price
-            if new_sl >= mark_price:
+            # SL must be well below current price (0.3% buffer for stale mark)
+            if new_sl >= mark_price * 0.997:
                 return
         else:
             new_sl = entry_price * (1.0 - locked_roe / 100.0 / leverage)
-            if new_sl <= mark_price:
+            if new_sl <= mark_price * 1.003:
                 return
 
         # Check if SL improved enough to warrant update
@@ -4868,12 +4869,19 @@ class LivePaperSession:
 
         # Update Bitget SL via place-pos-tpsl
         try:
+            adapter = self.live_order_executor or DecisionLiveOrderAdapter(
+                self.rest_client,
+                self.runtime.paper_service.settings,
+            )
+            formatted_sl = adapter.format_trigger_price(
+                value=new_sl, market="futures", symbol=symbol,
+            )
             tpsl_params: dict[str, Any] = {
                 "symbol": symbol,
                 "productType": "USDT-FUTURES",
                 "marginCoin": "USDT",
                 "holdSide": hold_side,
-                "stopLossTriggerPrice": f"{new_sl:.2f}",
+                "stopLossTriggerPrice": formatted_sl,
                 "stopLossTriggerType": "mark_price",
             }
             self.rest_client.place_futures_position_tpsl(order_params=tpsl_params)
@@ -4882,7 +4890,7 @@ class LivePaperSession:
                 direction = "↑" if hold_side == "long" else "↓"
                 print(
                     f"[TRAILING_STOP] {symbol} {hold_side} SL {direction} "
-                    f"${current_sl:.2f}→${new_sl:.2f} "
+                    f"{formatted_sl} (was {current_sl:.6f}) "
                     f"(peak ROE {peak_roe:.1f}% → lock {locked_roe:.1f}%)"
                 )
         except Exception as exc:
