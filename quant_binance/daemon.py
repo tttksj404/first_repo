@@ -377,6 +377,16 @@ def run_live_paper_daemon(
             decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
             stale_data_alarm_sla_seconds=settings.operational_limits.stale_data_alarm_sla_seconds,
         )
+        # Override stall-restart budget to avoid STALL_RECOVERY_LIMIT_EXCEEDED killing the
+        # daemon under benign decision-progress stalls. Self-heal still restarts the
+        # websocket; we just refuse to give up on the process. The external supervisor
+        # (scripts/daemon_supervisor.py) is the last resort if the process truly dies.
+        # Configurable via SELF_HEAL_MAX_STALL_RESTARTS env var (default 999).
+        try:
+            _max_stall_restarts = int(os.environ.get("SELF_HEAL_MAX_STALL_RESTARTS", "999"))
+        except (TypeError, ValueError):
+            _max_stall_restarts = 999
+        session.self_healing.max_stall_restarts_per_window = max(_max_stall_restarts, 1)
         if supports_private_reads:
             session.sync_account()
             # Auto-detect actual account equity so position sizing reflects real capital.
@@ -396,6 +406,12 @@ def run_live_paper_daemon(
                 session.remaining_portfolio_capacity_usd = _capacity
                 session.max_portfolio_capacity_usd = _capacity
             else:
+                _allow_fallback = str(os.environ.get("ALLOW_DAEMON_EQUITY_FALLBACK", "0")).strip().lower() in {"1", "true", "yes", "on"}
+                if execute_live_orders and not _allow_fallback:
+                    raise RuntimeError(
+                        "LIVE_EQUITY_DETECTION_FAILED: refusing to keep $10,000 sizing defaults in live mode. "
+                        "Check API credentials/account scope, or set ALLOW_DAEMON_EQUITY_FALLBACK=1 to override."
+                    )
                 print("[daemon] WARNING: could not detect account equity — keeping $10,000 default. Check API credentials.")
             previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
             session.restore_futures_state_from_runtime(

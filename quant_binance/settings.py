@@ -382,12 +382,12 @@ class Settings:
     portfolio_focus: PortfolioFocusConfig
     housekeeping: HousekeepingConfig
     strategy_profile: str
+    ensemble_signal_required: bool = True
     force_auto_mode: str = ""
     disable_position_adoption: bool = False
     data_collection_mode: bool = False
     data_collection_min_trades: int = 50
     b3_msb: B3MsbConfig = B3MsbConfig()
-    ensemble_signal_required: bool = True
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -458,10 +458,10 @@ class Settings:
             portfolio_focus=PortfolioFocusConfig(**raw["portfolio_focus"]),
             housekeeping=HousekeepingConfig(**raw["housekeeping"]),
             strategy_profile=raw["strategy_profile"],
+            ensemble_signal_required=bool(raw.get("ensemble_signal_required", True)),
             force_auto_mode=str(raw.get("force_auto_mode", "") or ""),
             disable_position_adoption=bool(raw.get("disable_position_adoption", False)),
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
             data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
             b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
-            ensemble_signal_required=bool(raw.get("ensemble_signal_required", True)),
         )

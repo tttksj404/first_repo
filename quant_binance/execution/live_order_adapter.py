@@ -186,6 +186,12 @@ class DecisionLiveOrderAdapter:
         if not callable(getter):
             cache[symbol] = {}
             return cache[symbol]
+        if self._exchange_id() == "bitget":
+            credentials = getattr(self.client, "credentials", object())
+            getter_qualname = str(getattr(getter, "__qualname__", ""))
+            if credentials is None and getter_qualname.startswith("BitgetRestClient."):
+                cache[symbol] = {}
+                return cache[symbol]
         try:
             info = getter(market=market)
         except Exception:
@@ -524,6 +530,75 @@ class DecisionLiveOrderAdapter:
             )
         return tuple(results)
 
+    def _emergency_close_futures_position(
+        self,
+        *,
+        decision: DecisionIntent,
+        quantity: float,
+    ) -> dict[str, Any]:
+        """Best-effort emergency close when entry protection cannot be armed.
+
+        This is fail-closed behavior: if we cannot attach SL/TP after an accepted
+        futures entry, we immediately attempt a reduce-only market close.
+        """
+        execution_symbol = self._execution_symbol(decision)
+        close_side = "sell" if decision.side == "long" else "buy"
+        close_qty = self.normalize_quantity(market="futures", symbol=execution_symbol, quantity=quantity)
+        if close_qty <= 0.0:
+            raise RuntimeError(f"EMERGENCY_CLOSE_INVALID_QUANTITY:{execution_symbol}:{quantity}")
+        order_params = {
+            "symbol": execution_symbol,
+            "side": close_side,
+            "orderType": "market",
+            "clientOid": f"{decision.decision_id}-panic-close",
+            "productType": "USDT-FUTURES",
+            "marginCoin": "USDT",
+            "marginMode": resolve_bitget_margin_mode(),
+            "tradeSide": "close",
+            "reduceOnly": "YES",
+            "size": f"{close_qty:.8f}",
+        }
+        try:
+            return self.client.place_order(market="futures", order_params=order_params)
+        except Exception as exc:
+            if not self._is_bitget_unilateral_error(str(exc)):
+                raise
+            retry_error = exc
+            for alternate_params in self._bitget_alternate_futures_params(order_params):
+                try:
+                    return self.client.place_order(market="futures", order_params=alternate_params)
+                except Exception as retry_exc:
+                    retry_error = retry_exc
+                    if not self._is_bitget_unilateral_error(str(retry_exc)):
+                        raise
+                    continue
+            raise retry_error
+
+    def _apply_fail_closed_on_missing_protection(
+        self,
+        *,
+        decision: DecisionIntent,
+        market: str,
+        accepted: bool,
+        quantity: float,
+        fill_ratio: float,
+        fill_status: str,
+        realized_edge_bps: float,
+        protection_error: str,
+    ) -> tuple[bool, float, str, float, str]:
+        if not accepted or market != "futures" or decision.side not in {"long", "short"}:
+            return accepted, fill_ratio, fill_status, realized_edge_bps, protection_error
+        try:
+            emergency_close_response = self._emergency_close_futures_position(
+                decision=decision,
+                quantity=quantity,
+            )
+            merged_error = f"{protection_error} | EMERGENCY_CLOSE_OK:{emergency_close_response}"
+            return False, 0.0, "protection_failed_closed", -10000.0, merged_error
+        except Exception as close_exc:
+            merged_error = f"{protection_error} | EMERGENCY_CLOSE_FAILED:{repr(close_exc)}"
+            raise RuntimeError(merged_error) from close_exc
+
     def _spot_quantity_reference_price(self, decision: DecisionIntent, reference_price: float) -> float:
         if (decision.spot_quote_asset or "USDT") == "USDT":
             return reference_price
@@ -666,7 +741,7 @@ class DecisionLiveOrderAdapter:
         realized_edge_bps = max((decision.net_expected_edge_bps * fill_ratio) - slippage_bps, -10000.0)
         protection_orders = ()
         protection_error = ""
-        if accepted:
+        if accepted and decision.side in {"long", "short"}:
             try:
                 protection_orders = self._submit_protection_orders(
                     decision=decision,
@@ -675,6 +750,29 @@ class DecisionLiveOrderAdapter:
                 )
             except Exception as exc:
                 protection_error = repr(exc)
+                accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
+                    decision=decision,
+                    market=market,
+                    accepted=accepted,
+                    quantity=quantity,
+                    fill_ratio=fill_ratio,
+                    fill_status=fill_status,
+                    realized_edge_bps=realized_edge_bps,
+                    protection_error=protection_error,
+                )
+            else:
+                if market == "futures" and not protection_orders:
+                    protection_error = "NO_PROTECTION_ORDERS_RETURNED"
+                    accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
+                        decision=decision,
+                        market=market,
+                        accepted=accepted,
+                        quantity=quantity,
+                        fill_ratio=fill_ratio,
+                        fill_status=fill_status,
+                        realized_edge_bps=realized_edge_bps,
+                        protection_error=protection_error,
+                    )
         return LiveOrderResult(
             symbol=decision.symbol,
             market=market,
