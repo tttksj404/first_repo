@@ -5,7 +5,7 @@
   "data_collection_mode": false,
   "decision_interval": "1m",
   "futures_score_min": 55,
-  "disable_position_adoption": false,
+  "disable_position_adoption": true,
   "decision_engine": {
     "decision_interval_minutes": 5
   },
@@ -27,9 +27,7 @@
     "major_size_boost_multiplier": 1.4,
     "major_strong_min_entry_notional_usd": 5.0,
     "major_symbols": [
-      "DOGEUSDT",
-      "XRPUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
     "min_entry_net_edge_bps": -5.0,
     "reduced_entry_net_edge_bps": -5.0,
@@ -38,9 +36,7 @@
     "priority_min_entry_net_edge_bps": -10.0,
     "priority_score_relaxation": 20.0,
     "priority_symbols": [
-      "DOGEUSDT",
-      "XRPUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
     "priority_volatility_relaxation": 0.36,
     "pyramid_enabled": false,
@@ -155,9 +151,7 @@
     "observe_only_liquidity_max": 0.0
   },
   "universe": [
-    "DOGEUSDT",
-    "XRPUSDT",
-    "SOLUSDT"
+    "PEPEUSDT"
   ],
   "funding_rate_strategy": {
     "enabled": true,
@@ -166,10 +160,7 @@
     "atr_tp_multiple": 2.5,
     "max_hold_hours": 8,
     "symbols": [
-      "SOLUSDT",
-      "XRPUSDT",
-      "ETHUSDT",
-      "BTCUSDT"
+      "PEPEUSDT"
     ],
     "notional_usd_per_trade": 50.0
   },
@@ -180,10 +171,7 @@
     "interval": "1h",
     "lookback_days": 180,
     "symbols": [
-      "BTCUSDT",
-      "ETHUSDT",
-      "SOLUSDT",
-      "XRPUSDT"
+      "PEPEUSDT"
     ],
     "swing_window": 13,
     "atr_tp_multiple": 4.2,

@@ -1133,7 +1133,8 @@ class LivePaperSession:
         )
 
     def _execution_quality_snapshot(self) -> dict[str, object]:
-        return self._execution_quality_state.snapshot()
+        snapshot = self._execution_quality_state.snapshot()
+        return self._sanitize_execution_quality_snapshot(snapshot)
 
     def _is_timeout_error(self, message: str) -> bool:
         normalized = message.lower()
@@ -1340,10 +1341,15 @@ class LivePaperSession:
         if path is None or not path.exists():
             return {}
         try:
-            return json.loads(path.read_text(encoding="utf-8"))
+            payload = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             logger.warning("failed to read persisted policy state %s", path, exc_info=True)
             return {}
+        allowed_symbols = self._allowed_runtime_symbols()
+        if not allowed_symbols:
+            return payload if isinstance(payload, dict) else {}
+        sanitized = self._sanitize_runtime_payload(payload, allowed_symbols=allowed_symbols)
+        return sanitized if isinstance(sanitized, dict) else {}
 
     def _write_persisted_policy_state(self, policy_state: dict[str, object]) -> None:
         path = self._policy_state_path()
@@ -1397,6 +1403,137 @@ class LivePaperSession:
         if forced == "normal":
             result["expansion_blocked"] = False
         return result
+
+    def _allowed_runtime_symbols(self) -> set[str]:
+        allowed_symbols = {
+            str(symbol)
+            for symbol in list(self.runtime.paper_service.settings.universe or ())
+            if str(symbol)
+        }
+        if self.runtime.eligible_symbols is not None:
+            allowed_symbols.update(
+                str(symbol)
+                for symbol in list(self.runtime.eligible_symbols or set())
+                if str(symbol)
+            )
+        allowed_symbols.update(
+            str(symbol)
+            for symbol in list(self.observe_only_symbols or [])
+            if str(symbol)
+        )
+        store = getattr(getattr(self.runtime, "dispatcher", None), "store", None)
+        state_map = getattr(store, "_states", None)
+        if isinstance(state_map, dict):
+            allowed_symbols.update(str(symbol) for symbol in state_map.keys() if str(symbol))
+        return allowed_symbols
+
+    @staticmethod
+    def _symbol_from_context_key(key: object) -> str:
+        text = str(key or "").strip()
+        if not text:
+            return ""
+        if "|" in text:
+            return text.split("|", 1)[0].strip()
+        return text if text.endswith("USDT") else ""
+
+    def _sanitize_runtime_payload(self, payload: object, *, allowed_symbols: set[str]) -> object:
+        if isinstance(payload, dict):
+            symbol = str(payload.get("symbol", "") or "").strip()
+            if symbol and symbol not in allowed_symbols:
+                return None
+            sanitized: dict[str, object] = {}
+            for key, value in payload.items():
+                if key == "symbol" and symbol:
+                    sanitized[key] = symbol
+                    continue
+                if key in {
+                    "symbols",
+                    "actionable_symbols",
+                    "candidate_only_symbols",
+                    "current_only_symbols",
+                    "promoted_symbols",
+                    "demoted_symbols",
+                } and isinstance(value, list):
+                    sanitized[key] = [
+                        item
+                        for item in value
+                        if not isinstance(item, str) or item in allowed_symbols
+                    ]
+                    continue
+                context_symbol = self._symbol_from_context_key(key)
+                if context_symbol and context_symbol not in allowed_symbols:
+                    continue
+                sanitized_value = self._sanitize_runtime_payload(value, allowed_symbols=allowed_symbols)
+                if sanitized_value is None:
+                    continue
+                sanitized[key] = sanitized_value
+            return sanitized
+        if isinstance(payload, list):
+            sanitized_list = []
+            for item in payload:
+                sanitized_item = self._sanitize_runtime_payload(item, allowed_symbols=allowed_symbols)
+                if sanitized_item is None:
+                    continue
+                sanitized_list.append(sanitized_item)
+            return sanitized_list
+        return payload
+
+    def _sanitize_execution_quality_snapshot(self, snapshot: dict[str, object]) -> dict[str, object]:
+        allowed_symbols = self._allowed_runtime_symbols()
+        if not allowed_symbols:
+            return snapshot
+        sanitized = dict(snapshot)
+        sanitized["symbols"] = {
+            symbol: metrics
+            for symbol, metrics in dict(snapshot.get("symbols", {}) or {}).items()
+            if str(symbol) in allowed_symbols
+        }
+        sanitized["contexts"] = {
+            key: value
+            for key, value in dict(snapshot.get("contexts", {}) or {}).items()
+            if self._symbol_from_context_key(key) in allowed_symbols
+        }
+        sanitized["active_overlays"] = {
+            key: value
+            for key, value in dict(snapshot.get("active_overlays", {}) or {}).items()
+            if self._symbol_from_context_key(key) in allowed_symbols
+        }
+        sanitized["degraded_keys"] = [
+            key
+            for key in list(snapshot.get("degraded_keys", []) or [])
+            if self._symbol_from_context_key(key) in allowed_symbols
+        ]
+        sanitized["degraded_overlays"] = {
+            key: value
+            for key, value in dict(snapshot.get("degraded_overlays", {}) or {}).items()
+            if self._symbol_from_context_key(key) in allowed_symbols
+        }
+        policy_bucket_contexts: dict[str, object] = {}
+        for bucket, payload in dict(snapshot.get("policy_bucket_contexts", {}) or {}).items():
+            bucket_payload = dict(payload or {})
+            bucket_payload["contexts"] = {
+                key: value
+                for key, value in dict(bucket_payload.get("contexts", {}) or {}).items()
+                if self._symbol_from_context_key(key) in allowed_symbols
+            }
+            bucket_payload["active_overlays"] = {
+                key: value
+                for key, value in dict(bucket_payload.get("active_overlays", {}) or {}).items()
+                if self._symbol_from_context_key(key) in allowed_symbols
+            }
+            bucket_payload["degraded_keys"] = [
+                key
+                for key in list(bucket_payload.get("degraded_keys", []) or [])
+                if self._symbol_from_context_key(key) in allowed_symbols
+            ]
+            bucket_payload["degraded_overlays"] = {
+                key: value
+                for key, value in dict(bucket_payload.get("degraded_overlays", {}) or {}).items()
+                if self._symbol_from_context_key(key) in allowed_symbols
+            }
+            policy_bucket_contexts[str(bucket)] = bucket_payload
+        sanitized["policy_bucket_contexts"] = policy_bucket_contexts
+        return sanitized
 
     def _policy_runtime_context(self) -> dict[str, object]:
         policy_state = self._read_persisted_policy_state()
