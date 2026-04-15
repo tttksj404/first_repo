@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-04-14T05:52:02.121058+00:00",
-  "overall_severity": "OK",
+  "updated_at": "2026-04-07T00:23:43.469014+00:00",
+  "overall_severity": "CRITICAL",
   "checks": {
     "adopted_ratio": {
       "severity": "OK",
@@ -21,11 +21,11 @@
       "value": 0
     },
     "equity_drop": {
-      "severity": "OK",
-      "message": "equity 53.14 USDT (delta -0.00% from baseline 53.14)",
-      "value": 0.0
+      "severity": "CRITICAL",
+      "message": "equity dropped 16.03% from 79.37 to 66.65 USDT (threshold 5.0%)",
+      "value": 16.0275
     }
   },
   "auto_actions": [],
-  "disk_usage_mb": 525.3
+  "disk_usage_mb": 421.7
 }

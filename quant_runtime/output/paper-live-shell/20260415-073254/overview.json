@@ -1,0 +1,94 @@
+{
+  "decision_count": 3,
+  "exchange_live_futures_position_count": 1,
+  "exchange_live_futures_positions": [
+    {
+      "roe_percent": -0.411,
+      "side": "short",
+      "symbol": "SOLUSDT",
+      "unrealized_pnl_usd": -0.1156
+    }
+  ],
+  "futures_available_balance_usd": 7.484228,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 7.484228,
+  "futures_manual_handling_balance_usd": 1.055429,
+  "futures_total_reusable_balance_usd": 36.554846,
+  "futures_transferable_execution_balance_usd": 0.007689,
+  "heartbeat_count": 34729,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-04-15T07:32:58.422355+00:00",
+  "last_decision_timestamp": "2026-04-15T07:35:00+00:00",
+  "last_event_timestamp": "2026-04-15T07:38:16.462554+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.229279,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -5.596197,
+      "reasons": [
+        "EXECUTION_QUALITY_EDGE_TOO_THIN"
+      ],
+      "score": 53.24,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 16.488724,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 3.078951,
+      "reasons": [],
+      "score": 54.5,
+      "side": "short",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "PEPEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 12.834714,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 4.076339,
+      "reasons": [],
+      "score": 58.36,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.007689,
+  "status": "healthy",
+  "tested_order_count": 0,
+  "top_rejection_reasons": {
+    "EXECUTION_QUALITY_EDGE_TOO_THIN": 1
+  },
+  "unrealized_pnl_usd_estimate": -0.062753,
+  "updated_at": "2026-04-15T07:38:16.821867+00:00"
+}

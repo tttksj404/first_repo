@@ -1,0 +1,22 @@
+[daemon] restored 16 learning observations from quant_runtime\output\paper-live-shell\20260414-063349\edge_table.json
+[daemon] equity auto-detected: $53.14 USDT ¡æ capacity: $1062.90 (was $10,000 / $5,000 defaults)
+[DECISION] 2026-04-14T06:45:00+00:00 DOGEUSDT mode=cash side=flat score=46.77
+[DECISION] 2026-04-14T06:45:00+00:00 PEPEUSDT mode=cash side=flat score=55.45
+[DECISION] 2026-04-14T06:45:00+00:00 SOLUSDT mode=cash side=flat score=51.25
+[DECISION] 2026-04-14T06:45:00+00:00 XRPUSDT mode=cash side=flat score=62.76
+[SUBMISSION_GATE] DOGEUSDT allow=False can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] DOGEUSDT allow=False live_allowed=True managed=cash:0.00 prepared=cash:0.00 reasons=LIQUIDITY_TOO_WEAK,SCORE_TOO_LOW,SENTIMENT_CAUTION,SUPPORT_NOT_CONFIRMED
+[SUBMISSION_GATE] PEPEUSDT allow=False can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] PEPEUSDT allow=False live_allowed=True managed=cash:0.00 prepared=cash:0.00 reasons=DIRECTION_CONFLICT,LIQUIDITY_TOO_WEAK,NO_ENSEMBLE_SIGNAL,SCORE_TOO_LOW,VOL_TOO_HIGH
+[SUBMISSION_GATE] SOLUSDT allow=False can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] SOLUSDT allow=False live_allowed=True managed=cash:0.00 prepared=cash:0.00 reasons=LIQUIDITY_TOO_WEAK,SCORE_TOO_LOW,SENTIMENT_CAUTION,SUPPORT_NOT_CONFIRMED,VOL_TOO_HIGH
+[SUBMISSION_GATE] XRPUSDT allow=False can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] XRPUSDT allow=False live_allowed=True managed=cash:0.00 prepared=cash:0.00 reasons=LIQUIDITY_TOO_WEAK,NO_ENSEMBLE_SIGNAL,SCORE_TOO_LOW,SUPPORT_NOT_CONFIRMED
+[CONNECT] websocket attempt=1
+[ERROR] websocket attempt=1 error=ssl=None is incompatible with a wss:// URI
+[RETRY] attempt=2 sleeping=1.00s
+[CONNECT] websocket attempt=2
+[ERROR] websocket attempt=2 error=ssl=None is incompatible with a wss:// URI
+[RETRY] attempt=3 sleeping=2.00s
+[CONNECT] websocket attempt=3
+[ERROR] websocket attempt=3 error=ssl=None is incompatible with a wss:// URI
