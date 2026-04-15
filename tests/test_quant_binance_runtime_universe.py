@@ -59,6 +59,27 @@ class QuantBinanceRuntimeUniverseTests(unittest.TestCase):
         self.assertTrue(sol_row["allow_bootstrap"])
         self.assertFalse(sol_row["bucket_evidence_available"])
 
+    def test_build_runtime_universe_hydration_drops_out_of_configured_symbols(self) -> None:
+        hydration = build_runtime_universe_hydration(
+            policy_state={
+                "active_policy": {
+                    "status": "promote",
+                    "adjustments": [
+                        {"symbol": "BTCUSDT", "action": "promote"},
+                        {"symbol": "DOGEUSDT", "action": "demote"},
+                    ],
+                },
+                "symbol_lifecycle": [
+                    {"symbol": "BTCUSDT", "recommended_action": "keep"},
+                    {"symbol": "DOGEUSDT", "recommended_action": "hold"},
+                ],
+            },
+            configured_symbols=("BTCUSDT",),
+            major_symbols=("BTCUSDT",),
+        )
+
+        self.assertEqual(list(hydration["rows_by_symbol"].keys()), ["BTCUSDT"])
+
 
 if __name__ == "__main__":
     unittest.main()
