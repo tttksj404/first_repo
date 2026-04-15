@@ -1,0 +1,28 @@
+[2026-04-15T05:33:43+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T05:33:43+00:00] daemon pid=45148 started
+[2026-04-15T05:41:49+00:00] daemon pid=45148 exited with code 1; restarting in 5s
+[2026-04-15T05:41:54+00:00] spawning daemon (restart #2 in last hour)
+[2026-04-15T05:41:54+00:00] daemon pid=12372 started
+[2026-04-15T05:48:10+00:00] daemon pid=12372 exited with code 4294967295; restarting in 5s
+[2026-04-15T05:48:15+00:00] spawning daemon (restart #3 in last hour)
+[2026-04-15T05:48:15+00:00] daemon pid=40280 started
+[2026-04-15T06:24:37+00:00] daemon pid=40280 exited with code 4294967295; restarting in 5s
+[2026-04-15T06:24:42+00:00] spawning daemon (restart #4 in last hour)
+[2026-04-15T06:24:42+00:00] daemon pid=8600 started
+[2026-04-15T06:47:43+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T06:47:43+00:00] daemon pid=28192 started
+[2026-04-15T06:50:19+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T06:50:19+00:00] daemon pid=43328 started
+[2026-04-15T07:24:41+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T07:24:41+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-15T07:24:41+00:00] daemon pid=5296 started
+[2026-04-15T07:32:53+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T07:32:53+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-15T07:32:53+00:00] daemon pid=16460 started
+[2026-04-15T07:38:22+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T07:38:22+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-15T07:38:22+00:00] daemon pid=13908 started
+[2026-04-15T07:45:58+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-15T07:45:58+00:00] live universe locked: PEPEUSDT,DOGEUSDT,SOLUSDT
+[2026-04-15T07:45:58+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-15T07:45:58+00:00] daemon pid=38704 started

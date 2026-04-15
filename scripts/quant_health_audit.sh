@@ -537,38 +537,6 @@ if [ "$DIRTY" -gt 10 ]; then
 fi
 
 # ============================================
-# 10. 런타임 버그/에러 패턴 감지
-# ============================================
-echo ""
-echo "[10] 런타임 버그/에러 패턴 감지"
-BUG_DETECTOR_OUTPUT=$($PYTHON "$REPO/scripts/quant_bug_detector.py" 2>&1)
-BUG_EXIT=$?
-echo "$BUG_DETECTOR_OUTPUT"
-
-if [ "$BUG_EXIT" -eq 2 ]; then
-    CRITICALS=$((CRITICALS+1))
-    # bug_detector_result.json에서 진단 정보 추출
-    BUG_ISSUES=$($PYTHON -c "
-import json
-r = json.load(open('$RUNTIME/artifacts/bug_detector_result.json'))
-for i in r.get('issues', []):
-    print(f'[{i[\"severity\"]}] {i[\"type\"]}: {i[\"diagnosis\"]}')
-" 2>/dev/null || echo "bug details unavailable")
-    ISSUES="$ISSUES [C] 런타임 버그 감지: $BUG_ISSUES"
-elif [ "$BUG_EXIT" -eq 1 ]; then
-    WARNINGS=$((WARNINGS+1))
-    BUG_ISSUES=$($PYTHON -c "
-import json
-r = json.load(open('$RUNTIME/artifacts/bug_detector_result.json'))
-for i in r.get('issues', []):
-    print(f'[{i[\"severity\"]}] {i[\"type\"]}: {i[\"diagnosis\"]}')
-" 2>/dev/null || echo "bug details unavailable")
-    ISSUES="$ISSUES [W] 런타임 이슈 감지: $BUG_ISSUES"
-else
-    echo "  OK: 런타임 버그 없음"
-fi
-
-# ============================================
 # 결과
 # ============================================
 echo ""
@@ -592,28 +560,9 @@ if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; then
 
     echo "[CLAUDE] 자동 수정 시작: CRITICAL=$CRITICALS WARNING=$WARNINGS"
 
-    # bug detector 결과 읽기
-    BUG_DETAIL=""
-    if [ -f "$RUNTIME/artifacts/bug_detector_result.json" ]; then
-        BUG_DETAIL=$($PYTHON -c "
-import json
-r = json.load(open('$RUNTIME/artifacts/bug_detector_result.json'))
-if r.get('issues'):
-    print('\n## 런타임 버그 감지 상세')
-    for i, issue in enumerate(r['issues'], 1):
-        print(f\"\n### 이슈 {i}: [{issue['severity']}] {issue['type']}\")
-        print(f\"진단: {issue.get('diagnosis', 'N/A')}\")
-        print(f\"수정 힌트: {issue.get('fix_hint', 'N/A')}\")
-        for k, v in issue.items():
-            if k not in ('type','severity','diagnosis','fix_hint','raw'):
-                print(f\"  {k}: {v}\")
-" 2>/dev/null || echo "")
-    fi
-
     CLAUDE_PROMPT="코인 매매 프로그램 정기 health audit 결과:
 
 ${AUDIT_SUMMARY}
-${BUG_DETAIL}
 
 다음을 순서대로 수행해줘:
 

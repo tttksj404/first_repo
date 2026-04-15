@@ -1,4 +1,0 @@
-# name|output_base|strategy_profile|universe_symbols|strategy_override_path
-core-majors|quant_runtime_a|active|BTCUSDT,ETHUSDT,SOLUSDT|
-alt-fast|quant_runtime_b|live-ultra-aggressive|DOGEUSDT,TRXUSDT,ADAUSDT|
-
