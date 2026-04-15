@@ -1284,6 +1284,99 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertEqual(policy_payload["status"], "rolled_back")
             self.assertEqual(policy_payload["active_policy"]["status"], "baseline")
 
+    def test_session_filters_persisted_policy_and_execution_quality_to_runtime_universe(self) -> None:
+        settings = replace(
+            self.settings,
+            universe=("BTCUSDT",),
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                major_symbols=("BTCUSDT",),
+                priority_symbols=("BTCUSDT",),
+            ),
+        )
+        session = self._build_session(settings=settings)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_dir = Path(tmpdir) / "output" / "paper-live-shell" / "run-a"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            summary_path = run_dir / "summary.json"
+            state_path = run_dir / "summary.state.json"
+            session.summary_path = summary_path
+
+            policy_state_path = summary_path.with_name("policy_state.json")
+            policy_state_path.write_text(
+                json.dumps(
+                    {
+                        "active_policy": {
+                            "status": "promote",
+                            "adjustments": [
+                                {"symbol": "BTCUSDT", "action": "promote"},
+                                {"symbol": "DOGEUSDT", "action": "demote"},
+                            ],
+                        },
+                        "symbol_lifecycle": [
+                            {"symbol": "BTCUSDT", "recommended_action": "keep"},
+                            {"symbol": "DOGEUSDT", "recommended_action": "hold"},
+                        ],
+                        "policy_evidence_buckets": {
+                            "active_policy": {
+                                "available": True,
+                                "alignment": {"aligned": True, "status": "aligned"},
+                                "evidence": {
+                                    "checkpoint_auto_judge": {
+                                        "symbol_actions": [
+                                            {"symbol": "BTCUSDT", "action": "keep"},
+                                            {"symbol": "DOGEUSDT", "action": "hold"},
+                                        ]
+                                    }
+                                },
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            session._execution_quality_state.record(
+                symbol="BTCUSDT",
+                outcome="filled",
+                fill_ratio=1.0,
+                slippage_bps=0.0,
+                realized_edge_bps=10.0,
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                market="futures",
+                exchange_id="binance",
+                policy_bucket="active_policy",
+            )
+            session._execution_quality_state.record(
+                symbol="DOGEUSDT",
+                outcome="filled",
+                fill_ratio=1.0,
+                slippage_bps=0.0,
+                realized_edge_bps=8.0,
+                timestamp=datetime(2026, 3, 8, 12, 6, tzinfo=timezone.utc),
+                market="futures",
+                exchange_id="binance",
+                policy_bucket="active_policy",
+            )
+
+            persisted = session._read_persisted_policy_state()
+            self.assertEqual(
+                [row["symbol"] for row in persisted["active_policy"]["adjustments"]],
+                ["BTCUSDT"],
+            )
+            self.assertEqual(
+                [row["symbol"] for row in persisted["symbol_lifecycle"]],
+                ["BTCUSDT"],
+            )
+
+            summary = session.flush(summary_path=summary_path, state_path=state_path)
+            self.assertIn("BTCUSDT", summary["execution_quality"]["symbols"])
+            self.assertNotIn("DOGEUSDT", summary["execution_quality"]["symbols"])
+            self.assertNotIn(
+                "DOGEUSDT|market=futures|exchange=binance|policy_bucket=active_policy",
+                summary["execution_quality"]["contexts"],
+            )
+
     def test_session_flush_persists_separated_execution_replay_comparison(self) -> None:
         session = self._build_session()
         session.live_orders = [
