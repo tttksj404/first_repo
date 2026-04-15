@@ -4,7 +4,7 @@
   "data_collection_min_trades": 500,
   "data_collection_mode": false,
   "decision_interval": "1m",
-  "futures_score_min": 55,
+  "futures_score_min": 45,
   "disable_position_adoption": false,
   "decision_engine": {
     "decision_interval_minutes": 5
@@ -27,9 +27,7 @@
     "major_size_boost_multiplier": 1.4,
     "major_strong_min_entry_notional_usd": 5.0,
     "major_symbols": [
-      "DOGEUSDT",
-      "XRPUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
     "min_entry_net_edge_bps": -5.0,
     "reduced_entry_net_edge_bps": -5.0,
@@ -38,9 +36,7 @@
     "priority_min_entry_net_edge_bps": -10.0,
     "priority_score_relaxation": 20.0,
     "priority_symbols": [
-      "DOGEUSDT",
-      "XRPUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
     "priority_volatility_relaxation": 0.36,
     "pyramid_enabled": false,
@@ -120,11 +116,11 @@
     "spot_block_penalty": 1.05
   },
   "mode_thresholds": {
-    "futures_score_min": 55,
-    "futures_trend_strength_min": 0.2,
-    "futures_liquidity_min": 0.18,
-    "futures_volatility_penalty_max": 1.2,
-    "futures_overheat_penalty_max": 1.2,
+    "futures_score_min": 45,
+    "futures_trend_strength_min": 0.1,
+    "futures_liquidity_min": 0.08,
+    "futures_volatility_penalty_max": 1.8,
+    "futures_overheat_penalty_max": 1.8,
     "spot_score_min": 999,
     "spot_liquidity_min": 999
   },
@@ -155,9 +151,7 @@
     "observe_only_liquidity_max": 0.0
   },
   "universe": [
-    "DOGEUSDT",
-    "XRPUSDT",
-    "SOLUSDT"
+    "PEPEUSDT"
   ],
   "funding_rate_strategy": {
     "enabled": true,
@@ -166,10 +160,7 @@
     "atr_tp_multiple": 2.5,
     "max_hold_hours": 8,
     "symbols": [
-      "SOLUSDT",
-      "XRPUSDT",
-      "ETHUSDT",
-      "BTCUSDT"
+      "PEPEUSDT"
     ],
     "notional_usd_per_trade": 50.0
   },
