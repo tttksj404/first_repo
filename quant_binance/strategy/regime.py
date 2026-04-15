@@ -704,10 +704,23 @@ def _futures_entry_plan(
         and features.volume_confirmation >= 0.7
         and features.liquidity_score >= exposure.soft_liquidity_floor
     )
+    ultra_aggressive_caution_override = (
+        settings.strategy_profile == "live-ultra-aggressive"
+        and features.predictability_score >= (futures_score_min - 4.0)
+        and features.trend_strength >= (thresholds.futures_trend_strength_min - 0.08)
+        and features.volume_confirmation >= 0.3
+        and features.liquidity_score >= max(exposure.soft_liquidity_floor - 0.04, 0.0)
+        and features.net_expected_edge_bps >= (exposure.reduced_entry_net_edge_bps - 2.0)
+    )
+    if features.sentiment_regime == "caution" and ultra_aggressive_caution_override:
+        reduced_size = True
+        size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
+        relaxed_reasons.append("SENTIMENT_CAUTION_OVERRIDE")
     if features.sentiment_regime == "caution" and not (
         (supportive_macro and exposure.macro_allow_caution and features.volume_confirmation >= 0.62)
         or priority_caution_override
         or bearish_caution_override
+        or ultra_aggressive_caution_override
     ):
         if _btc_eth_futures_sentiment_relaxation_allowed(
             features,
@@ -949,6 +962,7 @@ def evaluate_snapshot(
         settings,
         snapshot.symbol,
     )
+    futures_relaxed_reasons = list(futures_relaxed_reasons)
 
     # ENSEMBLE TOP 3: evaluate FIRST, bypass base filters if signal fires
     # Backtest: 200 tr/375d, WR 36%, PF 6.75, Ruin 0.0%, WF 4/4
@@ -1002,11 +1016,14 @@ def evaluate_snapshot(
             futures=_dc_replace(prediction.futures, side="long")
         )
     else:
-        # No ensemble signal: block only if ensemble_signal_required is set
-        if futures_ok:
+        # No ensemble signal: block only when explicitly required
+        ensemble_signal_required = bool(getattr(settings, "ensemble_signal_required", True))
+        if futures_ok and ensemble_signal_required:
             futures_reasons = list(futures_reasons) + ["NO_ENSEMBLE_SIGNAL"]
-        if getattr(settings, "ensemble_signal_required", True):
+        if ensemble_signal_required:
             futures_ok = False
+        elif futures_ok:
+            futures_relaxed_reasons.append("ENSEMBLE_OPTIONAL")
 
     if futures_ok:
         if futures_direction not in {-1, 1}:
@@ -1120,6 +1137,12 @@ def evaluate_snapshot(
         return decision_from_portfolio_intent(intent=intent)
 
     cash_reasons = tuple(sorted(set(futures_reasons + spot_reasons))) or ("SCORE_TOO_LOW",)
+    futures_reason_view = tuple(sorted(set(futures_reasons))) or ("NONE",)
+    spot_reason_view = tuple(sorted(set(spot_reasons))) or ("NONE",)
+    divergence_summary = (
+        f"FUTURES[{','.join(futures_reason_view[:6])}]|"
+        f"SPOT[{','.join(spot_reason_view[:6])}]"
+    )
     intent = build_portfolio_intent(
         prediction=prediction,
         selected_mode="cash",
@@ -1127,5 +1150,6 @@ def evaluate_snapshot(
         target_notional_usd=0.0,
         stop_distance_bps=0.0,
         rejection_reasons=cash_reasons,
+        divergence_code=divergence_summary,
     )
     return decision_from_portfolio_intent(intent=intent)

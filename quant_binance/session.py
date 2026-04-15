@@ -2743,12 +2743,17 @@ class LivePaperSession:
     def _futures_proactive_take_profit_thresholds(self) -> tuple[float, ...]:
         exit_rules = self.runtime.paper_service.settings.exit_rules
         raw_thresholds = getattr(exit_rules, "futures_proactive_take_profit_roe_thresholds_percent", ())
-        normalized = sorted({round(float(threshold), 6) for threshold in raw_thresholds if float(threshold) > 0.0})
+        normalized = sorted({round(float(threshold), 6) for threshold in raw_thresholds if float(threshold) >= 10.0})
         return tuple(normalized)
 
     def _futures_proactive_take_profit_fraction(self) -> float:
         exit_rules = self.runtime.paper_service.settings.exit_rules
         fraction = float(getattr(exit_rules, "futures_proactive_take_profit_fraction", 0.0) or 0.0)
+        major_fraction = float(
+            getattr(self.runtime.paper_service.settings.live_position_risk, "major_partial_exit_fraction", 0.0) or 0.0
+        )
+        if major_fraction > 0.0:
+            fraction = min(fraction, major_fraction)
         return max(0.0, min(fraction, 1.0))
 
     def _pending_proactive_take_profit_threshold(
@@ -3609,7 +3614,14 @@ class LivePaperSession:
         effective = max(min(fraction, 1.0), 0.0)
         if effective >= 0.999 or not self._is_fee_sensitive_partial_exit_reason(reason):
             return effective
-        if self._is_major_futures_symbol(str(position.get("symbol", ""))):
+        if (
+            self._is_major_futures_symbol(str(position.get("symbol", "")))
+            and reason in {
+                "LIVE_POSITION_PROFIT_PROTECTION",
+                "LIVE_POSITION_UNREALIZED_TAKE_PROFIT",
+                "LIVE_PORTFOLIO_PROFIT_LOCK",
+            }
+        ):
             effective = max(effective, self.runtime.paper_service.settings.live_position_risk.major_partial_exit_fraction)
         return min(effective, 1.0)
 
@@ -4620,8 +4632,12 @@ class LivePaperSession:
         for position in self.live_positions_snapshot:
             symbol = str(position.get("symbol", ""))
             _, management_mode = self._live_position_management_context(position=position, now=now)
-            in_core_universe = symbol in set(self.runtime.paper_service.settings.universe)
             is_major_symbol = self._is_major_futures_symbol(symbol)
+            in_core_universe = (
+                symbol in set(self.runtime.paper_service.settings.universe)
+                or is_major_symbol
+                or management_mode == "strategy"
+            )
             hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()
             self._reconcile_live_position_plan_orders(position=position, hold_side=hold_side)
             roe = self._position_roe_percent(position)
@@ -4720,7 +4736,7 @@ class LivePaperSession:
                 if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT", now=now):
                     continue
                 for threshold in self._futures_proactive_take_profit_thresholds():
-                    if threshold <= proactive_threshold:
+                    if threshold == proactive_threshold:
                         self.live_proactive_take_profit_keys.add(
                             self._live_proactive_take_profit_key(identity=identity, threshold=threshold)
                         )
@@ -4809,10 +4825,10 @@ class LivePaperSession:
     # ── Trailing Stop Implementation ──────────────────────────────
     # Activates when ROE >= threshold. Locks in 50% of peak profit.
     # Short positions use tighter activation (scalp style).
-    _TRAILING_ACTIVATION_ROE_LONG = 8.0    # long: activate at 8% ROE (20x: 0.4% price move)
-    _TRAILING_ACTIVATION_ROE_SHORT = 5.0   # short: activate at 5% ROE
-    _TRAILING_LOCK_RATIO = 0.50            # lock 50% of peak profit
-    _TRAILING_MIN_MOVE_BPS = 10            # minimum move to update (avoid spam)
+    _TRAILING_ACTIVATION_ROE_LONG = 8.0    # long: activate later to avoid clipping early trends
+    _TRAILING_ACTIVATION_ROE_SHORT = 5.0   # short: delay lock so one-shot runners can breathe
+    _TRAILING_LOCK_RATIO = 0.35            # lock 35% of peak profit (less aggressive)
+    _TRAILING_MIN_MOVE_BPS = 15            # minimum move to update (avoid micro-churn)
 
     def _update_trailing_stop(
         self,
@@ -4842,15 +4858,14 @@ class LivePaperSession:
             return
 
         # ROE to price: for long, SL = entry * (1 + locked_roe% / leverage)
-        # Buffer accounts for websocket markPrice staleness vs Bitget real-time validation
         if hold_side == "long":
             new_sl = entry_price * (1.0 + locked_roe / 100.0 / leverage)
-            # SL must be well below current price (0.3% buffer for stale mark)
-            if new_sl >= mark_price * 0.997:
+            # SL must be below current price
+            if new_sl >= mark_price:
                 return
         else:
             new_sl = entry_price * (1.0 - locked_roe / 100.0 / leverage)
-            if new_sl <= mark_price * 1.003:
+            if new_sl <= mark_price:
                 return
 
         # Check if SL improved enough to warrant update
@@ -4867,31 +4882,43 @@ class LivePaperSession:
         if move_bps < self._TRAILING_MIN_MOVE_BPS:
             return
 
+        # Format SL price using the symbol's actual price precision.
+        # Hardcoded ".2f" truncated low-priced coins (DOGE/PEPE/XRP) to "0.09"/"0.00",
+        # which Bitget rejected with code 45122 ("stop loss price please > mark price").
+        adapter = self.live_order_executor or DecisionLiveOrderAdapter(
+            self.rest_client,
+            self.runtime.paper_service.settings,
+        )
+        new_sl_str = adapter.format_trigger_price(value=new_sl, market="futures", symbol=symbol)
+        try:
+            new_sl_rounded = float(new_sl_str)
+        except (TypeError, ValueError):
+            new_sl_rounded = new_sl
+        # Re-validate after rounding: SL must stay on the correct side of mark.
+        # For LONG: SL strictly below mark. For SHORT: SL strictly above mark.
+        if hold_side == "long" and new_sl_rounded >= mark_price:
+            return
+        if hold_side == "short" and new_sl_rounded <= mark_price:
+            return
+
         # Update Bitget SL via place-pos-tpsl
         try:
-            adapter = self.live_order_executor or DecisionLiveOrderAdapter(
-                self.rest_client,
-                self.runtime.paper_service.settings,
-            )
-            formatted_sl = adapter.format_trigger_price(
-                value=new_sl, market="futures", symbol=symbol,
-            )
             tpsl_params: dict[str, Any] = {
                 "symbol": symbol,
                 "productType": "USDT-FUTURES",
                 "marginCoin": "USDT",
                 "holdSide": hold_side,
-                "stopLossTriggerPrice": formatted_sl,
+                "stopLossTriggerPrice": new_sl_str,
                 "stopLossTriggerType": "mark_price",
             }
             self.rest_client.place_futures_position_tpsl(order_params=tpsl_params)
-            self.live_trailing_stop_prices[identity] = new_sl
+            self.live_trailing_stop_prices[identity] = new_sl_rounded
             if self.verbose:
                 direction = "↑" if hold_side == "long" else "↓"
                 print(
                     f"[TRAILING_STOP] {symbol} {hold_side} SL {direction} "
-                    f"{formatted_sl} (was {current_sl:.6f}) "
-                    f"(peak ROE {peak_roe:.1f}% → lock {locked_roe:.1f}%)"
+                    f"{current_sl}→{new_sl_str} "
+                    f"(peak ROE {peak_roe:.1f}% → lock {locked_roe:.1f}%, mark={mark_price})"
                 )
         except Exception as exc:
             if self.verbose:
@@ -5298,9 +5325,16 @@ class LivePaperSession:
             not live_risk.portfolio_full_exit_only
             and
             not partial_action_taken
+            and not position.partial_take_profit_taken
             and not position.r_multiple_partial_take_profit_taken
             and position.stop_distance_bps > 0
-            and reward_bps >= position.stop_distance_bps * exit_rules.partial_take_profit_r
+            and reward_bps
+            > position.stop_distance_bps
+            * (
+                max(float(exit_rules.partial_take_profit_r), 1.0)
+                if position.market == "futures" and self._futures_proactive_take_profit_thresholds()
+                else float(exit_rules.partial_take_profit_r)
+            )
         ):
             position.r_multiple_partial_take_profit_taken = self._take_partial_paper_profit(
                 position=position,
@@ -5335,7 +5369,7 @@ class LivePaperSession:
                 position.proactive_take_profit_thresholds_hit = tuple(
                     threshold
                     for threshold in self._futures_proactive_take_profit_thresholds()
-                    if threshold in existing_thresholds or threshold <= proactive_threshold
+                    if threshold in existing_thresholds or threshold == proactive_threshold
                 )
                 partial_action_taken = True
                 if position.symbol not in self.paper_positions:
@@ -6191,6 +6225,35 @@ class LivePaperSession:
             exchange_id=self._execution_quality_exchange_id(),
             policy_bucket=self._policy_entry_bucket_name(policy_entry_context),
         )
+        # Ultra-aggressive live mode: keep execution-quality telemetry and sizing
+        # annotations, but optionally bypass the hard "cash/flat" block that comes
+        # only from execution-quality edge thinning.
+        if (
+            self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
+            and os.getenv("QUANT_DISABLE_EXECUTION_QUALITY_EDGE_GUARD", "1") == "1"
+            and "EXECUTION_QUALITY_EDGE_TOO_THIN" in set(managed_decision.rejection_reasons)
+            and managed_decision.final_mode == "cash"
+            and managed_decision.side == "flat"
+            and decision.final_mode in {"futures", "spot"}
+            and decision.side in {"long", "short"}
+            and decision.order_intent_notional_usd > 0.0
+        ):
+            restored_reasons = tuple(
+                sorted(
+                    reason
+                    for reason in managed_decision.rejection_reasons
+                    if reason != "EXECUTION_QUALITY_EDGE_TOO_THIN"
+                )
+            )
+            managed_decision = replace(
+                managed_decision,
+                final_mode=decision.final_mode,
+                side=decision.side,
+                order_intent_notional_usd=decision.order_intent_notional_usd,
+                stop_distance_bps=decision.stop_distance_bps,
+                net_expected_edge_bps=decision.net_expected_edge_bps,
+                rejection_reasons=restored_reasons,
+            )
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
         self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp

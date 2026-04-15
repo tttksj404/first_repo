@@ -302,7 +302,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(result.market, "futures")
         self.assertEqual(len(live_client.orders), 1)
 
-    def test_bitget_live_order_still_returns_success_when_protection_order_fails(self) -> None:
+    def test_bitget_live_order_fail_closes_when_protection_cannot_be_armed(self) -> None:
         class FlakyProtectionClient(FakeBitgetLiveClient):
             def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
                 raise RuntimeError('Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}')
@@ -317,10 +317,11 @@ class QuantBitgetMigrationTests(unittest.TestCase):
 
         self.assertIsNotNone(result)
         assert result is not None
-        self.assertTrue(result.accepted)
+        self.assertFalse(result.accepted)
         self.assertEqual(result.market, "futures")
-        self.assertEqual(len(live_client.orders), 1)
-        self.assertEqual(result.protection_error, "")
+        self.assertEqual(len(live_client.orders), 2)  # entry + emergency close
+        self.assertIn("NO_PROTECTION_ORDERS_RETURNED", result.protection_error)
+        self.assertIn("EMERGENCY_CLOSE_OK", result.protection_error)
 
     def test_bitget_live_order_retries_transient_protection_order_failure(self) -> None:
         class RetryProtectionClient(FakeBitgetLiveClient):

@@ -31,12 +31,11 @@ def select_futures_leverage(
     thresholds = settings.mode_thresholds
     exposure = settings.futures_exposure
     risk = settings.risk
-    target_leverage = max(1, min(int(math.ceil(risk.target_futures_leverage)), int(math.ceil(risk.max_futures_leverage))))
-    max_leverage = max(target_leverage, int(math.ceil(risk.max_futures_leverage)))
+    max_leverage = max(1, int(math.ceil(risk.max_futures_leverage)))
+    target_leverage = max(1, min(int(math.ceil(risk.target_futures_leverage)), max_leverage))
     # Per-coin optimal leverage from $100 MC validation (374d)
     cp = get_profile(symbol)
     if is_profiled(symbol):
-        max_leverage = max(max_leverage, cp.optimal_leverage)
         target_leverage = max(target_leverage, min(cp.optimal_leverage, max_leverage))
     elif settings.strategy_profile == "live-ultra-aggressive":
         if symbol == "ETHUSDT":
@@ -44,6 +43,10 @@ def select_futures_leverage(
         elif symbol == "BTCUSDT":
             target_leverage = min(target_leverage + 1, max_leverage)
     soft_leverage = max(1, target_leverage - 1)
+    if settings.strategy_profile == "live-ultra-aggressive":
+        # In one-shot live mode we avoid automatic 1x leverage downshifts on
+        # "soft" setups; sizing controls should handle downside, not leverage decay.
+        soft_leverage = target_leverage
     edge_to_cost_multiple = _edge_to_cost_multiple(
         net_expected_edge_bps=net_expected_edge_bps,
         estimated_round_trip_cost_bps=estimated_round_trip_cost_bps,
@@ -84,7 +87,7 @@ def select_futures_leverage(
         adx_leverage = 0
 
     if strong_setup:
-        return max(max_leverage, adx_leverage)
+        return max_leverage
     if adx_leverage > 0:
         return max(target_leverage, adx_leverage)
     if soft_setup:
