@@ -141,6 +141,11 @@ def build_runtime_universe_hydration(
     major_symbols: list[str] | tuple[str, ...] | set[str] = (),
 ) -> dict[str, object]:
     payload = dict(policy_state or {})
+    configured_symbol_set = {
+        str(symbol)
+        for symbol in list(configured_symbols or [])
+        if str(symbol)
+    }
     major_symbol_set = {str(symbol) for symbol in list(major_symbols or []) if str(symbol)}
     source, active_adjustments = _runtime_policy_source(payload)
     active_by_symbol = {
@@ -155,17 +160,7 @@ def build_runtime_universe_hydration(
     }
     bucket_name, bucket_summary_by_symbol, bucket_pruning_by_symbol, bucket_context = _preferred_bucket_context(payload)
     guardrails = _effective_policy_guardrails(payload)
-    symbols = sorted(
-        {
-            str(symbol)
-            for symbol in list(configured_symbols or [])
-            if str(symbol)
-        }
-        | set(lifecycle_by_symbol)
-        | set(active_by_symbol)
-        | set(bucket_summary_by_symbol)
-        | set(bucket_pruning_by_symbol)
-    )
+    symbols = sorted(configured_symbol_set)
     rows: list[dict[str, object]] = []
     rows_by_symbol: dict[str, dict[str, object]] = {}
     for symbol in symbols:
@@ -256,4 +251,3 @@ def build_runtime_universe_hydration(
         "rows": rows,
         "rows_by_symbol": rows_by_symbol,
     }
-
