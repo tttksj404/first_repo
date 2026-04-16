@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -69,6 +70,7 @@ def make_primitive() -> PrimitiveInputs:
 class FakeLiveOrderClient:
     def __init__(self) -> None:
         self.calls = 0
+        self.order_calls: list[tuple[str, dict[str, object]]] = []
         self.leverage_calls: list[tuple[str, int]] = []
         self.protection_calls: list[tuple[str, dict[str, object]]] = []
         self.max_openable_quantity: float | None = None
@@ -79,6 +81,7 @@ class FakeLiveOrderClient:
 
     def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
         self.calls += 1
+        self.order_calls.append((market, dict(order_params)))
         return {"status": "FILLED", "market": market, "orderId": self.calls}
 
     def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
@@ -256,6 +259,108 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertTrue(result.accepted)
         self.assertEqual(result.market, "futures")
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
+
+    def test_live_order_adapter_skips_long_stop_loss_protection_in_long_turnaround_mode(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+            ),
+        )
+        decision = DecisionIntent(
+            decision_id="d-long-turnaround",
+            decision_hash="hash-long-turnaround",
+            snapshot_id="s-long-turnaround",
+            config_version="2026-03-08.v1",
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=82.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=2000.0,
+            stop_distance_bps=45.0,
+        )
+        live_client = FakeLiveOrderClient()
+        live_client.exchange_id = "bitget"
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        _, order_params = adapter.build_order_params(decision=decision, reference_price=50000.0)
+        protection_payloads = adapter._build_bitget_protection_payloads(
+            decision=decision,
+            reference_price=50000.0,
+            quantity=0.04,
+        )
+
+        self.assertNotIn("presetStopLossPrice", order_params)
+        self.assertEqual(len(protection_payloads), 1)
+        protection_payload = protection_payloads[0][1]
+        self.assertIn("stopSurplusTriggerPrice", protection_payload)
+        self.assertNotIn("stopLossTriggerPrice", protection_payload)
+
+    def test_live_order_adapter_keeps_short_stop_loss_protection_in_long_turnaround_mode(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+            ),
+        )
+        decision = DecisionIntent(
+            decision_id="d-short-turnaround",
+            decision_hash="hash-short-turnaround",
+            snapshot_id="s-short-turnaround",
+            config_version="2026-03-08.v1",
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=82.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=2000.0,
+            stop_distance_bps=45.0,
+        )
+        live_client = FakeLiveOrderClient()
+        live_client.exchange_id = "bitget"
+        adapter = DecisionLiveOrderAdapter(live_client, settings)  # type: ignore[arg-type]
+
+        _, order_params = adapter.build_order_params(decision=decision, reference_price=50000.0)
+        protection_payloads = adapter._build_bitget_protection_payloads(
+            decision=decision,
+            reference_price=50000.0,
+            quantity=0.04,
+        )
+
+        self.assertIn("presetStopLossPrice", order_params)
+        self.assertEqual(len(protection_payloads), 1)
+        protection_payload = protection_payloads[0][1]
+        self.assertIn("stopSurplusTriggerPrice", protection_payload)
+        self.assertIn("stopLossTriggerPrice", protection_payload)
 
     def test_live_order_adapter_uses_active_profile_max_leverage_for_strong_futures_short(self) -> None:
         from quant_binance.models import DecisionIntent
