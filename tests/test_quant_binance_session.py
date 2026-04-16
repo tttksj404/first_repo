@@ -501,6 +501,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
     def test_cap_live_order_decision_blocks_bucket_observe_only_symbol(self) -> None:
         import tempfile
         session = self._build_session()
+        session.runtime.eligible_symbols = {"BTCUSDT"}
         session.capital_report = {
             "can_trade_futures_any": True,
             "futures_execution_balance_usd": 1000.0,
