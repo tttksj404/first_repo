@@ -105,6 +105,9 @@ COIN_PROFILES: dict[str, CoinProfile] = {
         # 1608t WR12.6% PF2.94, avg_win=$44 avg_loss=$2.16
         ema_fast=20, ema_slow=50, adx_floor=0, sl_atr_mult=2.0, rr=50.0,
         hold_bars=48, side_filter="both", optimal_leverage=15,
+        # Short thesis: faster confirmation, shorter hold, tighter TP/SL than longs.
+        # Designed for sharp downside bursts and quick mean-reversion risk after flushes.
+        short_ema_fast=10, short_ema_slow=21, short_adx_floor=28, short_sl_mult=3.0, short_rr=1.4, short_hold_bars=18,
         wr=0.126, pf=2.94,
     ),
     "LINKUSDT": CoinProfile(

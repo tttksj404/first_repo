@@ -83,6 +83,9 @@ class SupportsAccountSync(Protocol):
     ) -> dict[str, Any]:
         ...
 
+    def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, Any]:
+        ...
+
 
 def _resume_staged_candidate_policy(
     previous_policy_state: dict[str, Any] | None,
@@ -319,6 +322,7 @@ class LivePaperSession:
     futures_missing_on_exchange_counts: dict[str, int] = field(default_factory=dict)
     futures_reallocation_cooldown_until: datetime | None = None
     wallet_transfer_cooldowns: dict[str, datetime] = field(default_factory=dict)
+    coin_convert_spot_sell_cooldowns: dict[str, datetime] = field(default_factory=dict)
     self_healing: RuntimeSelfHealing = field(default_factory=RuntimeSelfHealing)
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
@@ -536,8 +540,60 @@ class LivePaperSession:
     # COIN-Futures → USDT auto-conversion
     # ------------------------------------------------------------------
     _COIN_CONVERT_THRESHOLD_USD = 15.0
+    _COIN_CONVERT_MIN_SPOT_NOTIONAL_USD = 1.0
+    _COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS = 6 * 60 * 60
     _COIN_CONVERT_ASSETS = ("ETH", "BTC")
     _COIN_SPOT_SIZE_DECIMALS = {"ETH": 4, "BTC": 6}
+
+    def _estimate_spot_asset_notional_usd(
+        self,
+        *,
+        asset: str,
+        quantity: float,
+        balance_row: dict[str, Any] | None = None,
+    ) -> float | None:
+        if quantity <= 0.0:
+            return 0.0
+        capital_report = dict(self.capital_report or {})
+        raw_routes = capital_report.get("capital_transfer_routes", [])
+        if isinstance(raw_routes, list):
+            for item in raw_routes:
+                if not isinstance(item, dict):
+                    continue
+                if str(item.get("source_market", "") or "").lower() != "spot":
+                    continue
+                if str(item.get("asset", "") or "").upper() != asset:
+                    continue
+                transferable_usd = float(item.get("transferable_usd") or 0.0)
+                if transferable_usd <= 0.0:
+                    continue
+                source_free_amount = float(item.get("source_free_amount") or 0.0)
+                if source_free_amount > 0.0 and quantity < source_free_amount:
+                    return transferable_usd * (quantity / source_free_amount)
+                return transferable_usd
+        if asset == "USDT":
+            return quantity
+        if self.rest_client is None:
+            return None
+        get_ticker = getattr(self.rest_client, "get_book_ticker", None)
+        if not callable(get_ticker):
+            return None
+        try:
+            ticker = get_ticker(market="spot", symbol=f"{asset}USDT")
+        except Exception:
+            return None
+        for key in ("bidPrice", "askPrice", "lastPrice", "price"):
+            try:
+                price = float(ticker.get(key) or 0.0)
+            except (TypeError, ValueError):
+                continue
+            if price > 0.0:
+                return quantity * price
+        # Spot balance rows can expose account-level USD values even when the
+        # per-asset ticker payload is empty. Treat that metadata as untrusted
+        # for non-USDT conversion decisions so dust cannot bypass the minimum
+        # notional guard and trigger repeated 45110 failures.
+        return None
 
     def _auto_convert_coin_futures_to_usdt(self) -> None:
         """Convert stranded COIN-Futures ETH/BTC into USDT-Futures capital.
@@ -589,6 +645,61 @@ class LivePaperSession:
                 decimals = self._COIN_SPOT_SIZE_DECIMALS.get(asset, 4)
                 sell_qty = math.floor(free * 10**decimals) / 10**decimals
                 if sell_qty <= 0.0:
+                    continue
+                estimated_notional_usd = self._estimate_spot_asset_notional_usd(
+                    asset=asset,
+                    quantity=sell_qty,
+                    balance_row=bal,
+                )
+                cooldown_until = self.coin_convert_spot_sell_cooldowns.get(asset)
+                if estimated_notional_usd is not None and estimated_notional_usd >= self._COIN_CONVERT_MIN_SPOT_NOTIONAL_USD:
+                    self.coin_convert_spot_sell_cooldowns.pop(asset, None)
+                    cooldown_until = None
+                elif cooldown_until is not None and cooldown_until <= datetime.now(tz=timezone.utc):
+                    self.coin_convert_spot_sell_cooldowns.pop(asset, None)
+                    cooldown_until = None
+                if cooldown_until is not None:
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": datetime.now(tz=timezone.utc),
+                            "coin": asset,
+                            "phase": "B",
+                            "step": "skip_cooldown",
+                            "status": "skipped",
+                            "sell_qty": sell_qty,
+                            "estimated_notional_usd": round(estimated_notional_usd, 8) if estimated_notional_usd is not None else None,
+                            "cooldown_until": cooldown_until,
+                        })
+                    continue
+                if estimated_notional_usd is None:
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": datetime.now(tz=timezone.utc),
+                            "coin": asset,
+                            "phase": "B",
+                            "step": "skip_unpriced",
+                            "status": "skipped",
+                            "sell_qty": sell_qty,
+                        })
+                    continue
+                if (
+                    estimated_notional_usd < self._COIN_CONVERT_MIN_SPOT_NOTIONAL_USD
+                ):
+                    cooldown_until = datetime.now(tz=timezone.utc) + timedelta(
+                        seconds=self._COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS
+                    )
+                    self.coin_convert_spot_sell_cooldowns[asset] = cooldown_until
+                    if self.log_store is not None:
+                        self.log_store.append("coin_convert", {
+                            "timestamp": datetime.now(tz=timezone.utc),
+                            "coin": asset,
+                            "phase": "B",
+                            "step": "skip_dust",
+                            "status": "skipped",
+                            "sell_qty": sell_qty,
+                            "estimated_notional_usd": round(estimated_notional_usd, 8),
+                            "cooldown_until": cooldown_until,
+                        })
                     continue
                 spot_only_rows.append((asset, sell_qty))
         except Exception:
@@ -763,15 +874,29 @@ class LivePaperSession:
                         market="spot", order_params=order_params,
                     )
                 except Exception as exc:
+                    error_message = str(exc)
+                    code = parse_error_code(error_message)
+                    if code in {"45110", "45111"} or "less than the minimum amount" in error_message.lower():
+                        self.coin_convert_spot_sell_cooldowns[asset] = now + timedelta(
+                            seconds=self._COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS
+                        )
                     print(f"[COIN_CONVERT] spot sell failed for {asset}: {exc}", flush=True)
                     if self.log_store is not None:
                         self.log_store.append("coin_convert", {
                             "timestamp": now, "coin": asset, "phase": "B",
                             "step": "sell", "status": "failed", "error": repr(exc),
+                            "error_code": code,
+                            "cooldown_until": self.coin_convert_spot_sell_cooldowns.get(asset),
                         })
                     continue
                 sell_ok = str(resp_sell.get("status", "")).upper() == "SUCCESS"
                 if not sell_ok:
+                    response_message = json.dumps(resp_sell, ensure_ascii=False, default=str)
+                    code = parse_error_code(response_message)
+                    if code in {"45110", "45111"} or "less than the minimum amount" in response_message.lower():
+                        self.coin_convert_spot_sell_cooldowns[asset] = now + timedelta(
+                            seconds=self._COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS
+                        )
                     print(f"[COIN_CONVERT] spot sell non-success for {asset}: {resp_sell}", flush=True)
                     continue
                 time.sleep(1.0)
@@ -3568,7 +3693,7 @@ class LivePaperSession:
             return False
         previous_balance = self._account_execution_balance_usd(previous_account_snapshot)
         current_balance = self._account_execution_balance_usd(self.account_snapshot)
-        if previous_balance is None or current_balance is None or current_balance <= previous_balance:
+        if previous_balance is None or current_balance is None:
             return False
         estimated_margin_release = self._estimated_position_margin_release_usd(
             previous_live_position=previous_live_position,
@@ -3578,7 +3703,21 @@ class LivePaperSession:
             return False
         balance_released = current_balance - previous_balance
         required_release = max(estimated_margin_release * 0.5, 1.0)
-        return balance_released >= required_release
+        if balance_released >= required_release:
+            return True
+        unrealized_pnl = float(previous_live_position.get("unrealizedPL") or 0.0)
+        material_balance_move = abs(balance_released) >= max(abs(unrealized_pnl) * 0.5, 1.0)
+        if not material_balance_move:
+            return False
+        orders_payload = self.open_orders_snapshot.get("orders", [])
+        if isinstance(orders_payload, dict):
+            candidate_orders = orders_payload.get("entrustedList") or orders_payload.get("list") or []
+        else:
+            candidate_orders = orders_payload if isinstance(orders_payload, list) else []
+        for item in candidate_orders:
+            if str(getattr(item, "get", lambda *_: "")("symbol", "") or "") == symbol:
+                return False
+        return True
 
     def _reconcile_manual_live_closes(
         self,
@@ -3807,6 +3946,8 @@ class LivePaperSession:
         if paper_position is None:
             return None, "pending_external_adoption"
         if paper_position.is_adopted():
+            if self._is_strategy_managed_adopted_position(position=paper_position):
+                return paper_position, "strategy"
             if paper_position.adoption_grace_active(now=now):
                 return paper_position, "adopted_grace"
             return paper_position, "adopted"
@@ -3937,8 +4078,9 @@ class LivePaperSession:
         best_price = max(entry_price, current_price)
         worst_price = min(entry_price, current_price)
         # startup_recovery=True: state was lost across restart; treat as strategy-owned (not external manual).
-        # startup_recovery=False: new unknown position appeared at runtime; treat as external manual adoption.
-        if startup_recovery:
+        # startup_recovery=False: new unknown position appeared at runtime; treat as external manual adoption
+        # unless we have recent in-session live-order evidence that this symbol/side was strategy-owned.
+        if startup_recovery or self._recent_strategy_live_order_matches_position(position=position):
             origin = "strategy_recovered"
             adoption_source = ""
             adopted_at_val: datetime | None = None
@@ -3977,6 +4119,42 @@ class LivePaperSession:
             adoption_source=adoption_source,
             adopted_at=adopted_at_val,
             adoption_grace_until=adoption_grace_until_val,
+        )
+
+    def _recent_strategy_live_order_matches_position(self, *, position: dict[str, Any]) -> bool:
+        symbol = str(position.get("symbol", "") or "")
+        if not symbol:
+            return False
+        hold_side = self._normalize_live_position_side(position)
+        if hold_side not in {"long", "short"}:
+            return False
+        position_time = self._parse_live_position_timestamp(position)
+        for row in reversed(self.live_orders):
+            if not bool(row.get("accepted", False)):
+                continue
+            if str(row.get("market", "") or "") != "futures":
+                continue
+            if str(row.get("symbol", "") or "") != symbol:
+                continue
+            order_side = str(row.get("side", "") or "").lower()
+            strategy_side = "long" if order_side == "buy" else "short" if order_side == "sell" else ""
+            if strategy_side != hold_side:
+                continue
+            row_time = row.get("timestamp")
+            if isinstance(row_time, datetime) and position_time is not None:
+                if abs((row_time - position_time).total_seconds()) > 6 * 3600:
+                    continue
+            return True
+        return False
+
+    def _is_strategy_managed_adopted_position(self, *, position: PaperPosition) -> bool:
+        return (
+            position.market == "futures"
+            and (
+                position.symbol in set(self.runtime.paper_service.settings.universe)
+                or position.symbol in set(self.runtime.paper_service.settings.futures_exposure.major_symbols)
+            )
+            and position.side in {"long", "short"}
         )
 
     def _reserve_capacity_for_reconciled_position(self, position: PaperPosition) -> None:
@@ -5540,10 +5718,7 @@ class LivePaperSession:
         position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
         if position.exchange_synced and not (
             position.is_adopted()
-            and position.symbol == "BTCUSDT"
-            and decision.final_mode == position.market
-            and decision.side in {"long", "short"}
-            and decision.side != position.side
+            and self._should_manage_adopted_position_with_strategy(position=position, decision=decision)
         ):
             position.exit_confirmation_count = 0
             position.last_exit_signal_reason = ""
@@ -5717,8 +5892,7 @@ class LivePaperSession:
         decision: DecisionIntent,
     ) -> bool:
         return (
-            position.symbol == "BTCUSDT"
-            and position.market == "futures"
+            self._is_strategy_managed_adopted_position(position=position)
             and decision.final_mode == position.market
             and decision.side in {"long", "short"}
         )

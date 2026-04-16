@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from dataclasses import replace
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from quant_binance.policy.portfolio import build_portfolio_intent, decision_from
 from quant_binance.risk.sizing import position_notional_and_stop_bps, quantity_from_notional
 from quant_binance.snapshots import validate_snapshot
 from quant_binance.settings import Settings
-from quant_binance.strategy.regime import build_strategy_prediction, evaluate_snapshot
+from quant_binance.strategy.regime import _futures_entry_plan, build_strategy_prediction, evaluate_snapshot
 from quant_binance.strategy.scorer import apply_score_and_costs, compute_predictability_score
 
 
@@ -237,6 +238,76 @@ class QuantBinanceCoreTests(unittest.TestCase):
         )
         self.assertEqual(decision.final_mode, "cash")
         self.assertEqual(decision.side, "flat")
+
+    def test_pepe_short_entry_is_more_strict_for_marginal_setup(self) -> None:
+        settings = replace(
+            self.settings,
+            ensemble_signal_required=False,
+            strategy_profile="live-ultra-aggressive",
+            mode_thresholds=replace(
+                self.settings.mode_thresholds,
+                futures_score_min=48,
+                futures_liquidity_min=0.16,
+                futures_trend_strength_min=0.05,
+            ),
+            cost_gate=replace(
+                self.settings.cost_gate,
+                edge_to_cost_multiple_min=0.78,
+            ),
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                min_entry_net_edge_bps=0.75,
+                reduced_entry_net_edge_bps=0.75,
+                macro_allow_caution=True,
+            ),
+        )
+        features = FeatureVector(
+            ret_rank_1h=0.7,
+            ret_rank_4h=0.68,
+            breakout_norm=0.7,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.62,
+            vol_z_1h_norm=0.6,
+            taker_imbalance_norm=0.62,
+            spread_bps_norm=0.22,
+            probe_slippage_bps_norm=0.22,
+            depth_10bps_norm=0.8,
+            book_stability_norm=0.82,
+            realized_vol_1h_norm=0.35,
+            realized_vol_4h_norm=0.34,
+            vol_shock_norm=0.32,
+            funding_abs_percentile=0.1,
+            oi_surge_percentile=0.2,
+            basis_stretch_percentile=0.15,
+            regime_alignment=1.0,
+            trend_direction=-1,
+            trend_strength=0.22,
+            volume_confirmation=0.5,
+            liquidity_score=0.18,
+            volatility_penalty=0.7,
+            overheat_penalty=0.35,
+            macro_regime="supportive",
+            macro_risk_penalty=0.1,
+            macro_liquidity_support_score=0.8,
+            macro_event_risk_score=0.1,
+            macro_trade_restraint="none",
+            macro_size_multiplier=1.0,
+            macro_leverage_cap=0,
+            macro_symbol_bias="neutral",
+            sentiment_regime="neutral",
+            sentiment_support_score=0.55,
+            gross_expected_edge_bps=9.0,
+            estimated_round_trip_cost_bps=5.0,
+        )
+        futures_features = apply_score_and_costs(features, settings, "futures")
+        futures_ok, futures_reasons, *_ = _futures_entry_plan(
+            futures_features,
+            settings,
+            "PEPEUSDT",
+        )
+        self.assertFalse(futures_ok)
+        self.assertIn("SCORE_TOO_LOW", futures_reasons)
+
 
     def test_low_liquidity_alt_becomes_observe_only(self) -> None:
         features = FeatureVector(

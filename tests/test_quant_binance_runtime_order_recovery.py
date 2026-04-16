@@ -200,6 +200,50 @@ class QuantBinanceRuntimeOrderRecoveryTests(unittest.TestCase):
         self.assertEqual(client.protection_orders[0]["stopLossTriggerPrice"], expected_stop)
         self.assertEqual(client.protection_orders[0]["stopSurplusTriggerPrice"], expected_take)
 
+    def test_live_order_adapter_uses_pepe_short_specific_rr_for_protection_prices(self) -> None:
+        decision = DecisionIntent(
+            decision_id="pepe-short-precision-test",
+            decision_hash="pepe-short-precision-hash",
+            snapshot_id="pepe-short-precision-snapshot",
+            config_version="2026-03-14.v1",
+            timestamp=datetime(2026, 3, 14, 0, 5, tzinfo=timezone.utc),
+            symbol="PEPEUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.8,
+            volume_confirmation=0.65,
+            liquidity_score=0.55,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=64.0,
+            gross_expected_edge_bps=18.0,
+            net_expected_edge_bps=9.0,
+            estimated_round_trip_cost_bps=7.0,
+            order_intent_notional_usd=120.0,
+            stop_distance_bps=100.0,
+        )
+        client = FakeBitgetPrecisionClient()
+        adapter = DecisionLiveOrderAdapter(client, self.settings)  # type: ignore[arg-type]
+        adapter._exchange_info_cache["futures"] = {
+            "PEPEUSDT": {
+                "pricePlace": "10",
+                "minTradeNum": "1000",
+                "sizeMultiplier": "1000",
+                "volumePlace": "0",
+            }
+        }
+
+        take_profit, stop_loss = adapter._protection_prices(
+            decision=decision,
+            reference_price=0.00000385,
+        )
+
+        # short_rr=1.4 should override the generic RR for short protection pricing.
+        self.assertAlmostEqual(stop_loss, 0.0000038885, places=12)
+        self.assertAlmostEqual(take_profit, 0.0000037961, places=12)
+
     def test_session_refreshes_account_state_after_bitget_balance_error(self) -> None:
         session = self._build_session(live_order_executor=FailingBitgetLiveOrderExecutor())
         session._refresh_account_state_after_live_order_activity = Mock()  # type: ignore[method-assign]
