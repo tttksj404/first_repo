@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
@@ -187,6 +188,72 @@ class ManualAdoptionRegressionTests(unittest.TestCase):
         self.assertTrue(session.paper_positions["ETHUSDT"].exchange_synced)
         self.assertEqual(session.paper_positions["ETHUSDT"].origin, "adopted")
         self.assertEqual(session.paper_positions["ETHUSDT"].adoption_source, "runtime_restore_legacy")
+
+    def test_restore_prefers_strategy_recovered_when_recent_live_order_matches_position(self) -> None:
+        session = self._build_session(symbol="PEPEUSDT", last_trade_price=0.0000038)
+        session.live_orders.append(
+            {
+                "timestamp": datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc),
+                "symbol": "PEPEUSDT",
+                "market": "futures",
+                "side": "buy",
+                "accepted": True,
+            }
+        )
+        restored = session._build_reconciled_paper_position(
+            position={
+                "symbol": "PEPEUSDT",
+                "holdSide": "long",
+                "total": "1000",
+                "available": "1000",
+                "openPriceAvg": "0.0000038",
+                "markPrice": "0.00000381",
+                "leverage": "30",
+                "cTime": "1772971200000",
+            },
+            startup_recovery=False,
+        )
+        assert restored is not None
+        self.assertEqual(restored.origin, "strategy_recovered")
+        self.assertEqual(restored.adoption_source, "")
+
+    def test_pepe_adopted_position_is_strategy_managed_for_live_context(self) -> None:
+        session = self._build_session(symbol="PEPEUSDT", last_trade_price=0.0000038)
+        session.runtime.paper_service.settings = replace(  # type: ignore[assignment]
+            session.runtime.paper_service.settings,
+            universe=("PEPEUSDT",),
+            futures_exposure=replace(
+                session.runtime.paper_service.settings.futures_exposure,
+                major_symbols=("PEPEUSDT",),
+            ),
+        )
+        restored = session._build_reconciled_paper_position(
+            position={
+                "symbol": "PEPEUSDT",
+                "holdSide": "long",
+                "total": "1000",
+                "available": "1000",
+                "openPriceAvg": "0.0000038",
+                "markPrice": "0.00000381",
+                "leverage": "30",
+                "cTime": "1772971200000",
+            },
+            startup_recovery=False,
+        )
+        assert restored is not None
+        session.paper_positions["PEPEUSDT"] = restored
+        position_dict = {
+            "symbol": "PEPEUSDT",
+            "holdSide": "long",
+            "total": "1000",
+            "available": "1000",
+        }
+        paper_position, mode = session._live_position_management_context(
+            position=position_dict,
+            now=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+        )
+        self.assertIsNotNone(paper_position)
+        self.assertEqual(mode, "strategy")
 
 
 if __name__ == "__main__":
