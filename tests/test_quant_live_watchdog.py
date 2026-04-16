@@ -39,6 +39,7 @@ class QuantLiveWatchdogTests(unittest.TestCase):
             start_new_session=True,
         )
 
+    @unittest.skipIf(os.name == "nt", "watchdog shell integration requires POSIX /bin/sh")
     def test_watchdog_replaces_legacy_pidfile_owner_before_restarting_supervisor(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             output_dir = Path(tempdir) / "runtime"
@@ -91,6 +92,7 @@ class QuantLiveWatchdogTests(unittest.TestCase):
                     os.killpg(legacy_proc.pid, signal.SIGKILL)
                     legacy_proc.wait(timeout=5)
 
+    @unittest.skipIf(os.name == "nt", "watchdog shell integration requires POSIX /bin/sh")
     def test_watchdog_skips_restart_when_summary_is_fresh(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             output_dir = Path(tempdir) / "runtime"

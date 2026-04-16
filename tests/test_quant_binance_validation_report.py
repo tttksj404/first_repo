@@ -783,7 +783,7 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             self.assertEqual(artifact["current_replay_summary"]["execution_metrics"]["total_realized_pnl_usd"], 3.0)
             self.assertEqual(
                 artifact["current_replay_summary"]["replay_provenance"]["classification"],
-                "direct_bucket_aware_replay",
+                "bucket_replay_evidence",
             )
             self.assertEqual(artifact["validation_path"]["current_walk_forward_window_count"], 1)
             self.assertEqual(artifact["policy_evidence_buckets"]["active_policy"]["source"], "observed_runtime_policy_bucket_artifacts")
@@ -954,7 +954,7 @@ class QuantBinanceValidationReportTests(unittest.TestCase):
             )
             self.assertEqual(
                 comparison_summary["candidate_replay_provenance"]["classification"],
-                "direct_bucket_aware_replay",
+                "bucket_replay_evidence",
             )
             self.assertEqual(
                 artifact["validation_path"]["candidate_replay_source"],

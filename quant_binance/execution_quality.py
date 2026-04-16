@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -555,16 +556,24 @@ class ExecutionQualityState:
         expected_profit_floor_bps = round(min(expected_profit_floor_bps, 60.0), 6)
 
         trade_restraint = "none"
-        # Bootstrap-friendly thresholds: require larger sample (>=20) and much
-        # worse metrics before halting.  This prevents the chicken-and-egg
-        # deadlock where the system halts before it can accumulate 50 trades.
-        if (
-            (rounded_sample_size >= 20 and reject_timeout_rate >= 0.85)
-            or (rounded_sample_size >= 20 and effective.avg_fill_ratio < 0.15)
-            or effective.avg_slippage_bps > 50.0
-            or (rounded_sample_size >= 20 and effective.avg_realized_edge_bps < -10.0)
-            or (rounded_sample_size >= 20 and effective.protection_degraded_rate >= 0.90)
-        ):
+        bootstrap_relax_enabled = os.getenv("QUANT_ENABLE_EXECUTION_QUALITY_BOOTSTRAP_RELAX", "0") == "1"
+        if bootstrap_relax_enabled:
+            should_halt = (
+                (rounded_sample_size >= 20 and reject_timeout_rate >= 0.85)
+                or (rounded_sample_size >= 20 and effective.avg_fill_ratio < 0.15)
+                or effective.avg_slippage_bps > 50.0
+                or (rounded_sample_size >= 20 and effective.avg_realized_edge_bps < -10.0)
+                or (rounded_sample_size >= 20 and effective.protection_degraded_rate >= 0.90)
+            )
+        else:
+            should_halt = (
+                (rounded_sample_size >= 5 and reject_timeout_rate >= 0.8)
+                or (rounded_sample_size >= 5 and effective.avg_fill_ratio < 0.4)
+                or effective.avg_slippage_bps > 30.0
+                or (rounded_sample_size >= 5 and effective.avg_realized_edge_bps < -4.0)
+                or (rounded_sample_size >= 5 and effective.protection_degraded_rate >= 0.5)
+            )
+        if should_halt:
             trade_restraint = "execution_quality_halt"
             size_multiplier = 0.0
 

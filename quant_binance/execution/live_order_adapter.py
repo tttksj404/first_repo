@@ -675,6 +675,29 @@ class DecisionLiveOrderAdapter:
                 )
             except Exception as exc:
                 protection_error = repr(exc)
+                accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
+                    decision=decision,
+                    market=market,
+                    accepted=accepted,
+                    quantity=quantity,
+                    fill_ratio=fill_ratio,
+                    fill_status=fill_status,
+                    realized_edge_bps=realized_edge_bps,
+                    protection_error=protection_error,
+                )
+            else:
+                if market == "futures" and self._exchange_id() == "bitget" and not protection_orders:
+                    protection_error = "NO_PROTECTION_ORDERS_RETURNED"
+                    accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
+                        decision=decision,
+                        market=market,
+                        accepted=accepted,
+                        quantity=quantity,
+                        fill_ratio=fill_ratio,
+                        fill_status=fill_status,
+                        realized_edge_bps=realized_edge_bps,
+                        protection_error=protection_error,
+                    )
         return LiveOrderResult(
             symbol=decision.symbol,
             market=market,
