@@ -362,6 +362,50 @@ class QuantBinanceLiveOrdersTests(unittest.TestCase):
         self.assertIn("stopSurplusTriggerPrice", protection_payload)
         self.assertIn("stopLossTriggerPrice", protection_payload)
 
+    def test_live_order_adapter_skips_non_positive_short_take_profit_trigger_prices(self) -> None:
+        from quant_binance.models import DecisionIntent
+
+        decision = DecisionIntent(
+            decision_id="d-short-invalid-tp",
+            decision_hash="hash-short-invalid-tp",
+            snapshot_id="s-short-invalid-tp",
+            config_version="2026-03-08.v1",
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="short",
+            trend_direction=-1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=82.0,
+            gross_expected_edge_bps=24.0,
+            net_expected_edge_bps=14.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=2000.0,
+            stop_distance_bps=20000.0,
+        )
+        live_client = FakeLiveOrderClient()
+        live_client.exchange_id = "bitget"
+        adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        _, order_params = adapter.build_order_params(decision=decision, reference_price=50000.0)
+        protection_payloads = adapter._build_bitget_protection_payloads(
+            decision=decision,
+            reference_price=50000.0,
+            quantity=0.04,
+        )
+
+        self.assertNotIn("presetStopSurplusPrice", order_params)
+        self.assertIn("presetStopLossPrice", order_params)
+        self.assertEqual(len(protection_payloads), 1)
+        protection_payload = protection_payloads[0][1]
+        self.assertNotIn("stopSurplusTriggerPrice", protection_payload)
+        self.assertIn("stopLossTriggerPrice", protection_payload)
+
     def test_live_order_adapter_uses_active_profile_max_leverage_for_strong_futures_short(self) -> None:
         from quant_binance.models import DecisionIntent
 

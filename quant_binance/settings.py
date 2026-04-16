@@ -267,6 +267,11 @@ class LivePositionRiskConfig:
     turnaround_grace_enabled: bool = True
     soft_stop_roe_percent: float = -10.0
     turnaround_abort_roe_percent: float = -14.0
+    turnaround_abort_volatility_adaptive: bool = False
+    turnaround_abort_volatility_floor_bps: float = 25.0
+    turnaround_abort_volatility_scale: float = 0.02
+    turnaround_abort_volatility_lookback_bars: int = 12
+    turnaround_abort_min_roe_percent: float = -35.0
     turnaround_recovery_roe_points: float = 2.0
     turnaround_predictability_min: float = 55.0
     turnaround_net_edge_min_bps: float = 2.0
