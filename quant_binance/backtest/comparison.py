@@ -507,9 +507,10 @@ def _evaluate_strategy(
             else:
                 long_trade_count += 1
             entry_turnover += position.entry_price * position.quantity_opened
-        new_closed_trades = session.closed_trades[closed_trade_index:]
+        closed_trades = list(session.closed_trades)
+        new_closed_trades = closed_trades[closed_trade_index:]
         exit_turnover += sum(float(trade.get("exit_price", 0.0)) * float(trade.get("quantity", 0.0)) for trade in new_closed_trades)
-        closed_trade_index = len(session.closed_trades)
+        closed_trade_index = len(closed_trades)
         equity_curve.append(_equity_curve_point(session=session, starting_equity_usd=equity_usd))
     realized_pnl = round(sum(float(trade.get("realized_pnl_usd_estimate", 0.0)) for trade in session.closed_trades), 6)
     unrealized_pnl = round(sum(position.unrealized_pnl_usd_estimate() for position in session.paper_positions.values()), 6)

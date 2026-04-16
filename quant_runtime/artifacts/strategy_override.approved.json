@@ -1,5 +1,5 @@
 {
-  "_lock": "ENSEMBLE_TOP3 gambling-turbo revision (2026-04-15 r7): maximize absolute PnL per trade under single-position mode. Keep 20x, SL=-10, no pyramid, top_n=1. r7 increases position caps/risk for bigger absolute PnL and allows ultra-aggressive runtime to bypass execution-quality edge-thin hard block.",
+  "_lock": "PEPE single-focus profit-probability revision (2026-04-16 r8): tighten entry-quality/cost gates, keep 20x leverage ceiling, and expand notional caps for higher absolute PnL only on higher-quality setups.",
   "ensemble_signal_required": false,
   "data_collection_min_trades": 500,
   "data_collection_mode": true,
@@ -9,38 +9,34 @@
   },
   "force_auto_mode": "normal",
   "futures_exposure": {
-    "macro_allow_caution": true,
-    "macro_edge_to_cost_multiple_min": 0.05,
-    "macro_liquidity_relaxation": 0.36,
-    "macro_min_entry_net_edge_bps": 0.2,
-    "macro_overheat_relaxation": 0.36,
-    "macro_score_relaxation": 20.0,
+    "macro_allow_caution": false,
+    "macro_edge_to_cost_multiple_min": 1.05,
+    "macro_liquidity_relaxation": 0.2,
+    "macro_min_entry_net_edge_bps": 4.0,
+    "macro_overheat_relaxation": 0.2,
+    "macro_score_relaxation": 8.0,
     "macro_support_min": 0.3,
-    "macro_volatility_relaxation": 0.34,
+    "macro_volatility_relaxation": 0.2,
     "major_medium_min_entry_notional_usd": 5.0,
     "major_min_meaningful_notional_usd": 5.0,
     "major_reallocation_edge_advantage_relaxation_bps": 1.0,
     "major_reallocation_incremental_pnl_relaxation_usd": 0.5,
     "major_reallocation_score_advantage_relaxation": 2.0,
-    "major_size_boost_multiplier": 1.4,
+    "major_size_boost_multiplier": 1.8,
     "major_strong_min_entry_notional_usd": 5.0,
     "major_symbols": [
-      "PEPEUSDT",
-      "DOGEUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
-    "min_entry_net_edge_bps": 0.0,
-    "reduced_entry_net_edge_bps": 0.0,
-    "priority_allow_caution": true,
-    "priority_edge_to_cost_multiple_min": 0.05,
-    "priority_min_entry_net_edge_bps": 0.0,
-    "priority_score_relaxation": 28.0,
+    "min_entry_net_edge_bps": 4.5,
+    "reduced_entry_net_edge_bps": 3.0,
+    "priority_allow_caution": false,
+    "priority_edge_to_cost_multiple_min": 1.0,
+    "priority_min_entry_net_edge_bps": 3.5,
+    "priority_score_relaxation": 8.0,
     "priority_symbols": [
-      "PEPEUSDT",
-      "DOGEUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
-    "priority_volatility_relaxation": 0.36,
+    "priority_volatility_relaxation": 0.18,
     "pyramid_enabled": false,
     "pyramid_major_only": true,
     "pyramid_max_adds_per_symbol": 0,
@@ -60,15 +56,17 @@
     "confirmation_cycles_for_exit": 4,
     "futures_max_holding_minutes": 4320,
     "spot_max_holding_minutes": 4320,
-    "futures_profit_protection_arm_roe_percent": 32.0,
-    "futures_profit_protection_retrace_roe_percent": 10.0,
-    "futures_proactive_take_profit_roe_thresholds_percent": [14.0, 30.0],
+    "futures_profit_protection_arm_roe_percent": 22.0,
+    "futures_profit_protection_retrace_roe_percent": 6.0,
+    "futures_proactive_take_profit_roe_thresholds_percent": [10.0, 24.0],
     "futures_proactive_take_profit_fraction": 0.40,
     "post_tp_stop_mode": "breakeven",
     "partial_take_profit_r": 2.0
   },
   "live_position_risk": {
     "disable_standard_stop_loss_exits": false,
+    "long_only_turnaround_mode": true,
+    "long_disable_standard_stop_loss": true,
     "major_drawdown_abort_roe_percent": -20.0,
     "major_drawdown_grace_enabled": true,
     "major_drawdown_grace_minutes": 180,
@@ -82,8 +80,8 @@
     "major_low_signal_min_roe_percent": 1.0,
     "major_low_signal_min_unrealized_usd": 1.5,
     "major_partial_exit_fraction": 0.65,
-    "major_profit_protection_arm_roe_percent": 10.0,
-    "major_profit_protection_retrace_roe_percent": 5.0,
+    "major_profit_protection_arm_roe_percent": 8.0,
+    "major_profit_protection_retrace_roe_percent": 3.0,
     "major_reentry_cooldown_minutes": 15,
     "major_reversal_confirmation_cycles": 2,
     "major_reversal_min_holding_minutes": 10,
@@ -99,10 +97,12 @@
     "position_unrealized_profit_arm_usd": 2.0,
     "position_unrealized_profit_retrace_usd": 0.5,
     "position_unrealized_take_profit_fraction": 0.35,
-    "profit_flip_take_profit_fraction": 0.35,
+    "profit_flip_fast_take_profit_roe_percent": 1.0,
+    "profit_flip_take_profit_fraction": 0.5,
     "stop_loss_roe_percent": -10.0,
     "soft_stop_roe_percent": -8.0,
-    "take_profit_roe_percent": 30.0
+    "turnaround_abort_roe_percent": -14.0,
+    "take_profit_roe_percent": 24.0
   },
   "loss_combo_downgrade": {
     "cooldown_loss_usd": 10.0,
@@ -118,30 +118,30 @@
     "spot_block_penalty": 1.05
   },
   "mode_thresholds": {
-    "futures_score_min": 40,
+    "futures_score_min": 58,
     "futures_trend_strength_min": 0.05,
-    "futures_liquidity_min": 0.10,
-    "futures_volatility_penalty_max": 1.8,
-    "futures_overheat_penalty_max": 1.8,
+    "futures_liquidity_min": 0.2,
+    "futures_volatility_penalty_max": 1.1,
+    "futures_overheat_penalty_max": 1.1,
     "spot_score_min": 999,
     "spot_liquidity_min": 999
   },
   "cost_gate": {
-    "edge_to_cost_multiple_min": 0.0
+    "edge_to_cost_multiple_min": 1.15
   },
   "portfolio_focus": {
     "enabled": true,
     "futures_top_n": 1,
-    "min_incremental_pnl_usd": 0.0,
-    "min_net_edge_advantage_bps": 0.0,
-    "min_score_advantage_to_replace": 0.0
+    "min_incremental_pnl_usd": 0.5,
+    "min_net_edge_advantage_bps": 1.5,
+    "min_score_advantage_to_replace": 2.0
   },
   "operational_limits": {
     "max_concurrent_futures_symbols": 1
   },
   "risk": {
-    "max_symbol_notional_fraction": 0.65,
-    "max_total_notional_fraction": 0.65,
+    "max_symbol_notional_fraction": 0.9,
+    "max_total_notional_fraction": 0.9,
     "min_expected_profit_usd_per_trade": 0.001,
     "min_meaningful_futures_notional_usd": 5.0,
     "min_meaningful_spot_notional_usd": 1.0,
@@ -156,9 +156,7 @@
     "observe_only_liquidity_max": 0.0
   },
   "universe": [
-    "PEPEUSDT",
-    "DOGEUSDT",
-    "SOLUSDT"
+    "PEPEUSDT"
   ],
   "funding_rate_strategy": {
     "enabled": true,
@@ -167,11 +165,9 @@
     "atr_tp_multiple": 2.5,
     "max_hold_hours": 8,
     "symbols": [
-      "PEPEUSDT",
-      "DOGEUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
-    "notional_usd_per_trade": 50.0
+    "notional_usd_per_trade": 80.0
   },
   "b3_msb_strategy": {
     "enabled": true,
@@ -180,9 +176,7 @@
     "interval": "1h",
     "lookback_days": 180,
     "symbols": [
-      "PEPEUSDT",
-      "DOGEUSDT",
-      "SOLUSDT"
+      "PEPEUSDT"
     ],
     "swing_window": 13,
     "atr_tp_multiple": 4.2,

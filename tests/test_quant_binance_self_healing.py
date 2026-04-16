@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -385,10 +387,14 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
 
     def test_run_live_paper_daemon_injects_self_healing_status_when_shell_omits_it(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
+            config_path = Path(output_dir) / "config.json"
+            config_payload = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+            config_payload["universe"] = ["BTCUSDT"]
+            config_path.write_text(json.dumps(config_payload), encoding="utf-8")
             with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeRestClient()):
                 with patch("quant_binance.daemon.LivePaperShell", FakeShellWithoutSelfHealing):
                     result = run_live_paper_daemon(
-                        config_path=CONFIG_PATH,
+                        config_path=config_path,
                         output_base_dir=output_dir,
                         exchange="binance",
                         max_retries=1,
@@ -397,6 +403,7 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
         self.assertIn("self_healing", result["summary"])
         self.assertEqual(result["summary"]["self_healing"]["status"], "healthy")
 
+    @unittest.skipIf(os.name == "nt", "shell script integration requires sh")
     def test_quant_report_and_status_scripts_print_self_healing_section(self) -> None:
         summary = build_runtime_summary(
             decisions=[],

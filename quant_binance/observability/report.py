@@ -22,6 +22,8 @@ from quant_binance.models import DecisionIntent
 from quant_binance.observability.log_store import _json_ready
 from quant_binance.policy_evidence import (
     baseline_control_bucket_comparison,
+    build_replay_provenance,
+    checkpoint_replay_provenance,
     policy_evidence_bucket,
     policy_evidence_bucket_evidence,
     with_policy_evidence_buckets,
@@ -2166,6 +2168,21 @@ def build_executive_operating_verdict(
     policy_validation: dict[str, object],
     evidence: dict[str, object] | None = None,
 ) -> dict[str, object]:
+    def _not_available_replay_provenance(*, decision_surface: str) -> dict[str, object]:
+        return {
+            "classification": "not_available",
+            "decision_surface": decision_surface,
+            "has_bucket_reference": False,
+            "has_runtime_summary_anchor": False,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": False,
+            "uses_mixed_root_summary_fallback": False,
+            "uses_projected_evidence": False,
+        }
+
     validation = dict(policy_validation or {})
     merged_evidence = dict(dict(validation.get("evidence", {}) or {}))
     merged_evidence.update(dict(evidence or {}))
@@ -2329,10 +2346,39 @@ def build_executive_operating_verdict(
         if reason and reason not in seen_reasons:
             unique_reasons.append(reason)
             seen_reasons.add(reason)
+    checkpoint_replay = dict(checkpoint_auto_judge.get("replay_provenance", {}) or {})
+    if not checkpoint_replay:
+        if checkpoint_auto_judge:
+            checkpoint_replay = checkpoint_replay_provenance(checkpoint_auto_judge)
+        else:
+            checkpoint_replay = _not_available_replay_provenance(decision_surface="checkpoint_auto_judge")
+
+    staged_summary = dict(
+        staged_candidate_evidence.get(
+            "candidate_replay_summary",
+            staged_candidate_evidence.get("replay_summary", {}),
+        )
+        or {}
+    )
+    staged_replay = dict(staged_summary.get("replay_provenance", {}) or {})
+    if not staged_replay:
+        staged_replay = _not_available_replay_provenance(decision_surface="staged_candidate")
+
+    primary_replay = dict(build_replay_provenance())
+    checkpoint_classification = str(checkpoint_replay.get("classification", "not_available") or "not_available")
+    if checkpoint_classification not in {"not_available", "projected_evidence"}:
+        primary_replay = dict(checkpoint_replay)
+        primary_replay["decision_surface"] = "checkpoint_auto_judge"
+
     return {
         "verdict": verdict,
         "confidence": confidence,
         "reasons": unique_reasons,
+        "replay_provenance": {
+            "primary": primary_replay,
+            "checkpoint_auto_judge": checkpoint_replay,
+            "staged_candidate": staged_replay,
+        },
         "signals": {
             "requested_status": requested_status,
             "promotion_status": promotion_status,
