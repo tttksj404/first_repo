@@ -132,7 +132,7 @@ class FuturesMismatchConvergenceTests(unittest.TestCase):
         )
 
         self.assertIn("BTCUSDT", session.paper_positions)
-        self.assertEqual(session.closed_trades, [])
+        self.assertEqual(len(session.closed_trades), 0)
         self.assertEqual(session.paper_positions["BTCUSDT"].current_price, 95.0)
 
     def test_restore_marks_legacy_placeholder_as_exchange_synced_and_keeps_it_open(self) -> None:
@@ -187,7 +187,7 @@ class FuturesMismatchConvergenceTests(unittest.TestCase):
         )
 
         self.assertIn("ETHUSDT", session.paper_positions)
-        self.assertEqual(session.closed_trades, [])
+        self.assertEqual(len(session.closed_trades), 0)
 
 
 if __name__ == "__main__":
