@@ -4127,7 +4127,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.live_orders[0]["response"]["orderId"], "short-stop-loss")
 
     @patch("quant_binance.session.send_telegram_message")
-    def test_session_skips_long_hard_stop_loss_and_uses_soft_stop_with_long_turnaround_mode(self, mock_send) -> None:
+    def test_session_skips_long_hard_and_soft_stop_with_long_turnaround_mode(self, mock_send) -> None:
         class PositionRestClient(FakeRestClient):
             def __init__(self) -> None:
                 super().__init__()
@@ -4184,9 +4184,8 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         session.sync_account()
 
-        self.assertEqual(len(session.live_orders), 1)
-        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_SOFT_STOP_LOSS")
-        self.assertEqual(session.live_orders[0]["response"]["orderId"], "long-soft-stop")
+        self.assertEqual(len(session.live_orders), 0)
+        self.assertEqual(len(session.rest_client.placed_orders), 0)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_session_forces_long_turnaround_abort_before_grace_paths(self, mock_send) -> None:

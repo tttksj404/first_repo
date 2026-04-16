@@ -413,6 +413,12 @@ class DecisionLiveOrderAdapter:
             stop_loss = reference_price * max(0.0, 1.0 - stop_fraction)
         return take_profit, stop_loss
 
+    def _skip_long_stop_loss_protection(self, decision: DecisionIntent) -> bool:
+        if self.settings is None or decision.side != "long":
+            return False
+        cfg = self.settings.live_position_risk
+        return bool(cfg.long_only_turnaround_mode and cfg.long_disable_standard_stop_loss)
+
     def _build_bitget_protection_payloads(
         self,
         *,
@@ -426,29 +432,32 @@ class DecisionLiveOrderAdapter:
         )
         if decision.final_mode == "futures":
             hold_side = "long" if decision.side == "long" else "short"
+            skip_stop_loss = self._skip_long_stop_loss_protection(decision)
+            payload: dict[str, Any] = {
+                "marginCoin": "USDT",
+                "productType": "USDT-FUTURES",
+                "symbol": decision.symbol,
+                "stopSurplusTriggerPrice": self.format_trigger_price(
+                    value=take_profit,
+                    market="futures",
+                    symbol=decision.symbol,
+                ),
+                "stopSurplusTriggerType": "mark_price",
+                "holdSide": hold_side,
+                "stopSurplusClientOid": f"{decision.decision_id}-tp",
+            }
+            if not skip_stop_loss:
+                payload["stopLossTriggerPrice"] = self.format_trigger_price(
+                    value=stop_loss,
+                    market="futures",
+                    symbol=decision.symbol,
+                )
+                payload["stopLossTriggerType"] = "mark_price"
+                payload["stopLossClientOid"] = f"{decision.decision_id}-sl"
             return (
                 (
                     "futures",
-                    {
-                        "marginCoin": "USDT",
-                        "productType": "USDT-FUTURES",
-                        "symbol": decision.symbol,
-                        "stopSurplusTriggerPrice": self.format_trigger_price(
-                            value=take_profit,
-                            market="futures",
-                            symbol=decision.symbol,
-                        ),
-                        "stopSurplusTriggerType": "mark_price",
-                        "stopLossTriggerPrice": self.format_trigger_price(
-                            value=stop_loss,
-                            market="futures",
-                            symbol=decision.symbol,
-                        ),
-                        "stopLossTriggerType": "mark_price",
-                        "holdSide": hold_side,
-                        "stopSurplusClientOid": f"{decision.decision_id}-tp",
-                        "stopLossClientOid": f"{decision.decision_id}-sl",
-                    },
+                    payload,
                 ),
             )
         if decision.final_mode == "spot" and decision.side == "long":
@@ -664,6 +673,7 @@ class DecisionLiveOrderAdapter:
                 params["marginMode"] = resolve_bitget_margin_mode()
                 params["tradeSide"] = "close" if decision.side == "flat" else "open"
                 if decision.side in {"long", "short"}:
+                    skip_stop_loss = self._skip_long_stop_loss_protection(decision)
                     take_profit, stop_loss = self._protection_prices(
                         decision=decision,
                         reference_price=reference_price,
@@ -673,11 +683,12 @@ class DecisionLiveOrderAdapter:
                         market="futures",
                         symbol=decision.symbol,
                     )
-                    params["presetStopLossPrice"] = self.format_trigger_price(
-                        value=stop_loss,
-                        market="futures",
-                        symbol=decision.symbol,
-                    )
+                    if not skip_stop_loss:
+                        params["presetStopLossPrice"] = self.format_trigger_price(
+                            value=stop_loss,
+                            market="futures",
+                            symbol=decision.symbol,
+                        )
             return market, params
         params = {
             "symbol": self._execution_symbol(decision),
