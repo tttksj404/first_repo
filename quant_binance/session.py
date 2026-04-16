@@ -162,6 +162,8 @@ class PaperPosition:
     latest_predictability_score: float = 0.0
     latest_liquidity_score: float = 0.0
     latest_net_expected_edge_bps: float = 0.0
+    latest_volume_confirmation: float | None = None
+    latest_trend_strength: float | None = None
     latest_estimated_round_trip_cost_bps: float = 0.0
     latest_decision_time: datetime | None = None
     partial_take_profit_taken: bool = False
@@ -232,6 +234,12 @@ class PaperPosition:
             "latest_predictability_score": round(self.latest_predictability_score or self.entry_predictability_score, 6),
             "latest_liquidity_score": round(self.latest_liquidity_score or self.entry_liquidity_score, 6),
             "latest_net_expected_edge_bps": round(self.latest_net_expected_edge_bps or self.entry_net_expected_edge_bps, 6),
+            "latest_volume_confirmation": (
+                round(self.latest_volume_confirmation, 6) if self.latest_volume_confirmation is not None else None
+            ),
+            "latest_trend_strength": (
+                round(self.latest_trend_strength, 6) if self.latest_trend_strength is not None else None
+            ),
             "latest_estimated_round_trip_cost_bps": round(
                 self.latest_estimated_round_trip_cost_bps or self.entry_estimated_round_trip_cost_bps,
                 6,
@@ -3811,13 +3819,17 @@ class LivePaperSession:
         identity: str,
         roe_percent: float,
         now: datetime,
+        abort_roe_floor: float | None = None,
     ) -> bool:
         cfg = self.runtime.paper_service.settings.live_position_risk
         if not cfg.turnaround_grace_enabled:
             return False
         if cfg.long_only_turnaround_mode and self._normalize_live_position_side(position) != "long":
             return False
-        if roe_percent > cfg.soft_stop_roe_percent or roe_percent <= cfg.turnaround_abort_roe_percent:
+        effective_abort_floor = (
+            cfg.turnaround_abort_roe_percent if abort_roe_floor is None else float(abort_roe_floor)
+        )
+        if roe_percent > cfg.soft_stop_roe_percent or roe_percent <= effective_abort_floor:
             return False
         paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
         if paper_position is None:
@@ -3833,12 +3845,24 @@ class LivePaperSession:
         recovery = roe_percent - worst_roe
         if recovery < cfg.turnaround_recovery_roe_points:
             return False
-        return (
-            paper_position.latest_predictability_score >= cfg.turnaround_predictability_min
-            and paper_position.latest_net_expected_edge_bps >= cfg.turnaround_net_edge_min_bps
-            and paper_position.latest_liquidity_score >= cfg.turnaround_liquidity_min
-            and paper_position.latest_predictability_score >= cfg.turnaround_predictability_min
-        )
+        if paper_position.latest_predictability_score < cfg.turnaround_predictability_min:
+            return False
+        if paper_position.latest_net_expected_edge_bps < cfg.turnaround_net_edge_min_bps:
+            return False
+        if paper_position.latest_liquidity_score < cfg.turnaround_liquidity_min:
+            return False
+        # Apply newer turnaround quality gates only when the signal values are available.
+        if (
+            paper_position.latest_volume_confirmation is not None
+            and paper_position.latest_volume_confirmation < cfg.turnaround_volume_confirmation_min
+        ):
+            return False
+        if (
+            paper_position.latest_trend_strength is not None
+            and paper_position.latest_trend_strength < cfg.turnaround_trend_strength_min
+        ):
+            return False
+        return True
 
     def _major_drawdown_grace_applies(
         self,
@@ -3945,6 +3969,8 @@ class LivePaperSession:
             latest_predictability_score=0.0,
             latest_liquidity_score=0.0,
             latest_net_expected_edge_bps=0.0,
+            latest_volume_confirmation=None,
+            latest_trend_strength=None,
             latest_estimated_round_trip_cost_bps=0.0,
             exchange_synced=True,
             origin=origin,
@@ -4062,6 +4088,16 @@ class LivePaperSession:
                 payload.get("latest_net_expected_edge_bps")
                 if payload.get("latest_net_expected_edge_bps") is not None
                 else payload.get("entry_net_expected_edge_bps") or 0.0
+            ),
+            latest_volume_confirmation=(
+                float(payload.get("latest_volume_confirmation"))
+                if payload.get("latest_volume_confirmation") is not None
+                else None
+            ),
+            latest_trend_strength=(
+                float(payload.get("latest_trend_strength"))
+                if payload.get("latest_trend_strength") is not None
+                else None
             ),
             latest_estimated_round_trip_cost_bps=float(
                 payload.get("latest_estimated_round_trip_cost_bps")
@@ -4299,6 +4335,62 @@ class LivePaperSession:
         if opened_at is None:
             return 0.0
         return max((now - opened_at).total_seconds() / 60.0, 0.0)
+
+    def _live_symbol_abs_return_volatility_bps(self, *, symbol: str, lookback_bars: int) -> float | None:
+        store = getattr(getattr(self.runtime, "dispatcher", None), "store", None)
+        if store is None or not hasattr(store, "get"):
+            return None
+        state = store.get(symbol)
+        if state is None:
+            return None
+        bars_window = max(int(lookback_bars), 2)
+        interval_volatilities: list[float] = []
+        for interval in ("1m", "5m", "15m"):
+            bars = list((state.klines or {}).get(interval) or [])
+            closed_bars = [bar for bar in bars if bool(getattr(bar, "is_closed", True))]
+            if len(closed_bars) < 3:
+                continue
+            closes = [
+                float(getattr(bar, "close_price", 0.0))
+                for bar in closed_bars[-(bars_window + 1):]
+                if float(getattr(bar, "close_price", 0.0)) > 0.0
+            ]
+            if len(closes) < 3:
+                continue
+            returns_bps: list[float] = []
+            for previous, current in zip(closes, closes[1:]):
+                if previous <= 0.0:
+                    continue
+                returns_bps.append(abs((current - previous) / previous) * 10000.0)
+            if returns_bps:
+                interval_volatilities.append(sum(returns_bps) / len(returns_bps))
+        if not interval_volatilities:
+            return None
+        # Use the highest recent interval volatility so abort widening reacts to
+        # any timeframe expansion, not only the fastest stream.
+        return max(interval_volatilities)
+
+    def _effective_long_turnaround_abort_roe_percent(
+        self,
+        *,
+        symbol: str,
+        base_abort_roe_percent: float,
+    ) -> float:
+        cfg = self.runtime.paper_service.settings.live_position_risk
+        effective_abort = base_abort_roe_percent
+        if not cfg.turnaround_abort_volatility_adaptive:
+            return effective_abort
+        volatility_bps = self._live_symbol_abs_return_volatility_bps(
+            symbol=symbol,
+            lookback_bars=cfg.turnaround_abort_volatility_lookback_bars,
+        )
+        if volatility_bps is None:
+            return effective_abort
+        floor_bps = max(cfg.turnaround_abort_volatility_floor_bps, 0.0)
+        scale = max(cfg.turnaround_abort_volatility_scale, 0.0)
+        extra_abort = max(volatility_bps - floor_bps, 0.0) * scale
+        effective_abort -= extra_abort
+        return max(effective_abort, cfg.turnaround_abort_min_roe_percent)
 
     def _live_client_oid(
         self,
@@ -4803,7 +4895,13 @@ class LivePaperSession:
             )
             long_turnaround_mode = cfg.long_only_turnaround_mode and is_long_position
             long_disable_standard_stop = long_turnaround_mode and cfg.long_disable_standard_stop_loss
-            if long_turnaround_mode and roe <= cfg.turnaround_abort_roe_percent:
+            long_turnaround_abort_roe = cfg.turnaround_abort_roe_percent
+            if long_turnaround_mode:
+                long_turnaround_abort_roe = self._effective_long_turnaround_abort_roe_percent(
+                    symbol=symbol,
+                    base_abort_roe_percent=cfg.turnaround_abort_roe_percent,
+                )
+            if long_turnaround_mode and roe <= long_turnaround_abort_roe:
                 self._close_live_position(position=position, reason="LIVE_POSITION_LONG_TURNAROUND_ABORT")
                 continue
             if (
@@ -4857,6 +4955,7 @@ class LivePaperSession:
                     identity=identity,
                     roe_percent=roe,
                     now=now,
+                    abort_roe_floor=long_turnaround_abort_roe,
                 )
             major_drawdown_grace = self._major_drawdown_grace_applies(
                 position=position,
@@ -5256,6 +5355,8 @@ class LivePaperSession:
         position.latest_predictability_score = decision.predictability_score
         position.latest_liquidity_score = decision.liquidity_score
         position.latest_net_expected_edge_bps = decision.net_expected_edge_bps
+        position.latest_volume_confirmation = decision.volume_confirmation
+        position.latest_trend_strength = decision.trend_strength
         position.latest_estimated_round_trip_cost_bps = decision.estimated_round_trip_cost_bps
         position.latest_decision_time = decision.timestamp
         self.remaining_portfolio_capacity_usd = max(
@@ -5316,6 +5417,8 @@ class LivePaperSession:
             latest_predictability_score=decision.predictability_score,
             latest_liquidity_score=decision.liquidity_score,
             latest_net_expected_edge_bps=decision.net_expected_edge_bps,
+            latest_volume_confirmation=decision.volume_confirmation,
+            latest_trend_strength=decision.trend_strength,
             latest_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
             latest_decision_time=decision.timestamp,
             confirmation_pending=(decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED"),
@@ -5428,6 +5531,8 @@ class LivePaperSession:
         position.latest_predictability_score = decision.predictability_score
         position.latest_liquidity_score = decision.liquidity_score
         position.latest_net_expected_edge_bps = decision.net_expected_edge_bps
+        position.latest_volume_confirmation = decision.volume_confirmation
+        position.latest_trend_strength = decision.trend_strength
         position.latest_estimated_round_trip_cost_bps = decision.estimated_round_trip_cost_bps
         position.latest_decision_time = timestamp
         reward_bps = self._reward_bps(position=position, price=price)

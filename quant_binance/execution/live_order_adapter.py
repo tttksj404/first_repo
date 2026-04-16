@@ -285,6 +285,17 @@ class DecisionLiveOrderAdapter:
         rounded = Decimal(str(safe_value)).quantize(quantum, rounding=ROUND_HALF_UP)
         return format(rounded, f".{decimals}f")
 
+    def _formatted_positive_trigger_price(self, *, value: float, market: str, symbol: str) -> str | None:
+        if value <= 0.0:
+            return None
+        formatted = self.format_trigger_price(value=value, market=market, symbol=symbol)
+        try:
+            if float(formatted) <= 0.0:
+                return None
+        except (TypeError, ValueError):
+            return None
+        return formatted
+
     def _safe_float(self, value: Any, default: float = 0.0) -> float:
         try:
             if value in (None, ""):
@@ -433,27 +444,32 @@ class DecisionLiveOrderAdapter:
         if decision.final_mode == "futures":
             hold_side = "long" if decision.side == "long" else "short"
             skip_stop_loss = self._skip_long_stop_loss_protection(decision)
+            take_profit_trigger = self._formatted_positive_trigger_price(
+                value=take_profit,
+                market="futures",
+                symbol=decision.symbol,
+            )
+            stop_loss_trigger = self._formatted_positive_trigger_price(
+                value=stop_loss,
+                market="futures",
+                symbol=decision.symbol,
+            )
             payload: dict[str, Any] = {
                 "marginCoin": "USDT",
                 "productType": "USDT-FUTURES",
                 "symbol": decision.symbol,
-                "stopSurplusTriggerPrice": self.format_trigger_price(
-                    value=take_profit,
-                    market="futures",
-                    symbol=decision.symbol,
-                ),
-                "stopSurplusTriggerType": "mark_price",
                 "holdSide": hold_side,
-                "stopSurplusClientOid": f"{decision.decision_id}-tp",
             }
-            if not skip_stop_loss:
-                payload["stopLossTriggerPrice"] = self.format_trigger_price(
-                    value=stop_loss,
-                    market="futures",
-                    symbol=decision.symbol,
-                )
+            if take_profit_trigger is not None:
+                payload["stopSurplusTriggerPrice"] = take_profit_trigger
+                payload["stopSurplusTriggerType"] = "mark_price"
+                payload["stopSurplusClientOid"] = f"{decision.decision_id}-tp"
+            if not skip_stop_loss and stop_loss_trigger is not None:
+                payload["stopLossTriggerPrice"] = stop_loss_trigger
                 payload["stopLossTriggerType"] = "mark_price"
                 payload["stopLossClientOid"] = f"{decision.decision_id}-sl"
+            if "stopSurplusTriggerPrice" not in payload and "stopLossTriggerPrice" not in payload:
+                return ()
             return (
                 (
                     "futures",
@@ -678,17 +694,21 @@ class DecisionLiveOrderAdapter:
                         decision=decision,
                         reference_price=reference_price,
                     )
-                    params["presetStopSurplusPrice"] = self.format_trigger_price(
+                    take_profit_trigger = self._formatted_positive_trigger_price(
                         value=take_profit,
                         market="futures",
                         symbol=decision.symbol,
                     )
+                    if take_profit_trigger is not None:
+                        params["presetStopSurplusPrice"] = take_profit_trigger
                     if not skip_stop_loss:
-                        params["presetStopLossPrice"] = self.format_trigger_price(
+                        stop_loss_trigger = self._formatted_positive_trigger_price(
                             value=stop_loss,
                             market="futures",
                             symbol=decision.symbol,
                         )
+                        if stop_loss_trigger is not None:
+                            params["presetStopLossPrice"] = stop_loss_trigger
             return market, params
         params = {
             "symbol": self._execution_symbol(decision),

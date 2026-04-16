@@ -1,5 +1,5 @@
 {
-  "_lock": "PEPE single-focus profit-probability revision (2026-04-16 r8): tighten entry-quality/cost gates, keep 20x leverage ceiling, and expand notional caps for higher absolute PnL only on higher-quality setups.",
+  "_lock": "PEPE single-focus profit-probability revision (2026-04-16 r9): keep strict entry-quality filters, but raise futures leverage/capacity for larger absolute PnL on qualified setups.",
   "ensemble_signal_required": false,
   "data_collection_min_trades": 500,
   "data_collection_mode": true,
@@ -17,13 +17,13 @@
     "macro_score_relaxation": 8.0,
     "macro_support_min": 0.3,
     "macro_volatility_relaxation": 0.2,
-    "major_medium_min_entry_notional_usd": 5.0,
-    "major_min_meaningful_notional_usd": 5.0,
+    "major_medium_min_entry_notional_usd": 160.0,
+    "major_min_meaningful_notional_usd": 160.0,
     "major_reallocation_edge_advantage_relaxation_bps": 1.0,
     "major_reallocation_incremental_pnl_relaxation_usd": 0.5,
     "major_reallocation_score_advantage_relaxation": 2.0,
     "major_size_boost_multiplier": 1.8,
-    "major_strong_min_entry_notional_usd": 5.0,
+    "major_strong_min_entry_notional_usd": 180.0,
     "major_symbols": [
       "PEPEUSDT"
     ],
@@ -101,7 +101,12 @@
     "profit_flip_take_profit_fraction": 0.5,
     "stop_loss_roe_percent": -10.0,
     "soft_stop_roe_percent": -8.0,
-    "turnaround_abort_roe_percent": -14.0,
+    "turnaround_abort_roe_percent": -20.0,
+    "turnaround_abort_volatility_adaptive": true,
+    "turnaround_abort_volatility_floor_bps": 20.0,
+    "turnaround_abort_volatility_scale": 0.2,
+    "turnaround_abort_volatility_lookback_bars": 12,
+    "turnaround_abort_min_roe_percent": -35.0,
     "take_profit_roe_percent": 24.0
   },
   "loss_combo_downgrade": {
@@ -140,14 +145,17 @@
     "max_concurrent_futures_symbols": 1
   },
   "risk": {
-    "max_symbol_notional_fraction": 0.9,
-    "max_total_notional_fraction": 0.9,
+    "max_symbol_notional_fraction": 1.0,
+    "max_total_notional_fraction": 1.0,
     "min_expected_profit_usd_per_trade": 0.001,
-    "min_meaningful_futures_notional_usd": 5.0,
+    "min_meaningful_futures_notional_usd": 160.0,
     "min_meaningful_spot_notional_usd": 1.0,
-    "per_trade_equity_risk": 0.30,
-    "target_futures_leverage": 20.0,
-    "max_futures_leverage": 20.0
+    "per_trade_equity_risk": 0.40,
+    "target_futures_leverage": 30.0,
+    "max_futures_leverage": 30.0
+  },
+  "cash_reserve": {
+    "when_futures_enabled": 0.02
   },
   "strategy_profile": "live-ultra-aggressive",
   "symbol_eligibility": {
@@ -167,7 +175,7 @@
     "symbols": [
       "PEPEUSDT"
     ],
-    "notional_usd_per_trade": 80.0
+    "notional_usd_per_trade": 160.0
   },
   "b3_msb_strategy": {
     "enabled": true,
