@@ -445,6 +445,39 @@ def _btc_eth_futures_sentiment_relaxation_allowed(
     )
 
 
+def _short_entry_strict_reasons(
+    features: FeatureVector,
+    settings: Settings,
+    *,
+    futures_score_min: float,
+    futures_liquidity_min: float,
+    min_entry_net_edge_bps: float,
+) -> list[str]:
+    if features.trend_direction >= 0:
+        return []
+    reasons: list[str] = []
+    short_score_floor = max(futures_score_min + 4.0, settings.mode_thresholds.futures_score_min + 1.0)
+    short_liquidity_floor = max(futures_liquidity_min + 0.08, settings.futures_exposure.soft_liquidity_floor + 0.08)
+    short_edge_floor = max(min_entry_net_edge_bps + 1.5, settings.futures_exposure.reduced_entry_net_edge_bps + 1.0)
+    short_cost_multiple_floor = max(settings.cost_gate.edge_to_cost_multiple_min + 0.18, 0.95)
+    short_trend_strength_floor = max(settings.mode_thresholds.futures_trend_strength_min + 0.02, 0.12)
+    short_volume_floor = 0.48
+
+    if features.predictability_score < short_score_floor:
+        reasons.append("SCORE_TOO_LOW")
+    if features.trend_strength < short_trend_strength_floor:
+        reasons.append("SCORE_TOO_LOW")
+    if features.volume_confirmation < short_volume_floor:
+        reasons.append("SCORE_TOO_LOW")
+    if features.liquidity_score < short_liquidity_floor:
+        reasons.append("LIQUIDITY_TOO_WEAK")
+    if features.net_expected_edge_bps < short_edge_floor:
+        reasons.append("EDGE_TOO_THIN")
+    if _edge_to_cost_multiple(features) < short_cost_multiple_floor:
+        reasons.append("EDGE_BELOW_COST")
+    return reasons
+
+
 def _btc_eth_spot_relaxation_reasons(
     features: FeatureVector,
     settings: Settings,
@@ -776,6 +809,15 @@ def _futures_entry_plan(
             size_multiplier = min(size_multiplier, exposure.reduced_size_multiplier)
         else:
             reasons.append("EDGE_TOO_THIN")
+    reasons.extend(
+        _short_entry_strict_reasons(
+            features,
+            settings,
+            futures_score_min=futures_score_min,
+            futures_liquidity_min=futures_liquidity_min,
+            min_entry_net_edge_bps=min_entry_net_edge_bps,
+        )
+    )
     if reasons:
         return False, reasons, 0.0, (), (), effective_direction
     if reduced_size and features.net_expected_edge_bps < exposure.reduced_entry_net_edge_bps:

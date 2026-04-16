@@ -64,6 +64,7 @@ class DecisionLiveOrderAdapter:
         self.settings = settings
         self._exchange_info_cache: dict[str, dict[str, dict[str, Any]]] = {}
         self._last_preflight_rejection: dict[str, Any] | None = None
+        self._bitget_margin_mode_by_symbol: dict[str, str] = {}
 
     def _exchange_id(self) -> str:
         return getattr(self.client, "exchange_id", "binance")
@@ -108,13 +109,23 @@ class DecisionLiveOrderAdapter:
             return
         leverage = self._target_futures_leverage(decision)
         try:
-            self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
+            response = self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
+            if self._exchange_id() == "bitget":
+                margin_mode = str((response or {}).get("marginMode", "") or "").strip().lower()
+                if margin_mode in {"crossed", "isolated"}:
+                    self._bitget_margin_mode_by_symbol[decision.symbol] = margin_mode
         except Exception as exc:
             if self._exchange_id() == "bitget":
                 message = str(exc)
                 if "40893" in message or "Unable to update the leverage factor" in message:
                     return
             raise
+
+    def _bitget_margin_mode_for_symbol(self, symbol: str) -> str:
+        cached = str(self._bitget_margin_mode_by_symbol.get(symbol, "") or "").strip().lower()
+        if cached in {"crossed", "isolated"}:
+            return cached
+        return resolve_bitget_margin_mode()
 
     def _is_bitget_unilateral_error(self, message: str) -> bool:
         code = self._bitget_error_code(message)
@@ -131,6 +142,11 @@ class DecisionLiveOrderAdapter:
         if match is None:
             return ""
         return match.group(1)
+
+    def _is_bitget_balance_error(self, message: str) -> bool:
+        code = self._bitget_error_code(message)
+        normalized = message.lower()
+        return code == "40762" and "exceeds the balance" in normalized
 
     def _bitget_retryable_protection_error(self, message: str) -> bool:
         code = self._bitget_error_code(message)
@@ -637,6 +653,7 @@ class DecisionLiveOrderAdapter:
         *,
         decision: DecisionIntent,
         reference_price: float,
+        futures_max_open_override: float | None = None,
     ) -> tuple[str, dict[str, Any]] | None:
         self._last_preflight_rejection = None
         if decision.final_mode not in {"spot", "futures"}:
@@ -646,11 +663,13 @@ class DecisionLiveOrderAdapter:
         side = "BUY" if decision.side == "long" else "SELL"
         execution_symbol = self._execution_symbol(decision)
         if market == "futures" and self._exchange_id() == "bitget" and hasattr(self.client, "get_max_openable_quantity"):
-            max_open = self.client.get_max_openable_quantity(
-                symbol=decision.symbol,
-                pos_side="long" if decision.side == "long" else "short",
-                order_type="market",
-            )
+            max_open = futures_max_open_override
+            if max_open is None:
+                max_open = self.client.get_max_openable_quantity(
+                    symbol=decision.symbol,
+                    pos_side="long" if decision.side == "long" else "short",
+                    order_type="market",
+                )
             if max_open is not None:
                 if max_open <= 0.0:
                     self._last_preflight_rejection = {
@@ -682,11 +701,11 @@ class DecisionLiveOrderAdapter:
             if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
                 params["size"] = f"{decision.order_intent_notional_usd:.2f}"
             else:
-                params["size"] = f"{quantity:.8f}"
+                params["size"] = self.format_quantity(market=market, symbol=execution_symbol, quantity=quantity)
             if market == "futures":
                 params["productType"] = "USDT-FUTURES"
                 params["marginCoin"] = "USDT"
-                params["marginMode"] = resolve_bitget_margin_mode()
+                params["marginMode"] = self._bitget_margin_mode_for_symbol(decision.symbol)
                 params["tradeSide"] = "close" if decision.side == "flat" else "open"
                 if decision.side in {"long", "short"}:
                     skip_stop_loss = self._skip_long_stop_loss_protection(decision)
@@ -724,36 +743,83 @@ class DecisionLiveOrderAdapter:
             params["reduceOnly"] = "false"
         return market, params
 
+    def _bitget_balance_retry_order_params(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        original_order_params: dict[str, Any],
+    ) -> tuple[str, dict[str, Any]] | None:
+        if decision.final_mode != "futures" or self._exchange_id() != "bitget":
+            return None
+        if not hasattr(self.client, "get_max_openable_quantity"):
+            return None
+        max_open = self.client.get_max_openable_quantity(
+            symbol=decision.symbol,
+            pos_side="long" if decision.side == "long" else "short",
+            order_type="market",
+        )
+        if max_open is None or max_open <= 0.0:
+            return None
+        # Keep a small safety buffer against exchange-side balance/margin rounding.
+        retry_max_open = max_open * 0.98
+        rebuilt = self.build_order_params(
+            decision=decision,
+            reference_price=reference_price,
+            futures_max_open_override=retry_max_open,
+        )
+        if rebuilt is None:
+            return None
+        market, retry_order_params = rebuilt
+        if retry_order_params == original_order_params:
+            return None
+        return market, retry_order_params
+
     def execute_decision(
         self,
         *,
         decision: DecisionIntent,
         reference_price: float,
     ) -> LiveOrderResult | None:
+        if decision.final_mode == "futures":
+            self._set_futures_leverage_if_supported(decision=decision)
         built = self.build_order_params(decision=decision, reference_price=reference_price)
         if built is None:
             return None
         market, order_params = built
-        if market == "futures":
-            self._set_futures_leverage_if_supported(decision=decision)
         try:
             response = self.client.place_order(market=market, order_params=order_params)
         except Exception as exc:
-            if self._exchange_id() != "bitget" or market != "futures" or not self._is_bitget_unilateral_error(str(exc)):
+            if self._exchange_id() != "bitget" or market != "futures":
                 raise
-            retry_error = exc
-            for alternate_params in self._bitget_alternate_futures_params(order_params):
-                try:
-                    response = self.client.place_order(market=market, order_params=alternate_params)
-                except Exception as retry_exc:
-                    retry_error = retry_exc
-                    if not self._is_bitget_unilateral_error(str(retry_exc)):
-                        raise
-                    continue
-                order_params = alternate_params
-                break
+            message = str(exc)
+            if self._is_bitget_balance_error(message):
+                rebuilt = self._bitget_balance_retry_order_params(
+                    decision=decision,
+                    reference_price=reference_price,
+                    original_order_params=order_params,
+                )
+                if rebuilt is None:
+                    raise
+                market, retry_order_params = rebuilt
+                response = self.client.place_order(market=market, order_params=retry_order_params)
+                order_params = retry_order_params
+            elif self._is_bitget_unilateral_error(message):
+                retry_error = exc
+                for alternate_params in self._bitget_alternate_futures_params(order_params):
+                    try:
+                        response = self.client.place_order(market=market, order_params=alternate_params)
+                    except Exception as retry_exc:
+                        retry_error = retry_exc
+                        if not self._is_bitget_unilateral_error(str(retry_exc)):
+                            raise
+                        continue
+                    order_params = alternate_params
+                    break
+                else:
+                    raise retry_error
             else:
-                raise retry_error
+                raise
         quantity = self._requested_fill_measure(market=market, order_params=order_params)
         accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
         fill_ratio = self._fill_ratio(

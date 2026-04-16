@@ -264,6 +264,257 @@ class QuantBinanceSessionTests(unittest.TestCase):
             sync_interval_seconds=1,
         )
 
+    def test_auto_convert_skips_spot_dust_below_exchange_minimum_notional(self) -> None:
+        class DustSpotRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.order_params_calls: list[dict[str, object]] = []
+                self.place_order_calls: list[tuple[str, dict[str, object]]] = []
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                if market == "spot":
+                    return {
+                        "balances": [
+                            {"asset": "BTC", "free": "0.000001", "locked": "0"},
+                        ]
+                    }
+                return {
+                    "availableBalance": "10.0",
+                    "accounts": [
+                        {"marginCoin": "USDT", "available": "10.0", "usdtEquity": "10.0"},
+                    ],
+                }
+
+            def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, object]:
+                assert market == "spot"
+                assert symbol == "BTCUSDT"
+                return {"bidPrice": "85000.0", "askPrice": "85010.0"}
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.order_params_calls.append(dict(kwargs))
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.place_order_calls.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "dust-should-not-sell"}
+
+            def transfer_asset(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append(dict(kwargs))
+                return {"status": "SUCCESS"}
+
+        session = self._build_session()
+        rest_client = DustSpotRestClient()
+        session.rest_client = rest_client
+        session.account_snapshot = rest_client.get_account(market="futures")
+
+        session._auto_convert_coin_futures_to_usdt()
+
+        self.assertEqual(rest_client.order_params_calls, [])
+        self.assertEqual(rest_client.place_order_calls, [])
+        self.assertEqual(rest_client.transfer_calls, [])
+
+    def test_auto_convert_skips_unpriced_spot_dust_instead_of_submitting_live_sell(self) -> None:
+        class UnpricedDustSpotRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.order_params_calls: list[dict[str, object]] = []
+                self.place_order_calls: list[tuple[str, dict[str, object]]] = []
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                if market == "spot":
+                    return {
+                        "balances": [
+                            {"asset": "BTC", "free": "0.000001", "locked": "0"},
+                        ]
+                    }
+                return {
+                    "availableBalance": "10.0",
+                    "accounts": [
+                        {"marginCoin": "USDT", "available": "10.0", "usdtEquity": "10.0"},
+                    ],
+                }
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.order_params_calls.append(dict(kwargs))
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.place_order_calls.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "unpriced-dust-should-not-sell"}
+
+            def transfer_asset(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append(dict(kwargs))
+                return {"status": "SUCCESS"}
+
+        session = self._build_session()
+        rest_client = UnpricedDustSpotRestClient()
+        session.rest_client = rest_client
+        session.account_snapshot = rest_client.get_account(market="futures")
+
+        session._auto_convert_coin_futures_to_usdt()
+
+        self.assertEqual(rest_client.order_params_calls, [])
+        self.assertEqual(rest_client.place_order_calls, [])
+        self.assertEqual(rest_client.transfer_calls, [])
+
+    def test_auto_convert_uses_capital_report_transferable_usd_for_spot_dust_guard(self) -> None:
+        class MispricedDustSpotRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.order_params_calls: list[dict[str, object]] = []
+                self.place_order_calls: list[tuple[str, dict[str, object]]] = []
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                if market == "spot":
+                    return {
+                        "balances": [
+                            {"asset": "BTC", "free": "0.000001", "locked": "0", "usdValue": "10.0"},
+                        ]
+                    }
+                return {
+                    "availableBalance": "10.0",
+                    "accounts": [
+                        {"marginCoin": "USDT", "available": "10.0", "usdtEquity": "10.0"},
+                    ],
+                }
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.order_params_calls.append(dict(kwargs))
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.place_order_calls.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "mispriced-dust-should-not-sell"}
+
+            def transfer_asset(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append(dict(kwargs))
+                return {"status": "SUCCESS"}
+
+        session = self._build_session()
+        rest_client = MispricedDustSpotRestClient()
+        session.rest_client = rest_client
+        session.capital_report = {
+            "capital_transfer_routes": [
+                {
+                    "source_market": "spot",
+                    "target_market": "futures",
+                    "asset": "BTC",
+                    "source_free_amount": 0.000001,
+                    "transferable_usd": 0.084262,
+                }
+            ]
+        }
+        session.account_snapshot = rest_client.get_account(market="futures")
+
+        session._auto_convert_coin_futures_to_usdt()
+
+        self.assertEqual(rest_client.order_params_calls, [])
+        self.assertEqual(rest_client.place_order_calls, [])
+        self.assertEqual(rest_client.transfer_calls, [])
+
+    def test_auto_convert_ignores_misleading_spot_balance_usd_value_when_ticker_shows_dust(self) -> None:
+        class MisleadingBalanceRowRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.order_params_calls: list[dict[str, object]] = []
+                self.place_order_calls: list[tuple[str, dict[str, object]]] = []
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                if market == "spot":
+                    return {
+                        "balances": [
+                            {"asset": "BTC", "free": "0.000001", "locked": "0", "usdValue": "10.0"},
+                        ]
+                    }
+                return {
+                    "availableBalance": "10.0",
+                    "accounts": [
+                        {"marginCoin": "USDT", "available": "10.0", "usdtEquity": "10.0"},
+                    ],
+                }
+
+            def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, object]:
+                assert market == "spot"
+                assert symbol == "BTCUSDT"
+                return {"bidPrice": "85000.0", "askPrice": "85010.0"}
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.order_params_calls.append(dict(kwargs))
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.place_order_calls.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "misleading-balance-row-should-not-sell"}
+
+            def transfer_asset(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append(dict(kwargs))
+                return {"status": "SUCCESS"}
+
+        session = self._build_session()
+        rest_client = MisleadingBalanceRowRestClient()
+        session.rest_client = rest_client
+        session.account_snapshot = rest_client.get_account(market="futures")
+
+        session._auto_convert_coin_futures_to_usdt()
+
+        self.assertEqual(rest_client.order_params_calls, [])
+        self.assertEqual(rest_client.place_order_calls, [])
+        self.assertEqual(rest_client.transfer_calls, [])
+
+    def test_auto_convert_ignores_misleading_spot_balance_usd_value_when_ticker_has_no_price(self) -> None:
+        class EmptyTickerBalanceRowRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.order_params_calls: list[dict[str, object]] = []
+                self.place_order_calls: list[tuple[str, dict[str, object]]] = []
+                self.transfer_calls: list[dict[str, object]] = []
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                if market == "spot":
+                    return {
+                        "balances": [
+                            {"asset": "BTC", "free": "0.000001", "locked": "0", "usdValue": "10.0"},
+                        ]
+                    }
+                return {
+                    "availableBalance": "10.0",
+                    "accounts": [
+                        {"marginCoin": "USDT", "available": "10.0", "usdtEquity": "10.0"},
+                    ],
+                }
+
+            def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, object]:
+                assert market == "spot"
+                assert symbol == "BTCUSDT"
+                return {"bidPrice": "0", "askPrice": "0", "raw": {"note": "missing_live_price"}}
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.order_params_calls.append(dict(kwargs))
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.place_order_calls.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "empty-ticker-should-not-sell"}
+
+            def transfer_asset(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.transfer_calls.append(dict(kwargs))
+                return {"status": "SUCCESS"}
+
+        session = self._build_session()
+        rest_client = EmptyTickerBalanceRowRestClient()
+        session.rest_client = rest_client
+        session.account_snapshot = rest_client.get_account(market="futures")
+
+        session._auto_convert_coin_futures_to_usdt()
+
+        self.assertEqual(rest_client.order_params_calls, [])
+        self.assertEqual(rest_client.place_order_calls, [])
+        self.assertEqual(rest_client.transfer_calls, [])
+
     def test_major_cross_symbol_alignment_closes_opposite_paper_major_before_new_entry(self) -> None:
         session = self._build_session()
         now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
@@ -2262,7 +2513,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
         self.assertEqual(session.rest_client.cancelled_orders, [("futures", "BTCUSDT", "open-1")])
         self.assertIn("BTCUSDT", session.manual_symbol_cooldowns)
-        self.assertTrue(any("MANUAL_CLOSE_SYNCED" in call.args[0] for call in mock_send.call_args_list))
+        self.assertTrue(any("MANUAL_CLOSE_SYNCED" in alert["text"] for alert in session.telegram_alerts))
 
     @patch("quant_binance.session.send_telegram_message")
     def test_sync_account_uses_higher_missing_on_exchange_threshold_for_major_symbol(self, mock_send) -> None:
@@ -2447,6 +2698,68 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.futures_missing_on_exchange_counts, {"BTCUSDT": 1})
         self.assertEqual(session.remaining_portfolio_capacity_usd, 4000.0)
         self.assertEqual(mock_send.call_count, 0)
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_sync_account_fast_manual_close_cleanup_allows_loss_realization_balance_drop(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self._balances = [25.0, 21.5]
+                self._balance_index = 0
+                self._positions = [
+                    [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "10.0",
+                            "available": "10.0",
+                            "openPriceAvg": "100.0",
+                            "markPrice": "99.6",
+                            "marginSize": "20.0",
+                            "unrealizedPL": "-3.5",
+                            "leverage": "2",
+                        }
+                    ],
+                    [],
+                ]
+                self._position_index = 0
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                balance = self._balances[min(self._balance_index, len(self._balances) - 1)]
+                self._balance_index += 1
+                return {
+                    "market": market,
+                    "balance": 1000.0,
+                    "availableBalance": balance,
+                    "executionAvailableBalance": balance,
+                }
+
+            def get_positions(self) -> dict[str, object]:
+                positions = self._positions[min(self._position_index, len(self._positions) - 1)]
+                self._position_index += 1
+                return {"positions": positions}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=self._focus_settings(futures_top_n=1))
+        session.rest_client = PositionRestClient()
+        now = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state.last_trade_price = 100.0
+        session._record_decision(
+            decision=make_decision(timestamp=now),
+            state=state,
+            timestamp=now,
+        )
+
+        session.sync_account()
+        self.assertIn("BTCUSDT", session.paper_positions)
+
+        session.sync_account()
+
+        self.assertNotIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.futures_missing_on_exchange_counts, {})
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
 
     @patch("quant_binance.session.send_telegram_message")
     def test_sync_account_is_noop_when_paper_and_exchange_futures_positions_are_aligned(self, mock_send) -> None:

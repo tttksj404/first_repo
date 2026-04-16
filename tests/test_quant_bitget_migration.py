@@ -437,6 +437,136 @@ class QuantBitgetMigrationTests(unittest.TestCase):
 
         self.assertEqual(len(live_client.orders), 1)
 
+    def test_bitget_live_order_sets_leverage_before_max_open_preflight(self) -> None:
+        events: list[str] = []
+
+        class OrderedClient(FakeBitgetLiveClient):
+            def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
+                events.append(f"set_leverage:{symbol}:{leverage}")
+                return super().set_futures_leverage(symbol=symbol, leverage=leverage)
+
+            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
+                events.append(f"max_open:{symbol}:{pos_side}")
+                return 25.0
+
+        live_client = OrderedClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=0.25,
+        )
+
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertGreaterEqual(len(events), 2)
+        self.assertTrue(events[0].startswith("set_leverage:"))
+        self.assertTrue(events[1].startswith("max_open:"))
+
+    def test_bitget_live_order_retries_balance_error_with_smaller_rebuilt_size(self) -> None:
+        class RetryBalanceClient(FakeBitgetLiveClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.max_open_calls = 0
+
+            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
+                self.max_open_calls += 1
+                return 100.0 if self.max_open_calls == 1 else 80.0
+
+            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
+                self.orders.append((market, dict(order_params)))
+                if len(self.orders) == 1:
+                    raise RuntimeError('Bitget HTTP 400: {"code":"40762","msg":"The order amount exceeds the balance"}')
+                return {"status": "SUCCESS", "orderId": "retried-balance-40762"}
+
+        live_client = RetryBalanceClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=1.0,
+        )
+
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.response.get("orderId"), "retried-balance-40762")
+        self.assertEqual(len(live_client.orders), 2)
+        first_size = float(live_client.orders[0][1]["size"])
+        second_size = float(live_client.orders[1][1]["size"])
+        self.assertLess(second_size, first_size)
+
+    def test_bitget_live_order_uses_margin_mode_returned_by_leverage_response(self) -> None:
+        class IsolatedClient(FakeBitgetLiveClient):
+            def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
+                self.leverage_calls.append((symbol, leverage))
+                return {
+                    "symbol": symbol,
+                    "leverage": leverage,
+                    "marginMode": "isolated",
+                }
+
+        live_client = IsolatedClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=50000.0,
+        )
+
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(live_client.orders[0][1]["marginMode"], "isolated")
+
+    def test_bitget_live_order_formats_quantity_using_exchange_precision(self) -> None:
+        class PrecisionClient(FakeBitgetLiveClient):
+            def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
+                return {
+                    "symbols": [
+                        {
+                            "symbol": "PEPEUSDT",
+                            "raw": {
+                                "minTradeNum": "1000",
+                                "sizeMultiplier": "1000",
+                                "volumePlace": "0",
+                                "pricePlace": "10",
+                            },
+                        }
+                    ]
+                }
+
+        live_client = PrecisionClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+        decision = DecisionIntent(
+            decision_id="pepe-qty",
+            decision_hash="hash-pepe-qty",
+            snapshot_id="snap-pepe-qty",
+            config_version="2026-03-13.v1",
+            timestamp=datetime(2026, 3, 10, 0, 30, tzinfo=timezone.utc),
+            symbol="PEPEUSDT",
+            candidate_mode="futures",
+            final_mode="futures",
+            side="long",
+            trend_direction=1,
+            trend_strength=0.8,
+            volume_confirmation=0.7,
+            liquidity_score=0.8,
+            volatility_penalty=0.2,
+            overheat_penalty=0.1,
+            predictability_score=66.0,
+            gross_expected_edge_bps=30.0,
+            net_expected_edge_bps=18.0,
+            estimated_round_trip_cost_bps=12.0,
+            order_intent_notional_usd=517.314631,
+            stop_distance_bps=80.0,
+            planned_leverage=30,
+        )
+
+        result = live_adapter.execute_decision(decision=decision, reference_price=3.8856e-06)
+
+        assert result is not None
+        self.assertTrue(result.accepted)
+        self.assertEqual(live_client.orders[0][1]["size"], "133136000")
+
     def test_bitget_live_order_caps_quantity_with_exchange_max_open_hint(self) -> None:
         class MaxOpenClient(FakeBitgetLiveClient):
             def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
