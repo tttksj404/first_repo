@@ -1169,7 +1169,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         )
 
     def test_session_syncs_and_flushes(self) -> None:
-        session = self._build_session()
+        session = self._build_session(settings=replace(self.settings, ensemble_signal_required=False))
         session.observe_only_symbols = ["SIGNUSDT"]
         now = datetime(2026, 3, 8, 12, 5, 0, tzinfo=timezone.utc)
         payload = {
@@ -1776,7 +1776,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.tested_orders, [])
 
     def test_execute_recorded_bootstrap_decision_runs_submission_path(self) -> None:
-        session = self._build_session()
+        session = self._build_session(settings=replace(self.settings, ensemble_signal_required=False))
         state = session.runtime.dispatcher.store.get("BTCUSDT")
         assert state is not None
         bootstrap_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
@@ -4064,6 +4064,184 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(any("LIVE_POSITION_STOP_LOSS" in call.args[0] for call in mock_send.call_args_list))
 
     @patch("quant_binance.session.send_telegram_message")
+    def test_session_keeps_short_hard_stop_loss_when_long_only_turnaround_enabled(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "short",
+                            "total": "0.02",
+                            "available": "0.02",
+                            "marginSize": "10",
+                            "unrealizedPL": "-1.1",
+                            "marginRatio": "0.1",
+                            "breakEvenPrice": "50000.0",
+                            "openPriceAvg": "50000.0",
+                            "uTime": "1234568901",
+                            "cTime": "1234568901",
+                        }
+                    ]
+                }
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "short-stop-loss"}
+
+        settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+                stop_loss_roe_percent=-10.0,
+                soft_stop_roe_percent=-8.0,
+                turnaround_abort_roe_percent=-14.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=settings)
+        session.rest_client = PositionRestClient()
+        self._seed_strategy_owned_live_position(
+            session,
+            symbol="BTCUSDT",
+            side="long",
+            entry_price=50000.0,
+            current_price=50000.0,
+            quantity=0.02,
+        )
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_STOP_LOSS")
+        self.assertEqual(session.live_orders[0]["response"]["orderId"], "short-stop-loss")
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_skips_long_hard_stop_loss_and_uses_soft_stop_with_long_turnaround_mode(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "0.02",
+                            "available": "0.02",
+                            "marginSize": "10",
+                            "unrealizedPL": "-1.1",
+                            "marginRatio": "0.1",
+                            "breakEvenPrice": "50000.0",
+                            "openPriceAvg": "50000.0",
+                            "uTime": "1234568902",
+                            "cTime": "1234568902",
+                        }
+                    ]
+                }
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "long-soft-stop"}
+
+        settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+                stop_loss_roe_percent=-10.0,
+                soft_stop_roe_percent=-8.0,
+                turnaround_abort_roe_percent=-14.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=settings)
+        session.rest_client = PositionRestClient()
+        self._seed_strategy_owned_live_position(
+            session,
+            symbol="BTCUSDT",
+            side="long",
+            entry_price=50000.0,
+            current_price=50000.0,
+            quantity=0.02,
+        )
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_SOFT_STOP_LOSS")
+        self.assertEqual(session.live_orders[0]["response"]["orderId"], "long-soft-stop")
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_forces_long_turnaround_abort_before_grace_paths(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+
+            def get_positions(self) -> dict[str, object]:
+                return {
+                    "positions": [
+                        {
+                            "symbol": "BTCUSDT",
+                            "holdSide": "long",
+                            "total": "0.02",
+                            "available": "0.02",
+                            "marginSize": "10",
+                            "unrealizedPL": "-1.5",
+                            "marginRatio": "0.1",
+                            "breakEvenPrice": "50000.0",
+                            "openPriceAvg": "50000.0",
+                            "uTime": "1234568903",
+                            "cTime": "1234568903",
+                        }
+                    ]
+                }
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "long-turnaround-abort"}
+
+        settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+                stop_loss_roe_percent=-10.0,
+                soft_stop_roe_percent=-8.0,
+                turnaround_abort_roe_percent=-14.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=settings)
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_LONG_TURNAROUND_ABORT")
+        self.assertEqual(session.live_orders[0]["response"]["orderId"], "long-turnaround-abort")
+
+    @patch("quant_binance.session.send_telegram_message")
     def test_session_trims_live_position_on_profit_protection_retrace(self, mock_send) -> None:
         class PositionRestClient(FakeRestClient):
             def __init__(self) -> None:
@@ -4122,6 +4300,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         custom_settings = replace(
             self.settings,
+            universe=("BTCUSDT", "ETHUSDT", "SOLUSDT"),
             futures_exposure=replace(
                 self.settings.futures_exposure,
                 major_symbols=(),
@@ -4498,6 +4677,111 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(len(session.live_orders), 1)
         self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_TURNAROUND_TAKE_PROFIT")
         self.assertTrue(session.live_orders[0]["partial_exit"])
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_uses_long_only_turnaround_rebound_threshold_and_fraction(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+                self.snapshots = [
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "long",
+                                "total": "0.02",
+                                "available": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "-1.2",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "openPriceAvg": "50000.0",
+                                "uTime": "1234567899",
+                                "cTime": "1234567899",
+                            }
+                        ]
+                    },
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "long",
+                                "total": "0.02",
+                                "available": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "0.12",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "openPriceAvg": "50000.0",
+                                "uTime": "1234567899",
+                                "cTime": "1234567899",
+                            }
+                        ]
+                    },
+                ]
+                self.position_calls = 0
+
+            def get_positions(self) -> dict[str, object]:
+                index = min(self.position_calls, len(self.snapshots) - 1)
+                self.position_calls += 1
+                return self.snapshots[index]
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "long-rebound-take-profit"}
+
+        settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+                profit_flip_fast_take_profit_roe_percent=1.0,
+                profit_flip_take_profit_fraction=0.5,
+                turnaround_abort_roe_percent=-14.0,
+                soft_stop_roe_percent=-8.0,
+                take_profit_roe_percent=99.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=settings)
+        session.rest_client = PositionRestClient()
+        session.paper_positions["BTCUSDT"] = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+            symbol="BTCUSDT",
+            market="futures",
+            side="long",
+            entry_time=datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc),
+            entry_price=50000.0,
+            current_price=49400.0,
+            quantity_opened=0.02,
+            quantity_remaining=0.02,
+            stop_distance_bps=500.0,
+            active_stop_price=49500.0,
+            best_price=50000.0,
+            worst_price=49400.0,
+            entry_predictability_score=82.0,
+            entry_liquidity_score=0.8,
+            latest_predictability_score=63.0,
+            latest_liquidity_score=0.65,
+            latest_net_expected_edge_bps=7.0,
+            latest_decision_time=datetime.now(tz=timezone.utc),
+            entry_net_expected_edge_bps=12.0,
+            entry_estimated_round_trip_cost_bps=6.0,
+            entry_planned_leverage=5,
+        )
+        session.live_worst_roe_by_identity["BTCUSDT|long|1234567899"] = -14.5
+
+        session.sync_account()
+        session.sync_account()
+
+        self.assertEqual(len(session.live_orders), 1)
+        self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_TURNAROUND_TAKE_PROFIT")
+        self.assertTrue(session.live_orders[0]["partial_exit"])
+        self.assertAlmostEqual(float(session.live_orders[0]["quantity"]), 0.01, places=8)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_session_closes_non_core_position_faster(self, mock_send) -> None:
@@ -5287,6 +5571,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         custom_settings = replace(
             self.settings,
+            universe=("BTCUSDT", "ETHUSDT", "SOLUSDT"),
             futures_exposure=replace(
                 self.settings.futures_exposure,
                 major_symbols=(),
@@ -5489,7 +5774,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         )
 
         self.assertIn("BTCUSDT", session.paper_positions)
-        self.assertEqual(session.closed_trades, [])
+        self.assertEqual(len(session.closed_trades), 0)
         self.assertEqual(session.rest_client.cancelled_orders, [])
         self.assertEqual(session.manual_symbol_cooldowns, {})
         mock_send.assert_not_called()
@@ -6308,7 +6593,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         self.assertEqual(managed, decision)
         self.assertIn("ETHUSDT", session.paper_positions)
-        self.assertEqual(session.closed_trades, [])
+        self.assertEqual(len(session.closed_trades), 0)
         self.assertIsNone(session.futures_reallocation_cooldown_until)
 
     def test_futures_reallocation_triggers_only_for_strict_execution_balance_exception(self) -> None:
@@ -6764,7 +7049,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
             self.assertIn("MAX_CONCURRENT_FUTURES", managed.rejection_reasons)
             self.assertIn("ETHUSDT", session.paper_positions)
             self.assertTrue(session.paper_positions["ETHUSDT"].exchange_synced)
-            self.assertEqual(session.closed_trades, [])
+            self.assertEqual(len(session.closed_trades), 0)
             self.assertIsNone(session.futures_reallocation_cooldown_until)
 
             events = session.log_store.read("futures_reallocation")
