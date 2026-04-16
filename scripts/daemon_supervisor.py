@@ -26,7 +26,8 @@ from pathlib import Path
 # NOTE: keep empty by default for safer behavior. If you really need to bypass
 # persisted runtime guardrails, export QUANT_BYPASS_POLICY_GUARDRAILS=1 before
 # starting the supervisor.
-DEFAULT_LOCKED_UNIVERSE = "PEPEUSDT,DOGEUSDT,SOLUSDT"
+# Keep live scope single-symbol by default unless STACK_UNIVERSE_SYMBOLS overrides it.
+DEFAULT_LOCKED_UNIVERSE = "PEPEUSDT"
 DAEMON_ENV_OVERRIDES: dict[str, str] = {}
 
 

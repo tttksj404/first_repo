@@ -285,7 +285,12 @@ class QuantBinanceCoreTests(unittest.TestCase):
             remaining_portfolio_capacity_usd=1500.0,
             settings=self.settings,
         )
-        self.assertEqual(stop_distance_bps, 45.0)
+        expected_stop_distance_bps = max(
+            self.settings.sizing.atr_multiple_for_stop * 25.0,
+            self.settings.sizing.stop_floor_bps,
+            1.0,
+        )
+        self.assertEqual(stop_distance_bps, expected_stop_distance_bps)
         self.assertEqual(notional, 1500.0)
         self.assertAlmostEqual(quantity_from_notional(notional, 50000.0), 0.03)
 

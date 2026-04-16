@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import tempfile
@@ -173,6 +174,7 @@ class RuntimeRecoveryTests(unittest.TestCase):
             rest_client=FakeRuntimeRestClient(),
         )
 
+    @unittest.skipIf(os.name == "nt", "shell script integration requires sh")
     def test_status_and_report_scripts_prefer_latest_runtime_snapshot(self) -> None:
         runtime_dir = ROOT / "tests" / "tmp_runtime_recovery_reports"
         if runtime_dir.exists():

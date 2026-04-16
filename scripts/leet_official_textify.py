@@ -719,9 +719,6 @@ def build_hwp_picture_ocr_lines_by_bindata_id(hwp_path: Path, xml_path: Path) ->
     if backend is None:
         return {}
 
-    if olefile is None:
-        return {}
-
     root = ET.parse(xml_path).getroot()
     bindata_refs = extract_hwp_bindata_refs(root)
     if not bindata_refs:
