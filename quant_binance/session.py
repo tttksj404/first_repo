@@ -324,6 +324,7 @@ class LivePaperSession:
     _execution_quality_state: ExecutionQualityState = field(init=False, repr=False)
     session_start_equity_usdt: float | None = field(default=None, init=False)
     _coin_convert_in_progress: bool = field(default=False, init=False)
+    _live_client_oid_counter: int = field(default=0, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.max_portfolio_capacity_usd is None:
@@ -1627,37 +1628,38 @@ class LivePaperSession:
         # trigger a proper re-verdict.  Non-major symbols remain blocked because
         # the rollback verdict still warrants caution outside the core universe.
         # ------------------------------------------------------------------
-        live_snapshot = dict(live_evidence_rejudge.get("current_snapshot", {}) or {})
-        snap_closed_trades = int(live_snapshot.get("closed_trade_count", 0) or 0)
-        snap_live_orders = int(live_snapshot.get("live_order_count", 0) or 0)
-        # Bootstrap-friendly: allow all symbols (not just majors) to break
-        # deadlock, and raise the closed-trade threshold from 0 to <10 so that
-        # symbols with a handful of trades can still accumulate evidence.
-        # Goal: reach 50 trades as fast as possible on a small (~$70-80) book.
-        _BOOTSTRAP_TRADE_THRESHOLD = 10
-        _is_evidence_deadlocked = (
-            effective_verdict == "rollback"
-            and rejudge_status in {"waiting", "blocked"}
-            and snap_closed_trades < _BOOTSTRAP_TRADE_THRESHOLD
-            and snap_live_orders == 0
-            # is_major_symbol check removed — all symbols may bootstrap
-        )
-        if _is_evidence_deadlocked:
-            logger.warning(
-                "[POLICY_DEADLOCK_DETECTED] symbol=%s verdict=%s rejudge_status=%s "
-                "snap_closed_trades=%d snap_live_orders=%d — "
-                "rollback verdict with thin live evidence (<%d trades). "
-                "Allowing bootstrap entry to break the deadlock (size will be capped). "
-                "If this was caused by contaminated inherited positions, check "
-                "closed_trades.jsonl for exit_reason=MANUAL_CLOSE_SYNCED entries "
-                "with entry_policy_bucket_available=false.",
-                decision.symbol,
-                effective_verdict,
-                rejudge_status,
-                snap_closed_trades,
-                snap_live_orders,
-                _BOOTSTRAP_TRADE_THRESHOLD,
+        deadlock_bootstrap_enabled = os.getenv("QUANT_ENABLE_POLICY_DEADLOCK_BOOTSTRAP", "0") == "1"
+        _is_evidence_deadlocked = False
+        if deadlock_bootstrap_enabled:
+            live_snapshot = dict(live_evidence_rejudge.get("current_snapshot", {}) or {})
+            snap_closed_trades = int(live_snapshot.get("closed_trade_count", 0) or 0)
+            snap_live_orders = int(live_snapshot.get("live_order_count", 0) or 0)
+            # Bootstrap-friendly: allow all symbols (not just majors) to break
+            # deadlock, and raise the closed-trade threshold from 0 to <10 so that
+            # symbols with a handful of trades can still accumulate evidence.
+            _BOOTSTRAP_TRADE_THRESHOLD = 10
+            _is_evidence_deadlocked = (
+                effective_verdict == "rollback"
+                and rejudge_status in {"waiting", "blocked"}
+                and snap_closed_trades < _BOOTSTRAP_TRADE_THRESHOLD
+                and snap_live_orders == 0
             )
+            if _is_evidence_deadlocked:
+                logger.warning(
+                    "[POLICY_DEADLOCK_DETECTED] symbol=%s verdict=%s rejudge_status=%s "
+                    "snap_closed_trades=%d snap_live_orders=%d — "
+                    "rollback verdict with thin live evidence (<%d trades). "
+                    "Allowing bootstrap entry to break the deadlock (size will be capped). "
+                    "If this was caused by contaminated inherited positions, check "
+                    "closed_trades.jsonl for exit_reason=MANUAL_CLOSE_SYNCED entries "
+                    "with entry_policy_bucket_available=false.",
+                    decision.symbol,
+                    effective_verdict,
+                    rejudge_status,
+                    snap_closed_trades,
+                    snap_live_orders,
+                    _BOOTSTRAP_TRADE_THRESHOLD,
+                )
 
         rejection_reasons: list[str] = []
         if lifecycle_action in {"rollback", "hold", "re_review"}:
@@ -3676,6 +3678,8 @@ class LivePaperSession:
         cfg = self.runtime.paper_service.settings.live_position_risk
         if not cfg.turnaround_grace_enabled:
             return False
+        if cfg.long_only_turnaround_mode and self._normalize_live_position_side(position) != "long":
+            return False
         if roe_percent > cfg.soft_stop_roe_percent or roe_percent <= cfg.turnaround_abort_roe_percent:
             return False
         paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
@@ -4169,9 +4173,10 @@ class LivePaperSession:
         symbol = str(position.get("symbol", "")).upper()[:12]
         hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()[:5]
         position_token = str(position.get("uTime") or position.get("cTime") or "")[-6:]
-        timestamp_token = str(time.time_ns())[-8:]
+        self._live_client_oid_counter = (self._live_client_oid_counter + 1) % 1000
+        nonce_token = f"{time.time_ns() % 1000000:06d}{self._live_client_oid_counter:03d}"
         normalized_reason = re.sub(r"[^a-z0-9]+", "", reason.lower())[:12]
-        oid = f"{symbol}-{hold_side}-{normalized_reason}-{suffix}-{position_token}-{timestamp_token}"
+        oid = f"{symbol}-{hold_side}-{normalized_reason}-{suffix}-{position_token}-{nonce_token}"
         return oid[:64]
 
     def _reset_live_position_breakeven_protection(self, *, position: dict[str, Any]) -> None:
@@ -4636,9 +4641,9 @@ class LivePaperSession:
             in_core_universe = (
                 symbol in set(self.runtime.paper_service.settings.universe)
                 or is_major_symbol
-                or management_mode == "strategy"
             )
-            hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()
+            hold_side = self._normalize_live_position_side(position)
+            is_long_position = hold_side == "long"
             self._reconcile_live_position_plan_orders(position=position, hold_side=hold_side)
             roe = self._position_roe_percent(position)
             unrealized_pnl = self._position_unrealized_pnl_usd(position)
@@ -4659,7 +4664,16 @@ class LivePaperSession:
                 position=position, identity=identity, roe=roe, peak_roe=peak_roe,
                 hold_side=hold_side, symbol=symbol,
             )
-            if self._standard_stop_loss_exits_enabled() and roe <= cfg.stop_loss_roe_percent:
+            long_turnaround_mode = cfg.long_only_turnaround_mode and is_long_position
+            long_disable_standard_stop = long_turnaround_mode and cfg.long_disable_standard_stop_loss
+            if long_turnaround_mode and roe <= cfg.turnaround_abort_roe_percent:
+                self._close_live_position(position=position, reason="LIVE_POSITION_LONG_TURNAROUND_ABORT")
+                continue
+            if (
+                self._standard_stop_loss_exits_enabled()
+                and not long_disable_standard_stop
+                and roe <= cfg.stop_loss_roe_percent
+            ):
                 self._close_live_position(position=position, reason="LIVE_POSITION_STOP_LOSS")
                 continue
             if margin_ratio >= cfg.margin_ratio_emergency:
@@ -4698,12 +4712,15 @@ class LivePaperSession:
             ):
                 self._close_live_position(position=position, reason="LIVE_POSITION_MAJOR_LOW_SIGNAL_EXIT")
                 continue
-            turnaround_grace = self._live_turnaround_grace_applies(
-                position=position,
-                identity=identity,
-                roe_percent=roe,
-                now=now,
-            )
+            if cfg.long_only_turnaround_mode and not is_long_position:
+                turnaround_grace = False
+            else:
+                turnaround_grace = self._live_turnaround_grace_applies(
+                    position=position,
+                    identity=identity,
+                    roe_percent=roe,
+                    now=now,
+                )
             major_drawdown_grace = self._major_drawdown_grace_applies(
                 position=position,
                 identity=identity,
@@ -4764,6 +4781,7 @@ class LivePaperSession:
                 continue
             if (
                 cfg.turnaround_grace_enabled
+                and (not cfg.long_only_turnaround_mode or is_long_position)
                 and worst_roe <= cfg.soft_stop_roe_percent
                 and roe >= cfg.profit_flip_fast_take_profit_roe_percent
                 and identity not in self.live_turnaround_take_profit_keys
@@ -6202,6 +6220,35 @@ class LivePaperSession:
         )
         return candidate
 
+    def _enforce_configured_universe_guard(self, decision: DecisionIntent) -> DecisionIntent:
+        # Final hard guard before any execution path: block symbols outside configured universe.
+        if os.getenv("QUANT_ENFORCE_CONFIGURED_UNIVERSE_GUARD", "0") != "1":
+            return decision
+        if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
+            return decision
+        if decision.order_intent_notional_usd <= 0.0:
+            return decision
+        allowed_symbols = set(self.runtime.paper_service.settings.universe)
+        if decision.symbol in allowed_symbols:
+            return decision
+        blocked_decision = replace(
+            decision,
+            final_mode="cash",
+            side="flat",
+            order_intent_notional_usd=0.0,
+            stop_distance_bps=0.0,
+            rejection_reasons=tuple(
+                sorted(set(decision.rejection_reasons + ("SYMBOL_NOT_IN_CONFIGURED_UNIVERSE",)))
+            ),
+        )
+        if self.verbose:
+            print(
+                f"[UNIVERSE_GUARD] blocked out-of-universe entry symbol={decision.symbol} "
+                f"allowed={sorted(allowed_symbols)}",
+                flush=True,
+            )
+        return blocked_decision
+
     def _record_decision(
         self,
         *,
@@ -6254,6 +6301,7 @@ class LivePaperSession:
                 net_expected_edge_bps=decision.net_expected_edge_bps,
                 rejection_reasons=restored_reasons,
             )
+        managed_decision = self._enforce_configured_universe_guard(managed_decision)
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
         self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp

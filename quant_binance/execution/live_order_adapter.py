@@ -761,7 +761,7 @@ class DecisionLiveOrderAdapter:
                     protection_error=protection_error,
                 )
             else:
-                if market == "futures" and not protection_orders:
+                if market == "futures" and self._exchange_id() == "bitget" and not protection_orders:
                     protection_error = "NO_PROTECTION_ORDERS_RETURNED"
                     accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
                         decision=decision,

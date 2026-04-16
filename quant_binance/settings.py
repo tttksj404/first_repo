@@ -260,6 +260,8 @@ class LivePositionRiskConfig:
     stop_loss_roe_percent: float
     margin_ratio_emergency: float
     disable_standard_stop_loss_exits: bool = False
+    long_only_turnaround_mode: bool = False
+    long_disable_standard_stop_loss: bool = False
     portfolio_full_exit_only: bool = False
     portfolio_full_exit_profit_ratio: float = 0.0
     turnaround_grace_enabled: bool = True
@@ -382,7 +384,7 @@ class Settings:
     portfolio_focus: PortfolioFocusConfig
     housekeeping: HousekeepingConfig
     strategy_profile: str
-    ensemble_signal_required: bool = True
+    ensemble_signal_required: bool = False
     force_auto_mode: str = ""
     disable_position_adoption: bool = False
     data_collection_mode: bool = False
@@ -458,7 +460,7 @@ class Settings:
             portfolio_focus=PortfolioFocusConfig(**raw["portfolio_focus"]),
             housekeeping=HousekeepingConfig(**raw["housekeeping"]),
             strategy_profile=raw["strategy_profile"],
-            ensemble_signal_required=bool(raw.get("ensemble_signal_required", True)),
+            ensemble_signal_required=bool(raw.get("ensemble_signal_required", False)),
             force_auto_mode=str(raw.get("force_auto_mode", "") or ""),
             disable_position_adoption=bool(raw.get("disable_position_adoption", False)),
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
