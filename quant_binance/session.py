@@ -4867,6 +4867,7 @@ class LivePaperSession:
             )
             if (
                 self._standard_stop_loss_exits_enabled()
+                and not long_disable_standard_stop
                 and roe <= cfg.soft_stop_roe_percent
                 and not turnaround_grace
                 and not major_drawdown_grace
