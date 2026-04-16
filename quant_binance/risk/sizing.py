@@ -33,9 +33,11 @@ def select_futures_leverage(
     risk = settings.risk
     max_leverage = max(1, int(math.ceil(risk.max_futures_leverage)))
     target_leverage = max(1, min(int(math.ceil(risk.target_futures_leverage)), max_leverage))
-    # Per-coin optimal leverage from $100 MC validation (374d)
+    # Optional per-coin leverage profile. Keep disabled for general profiles
+    # to preserve deterministic profile-level leverage behavior.
     cp = get_profile(symbol)
-    if is_profiled(symbol):
+    enable_profiled_leverage = settings.strategy_profile in {"autoresearch-leverage-strong"}
+    if enable_profiled_leverage and is_profiled(symbol):
         target_leverage = max(target_leverage, min(cp.optimal_leverage, max_leverage))
     elif settings.strategy_profile == "live-ultra-aggressive":
         if symbol == "ETHUSDT":

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import unittest
@@ -284,6 +285,7 @@ class QuantBinanceOpsTests(unittest.TestCase):
         self.assertEqual(snapshot["active_guards"]["stall_restart_budget_remaining"], 0)
         self.assertEqual(snapshot["recent_events"][-1]["status"], "suppressed")
 
+    @unittest.skipIf(os.name == "nt", "shell script integration requires sh")
     def test_quant_report_script_prints_split_futures_position_fields_without_legacy_ambiguity(self) -> None:
         summary = build_runtime_summary(
             decisions=[],
@@ -328,6 +330,7 @@ class QuantBinanceOpsTests(unittest.TestCase):
         self.assertNotIn("\nopen_futures_positions:", output)
         self.assertNotIn("\nlive_positions:", output)
 
+    @unittest.skipIf(os.name == "nt", "shell script integration requires sh")
     def test_quant_status_script_prints_split_futures_position_fields(self) -> None:
         summary = build_runtime_summary(
             decisions=[],

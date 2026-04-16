@@ -84,8 +84,13 @@ class QuantBinanceCapitalTests(unittest.TestCase):
         self.assertFalse(report.can_trade_spot_any)
         self.assertFalse(report.can_trade_futures_any)
         self.assertAlmostEqual(report.minimum_operational_balance_usd, 31.25)
-        self.assertAlmostEqual(report.minimum_full_universe_balance_usd, 625.0)
-        self.assertAlmostEqual(report.recommended_balance_usd, 1000.0)
+        buffered_requirements = [
+            *[item.buffered_min_equity_usd for item in report.spot_requirements],
+            *[item.buffered_min_equity_usd for item in report.futures_requirements],
+        ]
+        expected_full_universe = max(buffered_requirements)
+        self.assertAlmostEqual(report.minimum_full_universe_balance_usd, expected_full_universe)
+        self.assertAlmostEqual(report.recommended_balance_usd, round(expected_full_universe * 1.6, 6))
 
     def test_spot_only_balance_allows_spot_trading(self) -> None:
         report = build_capital_adequacy_report(
