@@ -184,8 +184,12 @@ def checkpoint_replay_provenance(info: dict[str, Any] | None) -> dict[str, objec
         evidence_source == "policy_bucket" and evidence_policy_bucket != "not_available"
     )
     uses_direct_bucket_replay = has_bucket_reference
-    uses_projected_evidence = not has_bucket_reference
-    uses_mixed_root_summary_fallback = "mixed" in evidence_source or "fallback" in evidence_source
+    uses_mixed_root_summary_fallback = (
+        evidence_source in {"root", "summary_artifact", "strategy_comparison_recent_summary"}
+        or "mixed" in evidence_source
+        or "fallback" in evidence_source
+    )
+    uses_projected_evidence = not has_bucket_reference and not uses_mixed_root_summary_fallback
     has_runtime_summary_anchor = (
         "runtime_summary" in evidence_source or "summary_artifact" in evidence_source
     )
@@ -194,6 +198,10 @@ def checkpoint_replay_provenance(info: dict[str, Any] | None) -> dict[str, objec
         classification = "bucket_replay_evidence"
         reason_code = "CHECKPOINT_BUCKET_REPLAY_SOURCE"
         decision_surface = evidence_policy_bucket
+    elif uses_mixed_root_summary_fallback:
+        classification = "mixed_root_summary_fallback"
+        reason_code = "root"
+        decision_surface = "not_available"
     else:
         classification = "projected_evidence"
         reason_code = "PROJECTED_CHECKPOINT_REPLAY_SOURCE"
@@ -211,4 +219,25 @@ def checkpoint_replay_provenance(info: dict[str, Any] | None) -> dict[str, objec
         "uses_direct_bucket_replay": uses_direct_bucket_replay,
         "uses_mixed_root_summary_fallback": uses_mixed_root_summary_fallback,
         "uses_projected_evidence": uses_projected_evidence,
+    }
+
+
+def build_replay_provenance() -> dict[str, object]:
+    """Return a stable fallback replay provenance payload.
+
+    Several reporting paths use this as a no-data/default replay provenance.
+    Keep the shape aligned with other provenance builders.
+    """
+    return {
+        "classification": "mixed_root_summary_fallback",
+        "decision_surface": "not_available",
+        "has_bucket_reference": False,
+        "has_runtime_summary_anchor": True,
+        "policy_bucket": "not_available",
+        "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+        "source": "root",
+        "summary": "mixed_root_summary_fallback:root",
+        "uses_direct_bucket_replay": False,
+        "uses_mixed_root_summary_fallback": True,
+        "uses_projected_evidence": False,
     }

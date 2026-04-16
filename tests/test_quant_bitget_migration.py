@@ -9,6 +9,7 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from quant_binance.exchange import ExchangeCredentials, resolve_exchange_id, runtime_readiness
+from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.execution.bitget_rest import BitgetRestClient, sign_bitget_request
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
@@ -656,7 +657,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertIsNotNone(capped_params)
         assert capped_params is not None
         self.assertEqual(capped_decision.order_intent_notional_usd, 8.386198)
-        self.assertEqual(capped_params["marginMode"], "crossed")
+        self.assertEqual(capped_params["marginMode"], resolve_bitget_margin_mode())
         self.assertEqual(capped_params["size"], "0.00016772")
         self.assertLess(float(capped_params["size"]), float(uncapped_params["size"]))
 
