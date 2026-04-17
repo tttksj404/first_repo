@@ -5,10 +5,16 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from quant_binance.performance_report import build_runtime_performance_report
+from quant_binance.performance_report import (
+    _SEEN_CONTAMINATION_WARNINGS,
+    build_runtime_performance_report,
+)
 
 
 class QuantBinancePerformanceReportTests(unittest.TestCase):
+    def setUp(self) -> None:
+        _SEEN_CONTAMINATION_WARNINGS.clear()
+
     def test_build_runtime_performance_report_aggregates_symbol_expectancy_and_regimes(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             run_dir = Path(tempdir) / "paper-live-shell" / "run-a"
@@ -94,6 +100,34 @@ class QuantBinancePerformanceReportTests(unittest.TestCase):
             recs = {row["symbol"]: row for row in report.pruning_recommendations}
             self.assertEqual(recs["BTCUSDT"]["recommendation"], "keep")
             self.assertEqual(recs["ETHUSDT"]["recommendation"], "keep")
+
+    def test_build_runtime_performance_report_logs_contamination_warning_once_per_run(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            run_dir = Path(tempdir) / "paper-live-shell" / "run-b"
+            logs_dir = run_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "summary.json").write_text("{}", encoding="utf-8")
+            (logs_dir / "closed_trades.jsonl").write_text(
+                json.dumps(
+                    {
+                        "symbol": "PEPEUSDT",
+                        "realized_pnl_usd_estimate": 1.0,
+                        "realized_return_bps_estimate": 10.0,
+                        "entry_policy_bucket_available": False,
+                        "exit_reason": "MANUAL_CLOSE_SYNCED",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs_dir / "decisions.jsonl").write_text("", encoding="utf-8")
+
+            with self.assertLogs("quant_binance.performance_report", level="WARNING") as captured:
+                build_runtime_performance_report(run_dir=run_dir)
+                build_runtime_performance_report(run_dir=run_dir)
+
+            self.assertEqual(len(captured.records), 1)
+            self.assertIn("POLICY_VALIDATION_CONTAMINATION", captured.output[0])
 
 
 if __name__ == "__main__":
