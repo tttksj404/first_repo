@@ -288,6 +288,8 @@ class LivePositionRiskConfig:
     major_drawdown_signal_max_age_minutes: int = 30
     profit_flip_fast_take_profit_roe_percent: float = 2.0
     profit_flip_take_profit_fraction: float = 0.25
+    short_profit_flip_fast_take_profit_roe_percent: float = 0.0
+    short_profit_flip_take_profit_fraction: float = 0.0
     position_unrealized_profit_arm_usd: float = 8.0
     position_unrealized_profit_retrace_usd: float = 3.0
     position_unrealized_take_profit_fraction: float = 0.25
@@ -299,6 +301,8 @@ class LivePositionRiskConfig:
     major_partial_exit_fraction: float = 0.5
     major_profit_protection_arm_roe_percent: float = 12.0
     major_profit_protection_retrace_roe_percent: float = 4.5
+    short_profit_protection_arm_roe_percent: float = 0.0
+    short_profit_protection_retrace_roe_percent: float = 0.0
     major_low_signal_max_holding_minutes: int = 0
     major_low_signal_min_unrealized_usd: float = 0.0
     major_low_signal_min_roe_percent: float = 0.0

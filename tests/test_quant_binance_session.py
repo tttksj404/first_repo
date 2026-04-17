@@ -4923,6 +4923,46 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(any("LIVE_POSITION_PROFIT_PROTECTION" in call.args[0] for call in mock_send.call_args_list))
 
     @patch("quant_binance.session.send_telegram_message")
+    def test_session_uses_short_specific_profit_protection_thresholds(self, mock_send) -> None:
+        custom_settings = replace(
+            self.settings,
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                major_profit_protection_arm_roe_percent=99.0,
+                major_profit_protection_retrace_roe_percent=99.0,
+                short_profit_protection_arm_roe_percent=10.0,
+                short_profit_protection_retrace_roe_percent=2.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=custom_settings)
+
+        arm_threshold, retrace_threshold = session._live_profit_protection_thresholds(
+            hold_side="short",
+            is_major_symbol=True,
+        )
+        self.assertEqual(arm_threshold, 10.0)
+        self.assertEqual(retrace_threshold, 2.0)
+        self.assertTrue(
+            session._profit_protection_partial_triggered(
+                peak_roe_percent=12.0,
+                current_roe_percent=9.0,
+                retrace_taken=False,
+                arm_threshold=arm_threshold,
+                retrace_threshold=retrace_threshold,
+            )
+        )
+        self.assertFalse(
+            session._profit_protection_partial_triggered(
+                peak_roe_percent=11.0,
+                current_roe_percent=9.5,
+                retrace_taken=False,
+                arm_threshold=arm_threshold,
+                retrace_threshold=retrace_threshold,
+            )
+        )
+
+    @patch("quant_binance.session.send_telegram_message")
     def test_session_does_not_trim_live_position_on_small_profit_retrace_noise(self, mock_send) -> None:
         class PositionRestClient(FakeRestClient):
             def __init__(self) -> None:
@@ -5461,6 +5501,117 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_TURNAROUND_TAKE_PROFIT")
         self.assertTrue(session.live_orders[0]["partial_exit"])
         self.assertAlmostEqual(float(session.live_orders[0]["quantity"]), 0.01, places=8)
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_session_uses_short_turnaround_rebound_threshold_and_full_exit(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+                self.snapshots = [
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "short",
+                                "total": "0.02",
+                                "available": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "-0.9",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "openPriceAvg": "50000.0",
+                                "uTime": "1234567898",
+                                "cTime": "1234567898",
+                            }
+                        ]
+                    },
+                    {
+                        "positions": [
+                            {
+                                "symbol": "BTCUSDT",
+                                "holdSide": "short",
+                                "total": "0.02",
+                                "available": "0.02",
+                                "marginSize": "10",
+                                "unrealizedPL": "0.2",
+                                "marginRatio": "0.1",
+                                "breakEvenPrice": "50000.0",
+                                "openPriceAvg": "50000.0",
+                                "uTime": "1234567898",
+                                "cTime": "1234567898",
+                            }
+                        ]
+                    },
+                ]
+                self.position_calls = 0
+
+            def get_positions(self) -> dict[str, object]:
+                index = min(self.position_calls, len(self.snapshots) - 1)
+                self.position_calls += 1
+                return self.snapshots[index]
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "short-rebound-take-profit"}
+
+        settings = replace(
+            self.settings,
+            universe=("BTCUSDT", "ETHUSDT", "SOLUSDT"),
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                major_symbols=("BTCUSDT",),
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+                short_profit_flip_fast_take_profit_roe_percent=1.5,
+                short_profit_flip_take_profit_fraction=1.0,
+                turnaround_abort_roe_percent=-14.0,
+                soft_stop_roe_percent=-8.0,
+                stop_loss_roe_percent=-20.0,
+                take_profit_roe_percent=99.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(settings=settings)
+        session.rest_client = PositionRestClient()
+        session.paper_positions["BTCUSDT"] = __import__("quant_binance.session", fromlist=["PaperPosition"]).PaperPosition(
+            symbol="BTCUSDT",
+            market="futures",
+            side="short",
+            entry_time=datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc),
+            entry_price=50000.0,
+            current_price=50600.0,
+            quantity_opened=0.02,
+            quantity_remaining=0.02,
+            stop_distance_bps=500.0,
+            active_stop_price=50500.0,
+            best_price=50000.0,
+            worst_price=50600.0,
+            entry_predictability_score=82.0,
+            entry_liquidity_score=0.8,
+            latest_predictability_score=63.0,
+            latest_liquidity_score=0.65,
+            latest_net_expected_edge_bps=7.0,
+            latest_decision_time=datetime.now(tz=timezone.utc),
+            entry_net_expected_edge_bps=12.0,
+            entry_estimated_round_trip_cost_bps=6.0,
+            entry_planned_leverage=5,
+        )
+        session.live_worst_roe_by_identity["BTCUSDT|short|1234567898"] = -9.5
+
+        session.sync_account()
+        session.sync_account()
+
+        matching_orders = [order for order in session.live_orders if order["reason"] == "LIVE_POSITION_TURNAROUND_TAKE_PROFIT"]
+        self.assertTrue(matching_orders)
+        self.assertFalse(matching_orders[-1]["partial_exit"])
+        self.assertAlmostEqual(float(matching_orders[-1]["quantity"]), 0.02, places=8)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_session_closes_non_core_position_faster(self, mock_send) -> None:
