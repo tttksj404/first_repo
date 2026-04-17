@@ -217,7 +217,7 @@ class ManualAdoptionRegressionTests(unittest.TestCase):
         self.assertEqual(restored.origin, "strategy_recovered")
         self.assertEqual(restored.adoption_source, "")
 
-    def test_pepe_adopted_position_is_strategy_managed_for_live_context(self) -> None:
+    def test_pepe_adopted_position_stays_observe_only_for_live_context(self) -> None:
         session = self._build_session(symbol="PEPEUSDT", last_trade_price=0.0000038)
         session.runtime.paper_service.settings = replace(  # type: ignore[assignment]
             session.runtime.paper_service.settings,
@@ -253,7 +253,116 @@ class ManualAdoptionRegressionTests(unittest.TestCase):
             now=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
         )
         self.assertIsNotNone(paper_position)
-        self.assertEqual(mode, "strategy")
+        self.assertIn(mode, {"adopted", "adopted_grace"})
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_pepe_adopted_position_does_not_auto_close_under_live_risk_management(self, mock_send) -> None:
+        class PositionRestClient(BitgetRestClient):
+            def __init__(self) -> None:
+                super().__init__(credentials=None)
+                self.placed_orders: list[tuple[str, dict[str, object]]] = []
+                self.snapshots = [
+                    {
+                        "positions": [
+                            {
+                                "symbol": "PEPEUSDT",
+                                "holdSide": "long",
+                                "total": "418358000",
+                                "available": "418358000",
+                                "marginSize": "53.3",
+                                "unrealizedPL": "-2.0",
+                                "marginRatio": "0.1",
+                                "openPriceAvg": "0.00000395278646",
+                                "markPrice": "0.0000039462",
+                                "leverage": "30",
+                                "cTime": "1776392102773",
+                                "uTime": "1776392200000",
+                            }
+                        ]
+                    },
+                    {
+                        "positions": [
+                            {
+                                "symbol": "PEPEUSDT",
+                                "holdSide": "long",
+                                "total": "418358000",
+                                "available": "418358000",
+                                "marginSize": "53.3",
+                                "unrealizedPL": "-2.4",
+                                "marginRatio": "0.1",
+                                "openPriceAvg": "0.00000395278646",
+                                "markPrice": "0.0000039448",
+                                "leverage": "30",
+                                "cTime": "1776392102773",
+                                "uTime": "1776392300000",
+                            }
+                        ]
+                    },
+                    {
+                        "positions": [
+                            {
+                                "symbol": "PEPEUSDT",
+                                "holdSide": "long",
+                                "total": "418358000",
+                                "available": "418358000",
+                                "marginSize": "53.3",
+                                "unrealizedPL": "-8.6",
+                                "marginRatio": "0.1",
+                                "openPriceAvg": "0.00000395278646",
+                                "markPrice": "0.0000039324",
+                                "leverage": "30",
+                                "cTime": "1776392102773",
+                                "uTime": "1776392434470",
+                            }
+                        ]
+                    },
+                ]
+                self.position_calls = 0
+
+            def get_account(self, *, market: str) -> dict[str, object]:
+                return {"market": market, "balance": 1000}
+
+            def get_open_orders(self, *, market: str, symbol: str | None = None) -> dict[str, object]:
+                return {"market": market, "orders": []}
+
+            def get_positions(self) -> dict[str, object]:
+                index = min(self.position_calls, len(self.snapshots) - 1)
+                self.position_calls += 1
+                return self.snapshots[index]
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                raise AssertionError("adopted manual position should remain observe-only")
+
+        settings = replace(
+            self.settings,
+            universe=("PEPEUSDT",),
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                major_symbols=("PEPEUSDT",),
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=True,
+                long_disable_standard_stop_loss=True,
+                turnaround_abort_roe_percent=-14.0,
+                soft_stop_roe_percent=-8.0,
+                stop_loss_roe_percent=-10.0,
+            ),
+        )
+        mock_send.return_value = {"ok": True}
+        session = self._build_session(symbol="PEPEUSDT", last_trade_price=0.0000039324)
+        session.runtime.paper_service.settings = settings  # type: ignore[assignment]
+        session.rest_client = PositionRestClient()
+
+        session.sync_account()
+        session.sync_account()
+        session.sync_account()
+
+        self.assertIn("PEPEUSDT", session.paper_positions)
+        self.assertEqual(session.paper_positions["PEPEUSDT"].origin, "adopted")
+        self.assertEqual(session.rest_client.placed_orders, [])
+        self.assertEqual(session.live_orders, [])
 
 
 if __name__ == "__main__":

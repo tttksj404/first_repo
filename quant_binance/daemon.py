@@ -97,6 +97,65 @@ def _bootstrap_decision_time(*, store, interval_minutes: int):
     )
 
 
+def _runtime_snapshot_futures_position_keys(
+    *,
+    state_payload: dict[str, Any],
+    summary_payload: dict[str, Any] | None,
+) -> set[tuple[str, str]]:
+    summary = summary_payload or {}
+    candidate_positions = (
+        state_payload.get("paper_open_futures_positions")
+        or summary.get("paper_open_futures_positions")
+        or summary.get("open_futures_positions")
+        or []
+    )
+    keys: set[tuple[str, str]] = set()
+    for item in candidate_positions:
+        if not isinstance(item, dict):
+            continue
+        symbol = str(item.get("symbol", "") or "").strip()
+        side = str(item.get("side", "") or item.get("holdSide", "") or "").strip().lower()
+        if not symbol:
+            continue
+        keys.add((symbol, side))
+    return keys
+
+
+def _enforce_strict_startup_position_block(
+    *,
+    session: LivePaperSession,
+    enabled: bool,
+    state_payload: dict[str, Any],
+    summary_payload: dict[str, Any] | None,
+) -> None:
+    if not enabled:
+        return
+    live_positions = session._active_live_futures_positions_by_symbol()
+    if not live_positions:
+        return
+    # Only block live positions that cannot be tied back to the previous runtime
+    # snapshot. Snapshot-matched positions remain eligible for strategy recovery.
+    snapshot_keys = _runtime_snapshot_futures_position_keys(
+        state_payload=state_payload,
+        summary_payload=summary_payload,
+    )
+    unexpected: list[str] = []
+    for symbol, position in sorted(live_positions.items()):
+        side = session._normalize_live_position_side(position)
+        key = (symbol, side)
+        wildcard_key = (symbol, "")
+        if key in snapshot_keys or wildcard_key in snapshot_keys:
+            continue
+        unexpected.append(f"{symbol}:{side}" if side else symbol)
+    if unexpected:
+        joined = ", ".join(unexpected)
+        raise RuntimeError(
+            "STRICT_STARTUP_POSITION_BLOCK: found live startup position(s) that are not present in the "
+            "previous runtime snapshot while disable_position_adoption=true. Refusing startup for "
+            f"unknown/external positions. Symbols: {joined}"
+        )
+
+
 def _build_live_ws_client(
     *,
     exchange_id: str,
@@ -347,6 +406,7 @@ def run_live_paper_daemon(
         log_store = JsonlLogStore(
             run_paths.root / "logs",
             max_bytes_per_stream=settings.housekeeping.max_log_bytes_per_stream if settings.housekeeping.enabled else None,
+            mirror_roots=[Path(output_base_dir) / "forensics"],
         )
         session = LivePaperSession(
             runtime=runtime,
@@ -414,6 +474,12 @@ def run_live_paper_daemon(
                     )
                 print("[daemon] WARNING: could not detect account equity — keeping $10,000 default. Check API credentials.")
             previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
+            _enforce_strict_startup_position_block(
+                session=session,
+                enabled=settings.disable_position_adoption,
+                state_payload=previous_state,
+                summary_payload=previous_summary,
+            )
             session.restore_futures_state_from_runtime(
                 state_payload=previous_state,
                 summary_payload=previous_summary,

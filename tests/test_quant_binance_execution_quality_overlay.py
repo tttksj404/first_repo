@@ -162,7 +162,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         self.assertGreater(restrained.order_intent_notional_usd, 0.0)
         self.assertEqual(restrained.execution_quality_trade_restraint, "none")
         self.assertNotIn("EXECUTION_QUALITY_RESTRAINT", restrained.rejection_reasons)
-        self.assertLess(restrained.execution_quality_size_multiplier, 1.0)
+        self.assertEqual(restrained.execution_quality_size_multiplier, 1.0)
 
     def test_overlay_halts_when_bad_execution_persists_beyond_minimum_sample_size(self) -> None:
         state = ExecutionQualityState()
@@ -213,7 +213,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         )
         self.assertEqual(degraded.final_mode, "futures")
         self.assertEqual(degraded.execution_quality_trade_restraint, "none")
-        self.assertLess(degraded.execution_quality_size_multiplier, 1.0)
+        self.assertEqual(degraded.execution_quality_size_multiplier, 1.0)
 
         for index in range(8):
             state.record(
@@ -311,7 +311,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
 
         self.assertEqual(futures_binance.final_mode, "futures")
         self.assertEqual(futures_binance.execution_quality_trade_restraint, "none")
-        self.assertLess(futures_binance.execution_quality_size_multiplier, 1.0)
+        self.assertEqual(futures_binance.execution_quality_size_multiplier, 1.0)
         self.assertEqual(spot_binance.final_mode, "spot")
         self.assertEqual(spot_binance.execution_quality_trade_restraint, "none")
         self.assertEqual(spot_binance.execution_quality_sample_size, 0)
@@ -364,7 +364,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
         )
 
         self.assertEqual(active_overlay.trade_restraint, "none")
-        self.assertLess(active_overlay.size_multiplier, 1.0)
+        self.assertEqual(active_overlay.size_multiplier, 1.0)
         self.assertEqual(staged_overlay.trade_restraint, "none")
         self.assertGreaterEqual(staged_overlay.sample_size, 3)
 
@@ -463,7 +463,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
 
         self.assertEqual(degraded_btc.final_mode, "futures")
         self.assertEqual(degraded_btc.execution_quality_trade_restraint, "none")
-        self.assertLess(degraded_btc.execution_quality_size_multiplier, 1.0)
+        self.assertEqual(degraded_btc.execution_quality_size_multiplier, 1.0)
         self.assertEqual(healthy_eth.final_mode, "futures")
         self.assertEqual(healthy_eth.execution_quality_trade_restraint, "none")
         self.assertEqual(healthy_eth.execution_quality_size_multiplier, 1.0)
@@ -517,7 +517,7 @@ class QuantBinanceExecutionQualityOverlayTests(unittest.TestCase):
             )
 
             self.assertEqual(futures_overlay.trade_restraint, "none")
-            self.assertLess(futures_overlay.size_multiplier, 1.0)
+            self.assertEqual(futures_overlay.size_multiplier, 1.0)
             self.assertEqual(spot_overlay.trade_restraint, "none")
             self.assertGreaterEqual(spot_overlay.sample_size, 3)
 

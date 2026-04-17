@@ -3974,8 +3974,6 @@ class LivePaperSession:
         if paper_position is None:
             return None, "pending_external_adoption"
         if paper_position.is_adopted():
-            if self._is_strategy_managed_adopted_position(position=paper_position):
-                return paper_position, "strategy"
             if paper_position.adoption_grace_active(now=now):
                 return paper_position, "adopted_grace"
             return paper_position, "adopted"
@@ -5072,6 +5070,8 @@ class LivePaperSession:
         for position in self.live_positions_snapshot:
             symbol = str(position.get("symbol", ""))
             _, management_mode = self._live_position_management_context(position=position, now=now)
+            if management_mode in {"adopted", "adopted_grace"}:
+                continue
             is_major_symbol = self._is_major_futures_symbol(symbol)
             in_core_universe = (
                 symbol in set(self.runtime.paper_service.settings.universe)
@@ -5931,11 +5931,7 @@ class LivePaperSession:
         position: PaperPosition,
         decision: DecisionIntent,
     ) -> bool:
-        return (
-            self._is_strategy_managed_adopted_position(position=position)
-            and decision.final_mode == position.market
-            and decision.side in {"long", "short"}
-        )
+        return False
 
     def _apply_paper_trade_management(
         self,
