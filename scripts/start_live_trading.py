@@ -120,6 +120,19 @@ def _clear_stop_files(project_root: Path, components: list[dict[str, str]]) -> N
             pass
 
 
+def _rotate_runtime_logs(project_root: Path) -> None:
+    runtime = project_root / "quant_runtime"
+    archive_dir = runtime / "archive"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    for name in ("_live_auto_trade_live_restart.log", "_live_auto_trade_live_restart.err.log"):
+        path = runtime / name
+        if path.exists() and path.stat().st_size > 0:
+            archived = archive_dir / f"{name}.{stamp}"
+            path.replace(archived)
+        path.touch(exist_ok=True)
+
+
 def _launch(project_root: Path, script_rel: str) -> str:
     script_path = (project_root / script_rel).as_posix()
     cmd = (
@@ -158,6 +171,7 @@ def main() -> int:
         print("Stop them first:  python scripts/stop_live_trading.py")
         return 2
 
+    _rotate_runtime_logs(project_root)
     _clear_stop_files(project_root, components)
 
     pid_log = project_root / "quant_runtime" / "_stack_launch.log"

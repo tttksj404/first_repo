@@ -40,7 +40,7 @@ def _tail(path: Path, n: int = 200) -> list[str]:
     if not path.exists():
         return []
     try:
-        data = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        data = path.read_text(encoding="utf-8", errors="replace").replace("\x00", "").splitlines()
     except Exception:
         return []
     return data[-n:]

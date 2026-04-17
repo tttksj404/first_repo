@@ -31,26 +31,30 @@ DEFAULT_LOCKED_UNIVERSE = "PEPEUSDT"
 DAEMON_ENV_OVERRIDES: dict[str, str] = {}
 
 
-DAEMON_CMD = [
-    sys.executable,
-    "-m",
-    "quant_binance.runtime",
-    "--mode",
-    "live-auto-trade-daemon",
-    "--exchange",
-    "bitget",
-    "--output-base",
-    "quant_runtime",
-    "--max-retries",
-    "999999",
-    "--sync-interval-seconds",
-    "60",
-    "--insecure-ssl",
-    "--equity-usd",
-    "40",
-    "--ack-live-risk",
-    "I_UNDERSTAND_LIVE_TRADING",
-]
+DEFAULT_EQUITY_USD = "25"
+
+
+def _daemon_cmd(*, equity_usd: str) -> list[str]:
+    return [
+        sys.executable,
+        "-m",
+        "quant_binance.runtime",
+        "--mode",
+        "live-auto-trade-daemon",
+        "--exchange",
+        "bitget",
+        "--output-base",
+        "quant_runtime",
+        "--max-retries",
+        "999999",
+        "--sync-interval-seconds",
+        "60",
+        "--insecure-ssl",
+        "--equity-usd",
+        equity_usd,
+        "--ack-live-risk",
+        "I_UNDERSTAND_LIVE_TRADING",
+    ]
 
 
 def _log(msg: str, log_path: Path) -> None:
@@ -66,6 +70,22 @@ def _log(msg: str, log_path: Path) -> None:
 
 def _truthy(value: str | None) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _read_stderr_chunk(*, stderr_path: Path, start_offset: int) -> str:
+    try:
+        with stderr_path.open("rb") as handle:
+            handle.seek(max(0, start_offset))
+            return handle.read().decode("utf-8", errors="ignore")
+    except FileNotFoundError:
+        return ""
+
+
+def _extract_strict_startup_block(stderr_chunk: str) -> str | None:
+    lines = [line.strip() for line in stderr_chunk.splitlines() if "STRICT_STARTUP_POSITION_BLOCK" in line]
+    if not lines:
+        return None
+    return lines[-1]
 
 
 def main() -> int:
@@ -91,6 +111,7 @@ def main() -> int:
 
         stdout_path = runtime / "_live_auto_trade_live_restart.log"
         stderr_path = runtime / "_live_auto_trade_live_restart.err.log"
+        stderr_size_before = stderr_path.stat().st_size if stderr_path.exists() else 0
         # Append mode so log history accumulates across restarts
         stdout_f = stdout_path.open("a", encoding="utf-8", buffering=1)
         stderr_f = stderr_path.open("a", encoding="utf-8", buffering=1)
@@ -110,8 +131,18 @@ def main() -> int:
             else:
                 child_env.pop("QUANT_BYPASS_POLICY_GUARDRAILS", None)
                 _log("runtime policy guardrail bypass disabled (default safe mode)", supervisor_log)
+            equity_usd = str(child_env.get("STACK_EQUITY_USD", DEFAULT_EQUITY_USD)).strip() or DEFAULT_EQUITY_USD
+            try:
+                if float(equity_usd) <= 0:
+                    raise ValueError
+            except ValueError:
+                equity_usd = DEFAULT_EQUITY_USD
+                _log(
+                    f"invalid STACK_EQUITY_USD; fallback to default equity_usd={DEFAULT_EQUITY_USD}",
+                    supervisor_log,
+                )
             proc = subprocess.Popen(
-                DAEMON_CMD,
+                _daemon_cmd(equity_usd=equity_usd),
                 cwd=str(root),
                 stdout=stdout_f,
                 stderr=stderr_f,
@@ -131,6 +162,22 @@ def main() -> int:
         exit_code = proc.wait()
         stdout_f.close()
         stderr_f.close()
+        strict_startup_block = _extract_strict_startup_block(
+            _read_stderr_chunk(stderr_path=stderr_path, start_offset=stderr_size_before)
+        )
+        if strict_startup_block:
+            _log(
+                "startup blocked by an unknown/external exchange position while "
+                "disable_position_adoption=true; supervisor will not auto-restart until you resolve it.",
+                supervisor_log,
+            )
+            _log(strict_startup_block, supervisor_log)
+            _log(
+                "Resolve the listed symbol on the exchange first, or restore a matching runtime snapshot, "
+                "then run: python scripts/start_live_trading.py",
+                supervisor_log,
+            )
+            return 3
         _log(f"daemon pid={proc.pid} exited with code {exit_code}; restarting in 5s", supervisor_log)
         time.sleep(5)
 

@@ -510,8 +510,8 @@ class ExecutionQualityState:
         leverage_reduction += _quality_scale(effective.avg_slippage_bps, start=6.0, span=14.0, cap=0.12)
         leverage_reduction += _quality_scale(retention_gap, start=0.15, span=0.6, cap=0.18)
         leverage_reduction += _quality_scale(effective.protection_degraded_rate, start=0.18, span=0.52, cap=0.16)
-        # Floor: never reduce below 85% to protect minimum viable position size
-        _SIZE_FLOOR = 0.85
+        # S4 mode: keep full notional sizing unless trade_restraint triggers a hard halt.
+        _SIZE_FLOOR = 1.0
         _LEVERAGE_FLOOR = 0.85
         size_multiplier = max(size_multiplier, _SIZE_FLOOR)
         leverage_multiplier = _clamp(1.0 - leverage_reduction, _LEVERAGE_FLOOR, 1.0)

@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from quant_binance.daemon import run_live_paper_daemon
+from quant_binance.daemon import _enforce_strict_startup_position_block, run_live_paper_daemon
 from quant_binance.data.market_store import MarketStateStore
 from quant_binance.data.state import SymbolMarketState, TopOfBook
 from quant_binance.execution.router import ExecutionRouter
@@ -308,25 +308,37 @@ class RuntimeRecoveryTests(unittest.TestCase):
         self.assertIn("ADAUSDT", result["summary"]["paper_symbols"])
         self.assertEqual(result["summary"]["missing_in_paper_counts"], {})
 
-    def test_run_live_paper_daemon_immediately_adopts_live_positions_missing_from_previous_runtime_snapshot(self) -> None:
-        with tempfile.TemporaryDirectory() as output_dir:
-            previous_run = Path(output_dir) / "output" / "paper-live-shell" / "20260313-previous"
-            previous_run.mkdir(parents=True, exist_ok=True)
-            previous_summary = build_runtime_summary(decisions=[])
-            write_runtime_summary(previous_run / "summary.json", previous_summary)
-            write_runtime_state(previous_run / "summary.state.json", {})
+    def test_strict_startup_block_rejects_live_positions_missing_from_previous_runtime_snapshot(self) -> None:
+        session = self._build_session()
+        session.rest_client = FakeDaemonClient()
+        session.sync_account()
 
-            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeDaemonClient()):
-                with patch("quant_binance.daemon.LivePaperShell", RestoredPositionsShell):
-                    result = run_live_paper_daemon(
-                        config_path=CONFIG_PATH,
-                        output_base_dir=output_dir,
-                        exchange="binance",
-                        max_retries=1,
-                    )
+        with self.assertRaisesRegex(RuntimeError, "STRICT_STARTUP_POSITION_BLOCK"):
+            _enforce_strict_startup_position_block(
+                session=session,
+                enabled=True,
+                state_payload={},
+                summary_payload={},
+            )
 
-        self.assertIn("ADAUSDT", result["summary"]["paper_symbols"])
-        self.assertEqual(result["summary"]["missing_in_paper_counts"], {})
+    def test_strict_startup_block_allows_live_positions_present_in_previous_runtime_snapshot(self) -> None:
+        session = self._build_session()
+        session.rest_client = FakeDaemonClient()
+        session.sync_account()
+
+        _enforce_strict_startup_position_block(
+            session=session,
+            enabled=True,
+            state_payload={
+                "paper_open_futures_positions": [
+                    {
+                        "symbol": "ADAUSDT",
+                        "side": "short",
+                    }
+                ]
+            },
+            summary_payload={},
+        )
 
 
 if __name__ == "__main__":

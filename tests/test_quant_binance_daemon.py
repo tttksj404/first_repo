@@ -200,6 +200,20 @@ class CapitalReportShell(FakeShell):
         }
 
 
+class ForensicLogShell(FakeShell):
+    async def run(self) -> dict[str, object]:
+        assert self.session.log_store is not None
+        self.session.log_store.append(
+            "live_position_actions",
+            {
+                "symbol": "PEPEUSDT",
+                "reason": "LIVE_POSITION_LONG_TURNAROUND_ABORT",
+                "accepted": True,
+            },
+        )
+        return {"status": "ok"}
+
+
 class BootstrapContinuationShell(FakeShell):
     async def run(self) -> dict[str, object]:
         open_time = datetime(2026, 3, 14, 0, 20, tzinfo=timezone.utc)
@@ -546,6 +560,26 @@ class QuantBinanceDaemonTests(unittest.TestCase):
             result["summary"]["btc_decision_timestamps"],
             ["2026-03-14T00:20:00+00:00", "2026-03-14T00:25:00+00:00"],
         )
+
+    def test_run_live_paper_daemon_mirrors_logs_to_forensics_root(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeBitgetDaemonClient()):
+                with patch("quant_binance.daemon.LivePaperShell", ForensicLogShell):
+                    result = run_live_paper_daemon(
+                        config_path=CONFIG_PATH,
+                        output_base_dir=output_dir,
+                        exchange="bitget",
+                        max_retries=1,
+                    )
+
+            primary_log = result["run_paths"].root / "logs" / "live_position_actions.jsonl"
+            forensic_log = Path(output_dir) / "forensics" / "live_position_actions.jsonl"
+            self.assertTrue(primary_log.exists())
+            self.assertTrue(forensic_log.exists())
+            self.assertEqual(
+                json.loads(primary_log.read_text(encoding="utf-8").splitlines()[0]),
+                json.loads(forensic_log.read_text(encoding="utf-8").splitlines()[0]),
+            )
 
     def test_run_live_paper_daemon_persists_startup_failure_state(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:

@@ -16,6 +16,7 @@ from quant_binance.closed_trade_metrics import (
 import logging
 
 logger = logging.getLogger(__name__)
+_SEEN_CONTAMINATION_WARNINGS: set[tuple[str, str, tuple[str, ...], int]] = set()
 
 
 @dataclass(frozen=True)
@@ -87,6 +88,37 @@ def _score_bucket_label(score: float) -> str:
     return f"{lower:02d}-{upper:02d}"
 
 
+def _warn_inherited_trade_contamination_once(
+    *,
+    source: str,
+    run_dir: Path,
+    inherited: list[dict[str, Any]],
+) -> None:
+    if not inherited:
+        return
+    symbols = tuple(sorted({str(trade.get("symbol", "?")) for trade in inherited}))
+    fingerprint = (source, str(run_dir), symbols, len(inherited))
+    if fingerprint in _SEEN_CONTAMINATION_WARNINGS:
+        return
+    _SEEN_CONTAMINATION_WARNINGS.add(fingerprint)
+    if source == "from_rows":
+        logger.warning(
+            "[POLICY_VALIDATION_CONTAMINATION] %d inherited manual-close trade(s) excluded "
+            "from policy validation (from_rows path). Symbols: %s.",
+            len(inherited),
+            list(symbols),
+        )
+        return
+    logger.warning(
+        "[POLICY_VALIDATION_CONTAMINATION] %d inherited manual-close trade(s) excluded "
+        "from policy validation - these positions were entered in a prior session and "
+        "closed via MANUAL_CLOSE_SYNCED, not by the current strategy. "
+        "Symbols: %s. Excluding to prevent false rollback verdict.",
+        len(inherited),
+        list(symbols),
+    )
+
+
 def build_runtime_performance_report_from_rows(
     *,
     run_dir: str | Path,
@@ -106,13 +138,11 @@ def build_runtime_performance_report_from_rows(
     _summary_path = Path(summary_path) if summary_path is not None else root / "summary.json"
     _raw_closed_trades = list(closed_trades)
     clean_trades, _inherited = filter_inherited_trades(_raw_closed_trades)
-    if _inherited:
-        logger.warning(
-            "[POLICY_VALIDATION_CONTAMINATION] %d inherited manual-close trade(s) excluded "
-            "from policy validation (from_rows path) — Symbols: %s.",
-            len(_inherited),
-            sorted({str(t.get("symbol", "?")) for t in _inherited}),
-        )
+    _warn_inherited_trade_contamination_once(
+        source="from_rows",
+        run_dir=root,
+        inherited=_inherited,
+    )
     return _build_report_from_clean_rows(
         root=root,
         summary_path=_summary_path,
@@ -126,15 +156,11 @@ def build_runtime_performance_report(*, run_dir: str | Path) -> RuntimePerforman
     summary_path = root / "summary.json"
     _raw_closed_trades = load_closed_trades_jsonl(root / "logs" / "closed_trades.jsonl")
     closed_trades, _inherited = filter_inherited_trades(_raw_closed_trades)
-    if _inherited:
-        logger.warning(
-            "[POLICY_VALIDATION_CONTAMINATION] %d inherited manual-close trade(s) excluded "
-            "from policy validation — these positions were entered in a prior session and "
-            "closed via MANUAL_CLOSE_SYNCED, not by the current strategy. "
-            "Symbols: %s. Excluding to prevent false rollback verdict.",
-            len(_inherited),
-            sorted({str(t.get("symbol", "?")) for t in _inherited}),
-        )
+    _warn_inherited_trade_contamination_once(
+        source="disk",
+        run_dir=root,
+        inherited=_inherited,
+    )
     decisions = load_closed_trades_jsonl(root / "logs" / "decisions.jsonl")
     return _build_report_from_clean_rows(
         root=root,
