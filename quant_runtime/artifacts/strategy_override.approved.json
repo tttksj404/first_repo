@@ -3,7 +3,7 @@
   "ensemble_signal_required": false,
   "data_collection_min_trades": 500,
   "data_collection_mode": true,
-  "disable_position_adoption": false,
+  "disable_position_adoption": true,
   "decision_engine": {
     "decision_interval_minutes": 5
   },
@@ -105,12 +105,12 @@
     "short_profit_flip_take_profit_fraction": 1.0,
     "stop_loss_roe_percent": -10.0,
     "soft_stop_roe_percent": -8.0,
-    "turnaround_abort_roe_percent": -20.0,
+    "turnaround_abort_roe_percent": -18.0,
     "turnaround_abort_volatility_adaptive": true,
     "turnaround_abort_volatility_floor_bps": 20.0,
     "turnaround_abort_volatility_scale": 0.2,
     "turnaround_abort_volatility_lookback_bars": 12,
-    "turnaround_abort_min_roe_percent": -35.0,
+    "turnaround_abort_min_roe_percent": -22.0,
     "take_profit_roe_percent": 32.0
   },
   "loss_combo_downgrade": {

@@ -60,6 +60,21 @@ class QuantBinanceLearningTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0]["decision_id"], "d1")
 
+    def test_jsonl_log_store_mirrors_writes_to_forensics_root(self) -> None:
+        forensic_root = self.root / "forensics"
+        store = JsonlLogStore(self.root / "logs", mirror_roots=[forensic_root])
+
+        store.append("live_position_actions", {"reason": "LIVE_POSITION_LONG_TURNAROUND_ABORT"})
+
+        primary_rows = store.read("live_position_actions")
+        mirrored_rows = [
+            json.loads(line)
+            for line in (forensic_root / "live_position_actions.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        self.assertEqual(primary_rows, mirrored_rows)
+        self.assertEqual(mirrored_rows[0]["reason"], "LIVE_POSITION_LONG_TURNAROUND_ABORT")
+
     def test_online_edge_learner_exports_table(self) -> None:
         learner = OnlineEdgeLearner(min_observations=1)
         decisions = (
