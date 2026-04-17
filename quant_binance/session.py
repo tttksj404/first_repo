@@ -3076,6 +3076,34 @@ class LivePaperSession:
         drawdown = peak_roe_percent - current_roe_percent
         return drawdown >= effective_retrace
 
+    def _live_profit_protection_thresholds(
+        self,
+        *,
+        hold_side: str,
+        is_major_symbol: bool,
+    ) -> tuple[float | None, float | None]:
+        if not is_major_symbol:
+            return None, None
+        cfg = self.runtime.paper_service.settings.live_position_risk
+        if hold_side == "short":
+            short_arm = float(getattr(cfg, "short_profit_protection_arm_roe_percent", 0.0) or 0.0)
+            short_retrace = float(getattr(cfg, "short_profit_protection_retrace_roe_percent", 0.0) or 0.0)
+            if short_arm > 0.0 and short_retrace > 0.0:
+                return short_arm, short_retrace
+        return cfg.major_profit_protection_arm_roe_percent, cfg.major_profit_protection_retrace_roe_percent
+
+    def _live_turnaround_take_profit_targets(self, *, hold_side: str) -> tuple[float, float]:
+        cfg = self.runtime.paper_service.settings.live_position_risk
+        if hold_side == "short":
+            return (
+                float(getattr(cfg, "short_profit_flip_fast_take_profit_roe_percent", 0.0) or 0.0),
+                float(getattr(cfg, "short_profit_flip_take_profit_fraction", 0.0) or 0.0),
+            )
+        return (
+            float(cfg.profit_flip_fast_take_profit_roe_percent),
+            float(cfg.profit_flip_take_profit_fraction),
+        )
+
     def _position_stop_hit(self, *, position: PaperPosition, price: float) -> bool:
         if position.side == "short":
             return price >= position.active_stop_price
@@ -5051,6 +5079,7 @@ class LivePaperSession:
             )
             hold_side = self._normalize_live_position_side(position)
             is_long_position = hold_side == "long"
+            is_short_position = hold_side == "short"
             self._reconcile_live_position_plan_orders(position=position, hold_side=hold_side)
             roe = self._position_roe_percent(position)
             unrealized_pnl = self._position_unrealized_pnl_usd(position)
@@ -5178,12 +5207,16 @@ class LivePaperSession:
                     fraction=proactive_fraction,
                 )
                 continue
+            protection_arm_threshold, protection_retrace_threshold = self._live_profit_protection_thresholds(
+                hold_side=hold_side,
+                is_major_symbol=is_major_symbol,
+            )
             if self._profit_protection_partial_triggered(
                 peak_roe_percent=peak_roe,
                 current_roe_percent=roe,
                 retrace_taken=identity in self.live_profit_protection_keys,
-                arm_threshold=cfg.major_profit_protection_arm_roe_percent if is_major_symbol else None,
-                retrace_threshold=cfg.major_profit_protection_retrace_roe_percent if is_major_symbol else None,
+                arm_threshold=protection_arm_threshold,
+                retrace_threshold=protection_retrace_threshold,
             ):
                 if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_PROFIT_PROTECTION", now=now):
                     continue
@@ -5194,11 +5227,18 @@ class LivePaperSession:
                     fraction=0.5,
                 )
                 continue
+            turnaround_take_profit_roe, turnaround_take_profit_fraction = self._live_turnaround_take_profit_targets(
+                hold_side=hold_side,
+            )
             if (
                 cfg.turnaround_grace_enabled
-                and (not cfg.long_only_turnaround_mode or is_long_position)
+                and (
+                    (is_long_position and (not cfg.long_only_turnaround_mode or is_long_position))
+                    or (is_short_position and turnaround_take_profit_fraction > 0.0)
+                )
                 and worst_roe <= cfg.soft_stop_roe_percent
-                and roe >= cfg.profit_flip_fast_take_profit_roe_percent
+                and turnaround_take_profit_roe > 0.0
+                and roe >= turnaround_take_profit_roe
                 and identity not in self.live_turnaround_take_profit_keys
             ):
                 if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_TURNAROUND_TAKE_PROFIT", now=now):
@@ -5207,7 +5247,7 @@ class LivePaperSession:
                 self._close_live_position(
                     position=position,
                     reason="LIVE_POSITION_TURNAROUND_TAKE_PROFIT",
-                    fraction=cfg.profit_flip_take_profit_fraction,
+                    fraction=turnaround_take_profit_fraction,
                 )
                 continue
             if (
