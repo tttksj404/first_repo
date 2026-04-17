@@ -17,6 +17,7 @@ To stop everything: python scripts/stop_live_trading.py
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -133,15 +134,77 @@ def _rotate_runtime_logs(project_root: Path) -> None:
         path.touch(exist_ok=True)
 
 
-def _launch(project_root: Path, script_rel: str) -> str:
-    script_path = (project_root / script_rel).as_posix()
+def _resolve_python_executable(project_root: Path) -> str:
+    explicit_candidates = [
+        os.environ.get("STACK_PYTHON", "").strip(),
+        os.environ.get("PYTHON_BIN", "").strip(),
+    ]
+    inferred_candidates = [
+        str(project_root / ".venv" / "Scripts" / "python.exe"),
+        sys.executable,
+        shutil.which("python") or "",
+    ]
+    for candidate in [*explicit_candidates, *inferred_candidates]:
+        if not candidate:
+            continue
+        path = Path(candidate)
+        if path.is_file():
+            return str(path)
+    return "python"
+
+
+def _launch(project_root: Path, script_rel: str, *, python_executable: str) -> str:
     cmd = (
-        f"Start-Process -FilePath 'python' -ArgumentList '-u','{script_rel}' "
+        f"Start-Process -FilePath '{python_executable}' -ArgumentList '-u','{script_rel}' "
         f"-WorkingDirectory '{str(project_root)}' -WindowStyle Hidden -PassThru | "
         f"Select-Object -ExpandProperty Id"
     )
     out = _powershell(cmd).strip()
     return out
+
+
+def _read_text(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="ignore").replace("\x00", "")
+    except FileNotFoundError:
+        return ""
+
+
+def _tail_lines(path: Path, count: int = 20) -> list[str]:
+    text = _read_text(path)
+    if not text:
+        return []
+    return text.splitlines()[-count:]
+
+
+def _wait_for_stack_boot(project_root: Path, components: list[dict[str, str]], *, timeout_seconds: int = 20) -> tuple[bool, str]:
+    deadline = time.time() + timeout_seconds
+    expected = {component["name"] for component in components}
+    supervisor_log = project_root / "quant_runtime" / "_supervisor.log"
+    stderr_log = project_root / "quant_runtime" / "_live_auto_trade_live_restart.err.log"
+    while time.time() < deadline:
+        running = _detect_existing(project_root, components)
+        running_names = {name for name, _, _ in running}
+        if expected.issubset(running_names) and "raw-daemon" in running_names:
+            return True, ""
+        supervisor_tail = "\n".join(_tail_lines(supervisor_log, 8))
+        stderr_tail = "\n".join(_tail_lines(stderr_log, 8))
+        if "STRICT_STARTUP_POSITION_BLOCK" in supervisor_tail or "STRICT_STARTUP_POSITION_BLOCK" in stderr_tail:
+            details = supervisor_tail or stderr_tail
+            return False, f"strict startup block detected\n{details}".strip()
+        time.sleep(1)
+    running = _detect_existing(project_root, components)
+    running_names = sorted({name for name, _, _ in running})
+    supervisor_tail = "\n".join(_tail_lines(supervisor_log, 8))
+    stderr_tail = "\n".join(_tail_lines(stderr_log, 8))
+    details = [
+        f"running={running_names or ['<none>']}",
+    ]
+    if supervisor_tail:
+        details.append("supervisor_tail=\n" + supervisor_tail)
+    if stderr_tail:
+        details.append("stderr_tail=\n" + stderr_tail)
+    return False, "\n".join(details)
 
 
 def main() -> int:
@@ -173,19 +236,32 @@ def main() -> int:
 
     _rotate_runtime_logs(project_root)
     _clear_stop_files(project_root, components)
+    python_executable = _resolve_python_executable(project_root)
 
     pid_log = project_root / "quant_runtime" / "_stack_launch.log"
     pid_log.parent.mkdir(parents=True, exist_ok=True)
     with pid_log.open("a", encoding="utf-8") as f:
         f.write(f"\n=== launch @ {_now_iso()} ===\n")
         for comp in components:
-            pid = _launch(project_root, comp["script"])
+            pid = _launch(project_root, comp["script"], python_executable=python_executable)
             line = f"[{_now_iso()}] started {comp['name']} pid={pid}"
             print(line)
             f.write(line + "\n")
             time.sleep(0.5)
 
+    boot_ok, boot_details = _wait_for_stack_boot(project_root, components)
+    if not boot_ok:
+        print(f"[{_now_iso()}] STARTUP VALIDATION FAILED")
+        if boot_details:
+            print(boot_details)
+        print()
+        print("Inspect logs:")
+        print("  Get-Content quant_runtime/_supervisor.log -Tail 40")
+        print("  Get-Content quant_runtime/_live_auto_trade_live_restart.err.log -Tail 40")
+        return 3
+
     print()
+    print(f"[{_now_iso()}] python_executable={python_executable}")
     print(f"[{_now_iso()}] policy_guardrail_bypass={bypass_policy_guardrails} (set STACK_BYPASS_POLICY_GUARDRAILS=0 to enforce)")
     print(
         f"[{_now_iso()}] execution_quality_edge_guard_bypass={bypass_execution_quality_edge_guard} "
