@@ -3,10 +3,11 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.daemon_supervisor import _extract_strict_startup_block, _read_stderr_chunk
 from scripts.monitor_daemon_health import _tail
-from scripts.start_live_trading import _rotate_runtime_logs
+from scripts.start_live_trading import _resolve_python_executable, _rotate_runtime_logs, _wait_for_stack_boot
 
 
 class LiveRuntimeScriptTests(unittest.TestCase):
@@ -64,6 +65,49 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         line = _extract_strict_startup_block(stderr_chunk)
 
         self.assertEqual(line, "STRICT_STARTUP_POSITION_BLOCK: second hit")
+
+    def test_resolve_python_executable_prefers_repo_venv(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            python_path = root / ".venv" / "Scripts" / "python.exe"
+            python_path.parent.mkdir(parents=True, exist_ok=True)
+            python_path.write_text("", encoding="utf-8")
+
+            resolved = _resolve_python_executable(root)
+
+            self.assertEqual(resolved, str(python_path))
+
+    def test_wait_for_stack_boot_succeeds_when_components_and_raw_daemon_are_running(self) -> None:
+        root = Path(tempfile.gettempdir())
+        components = [{"name": "supervisor"}, {"name": "monitor"}]
+        with patch(
+            "scripts.start_live_trading._detect_existing",
+            side_effect=[
+                [("supervisor", "1", "cmd")],
+                [("supervisor", "1", "cmd"), ("monitor", "2", "cmd"), ("raw-daemon", "3", "cmd")],
+            ],
+        ):
+            ok, details = _wait_for_stack_boot(root, components, timeout_seconds=2)
+
+        self.assertTrue(ok)
+        self.assertEqual(details, "")
+
+    def test_wait_for_stack_boot_surfaces_strict_startup_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            runtime = root / "quant_runtime"
+            runtime.mkdir(parents=True, exist_ok=True)
+            (runtime / "_supervisor.log").write_text(
+                "STRICT_STARTUP_POSITION_BLOCK: found live startup position(s)\n",
+                encoding="utf-8",
+            )
+            components = [{"name": "supervisor"}, {"name": "monitor"}]
+            with patch("scripts.start_live_trading._detect_existing", return_value=[]):
+                ok, details = _wait_for_stack_boot(root, components, timeout_seconds=1)
+
+        self.assertFalse(ok)
+        self.assertIn("strict startup block detected", details)
+        self.assertIn("STRICT_STARTUP_POSITION_BLOCK", details)
 
 
 if __name__ == "__main__":
