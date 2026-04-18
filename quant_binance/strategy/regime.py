@@ -465,10 +465,11 @@ def _short_entry_strict_reasons(
     futures_liquidity_min: float,
     min_entry_net_edge_bps: float,
 ) -> list[str]:
+    if features.trend_direction >= 0:
+        # Long / flat trend: short-side gating is not applicable.
+        return []
     if settings.futures_exposure.short_disabled:
         return ["SHORT_DISABLED"]
-    if features.trend_direction >= 0:
-        return []
     reasons: list[str] = []
     extra_score = settings.futures_exposure.short_extra_score_floor
     extra_edge = settings.futures_exposure.short_extra_edge_bps
