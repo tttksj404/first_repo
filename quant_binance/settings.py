@@ -230,6 +230,12 @@ class FuturesExposureConfig:
     pyramid_min_volume_confirmation: float = 0.45
     pyramid_max_adds_per_symbol: int = 1
     pyramid_size_multiplier: float = 0.5
+    # Short-side suppression knobs (override-aware; defaults preserve legacy behavior)
+    short_disabled: bool = False
+    short_extra_score_floor: float = 4.0
+    short_extra_edge_bps: float = 1.5
+    short_extra_liquidity_floor: float = 0.08
+    short_extra_cost_multiple_floor: float = 0.18
 
 
 @dataclass(frozen=True)
@@ -262,6 +268,8 @@ class LivePositionRiskConfig:
     disable_standard_stop_loss_exits: bool = False
     long_only_turnaround_mode: bool = False
     long_disable_standard_stop_loss: bool = False
+    short_only_turnaround_mode: bool = False
+    short_disable_standard_stop_loss: bool = False
     portfolio_full_exit_only: bool = False
     portfolio_full_exit_profit_ratio: float = 0.0
     turnaround_grace_enabled: bool = True
