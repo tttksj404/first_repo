@@ -526,6 +526,61 @@ class QuantBinanceCoreTests(unittest.TestCase):
         self.assertEqual(prediction.futures.side, "long")
         self.assertEqual(prediction.spot.side, "long")
 
+    def test_configured_funding_bias_rewards_negative_funding_for_longs(self) -> None:
+        settings = replace(
+            self.settings,
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                funding_bias_enabled=True,
+                funding_bias_min_abs_bps=0.0,
+                funding_bias_max_abs_bps=5.0,
+            ),
+        )
+        features = FeatureVector(
+            ret_rank_1h=0.8,
+            ret_rank_4h=0.78,
+            breakout_norm=0.82,
+            ema_stack_score=1.0,
+            vol_z_5m_norm=0.7,
+            vol_z_1h_norm=0.72,
+            taker_imbalance_norm=0.69,
+            spread_bps_norm=0.2,
+            probe_slippage_bps_norm=0.25,
+            depth_10bps_norm=0.86,
+            book_stability_norm=0.9,
+            realized_vol_1h_norm=0.3,
+            realized_vol_4h_norm=0.28,
+            vol_shock_norm=0.35,
+            funding_abs_percentile=0.14,
+            oi_surge_percentile=0.1,
+            basis_stretch_percentile=0.18,
+            regime_alignment=1.0,
+            trend_direction=1,
+            trend_strength=0.82,
+            volume_confirmation=0.74,
+            liquidity_score=0.86,
+            volatility_penalty=0.28,
+            overheat_penalty=0.14,
+            gross_expected_edge_bps=24.0,
+        )
+        positive_funding = build_strategy_prediction(
+            replace(make_snapshot("DOGEUSDT", features), funding_rate=0.0004),
+            settings,
+        ).futures
+        negative_funding = build_strategy_prediction(
+            replace(make_snapshot("DOGEUSDT", features), funding_rate=-0.0004),
+            settings,
+        ).futures
+
+        self.assertGreater(
+            negative_funding.net_expected_edge_bps,
+            positive_funding.net_expected_edge_bps,
+        )
+        self.assertLess(
+            negative_funding.estimated_round_trip_cost_bps,
+            positive_funding.estimated_round_trip_cost_bps,
+        )
+
     def test_major_prediction_specialist_adjustment_boosts_btc_eth_futures_over_alt(self) -> None:
         major_features = FeatureVector(
             ret_rank_1h=0.82, ret_rank_4h=0.8, breakout_norm=0.84, ema_stack_score=1.0,

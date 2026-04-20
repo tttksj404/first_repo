@@ -161,7 +161,11 @@ def _build_live_ws_client(
     exchange_id: str,
     symbols: tuple[str, ...],
     allow_insecure_ssl: bool,
+    decision_interval_minutes: int = 5,
 ) -> CombinedWebSocketClient:
+    decision_interval = f"{max(int(decision_interval_minutes), 1)}m"
+    spot_intervals = tuple(dict.fromkeys(("1m", "5m", "1h", "4h", decision_interval)))
+    futures_intervals = tuple(dict.fromkeys(("5m", decision_interval)))
     if exchange_id == "bitget":
         def _chunk_symbols(symbols_in: tuple[str, ...], *, streams_per_symbol: int) -> list[tuple[str, ...]]:
             max_symbols = max(1, BITGET_MAX_CHANNELS_PER_CONNECTION // max(streams_per_symbol, 1))
@@ -171,22 +175,24 @@ def _build_live_ws_client(
             ]
 
         clients: list[BitgetWebSocketClient] = []
-        for chunk in _chunk_symbols(symbols, streams_per_symbol=6):
+        spot_streams_per_symbol = 2 + len(spot_intervals)
+        futures_streams_per_symbol = 2 + len(futures_intervals)
+        for chunk in _chunk_symbols(symbols, streams_per_symbol=spot_streams_per_symbol):
             clients.append(
                 BitgetWebSocketClient(
                     market="spot",
                     symbols=chunk,
-                    intervals=("1m", "5m", "1h", "4h"),
+                    intervals=spot_intervals,
                     allow_insecure_ssl=allow_insecure_ssl,
                     label=f"spot-{chunk[0].lower()}",
                 )
             )
-        for chunk in _chunk_symbols(symbols, streams_per_symbol=3):
+        for chunk in _chunk_symbols(symbols, streams_per_symbol=futures_streams_per_symbol):
             clients.append(
                 BitgetWebSocketClient(
                     market="futures",
                     symbols=chunk,
-                    intervals=("5m",),
+                    intervals=futures_intervals,
                     allow_insecure_ssl=allow_insecure_ssl,
                     label=f"futures-{chunk[0].lower()}",
                 )
@@ -197,8 +203,8 @@ def _build_live_ws_client(
     spot_streams = []
     futures_streams = []
     for symbol in symbols:
-        spot_streams.extend(build_spot_streams(symbol, ("1m", "5m", "1h", "4h")))
-        futures_streams.extend(build_futures_streams(symbol, ("5m",)))
+        spot_streams.extend(build_spot_streams(symbol, spot_intervals))
+        futures_streams.extend(build_futures_streams(symbol, futures_intervals))
         futures_streams.append(f"{symbol.lower()}@openInterest")
     return CombinedWebSocketClient(
         [
@@ -473,6 +479,34 @@ def run_live_paper_daemon(
                         "Check API credentials/account scope, or set ALLOW_DAEMON_EQUITY_FALLBACK=1 to override."
                     )
                 print("[daemon] WARNING: could not detect account equity — keeping $10,000 default. Check API credentials.")
+            if not execute_live_orders:
+                paper_equity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_EQUITY_USD", "") or "").strip()
+                if paper_equity_raw:
+                    try:
+                        paper_equity = float(paper_equity_raw)
+                    except (TypeError, ValueError):
+                        paper_equity = 0.0
+                    if paper_equity > 0.0:
+                        _leverage_cap = max(session.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
+                        paper_capacity = round(paper_equity * _leverage_cap, 6)
+                        capacity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_CAPACITY_USD", "") or "").strip()
+                        if capacity_raw:
+                            try:
+                                paper_capacity = max(float(capacity_raw), 0.0)
+                            except (TypeError, ValueError):
+                                pass
+                        session.equity_usd = paper_equity
+                        session.remaining_portfolio_capacity_usd = paper_capacity
+                        session.max_portfolio_capacity_usd = paper_capacity
+                        session.capital_report["futures_available_balance_usd"] = paper_equity
+                        session.capital_report["futures_execution_balance_usd"] = paper_equity
+                        session.capital_report["futures_recognized_balance_usd"] = paper_equity
+                        session.capital_report["futures_total_reusable_balance_usd"] = paper_equity
+                        print(
+                            f"[daemon] paper verification equity override: ${paper_equity:.2f} USDT "
+                            f"-> capacity: ${paper_capacity:.2f}",
+                            flush=True,
+                        )
             previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
             _enforce_strict_startup_position_block(
                 session=session,
@@ -544,6 +578,7 @@ def run_live_paper_daemon(
                 exchange_id=exchange_id,
                 symbols=runtime_symbols,
                 allow_insecure_ssl=allow_insecure_ssl,
+                decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
             ),
             session=session,
             backoff_policy=BackoffPolicy(max_attempts=max_retries),

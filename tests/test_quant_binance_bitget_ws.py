@@ -196,10 +196,23 @@ class QuantBinanceBitgetWebSocketTests(unittest.TestCase):
 
         kwargs = client._connect_kwargs(ssl_context=None)
 
-        self.assertEqual(kwargs["ssl"], None)
+        self.assertNotIn("ssl", kwargs)
         self.assertIsNone(kwargs["ping_interval"])
         self.assertIsNone(kwargs["ping_timeout"])
         self.assertEqual(kwargs["close_timeout"], 1)
+
+    def test_client_passes_ssl_context_only_when_requested(self) -> None:
+        client = BitgetWebSocketClient(
+            market="spot",
+            symbols=("BTCUSDT",),
+            intervals=("5m",),
+        )
+        ssl_context = object()
+
+        kwargs = client._connect_kwargs(ssl_context=ssl_context)  # type: ignore[arg-type]
+
+        self.assertIs(kwargs["ssl"], ssl_context)
+        self.assertIsNone(kwargs["ping_interval"])
 
     def test_client_splits_large_subscribe_payloads_into_safe_batches(self) -> None:
         symbols = tuple(f"SYM{index}USDT" for index in range(12))
