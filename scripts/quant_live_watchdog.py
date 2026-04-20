@@ -174,6 +174,7 @@ class QuantLiveWatchdog:
         except (OSError, json.JSONDecodeError):
             return SummaryHealth(fresh=False, reason=invalid_reason, age_seconds=None)
 
+        status = str(data.get("status") or "")
         updated_at_raw = data.get("updated_at")
         if not isinstance(updated_at_raw, str):
             return SummaryHealth(fresh=False, reason=f"{invalid_reason}:missing_updated_at", age_seconds=None)
@@ -184,6 +185,11 @@ class QuantLiveWatchdog:
             return SummaryHealth(fresh=False, reason=f"{invalid_reason}:invalid_updated_at", age_seconds=None)
 
         age_seconds = max((datetime.now(timezone.utc) - updated_at).total_seconds(), 0.0)
+        if status == "startup_failed":
+            return SummaryHealth(fresh=False, reason="startup_failed", age_seconds=age_seconds)
+        if status == "unhealthy":
+            reason = str(data.get("reason") or "unhealthy")
+            return SummaryHealth(fresh=False, reason=reason, age_seconds=age_seconds)
         if age_seconds > self.stale_seconds:
             return SummaryHealth(fresh=False, reason=stale_reason, age_seconds=age_seconds)
         return SummaryHealth(fresh=True, reason="fresh", age_seconds=age_seconds)
@@ -667,7 +673,11 @@ class QuantLiveWatchdog:
         if runtime_fresh:
             if child_alive:
                 return
-            self.log(f"child missing but runtime state still fresh; waiting summary={summary_health.reason} health={health_state.reason}")
+            self.log(
+                "supervisor missing but summary still fresh; waiting "
+                f"child_alive={child_alive} supervisor_alive={supervisor_alive} "
+                f"summary={summary_health.reason} health={health_state.reason}"
+            )
             return
 
         combined_reason = f"summary={summary_health.reason},health={health_state.reason},child_alive={child_alive},supervisor_alive={supervisor_alive}"
