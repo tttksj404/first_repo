@@ -6,12 +6,24 @@ slot_pid() {
   awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
 }
 
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+SUPERVISOR_STOP_FILE="$REPO_ROOT/scripts/_supervisor_stop"
+
+supervisor_stop_requested() {
+  [ -f "$SUPERVISOR_STOP_FILE" ] && grep -qi 'stop' "$SUPERVISOR_STOP_FILE" 2>/dev/null
+}
+
 OUTPUT_BASE="${1:-quant_runtime}"
 LOG_DIR="$OUTPUT_BASE"
 SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
 
 mkdir -p "$LOG_DIR"
+if supervisor_stop_requested; then
+  printf '[SUPERVISOR] stop file present; refusing to start at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  exit 0
+fi
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
   EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
   if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
@@ -157,7 +169,13 @@ start_watchdog() {
     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS" \
     PYTHON_BIN="$PYTHON_BIN" \
     "$PYTHON_BIN" scripts/quant_live_watchdog.py "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
-  printf '[SUPERVISOR] requested watchdog start at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  watchdog_start_status=$?
+  watchdog_pid=$!
+  if [ "$watchdog_start_status" -ne 0 ]; then
+    printf '[SUPERVISOR] watchdog start request failed status=%s at %s\n' "$watchdog_start_status" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    return 0
+  fi
+  printf '[SUPERVISOR] requested watchdog start pid=%s at %s\n' "$watchdog_pid" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 }
 
 run_report_cycle() {
@@ -293,9 +311,19 @@ start_news_loop
 start_watchdog
 
 while :; do
+  if supervisor_stop_requested; then
+    printf '[SUPERVISOR] stop file present; exiting supervisor loop at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
   run_child
   while kill -0 "$CHILD_PID" 2>/dev/null; do
     sleep "$WATCHDOG_POLL_SECONDS"
+    if supervisor_stop_requested; then
+      printf '[SUPERVISOR] stop file present; stopping child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+      kill "$CHILD_PID" 2>/dev/null || true
+      wait "$CHILD_PID" 2>/dev/null || true
+      exit 0
+    fi
     # Auto-restart watchdog if it died
     if [ "${QUANT_ENABLE_SUPERVISOR_WATCHDOG:-1}" = "1" ]; then
       if ! pgrep -f "quant_live_watchdog.py" >/dev/null 2>&1; then
@@ -326,6 +354,10 @@ PY
   done
   CHILD_EXIT_CODE=0
   wait "$CHILD_PID" 2>/dev/null || CHILD_EXIT_CODE=$?
+  if supervisor_stop_requested; then
+    printf '[SUPERVISOR] stop file present after child exit; not restarting at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
   printf '[SUPERVISOR] child exited, restarting in %ss at %s\n' "$RESTART_SLEEP_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
     "$PYTHON_BIN" scripts/quant_notify_runtime_event.py exited "$OUTPUT_BASE" "child_pid=$CHILD_PID" "exit_code=$CHILD_EXIT_CODE" >>"$SUPERVISOR_LOG" 2>&1 || true

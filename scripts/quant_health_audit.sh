@@ -10,6 +10,43 @@ CLAUDE="/Users/tttksj/.local/bin/claude"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 DISABLE_AUTOFIX="${QUANT_HEALTH_AUDIT_DISABLE_AUTOFIX:-0}"
 
+slot_pid() {
+    if [ -f "$1" ]; then
+        awk 'NR==1 {print $1}' "$1" 2>/dev/null || true
+    fi
+}
+
+pid_is_visible() {
+    pid="$1"
+    case "$pid" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    if kill -0 "$pid" 2>/dev/null; then
+        return 0
+    fi
+    if command -v lsof >/dev/null 2>&1 && lsof -a -p "$pid" -d cwd >/dev/null 2>&1; then
+        return 0
+    fi
+    if ps -p "$pid" >/dev/null 2>&1; then
+        return 0
+    fi
+    return 1
+}
+
+pgrep_count() {
+    pattern="$1"
+    count="$(pgrep -f "$pattern" 2>/dev/null | wc -l | tr -d ' ')"
+    printf '%s' "${count:-0}"
+}
+
+latest_child_pid_from_log() {
+    if [ -f "$RUNTIME/live_supervisor.log" ]; then
+        grep -a "started child pid=" "$RUNTIME/live_supervisor.log" \
+            | sed -n 's/.*started child pid=\([0-9][0-9]*\).*/\1/p' \
+            | tail -1
+    fi
+}
+
 echo "============================================"
 echo "[HEALTH_AUDIT] $TIMESTAMP"
 echo "============================================"
@@ -27,19 +64,38 @@ crit() { echo "  CRITICAL: $1"; CRITICALS=$((CRITICALS+1)); ISSUES="$ISSUES [C] 
 echo ""
 echo "[1] 프로세스 상태"
 
-PROCS=$(pgrep -f quant_binance 2>/dev/null | wc -l | tr -d ' ')
+PROCS=$(pgrep_count "quant_binance")
 if [ "$PROCS" -ge 1 ]; then
     echo "  OK: quant_binance ${PROCS}개 실행 중"
 else
-    crit "quant_binance 프로세스 없음"
+    CHILD_PID="$(latest_child_pid_from_log)"
+    if pid_is_visible "$CHILD_PID"; then
+        echo "  OK: quant_binance child pid=${CHILD_PID} 실행 중 (pid/lsof fallback)"
+        PROCS=1
+    else
+        crit "quant_binance 프로세스 없음"
+    fi
+fi
+
+SUPERVISOR_PID="$(slot_pid "$RUNTIME/live_supervisor.pid")"
+if pid_is_visible "$SUPERVISOR_PID"; then
+    echo "  OK: supervisor pid=${SUPERVISOR_PID} 실행 중"
+else
+    warn "supervisor pid 확인 불가"
 fi
 
 # Watchdog 프로세스
-WD=$(pgrep -f "quant_live_watchdog.py" 2>/dev/null | wc -l | tr -d ' ')
+WD=$(pgrep_count "quant_live_watchdog.py")
 if [ "$WD" -ge 1 ]; then
     echo "  OK: watchdog ${WD}개 실행 중"
 else
-    warn "watchdog 프로세스 없음 — 자동 재시작 보호 없음"
+    WATCHDOG_PID="$(slot_pid "$RUNTIME/live_supervisor_watchdog.pid")"
+    if pid_is_visible "$WATCHDOG_PID"; then
+        echo "  OK: watchdog pid=${WATCHDOG_PID} 실행 중 (pid/lsof fallback)"
+        WD=1
+    else
+        warn "watchdog 프로세스 없음 — 자동 재시작 보호 없음"
+    fi
 fi
 
 # Health file
@@ -249,12 +305,16 @@ if [ -f "$RUNTIME/health_audit.log" ]; then
 fi
 
 # Memory usage
-MEM_INFO=$(ps aux | grep "quant_binance" | grep -v grep | awk '{sum+=$6} END {printf "%.0f", sum/1024}' 2>/dev/null || echo "0")
-echo "  quant_binance 메모리: ${MEM_INFO}MB"
-if [ "$MEM_INFO" -gt 2000 ]; then
-    crit "메모리 ${MEM_INFO}MB (>2GB) — 메모리 누수 가능"
-elif [ "$MEM_INFO" -gt 1000 ]; then
-    warn "메모리 ${MEM_INFO}MB (>1GB)"
+MEM_INFO=$(ps aux 2>/dev/null | grep "quant_binance" | grep -v grep | awk '{sum+=$6} END {if (sum > 0) printf "%.0f", sum/1024}' 2>/dev/null || true)
+if [ -n "$MEM_INFO" ]; then
+    echo "  quant_binance 메모리: ${MEM_INFO}MB"
+    if [ "$MEM_INFO" -gt 2000 ]; then
+        crit "메모리 ${MEM_INFO}MB (>2GB) — 메모리 누수 가능"
+    elif [ "$MEM_INFO" -gt 1000 ]; then
+        warn "메모리 ${MEM_INFO}MB (>1GB)"
+    fi
+else
+    echo "  quant_binance 메모리: unavailable (process visibility restricted)"
 fi
 
 # Disk space
@@ -363,11 +423,16 @@ CPU=$($PYTHON -c "
 import subprocess
 out = subprocess.check_output(['ps', 'aux']).decode()
 total = sum(float(line.split()[2]) for line in out.strip().split('\n')[1:] if 'quant_binance' in line)
-print(f'{total:.0f}')
-" 2>/dev/null || echo "0")
-echo "  quant_binance CPU: ${CPU}%"
-if [ "$CPU" -gt 90 ]; then
-    warn "CPU ${CPU}% (>90%) — 과부하"
+if total > 0:
+    print(f'{total:.0f}')
+" 2>/dev/null || true)
+if [ -n "$CPU" ]; then
+    echo "  quant_binance CPU: ${CPU}%"
+    if [ "$CPU" -gt 90 ]; then
+        warn "CPU ${CPU}% (>90%) — 과부하"
+    fi
+else
+    echo "  quant_binance CPU: unavailable (process visibility restricted)"
 fi
 
 # ============================================

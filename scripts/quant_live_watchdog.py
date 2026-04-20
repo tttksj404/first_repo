@@ -55,6 +55,7 @@ class QuantLiveWatchdog:
         self.supervisor_pid_path = self.log_dir / "live_supervisor.pid"
         self.watchdog_pid_path = self.log_dir / "live_supervisor_watchdog.pid"
         self.health_state_path = self.log_dir / "live_supervisor_health.json"
+        self.supervisor_stop_path = self.repo_root / "scripts" / "_supervisor_stop"
         self.summary_path = self.output_base / "output" / "paper-live-shell" / "latest" / "summary.state.json"
         self.started_at = time.time()
         digest = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
@@ -77,6 +78,12 @@ class QuantLiveWatchdog:
         self.closed_trades_path = self.output_base / "output" / "paper-live-shell" / "latest" / "logs" / "closed_trades.jsonl"
         self.strategy_override_path = self.output_base / "artifacts" / "strategy_override.approved.json"
         self.strategy_health_path = self.log_dir / "health_status.json"
+
+    def supervisor_stop_requested(self) -> bool:
+        try:
+            return "stop" in self.supervisor_stop_path.read_text(encoding="utf-8", errors="ignore").lower()
+        except OSError:
+            return False
 
     def _resolve_python_bin(self) -> str:
         requested = os.environ.get("PYTHON_BIN")
@@ -244,6 +251,9 @@ class QuantLiveWatchdog:
         return False
 
     def restart_supervisor(self) -> None:
+        if self.supervisor_stop_requested():
+            self.log("supervisor stop file present; refusing restart")
+            return
         if self._check_circuit_breaker():
             return
 
@@ -646,6 +656,9 @@ class QuantLiveWatchdog:
         self._write_strategy_health(overall, checks, auto_actions)
 
     def step(self) -> None:
+        if self.supervisor_stop_requested():
+            self.log("supervisor stop file present; watchdog exiting")
+            raise SystemExit(0)
         if not self.owns_watchdog_slot():
             current_pid, current_version = self.read_slot(self.watchdog_pid_path)
             self.log(f"watchdog slot lost to pid={current_pid} {current_version or ''}".strip())
