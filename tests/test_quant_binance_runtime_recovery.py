@@ -340,6 +340,27 @@ class RuntimeRecoveryTests(unittest.TestCase):
             summary_payload={},
         )
 
+    def test_strict_startup_block_allows_live_positions_from_recorded_live_order(self) -> None:
+        session = self._build_session()
+        session.rest_client = FakeDaemonClient()
+        session.sync_account()
+
+        _enforce_strict_startup_position_block(
+            session=session,
+            enabled=True,
+            state_payload={},
+            summary_payload={
+                "live_orders": [
+                    {
+                        "accepted": True,
+                        "market": "futures",
+                        "symbol": "ADAUSDT",
+                        "side": "sell",
+                    }
+                ]
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
