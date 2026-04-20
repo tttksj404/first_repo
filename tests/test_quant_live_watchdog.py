@@ -92,6 +92,32 @@ class QuantLiveWatchdogTests(unittest.TestCase):
                     os.killpg(legacy_proc.pid, signal.SIGKILL)
                     legacy_proc.wait(timeout=5)
 
+    def test_watchdog_treats_fresh_startup_failure_summary_as_unhealthy(self) -> None:
+        from scripts.quant_live_watchdog import QuantLiveWatchdog
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            output_dir = Path(tempdir) / "runtime"
+            latest_dir = output_dir / "output" / "paper-live-shell" / "latest"
+            latest_dir.mkdir(parents=True, exist_ok=True)
+            (latest_dir / "summary.state.json").write_text(
+                textwrap.dedent(
+                    f"""\
+                    {{
+                      "status": "startup_failed",
+                      "updated_at": "{datetime.now(timezone.utc).isoformat()}",
+                      "error": "Bitget DNS resolution failed"
+                    }}
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            watchdog = QuantLiveWatchdog(output_base=output_dir)
+            health = watchdog.summary_health()
+
+        self.assertFalse(health.fresh)
+        self.assertEqual(health.reason, "startup_failed")
+
     @unittest.skipIf(os.name == "nt", "watchdog shell integration requires POSIX /bin/sh")
     def test_watchdog_skips_restart_when_summary_is_fresh(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

@@ -8,6 +8,7 @@ RUNTIME="$REPO/quant_runtime"
 PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 CLAUDE="/Users/tttksj/.local/bin/claude"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
+DISABLE_AUTOFIX="${QUANT_HEALTH_AUDIT_DISABLE_AUTOFIX:-0}"
 
 echo "============================================"
 echo "[HEALTH_AUDIT] $TIMESTAMP"
@@ -78,9 +79,9 @@ if [ -f "$RUNTIME/live_supervisor.log" ]; then
     ERROR_COUNT=${ERROR_COUNT:-0}
     echo "  Recent errors (last 200 lines): $ERROR_COUNT"
     if [ "$ERROR_COUNT" -gt 20 ]; then
-        crit "에러 폭발 ($ERROR_COUNT건/200줄)"
+        crit "에러 폭발 (${ERROR_COUNT}건/200줄)"
     elif [ "$ERROR_COUNT" -gt 10 ]; then
-        warn "에러 다수 ($ERROR_COUNT건/200줄)"
+        warn "에러 다수 (${ERROR_COUNT}건/200줄)"
     fi
 fi
 
@@ -542,7 +543,9 @@ fi
 echo ""
 echo "============================================"
 echo "[RESULT] CRITICAL=$CRITICALS WARNING=$WARNINGS"
-if [ "$CRITICALS" -gt 0 ]; then
+if [ "$DISABLE_AUTOFIX" = "1" ] && { [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; }; then
+    echo "[ACTION] issues found — autofix disabled"
+elif [ "$CRITICALS" -gt 0 ]; then
     echo "[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행"
 elif [ "$WARNINGS" -ge 1 ]; then
     echo "[ACTION] WARNING 발견 — Claude Code 자동 수정 실행"
@@ -555,7 +558,7 @@ echo ""
 # ============================================
 # 10. Claude Code 자동 수정
 # ============================================
-if [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; then
+if [ "$DISABLE_AUTOFIX" != "1" ] && { [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; }; then
     AUDIT_SUMMARY="health audit at $TIMESTAMP: CRITICAL=$CRITICALS WARNING=$WARNINGS.$ISSUES"
 
     echo "[CLAUDE] 자동 수정 시작: CRITICAL=$CRITICALS WARNING=$WARNINGS"
@@ -629,5 +632,9 @@ ${AUDIT_SUMMARY}
         echo "[CLAUDE] claude CLI not found at $CLAUDE — 수동 확인 필요"
     fi
 else
-    echo "[SKIP] 정상 — Claude Code 실행 불필요"
+    if [ "$DISABLE_AUTOFIX" = "1" ]; then
+        echo "[SKIP] autofix disabled"
+    else
+        echo "[SKIP] 정상 — Claude Code 실행 불필요"
+    fi
 fi
