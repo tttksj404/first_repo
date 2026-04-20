@@ -456,6 +456,7 @@ class ExecutionQualityState:
         now: datetime,
     ) -> ExecutionQualityOverlay:
         effective = self._effective_metrics(metrics, now=now)
+        decayed = self._decayed_metrics(metrics, now=now)
         effective_attempts = max(effective.effective_sample_size, 0.0)
         rounded_sample_size = max(int(effective_attempts + 0.5), 0)
         if rounded_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
@@ -510,8 +511,8 @@ class ExecutionQualityState:
         leverage_reduction += _quality_scale(effective.avg_slippage_bps, start=6.0, span=14.0, cap=0.12)
         leverage_reduction += _quality_scale(retention_gap, start=0.15, span=0.6, cap=0.18)
         leverage_reduction += _quality_scale(effective.protection_degraded_rate, start=0.18, span=0.52, cap=0.16)
-        # Floor: never reduce below 85% to protect minimum viable position size
-        _SIZE_FLOOR = 0.85
+        # Floor: preserve minimum viable position size even when quality throttles are active.
+        _SIZE_FLOOR = 0.86
         _LEVERAGE_FLOOR = 0.85
         size_multiplier = max(size_multiplier, _SIZE_FLOOR)
         leverage_multiplier = _clamp(1.0 - leverage_reduction, _LEVERAGE_FLOOR, 1.0)
@@ -576,6 +577,8 @@ class ExecutionQualityState:
         if should_halt:
             trade_restraint = "execution_quality_halt"
             size_multiplier = 0.0
+        elif decayed.weighted_fills + decayed.weighted_partial_fills <= 0.0:
+            size_multiplier = 1.0
 
         degraded = (
             trade_restraint != "none"
