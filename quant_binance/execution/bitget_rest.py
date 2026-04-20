@@ -703,23 +703,28 @@ class BitgetRestClient:
                 break
         return {"positions": rows}
 
-    def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
+    def set_futures_leverage(self, *, symbol: str, leverage: int, hold_side: str | None = None) -> dict[str, Any]:
+        body_params: dict[str, Any] = {
+            "symbol": symbol,
+            "productType": self.contract_config.product_type,
+            "marginCoin": self.contract_config.margin_coin,
+            "leverage": str(leverage),
+        }
+        normalized_hold_side = str(hold_side or "").strip().lower()
+        if normalized_hold_side in {"long", "short"}:
+            body_params["holdSide"] = normalized_hold_side
         payload = self.send(
             self.build_signed_request(
                 path="/api/v2/mix/account/set-leverage",
                 method="POST",
-                body_params={
-                    "symbol": symbol,
-                    "productType": self.contract_config.product_type,
-                    "marginCoin": self.contract_config.margin_coin,
-                    "leverage": str(leverage),
-                },
+                body_params=body_params,
             )
         )
         data = payload.get("data")
         normalized: dict[str, Any] = {
             "symbol": symbol,
             "leverage": leverage,
+            "holdSide": normalized_hold_side,
             "raw": payload,
         }
         if isinstance(data, dict):

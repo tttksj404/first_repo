@@ -353,6 +353,49 @@ class LivePaperSession:
             return learner_path.parents[3] / "execution_quality_state.json"
         return None
 
+    def _paper_verification_equity_override(self) -> tuple[float, float] | None:
+        if self.live_order_executor is not None:
+            return None
+        equity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_EQUITY_USD", "") or "").strip()
+        if not equity_raw:
+            return None
+        try:
+            equity = float(equity_raw)
+        except (TypeError, ValueError):
+            return None
+        if equity <= 0.0:
+            return None
+        leverage_cap = max(self.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
+        capacity = round(equity * leverage_cap, 6)
+        capacity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_CAPACITY_USD", "") or "").strip()
+        if capacity_raw:
+            try:
+                capacity = max(float(capacity_raw), 0.0)
+            except (TypeError, ValueError):
+                pass
+        return equity, capacity
+
+    def _paper_verification_mode_enabled(self) -> bool:
+        return self._paper_verification_equity_override() is not None
+
+    def _apply_paper_verification_account_override(self) -> None:
+        override = self._paper_verification_equity_override()
+        if override is None:
+            return
+        equity, capacity = override
+        open_notional = sum(
+            position.current_notional_usd_estimate()
+            for position in self.paper_positions.values()
+            if position.quantity_remaining > 0.0
+        )
+        self.equity_usd = equity
+        self.max_portfolio_capacity_usd = capacity
+        self.remaining_portfolio_capacity_usd = max(capacity - open_notional, 0.0)
+        self.capital_report["futures_available_balance_usd"] = equity
+        self.capital_report["futures_execution_balance_usd"] = equity
+        self.capital_report["futures_recognized_balance_usd"] = equity
+        self.capital_report["futures_total_reusable_balance_usd"] = equity
+
     def process_payload(self, payload: dict[str, Any], *, now: datetime | None = None) -> DecisionIntent | None:
         timestamp = now or datetime.now(tz=timezone.utc)
         self.heartbeat_count += 1
@@ -535,6 +578,7 @@ class LivePaperSession:
             if self.max_portfolio_capacity_usd is None or new_capacity > self.remaining_portfolio_capacity_usd:
                 self.remaining_portfolio_capacity_usd = new_capacity
                 self.max_portfolio_capacity_usd = new_capacity
+        self._apply_paper_verification_account_override()
 
     # ------------------------------------------------------------------
     # COIN-Futures → USDT auto-conversion
@@ -1040,6 +1084,12 @@ class LivePaperSession:
             live_positions=self.live_positions_snapshot,
             self_healing=self_healing_status,
         )
+        if self._paper_verification_mode_enabled():
+            mismatch_details_payload = dict(summary.get("futures_position_mismatch_details") or {})
+            mismatch_details_payload["missing_on_exchange"] = []
+            summary["futures_position_mismatch_details"] = mismatch_details_payload
+            summary["futures_position_mismatch"] = bool(mismatch_details_payload.get("missing_in_paper"))
+            summary["paper_verification_mode"] = True
         summary["macro_runtime"] = macro_runtime
         summary["execution_quality"] = self._execution_quality_snapshot()
         current_equity = self._extract_total_usdt_equity()
@@ -1351,7 +1401,7 @@ class LivePaperSession:
             and decision.final_mode == "futures"
             and self._is_major_futures_symbol(decision.symbol)
         ):
-            return min(base_threshold, 0.1)
+            return min(base_threshold, 0.09)
         return base_threshold
 
     def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float, decision: DecisionIntent | None = None) -> float:
@@ -1860,6 +1910,23 @@ class LivePaperSession:
         if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
             return decision
         _settings = self.runtime.paper_service.settings
+        if (
+            _settings.live_position_risk.long_only_turnaround_mode
+            and decision.final_mode == "futures"
+            and decision.side != "long"
+        ):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",)))
+                ),
+            )
+        if self.live_order_executor is None and os.getenv("QUANT_PAPER_VERIFY_RELAX_POLICY_GATES", "0") == "1":
+            return decision
         if _settings.data_collection_mode and len(self.closed_trades) < _settings.data_collection_min_trades:
             logger.info(
                 "[DATA_COLLECTION_MODE] symbol=%s closed_trades=%d/%d — bypassing policy guardrails to accumulate live evidence",
@@ -2127,6 +2194,260 @@ class LivePaperSession:
         if action in {"promote", "aggressive_promote", "demote", "disabled"}:
             return float(adjustment.get("size_multiplier", 1.0) or 1.0)
         return 1.0
+
+    def _high_conviction_recent_long_confirmation_passes(
+        self,
+        decision: DecisionIntent,
+        *,
+        is_major_strong_futures_decision: bool,
+    ) -> bool:
+        exposure = self.runtime.paper_service.settings.futures_exposure
+        required_confirmations = max(int(exposure.high_conviction_recent_long_confirmations), 0)
+        if required_confirmations <= 1:
+            return True
+        max_age_minutes = max(int(exposure.high_conviction_recent_max_age_minutes), 0)
+        min_trend_strength = max(float(exposure.high_conviction_recent_min_trend_strength), 0.0)
+        min_volume_confirmation = max(float(exposure.high_conviction_recent_min_volume_confirmation), 0.0)
+        min_liquidity = max(float(exposure.high_conviction_recent_min_liquidity), 0.0)
+        max_volatility_penalty = max(float(exposure.high_conviction_recent_max_volatility_penalty), 0.0)
+        max_overheat_penalty = max(float(exposure.high_conviction_recent_max_overheat_penalty), 0.0)
+        min_edge_to_cost_multiple = max(float(exposure.high_conviction_recent_min_edge_to_cost_multiple), 0.0)
+        if min_trend_strength <= 0.0:
+            min_trend_strength = (
+                float(exposure.strong_trend_strength_min)
+                if is_major_strong_futures_decision
+                else float(exposure.pyramid_min_trend_strength)
+            )
+        if min_volume_confirmation <= 0.0:
+            min_volume_confirmation = (
+                float(exposure.strong_volume_confirmation_min)
+                if is_major_strong_futures_decision
+                else float(exposure.pyramid_min_volume_confirmation)
+            )
+        if min_liquidity <= 0.0:
+            min_liquidity = (
+                float(exposure.strong_liquidity_min)
+                if is_major_strong_futures_decision
+                else float(exposure.soft_liquidity_floor)
+            )
+        if max_volatility_penalty <= 0.0:
+            max_volatility_penalty = (
+                float(exposure.strong_volatility_penalty_max)
+                if is_major_strong_futures_decision
+                else float(exposure.soft_volatility_penalty_max)
+            )
+        if max_overheat_penalty <= 0.0:
+            max_overheat_penalty = (
+                float(exposure.strong_overheat_penalty_max)
+                if is_major_strong_futures_decision
+                else float(exposure.soft_overheat_penalty_max)
+            )
+        if min_edge_to_cost_multiple <= 0.0:
+            min_edge_to_cost_multiple = (
+                float(exposure.strong_edge_to_cost_multiple_min)
+                if is_major_strong_futures_decision
+                else max(float(exposure.priority_edge_to_cost_multiple_min), 1.0)
+            )
+
+        def qualifies(candidate: DecisionIntent) -> bool:
+            if candidate.symbol != decision.symbol:
+                return False
+            if candidate.final_mode != "futures" or candidate.side != "long":
+                return False
+            if candidate.trend_direction <= 0:
+                return False
+            if candidate.trend_strength < min_trend_strength:
+                return False
+            if candidate.volume_confirmation < min_volume_confirmation:
+                return False
+            if candidate.liquidity_score < min_liquidity:
+                return False
+            if candidate.volatility_penalty > max_volatility_penalty:
+                return False
+            if candidate.overheat_penalty > max_overheat_penalty:
+                return False
+            edge_to_cost_multiple = (
+                float("inf")
+                if candidate.estimated_round_trip_cost_bps <= 0.0
+                else candidate.gross_expected_edge_bps / candidate.estimated_round_trip_cost_bps
+            )
+            return candidate.net_expected_edge_bps > 0.0 and edge_to_cost_multiple >= min_edge_to_cost_multiple
+
+        if not qualifies(decision):
+            return False
+        seen_decision_ids = {decision.decision_id}
+
+        def clean_reversal_unlock_passes(*, opposite_max_age_minutes: int) -> bool:
+            if not bool(getattr(exposure, "high_conviction_recent_reversal_unlock_enabled", False)):
+                return False
+            unlock_confirmations = max(
+                int(getattr(exposure, "high_conviction_recent_reversal_unlock_confirmations", 0)),
+                0,
+            )
+            if unlock_confirmations <= 0:
+                unlock_confirmations = max(required_confirmations + 1, 3)
+            confirmations = 1
+            for previous in reversed(self.decisions):
+                if previous.decision_id in seen_decision_ids:
+                    continue
+                if previous.symbol != decision.symbol:
+                    continue
+                age_seconds = (decision.timestamp - previous.timestamp).total_seconds()
+                if age_seconds < 0:
+                    continue
+                if opposite_max_age_minutes > 0 and age_seconds > opposite_max_age_minutes * 60:
+                    return False
+                if (
+                    previous.final_mode == "futures"
+                    and previous.side == "short"
+                    and previous.order_intent_notional_usd > 0.0
+                ):
+                    return confirmations >= unlock_confirmations
+                if not qualifies(previous):
+                    return False
+                confirmations += 1
+                if confirmations >= unlock_confirmations:
+                    return True
+            return False
+
+        if bool(getattr(exposure, "high_conviction_recent_opposite_block_enabled", False)):
+            opposite_max_age_minutes = max(
+                int(getattr(exposure, "high_conviction_recent_opposite_max_age_minutes", 0)),
+                0,
+            )
+            if opposite_max_age_minutes <= 0:
+                opposite_max_age_minutes = max_age_minutes
+            if opposite_max_age_minutes > 0:
+                for previous in reversed(self.decisions):
+                    if previous.decision_id in seen_decision_ids:
+                        continue
+                    if previous.symbol != decision.symbol:
+                        continue
+                    age_seconds = (decision.timestamp - previous.timestamp).total_seconds()
+                    if age_seconds < 0 or age_seconds > opposite_max_age_minutes * 60:
+                        continue
+                    if (
+                        previous.final_mode == "futures"
+                        and previous.side == "short"
+                        and previous.order_intent_notional_usd > 0.0
+                    ):
+                        if clean_reversal_unlock_passes(opposite_max_age_minutes=opposite_max_age_minutes):
+                            break
+                        return False
+        confirmations = 1
+        for previous in reversed(self.decisions):
+            if previous.decision_id in seen_decision_ids:
+                continue
+            if previous.symbol != decision.symbol:
+                continue
+            if max_age_minutes > 0:
+                age_seconds = abs((decision.timestamp - previous.timestamp).total_seconds())
+                if age_seconds > max_age_minutes * 60:
+                    return False
+            if not qualifies(previous):
+                return False
+            confirmations += 1
+            if confirmations >= required_confirmations:
+                return True
+        return False
+
+    def _apply_high_conviction_futures_sizing(
+        self,
+        decision: DecisionIntent,
+        *,
+        execution_headroom: float,
+        leverage: float,
+        max_notional: float,
+        is_major_strong_futures_decision: bool,
+        is_major_medium_futures_decision: bool,
+    ) -> DecisionIntent:
+        exposure = self.runtime.paper_service.settings.futures_exposure
+        if not exposure.high_conviction_sizing_enabled:
+            return decision
+        if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
+            return decision
+        if not self._is_major_futures_symbol(decision.symbol):
+            return decision
+        if decision.side != "long":
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_LONG_ONLY",)))),
+            )
+        if execution_headroom <= 0.0 or leverage <= 0.0 or max_notional <= 0.0:
+            return decision
+        if not self._high_conviction_recent_long_confirmation_passes(
+            decision,
+            is_major_strong_futures_decision=is_major_strong_futures_decision,
+        ):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",)))
+                ),
+            )
+        target_margin_fraction = 0.0
+        boost_reason = ""
+        if is_major_strong_futures_decision:
+            target_margin_fraction = max(float(exposure.high_conviction_target_margin_fraction), 0.0)
+            boost_reason = "HIGH_CONVICTION_A_PLUS_SIZE"
+        elif is_major_medium_futures_decision:
+            target_margin_fraction = max(float(exposure.high_conviction_medium_margin_fraction), 0.0)
+            boost_reason = "HIGH_CONVICTION_MEDIUM_SIZE"
+        elif exposure.high_conviction_block_non_strong:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_A_PLUS_REQUIRED",)))),
+            )
+        if target_margin_fraction <= 0.0:
+            if exposure.high_conviction_block_non_strong:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_A_PLUS_REQUIRED",)))),
+                )
+            return decision
+        target_notional = execution_headroom * min(target_margin_fraction, 1.0) * max(leverage, 1.0)
+        target_notional = min(target_notional, max_notional)
+        min_notional = max(float(exposure.high_conviction_min_notional_usd), 0.0)
+        if min_notional > 0.0 and target_notional < min_notional:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_NOTIONAL_TOO_SMALL",)))),
+            )
+        target_notional = round(max(target_notional, 0.0), 6)
+        if target_notional <= 0.0:
+            return decision
+        if target_notional <= decision.order_intent_notional_usd:
+            return replace(
+                decision,
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (boost_reason,)))),
+            )
+        scale = target_notional / max(decision.order_intent_notional_usd, 1e-9)
+        return replace(
+            decision,
+            order_intent_notional_usd=target_notional,
+            strategy_size_multiplier=round(decision.strategy_size_multiplier * scale, 6),
+            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (boost_reason,)))),
+        )
 
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
         decision = self._direct_policy_evidence_guardrails(decision)
@@ -2402,6 +2723,16 @@ class LivePaperSession:
                     )
                 safety_cap = execution_headroom * safety_cap_fraction
                 max_notional = min(max_notional, safety_cap)
+            decision = self._apply_high_conviction_futures_sizing(
+                decision,
+                execution_headroom=execution_headroom,
+                leverage=leverage,
+                max_notional=max_notional,
+                is_major_strong_futures_decision=is_major_strong_futures_decision,
+                is_major_medium_futures_decision=is_major_medium_futures_decision,
+            )
+            if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
+                return decision
         else:
             return decision
         rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
@@ -4489,6 +4820,12 @@ class LivePaperSession:
         paper_positions_by_symbol = self._open_paper_futures_positions_by_symbol()
         missing_in_paper = set(live_positions_by_symbol) - set(paper_positions_by_symbol)
         missing_on_exchange = set(paper_positions_by_symbol) - set(live_positions_by_symbol)
+        if self._paper_verification_mode_enabled():
+            # In paper-only verification, strategy positions are intentionally not
+            # present on the exchange. Keep unmanaged live-position adoption checks,
+            # but do not close simulated positions as manual exchange syncs.
+            missing_on_exchange = set()
+            self.futures_missing_on_exchange_counts = {}
         self._update_consecutive_mismatch_counts(
             counts=self.futures_missing_in_paper_counts,
             active_symbols=missing_in_paper,
@@ -5670,7 +6007,45 @@ class LivePaperSession:
             minutes = base_minutes
         return timestamp + timedelta(minutes=max(minutes, 1))
 
+    def _last_closed_trade_realized_pnl(self) -> float:
+        if not self.closed_trades:
+            return 0.0
+        try:
+            return float(self.closed_trades[-1].get("realized_pnl_usd_estimate", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _position_has_profit_milestone(self, position: PaperPosition) -> bool:
+        return (
+            position.partial_take_profit_taken
+            or position.r_multiple_partial_take_profit_taken
+            or position.profit_protection_retrace_taken
+            or bool(position.proactive_take_profit_thresholds_hit)
+        )
+
+    def _profit_exit_reentry_cooldown_reason(self, *, position: PaperPosition, realized_pnl: float, exit_reason: str) -> str:
+        if position.market != "futures" or not self._is_major_futures_symbol(position.symbol):
+            return ""
+        if self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes <= 0:
+            return ""
+        has_profit_milestone = self._position_has_profit_milestone(position)
+        if realized_pnl <= 0.0 and not has_profit_milestone:
+            return ""
+        profit_exit_reasons = {
+            "PORTFOLIO_FULL_EXIT",
+            "MAX_HOLDING_TIME",
+            "TAKE_PROFIT",
+            "BREAKEVEN_STOP",
+            "PARTIAL_TAKE_PROFIT",
+            "PROACTIVE_PARTIAL_TAKE_PROFIT",
+            "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT",
+        }
+        if exit_reason in profit_exit_reasons or has_profit_milestone:
+            return "PROFIT_REENTRY_COOLDOWN"
+        return ""
+
     def _close_position(self, *, position: PaperPosition, exit_price: float, timestamp: datetime, exit_reason: str) -> None:
+        closed_trade_count = len(self.closed_trades)
         self._record_closed_trade(
             position=position,
             exit_price=exit_price,
@@ -5678,9 +6053,25 @@ class LivePaperSession:
             exit_time=timestamp,
             exit_reason=exit_reason,
         )
+        realized_pnl = self._last_closed_trade_realized_pnl() if len(self.closed_trades) > closed_trade_count else 0.0
         if position.market == "futures" and exit_reason == "CAPITAL_REALLOCATION":
             cooldown_until = self._manual_reentry_cooldown_until(timestamp)
             self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp, source=exit_reason)
+        profit_cooldown_source = self._profit_exit_reentry_cooldown_reason(
+            position=position,
+            realized_pnl=realized_pnl,
+            exit_reason=exit_reason,
+        )
+        if profit_cooldown_source:
+            cooldown_until = timestamp + timedelta(
+                minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
+            )
+            self._set_manual_symbol_cooldown(
+                symbol=position.symbol,
+                until=cooldown_until,
+                timestamp=timestamp,
+                source=profit_cooldown_source,
+            )
         if (
             position.market == "futures"
             and self._is_major_futures_symbol(position.symbol)
@@ -5701,7 +6092,7 @@ class LivePaperSession:
             and self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_cooldown_minutes > 0
             and self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd > 0.0
             and self.closed_trades
-            and float(self.closed_trades[-1].get("realized_pnl_usd_estimate", 0.0)) <= -self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd
+            and realized_pnl <= -self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd
         ):
             cooldown_until = timestamp + timedelta(
                 minutes=self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_cooldown_minutes
@@ -5946,6 +6337,8 @@ class LivePaperSession:
             fallback_price = position.current_price if position.current_price > 0 else position.entry_price
         price = self._market_price(state=state, fallback=fallback_price)
         if position is None:
+            if os.getenv("QUANT_PAPER_VERIFY_USE_CAPPED_ENTRY", "0") == "1":
+                decision = self._cap_live_order_decision(decision, reference_price=price)
             return self._open_paper_position(decision=decision, price=price), False
         if position.is_adopted() and not self._should_manage_adopted_position_with_strategy(position=position, decision=decision):
             self._refresh_observed_paper_position(position=position, price=price)
