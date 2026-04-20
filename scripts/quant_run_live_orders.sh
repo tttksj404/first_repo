@@ -231,6 +231,7 @@ if not summary_state_path.exists():
     sys.exit(0)
 
 data = json.loads(summary_state_path.read_text(encoding="utf-8"))
+runtime_status = str(data.get("status") or "")
 updated_at_raw = data.get("updated_at")
 updated_at = datetime.fromisoformat(updated_at_raw) if isinstance(updated_at_raw, str) else None
 if updated_at is None:
@@ -255,6 +256,14 @@ payload = {
     "last_decision_emitted_at": decision_emitted_at.isoformat() if decision_emitted_at else None,
     "decision_age_seconds": round(decision_age_seconds, 3) if decision_age_seconds is not None else None,
 }
+
+if runtime_status == "startup_failed":
+    payload["status"] = "unhealthy"
+    payload["reason"] = "startup_failed"
+    if data.get("error"):
+        payload["error"] = str(data.get("error"))
+    state_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    sys.exit(1)
 
 if age_seconds > stale_seconds:
     payload["status"] = "unhealthy"
