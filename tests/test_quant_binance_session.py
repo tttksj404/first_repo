@@ -4503,6 +4503,53 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertGreater(session.paper_positions["BTCUSDT"].quantity_remaining, original_quantity)
         self.assertEqual(session.futures_pyramid_add_counts["BTCUSDT"], 1)
 
+    def test_pyramid_fill_tracks_micropriced_futures_position(self) -> None:
+        settings = replace(
+            self.settings,
+            futures_exposure=replace(
+                self.settings.futures_exposure,
+                pyramid_size_multiplier=0.4,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        position = PaperPosition(
+            symbol="PEPEUSDT",
+            market="futures",
+            side="long",
+            entry_time=entry_time,
+            entry_price=0.00000376,
+            current_price=0.00000376,
+            quantity_opened=33281000.0,
+            quantity_remaining=33281000.0,
+            stop_distance_bps=250.0,
+            active_stop_price=0.00000366,
+            best_price=0.00000376,
+            worst_price=0.00000376,
+            entry_predictability_score=76.0,
+            entry_liquidity_score=0.55,
+            entry_net_expected_edge_bps=32.0,
+            entry_estimated_round_trip_cost_bps=9.5,
+            entry_planned_leverage=30,
+        )
+        decision = make_decision(
+            timestamp=entry_time + timedelta(minutes=5),
+            symbol="PEPEUSDT",
+            predictability_score=64.0,
+            net_expected_edge_bps=15.0,
+            order_intent_notional_usd=153.34,
+        )
+        original_quantity = position.quantity_remaining
+
+        session._apply_pyramid_fill_to_position(
+            position=position,
+            decision=decision,
+            price=0.00000377,
+        )
+
+        self.assertGreater(position.quantity_remaining, original_quantity)
+        self.assertEqual(session.futures_pyramid_add_counts["PEPEUSDT"], 1)
+
     def test_session_does_not_retrigger_same_proactive_roe_threshold(self) -> None:
         session = self._build_session()
         state = session.runtime.dispatcher.store.get("BTCUSDT")
@@ -7531,6 +7578,58 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         self.assertIn("BTCUSDT", session.paper_positions)
         self.assertEqual(len(session.live_orders), 1)
+        self.assertTrue(session.paper_positions["BTCUSDT"].exchange_synced)
+
+    def test_live_entry_exchange_synced_paper_position_survives_reversal_signal(self) -> None:
+        class AcceptedLiveExecutor:
+            def _exchange_id(self) -> str:
+                return "bitget"
+
+            def execute_decision(self, *, decision, reference_price):  # type: ignore[no-untyped-def]
+                return type(
+                    "LiveOrderResultStub",
+                    (),
+                    {
+                        "symbol": decision.symbol,
+                        "market": decision.final_mode,
+                        "side": decision.side,
+                        "quantity": round(decision.order_intent_notional_usd / reference_price, 8),
+                        "accepted": True,
+                        "response": {"status": "SUCCESS", "orderId": "live-1"},
+                        "protection_orders": (),
+                        "protection_error": "",
+                    },
+                )()
+
+            def pop_last_preflight_rejection(self):  # type: ignore[no-untyped-def]
+                return None
+
+        session = self._build_session()
+        session.order_tester = None
+        session.live_order_executor = AcceptedLiveExecutor()  # type: ignore[assignment]
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        entry_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state.last_trade_price = 100.0
+
+        session._record_decision(
+            decision=make_decision(timestamp=entry_time, symbol="BTCUSDT", side="long"),
+            state=state,
+            timestamp=entry_time,
+        )
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertTrue(session.paper_positions["BTCUSDT"].exchange_synced)
+
+        reversal_time = entry_time + timedelta(minutes=5)
+        session._record_decision(
+            decision=make_decision(timestamp=reversal_time, symbol="BTCUSDT", side="short"),
+            state=state,
+            timestamp=reversal_time,
+        )
+
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.paper_positions["BTCUSDT"].side, "long")
+        self.assertEqual(len(session.closed_trades), 0)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_live_entry_sends_telegram_alert_on_acceptance(self, mock_send) -> None:

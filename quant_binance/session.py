@@ -6039,7 +6039,7 @@ class LivePaperSession:
         price: float,
     ) -> None:
         exposure = self.runtime.paper_service.settings.futures_exposure
-        if decision.order_intent_notional_usd <= 0 or price <= 0.01:
+        if decision.order_intent_notional_usd <= 0 or price <= 0.0:
             return
         added_notional = decision.order_intent_notional_usd * max(exposure.pyramid_size_multiplier, 0.0)
         if added_notional <= 0.0:
@@ -6072,7 +6072,13 @@ class LivePaperSession:
         )
         self.futures_pyramid_add_counts[position.symbol] = self.futures_pyramid_add_counts.get(position.symbol, 0) + 1
 
-    def _open_paper_position(self, *, decision: DecisionIntent, price: float) -> bool:
+    def _open_paper_position(
+        self,
+        *,
+        decision: DecisionIntent,
+        price: float,
+        exchange_synced: bool = False,
+    ) -> bool:
         if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
             return False
         if price <= 0 or decision.order_intent_notional_usd <= 0:
@@ -6128,6 +6134,7 @@ class LivePaperSession:
             latest_trend_strength=decision.trend_strength,
             latest_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
             latest_decision_time=decision.timestamp,
+            exchange_synced=exchange_synced,
             confirmation_pending=(decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED"),
             confirmation_pending_since=decision.timestamp if decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED" else None,
             entry_policy_context_source=str(policy_entry_context.get("entry_policy_context_source", "") or ""),
@@ -7683,6 +7690,7 @@ class LivePaperSession:
                                 self._open_paper_position(
                                     decision=executable_decision,
                                     price=state.last_trade_price,
+                                    exchange_synced=True,
                                 )
                             if pyramid_requested:
                                 paper_position = self.paper_positions.get(executable_decision.symbol)
