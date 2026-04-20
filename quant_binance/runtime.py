@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 
 from quant_binance.backtest.fixtures import load_snapshot_fixture
@@ -322,6 +323,15 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     if args.mode == "live-auto-trade-daemon":
+        stop_file = Path(__file__).resolve().parents[1] / "scripts" / "_supervisor_stop"
+        try:
+            stop_requested = "stop" in stop_file.read_text(encoding="utf-8", errors="ignore").lower()
+        except OSError:
+            stop_requested = False
+        if stop_requested and os.environ.get("QUANT_IGNORE_SUPERVISOR_STOP", "0") != "1":
+            raise RuntimeError(
+                "LIVE_AUTO_STOP_FILE_PRESENT: refusing to start live-auto-trade-daemon while scripts/_supervisor_stop contains stop"
+            )
         if args.ack_live_risk != "I_UNDERSTAND_LIVE_TRADING":
             parser.error("--ack-live-risk I_UNDERSTAND_LIVE_TRADING is required for live-auto-trade-daemon")
         result = run_live_paper_daemon(

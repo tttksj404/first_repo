@@ -118,6 +118,17 @@ def _runtime_snapshot_futures_position_keys(
         if not symbol:
             continue
         keys.add((symbol, side))
+    for item in list(summary.get("live_orders") or []):
+        if not isinstance(item, dict) or not bool(item.get("accepted", False)):
+            continue
+        if str(item.get("market", "") or "") != "futures":
+            continue
+        symbol = str(item.get("symbol", "") or "").strip()
+        order_side = str(item.get("side", "") or "").strip().lower()
+        side = "long" if order_side == "buy" else "short" if order_side == "sell" else ""
+        if not symbol or not side:
+            continue
+        keys.add((symbol, side))
     return keys
 
 

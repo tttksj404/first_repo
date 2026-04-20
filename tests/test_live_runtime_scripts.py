@@ -11,6 +11,34 @@ from scripts.start_live_trading import _resolve_python_executable, _rotate_runti
 
 
 class LiveRuntimeScriptTests(unittest.TestCase):
+    def test_quant_run_live_orders_honors_supervisor_stop_file(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("SUPERVISOR_STOP_FILE", script)
+        self.assertIn("refusing to start", script)
+        self.assertIn("not restarting", script)
+
+    def test_quant_stop_stops_supervisor_watchdog_and_writes_stop_files(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_stop.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("_supervisor_stop", script)
+        self.assertIn("_safety_guardian_stop", script)
+        self.assertIn("live_supervisor_watchdog.pid", script)
+        self.assertIn("scripts/quant_run_live_orders.sh", script)
+
+    def test_quant_run_live_orders_logs_watchdog_start_failure_without_aborting(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("watchdog_start_status=$?", script)
+        self.assertIn("watchdog start request failed", script)
+        self.assertIn("requested watchdog start pid=", script)
+
     def test_tail_strips_nul_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             path = Path(tempdir) / "runtime.err.log"
