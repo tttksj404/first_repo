@@ -206,7 +206,15 @@ class QuantBinanceSessionTests(unittest.TestCase):
             volatility_penalty=0.2,
             overheat_penalty=0.1,
         )
-        session = self._build_session()
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+        )
+        session = self._build_session(settings=settings)
         exposure = session.runtime.paper_service.settings.futures_exposure
         thresholds = session.runtime.paper_service.settings.mode_thresholds
         self.assertTrue(is_major_strong_futures_decision(decision=decision, major_symbols=exposure.major_symbols, exposure=exposure, thresholds=thresholds))
@@ -314,7 +322,15 @@ class QuantBinanceSessionTests(unittest.TestCase):
                 self.transfer_calls.append(dict(kwargs))
                 return {"status": "SUCCESS"}
 
-        session = self._build_session()
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+        )
+        session = self._build_session(settings=settings)
         rest_client = DustSpotRestClient()
         session.rest_client = rest_client
         session.account_snapshot = rest_client.get_account(market="futures")
@@ -4281,6 +4297,55 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(capped.final_mode, "cash")
         self.assertIn("EXPECTED_PROFIT_TOO_SMALL_AFTER_CAP", capped.rejection_reasons)
 
+    def test_small_live_equity_requires_wider_fee_profit_buffer(self) -> None:
+        class AcceptedLiveExecutor:
+            def _exchange_id(self) -> str:
+                return "bitget"
+
+            def execute_decision(self, *, decision, reference_price):  # type: ignore[no-untyped-def]
+                raise AssertionError("entry should be blocked before live execution")
+
+            def pop_last_preflight_rejection(self):  # type: ignore[no-untyped-def]
+                return None
+
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        session.live_order_executor = AcceptedLiveExecutor()  # type: ignore[assignment]
+        session.equity_usd = 5.4
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 5.4,
+            "futures_available_balance_usd": 5.4,
+            "futures_requirements": [
+                {"symbol": "PEPEUSDT", "min_notional_usd": 5.0, "min_quantity": 1000.0},
+            ],
+        }
+        decision = replace(
+            make_decision(
+                timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+                symbol="PEPEUSDT",
+                predictability_score=71.2,
+                liquidity_score=0.56,
+                gross_expected_edge_bps=40.32,
+                net_expected_edge_bps=31.53,
+                estimated_round_trip_cost_bps=8.79,
+                order_intent_notional_usd=162.1,
+            ),
+            volume_confirmation=0.62,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=0.00000379)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertIn("EXPECTED_PROFIT_TOO_SMALL", capped.rejection_reasons)
+
     def test_cap_live_order_decision_uses_execution_quality_expected_profit_floor_for_degraded_alt(self) -> None:
         settings = replace(
             self.settings,
@@ -6262,6 +6327,63 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(len(session.live_orders), 1)
         self.assertEqual(session.live_orders[0]["reason"], "LIVE_POSITION_LONG_TURNAROUND_ABORT")
         self.assertEqual(session.live_orders[0]["response"]["orderId"], "long-turnaround-abort")
+
+    @patch("quant_binance.session.send_telegram_message")
+    def test_full_live_close_records_strategy_reason_without_manual_close_sync(self, mock_send) -> None:
+        class PositionRestClient(FakeRestClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.placed_orders = []
+
+            def build_order_params(self, **kwargs):  # type: ignore[no-untyped-def]
+                return kwargs
+
+            def place_order(self, *, market: str, order_params: dict[str, object]) -> dict[str, object]:
+                self.placed_orders.append((market, dict(order_params)))
+                return {"status": "SUCCESS", "orderId": "strategy-close-1"}
+
+        mock_send.return_value = {"ok": True}
+        session = self._build_session()
+        session.rest_client = PositionRestClient()
+        entry_time = datetime(2026, 3, 8, 12, 0, tzinfo=timezone.utc)
+        session.paper_positions["BTCUSDT"] = PaperPosition(
+            symbol="BTCUSDT",
+            market="futures",
+            side="long",
+            entry_time=entry_time,
+            entry_price=100.0,
+            current_price=99.0,
+            quantity_opened=1.0,
+            quantity_remaining=1.0,
+            stop_distance_bps=500.0,
+            active_stop_price=95.0,
+            best_price=101.0,
+            worst_price=99.0,
+            entry_predictability_score=82.0,
+            entry_liquidity_score=0.8,
+            entry_net_expected_edge_bps=18.0,
+            entry_estimated_round_trip_cost_bps=8.0,
+            entry_planned_leverage=30,
+            exchange_synced=True,
+        )
+
+        session._close_live_position(
+            position={
+                "symbol": "BTCUSDT",
+                "holdSide": "long",
+                "total": "1",
+                "available": "1",
+                "markPrice": "99",
+                "openPriceAvg": "100",
+                "uTime": "1234568903",
+                "cTime": "1234568903",
+            },
+            reason="LIVE_POSITION_LONG_TURNAROUND_ABORT",
+        )
+
+        self.assertNotIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "LIVE_POSITION_LONG_TURNAROUND_ABORT")
+        self.assertNotEqual(session.closed_trades[-1]["exit_reason"], "MANUAL_CLOSE_SYNCED")
 
     @patch("quant_binance.session.send_telegram_message")
     def test_session_trims_live_position_on_profit_protection_retrace(self, mock_send) -> None:
