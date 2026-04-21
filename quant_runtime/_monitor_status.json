@@ -1,8 +1,8 @@
 {
-  "ts": "2026-04-17T04:38:50.164299+00:00",
-  "cycle": 15,
+  "ts": "2026-04-21T23:09:22.708191+00:00",
+  "cycle": 72,
   "heartbeats": {
-    "events": 26575,
+    "events": 26775,
     "decisions": 17,
     "live_orders": 0,
     "tested_orders": 0
@@ -10,12 +10,11 @@
   "error_counts_recent": {
     "45122": 0,
     "trailing_stop_failures": 0,
-    "websocket_errors": 3,
+    "websocket_errors": 2,
     "http_4xx_5xx": 0,
     "tracebacks": 0
   },
   "bitget": {
-    "equity_usdt": 42.320131516614,
-    "positions": []
+    "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/account/accounts?productType=USDT-FUTURES (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not kn"
   }
 }

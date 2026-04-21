@@ -5022,3 +5022,666 @@
 [YOLO_HEALTH] 완료: fixes=0 issues=0 manual=0
 [YOLO] 정상 — 수정 불필요
 [CLAUDE] PID=19283 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-21 18:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  WARNING: supervisor pid 확인 불가
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: healthy
+  Health 갱신: 6분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=15700 decisions=2 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 6분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 26MB
+  output 디렉토리: 168MB
+  health_audit.log: 1MB
+  quant_binance 메모리: unavailable (process visibility restricted)
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 2%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 20건
+  모드: {'cash': 20}
+  최근 6h 의사결정: 3건
+
+[8] 포지션 sync
+  account_sync 이벤트: 28건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 2건
+
+============================================
+[RESULT] CRITICAL=1 WARNING=2
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=2
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_ISSUE] exec_quality DOGEUSDT: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality DOGEUSDT|market=futures|exchange=bitget|policy_bucket=active_policy: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality PEPEUSDT: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality PEPEUSDT|market=futures|exchange=bitget|policy_bucket=active_policy: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality SOLUSDT: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality SOLUSDT|market=futures|exchange=bitget|policy_bucket=active_policy: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality XRPUSDT: size=0.00 lev=0.70
+[YOLO_ISSUE] exec_quality XRPUSDT|market=futures|exchange=bitget|policy_bucket=active_policy: size=0.00 lev=0.70
+[YOLO_FIX] Execution quality state 리셋 (패널티 해제)
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_HEALTH] 완료: fixes=1 issues=8 manual=0
+[YOLO] 자동 수정 완료 — 봇 재시작
+[YOLO] 봇 재시작됨 (PID: 10471)
+[CLAUDE] PID=10473 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-22 00:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  OK: supervisor pid=45835 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 23
+  CRITICAL: 에러 폭발 (23건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 1분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 1시간 전
+
+[4] 리소스
+  supervisor.log: 26MB
+  output 디렉토리: 169MB
+  health_audit.log: 1MB
+  quant_binance 메모리: unavailable (process visibility restricted)
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: unavailable (process visibility restricted)
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    daemon_stalled: 1건
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 18건
+  WARNING: 네트워크 에러 빈발 (18건)
+  WARNING: Bitget API 연결 실패 — <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+[7] 의사결정 흐름
+  총 의사결정: 4건
+  모드: {'cash': 3, 'futures': 1}
+  최근 6h 의사결정: 4건
+
+[8] 포지션 sync
+  account_sync 이벤트: 25건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=2 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=2 WARNING=3
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1321, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              encode_chunked=req.has_header('Transfer-encoding'))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1358, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1404, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1353, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1113, in _send_output
+    self.send(msg)
+    ~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1057, in send
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1492, in connect
+    super().connect()
+    ~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1023, in connect
+    self.sock = self._create_connection(
+                ~~~~~~~~~~~~~~~~~~~~~~~^
+        (self.host,self.port), self.timeout, self.source_address)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 846, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 983, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 1058, in send
+    with urlopen(request, timeout=15, context=context) as response:
+         ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 487, in open
+    response = self._open(req, data)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 504, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+                              '_open', req)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1369, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        context=self._context)
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1324, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/tttksj/first_repo/scripts/yolo_health_check.py", line 274, in <module>
+    check_and_fix()
+    ~~~~~~~~~~~~~^^
+  File "/Users/tttksj/first_repo/scripts/yolo_health_check.py", line 70, in check_and_fix
+    spot = client.get_account(market="spot")
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 798, in get_account
+    payload = self.send(self.build_account_request(market=market))
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 1080, in send
+    raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
+RuntimeError: Bitget transport error for https://api.bitget.com/api/v2/spot/account/assets?assetType=hold_only (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known
+  WARNING: 한탕 모드 자동 수정 완료 — 재시작은 QUANT_HEALTH_AUDIT_ALLOW_RESTART=1 없어서 차단
+[CLAUDE] PID=53193 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-22 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  OK: supervisor pid=45835 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 3분 전
+  Recent errors (last 200 lines): 22
+  CRITICAL: 에러 폭발 (22건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 3분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 27MB
+  output 디렉토리: 169MB
+  health_audit.log: 1MB
+  quant_binance 메모리: unavailable (process visibility restricted)
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: unavailable (process visibility restricted)
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    daemon_stalled: 1건
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 18건
+  WARNING: 네트워크 에러 빈발 (18건)
+  WARNING: Bitget API 연결 실패 — <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+[7] 의사결정 흐름
+  총 의사결정: 4건
+  모드: {'cash': 3, 'futures': 1}
+  최근 6h 의사결정: 4건
+
+[8] 포지션 sync
+  account_sync 이벤트: 25건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=2 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=2 WARNING=3
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1321, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              encode_chunked=req.has_header('Transfer-encoding'))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1358, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1404, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1353, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1113, in _send_output
+    self.send(msg)
+    ~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1057, in send
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1492, in connect
+    super().connect()
+    ~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1023, in connect
+    self.sock = self._create_connection(
+                ~~~~~~~~~~~~~~~~~~~~~~~^
+        (self.host,self.port), self.timeout, self.source_address)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 846, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 983, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 1058, in send
+    with urlopen(request, timeout=15, context=context) as response:
+         ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 487, in open
+    response = self._open(req, data)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 504, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+                              '_open', req)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1369, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        context=self._context)
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1324, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/tttksj/first_repo/scripts/yolo_health_check.py", line 274, in <module>
+    check_and_fix()
+    ~~~~~~~~~~~~~^^
+  File "/Users/tttksj/first_repo/scripts/yolo_health_check.py", line 70, in check_and_fix
+    spot = client.get_account(market="spot")
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 798, in get_account
+    payload = self.send(self.build_account_request(market=market))
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 1080, in send
+    raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
+RuntimeError: Bitget transport error for https://api.bitget.com/api/v2/spot/account/assets?assetType=hold_only (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known
+  WARNING: 한탕 모드 자동 수정 완료 — 재시작은 QUANT_HEALTH_AUDIT_ALLOW_RESTART=1 없어서 차단
+[CLAUDE] PID=62023 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-22 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  CRITICAL: quant_binance 프로세스 없음
+  OK: supervisor pid=45835 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 1분 전
+  Recent errors (last 200 lines): 23
+  CRITICAL: 에러 폭발 (23건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 1분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.0MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 27MB
+  output 디렉토리: 170MB
+  health_audit.log: 1MB
+  quant_binance 메모리: unavailable (process visibility restricted)
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: unavailable (process visibility restricted)
+
+[5] Self-healing
+  총 이벤트: 1건, 최근 20건:
+    daemon_stalled: 1건
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 18건
+  WARNING: 네트워크 에러 빈발 (18건)
+  WARNING: Bitget API 연결 실패 — <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+[7] 의사결정 흐름
+  총 의사결정: 4건
+  모드: {'cash': 3, 'futures': 1}
+  최근 6h 의사결정: 4건
+
+[8] 포지션 sync
+  account_sync 이벤트: 25건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=2 WARNING=3
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=2 WARNING=3
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1321, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              encode_chunked=req.has_header('Transfer-encoding'))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1358, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1404, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1353, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1113, in _send_output
+    self.send(msg)
+    ~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1057, in send
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1492, in connect
+    super().connect()
+    ~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1023, in connect
+    self.sock = self._create_connection(
+                ~~~~~~~~~~~~~~~~~~~~~~~^
+        (self.host,self.port), self.timeout, self.source_address)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 846, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 983, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 1058, in send
+    with urlopen(request, timeout=15, context=context) as response:
+         ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 487, in open
+    response = self._open(req, data)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 504, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+                              '_open', req)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1369, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        context=self._context)
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/urllib/request.py", line 1324, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/tttksj/first_repo/scripts/yolo_health_check.py", line 274, in <module>
+    check_and_fix()
+    ~~~~~~~~~~~~~^^
+  File "/Users/tttksj/first_repo/scripts/yolo_health_check.py", line 70, in check_and_fix
+    spot = client.get_account(market="spot")
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 798, in get_account
+    payload = self.send(self.build_account_request(market=market))
+  File "/Users/tttksj/first_repo/quant_binance/execution/bitget_rest.py", line 1080, in send
+    raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
+RuntimeError: Bitget transport error for https://api.bitget.com/api/v2/spot/account/assets?assetType=hold_only (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known
+  WARNING: 한탕 모드 자동 수정 완료 — 재시작은 QUANT_HEALTH_AUDIT_ALLOW_RESTART=1 없어서 차단
+[CLAUDE] PID=70894 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-22 06:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: supervisor pid=45835 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=7775 decisions=1 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 0시간 전
+
+[4] 리소스
+  supervisor.log: 27MB
+  output 디렉토리: 157MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 74MB
+  디스크 여유: 76GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 1%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 2건
+  모드: {'cash': 2}
+  최근 6h 의사결정: 2건
+
+[8] 포지션 sync
+  account_sync 이벤트: 10건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=0 WARNING=0
+[STATUS] 정상 — 수정 불필요
+============================================
+
+[SKIP] 정상 — Claude Code 실행 불필요
+============================================
+[HEALTH_AUDIT] 2026-04-22 08:17:01 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  OK: supervisor pid=45835 실행 중
+  OK: watchdog 1개 실행 중
+  Health status: healthy
+  Health 갱신: 0분 전
+  Recent errors (last 200 lines): 1
+  마지막 heartbeat: [HEARTBEAT] events=197650 decisions=25 live_orders=0 tested_orders=0
+
+[2] 데이터 품질
+  summary.json 갱신: 0분 전
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 2시간 전
+
+[4] 리소스
+  supervisor.log: 28MB
+  output 디렉토리: 235MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 94MB
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 1%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 0건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 26건
+  모드: {'cash': 15, 'futures': 11}
+  최근 6h 의사결정: 26건
+  cash(미진입) 비율: 58%
+
+[8] 포지션 sync
+  account_sync 이벤트: 127건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=0 WARNING=0
+[STATUS] 정상 — 수정 불필요
+============================================
+
+[SKIP] 정상 — Claude Code 실행 불필요

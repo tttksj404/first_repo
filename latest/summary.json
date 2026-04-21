@@ -337,7 +337,7 @@
     "minimum_sample_size": 3,
     "policy_bucket_contexts": {},
     "symbols": {},
-    "updated_at": "2026-04-21T08:28:33.612459+00:00"
+    "updated_at": "2026-04-21T13:49:36.145485+00:00"
   },
   "executive_operating_verdict": {
     "confidence": "high",
@@ -650,7 +650,7 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-21T08:28:33.644888+00:00",
+        "updated_at": "2026-04-21T13:49:36.148775+00:00",
         "version": 0,
         "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
       },
@@ -1098,7 +1098,7 @@
     "source": "persisted_policy_state",
     "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
     "symbols": [],
-    "updated_at": "2026-04-21T08:28:33.644888+00:00",
+    "updated_at": "2026-04-21T13:49:36.148775+00:00",
     "version": 0,
     "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
   },
@@ -1387,7 +1387,7 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-21T08:28:33.644888+00:00",
+        "updated_at": "2026-04-21T13:49:36.148775+00:00",
         "version": 0,
         "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
       },
@@ -1900,7 +1900,7 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-21T08:28:33.644888+00:00",
+          "updated_at": "2026-04-21T13:49:36.148775+00:00",
           "version": 0,
           "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
         },
@@ -2348,7 +2348,7 @@
       "source": "persisted_policy_state",
       "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
       "symbols": [],
-      "updated_at": "2026-04-21T08:28:33.644888+00:00",
+      "updated_at": "2026-04-21T13:49:36.148775+00:00",
       "version": 0,
       "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
     },
@@ -2364,7 +2364,7 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-21T08:28:33.644888+00:00",
+          "updated_at": "2026-04-21T13:49:36.148775+00:00",
           "version": 0,
           "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
         },
@@ -4202,7 +4202,7 @@
               "source": "persisted_policy_state",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-21T08:28:33.644888+00:00",
+              "updated_at": "2026-04-21T13:49:36.148775+00:00",
               "version": 0,
               "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
             },
@@ -5014,7 +5014,7 @@
       "state_counts": {},
       "symbol_count": 0
     },
-    "updated_at": "2026-04-21T08:28:33.646908+00:00",
+    "updated_at": "2026-04-21T13:49:36.149043+00:00",
     "version": 0
   },
   "policy_validation": {
@@ -7734,7 +7734,7 @@
     {
       "key": "trade:2026-03-08 12:10:00+00:00:BTCUSDT:PARTIAL_TAKE_PROFIT:5.0",
       "result": {
-        "reason": "missing_token_or_allowlist",
+        "reason": "report_only_filtered",
         "sent": false
       },
       "text": "[PARTIAL_TAKE_PROFIT] BTCUSDT\nrealized_pnl_usd_estimate=40.00\nrealized_return_bps_estimate=800.00"
@@ -7742,7 +7742,7 @@
     {
       "key": "trade:2026-03-08 12:15:00+00:00:BTCUSDT:BREAKEVEN_STOP:5.0",
       "result": {
-        "reason": "missing_token_or_allowlist",
+        "reason": "report_only_filtered",
         "sent": false
       },
       "text": "[BREAKEVEN_STOP] BTCUSDT\nrealized_pnl_usd_estimate=0.00\nrealized_return_bps_estimate=0.00"
