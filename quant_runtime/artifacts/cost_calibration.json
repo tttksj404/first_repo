@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-17T04:24:46.789077+00:00",
+  "generated_at": "2026-04-21T21:13:24.712322+00:00",
   "global_empirical_entry_slippage_bps": 0.0,
   "global_empirical_exit_slippage_bps": 0.0,
   "global_empirical_fee_bps": 4.0,
@@ -9,7 +9,15 @@
       "empirical_entry_slippage_bps": 0.0,
       "empirical_exit_slippage_bps": 0.0,
       "empirical_fee_bps": 4.0,
-      "fee_sample_count": 100,
+      "fee_sample_count": 3,
+      "slippage_sample_count": 0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "empirical_entry_slippage_bps": 0.0,
+      "empirical_exit_slippage_bps": 0.0,
+      "empirical_fee_bps": 4.0,
+      "fee_sample_count": 97,
       "slippage_sample_count": 0,
       "symbol": "PEPEUSDT"
     }

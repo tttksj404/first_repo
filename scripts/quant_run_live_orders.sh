@@ -6,6 +6,23 @@ slot_pid() {
   awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
 }
 
+pid_is_visible() {
+  pid="$1"
+  case "$pid" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+  if kill -0 "$pid" 2>/dev/null; then
+    return 0
+  fi
+  if command -v lsof >/dev/null 2>&1 && lsof -a -p "$pid" -d cwd >/dev/null 2>&1; then
+    return 0
+  fi
+  if ps -p "$pid" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 SUPERVISOR_STOP_FILE="$REPO_ROOT/scripts/_supervisor_stop"
@@ -26,7 +43,7 @@ if supervisor_stop_requested; then
 fi
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
   EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
-  if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+  if pid_is_visible "$EXISTING_SUPERVISOR_PID"; then
     printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -74,14 +91,14 @@ acquire_supervisor_lock() {
 
   if [ -f "$SUPERVISOR_PID_PATH" ]; then
     EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
-    if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+    if pid_is_visible "$EXISTING_SUPERVISOR_PID"; then
       printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
       exit 0
     fi
   fi
 
   LOCK_OWNER_PID="$(slot_pid "$SUPERVISOR_LOCK_DIR/pid")"
-  if [ -n "$LOCK_OWNER_PID" ] && kill -0 "$LOCK_OWNER_PID" 2>/dev/null; then
+  if pid_is_visible "$LOCK_OWNER_PID"; then
     printf '[SUPERVISOR] supervisor lock held by pid=%s at %s\n' "$LOCK_OWNER_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -100,7 +117,7 @@ acquire_supervisor_lock
 
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
   EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
-  if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+  if pid_is_visible "$EXISTING_SUPERVISOR_PID"; then
     printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -339,7 +356,8 @@ while :; do
     fi
     # Auto-restart watchdog if it died
     if [ "${QUANT_ENABLE_SUPERVISOR_WATCHDOG:-1}" = "1" ]; then
-      if ! pgrep -f "quant_live_watchdog.py" >/dev/null 2>&1; then
+      WATCHDOG_SLOT_PID="$(slot_pid "$SUPERVISOR_WATCHDOG_PID_PATH")"
+      if ! pid_is_visible "$WATCHDOG_SLOT_PID"; then
         printf '[SUPERVISOR] watchdog died, restarting at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
         start_watchdog
       fi

@@ -13,7 +13,7 @@
     "armed": false,
     "reasons": []
   },
-  "last_decision_emitted_at": "2026-04-21T08:28:33.611457+00:00",
+  "last_decision_emitted_at": "2026-04-21T13:49:36.145154+00:00",
   "last_decision_timestamp": "2026-03-08T12:15:00+00:00",
   "last_event_timestamp": null,
   "live_order_count": 0,
@@ -70,5 +70,5 @@
   "tested_order_count": 1,
   "top_rejection_reasons": {},
   "unrealized_pnl_usd_estimate": 0,
-  "updated_at": "2026-04-21T08:28:33.705226+00:00"
+  "updated_at": "2026-04-21T13:49:36.154350+00:00"
 }

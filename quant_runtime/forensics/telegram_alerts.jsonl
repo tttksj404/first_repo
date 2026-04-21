@@ -9,3 +9,9 @@
 {"key": "risk:WEEKLY_REALIZED_LOSS_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[WEEKLY_REALIZED_LOSS_LIMIT] ratio=0.1888 limit=0.0500"}
 {"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.1888 limit=0.0250"}
 {"key": "manual-close:PEPEUSDT:2026-04-17T02:21:32.941594+00:00", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] PEPEUSDT\nreentry_block_until=2026-04-17T02:26:32.941594+00:00"}
+{"key": "live-entry:1430461842722533377:2026-04-21 12:30:00.004917+00:00", "result": {"reason": "report_only_mode", "sent": false}, "text": "[LIVE_ENTRY] PEPEUSDT\nmarket=futures\nside=BUY\nquantity=39716000.00000000\nreference_price=0.0000\norder_id=1430461842722533377"}
+{"key": "live-position-close:PEPEUSDT:1776774600751:LIVE_POSITION_LONG_TURNAROUND_ABORT:1.0000", "result": {"reason": "report_only_mode", "sent": false}, "text": "[LIVE_POSITION_LONG_TURNAROUND_ABORT] PEPEUSDT\nroe_percent=-30.05\nunrealized_pl=-1.51"}
+{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-21", "result": {"reason": "report_only_mode", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.2753 limit=0.0200"}
+{"key": "risk:WEEKLY_REALIZED_LOSS_LIMIT:2026-04-21", "result": {"reason": "report_only_mode", "sent": false}, "text": "[WEEKLY_REALIZED_LOSS_LIMIT] ratio=0.2753 limit=0.0500"}
+{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-21", "result": {"reason": "report_only_mode", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.2753 limit=0.0250"}
+{"key": "manual-close:PEPEUSDT:2026-04-21T12:41:32.194702+00:00", "result": {"reason": "report_only_mode", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] PEPEUSDT\nreentry_block_until=2026-04-21T12:46:32.194702+00:00"}
