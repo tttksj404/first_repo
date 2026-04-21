@@ -1,0 +1,11 @@
+{"key": "manual-close:PEPEUSDT:2026-04-17T01:50:31.418275+00:00", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] PEPEUSDT\nreentry_block_until=2026-04-17T01:55:31.418275+00:00"}
+{"key": "live-position-close:PEPEUSDT:1776391020256:LIVE_POSITION_TURNAROUND_TAKE_PROFIT:1.0000", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[LIVE_POSITION_TURNAROUND_TAKE_PROFIT] PEPEUSDT\nroe_percent=4.07\nunrealized_pl=2.17"}
+{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.0647 limit=0.0200"}
+{"key": "risk:WEEKLY_REALIZED_LOSS_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[WEEKLY_REALIZED_LOSS_LIMIT] ratio=0.0647 limit=0.0500"}
+{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.0647 limit=0.0250"}
+{"key": "manual-close:PEPEUSDT:2026-04-17T02:01:13.255908+00:00", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] PEPEUSDT\nreentry_block_until=2026-04-17T02:06:13.255908+00:00"}
+{"key": "live-position-close:PEPEUSDT:1776392102774:LIVE_POSITION_LONG_TURNAROUND_ABORT:1.0000", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[LIVE_POSITION_LONG_TURNAROUND_ABORT] PEPEUSDT\nroe_percent=-21.70\nunrealized_pl=-11.96"}
+{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.1888 limit=0.0200"}
+{"key": "risk:WEEKLY_REALIZED_LOSS_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[WEEKLY_REALIZED_LOSS_LIMIT] ratio=0.1888 limit=0.0500"}
+{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-17", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.1888 limit=0.0250"}
+{"key": "manual-close:PEPEUSDT:2026-04-17T02:21:32.941594+00:00", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[MANUAL_CLOSE_SYNCED] PEPEUSDT\nreentry_block_until=2026-04-17T02:26:32.941594+00:00"}

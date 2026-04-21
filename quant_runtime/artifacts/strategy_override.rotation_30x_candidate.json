@@ -5,7 +5,8 @@
   "data_collection_mode": false,
   "disable_position_adoption": true,
   "decision_engine": {
-    "decision_interval_minutes": 1
+    "decision_interval_minutes": 1,
+    "decision_interval_seconds": 15
   },
   "force_auto_mode": "normal",
   "futures_exposure": {
@@ -34,7 +35,7 @@
     "strong_size_multiplier": 1.0,
     "high_conviction_sizing_enabled": true,
     "high_conviction_block_non_strong": true,
-    "high_conviction_target_margin_fraction": 0.9,
+    "high_conviction_target_margin_fraction": 1.0,
     "high_conviction_medium_margin_fraction": 0.35,
     "high_conviction_min_notional_usd": 120.0,
     "high_conviction_recent_long_confirmations": 2,
@@ -49,6 +50,9 @@
     "high_conviction_recent_opposite_max_age_minutes": 6,
     "high_conviction_recent_reversal_unlock_enabled": true,
     "high_conviction_recent_reversal_unlock_confirmations": 3,
+    "high_conviction_max_decision_age_seconds": 75,
+    "high_conviction_recent_weak_block_enabled": true,
+    "high_conviction_recent_weak_max_age_seconds": 180,
     "funding_bias_enabled": true,
     "funding_bias_min_abs_bps": 0.2,
     "funding_bias_max_abs_bps": 5.0,
@@ -74,6 +78,10 @@
     "pyramid_enabled": false,
     "pyramid_major_only": true,
     "pyramid_max_adds_per_symbol": 0,
+    "pyramid_min_predictability_score": 68.0,
+    "pyramid_min_net_edge_bps": 32.0,
+    "pyramid_min_trend_strength": 0.55,
+    "pyramid_min_volume_confirmation": 0.45,
     "pyramid_min_roe_percent": 8.0,
     "pyramid_size_multiplier": 0.0,
     "reduced_size_multiplier": 1.0,
@@ -82,7 +90,7 @@
       "SOLUSDT"
     ],
     "demoted_symbol_size_cap": 0.45,
-    "soft_liquidity_floor": 0.12,
+    "soft_liquidity_floor": 0.28,
     "soft_overheat_penalty_max": 1.15,
     "soft_volatility_penalty_max": 1.5
   },
@@ -95,11 +103,13 @@
     "futures_profit_protection_arm_roe_percent": 18.0,
     "futures_profit_protection_retrace_roe_percent": 5.0,
     "futures_proactive_take_profit_roe_thresholds_percent": [
+      5.0,
       18.0,
       35.0,
       60.0
     ],
-    "futures_proactive_take_profit_fraction": 0.25,
+    "futures_proactive_take_profit_min_roe_percent": 5.0,
+    "futures_proactive_take_profit_fraction": 0.75,
     "post_tp_stop_mode": "breakeven",
     "partial_take_profit_r": 1.6
   },
@@ -119,7 +129,7 @@
     "major_low_signal_max_holding_minutes": 0,
     "major_low_signal_min_roe_percent": 1.0,
     "major_low_signal_min_unrealized_usd": 0.75,
-    "major_partial_exit_fraction": 0.5,
+    "major_partial_exit_fraction": 0.75,
     "major_profit_protection_arm_roe_percent": 14.0,
     "major_profit_protection_retrace_roe_percent": 4.0,
     "short_profit_protection_arm_roe_percent": 10.0,

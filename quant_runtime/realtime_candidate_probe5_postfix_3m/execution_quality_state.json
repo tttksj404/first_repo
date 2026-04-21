@@ -1,0 +1,11 @@
+{
+  "active_overlays": {},
+  "contexts": {},
+  "decay_half_life_days": 14.0,
+  "degraded_keys": [],
+  "degraded_overlays": {},
+  "minimum_sample_size": 3,
+  "policy_bucket_contexts": {},
+  "symbols": {},
+  "updated_at": "2026-04-20T03:15:10.525296+00:00"
+}

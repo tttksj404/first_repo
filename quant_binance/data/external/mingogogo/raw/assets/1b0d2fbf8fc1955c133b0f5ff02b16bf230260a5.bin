@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paming Surge Alert System - 파밍 급등락 알림 시스템</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .copyright-warning {
+            background: #ff0000;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* 헤더 */
+        header {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .main-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5),
+                         0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .subtitle {
+            font-size: 20px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .company-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+
+        .company-info p {
+            margin: 5px 0;
+        }
+
+        /* SNS 링크 */
+        .sns-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            border-bottom: 3px solid #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .sns-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, #1a1f2e 0%, #252b3b 100%);
+            border-radius: 12px;
+            text-decoration: none;
+            color: #00d4ff;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .sns-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+            border: 1px solid #00d4ff;
+            background: linear-gradient(135deg, #252b3b 0%, #2d3548 100%);
+        }
+
+        .sns-link i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .sns-link span {
+            font-size: 11px;
+            text-align: center;
+            word-break: keep-all;
+            color: #a0d4ff;
+        }
+
+        /* 메인 콘텐츠 */
+        .main-content {
+            padding: 30px;
+        }
+
+        /* 잔액 정보 */
+        .balance-section {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(255, 100, 150, 0.2);
+            border: 1px solid rgba(255, 100, 150, 0.3);
+        }
+
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .balance-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* 수수료 안내 */
+        .fee-info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .fee-info h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .fee-info ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .fee-info li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .fee-highlight {
+            background: #dc3545;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* 거래 섹션 */
+        .trading-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .search-section {
+            background: linear-gradient(135deg, #1a1f2e 0%, #252b3b 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .search-section h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            background: #0f1419;
+            color: #00d4ff;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00d4ff;
+        }
+
+        .suggestions {
+            background: #0f1419;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            transition: background 0.2s;
+            color: #00d4ff;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .trading-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .trading-controls input,
+        .trading-controls select {
+            padding: 12px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            background: #0f1419;
+            color: #00d4ff;
+        }
+
+        .trading-controls input[type="number"] {
+            padding-right: 120px;
+        }
+
+        .trading-controls input:focus,
+        .trading-controls select:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .trading-controls input::placeholder {
+            color: rgba(160, 212, 255, 0.5);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-buy {
+            background: linear-gradient(135deg, #ff0844 0%, #ff5478 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 8, 68, 0.4);
+        }
+
+        .btn-buy:hover {
+            background: linear-gradient(135deg, #e60739 0%, #ff3864 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 8, 68, 0.6);
+        }
+
+        .btn-sell {
+            background: linear-gradient(135deg, #00b4d8 0%, #0096c7 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 180, 216, 0.4);
+        }
+
+        .btn-sell:hover {
+            background: linear-gradient(135deg, #0096c7 0%, #0077b6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 180, 216, 0.6);
+        }
+
+        /* 차트 섹션 */
+        .chart-section {
+            background: linear-gradient(135deg, #1a1f2e 0%, #252b3b 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .chart-section h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+
+        #tradingview-chart {
+            width: 100%;
+            height: 500px;
+            border-radius: 10px;
+            background: #0f1419;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        /* 포지션 카드 */
+        .positions-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .positions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .position-card {
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 롱 포지션 - 빨간색 배경 */
+        .position-card.long-position {
+            background: linear-gradient(135deg, #2a1520 0%, #3d1f2e 100%);
+            border: 2px solid rgba(255, 8, 68, 0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 0 25px rgba(255, 8, 68, 0.3);
+        }
+
+        .position-card.long-position::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255, 8, 68, 0.15), transparent);
+            pointer-events: none;
+        }
+
+        .position-card.long-position:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255, 8, 68, 0.5), 0 0 40px rgba(255, 8, 68, 0.4);
+            border-color: #ff0844;
+        }
+
+        .position-card.long-position .position-header {
+            border-bottom: 2px solid rgba(255, 8, 68, 0.4);
+        }
+
+        .position-card.long-position .info-row {
+            background: rgba(255, 8, 68, 0.08);
+            border-left: 3px solid rgba(255, 8, 68, 0.6);
+        }
+
+        .position-card.long-position .info-row:hover {
+            background: rgba(255, 8, 68, 0.15);
+            border-left-color: #ff0844;
+        }
+
+        /* 숏 포지션 - 파란색 배경 */
+        .position-card.short-position {
+            background: linear-gradient(135deg, #152a3d 0%, #1f2e4d 100%);
+            border: 2px solid rgba(0, 180, 216, 0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 0 25px rgba(0, 180, 216, 0.3);
+        }
+
+        .position-card.short-position::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(0, 180, 216, 0.15), transparent);
+            pointer-events: none;
+        }
+
+        .position-card.short-position:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 180, 216, 0.5), 0 0 40px rgba(0, 180, 216, 0.4);
+            border-color: #00b4d8;
+        }
+
+        .position-card.short-position .position-header {
+            border-bottom: 2px solid rgba(0, 180, 216, 0.4);
+        }
+
+        .position-card.short-position .info-row {
+            background: rgba(0, 180, 216, 0.08);
+            border-left: 3px solid rgba(0, 180, 216, 0.6);
+        }
+
+        .position-card.short-position .info-row:hover {
+            background: rgba(0, 180, 216, 0.15);
+            border-left-color: #00b4d8;
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .coin-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .leverage-badge {
+            background: linear-gradient(135deg, #ff0844 0%, #ff5478 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 8, 68, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(255, 8, 68, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(255, 8, 68, 0.8);
+            }
+        }
+
+        .position-info {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            padding: 10px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid rgba(0, 212, 255, 0.5);
+            transition: all 0.3s;
+        }
+
+        .info-row:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-left-color: #00d4ff;
+        }
+
+        .info-label {
+            color: #a0d4ff;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #00d4ff;
+            font-size: 16px;
+        }
+
+        .profit-positive {
+            color: #ff0844;
+            text-shadow: 0 0 5px rgba(255, 8, 68, 0.3);
+        }
+
+        .profit-negative {
+            color: #00b4d8;
+            text-shadow: 0 0 5px rgba(0, 180, 216, 0.3);
+        }
+
+        .memo-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .memo-label {
+            font-size: 13px;
+            color: #00d4ff;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .memo-text {
+            font-size: 14px;
+            color: #a0d4ff;
+            background: rgba(0, 212, 255, 0.08);
+            padding: 12px;
+            border-radius: 10px;
+            min-height: 50px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff0844 0%, #ff5478 100%);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 8, 68, 0.3);
+        }
+
+        .close-btn:hover {
+            background: linear-gradient(135deg, #e60739 0%, #ff3864 100%);
+            box-shadow: 0 8px 25px rgba(255, 8, 68, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .close-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 손익 현황 */
+        .profit-summary {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .profit-summary h2 {
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .balance-section h2 {
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .profit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .profit-item {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .profit-item-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .profit-item-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* 푸터 */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .donation-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .donation-section h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .account-info {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .donation-description {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .footer-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 13px;
+        }
+
+        .footer-info p {
+            margin: 5px 0;
+        }
+
+        /* 로딩 애니메이션 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 10px;
+            }
+
+            .main-title {
+                font-size: 20px;
+                letter-spacing: 1px;
+            }
+
+            .subtitle {
+                font-size: 16px !important;
+            }
+
+            .company-info {
+                padding: 15px !important;
+            }
+
+            .company-info > div {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* SNS 링크 모바일 최적화 */
+            .sns-links {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .sns-link {
+                padding: 12px 6px;
+            }
+
+            .sns-link i {
+                font-size: 24px;
+                margin-bottom: 5px;
+            }
+
+            .sns-link span {
+                font-size: 9px;
+            }
+
+            /* 잔액 섹션 */
+            .balance-section {
+                padding: 15px;
+            }
+
+            .balance-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .balance-item {
+                padding: 12px;
+            }
+
+            .balance-value {
+                font-size: 18px;
+            }
+
+            /* 손익 현황 */
+            .profit-summary {
+                padding: 15px;
+            }
+
+            .profit-summary h2 {
+                font-size: 18px;
+            }
+
+            .profit-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .profit-item {
+                padding: 12px;
+            }
+
+            .profit-item-value {
+                font-size: 20px;
+            }
+
+            /* 거래 섹션 세로 배치 */
+            .main-content > div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+
+            .search-section {
+                padding: 15px;
+            }
+
+            .search-section h3 {
+                font-size: 16px;
+            }
+
+            .trading-controls input,
+            .trading-controls select {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            /* 차트 세로 배치 및 크게 */
+            .chart-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .chart-section h3 {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            #tradingview-chart,
+            #bitcoin-chart {
+                height: 400px !important;
+            }
+
+            /* 포지션 섹션 */
+            .section-title {
+                font-size: 22px;
+            }
+
+            .positions-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .position-card {
+                padding: 18px;
+            }
+
+            .coin-name {
+                font-size: 18px;
+            }
+
+            .leverage-badge {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .info-row {
+                font-size: 13px;
+                padding: 8px;
+            }
+
+            .info-value {
+                font-size: 14px;
+            }
+
+            .close-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            /* 모달 */
+            .modal-content {
+                width: 95% !important;
+                margin: 5% auto;
+                padding: 20px;
+            }
+
+            .modal-header {
+                font-size: 18px;
+            }
+
+            .modal-body {
+                font-size: 14px;
+                max-height: 400px;
+            }
+
+            /* 푸터 */
+            footer {
+                padding: 20px;
+            }
+
+            .donation-section h3 {
+                font-size: 16px;
+            }
+
+            .account-info {
+                font-size: 16px;
+            }
+
+            .footer-info {
+                font-size: 11px;
+            }
+
+            /* 현재가 표시 */
+            .current-price {
+                font-size: 16px;
+            }
+
+            /* 한글 금액 표시 */
+            #amountKorean {
+                font-size: 11px;
+                right: 10px;
+            }
+
+            .trading-controls input[type="number"] {
+                padding-right: 90px;
+            }
+        }
+
+        /* 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-body input,
+        .modal-body textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .modal-body textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .current-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 상단 환영 메시지 -->
+    <div class="copyright-warning" style="background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); font-size: 15px; padding: 15px;">
+        ✨ <strong>환영합니다!</strong> ✨<br>
+        이 프로그램은 누구나 자유롭게 이용하실 수 있습니다.<br>
+        공부하고, 분석하고, 실력을 키워 성공하시길 진심으로 응원합니다! 💪📈<br>
+        <span style="font-size: 13px; opacity: 0.9; margin-top: 5px; display: inline-block;">
+            제작자: 서교민 (파밍)
+        </span>
+    </div>
+
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <div class="main-title">PAMING SURGE ALERT SYSTEM</div>
+            <div class="subtitle" style="font-size: 24px; font-weight: 600; margin-bottom: 20px; background: linear-gradient(90deg, #00d4ff 0%, #ff0844 50%, #00d4ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                ⚡ 파밍 모의투자 시스템 ⚡
+            </div>
+            <div class="company-info" style="background: rgba(0, 212, 255, 0.1); padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 600px; margin: 0 auto;">
+                    <div style="text-align: left;">
+                        <p style="margin: 5px 0; color: #00d4ff;">
+                            <i class="fas fa-building" style="margin-right: 8px;"></i>
+                            <strong>회사명:</strong> MINJINE (민지네)
+                        </p>
+                        <p style="margin: 5px 0; color: #00d4ff;">
+                            <i class="fas fa-id-card" style="margin-right: 8px;"></i>
+                            <strong>사업자:</strong> 507-05-99353
+                        </p>
+                    </div>
+                    <div style="text-align: left;">
+                        <p style="margin: 5px 0; color: #00d4ff;">
+                            <i class="fas fa-user-tie" style="margin-right: 8px;"></i>
+                            <strong>제작:</strong> 파밍 (서교민)
+                        </p>
+                        <p style="margin: 5px 0; color: #00d4ff;">
+                            <i class="fas fa-store" style="margin-right: 8px;"></i>
+                            <strong>통신판매:</strong> 제 2025-창원성산-0165 호
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SNS 링크 -->
+        <div class="sns-links">
+            <a href="https://open.kakao.com/o/pCRUPHZh" target="_blank" class="sns-link" style="background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%); color: white; border: 2px solid #d9534f;">
+                <i class="fas fa-fish"></i>
+                <span style="color: white;">수산 주문하기</span>
+            </a>
+            <a href="https://www.daangn.com/kr/local-profile/%EB%AF%BC%EC%A7%80%EB%84%A4-m96qm3mjf3qc" target="_blank" class="sns-link" style="background: linear-gradient(135deg, #f68b1f 0%, #e67e22 100%); color: white; border: 2px solid #f68b1f;">
+                <i class="fas fa-carrot"></i>
+                <span style="color: white;">당근마켓</span>
+            </a>
+            <a href="https://smartstore.naver.com/minjinehot/category/50000006" target="_blank" class="sns-link" style="background: linear-gradient(135deg, #1ec800 0%, #19b300 100%); color: white; border: 2px solid #1ec800;">
+                <i class="fas fa-store"></i>
+                <span style="color: white;">네이버 쇼핑몰</span>
+            </a>
+            <a href="https://open.kakao.com/o/sawLPHZh" target="_blank" class="sns-link">
+                <i class="fas fa-headset"></i>
+                <span>1:1 문의</span>
+            </a>
+            <a href="https://open.kakao.com/me/paming" target="_blank" class="sns-link">
+                <i class="fas fa-comment"></i>
+                <span>코인 상담</span>
+            </a>
+            <a href="https://open.kakao.com/o/gu21QyJh" target="_blank" class="sns-link">
+                <i class="fas fa-comments"></i>
+                <span>코인 오픈톡방</span>
+            </a>
+            <a href="https://mingogogo.tistory.com/" target="_blank" class="sns-link">
+                <i class="fab fa-bitcoin"></i>
+                <span>코인 블로그</span>
+            </a>
+            <a href="https://www.tiktok.com/@jjinbbin" target="_blank" class="sns-link">
+                <i class="fab fa-tiktok"></i>
+                <span>틱톡</span>
+            </a>
+            <a href="https://www.youtube.com/@%EC%BD%94%EC%9D%B8%ED%8C%8C%EB%B0%8D/shorts" target="_blank" class="sns-link">
+                <i class="fab fa-youtube"></i>
+                <span>코인 채널</span>
+            </a>
+            <a href="https://www.instagram.com/coin.ming" target="_blank" class="sns-link">
+                <i class="fab fa-instagram"></i>
+                <span>인스타그램</span>
+            </a>
+            <a href="https://www.threads.com/@minjinehot" target="_blank" class="sns-link">
+                <i class="fab fa-threads"></i>
+                <span>쓰레드</span>
+            </a>
+            <a href="https://www.youtube.com/@minjinehot" target="_blank" class="sns-link">
+                <i class="fab fa-youtube"></i>
+                <span>일상 채널</span>
+            </a>
+            <a href="https://tt10119.tistory.com/" target="_blank" class="sns-link">
+                <i class="fas fa-blog"></i>
+                <span>일상 블로그</span>
+            </a>
+            <a href="javascript:void(0)" onclick="showBeginnerGuide()" class="sns-link" style="background: linear-gradient(135deg, #ff0844 0%, #ff5478 100%);">
+                <i class="fas fa-book-open"></i>
+                <span>초보자 필독</span>
+            </a>
+            <a href="javascript:void(0)" onclick="showFundingInfo()" class="sns-link" style="background: linear-gradient(135deg, #00b4d8 0%, #0096c7 100%);">
+                <i class="fas fa-info-circle"></i>
+                <span>펀딩비 가이드</span>
+            </a>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 잔액 정보 -->
+            <div class="balance-section">
+                <h2>💰 계좌 현황</h2>
+                <div class="balance-grid">
+                    <div class="balance-item">
+                        <div class="balance-label">보유 현금</div>
+                        <div class="balance-value" id="cash">₩10,000,000</div>
+                    </div>
+                    <div class="balance-item">
+                        <div class="balance-label">평가 자산</div>
+                        <div class="balance-value" id="totalAsset">₩0</div>
+                    </div>
+                    <div class="balance-item">
+                        <div class="balance-label">총 자산</div>
+                        <div class="balance-value" id="totalValue">₩10,000,000</div>
+                    </div>
+                    <div class="balance-item">
+                        <div class="balance-label">보유 포지션</div>
+                        <div class="balance-value"><span id="positionCount">0</span> / 10</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 손익 현황 -->
+            <div class="profit-summary">
+                <h2>📊 손익 현황</h2>
+                <div class="profit-grid">
+                    <div class="profit-item">
+                        <div class="profit-item-label">실현 손익</div>
+                        <div class="profit-item-value" id="realizedProfit">₩0</div>
+                    </div>
+                    <div class="profit-item">
+                        <div class="profit-item-label">미실현 손익</div>
+                        <div class="profit-item-value" id="unrealizedProfit">₩0</div>
+                    </div>
+                    <div class="profit-item">
+                        <div class="profit-item-label">총 손익</div>
+                        <div class="profit-item-value" id="totalProfit">₩0</div>
+                    </div>
+                    <div class="profit-item">
+                        <div class="profit-item-label">수익률</div>
+                        <div class="profit-item-value" id="profitRate">0.00%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 거래 섹션 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <!-- 왼쪽: 코인 검색 및 거래 -->
+                <div class="search-section">
+                    <h3>🔍 코인 검색 및 거래</h3>
+                    <div class="search-box">
+                        <input type="text" id="coinSearch" placeholder="코인 이름 또는 심볼 검색 (예: 비트코인, BTC)">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div id="suggestions" class="suggestions"></div>
+
+                    <div class="trading-controls">
+                        <input type="text" id="selectedCoin" placeholder="선택된 코인" readonly>
+                        <div class="current-price" id="currentPrice">현재가: -</div>
+                        <div style="position: relative;">
+                            <input type="number" id="amount" placeholder="거래 금액 (원)" min="5000" oninput="updateAmountInKorean()">
+                            <div id="amountKorean" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #00d4ff; font-weight: bold; font-size: 14px; pointer-events: none;"></div>
+                        </div>
+                        <select id="leverage">
+                            <option value="1">레버리지 1배 (현물)</option>
+                            <option value="2">레버리지 2배</option>
+                            <option value="3">레버리지 3배</option>
+                            <option value="5">레버리지 5배</option>
+                            <option value="10">레버리지 10배</option>
+                            <option value="20">레버리지 20배</option>
+                            <option value="25">레버리지 25배</option>
+                            <option value="30">레버리지 30배</option>
+                            <option value="50">레버리지 50배</option>
+                            <option value="75">레버리지 75배</option>
+                            <option value="100">레버리지 100배</option>
+                            <option value="125">레버리지 125배</option>
+                        </select>
+                        <div class="button-group">
+                            <button class="btn btn-buy" onclick="openTradeModal('buy')">
+                                <i class="fas fa-arrow-up"></i> 매수 (Long)
+                            </button>
+                            <button class="btn btn-sell" onclick="openTradeModal('sell')">
+                                <i class="fas fa-arrow-down"></i> 매도 (Short)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 거래 정보 및 통계 -->
+                <div class="search-section">
+                    <h3>📊 거래 정보</h3>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                        <div style="background: rgba(255, 8, 68, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 8, 68, 0.3);">
+                            <div style="font-size: 14px; color: #ff0844; margin-bottom: 5px;">💰 현재 투자 가능 금액</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #ff0844;" id="availableCash">₩10,000,000</div>
+                        </div>
+                        <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="font-size: 14px; color: #00d4ff; margin-bottom: 5px;">📈 현재 보유 포지션</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #00d4ff;"><span id="currentPositions">0</span> / 10 개</div>
+                        </div>
+                        <div style="background: rgba(150, 201, 61, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(150, 201, 61, 0.3);">
+                            <div style="font-size: 14px; color: #96c93d; margin-bottom: 5px;">💎 총 평가 자산</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #96c93d;" id="totalAssetInfo">₩10,000,000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <!-- 왼쪽: 선택한 코인 차트 -->
+                <div class="chart-section">
+                    <h3 id="chartTitle">📈 선택한 코인 차트</h3>
+                    <div id="tradingview-chart">
+                        <iframe 
+                            src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=UPBIT:BTCKRW&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=1a1f2e&studies=[]&theme=dark&style=1&timezone=Asia/Seoul&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=kr"
+                            style="width: 100%; height: 100%; border: none; border-radius: 10px;">
+                        </iframe>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 비트코인 고정 차트 -->
+                <div class="chart-section">
+                    <h3>📊 비트코인 차트 (고정)</h3>
+                    <div id="bitcoin-chart" style="width: 100%; height: 500px; border-radius: 10px; background: #0f1419; border: 1px solid rgba(0, 212, 255, 0.2);">
+                        <iframe 
+                            src="https://s.tradingview.com/widgetembed/?frameElementId=bitcoin_chart&symbol=UPBIT:BTCKRW&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=1a1f2e&studies=[]&theme=dark&style=1&timezone=Asia/Seoul&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=kr"
+                            style="width: 100%; height: 100%; border: none; border-radius: 10px;">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 보유 포지션 -->
+            <div class="positions-section">
+                <h2 class="section-title" style="font-size: 32px; background: linear-gradient(90deg, #00d4ff 0%, #ff0844 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: none;">
+                    <i class="fas fa-wallet" style="color: #00d4ff;"></i> 보유 포지션 (최대 10개)
+                </h2>
+                <div id="positions" class="positions-grid">
+                    <!-- 포지션 카드가 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 푸터 -->
+        <footer>
+            <div class="donation-section">
+                <h3>💝 후원 계좌</h3>
+                <div class="account-info">케이뱅크 100-165-970266 서교민</div>
+                <div class="donation-description">
+                    후원금은 프로그램 제작 및 유지보수, 오픈톡방 이벤트 운영에 사용되며,<br>
+                    수익의 20%는 사회 공헌 활동에 기부됩니다.
+                </div>
+            </div>
+
+            <div class="footer-info">
+                <p><strong>회사명:</strong> MINJINE (민지네) | <strong>제작:</strong> 파밍 (서교민)</p>
+                <p><strong>사업자번호:</strong> 507-05-99353 | <strong>통신판매업:</strong> 제 2025-창원성산-0165 호</p>
+                <p style="margin-top: 15px;">© 2025 MINJINE. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 하단 환영 메시지 -->
+    <div class="copyright-warning" style="background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); font-size: 15px; padding: 15px;">
+        ✨ <strong>환영합니다!</strong> ✨<br>
+        이 프로그램은 누구나 자유롭게 이용하실 수 있습니다.<br>
+        공부하고, 분석하고, 실력을 키워 성공하시길 진심으로 응원합니다! 💪📈<br>
+        <span style="font-size: 13px; opacity: 0.9; margin-top: 5px; display: inline-block;">
+            제작자: 서교민 (파밍)
+        </span>
+    </div>
+
+    <!-- 거래 모달 -->
+    <div id="tradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">매수</div>
+            <div class="modal-body">
+                <p><strong>코인:</strong> <span id="modalCoin"></span></p>
+                <p><strong>현재가:</strong> <span id="modalPrice"></span></p>
+                <p><strong>거래 금액:</strong> <span id="modalAmount"></span></p>
+                <p><strong>레버리지:</strong> <span id="modalLeverage"></span></p>
+                <p><strong>예상 수수료:</strong> <span id="modalFee"></span></p>
+                <p><strong>실제 투자금:</strong> <span id="modalInvestment"></span></p>
+                <label for="memoInput" style="display: block; margin-top: 15px; font-weight: bold;">매수/매도 이유 (메모)</label>
+                <textarea id="memoInput" placeholder="매수 이유: 손절가 익절가 확인 후 진입" onfocus="if(this.value === '매수 이유: 손절가 익절가 확인 후 진입') this.value = ''"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="closeTradeModal()" style="background: #6c757d; color: white;">취소</button>
+                <button onclick="confirmTrade()" id="confirmBtn" style="background: #28a745; color: white;">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 초보자 필독 모달 -->
+    <div id="beginnerModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header" style="color: #ff0844;">📚 초보자 필독! 수수료 및 비용 완벽 가이드</div>
+            <div class="modal-body" style="max-height: 500px; overflow-y: auto; line-height: 1.8;">
+                
+                <h4 style="color: #ff0844; margin-top: 0;">💰 거래 수수료 구조</h4>
+                
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;">
+                    <p style="margin: 5px 0; font-weight: bold;">📌 현물 거래 수수료 (업비트 기준)</p>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>매수 시: <strong>0.05%</strong></li>
+                        <li>매도 시: <strong>0.05%</strong></li>
+                    </ul>
+                    <p style="margin: 5px 0; color: #856404;"><strong>예시:</strong> 100만원 매수 → 수수료 500원 차감</p>
+                </div>
+
+                <div style="background: #ffe6e6; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;">
+                    <p style="margin: 5px 0; font-weight: bold; color: #dc3545;">⚡ 레버리지 거래 수수료</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #721c24;">
+                        <li><strong>메이커(Maker) 수수료:</strong> 0.02% - 지정가 주문</li>
+                        <li><strong>테이커(Taker) 수수료:</strong> 0.05% - 시장가 주문</li>
+                    </ul>
+                    <div style="background: #fff; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                        <p style="margin: 5px 0; font-weight: bold; color: #dc3545;">⚠️ 핵심 포인트</p>
+                        <p style="margin: 5px 0; color: #333;">레버리지 배율과 관계없이 <strong>포지션 전체 규모</strong>를 기준으로 수수료 계산!</p>
+                    </div>
+                </div>
+
+                <h4 style="color: #ff0844; margin-top: 20px;">📊 레버리지 수수료 계산 예시</h4>
+                
+                <div style="background: #e6f3ff; padding: 15px; border-radius: 8px; margin: 10px 0; border: 2px solid #007bff;">
+                    <p style="margin: 5px 0; font-weight: bold; color: #007bff;">💡 실전 예시 1: 10배 레버리지</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #004085;">
+                        <li>보유 현금: <strong>100만원</strong></li>
+                        <li>레버리지: <strong>10배</strong></li>
+                        <li>포지션 규모: <strong>1,000만원</strong> (100만 × 10)</li>
+                        <li>테이커 수수료: 1,000만 × 0.05% = <strong style="color: #dc3545;">5,000원</strong></li>
+                    </ul>
+                </div>
+
+                <div style="background: #e6f3ff; padding: 15px; border-radius: 8px; margin: 10px 0; border: 2px solid #007bff;">
+                    <p style="margin: 5px 0; font-weight: bold; color: #007bff;">💡 실전 예시 2: 20배 레버리지</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #004085;">
+                        <li>보유 현금: <strong>50만원</strong></li>
+                        <li>레버리지: <strong>20배</strong></li>
+                        <li>포지션 규모: <strong>1,000만원</strong> (50만 × 20)</li>
+                        <li>테이커 수수료: 1,000만 × 0.05% = <strong style="color: #dc3545;">5,000원</strong></li>
+                    </ul>
+                    <p style="margin: 10px 0; color: #dc3545; font-weight: bold;">→ 담보금이 적어도 포지션이 크면 수수료도 커집니다!</p>
+                </div>
+
+                <h4 style="color: #ff0844; margin-top: 20px;">⚠️ 청산(Liquidation) 위험</h4>
+                
+                <div style="background: #fff0f0; padding: 15px; border-radius: 8px; margin: 10px 0; border: 3px solid #dc3545;">
+                    <p style="margin: 5px 0; font-weight: bold; color: #dc3545;">🚨 청산이란?</p>
+                    <p style="margin: 10px 0; color: #333;">손실이 담보금(증거금)을 초과하면 <strong>거래소가 강제로 포지션을 종료</strong>하는 것입니다.</p>
+                    
+                    <p style="margin: 10px 0; font-weight: bold; color: #dc3545;">청산 예시:</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #333;">
+                        <li>담보금: 100만원</li>
+                        <li>10배 레버리지로 1,000만원 포지션</li>
+                        <li>가격이 <strong>10%만 하락</strong>해도 → 100만원 전액 손실 → <strong>청산!</strong></li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #ff0844; margin-top: 20px;">💪 초보자를 위한 5가지 핵심 팁</h4>
+                
+                <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin: 10px 0; border: 2px solid #28a745;">
+                    <ol style="margin: 10px 0; padding-left: 20px; color: #155724; line-height: 2;">
+                        <li><strong>낮은 레버리지로 시작:</strong> 1~3배 레버리지 추천</li>
+                        <li><strong>수수료 계산 필수:</strong> 포지션 규모 × 0.05%</li>
+                        <li><strong>손절가 설정:</strong> 진입 전 반드시 손절가 정하기</li>
+                        <li><strong>익절가 설정:</strong> 목표 수익률 미리 계획</li>
+                        <li><strong>소액으로 연습:</strong> 모의투자로 충분히 익히기</li>
+                    </ol>
+                </div>
+
+                <div style="background: #ff6b6b; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; font-weight: bold; font-size: 16px;">
+                    ⚠️ 경고: 레버리지가 높을수록 수익도 크지만<br>
+                    손실도 기하급수적으로 증가합니다!<br>
+                    신중하게 거래하세요! ⚠️
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="closeBeginnerModal()" style="background: #ff0844; color: white; width: 100%;">확인했습니다</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 펀딩비 설명 모달 -->
+    <div id="fundingModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header" style="color: #007bff;">📚 펀딩비(Funding Fee) 완벽 가이드</div>
+            <div class="modal-body" style="max-height: 500px; overflow-y: auto; line-height: 1.8;">
+                <h4 style="color: #333; margin-top: 0;">1️⃣ 펀딩비란?</h4>
+                <p>펀딩비는 <strong>레버리지(선물) 거래에서 포지션을 보유할 때 주기적으로 발생하는 비용</strong>입니다.</p>
+                <p>현물 가격과 선물 가격의 차이를 줄이기 위해 롱(매수) 포지션과 숏(매도) 포지션 보유자 간에 주고받는 수수료입니다.</p>
+
+                <h4 style="color: #333; margin-top: 20px;">2️⃣ 언제 발생하나요?</h4>
+                <ul>
+                    <li><strong>발생 주기:</strong> 거래소마다 다르지만 일반적으로 <strong>8시간마다 1회</strong> (하루 3회)</li>
+                    <li><strong>발생 시간:</strong> 보통 00:00, 08:00, 16:00 (UTC 기준)</li>
+                    <li><strong>대상:</strong> 해당 시간에 <strong>포지션을 보유하고 있는 경우에만</strong> 발생</li>
+                </ul>
+
+                <h4 style="color: #333; margin-top: 20px;">3️⃣ 얼마나 나가나요?</h4>
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <p style="margin: 5px 0;"><strong>펀딩비율:</strong> 보통 <strong>-0.05% ~ +0.05%</strong> 범위</p>
+                    <p style="margin: 5px 0;"><strong>계산 예시:</strong></p>
+                    <ul style="margin: 5px 0;">
+                        <li>포지션 규모: 1,000만원</li>
+                        <li>펀딩비율: +0.01% (양수)</li>
+                        <li>롱 포지션 보유자: <strong>1,000원 지불</strong></li>
+                        <li>숏 포지션 보유자: <strong>1,000원 수취</strong></li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #333; margin-top: 20px;">4️⃣ 양수/음수 의미</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 10px 0;">
+                    <div style="background: #ffe6e6; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                        <p style="margin: 0; font-weight: bold; color: #dc3545;">📈 펀딩비율이 양수(+)일 때</p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li><strong>롱(Long):</strong> 비용 지불 ❌</li>
+                            <li><strong>숏(Short):</strong> 비용 수취 ✅</li>
+                        </ul>
+                        <p style="margin: 5px 0; font-size: 13px; color: #666;">→ 시장이 상승장일 때 많이 발생</p>
+                    </div>
+                    <div style="background: #e6f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
+                        <p style="margin: 0; font-weight: bold; color: #007bff;">📉 펀딩비율이 음수(-)일 때</p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li><strong>롱(Long):</strong> 비용 수취 ✅</li>
+                            <li><strong>숏(Short):</strong> 비용 지불 ❌</li>
+                        </ul>
+                        <p style="margin: 5px 0; font-size: 13px; color: #666;">→ 시장이 하락장일 때 많이 발생</p>
+                    </div>
+                </div>
+
+                <h4 style="color: #333; margin-top: 20px;">5️⃣ 장기 보유 시 주의사항</h4>
+                <div style="background: #ffecec; padding: 15px; border-radius: 8px; border: 2px solid #dc3545;">
+                    <p style="margin: 5px 0;"><strong>⚠️ 하루 3회 × 30일 = 90회 발생</strong></p>
+                    <p style="margin: 5px 0;">펀딩비가 평균 0.01%라고 가정 시:</p>
+                    <ul style="margin: 10px 0;">
+                        <li>1개월 누적: <strong>약 0.9%</strong> 비용 발생</li>
+                        <li>1,000만원 포지션: <strong>약 9만원</strong> 손실</li>
+                    </ul>
+                    <p style="margin: 5px 0; font-weight: bold; color: #dc3545;">→ 장기 보유 시 수익이 나도 펀딩비로 손실 가능!</p>
+                </div>
+
+                <h4 style="color: #333; margin-top: 20px;">6️⃣ 초보자를 위한 팁</h4>
+                <ul>
+                    <li>✅ <strong>단기 트레이딩 추천:</strong> 펀딩비 부담을 줄일 수 있습니다</li>
+                    <li>✅ <strong>펀딩 시간 전 청산:</strong> 00:00, 08:00, 16:00 직전에 청산하면 펀딩비 회피</li>
+                    <li>✅ <strong>펀딩비율 확인:</strong> 거래 전 현재 펀딩비율을 반드시 확인하세요</li>
+                    <li>✅ <strong>저레버리지 사용:</strong> 레버리지가 낮을수록 펀딩비 부담도 줄어듭니다</li>
+                    <li>⚠️ <strong>장기 보유 주의:</strong> 현물 거래가 더 유리할 수 있습니다</li>
+                </ul>
+
+                <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 20px; border: 2px solid #28a745;">
+                    <p style="margin: 0; font-weight: bold; color: #155724;">💡 핵심 요약</p>
+                    <ul style="margin: 10px 0; color: #155724;">
+                        <li>펀딩비는 레버리지 거래 시 8시간마다 발생</li>
+                        <li>양수면 롱이 지불, 음수면 숏이 지불</li>
+                        <li>장기 보유 시 누적 비용이 커질 수 있음</li>
+                        <li>초보자는 단기 트레이딩 또는 현물 거래 권장</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="closeFundingModal()" style="background: #007bff; color: white; width: 100%;">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let allMarkets = [];
+        let currentPrices = {};
+        let priceUpdateInterval;
+        
+        // 데이터 구조
+        let accountData = {
+            cash: 10000000, // 초기 자본 1000만원
+            positions: [],
+            realizedProfit: 0,
+            trades: []
+        };
+
+        let pendingTrade = null;
+
+        // 로컬스토리지에서 데이터 로드
+        function loadData() {
+            const saved = localStorage.getItem('pamingTradingData');
+            if (saved) {
+                accountData = JSON.parse(saved);
+            }
+            updateDisplay();
+        }
+
+        // 로컬스토리지에 데이터 저장
+        function saveData() {
+            localStorage.setItem('pamingTradingData', JSON.stringify(accountData));
+        }
+
+        // 숫자 포맷팅
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ko-KR').format(Math.round(num));
+        }
+
+        function formatPrice(num) {
+            if (num >= 1000) {
+                return formatNumber(num);
+            } else if (num >= 1) {
+                return num.toFixed(2);
+            } else {
+                return num.toFixed(8);
+            }
+        }
+
+        // 숫자를 한글로 변환
+        function numberToKorean(num) {
+            if (!num || num === 0) return '';
+            
+            const units = ['', '만', '억', '조'];
+            const smallUnits = ['', '십', '백', '천'];
+            
+            let result = '';
+            let unitIndex = 0;
+            
+            while (num > 0) {
+                const part = num % 10000;
+                if (part > 0) {
+                    let partStr = '';
+                    let tempPart = part;
+                    let smallUnitIndex = 0;
+                    
+                    while (tempPart > 0) {
+                        const digit = tempPart % 10;
+                        if (digit > 0) {
+                            if (digit === 1 && smallUnitIndex > 0) {
+                                partStr = smallUnits[smallUnitIndex] + partStr;
+                            } else {
+                                partStr = digit + smallUnits[smallUnitIndex] + partStr;
+                            }
+                        }
+                        tempPart = Math.floor(tempPart / 10);
+                        smallUnitIndex++;
+                    }
+                    
+                    result = partStr + units[unitIndex] + result;
+                }
+                num = Math.floor(num / 10000);
+                unitIndex++;
+            }
+            
+            return result + '원';
+        }
+
+        // 거래 금액 한글 표시 업데이트
+        function updateAmountInKorean() {
+            const amount = document.getElementById('amount').value;
+            const koreanAmount = document.getElementById('amountKorean');
+            
+            if (amount && !isNaN(amount) && amount > 0) {
+                koreanAmount.textContent = numberToKorean(parseInt(amount));
+            } else {
+                koreanAmount.textContent = '';
+            }
+        }
+
+        // 업비트 마켓 코드 가져오기
+        async function fetchMarkets() {
+            try {
+                const response = await fetch('https://api.upbit.com/v1/market/all?isDetails=false');
+                const data = await response.json();
+                allMarkets = data.filter(market => market.market.startsWith('KRW-'));
+                console.log('마켓 로드 완료:', allMarkets.length);
+            } catch (error) {
+                console.error('마켓 로드 실패:', error);
+                alert('코인 목록을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 실시간 가격 업데이트
+        async function updatePrices() {
+            if (allMarkets.length === 0) return;
+
+            try {
+                const markets = allMarkets.map(m => m.market).join(',');
+                const response = await fetch(`https://api.upbit.com/v1/ticker?markets=${markets}`);
+                const data = await response.json();
+                
+                data.forEach(ticker => {
+                    currentPrices[ticker.market] = ticker.trade_price;
+                });
+
+                // 선택된 코인의 현재가 업데이트
+                const selectedMarket = document.getElementById('selectedCoin').value;
+                if (selectedMarket && currentPrices[selectedMarket]) {
+                    document.getElementById('currentPrice').textContent = 
+                        `현재가: ₩${formatPrice(currentPrices[selectedMarket])}`;
+                }
+
+                // 포지션 업데이트
+                updatePositions();
+            } catch (error) {
+                console.error('가격 업데이트 실패:', error);
+            }
+        }
+
+        // 코인 검색
+        document.getElementById('coinSearch').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const suggestionsDiv = document.getElementById('suggestions');
+            
+            if (query.length < 1) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            const filtered = allMarkets.filter(market => {
+                const code = market.market.replace('KRW-', '').toLowerCase();
+                const koreanName = market.korean_name.toLowerCase();
+                const englishName = market.english_name.toLowerCase();
+                return code.includes(query) || koreanName.includes(query) || englishName.includes(query);
+            }).slice(0, 10);
+
+            if (filtered.length > 0) {
+                suggestionsDiv.innerHTML = filtered.map(market => `
+                    <div class="suggestion-item" onclick="selectCoin('${market.market}', '${market.korean_name}')">
+                        <strong>${market.korean_name}</strong> (${market.market.replace('KRW-', '')})
+                    </div>
+                `).join('');
+                suggestionsDiv.style.display = 'block';
+            } else {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // 코인 선택
+        function selectCoin(market, name) {
+            document.getElementById('selectedCoin').value = market;
+            document.getElementById('selectedCoin').dataset.name = name;
+            document.getElementById('coinSearch').value = name;
+            document.getElementById('suggestions').style.display = 'none';
+            
+            if (currentPrices[market]) {
+                document.getElementById('currentPrice').textContent = 
+                    `현재가: ₩${formatPrice(currentPrices[market])}`;
+            }
+
+            // 차트 업데이트
+            updateChart(market);
+        }
+
+        // 차트 업데이트 함수
+        function updateChart(market) {
+            const chartContainer = document.getElementById('tradingview-chart');
+            const chartTitle = document.getElementById('chartTitle');
+            const coinName = document.getElementById('selectedCoin').dataset.name || '비트코인';
+            const symbol = market.replace('KRW-', '');
+            
+            // 차트 제목 업데이트
+            chartTitle.textContent = `📈 ${coinName} 차트`;
+            
+            // 선택한 코인 차트 업데이트
+            chartContainer.innerHTML = `
+                <iframe 
+                    src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=UPBIT:${symbol}KRW&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=1a1f2e&studies=[]&theme=dark&style=1&timezone=Asia/Seoul&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=kr"
+                    style="width: 100%; height: 100%; border: none; border-radius: 10px;">
+                </iframe>
+            `;
+        }
+
+        // 거래 모달 열기
+        function openTradeModal(type) {
+            const market = document.getElementById('selectedCoin').value;
+            const name = document.getElementById('selectedCoin').dataset.name;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const leverage = parseInt(document.getElementById('leverage').value);
+
+            if (!market) {
+                alert('코인을 선택해주세요.');
+                return;
+            }
+
+            if (!amount || amount < 5000) {
+                alert('거래 금액은 최소 5,000원 이상이어야 합니다.');
+                return;
+            }
+
+            if (accountData.positions.length >= 10) {
+                alert('최대 10개의 포지션만 보유할 수 있습니다.');
+                return;
+            }
+
+            const price = currentPrices[market];
+            if (!price) {
+                alert('현재가를 불러올 수 없습니다.');
+                return;
+            }
+
+            const fee = amount * 0.0005; // 0.05% 수수료
+            const totalCost = amount + fee;
+
+            if (totalCost > accountData.cash) {
+                alert('보유 현금이 부족합니다.');
+                return;
+            }
+
+            // 모달 정보 설정
+            document.getElementById('modalTitle').textContent = type === 'buy' ? '매수 확인' : '매도 확인';
+            document.getElementById('modalCoin').textContent = name;
+            document.getElementById('modalPrice').textContent = `₩${formatPrice(price)}`;
+            document.getElementById('modalAmount').textContent = `₩${formatNumber(amount)}`;
+            document.getElementById('modalLeverage').textContent = `${leverage}배`;
+            document.getElementById('modalFee').textContent = `₩${formatNumber(fee)}`;
+            document.getElementById('modalInvestment').textContent = `₩${formatNumber(totalCost)}`;
+            document.getElementById('memoInput').value = '매수 이유: 손절가 익절가 확인 후 진입';
+
+            pendingTrade = {
+                type,
+                market,
+                name,
+                price,
+                amount,
+                leverage,
+                fee,
+                totalCost
+            };
+
+            document.getElementById('tradeModal').style.display = 'block';
+        }
+
+        // 거래 모달 닫기
+        function closeTradeModal() {
+            document.getElementById('tradeModal').style.display = 'none';
+            pendingTrade = null;
+        }
+
+        // 초보자 가이드 모달 열기
+        function showBeginnerGuide() {
+            document.getElementById('beginnerModal').style.display = 'block';
+        }
+
+        // 초보자 가이드 모달 닫기
+        function closeBeginnerModal() {
+            document.getElementById('beginnerModal').style.display = 'none';
+        }
+
+        // 펀딩비 설명 모달 열기
+        function showFundingInfo() {
+            document.getElementById('fundingModal').style.display = 'block';
+        }
+
+        // 펀딩비 설명 모달 닫기
+        function closeFundingModal() {
+            document.getElementById('fundingModal').style.display = 'none';
+        }
+
+        // 거래 확인
+        function confirmTrade() {
+            if (!pendingTrade) return;
+
+            const memo = document.getElementById('memoInput').value;
+
+            // 현금 차감
+            accountData.cash -= pendingTrade.totalCost;
+
+            // 포지션 추가
+            const position = {
+                id: Date.now(),
+                market: pendingTrade.market,
+                name: pendingTrade.name,
+                type: pendingTrade.type,
+                entryPrice: pendingTrade.price,
+                amount: pendingTrade.amount,
+                leverage: pendingTrade.leverage,
+                fee: pendingTrade.fee,
+                memo: memo,
+                timestamp: new Date().toISOString()
+            };
+
+            accountData.positions.push(position);
+            
+            // 거래 기록
+            accountData.trades.push({
+                ...position,
+                action: 'open'
+            });
+
+            saveData();
+            updateDisplay();
+            closeTradeModal();
+
+            // 입력 필드 초기화
+            document.getElementById('amount').value = '';
+            
+            alert(`${pendingTrade.type === 'buy' ? '매수' : '매도'} 완료!`);
+        }
+
+        // 포지션 청산
+        function closePosition(positionId) {
+            const position = accountData.positions.find(p => p.id === positionId);
+            if (!position) return;
+
+            const currentPrice = currentPrices[position.market];
+            if (!currentPrice) {
+                alert('현재가를 불러올 수 없습니다.');
+                return;
+            }
+
+            if (!confirm(`${position.name} 포지션을 청산하시겠습니까?`)) {
+                return;
+            }
+
+            // 손익 계산
+            let priceChange = 0;
+            if (position.type === 'buy') {
+                priceChange = (currentPrice - position.entryPrice) / position.entryPrice;
+            } else {
+                priceChange = (position.entryPrice - currentPrice) / position.entryPrice;
+            }
+
+            const profitBeforeFee = position.amount * position.leverage * priceChange;
+            const closeFee = position.amount * 0.0005;
+            const netProfit = profitBeforeFee - closeFee;
+            const returnAmount = position.amount + netProfit;
+
+            // 현금 반환
+            accountData.cash += returnAmount;
+            accountData.realizedProfit += netProfit;
+
+            // 포지션 제거
+            accountData.positions = accountData.positions.filter(p => p.id !== positionId);
+
+            // 거래 기록
+            accountData.trades.push({
+                ...position,
+                action: 'close',
+                exitPrice: currentPrice,
+                profit: netProfit,
+                timestamp: new Date().toISOString()
+            });
+
+            saveData();
+            updateDisplay();
+
+            alert(`포지션 청산 완료!\n손익: ₩${formatNumber(netProfit)}`);
+        }
+
+        // 포지션 업데이트
+        function updatePositions() {
+            const positionsDiv = document.getElementById('positions');
+            
+            if (accountData.positions.length === 0) {
+                positionsDiv.innerHTML = '<p style="text-align: center; color: #a0d4ff; padding: 50px;">보유 중인 포지션이 없습니다.</p>';
+                return;
+            }
+
+            let unrealizedTotal = 0;
+
+            positionsDiv.innerHTML = accountData.positions.map(position => {
+                const currentPrice = currentPrices[position.market] || position.entryPrice;
+                
+                let priceChange = 0;
+                if (position.type === 'buy') {
+                    priceChange = (currentPrice - position.entryPrice) / position.entryPrice;
+                } else {
+                    priceChange = (position.entryPrice - currentPrice) / position.entryPrice;
+                }
+
+                const unrealizedProfit = position.amount * position.leverage * priceChange;
+                unrealizedTotal += unrealizedProfit;
+
+                const profitPercent = (priceChange * position.leverage * 100).toFixed(2);
+                const profitClass = unrealizedProfit >= 0 ? 'profit-positive' : 'profit-negative';
+                
+                // 롱/숏에 따라 카드 클래스 추가
+                const positionClass = position.type === 'buy' ? 'long-position' : 'short-position';
+                const positionTypeText = position.type === 'buy' ? '롱 (Long) 🔴' : '숏 (Short) 🔵';
+                const positionTypeColor = position.type === 'buy' ? '#ff0844' : '#00b4d8';
+
+                return `
+                    <div class="position-card ${positionClass}">
+                        <div class="position-header">
+                            <div class="coin-name">${position.name}</div>
+                            <div class="leverage-badge">${position.leverage}x</div>
+                        </div>
+                        <div class="position-info">
+                            <div class="info-row">
+                                <span class="info-label">포지션</span>
+                                <span class="info-value" style="color: ${positionTypeColor}; font-weight: bold;">${positionTypeText}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">진입가</span>
+                                <span class="info-value">₩${formatPrice(position.entryPrice)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">현재가</span>
+                                <span class="info-value">₩${formatPrice(currentPrice)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">투자금</span>
+                                <span class="info-value">₩${formatNumber(position.amount)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">미실현 손익</span>
+                                <span class="info-value ${profitClass}">
+                                    ₩${formatNumber(unrealizedProfit)} (${profitPercent}%)
+                                </span>
+                            </div>
+                        </div>
+                        ${position.memo ? `
+                            <div class="memo-section">
+                                <div class="memo-label">📝 거래 메모</div>
+                                <div class="memo-text">${position.memo}</div>
+                            </div>
+                        ` : ''}
+                        <button class="close-btn" onclick="closePosition(${position.id})">
+                            <i class="fas fa-times-circle"></i> 포지션 청산
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            // 미실현 손익 업데이트
+            document.getElementById('unrealizedProfit').textContent = `₩${formatNumber(unrealizedTotal)}`;
+            document.getElementById('unrealizedProfit').className = 
+                unrealizedTotal >= 0 ? 'profit-item-value profit-positive' : 'profit-item-value profit-negative';
+        }
+
+        // 화면 업데이트
+        function updateDisplay() {
+            // 잔액
+            document.getElementById('cash').textContent = `₩${formatNumber(accountData.cash)}`;
+            document.getElementById('positionCount').textContent = accountData.positions.length;
+            
+            // 거래 정보 섹션 업데이트
+            document.getElementById('availableCash').textContent = `₩${formatNumber(accountData.cash)}`;
+            document.getElementById('currentPositions').textContent = accountData.positions.length;
+
+            // 평가 자산
+            let totalAsset = 0;
+            accountData.positions.forEach(position => {
+                totalAsset += position.amount;
+            });
+            document.getElementById('totalAsset').textContent = `₩${formatNumber(totalAsset)}`;
+
+            // 총 자산
+            const totalValue = accountData.cash + totalAsset;
+            document.getElementById('totalValue').textContent = `₩${formatNumber(totalValue)}`;
+            document.getElementById('totalAssetInfo').textContent = `₩${formatNumber(totalValue)}`;
+
+            // 손익
+            document.getElementById('realizedProfit').textContent = `₩${formatNumber(accountData.realizedProfit)}`;
+            document.getElementById('realizedProfit').className = 
+                accountData.realizedProfit >= 0 ? 'profit-item-value profit-positive' : 'profit-item-value profit-negative';
+
+            // 총 손익
+            const unrealizedText = document.getElementById('unrealizedProfit').textContent;
+            const unrealized = parseFloat(unrealizedText.replace(/[^0-9.-]/g, '')) || 0;
+            const totalProfit = accountData.realizedProfit + unrealized;
+            document.getElementById('totalProfit').textContent = `₩${formatNumber(totalProfit)}`;
+            document.getElementById('totalProfit').className = 
+                totalProfit >= 0 ? 'profit-item-value profit-positive' : 'profit-item-value profit-negative';
+
+            // 수익률
+            const profitRate = ((totalProfit / 10000000) * 100).toFixed(2);
+            document.getElementById('profitRate').textContent = `${profitRate}%`;
+            document.getElementById('profitRate').className = 
+                totalProfit >= 0 ? 'profit-item-value profit-positive' : 'profit-item-value profit-negative';
+
+            // 포지션
+            updatePositions();
+        }
+
+        // 초기화
+        async function init() {
+            loadData();
+            await fetchMarkets();
+            await updatePrices();
+            
+            // 5초마다 가격 업데이트
+            priceUpdateInterval = setInterval(updatePrices, 5000);
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const tradeModal = document.getElementById('tradeModal');
+            const fundingModal = document.getElementById('fundingModal');
+            const beginnerModal = document.getElementById('beginnerModal');
+            
+            if (event.target === tradeModal) {
+                closeTradeModal();
+            }
+            if (event.target === fundingModal) {
+                closeFundingModal();
+            }
+            if (event.target === beginnerModal) {
+                closeBeginnerModal();
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', init);
+
+        // 페이지 종료 시 데이터 저장
+        window.addEventListener('beforeunload', saveData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 0,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 0,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 0
+  },
+  "observation_count": 0,
+  "symbols": {}
+}

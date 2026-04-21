@@ -1,0 +1,14 @@
+﻿{
+    "target_seconds":  5400,
+    "pid":  13500,
+    "probe":  "C:\\Users\\SSAFY\\Downloads\\first_repo-main\\quant_runtime\\realtime_candidate_probe25_90m_watch_20260421_102624",
+    "started_at":  "2026-04-21T10:26:24.3196550+09:00",
+    "strategy":  "rotation_30x_candidate_90m_watch",
+    "paper_only":  true,
+    "equity_usd":  50,
+    "capacity_usd":  1500,
+    "relax_policy_gates":  true,
+    "high_conviction_target_margin_fraction":  1,
+    "high_conviction_medium_margin_fraction":  0.35,
+    "max_retries":  1000
+}

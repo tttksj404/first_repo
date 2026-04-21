@@ -1,0 +1,420 @@
+{
+  "baseline_control_comparison": {
+    "artifact_path": "",
+    "available": false,
+    "bucket_replay_ready": false,
+    "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_TESTED_ORDER_LOGS_AND_LIVE_ORDER_LOGS",
+    "bucket_replay_reference_bucket": "active_policy",
+    "bucket_replay_required_for_expansion": true,
+    "current_policy_bucket_replay": {
+      "available": true,
+      "bucket_name": "active_policy",
+      "bucket_replay_ready": false,
+      "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_TESTED_ORDER_LOGS_AND_LIVE_ORDER_LOGS",
+      "decision_count": 19,
+      "micro_live_status": "pending",
+      "missing_surfaces": [
+        "tested_order_logs",
+        "live_order_logs"
+      ],
+      "replay_source": "observed_runtime_policy_bucket_artifacts",
+      "run_count": 1,
+      "total_closed_trade_count": 1,
+      "total_live_order_count": 0,
+      "total_tested_order_count": 0
+    },
+    "evidence_source": "summary_artifact+policy_bucket_replay",
+    "lineage_scope_status": "aligned",
+    "reason": "NO_RECENT_BASELINE_CONTROL_ARTIFACT",
+    "replay_grounding": "strategy_comparison_recent_summary+policy_bucket_replay",
+    "replay_provenance": {
+      "classification": "bucket_replay_evidence",
+      "decision_surface": "baseline_control",
+      "has_bucket_reference": true,
+      "has_runtime_summary_anchor": false,
+      "policy_bucket": "baseline_control",
+      "reason_code": "BASELINE_BUCKET_REPLAY_SOURCE",
+      "source": "summary_artifact+policy_bucket_replay",
+      "summary": "bucket_replay_evidence:BASELINE_BUCKET_REPLAY_SOURCE",
+      "uses_direct_bucket_replay": true,
+      "uses_mixed_root_summary_fallback": false,
+      "uses_projected_evidence": false
+    },
+    "staged_candidate_bucket_replay": {
+      "available": false,
+      "bucket_name": "staged_candidate",
+      "bucket_replay_ready": false,
+      "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE",
+      "decision_count": 0,
+      "micro_live_status": "not_available",
+      "missing_surfaces": [
+        "decision_logs",
+        "tested_order_logs",
+        "live_order_logs",
+        "closed_trade_logs"
+      ],
+      "replay_source": "",
+      "run_count": 0,
+      "total_closed_trade_count": 0,
+      "total_live_order_count": 0,
+      "total_tested_order_count": 0
+    },
+    "verdict": "not_available"
+  },
+  "comparison_score_delta": 1.5,
+  "comparison_verdict": "candidate_better",
+  "confidence": "low",
+  "current_policy_status": "demote",
+  "evidence": {
+    "decision_count": 19,
+    "evidence_source": "policy_bucket",
+    "policy_bucket": "active_policy",
+    "run_count": 1,
+    "runner_avg_edge_retention_ratio": 0.0,
+    "runner_drawdown_to_pnl_ratio": 0.0,
+    "runner_positive_walk_forward_ratio": 0.25,
+    "runner_protection_degraded_rate": 0.0,
+    "runner_reject_rate": 0.0,
+    "runner_total_realized_pnl_usd": 0.227515,
+    "total_closed_trade_count": 1,
+    "total_live_order_count": 0,
+    "total_tested_order_count": 0
+  },
+  "evidence_bucket_available": true,
+  "evidence_policy_bucket": "active_policy",
+  "evidence_source": "policy_bucket",
+  "policy_guardrails": {
+    "allow_alt_promotions": false,
+    "max_positive_symbols": 1,
+    "non_major_positive_bias": "observe_only",
+    "prefer_majors_only": true,
+    "promotion_intensity_cap": 0.8
+  },
+  "raw_verdict": "tighten",
+  "reason_codes": [
+    "CHECKPOINT_POLICY_BUCKET_ACTIVE_POLICY_USED",
+    "RUNNER_EXECUTION_EVIDENCE_REQUIRES_TIGHTENING",
+    "SAMPLE_QUALITY_WATCHDOG_THIN"
+  ],
+  "regime_actions": [
+    {
+      "action": "tighten",
+      "avg_net_edge_bps": -18.388171,
+      "decision_count": 56,
+      "mode": "cash",
+      "reason_codes": [
+        "REGIME_EDGE_NON_POSITIVE"
+      ]
+    },
+    {
+      "action": "hold",
+      "avg_net_edge_bps": 16.123949,
+      "decision_count": 119,
+      "mode": "futures",
+      "reason_codes": [
+        "REGIME_WITHIN_THRESHOLDS"
+      ]
+    }
+  ],
+  "replay_provenance": {
+    "classification": "bucket_replay_evidence",
+    "decision_surface": "active_policy",
+    "has_bucket_reference": true,
+    "has_runtime_summary_anchor": false,
+    "policy_bucket": "active_policy",
+    "reason_code": "CHECKPOINT_BUCKET_REPLAY_SOURCE",
+    "source": "policy_bucket",
+    "summary": "bucket_replay_evidence:CHECKPOINT_BUCKET_REPLAY_SOURCE",
+    "uses_direct_bucket_replay": true,
+    "uses_mixed_root_summary_fallback": false,
+    "uses_projected_evidence": false
+  },
+  "sample_quality_watchdog_status": "thin",
+  "symbol_actions": [
+    {
+      "active_policy_action": "none",
+      "lifecycle_action": "hold",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "LIFECYCLE_STATE_HELD",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN"
+      ],
+      "recommendation": "keep",
+      "sample_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "trade_count": 0
+    },
+    {
+      "active_policy_action": "demote",
+      "lifecycle_action": "hold",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "prune",
+      "sample_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "PEPEUSDT",
+      "trade_count": 0
+    },
+    {
+      "active_policy_action": "demote",
+      "lifecycle_action": "hold",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_SUPPORT_NEGATIVE"
+      ],
+      "recommendation": "prune",
+      "sample_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "SOLUSDT",
+      "trade_count": 1
+    }
+  ],
+  "symbol_lifecycle": [
+    {
+      "active_policy_action": "none",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "observe_only",
+      "evidence_generated_at": "2026-04-20T04:02:03.711198+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": true,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "e1a42ae56e98f453d0d971e55e1b0aa64f0a4cde5fb28b53b3beeceef7bc781c",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "2095ca5844cb0c6f0d78b37bd23745abdf0363659d4d23809fc926eec2afeec7",
+        "symbols": [
+          "PEPEUSDT",
+          "SOLUSDT"
+        ],
+        "updated_at": "2026-04-20T04:02:03.711198+00:00",
+        "version": 50,
+        "versioned_key": "ef1ebc5318595c6527c5264dd1df61766940f5d1da8fe7efff00e3a49a74b4df"
+      },
+      "previous_state": "observe_only",
+      "pruning_recommendation": "keep",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "LIFECYCLE_STATE_HELD",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN"
+      ],
+      "recommendation": "keep",
+      "recommended_action": "hold",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "ETHUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "observe_only",
+      "trade_count": 0,
+      "transition": "observe_only_steady",
+      "validation_ready": true
+    },
+    {
+      "active_policy_action": "demote",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "demoted",
+      "evidence_generated_at": "2026-04-20T04:02:03.711198+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": true,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "e1a42ae56e98f453d0d971e55e1b0aa64f0a4cde5fb28b53b3beeceef7bc781c",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "2095ca5844cb0c6f0d78b37bd23745abdf0363659d4d23809fc926eec2afeec7",
+        "symbols": [
+          "PEPEUSDT",
+          "SOLUSDT"
+        ],
+        "updated_at": "2026-04-20T04:02:03.711198+00:00",
+        "version": 50,
+        "versioned_key": "ef1ebc5318595c6527c5264dd1df61766940f5d1da8fe7efff00e3a49a74b4df"
+      },
+      "previous_state": "demoted",
+      "pruning_recommendation": "prune",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "prune",
+      "recommended_action": "hold",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "PEPEUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "demoted",
+      "trade_count": 0,
+      "transition": "demoted_steady",
+      "validation_ready": true
+    },
+    {
+      "active_policy_action": "demote",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "demoted",
+      "evidence_generated_at": "2026-04-20T04:02:03.711198+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": true,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "e1a42ae56e98f453d0d971e55e1b0aa64f0a4cde5fb28b53b3beeceef7bc781c",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "2095ca5844cb0c6f0d78b37bd23745abdf0363659d4d23809fc926eec2afeec7",
+        "symbols": [
+          "PEPEUSDT",
+          "SOLUSDT"
+        ],
+        "updated_at": "2026-04-20T04:02:03.711198+00:00",
+        "version": 50,
+        "versioned_key": "ef1ebc5318595c6527c5264dd1df61766940f5d1da8fe7efff00e3a49a74b4df"
+      },
+      "previous_state": "demoted",
+      "pruning_recommendation": "prune",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_SUPPORT_NEGATIVE"
+      ],
+      "recommendation": "prune",
+      "recommended_action": "hold",
+      "required_trade_count_for_validation": 3,
+      "rolling_positive_window_ratio": 1.0,
+      "rolling_recent_run_consistency": 1.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "SOLUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "demoted",
+      "trade_count": 1,
+      "transition": "demoted_steady",
+      "validation_ready": false
+    },
+    {
+      "active_policy_action": "none",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "baseline",
+      "evidence_generated_at": "2026-04-20T04:02:03.711198+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": true,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 2,
+        "adjustment_signature": "e1a42ae56e98f453d0d971e55e1b0aa64f0a4cde5fb28b53b3beeceef7bc781c",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "2095ca5844cb0c6f0d78b37bd23745abdf0363659d4d23809fc926eec2afeec7",
+        "symbols": [
+          "PEPEUSDT",
+          "SOLUSDT"
+        ],
+        "updated_at": "2026-04-20T04:02:03.711198+00:00",
+        "version": 50,
+        "versioned_key": "ef1ebc5318595c6527c5264dd1df61766940f5d1da8fe7efff00e3a49a74b4df"
+      },
+      "previous_state": "baseline",
+      "pruning_recommendation": "keep",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN"
+      ],
+      "recommendation": "keep",
+      "recommended_action": "keep",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "DOGEUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "baseline",
+      "trade_count": 0,
+      "transition": "baseline_steady",
+      "validation_ready": true
+    }
+  ],
+  "symbol_lifecycle_summary": {
+    "action_counts": {
+      "hold": 3,
+      "keep": 1
+    },
+    "actionable_symbol_count": 3,
+    "actionable_symbols": [
+      "ETHUSDT",
+      "PEPEUSDT",
+      "SOLUSDT"
+    ],
+    "state_counts": {
+      "baseline": 1,
+      "demoted": 2,
+      "observe_only": 1
+    },
+    "symbol_count": 4
+  },
+  "verdict": "tighten"
+}

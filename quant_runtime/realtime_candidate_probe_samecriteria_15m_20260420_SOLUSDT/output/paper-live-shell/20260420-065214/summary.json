@@ -1,0 +1,1196 @@
+{
+  "accepted_live_order_count": 0,
+  "account_snapshot": {
+    "accounts": [
+      {
+        "accountEquity": "4.32617905",
+        "assetList": [
+          {
+            "available": "0",
+            "balance": "0",
+            "coin": "BTC"
+          }
+        ],
+        "assetMode": "single",
+        "available": "4.32617905",
+        "btcEquity": "0.000057883655",
+        "coupon": "0",
+        "crossedMargin": "0",
+        "crossedMaxAvailable": "4.32617905",
+        "crossedRiskRate": "0",
+        "crossedUnrealizedPL": "",
+        "grant": "",
+        "isolatedMargin": "0",
+        "isolatedMaxAvailable": "4.32617905",
+        "isolatedUnrealizedPL": "",
+        "locked": "0",
+        "marginCoin": "USDT",
+        "maxTransferOut": "4.32617905",
+        "unionAvailable": "4.32617905",
+        "unionMm": "0",
+        "unionTotalMargin": "4.32617905",
+        "unrealizedPL": "0",
+        "usdtEquity": "4.326179051712"
+      }
+    ],
+    "availableBalance": 4.32617905,
+    "crossedMaxAvailable": 4.32617905,
+    "executionAvailableBalance": 4.32617905,
+    "raw": {
+      "code": "00000",
+      "data": [
+        {
+          "accountEquity": "4.32617905",
+          "assetList": [
+            {
+              "available": "0",
+              "balance": "0",
+              "coin": "BTC"
+            }
+          ],
+          "assetMode": "single",
+          "available": "4.32617905",
+          "btcEquity": "0.000057883655",
+          "coupon": "0",
+          "crossedMargin": "0",
+          "crossedMaxAvailable": "4.32617905",
+          "crossedRiskRate": "0",
+          "crossedUnrealizedPL": "",
+          "grant": "",
+          "isolatedMargin": "0",
+          "isolatedMaxAvailable": "4.32617905",
+          "isolatedUnrealizedPL": "",
+          "locked": "0",
+          "marginCoin": "USDT",
+          "maxTransferOut": "4.32617905",
+          "unionAvailable": "4.32617905",
+          "unionMm": "0",
+          "unionTotalMargin": "4.32617905",
+          "unrealizedPL": "0",
+          "usdtEquity": "4.326179051712"
+        }
+      ],
+      "msg": "success",
+      "requestTime": 1776668793245
+    },
+    "unionAvailable": 4.32617905
+  },
+  "adopted_futures_position_count": 0,
+  "adopted_futures_positions": [],
+  "avg_edge_retention_ratio": 0.0,
+  "avg_expected_edge_bps": 0.0,
+  "avg_fill_ratio": 0.0,
+  "avg_realized_edge_bps": 0.0,
+  "avg_slippage_bps": 0.0,
+  "candidate_policy": {
+    "adjustments": [],
+    "decomposition_summary": {
+      "candidate_adjustment_rows": [],
+      "dominant_regime_mode": "",
+      "elite_regime_modes": [],
+      "runtime_pruning_recommendation_count": 0,
+      "runtime_symbol_recommendation_count": 0,
+      "runtime_symbol_scorecard_count": 0,
+      "score_delta_total": 0,
+      "supportive_regime_modes": []
+    },
+    "signal_sources": [],
+    "status": "insufficient_data"
+  },
+  "capital_report": {
+    "can_trade_any": true,
+    "can_trade_futures_any": false,
+    "can_trade_spot_any": true,
+    "capital_transfer_routes": [
+      {
+        "asset": "USDT",
+        "auto_transfer_supported": true,
+        "capacity_effect": "spot_execution",
+        "note": "Futures USDT can be transferred back to spot for spot execution funding.",
+        "requires_manual_transfer": false,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 4.32617905,
+        "source_market": "futures",
+        "target_market": "spot",
+        "transferable_usd": 4.326179
+      },
+      {
+        "asset": "USDT",
+        "auto_transfer_supported": true,
+        "capacity_effect": "direct_execution",
+        "note": "Spot USDT can be moved into futures as immediate execution balance.",
+        "requires_manual_transfer": false,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 0.00768858,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.007689
+      },
+      {
+        "asset": "XRP",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot XRP can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 0.425,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.600865
+      },
+      {
+        "asset": "BABYDOGE",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot BABYDOGE can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1000000000.0,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.413
+      },
+      {
+        "asset": "BTC",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot BTC can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1.13e-06,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.084227
+      },
+      {
+        "asset": "ETH",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot ETH can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 8e-07,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.001828
+      },
+      {
+        "asset": "VIRTUAL",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot VIRTUAL can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 0.0026,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.00178
+      },
+      {
+        "asset": "SOL",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot SOL can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1.48e-05,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.001251
+      },
+      {
+        "asset": "TRX",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot TRX can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 2.4e-05,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 8e-06
+      },
+      {
+        "asset": "DOGE",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot DOGE can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1.49e-05,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 1e-06
+      }
+    ],
+    "futures_available_balance_usd": 50.0,
+    "futures_collateral_candidate_balance_usd": 0,
+    "futures_execution_balance_usd": 50.0,
+    "futures_funding_assets": [
+      {
+        "asset": "USDT",
+        "free": 4.32617905,
+        "free_balance_usd": 4.326179,
+        "locked": 0.0,
+        "margin_available": true,
+        "total": 4.32617905,
+        "total_balance_usd": 4.326179
+      }
+    ],
+    "futures_manual_handling_balance_usd": 1.10296,
+    "futures_recognized_balance_usd": 50.0,
+    "futures_requirements": [
+      {
+        "buffered_min_equity_usd": 6.25,
+        "market": "futures",
+        "min_equity_usd": 5.0,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.1,
+        "symbol": "SOLUSDT"
+      }
+    ],
+    "futures_total_reusable_balance_usd": 50.0,
+    "futures_transferable_execution_balance_usd": 0.007689,
+    "max_futures_to_spot_transfer_usd": 4.326179,
+    "max_spot_to_futures_transfer_usd": 0.600865,
+    "minimum_full_universe_balance_usd": 6.25,
+    "minimum_operational_balance_usd": 1.25,
+    "note": "5% \uc218\uc775 \ubcf4\uc7a5\uc740 \ubd88\uac00\ud558\uba70, \uc544\ub798 \uae08\uc561\uc740 \ud604\uc7ac \uc124\uc815\uacfc \ucd5c\uc18c \uc8fc\ubb38 \uc870\uac74 \uae30\uc900\uc758 \uc6b4\uc601 \uac00\ub2a5 \uc790\uae08 \ucd94\uc815\uce58\uc785\ub2c8\ub2e4.",
+    "pending_symbols": [],
+    "recommended_balance_usd": 10.0,
+    "spot_available_balance_usd": 0.007689,
+    "spot_execution_routes": [
+      {
+        "base_asset": "SOL",
+        "execution_symbol": "SOLUSDT",
+        "free_balance": 0.00768858,
+        "free_balance_usd": 0.007689,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000055,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000055,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "SOLUSDT"
+      },
+      {
+        "base_asset": "SOL",
+        "execution_symbol": "SOLBTC",
+        "free_balance": 1.13e-06,
+        "free_balance_usd": 0.084227,
+        "funding_asset": "BTC",
+        "funding_source_market": "spot",
+        "min_notional_usd": 74537.168142,
+        "min_quantity": 0.0,
+        "quote_asset": "BTC",
+        "quote_asset_usd_price": 74537.168142,
+        "requires_wallet_transfer": false,
+        "route_type": "cross_quote",
+        "target_symbol": "SOLUSDT"
+      },
+      {
+        "base_asset": "SOL",
+        "execution_symbol": "SOLUSDT",
+        "free_balance": 4.32617905,
+        "free_balance_usd": 4.326179,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000055,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000055,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "SOLUSDT"
+      }
+    ],
+    "spot_funding_assets": [
+      {
+        "asset": "XRP",
+        "free": 0.425,
+        "free_balance_usd": 0.600865,
+        "locked": 0.0,
+        "total": 0.425,
+        "total_balance_usd": 0.600865
+      },
+      {
+        "asset": "BABYDOGE",
+        "free": 1000000000.0,
+        "free_balance_usd": 0.413,
+        "locked": 0.0,
+        "total": 1000000000.0,
+        "total_balance_usd": 0.413
+      },
+      {
+        "asset": "BTC",
+        "free": 1.13e-06,
+        "free_balance_usd": 0.084227,
+        "locked": 0.0,
+        "total": 1.13e-06,
+        "total_balance_usd": 0.084227
+      },
+      {
+        "asset": "USDT",
+        "free": 0.00768858,
+        "free_balance_usd": 0.007689,
+        "locked": 0.0,
+        "total": 0.00768858,
+        "total_balance_usd": 0.007689
+      },
+      {
+        "asset": "ETH",
+        "free": 8e-07,
+        "free_balance_usd": 0.001828,
+        "locked": 0.0,
+        "total": 8e-07,
+        "total_balance_usd": 0.001828
+      },
+      {
+        "asset": "VIRTUAL",
+        "free": 0.0026,
+        "free_balance_usd": 0.00178,
+        "locked": 0.0,
+        "total": 0.0026,
+        "total_balance_usd": 0.00178
+      },
+      {
+        "asset": "SOL",
+        "free": 1.48e-05,
+        "free_balance_usd": 0.001251,
+        "locked": 0.0,
+        "total": 1.48e-05,
+        "total_balance_usd": 0.001251
+      },
+      {
+        "asset": "TRX",
+        "free": 2.4e-05,
+        "free_balance_usd": 8e-06,
+        "locked": 0.0,
+        "total": 2.4e-05,
+        "total_balance_usd": 8e-06
+      },
+      {
+        "asset": "DOGE",
+        "free": 1.49e-05,
+        "free_balance_usd": 1e-06,
+        "locked": 0.0,
+        "total": 1.49e-05,
+        "total_balance_usd": 1e-06
+      }
+    ],
+    "spot_recognized_balance_usd": 1.110649,
+    "spot_requirements": [
+      {
+        "buffered_min_equity_usd": 1.25,
+        "market": "spot",
+        "min_equity_usd": 1.0,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "SOLUSDT"
+      }
+    ]
+  },
+  "closed_trade_count": 0,
+  "closed_trades": [],
+  "decision_count": 89,
+  "estimated_round_trip_fee_usd": 0,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "execution_audit_by_symbol": [],
+  "execution_outcome_counts": {},
+  "execution_quality": {
+    "active_overlays": {},
+    "contexts": {},
+    "decay_half_life_days": 14.0,
+    "degraded_keys": [],
+    "degraded_overlays": {},
+    "minimum_sample_size": 3,
+    "policy_bucket_contexts": {},
+    "symbols": {},
+    "updated_at": "2026-04-20T07:07:13.088655+00:00"
+  },
+  "executive_operating_verdict": {
+    "confidence": "high",
+    "reasons": [
+      "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+    ],
+    "replay_provenance": {
+      "checkpoint_auto_judge": {
+        "classification": "not_available",
+        "decision_surface": "checkpoint_auto_judge",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "NOT_AVAILABLE",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "primary": {
+        "classification": "mixed_root_summary_fallback",
+        "decision_surface": "not_available",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": true,
+        "policy_bucket": "not_available",
+        "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+        "source": "root",
+        "summary": "mixed_root_summary_fallback:root",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": true,
+        "uses_projected_evidence": false
+      },
+      "staged_candidate": {
+        "classification": "not_available",
+        "decision_surface": "staged_candidate",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "NOT_AVAILABLE",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      }
+    },
+    "signals": {
+      "active_policy_bucket_available": false,
+      "auto_mode": "normal",
+      "baseline_control_bucket_available": false,
+      "blocked_symbols": [],
+      "cautious_symbols": [],
+      "checkpoint_evidence_policy_bucket": "not_available",
+      "checkpoint_evidence_source": "not_available",
+      "checkpoint_verdict": "not_available",
+      "micro_live_status": "not_available",
+      "operational_status": "hold",
+      "policy_lineage_status": "unknown",
+      "policy_validation_status": "fail",
+      "promotion_status": "keep",
+      "requested_status": "keep",
+      "review_symbols": [],
+      "sample_quality_watchdog_status": "not_available",
+      "simple_baseline_gate_status": "not_available",
+      "staged_candidate_bucket_available": false
+    },
+    "source_reason_codes": {
+      "auto_mode": [],
+      "checkpoint_auto_judge": [],
+      "operational": [
+        "INSUFFICIENT_LIVE_ORDERS"
+      ],
+      "policy_validation": [
+        "NO_CANDIDATE_ADJUSTMENTS",
+        "NO_PROMOTION_ACTION",
+        "REPLAY_DRAWDOWN_TOO_HIGH",
+        "SHADOW_ALIGNMENT_TOO_LOW"
+      ],
+      "promotion": [
+        "INSUFFICIENT_ATTRIBUTION_DATA"
+      ]
+    },
+    "verdict": "rollback"
+  },
+  "exit_reason_counts": {},
+  "futures_position_mismatch": false,
+  "futures_position_mismatch_details": {
+    "missing_in_paper": [],
+    "missing_on_exchange": []
+  },
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "live_order_count": 0,
+  "live_orders": [],
+  "live_positions": [],
+  "macro_runtime": {
+    "active_symbols": [
+      "SOLUSDT"
+    ],
+    "cash_rejections": 0,
+    "regime": "neutral",
+    "symbol_bias": "neutral",
+    "trade_restraint": "none"
+  },
+  "major_entry_relaxation_count": 59,
+  "major_size_boost_count": 0,
+  "modes": [
+    "cash",
+    "cash",
+    "cash",
+    "futures",
+    "futures",
+    "futures",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "futures",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "futures",
+    "cash",
+    "cash",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "futures",
+    "cash",
+    "cash",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures",
+    "futures"
+  ],
+  "observe_only_symbols": [],
+  "open_futures_positions": [
+    {
+      "active_stop_price": 81.657857,
+      "adopted_at": null,
+      "adoption_grace_active": false,
+      "adoption_grace_until": null,
+      "adoption_source": "",
+      "best_price": 84.62,
+      "confirmation_pending": false,
+      "confirmation_pending_since": null,
+      "current_notional_usd_estimate": 900.095886,
+      "current_price": 84.484,
+      "entry_estimated_round_trip_cost_bps": 8.355135,
+      "entry_liquidity_score": 0.566938,
+      "entry_net_expected_edge_bps": 28.512117,
+      "entry_planned_leverage": 30,
+      "entry_policy_bucket": "active_policy",
+      "entry_policy_bucket_alignment_status": "pending",
+      "entry_policy_bucket_available": false,
+      "entry_policy_bucket_source": "active_policy_live_evidence_pending",
+      "entry_policy_context_source": "active_policy",
+      "entry_policy_execution_phase": "baseline",
+      "entry_policy_lineage": {
+        "adjustment_count": 1,
+        "adjustment_signature": "d7de48fb05152b20beff81055c1d908e2b756184e101f9ef441dd08d98c00fdf",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "persisted_policy_state",
+        "structural_key": "8b426d9b2c90cb0713e14cf63913d5943ec307cff80aec0837a4b7a174f0032e",
+        "symbols": [
+          "SOLUSDT"
+        ],
+        "updated_at": "2026-04-20T06:57:56.899960+00:00",
+        "version": 22,
+        "versioned_key": "113c342d1db488bc6224aa26e34c921febe81237e7fca8987c3327ecc1bbbfe6"
+      },
+      "entry_predictability_score": 66.81749,
+      "entry_price": 84.475,
+      "entry_time": "2026-04-20T06:58:00+00:00",
+      "exchange_synced": false,
+      "exit_confirmation_count": 0,
+      "last_exit_signal_reason": "",
+      "latest_decision_time": "2026-04-20T07:07:00+00:00",
+      "latest_estimated_round_trip_cost_bps": 8.355097,
+      "latest_liquidity_score": 0.579774,
+      "latest_net_expected_edge_bps": 29.901275,
+      "latest_predictability_score": 75.14347,
+      "latest_trend_strength": 0.915168,
+      "latest_volume_confirmation": 0.495613,
+      "market": "futures",
+      "origin": "strategy",
+      "partial_take_profit_taken": false,
+      "peak_roe_percent": 5.149453,
+      "proactive_take_profit_thresholds_hit": [],
+      "profit_protection_retrace_taken": false,
+      "quantity_opened": 10.65403966,
+      "quantity_remaining": 10.65403966,
+      "r_multiple_partial_take_profit_taken": false,
+      "side": "long",
+      "stop_distance_bps": 333.488352,
+      "symbol": "SOLUSDT",
+      "unrealized_pnl_usd_estimate": 0.095886,
+      "worst_price": 84.327
+    }
+  ],
+  "open_orders_snapshot": {
+    "orders": {
+      "endId": null,
+      "entrustedList": null
+    },
+    "raw": {
+      "code": "00000",
+      "data": {
+        "endId": null,
+        "entrustedList": null
+      },
+      "msg": "success",
+      "requestTime": 1776668793482
+    }
+  },
+  "open_spot_positions": [],
+  "operational_verdict": {
+    "metrics": {
+      "avg_edge_retention_ratio": 0.0,
+      "avg_fill_ratio": 0.0,
+      "avg_realized_edge_bps": 0.0,
+      "live_order_count": 0,
+      "protection_degraded_rate": 0.0,
+      "realized_vs_expected_edge_gap_bps": 0.0,
+      "reject_rate": 0.0
+    },
+    "reasons": [
+      "INSUFFICIENT_LIVE_ORDERS"
+    ],
+    "status": "hold"
+  },
+  "paper_open_futures_position_count": 1,
+  "paper_open_futures_positions": [
+    {
+      "active_stop_price": 81.657857,
+      "adopted_at": null,
+      "adoption_grace_active": false,
+      "adoption_grace_until": null,
+      "adoption_source": "",
+      "best_price": 84.62,
+      "confirmation_pending": false,
+      "confirmation_pending_since": null,
+      "current_notional_usd_estimate": 900.095886,
+      "current_price": 84.484,
+      "entry_estimated_round_trip_cost_bps": 8.355135,
+      "entry_liquidity_score": 0.566938,
+      "entry_net_expected_edge_bps": 28.512117,
+      "entry_planned_leverage": 30,
+      "entry_policy_bucket": "active_policy",
+      "entry_policy_bucket_alignment_status": "pending",
+      "entry_policy_bucket_available": false,
+      "entry_policy_bucket_source": "active_policy_live_evidence_pending",
+      "entry_policy_context_source": "active_policy",
+      "entry_policy_execution_phase": "baseline",
+      "entry_policy_lineage": {
+        "adjustment_count": 1,
+        "adjustment_signature": "d7de48fb05152b20beff81055c1d908e2b756184e101f9ef441dd08d98c00fdf",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "persisted_policy_state",
+        "structural_key": "8b426d9b2c90cb0713e14cf63913d5943ec307cff80aec0837a4b7a174f0032e",
+        "symbols": [
+          "SOLUSDT"
+        ],
+        "updated_at": "2026-04-20T06:57:56.899960+00:00",
+        "version": 22,
+        "versioned_key": "113c342d1db488bc6224aa26e34c921febe81237e7fca8987c3327ecc1bbbfe6"
+      },
+      "entry_predictability_score": 66.81749,
+      "entry_price": 84.475,
+      "entry_time": "2026-04-20T06:58:00+00:00",
+      "exchange_synced": false,
+      "exit_confirmation_count": 0,
+      "last_exit_signal_reason": "",
+      "latest_decision_time": "2026-04-20T07:07:00+00:00",
+      "latest_estimated_round_trip_cost_bps": 8.355097,
+      "latest_liquidity_score": 0.579774,
+      "latest_net_expected_edge_bps": 29.901275,
+      "latest_predictability_score": 75.14347,
+      "latest_trend_strength": 0.915168,
+      "latest_volume_confirmation": 0.495613,
+      "market": "futures",
+      "origin": "strategy",
+      "partial_take_profit_taken": false,
+      "peak_roe_percent": 5.149453,
+      "proactive_take_profit_thresholds_hit": [],
+      "profit_protection_retrace_taken": false,
+      "quantity_opened": 10.65403966,
+      "quantity_remaining": 10.65403966,
+      "r_multiple_partial_take_profit_taken": false,
+      "side": "long",
+      "stop_distance_bps": 333.488352,
+      "symbol": "SOLUSDT",
+      "unrealized_pnl_usd_estimate": 0.095886,
+      "worst_price": 84.327
+    }
+  ],
+  "paper_verification_mode": true,
+  "pending_external_futures_position_count": 0,
+  "pending_external_futures_positions": [],
+  "performance_attribution": [],
+  "policy_state": {
+    "active_policy": {
+      "adjustments": [],
+      "auto_mode": {},
+      "executive_operating_verdict": {
+        "confidence": "high",
+        "reasons": [
+          "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+        ],
+        "replay_provenance": {
+          "checkpoint_auto_judge": {
+            "classification": "not_available",
+            "decision_surface": "checkpoint_auto_judge",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "primary": {
+            "classification": "mixed_root_summary_fallback",
+            "decision_surface": "not_available",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": true,
+            "policy_bucket": "not_available",
+            "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+            "source": "root",
+            "summary": "mixed_root_summary_fallback:root",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": true,
+            "uses_projected_evidence": false
+          },
+          "staged_candidate": {
+            "classification": "not_available",
+            "decision_surface": "staged_candidate",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          }
+        },
+        "signals": {
+          "active_policy_bucket_available": false,
+          "auto_mode": "normal",
+          "baseline_control_bucket_available": false,
+          "blocked_symbols": [],
+          "cautious_symbols": [],
+          "checkpoint_evidence_policy_bucket": "not_available",
+          "checkpoint_evidence_source": "not_available",
+          "checkpoint_verdict": "not_available",
+          "micro_live_status": "not_available",
+          "operational_status": "hold",
+          "policy_lineage_status": "unknown",
+          "policy_validation_status": "fail",
+          "promotion_status": "keep",
+          "requested_status": "keep",
+          "review_symbols": [],
+          "sample_quality_watchdog_status": "not_available",
+          "simple_baseline_gate_status": "not_available",
+          "staged_candidate_bucket_available": false
+        },
+        "source_reason_codes": {
+          "auto_mode": [],
+          "checkpoint_auto_judge": [],
+          "operational": [
+            "INSUFFICIENT_LIVE_ORDERS"
+          ],
+          "policy_validation": [
+            "NO_CANDIDATE_ADJUSTMENTS",
+            "NO_PROMOTION_ACTION",
+            "REPLAY_DRAWDOWN_TOO_HIGH",
+            "SHADOW_ALIGNMENT_TOO_LOW"
+          ],
+          "promotion": [
+            "INSUFFICIENT_ATTRIBUTION_DATA"
+          ]
+        },
+        "verdict": "rollback"
+      },
+      "lifecycle_stage": "baseline",
+      "micro_live_gate": {},
+      "micro_live_readiness": "not_available",
+      "policy_lineage": {
+        "adjustment_count": 0,
+        "adjustment_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "keep",
+        "rollout_phase": "baseline",
+        "source": "ephemeral_policy_state",
+        "structural_key": "1fc1b037426836cda7df24ab7772579c7c0226516ee08658567d2962a5ae5551",
+        "symbols": [],
+        "updated_at": "",
+        "version": 0,
+        "versioned_key": "6eed748c0014dac7652612ebd7cb869e28d6e0f060755071b6892b70a7605b28"
+      },
+      "status": "keep"
+    },
+    "auto_mode": {},
+    "candidate_policy": {
+      "adjustments": [],
+      "decomposition_summary": {
+        "candidate_adjustment_rows": [],
+        "dominant_regime_mode": "",
+        "elite_regime_modes": [],
+        "runtime_pruning_recommendation_count": 0,
+        "runtime_symbol_recommendation_count": 0,
+        "runtime_symbol_scorecard_count": 0,
+        "score_delta_total": 0,
+        "supportive_regime_modes": []
+      },
+      "signal_sources": [],
+      "status": "insufficient_data"
+    },
+    "executive_operating_verdict": {
+      "confidence": "high",
+      "reasons": [
+        "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+      ],
+      "replay_provenance": {
+        "checkpoint_auto_judge": {
+          "classification": "not_available",
+          "decision_surface": "checkpoint_auto_judge",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "NOT_AVAILABLE",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "primary": {
+          "classification": "mixed_root_summary_fallback",
+          "decision_surface": "not_available",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": true,
+          "policy_bucket": "not_available",
+          "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+          "source": "root",
+          "summary": "mixed_root_summary_fallback:root",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": true,
+          "uses_projected_evidence": false
+        },
+        "staged_candidate": {
+          "classification": "not_available",
+          "decision_surface": "staged_candidate",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "NOT_AVAILABLE",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        }
+      },
+      "signals": {
+        "active_policy_bucket_available": false,
+        "auto_mode": "normal",
+        "baseline_control_bucket_available": false,
+        "blocked_symbols": [],
+        "cautious_symbols": [],
+        "checkpoint_evidence_policy_bucket": "not_available",
+        "checkpoint_evidence_source": "not_available",
+        "checkpoint_verdict": "not_available",
+        "micro_live_status": "not_available",
+        "operational_status": "hold",
+        "policy_lineage_status": "unknown",
+        "policy_validation_status": "fail",
+        "promotion_status": "keep",
+        "requested_status": "keep",
+        "review_symbols": [],
+        "sample_quality_watchdog_status": "not_available",
+        "simple_baseline_gate_status": "not_available",
+        "staged_candidate_bucket_available": false
+      },
+      "source_reason_codes": {
+        "auto_mode": [],
+        "checkpoint_auto_judge": [],
+        "operational": [
+          "INSUFFICIENT_LIVE_ORDERS"
+        ],
+        "policy_validation": [
+          "NO_CANDIDATE_ADJUSTMENTS",
+          "NO_PROMOTION_ACTION",
+          "REPLAY_DRAWDOWN_TOO_HIGH",
+          "SHADOW_ALIGNMENT_TOO_LOW"
+        ],
+        "promotion": [
+          "INSUFFICIENT_ATTRIBUTION_DATA"
+        ]
+      },
+      "verdict": "rollback"
+    },
+    "policy_lineage": {
+      "adjustment_count": 0,
+      "adjustment_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "available": true,
+      "basis": "adjustments",
+      "policy_status": "keep",
+      "rollout_phase": "baseline",
+      "source": "ephemeral_policy_state",
+      "structural_key": "1fc1b037426836cda7df24ab7772579c7c0226516ee08658567d2962a5ae5551",
+      "symbols": [],
+      "updated_at": "",
+      "version": 0,
+      "versioned_key": "6eed748c0014dac7652612ebd7cb869e28d6e0f060755071b6892b70a7605b28"
+    },
+    "promotion_verdict": {
+      "blocked_reasons": [],
+      "effective_status": "keep",
+      "micro_live_gate": {},
+      "micro_live_readiness": "not_available",
+      "reasons": [
+        "INSUFFICIENT_ATTRIBUTION_DATA"
+      ],
+      "requested_status": "keep",
+      "rollout_stage": "baseline",
+      "status": "keep"
+    },
+    "status": "keep"
+  },
+  "policy_validation": {
+    "evidence": {
+      "avg_realized_edge_bps": 0.0,
+      "avg_retention": 0.0,
+      "max_protection_degraded_rate": 1.0,
+      "max_reject_rate": 1.0,
+      "replay_like_drawdown_ratio": 1.0,
+      "sample_count": 0,
+      "shadow_alignment_score": 0.0
+    },
+    "reasons": [
+      "NO_CANDIDATE_ADJUSTMENTS",
+      "NO_PROMOTION_ACTION",
+      "REPLAY_DRAWDOWN_TOO_HIGH",
+      "SHADOW_ALIGNMENT_TOO_LOW"
+    ],
+    "status": "fail"
+  },
+  "promotion_verdict": {
+    "blocked_reasons": [],
+    "effective_status": "keep",
+    "micro_live_gate": {},
+    "micro_live_readiness": "not_available",
+    "reasons": [
+      "INSUFFICIENT_ATTRIBUTION_DATA"
+    ],
+    "requested_status": "keep",
+    "rollout_stage": "baseline",
+    "status": "keep"
+  },
+  "protection_degraded_count": 0,
+  "protection_degraded_rate": 0.0,
+  "realized_pnl_net_usd_estimate": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "realized_vs_expected_edge_gap_bps": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.548994,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 23.135996,
+      "reasons": [],
+      "score": 72.97,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.551431,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 23.132047,
+      "reasons": [],
+      "score": 72.97,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.355135,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 25.627654,
+      "reasons": [],
+      "score": 73.86,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.355051,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 26.179426,
+      "reasons": [],
+      "score": 73.7,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.355097,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 29.901275,
+      "reasons": [],
+      "score": 75.14,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    }
+  ],
+  "rejected_live_order_count": 0,
+  "self_healing": {
+    "active_guards": {
+      "live_order_cooldown_until": null,
+      "manual_symbol_cooldowns": [],
+      "mismatch_active": false,
+      "mismatch_details": {
+        "missing_in_paper": [],
+        "missing_on_exchange": []
+      },
+      "missing_market_state_symbols": [],
+      "stall_restart_budget_remaining": 999,
+      "symbol_order_cooldowns": []
+    },
+    "issue_counts": {},
+    "recent_events": [],
+    "recovery_counts": {},
+    "status": "healthy"
+  },
+  "session_current_equity_usdt": 4.326179051712,
+  "session_equity_delta_usdt": 0.0,
+  "session_start_equity_usdt": 4.326179051712,
+  "symbol_performance": [],
+  "symbols": [
+    "SOLUSDT"
+  ],
+  "telegram_alerts": [],
+  "tested_order_count": 1,
+  "tested_orders": [
+    {
+      "accepted": true,
+      "market": "futures",
+      "quantity": 10.65403966,
+      "side": "buy",
+      "symbol": "SOLUSDT"
+    }
+  ],
+  "top_rejection_reasons": {
+    "DIRECTION_CONFLICT": 30,
+    "EDGE_BELOW_COST": 30,
+    "EDGE_TOO_THIN": 5,
+    "LIQUIDITY_TOO_WEAK": 30,
+    "SCORE_TOO_LOW": 30,
+    "SENTIMENT_CAUTION": 3,
+    "SENTIMENT_TOO_WEAK": 1,
+    "SUPPORT_NOT_CONFIRMED": 30
+  },
+  "unrealized_futures_pnl_usd_estimate": 0.095886,
+  "unrealized_pnl_usd_estimate": 0.095886,
+  "unrealized_spot_pnl_usd_estimate": 0
+}

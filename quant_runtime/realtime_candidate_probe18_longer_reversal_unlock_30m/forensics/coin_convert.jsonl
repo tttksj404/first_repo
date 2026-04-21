@@ -1,0 +1,5 @@
+{"coin": "BTC", "cooldown_until": "2026-04-20T14:38:59.360926+00:00", "estimated_notional_usd": 0.07461681, "phase": "B", "sell_qty": 1e-06, "status": "skipped", "step": "skip_dust", "timestamp": "2026-04-20T08:38:59.360926+00:00"}
+{"coin": "BTC", "cooldown_until": "2026-04-20T14:38:59.360926+00:00", "estimated_notional_usd": 0.07458142, "phase": "B", "sell_qty": 1e-06, "status": "skipped", "step": "skip_cooldown", "timestamp": "2026-04-20T08:39:59.501003+00:00"}
+{"coin": "BTC", "cooldown_until": "2026-04-20T14:38:59.360926+00:00", "estimated_notional_usd": 0.07456814, "phase": "B", "sell_qty": 1e-06, "status": "skipped", "step": "skip_cooldown", "timestamp": "2026-04-20T08:40:59.385413+00:00"}
+{"coin": "BTC", "cooldown_until": "2026-04-20T14:38:59.360926+00:00", "estimated_notional_usd": 0.07459558, "phase": "B", "sell_qty": 1e-06, "status": "skipped", "step": "skip_cooldown", "timestamp": "2026-04-20T08:41:59.520262+00:00"}
+{"coin": "BTC", "cooldown_until": "2026-04-20T14:38:59.360926+00:00", "estimated_notional_usd": 0.07463097, "phase": "B", "sell_qty": 1e-06, "status": "skipped", "step": "skip_cooldown", "timestamp": "2026-04-20T08:42:59.735552+00:00"}

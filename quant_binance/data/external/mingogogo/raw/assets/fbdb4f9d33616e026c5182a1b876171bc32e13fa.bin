@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>파밍 알트코인 추세확인 - MINJINE Premium v2.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+<style>
+:root{--primary-gradient:linear-gradient(135deg,#667eea 0%,#764ba2 100%);--dark-gradient:linear-gradient(145deg,#05050a 0%,#0a0a14 25%,#0f0f1a 50%,#0a0a14 75%,#05050a 100%);--glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.1);--text-primary:#fff;--text-secondary:rgba(255,255,255,0.75);--text-accent:#64ffda;--btc-color:#f7931a;--eth-color:#627eea;--alt-color:#64ffda}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Exo 2',system-ui,sans-serif;background:var(--dark-gradient);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(100,255,218,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(100,255,218,0.03) 1px, transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;width:600px;height:600px;top:-200px;right:-200px;background:radial-gradient(circle,rgba(247,147,26,0.15) 0%,transparent 70%);pointer-events:none;z-index:0}
+.wrap{width:100%;max-width:1200px;position:relative;z-index:1}
+.glass{background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.02) 100%);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.1),inset 0 -1px 0 rgba(0,0,0,0.1)}
+.top{display:flex;flex-direction:column;align-items:center;gap:12px;margin:10px 0 20px}
+.title{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,#64ffda 0%,#448aff 25%,#7c4dff 50%,#e040fb 75%,#ff4081 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 4s ease infinite}
+@keyframes gradientShift{0%,100%{background-position:0% center}50%{background-position:200% center}}
+.badge{padding:8px 18px;border-radius:30px;background:linear-gradient(135deg,rgba(102,126,234,0.3) 0%,rgba(118,75,162,0.3) 100%);border:1px solid rgba(100,255,218,0.3);font-weight:700;font-size:13px;letter-spacing:1px;box-shadow:0 0 20px rgba(100,255,218,0.2)}
+.social-links{display:flex;justify-content:center;gap:16px;margin:24px 0;flex-wrap:wrap}
+.social-link{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 20px;text-decoration:none;color:var(--text-secondary);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;transition:all .35s}
+.social-link:hover{color:var(--text-accent);background:rgba(100,255,218,0.08);border-color:rgba(100,255,218,0.3);transform:translateY(-4px)}
+.social-icon{font-size:13px;font-weight:800;font-family:'Orbitron',monospace;letter-spacing:1px}
+.social-name{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;opacity:0.7}
+.info{width:100%;display:flex;gap:12px;justify-content:space-between;align-items:center;padding:14px 20px;margin-top:8px}
+.info .item{font-family:'Orbitron',monospace;color:var(--text-accent);font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:var(--text-secondary);font-weight:700;font-size:13px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px);color:#fff;border-color:rgba(100,255,218,0.4);box-shadow:0 8px 25px rgba(100,255,218,0.15)}
+.btn.active{background:linear-gradient(135deg,rgba(100,255,218,0.2) 0%,rgba(100,255,218,0.05) 100%);color:var(--text-accent);border-color:var(--text-accent);box-shadow:0 0 25px rgba(100,255,218,0.25)}
+.panel{width:100%;padding:18px;margin-top:8px}
+.canvas-box{position:relative;width:100%;height:min(58vh,540px);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(10,10,18,0.98) 0%,rgba(5,5,12,0.99) 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.canvas-box::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(100,255,218,0.5),transparent);z-index:2}
+#chart{position:relative;z-index:3}
+.bar{margin-top:14px;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.switch{position:relative;display:inline-block;width:52px;height:28px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.15);border-radius:28px;transition:all .35s;border:1px solid rgba(255,255,255,0.1)}
+.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,#fff 0%,#e0e0e0 100%);border-radius:50%;transition:all .35s;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+input:checked+.slider{background:linear-gradient(135deg,rgba(100,255,218,0.4) 0%,rgba(100,255,218,0.2) 100%);border-color:rgba(100,255,218,0.5);box-shadow:0 0 20px rgba(100,255,218,0.3)}
+input:checked+.slider:before{transform:translateY(-50%) translateX(24px);background:linear-gradient(135deg,#64ffda 0%,#4dd0b8 100%)}
+.act{padding:12px 20px;border-radius:14px;border:none;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#667eea 100%);background-size:200% auto;color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:all .35s;box-shadow:0 8px 25px rgba(102,126,234,0.35)}
+.act:hover{background-position:right center;transform:translateY(-2px)}
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);opacity:0;visibility:hidden;transition:all .35s;z-index:100}
+.modal.show{opacity:1;visibility:visible}
+.modal .content{width:min(94vw,950px);max-height:85vh;overflow:auto;border-radius:20px;transform:scale(0.95) translateY(20px);transition:transform .35s}
+.modal.show .content{transform:scale(1) translateY(0)}
+.modal .head{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2)}
+.modal .head h3{margin:0;font-family:'Orbitron',monospace;color:var(--text-accent);font-size:18px}
+.modal .body{padding:20px 24px;color:var(--text-secondary);font-size:15px;line-height:1.8}
+@media (max-width:720px){body{padding:12px 10px}.title{font-size:20px}.badge{font-size:11px;padding:6px 12px}.canvas-box{height:45vh;min-height:280px;border-radius:12px}.social-links{gap:8px;margin:16px 0}.social-link{padding:8px 12px;border-radius:10px}.social-icon{font-size:11px}.social-name{font-size:9px}.info{padding:10px 12px;flex-wrap:wrap;gap:8px;border-radius:14px}.info .item{font-size:11px}.controls{gap:4px;justify-content:center}.btn{padding:8px 10px;font-size:11px;border-radius:8px}.act{padding:10px 14px;font-size:12px}.panel{padding:12px;border-radius:14px}.bar{padding:10px 12px;border-radius:14px}.modal .body{padding:14px 16px;font-size:13px}.glass{border-radius:14px}}
+@media (max-width:480px){body{padding:10px 8px}.title{font-size:18px}.canvas-box{height:40vh;min-height:250px}.controls{width:100%}.btn{flex:1;min-width:0;padding:8px 6px;font-size:10px;text-align:center}.info{justify-content:center}.info .item{font-size:10px}.act{width:100%;margin-top:8px}.social-links{gap:6px}.social-link{padding:6px 10px}}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,0.02)}
+::-webkit-scrollbar-thumb{background:rgba(100,255,218,0.3);border-radius:4px}
+.expired-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+.expired-overlay h1{font-family:'Orbitron',monospace;font-size:32px;color:#f44336;margin-bottom:20px}
+.expired-overlay p{color:rgba(255,255,255,0.7);font-size:16px;margin-bottom:30px}
+.expired-overlay a{color:#64ffda;text-decoration:none;padding:12px 28px;border:2px solid #64ffda;border-radius:25px}
+.license-badge{display:inline-block;padding:8px 16px;background:linear-gradient(135deg,rgba(255,193,7,0.2) 0%,rgba(255,152,0,0.15) 100%);border:1px solid rgba(255,193,7,0.4);border-radius:20px;font-family:'Orbitron',monospace;font-size:12px;color:#ffc107;font-weight:700;margin-bottom:12px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 10px rgba(255,193,7,0.3)}50%{box-shadow:0 0 20px rgba(255,193,7,0.5)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.live-dot{display:inline-block;width:8px;height:8px;background:#4caf50;border-radius:50%;margin-right:6px;animation:blink 1s ease-in-out infinite}
+</style>
+</head>
+<body>
+<audio id="buy-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+<audio id="sell-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-system-beep-buzzer-fail-2960.mp3" preload="auto"></audio>
+<div class="wrap">
+<div style="text-align:center;margin-bottom:20px;padding:24px 16px;background:linear-gradient(135deg,rgba(247,147,26,0.08) 0%,rgba(100,255,218,0.05) 50%,rgba(118,75,162,0.08) 100%);border-radius:20px;border:1px solid rgba(255,255,255,0.08);position:relative;overflow:hidden;">
+<div style="position:absolute;top:-50px;left:-50px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.2) 0%,transparent 70%);pointer-events:none;"></div>
+<div style="position:absolute;bottom:-50px;right:-50px;width:150px;height:150px;background:radial-gradient(circle,rgba(100,255,218,0.15) 0%,transparent 70%);pointer-events:none;"></div>
+<div class="license-badge">사용 가능 기한: 2026년 1월 31일까지</div>
+<div style="font-family:'Orbitron',monospace;font-size:clamp(28px,6vw,42px);font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#f7931a 0%,#ffd700 25%,#64ffda 50%,#667eea 75%,#f7931a 100%);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoShift 5s ease infinite;margin-bottom:12px;">MINJINE</div>
+<div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:8px;">
+<div style="text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">CEO</div><div style="font-size:14px;color:#f7931a;font-weight:700;">서교민 <span style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:400;">(PAMING)</span></div></div>
+<div style="width:1px;height:30px;background:rgba(255,255,255,0.1);"></div>
+<div style="text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">CO-CEO</div><div style="font-size:14px;color:#64ffda;font-weight:700;">박선영 <span style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:400;">(A-YA)</span></div></div>
+</div>
+<div style="font-size:11px;color:rgba(255,255,255,0.4);">사업자등록번호: 507-05-99353</div>
+</div>
+<style>@keyframes logoShift{0%,100%{background-position:0% center}50%{background-position:300% center}}</style>
+<div style="margin-bottom:20px;padding:24px 20px;background:linear-gradient(135deg,rgba(118,75,162,0.15) 0%,rgba(102,126,234,0.1) 50%,rgba(100,255,218,0.08) 100%);border-radius:20px;border:2px solid rgba(118,75,162,0.4);position:relative;overflow:hidden;">
+<div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(118,75,162,0.3) 0%,transparent 70%);pointer-events:none;"></div>
+<div style="text-align:center;margin-bottom:16px;">
+<div style="font-family:'Orbitron',monospace;font-size:clamp(18px,4vw,24px);font-weight:900;color:#fff;letter-spacing:2px;">PROGRAM DEVELOPMENT</div>
+<div style="font-size:14px;color:#64ffda;font-weight:700;margin-top:6px;">프로그램 제작문의</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+<div style="background:rgba(247,147,26,0.1);border:1px solid rgba(247,147,26,0.3);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:14px;margin-bottom:6px;color:#f7931a;font-family:Orbitron;font-weight:700;">01</div><div style="font-size:13px;color:#f7931a;font-weight:700;">코인분석 프로그램</div><div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;">자동매매 / 신호알림</div></div>
+<div style="background:rgba(100,255,218,0.1);border:1px solid rgba(100,255,218,0.3);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:14px;margin-bottom:6px;color:#64ffda;font-family:Orbitron;font-weight:700;">02</div><div style="font-size:13px;color:#64ffda;font-weight:700;">업무 자동화</div><div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;">엑셀 / 웹크롤링</div></div>
+<div style="background:rgba(98,126,234,0.1);border:1px solid rgba(98,126,234,0.3);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:14px;margin-bottom:6px;color:#627eea;font-family:Orbitron;font-weight:700;">03</div><div style="font-size:13px;color:#627eea;font-weight:700;">웹/앱 개발</div><div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;">대시보드 / API</div></div>
+</div>
+<div style="text-align:center;"><a href="https://open.kakao.com/me/paming" target="_blank" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#764ba2 0%,#667eea 100%);color:#fff;font-weight:700;font-size:13px;text-decoration:none;border-radius:25px;box-shadow:0 8px 25px rgba(118,75,162,0.4);">1:1 제작 상담하기</a></div>
+</div>
+<div class="top">
+<div style="position:relative;display:inline-block;"><div class="title" style="font-size:clamp(22px,5vw,32px);">통합 시장 추세 분석</div></div>
+<div class="badge glass" style="margin-top:8px;">BTC + ETH + 알트 평균 | 100캔들 기준</div>
+</div>
+<div style="margin:16px 0;padding:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:16px;">
+<div style="text-align:center;margin-bottom:14px;"><div style="font-family:'Orbitron',monospace;font-size:13px;color:#64ffda;font-weight:700;">PAMING CHANNEL</div></div>
+<div class="social-links" style="margin:0;">
+<a href="https://mingogogo.tistory.com/" target="_blank" class="social-link"><div class="social-icon">Blog</div><div class="social-name">티스토리</div></a>
+<a href="https://www.tiktok.com/@jjinbbin" target="_blank" class="social-link"><div class="social-icon">TikTok</div><div class="social-name">틱톡</div></a>
+<a href="https://www.youtube.com/@%EC%BD%94%EC%9D%B8%ED%8C%8C%EB%B0%8D" target="_blank" class="social-link"><div class="social-icon">YouTube</div><div class="social-name">유튜브</div></a>
+<a href="https://www.instagram.com/coin.ming" target="_blank" class="social-link"><div class="social-icon">Insta</div><div class="social-name">인스타</div></a>
+<a href="https://www.threads.net/@minjinehot" target="_blank" class="social-link"><div class="social-icon">Threads</div><div class="social-name">스레드</div></a>
+<a href="https://open.kakao.com/o/pcrL4j6h" target="_blank" class="social-link" style="border-color:rgba(255,232,18,0.3);"><div class="social-icon" style="color:#ffe812;">KakaoTalk</div><div class="social-name">오픈톡</div></a>
+<a href="https://open.kakao.com/me/paming" target="_blank" class="social-link" style="border-color:rgba(255,232,18,0.3);"><div class="social-icon" style="color:#ffe812;">1:1</div><div class="social-name">상담</div></a>
+</div>
+</div>
+<div class="glass info">
+<div class="item"><span class="live-dot"></span>현재 시각 <span id="now"></span></div>
+<div class="item">API <span id="api">0</span></div>
+<div class="item">알림 <label class="switch"><input id="alert" type="checkbox"><span class="slider"></span></label></div>
+</div>
+<div class="panel glass">
+<div id="altSignals" style="margin-bottom:14px;padding:14px;background:rgba(0,0,0,0.25);border-radius:14px;border:1px solid rgba(255,255,255,0.08);">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+<div><span style="font-family:'Orbitron',monospace;font-size:13px;color:#64ffda;font-weight:700;">알트코인 추세 신호등</span><span style="font-size:10px;color:rgba(255,255,255,0.4);margin-left:8px;">3분봉 | Top 30</span></div>
+<div style="display:flex;gap:4px;align-items:center;"><span style="width:10px;height:10px;background:#f44336;border-radius:2px;"></span><span style="font-size:9px;color:rgba(255,255,255,0.4);">하락</span><span style="width:10px;height:10px;background:#ffeb3b;border-radius:2px;margin-left:6px;"></span><span style="font-size:9px;color:rgba(255,255,255,0.4);">중립</span><span style="width:10px;height:10px;background:#4caf50;border-radius:2px;margin-left:6px;"></span><span style="font-size:9px;color:rgba(255,255,255,0.4);">상승</span></div>
+</div>
+<div id="signalGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:5px;"><div style="text-align:center;color:rgba(255,255,255,0.3);font-size:11px;padding:8px;grid-column:1/-1;">로딩중...</div></div>
+</div>
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+<div class="controls" id="controls">
+<button class="btn" data-period="1min">1분</button>
+<button class="btn" data-period="3min">3분</button>
+<button class="btn" data-period="5min">5분</button>
+<button class="btn" data-period="15min">15분</button>
+<button class="btn" data-period="30min">30분</button>
+<button class="btn active" data-period="1hour">1시간</button>
+<button class="btn" data-period="4hour">4시간</button>
+<button class="btn" data-period="1day">1일</button>
+</div>
+<div style="display:flex;gap:6px;">
+<button id="manual" class="act" style="background:linear-gradient(135deg,#455a64 0%,#607d8b 100%);box-shadow:0 6px 20px rgba(69,90,100,0.3);">사용법</button>
+<button id="brief" class="act">종합분석</button>
+</div>
+</div>
+<div class="canvas-box">
+<canvas id="chart"></canvas>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:16px;font-size:10px;font-family:'Orbitron',monospace;color:rgba(255,255,255,0.6);z-index:5;">
+<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:rgba(255,50,50,0.4);border-radius:2px;"></span>거래량 급증</span>
+<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:rgba(50,100,255,0.4);border-radius:2px;"></span>거래량 감소</span>
+</div>
+</div>
+</div>
+<div class="glass bar">
+<div id="msg" style="color:#ffc107;font-weight:700">참고용 도구입니다. 투자 책임은 본인에게 있습니다.</div>
+<div style="font-family:'Orbitron',monospace;font-size:11px;color:rgba(255,255,255,0.4);">MINJINE v2.0</div>
+</div>
+<div style="margin-top:24px;padding:24px 16px;background:linear-gradient(180deg,rgba(255,255,255,0.02) 0%,rgba(0,0,0,0.1) 100%);border-radius:20px;border:1px solid rgba(255,255,255,0.05);">
+<div style="text-align:center;margin-bottom:20px;"><div style="font-family:'Orbitron',monospace;font-size:clamp(24px,5vw,36px);font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,#f7931a 0%,#ffd700 30%,#64ffda 60%,#f7931a 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoShift 5s ease infinite;">MINJINE</div></div>
+<div style="background:rgba(100,255,218,0.03);border:1px solid rgba(100,255,218,0.15);border-radius:14px;padding:16px;margin-bottom:16px;">
+<div style="text-align:center;margin-bottom:12px;"><div style="font-family:'Orbitron',monospace;font-size:12px;color:#64ffda;font-weight:700;">PAMING OFFICIAL</div></div>
+<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">
+<a href="https://mingogogo.tistory.com/" target="_blank" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:11px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:8px;">Blog</a>
+<a href="https://www.youtube.com/@%EC%BD%94%EC%9D%B8%ED%8C%8C%EB%B0%8D" target="_blank" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:11px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:8px;">YouTube</a>
+<a href="https://open.kakao.com/o/pcrL4j6h" target="_blank" style="color:#ffe812;text-decoration:none;font-size:11px;padding:8px 14px;background:rgba(255,232,18,0.05);border:1px solid rgba(255,232,18,0.2);border-radius:8px;">KakaoTalk</a>
+<a href="https://open.kakao.com/me/paming" target="_blank" style="color:#ffe812;text-decoration:none;font-size:11px;padding:8px 14px;background:rgba(255,232,18,0.05);border:1px solid rgba(255,232,18,0.2);border-radius:8px;">1:1 상담</a>
+</div>
+</div>
+<div style="text-align:center;padding:14px;background:linear-gradient(135deg,rgba(247,147,26,0.05),rgba(247,147,26,0.02));border:1px solid rgba(247,147,26,0.2);border-radius:12px;max-width:300px;margin:0 auto 16px;">
+<div style="font-size:10px;color:#f7931a;font-weight:700;margin-bottom:6px;font-family:'Orbitron',monospace;">SUPPORT</div>
+<div style="font-size:14px;color:rgba(255,255,255,0.9);font-weight:600;">케이뱅크 100-165-970266</div>
+<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">예금주: 서교민</div>
+</div>
+<div style="text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05);">
+<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px;"><div><span style="font-size:10px;color:rgba(255,255,255,0.4);">CEO</span><span style="font-size:12px;color:#f7931a;font-weight:600;margin-left:6px;">서교민</span></div><div><span style="font-size:10px;color:rgba(255,255,255,0.4);">CO-CEO</span><span style="font-size:12px;color:#64ffda;font-weight:600;margin-left:6px;">박선영</span></div></div>
+<div style="font-size:11px;color:rgba(255,255,255,0.4);">사업자등록번호: 507-05-99353</div>
+<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:10px;">Copyright 2024-2025 MINJINE. All Rights Reserved.</div>
+</div>
+</div>
+</div>
+<div id="modal" class="modal"><div class="content glass"><div class="head"><h3>종합분석</h3><button id="close" class="btn">닫기</button></div><div id="body" class="body">분석 준비 중...</div></div></div>
+<div id="manualModal" class="modal"><div class="content glass" style="max-width:700px;"><div class="head"><h3>프로그램 사용법</h3><button id="manualClose" class="btn">닫기</button></div><div class="body" style="font-size:13px;line-height:1.8;"><div style="margin-bottom:20px;"><div style="font-family:'Orbitron',monospace;font-size:14px;color:#64ffda;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(100,255,218,0.2);">1. 알트코인 추세 신호등</div><div style="color:rgba(255,255,255,0.8);">거래대금 상위 30개 알트코인의 3분봉 추세를 10단계 색상으로 표시합니다.</div></div><div style="margin-bottom:20px;"><div style="font-family:'Orbitron',monospace;font-size:14px;color:#f7931a;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(247,147,26,0.2);">2. 메인 차트</div><div style="color:rgba(255,255,255,0.8);"><strong style="color:#f7931a;">BTC</strong>: 비트코인 | <strong style="color:#627eea;">ETH</strong>: 이더리움 | <strong style="color:#64ffda;">알트 평균</strong>: 상위 알트코인 평균</div></div><div style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);border-radius:10px;padding:14px;text-align:center;"><div style="color:#ffc107;font-weight:700;margin-bottom:6px;">주의사항</div><div style="font-size:12px;color:rgba(255,255,255,0.7);">본 프로그램은 참고용 도구입니다. 투자 판단과 책임은 본인에게 있습니다.</div></div></div></div></div>
+<script>
+(function(){
+var _0xExp=new Date('2026-01-31T23:59:59');
+if(new Date()>_0xExp){document.body.innerHTML='<div class="expired-overlay"><h1>사용 기간 만료</h1><p>프로그램 사용 기간이 종료되었습니다.</p><a href="https://open.kakao.com/me/paming" target="_blank">갱신 문의하기</a></div>';return;}
+var FRAME={'1min':{api:'minutes/1',unit:'minute'},'3min':{api:'minutes/3',unit:'minute'},'5min':{api:'minutes/5',unit:'minute'},'15min':{api:'minutes/15',unit:'minute'},'30min':{api:'minutes/30',unit:'minute'},'1hour':{api:'minutes/60',unit:'hour'},'4hour':{api:'minutes/240',unit:'hour'},'1day':{api:'days',unit:'day'}};
+var COUNT=100,SMA_N=12,API_BASE='https://api.upbit.com/v1';
+var el={now:document.getElementById('now'),api:document.getElementById('api'),alert:document.getElementById('alert'),controls:document.getElementById('controls'),brief:document.getElementById('brief'),chart:document.getElementById('chart'),msg:document.getElementById('msg'),modal:document.getElementById('modal'),body:document.getElementById('body'),close:document.getElementById('close'),buy:document.getElementById('buy-sound'),sell:document.getElementById('sell-sound'),manual:document.getElementById('manual'),manualModal:document.getElementById('manualModal'),manualClose:document.getElementById('manualClose')};
+var active='1hour',apiCount=0,chart,topAlt=[],alertOn=false;
+var bases={btc:0,eth:0,alt:0};
+var alertSide={'KRW-BTC':null,'KRW-ETH':null,'ALT':null};
+var fullUpdateTimer=null,streamTimer=null;
+var volumeData=[];
+var cachedMarkets=null,cacheTime=0;
+var blinkState=true;
+function tickClock(){el.now.textContent=new Date().toLocaleString('ko-KR');}
+setInterval(tickClock,1000);tickClock();
+async function fetchJson(url){apiCount++;el.api.textContent=apiCount;var res=await fetch(url,{cache:'no-cache',headers:{'Accept':'application/json'}});if(!res.ok)throw new Error('API '+res.status);return res.json();}
+function sma(series,n){n=n||SMA_N;if(!series||series.length<n)return[];var out=[];for(var i=n-1;i<series.length;i++){var s=0;for(var j=0;j<n;j++)s+=series[i-j].y;out.push({x:series[i].x,y:s/n});}return out;}
+async function getMarkets(){var now=Date.now();if(cachedMarkets&&(now-cacheTime)<300000)return cachedMarkets;cachedMarkets=await fetchJson(API_BASE+'/market/all?isDetails=true');cacheTime=now;return cachedMarkets;}
+function initChart(){
+var ctx=el.chart.getContext('2d');
+var btcG=ctx.createLinearGradient(0,0,0,450);btcG.addColorStop(0,'rgba(247,147,26,0.25)');btcG.addColorStop(0.5,'rgba(247,147,26,0.08)');btcG.addColorStop(1,'rgba(247,147,26,0)');
+var ethG=ctx.createLinearGradient(0,0,0,450);ethG.addColorStop(0,'rgba(98,126,234,0.25)');ethG.addColorStop(0.5,'rgba(98,126,234,0.08)');ethG.addColorStop(1,'rgba(98,126,234,0)');
+var altG=ctx.createLinearGradient(0,0,0,450);altG.addColorStop(0,'rgba(100,255,218,0.25)');altG.addColorStop(0.5,'rgba(100,255,218,0.08)');altG.addColorStop(1,'rgba(100,255,218,0)');
+var volPlugin={id:'volBg',beforeDraw:function(c){if(!volumeData||volumeData.length===0)return;var ctx=c.ctx,area=c.chartArea,xS=c.scales.x;ctx.save();var vols=volumeData.map(function(v){return v.vol;}),max=Math.max.apply(null,vols),min=Math.min.apply(null,vols);volumeData.forEach(function(item,i){var x=xS.getPixelForValue(item.x);var bw=i<volumeData.length-1?xS.getPixelForValue(volumeData[i+1].x)-x:(area.right-area.left)/volumeData.length;var ratio=max===min?0.5:(item.vol-min)/(max-min);var r,g,b,a;if(ratio>0.65){var int=(ratio-0.65)/0.35;r=255;g=Math.floor(80*(1-int));b=g;a=0.03+(int*0.07);}else if(ratio<0.35){var int=(0.35-ratio)/0.35;r=Math.floor(50*(1-int));g=Math.floor(120*(1-int));b=255;a=0.02+(int*0.05);}else{a=0;}if(a>0){ctx.fillStyle='rgba('+r+','+g+','+b+','+a+')';ctx.fillRect(x,area.top,bw,area.bottom-area.top);}});ctx.restore();}};
+var glowPlugin={id:'glow',beforeDatasetsDraw:function(c){var ctx=c.ctx;ctx.save();c.data.datasets.forEach(function(ds,i){if(i<3&&ds.data.length>0){var meta=c.getDatasetMeta(i);if(!meta.hidden){ctx.shadowColor=ds.borderColor;ctx.shadowBlur=15;}}});},afterDatasetsDraw:function(c){c.ctx.restore();}};
+var midnightPlugin={id:'midnight',afterDraw:function(c){var ctx=c.ctx,area=c.chartArea,xS=c.scales.x;if(!volumeData||volumeData.length===0)return;ctx.save();ctx.font='9px Orbitron';ctx.fillStyle='rgba(255,255,255,0.3)';ctx.textAlign='center';var drawn={};volumeData.forEach(function(item){var d=new Date(item.x);if(d.getHours()===0&&d.getMinutes()<30){var ds=(d.getMonth()+1)+'/'+d.getDate();if(!drawn[ds]){drawn[ds]=true;var x=xS.getPixelForValue(item.x);ctx.beginPath();ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.setLineDash([3,3]);ctx.moveTo(x,area.top);ctx.lineTo(x,area.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillText(ds,x,area.bottom+12);}}});ctx.restore();}};
+var livePointPlugin={id:'livePoint',afterDatasetsDraw:function(c){var datasets=c.data.datasets;var colors=['#f7931a','#627eea','#64ffda'];for(var i=0;i<3;i++){var ds=datasets[i];if(ds.data.length>0){var meta=c.getDatasetMeta(i);if(!meta.hidden){var last=meta.data[meta.data.length-1];if(last){var ctx=c.ctx;ctx.save();ctx.beginPath();ctx.arc(last.x,last.y,blinkState?6:4,0,Math.PI*2);ctx.fillStyle=colors[i];ctx.globalAlpha=blinkState?1:0.5;ctx.fill();ctx.globalAlpha=1;if(blinkState){ctx.beginPath();ctx.arc(last.x,last.y,10,0,Math.PI*2);ctx.strokeStyle=colors[i];ctx.globalAlpha=0.3;ctx.lineWidth=2;ctx.stroke();}ctx.restore();}}}}blinkState=!blinkState;}};
+var isMobile=window.innerWidth<=768;
+chart=new Chart(ctx,{type:'line',plugins:[volPlugin,glowPlugin,midnightPlugin,livePointPlugin],data:{datasets:[{label:'BTC',borderColor:'#f7931a',backgroundColor:btcG,tension:.35,borderWidth:isMobile?2:3,pointRadius:0,pointHoverRadius:0,fill:true,order:3},{label:'ETH',borderColor:'#627eea',backgroundColor:ethG,tension:.35,borderWidth:isMobile?2:3,pointRadius:0,pointHoverRadius:0,fill:true,order:2},{label:'알트 평균',borderColor:'#64ffda',backgroundColor:altG,tension:.35,borderWidth:isMobile?2:3,pointRadius:0,pointHoverRadius:0,fill:true,order:1},{label:'BTC SMA',borderColor:'rgba(247,147,26,0.4)',borderDash:[8,4],tension:.25,borderWidth:1.5,pointRadius:0,fill:false,order:6},{label:'ETH SMA',borderColor:'rgba(98,126,234,0.4)',borderDash:[8,4],tension:.25,borderWidth:1.5,pointRadius:0,fill:false,order:5},{label:'알트 SMA',borderColor:'rgba(100,255,218,0.4)',borderDash:[8,4],tension:.25,borderWidth:1.5,pointRadius:0,fill:false,order:4}]},options:{responsive:true,maintainAspectRatio:false,animation:false,events:[],interaction:{mode:'nearest',intersect:false,axis:'x'},plugins:{legend:{position:'top',align:isMobile?'center':'end',labels:{color:'rgba(255,255,255,.85)',font:{weight:'600',size:isMobile?10:12,family:'Orbitron'},padding:isMobile?10:16,usePointStyle:true,pointStyle:'circle',boxWidth:isMobile?8:12,filter:function(l){return!l.text.includes('SMA');}}},tooltip:{enabled:false},annotation:{annotations:{top:{type:'line',borderColor:'rgba(255,82,82,.6)',borderWidth:2,borderDash:[8,6],label:{enabled:true,content:'MAX',backgroundColor:'rgba(255,82,82,.85)',color:'#fff',font:{size:isMobile?8:10,weight:'700',family:'Orbitron'},padding:{x:6,y:3},cornerRadius:6}},bot:{type:'line',borderColor:'rgba(68,138,255,.6)',borderWidth:2,borderDash:[8,6],label:{enabled:true,content:'MIN',backgroundColor:'rgba(68,138,255,.85)',color:'#fff',font:{size:isMobile?8:10,weight:'700',family:'Orbitron'},padding:{x:6,y:3},cornerRadius:6}},zero:{type:'line',yMin:0,yMax:0,borderColor:'rgba(255,255,255,0.15)',borderWidth:1,borderDash:[4,4]}}}},scales:{x:{type:'time',time:{unit:FRAME[active].unit,tooltipFormat:'yyyy-MM-dd HH:mm',displayFormats:{minute:'HH:mm',hour:'HH:mm',day:'MM/dd'}},grid:{color:'rgba(255,255,255,.04)',drawBorder:false},ticks:{color:'rgba(255,255,255,.5)',font:{size:isMobile?9:11,family:'Exo 2'},maxRotation:0,padding:isMobile?4:8,maxTicksLimit:isMobile?6:10},border:{display:false},afterFit:function(scale){var range=scale.max-scale.min;scale.max=scale.max+(range*0.1);}},y:{grid:{color:'rgba(255,255,255,.04)',drawBorder:false},ticks:{color:'rgba(255,255,255,.6)',font:{size:isMobile?9:11,weight:'600',family:'Exo 2'},callback:function(v){return(v>=0?'+':'')+v.toFixed(1)+'%';},padding:isMobile?4:8},border:{display:false}}},layout:{padding:{left:isMobile?5:10,right:isMobile?15:30,top:isMobile?5:10,bottom:isMobile?20:25}}}});
+}
+async function fullUpdate(){
+el.msg.textContent='데이터 갱신 중...';
+try{
+var iv=FRAME[active].api;
+chart.options.scales.x.time.unit=FRAME[active].unit;
+var marketAll=await getMarkets();
+var krw=marketAll.filter(function(m){return m.market.startsWith('KRW-');});
+var mkts=krw.slice(0,80).map(function(m){return m.market;});
+var tickers=await fetchJson(API_BASE+'/ticker?markets='+mkts.join(','));
+topAlt=tickers.filter(function(t){return!['KRW-BTC','KRW-ETH'].includes(t.market);}).sort(function(a,b){return b.acc_trade_price_24h-a.acc_trade_price_24h;}).slice(0,5);
+var candleUrls=[API_BASE+'/candles/'+iv+'?market=KRW-BTC&count='+COUNT,API_BASE+'/candles/'+iv+'?market=KRW-ETH&count='+COUNT];
+topAlt.forEach(function(a){candleUrls.push(API_BASE+'/candles/'+iv+'?market='+a.market+'&count='+COUNT);});
+var allCandles=await Promise.all(candleUrls.map(function(url){return fetchJson(url);}));
+var btc=allCandles[0],eth=allCandles[1];
+if(!btc||!eth||btc.length<10)throw new Error('캔들 로딩 실패');
+var btcR=btc.slice().reverse();bases.btc=btcR[0].trade_price;
+var ethR=eth.slice().reverse();bases.eth=ethR[0].trade_price;
+var fmt=function(cs,base){return cs.map(function(c){return{x:new Date(c.candle_date_time_kst).getTime(),y:((c.trade_price/base)-1)*100};});};
+volumeData=btcR.map(function(c){return{x:new Date(c.candle_date_time_kst).getTime(),vol:c.candle_acc_trade_price};});
+chart.data.datasets[0].data=fmt(btcR,bases.btc);
+chart.data.datasets[1].data=fmt(ethR,bases.eth);
+var altCandles=allCandles.slice(2).filter(function(a){return Array.isArray(a)&&a.length===btc.length;});
+if(altCandles.length){
+var avg=[];
+for(var i=0;i<btc.length;i++){
+var sum=0;
+for(var j=0;j<altCandles.length;j++){sum+=altCandles[j].slice().reverse()[i].trade_price;}
+avg.push(sum/altCandles.length);
+}
+bases.alt=avg[0];
+chart.data.datasets[2].data=avg.map(function(v,i){return{x:new Date(btcR[i].candle_date_time_kst).getTime(),y:((v/bases.alt)-1)*100};});
+}else{chart.data.datasets[2].data=[];}
+chart.data.datasets[3].data=sma(chart.data.datasets[0].data);
+chart.data.datasets[4].data=sma(chart.data.datasets[1].data);
+chart.data.datasets[5].data=sma(chart.data.datasets[2].data);
+var last=function(arr){return arr.length?arr[arr.length-1].y:null;};
+alertSide['KRW-BTC']=last(chart.data.datasets[0].data)>last(chart.data.datasets[3].data)?'above':'below';
+alertSide['KRW-ETH']=last(chart.data.datasets[1].data)>last(chart.data.datasets[4].data)?'above':'below';
+alertSide['ALT']=last(chart.data.datasets[2].data)>last(chart.data.datasets[5].data)?'above':'below';
+autoY();chart.update('none');el.msg.textContent='정상';
+}catch(e){el.msg.textContent='오류: '+e.message;}
+}
+async function streamUpdate(){
+try{
+var mkts=['KRW-BTC','KRW-ETH'].concat(topAlt.map(function(a){return a.market;}));
+var t=await fetchJson(API_BASE+'/ticker?markets='+mkts.join(','));
+if(!t||!t.length)return;
+var find=function(m){var f=t.find(function(x){return x.market===m;});return f?f.trade_price:null;};
+var now=Date.now();
+var updateDs=function(market,base,di,si){
+var price=find(market);
+if(!price||!base)return;
+var y=((price/base)-1)*100;
+var ds=chart.data.datasets[di].data;
+if(ds.length>0){ds[ds.length-1].y=y;}
+chart.data.datasets[si].data=sma(ds);
+if(alertOn){
+var smaDs=chart.data.datasets[si].data;
+if(smaDs.length>0){
+var lastS=smaDs[smaDs.length-1].y;
+var prev=alertSide[market];
+var cur=y>lastS?'above':'below';
+if(prev==='below'&&cur==='above')el.buy.play();
+if(prev==='above'&&cur==='below')el.sell.play();
+alertSide[market]=cur;
+}
+}
+};
+updateDs('KRW-BTC',bases.btc,0,3);
+updateDs('KRW-ETH',bases.eth,1,4);
+if(topAlt.length&&bases.alt){
+var vals=topAlt.map(function(a){return find(a.market);}).filter(Boolean);
+if(vals.length){
+var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+var ds=chart.data.datasets[2].data;
+var y=((avg/bases.alt)-1)*100;
+if(ds.length>0){ds[ds.length-1].y=y;}
+chart.data.datasets[5].data=sma(ds);
+if(alertOn){
+var smaDs=chart.data.datasets[5].data;
+if(smaDs.length>0){
+var lastS=smaDs[smaDs.length-1].y;
+var prev=alertSide['ALT'];
+var cur=y>lastS?'above':'below';
+if(prev==='below'&&cur==='above')el.buy.play();
+if(prev==='above'&&cur==='below')el.sell.play();
+alertSide['ALT']=cur;
+}
+}
+}
+}
+autoY();chart.update('none');
+}catch(e){}
+}
+function autoY(){
+var datasets=[chart.data.datasets[0],chart.data.datasets[1],chart.data.datasets[2]];
+var fullData=[];
+datasets.forEach(function(ds){ds.data.forEach(function(p){fullData.push(p.y);});});
+if(!fullData.length)return;
+var fullMax=Math.max.apply(null,fullData);
+var fullMin=Math.min.apply(null,fullData);
+var pad=Math.max(0.3,(fullMax-fullMin)*0.2);
+chart.options.scales.y.max=fullMax+pad;
+chart.options.scales.y.min=fullMin-pad;
+var ann=chart.options.plugins.annotation.annotations;
+ann.top.yMin=ann.top.yMax=fullMax;
+ann.top.label.content='최고 '+fullMax.toFixed(2)+'%';
+ann.bot.yMin=ann.bot.yMax=fullMin;
+ann.bot.label.content='최저 '+fullMin.toFixed(2)+'%';
+}
+async function briefing(){
+el.modal.classList.add('show');
+el.body.innerHTML='<div style="text-align:center;padding:30px;"><div style="color:#64ffda;font-size:14px;">분석중...</div></div>';
+try{
+var marketAll=await getMarkets();
+var krw=marketAll.filter(function(m){return m.market.startsWith('KRW-')&&!['KRW-BTC','KRW-ETH'].includes(m.market);});
+var tickers=await fetchJson(API_BASE+'/ticker?markets='+krw.slice(0,50).map(function(m){return m.market;}).join(','));
+var topAlts=tickers.sort(function(a,b){return b.acc_trade_price_24h-a.acc_trade_price_24h;}).slice(0,15);
+var analyzeRange=async function(api,count,label){
+var urls=topAlts.map(function(a){return API_BASE+'/candles/'+api+'?market='+a.market+'&count='+count;});
+var results=await Promise.all(urls.map(function(url){return fetchJson(url).catch(function(){return null;});}));
+var altResults=[];
+results.forEach(function(candles,i){
+if(!candles||candles.length<3)return;
+var rev=candles.slice().reverse();
+var first=rev[0].trade_price;
+var last=rev[rev.length-1].trade_price;
+var change=((last-first)/first)*100;
+altResults.push({market:topAlts[i].market.replace('KRW-',''),change:change});
+});
+if(altResults.length===0)return null;
+var avgChange=altResults.reduce(function(s,a){return s+a.change;},0)/altResults.length;
+var upCnt=altResults.filter(function(a){return a.change>0.3;}).length;
+var downCnt=altResults.filter(function(a){return a.change<-0.3;}).length;
+var neutralCnt=altResults.length-upCnt-downCnt;
+var upRatio=(upCnt/altResults.length*100).toFixed(0);
+var downRatio=(downCnt/altResults.length*100).toFixed(0);
+var trend,trendClass;
+if(avgChange>2){trend='강한 상승';trendClass='strongUp';}
+else if(avgChange>0.5){trend='상승';trendClass='up';}
+else if(avgChange>0){trend='약상승';trendClass='weakUp';}
+else if(avgChange>-0.5){trend='약하락';trendClass='weakDown';}
+else if(avgChange>-2){trend='하락';trendClass='down';}
+else{trend='강한 하락';trendClass='strongDown';}
+var sorted=altResults.slice().sort(function(a,b){return b.change-a.change;});
+return{label:label,avgChange:avgChange.toFixed(2),trend:trend,trendClass:trendClass,upCount:upCnt,downCount:downCnt,neutralCount:neutralCnt,upRatio:upRatio,downRatio:downRatio,topUp:sorted.slice(0,3),topDown:sorted.slice(-3).reverse()};
+};
+var results=await Promise.all([analyzeRange('minutes/3',10,'단기 (30분)'),analyzeRange('minutes/15',16,'중기 (4시간)'),analyzeRange('minutes/60',24,'장기 (24시간)')]);
+var getTrendColor=function(tc){var c={strongUp:'#1b5e20',up:'#4caf50',weakUp:'#81c784',weakDown:'#ff8a65',down:'#f44336',strongDown:'#b71c1c'};return c[tc]||'#9e9e9e';};
+var renderAnalysis=function(data,bc){
+if(!data)return'<div style="padding:20px;text-align:center;color:rgba(255,255,255,0.4);">데이터 없음</div>';
+var color=getTrendColor(data.trendClass);
+var sign=data.avgChange>=0?'+':'';
+return'<div style="background:rgba('+bc+',0.08);border:1px solid rgba('+bc+',0.3);border-radius:14px;padding:16px;margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;"><div style="font-family:\'Orbitron\',monospace;font-size:15px;font-weight:700;color:rgb('+bc+');">'+data.label+'</div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;font-weight:800;color:'+color+';">'+sign+data.avgChange+'%</span><span style="background:'+color+'22;color:'+color+';padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;">'+data.trend+'</span></div></div><div style="margin-bottom:14px;"><div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.1);"><div style="width:'+data.upRatio+'%;background:linear-gradient(90deg,#1b5e20,#4caf50);"></div><div style="width:'+(100-data.upRatio-data.downRatio)+'%;background:#9e9e9e;"></div><div style="width:'+data.downRatio+'%;background:linear-gradient(90deg,#f44336,#b71c1c);"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;"><span style="color:#4caf50;">상승 '+data.upCount+'개</span><span style="color:#9e9e9e;">중립 '+data.neutralCount+'개</span><span style="color:#f44336;">하락 '+data.downCount+'개</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div style="background:rgba(76,175,80,0.1);border-radius:8px;padding:10px;"><div style="font-size:10px;color:#4caf50;font-weight:700;margin-bottom:6px;">상승 TOP 3</div>'+data.topUp.map(function(a){return'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:rgba(255,255,255,0.8);">'+a.market+'</span><span style="color:#4caf50;font-weight:600;">+'+a.change.toFixed(2)+'%</span></div>';}).join('')+'</div><div style="background:rgba(244,67,54,0.1);border-radius:8px;padding:10px;"><div style="font-size:10px;color:#f44336;font-weight:700;margin-bottom:6px;">하락 TOP 3</div>'+data.topDown.map(function(a){return'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:rgba(255,255,255,0.8);">'+a.market+'</span><span style="color:#f44336;font-weight:600;">'+a.change.toFixed(2)+'%</span></div>';}).join('')+'</div></div></div>';
+};
+var html='<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.1);"><div style="font-size:12px;color:rgba(255,255,255,0.5);">분석 시각: '+new Date().toLocaleString('ko-KR')+'</div></div>';
+html+=renderAnalysis(results[0],'100,255,218');
+html+=renderAnalysis(results[1],'98,126,234');
+html+=renderAnalysis(results[2],'247,147,26');
+el.body.innerHTML=html;
+}catch(e){el.body.innerHTML='<div style="padding:30px;text-align:center;color:#f44336;">분석 실패: '+e.message+'</div>';}
+}
+function wire(){
+el.alert.addEventListener('change',function(e){alertOn=e.target.checked;});
+el.controls.addEventListener('click',function(e){
+if(!e.target.classList.contains('btn')||e.target.classList.contains('active'))return;
+Array.from(el.controls.children).forEach(function(b){b.classList.remove('active');});
+e.target.classList.add('active');
+active=e.target.dataset.period;
+clearInterval(fullUpdateTimer);clearInterval(streamTimer);
+fullUpdate().then(function(){
+fullUpdateTimer=setInterval(fullUpdate,60000);
+streamTimer=setInterval(streamUpdate,2000);
+});
+});
+el.brief.addEventListener('click',briefing);
+el.close.addEventListener('click',function(){el.modal.classList.remove('show');});
+el.manual.addEventListener('click',function(){el.manualModal.classList.add('show');});
+el.manualClose.addEventListener('click',function(){el.manualModal.classList.remove('show');});
+window.addEventListener('resize',function(){if(chart)chart.resize();});
+}
+async function updateAltSignals(){
+try{
+var grid=document.getElementById('signalGrid');
+if(!grid)return;
+var marketAll=await getMarkets();
+var krw=marketAll.filter(function(m){return m.market.startsWith('KRW-')&&!['KRW-BTC','KRW-ETH'].includes(m.market);});
+var tickers=await fetchJson(API_BASE+'/ticker?markets='+krw.slice(0,80).map(function(m){return m.market;}).join(','));
+var top30=tickers.sort(function(a,b){return b.acc_trade_price_24h-a.acc_trade_price_24h;}).slice(0,30);
+var urls=top30.map(function(a){return API_BASE+'/candles/minutes/3?market='+a.market+'&count=20';});
+var allCandles=await Promise.all(urls.map(function(url){return fetchJson(url).catch(function(){return null;});}));
+var getColor=function(change){
+if(change>=3)return{bg:'rgba(27,94,32,0.5)',text:'#1b5e20',border:'#1b5e20'};
+if(change>=2)return{bg:'rgba(46,125,50,0.4)',text:'#2e7d32',border:'#2e7d32'};
+if(change>=1)return{bg:'rgba(76,175,80,0.35)',text:'#4caf50',border:'#4caf50'};
+if(change>=0.5)return{bg:'rgba(129,199,132,0.3)',text:'#81c784',border:'#81c784'};
+if(change>=0.3)return{bg:'rgba(165,214,167,0.25)',text:'#a5d6a7',border:'#a5d6a7'};
+if(change>-0.3)return{bg:'rgba(255,235,59,0.25)',text:'#ffeb3b',border:'#fdd835'};
+if(change>-0.5)return{bg:'rgba(255,183,77,0.25)',text:'#ffb74d',border:'#ffa726'};
+if(change>-1)return{bg:'rgba(255,138,101,0.3)',text:'#ff8a65',border:'#ff7043'};
+if(change>-2)return{bg:'rgba(244,67,54,0.35)',text:'#f44336',border:'#f44336'};
+if(change>-3)return{bg:'rgba(211,47,47,0.4)',text:'#d32f2f',border:'#d32f2f'};
+return{bg:'rgba(183,28,28,0.5)',text:'#b71c1c',border:'#b71c1c'};
+};
+var html='';
+allCandles.forEach(function(candles,i){
+if(!candles||candles.length<5)return;
+var rev=candles.slice().reverse();
+var first=rev[0].trade_price;
+var last=rev[rev.length-1].trade_price;
+var change=((last-first)/first)*100;
+var color=getColor(change);
+var symbol=top30[i].market.replace('KRW-','');
+html+='<div style="background:'+color.bg+';border:1px solid '+color.border+'55;border-radius:5px;padding:5px 3px;text-align:center;min-width:0;"><div style="font-size:9px;font-weight:700;color:'+color.text+';margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;">'+symbol+'</div><div style="font-size:8px;color:'+color.text+';opacity:0.9;">'+(change>=0?'+':'')+change.toFixed(1)+'%</div></div>';
+});
+grid.innerHTML=html||'<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:11px;padding:8px;grid-column:1/-1;">데이터 없음</div>';
+}catch(e){}
+}
+function start(){
+initChart();
+wire();
+fullUpdate().then(function(){
+fullUpdateTimer=setInterval(fullUpdate,60000);
+streamTimer=setInterval(streamUpdate,2000);
+});
+updateAltSignals();
+setInterval(updateAltSignals,30000);
+}
+start();
+})();
+</script>
+</body>
+</html>

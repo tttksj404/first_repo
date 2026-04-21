@@ -418,6 +418,7 @@ def run_live_paper_daemon(
             primitive_builder=lambda symbol, decision_time: extractor.build_primitive_inputs(store.get(symbol)),  # type: ignore[arg-type]
             history_provider=lambda symbol, decision_time: extractor.build_history_context(store.get(symbol)),  # type: ignore[arg-type]
             decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
+            decision_interval_seconds=settings.decision_engine.decision_interval_seconds,
             eligible_symbols=eligible_symbols,
         )
         log_store = JsonlLogStore(
