@@ -1,0 +1,29 @@
+{
+  "source_dir": "C:\\Users\\SSAFY\\Desktop\\ai_lecture-master-master\\crawl_mingogogo",
+  "generated_at": "2026-04-20",
+  "copied_raw_files": [
+    "posts.json",
+    "all_pages_summary.json",
+    "coin_program_dataset_summary_metrics_clean.csv",
+    "coin_program_dataset_coin_returns_clean.csv",
+    "coin_program_dataset_signal_strict_clean.csv",
+    "coin_program_recommendation_with_rationale.csv",
+    "coin_program_target_posts_algorithm_clues.csv",
+    "coin_program_inferred_algorithm_blueprint.json",
+    "algorithm_explainer_posts_curated.csv",
+    "algorithm_explainer_posts_curated.md",
+    "coin_program_reco_rationale_algorithm_report.md"
+  ],
+  "processed_files": [
+    "post_catalog.csv",
+    "recommendation_events.jsonl",
+    "algorithm_explainers_readable.md"
+  ],
+  "notes": [
+    "?? ???? coin_returns + summary_metrics + rationale_keywords ???",
+    "???? ???? curated ?? ??",
+    "assets ??? ?? ??(raw/assets, ? 450.93MB)"
+  ],
+  "assets_included": true,
+  "assets_path": "C:\\Users\\SSAFY\\Downloads\\first_repo-main\\quant_binance\\data\\external\\mingogogo\\raw\\assets"
+}

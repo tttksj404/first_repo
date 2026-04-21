@@ -1,5 +1,5 @@
 {
-  "decision_count": 1,
+  "decision_count": 3,
   "exchange_live_futures_position_count": 0,
   "exchange_live_futures_positions": [],
   "futures_available_balance_usd": null,
@@ -8,31 +8,58 @@
   "futures_manual_handling_balance_usd": null,
   "futures_total_reusable_balance_usd": null,
   "futures_transferable_execution_balance_usd": null,
-  "heartbeat_count": 1,
+  "heartbeat_count": 0,
   "kill_switch": {
     "armed": false,
     "reasons": []
   },
-  "last_decision_emitted_at": "2026-04-15T05:47:55.451869+00:00",
-  "last_decision_timestamp": "2026-03-08T12:05:00+00:00",
-  "last_event_timestamp": "2026-04-15T05:47:55.436064+00:00",
+  "last_decision_emitted_at": "2026-04-21T08:28:33.611457+00:00",
+  "last_decision_timestamp": "2026-03-08T12:15:00+00:00",
+  "last_event_timestamp": null,
   "live_order_count": 0,
-  "realized_pnl_usd_estimate": 0.0,
+  "realized_pnl_usd_estimate": 40.0,
   "recent_decisions": [
     {
       "candidate_mode": "futures",
       "entry_relaxations": [],
-      "estimated_round_trip_cost_bps": 26.0,
+      "estimated_round_trip_cost_bps": 10.0,
       "execution_quality_trade_restraint": "none",
       "macro_trade_restraint": "none",
-      "mode": "cash",
-      "net_expected_edge_bps": 34.904788,
-      "reasons": [
-        "NO_ENSEMBLE_SIGNAL",
-        "SUPPORT_NOT_CONFIRMED"
-      ],
-      "score": 82.22,
-      "side": "flat",
+      "mode": "futures",
+      "net_expected_edge_bps": 18.0,
+      "reasons": [],
+      "score": 82.0,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "BTCUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 10.0,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 18.0,
+      "reasons": [],
+      "score": 82.0,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "BTCUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 10.0,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 18.0,
+      "reasons": [],
+      "score": 82.0,
+      "side": "long",
       "size_boost_reasons": [],
       "strategy_size_multiplier": 1.0,
       "symbol": "BTCUSDT"
@@ -40,11 +67,8 @@
   ],
   "spot_available_balance_usd": null,
   "status": "healthy",
-  "tested_order_count": 0,
-  "top_rejection_reasons": {
-    "NO_ENSEMBLE_SIGNAL": 1,
-    "SUPPORT_NOT_CONFIRMED": 1
-  },
+  "tested_order_count": 1,
+  "top_rejection_reasons": {},
   "unrealized_pnl_usd_estimate": 0,
-  "updated_at": "2026-04-15T05:47:56.691884+00:00"
+  "updated_at": "2026-04-21T08:28:33.705226+00:00"
 }

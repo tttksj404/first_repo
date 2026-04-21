@@ -20,9 +20,14 @@ Thumbs.db
 *.py[cod]
 *$py.class
 .venv/
+.venv_threads/
 env/
 venv/
 ENV/
+
+# Local collector/session scratch
+.session.json
+.tmp_threads_queries.txt
 
 # IDEs
 .vscode/
