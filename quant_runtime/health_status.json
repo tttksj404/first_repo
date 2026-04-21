@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-21T23:42:33.292830+00:00",
+  "updated_at": "2026-04-21T23:46:54.953860+00:00",
   "overall_severity": "OK",
   "checks": {
     "adopted_ratio": {
@@ -22,10 +22,10 @@
     },
     "equity_drop": {
       "severity": "OK",
-      "message": "equity=3.84 (accumulating history)",
-      "value": 3.837693548592
+      "message": "equity data unavailable",
+      "value": null
     }
   },
   "auto_actions": [],
-  "disk_usage_mb": 2482.4
+  "disk_usage_mb": 2481.4
 }
