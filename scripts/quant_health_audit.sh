@@ -9,6 +9,7 @@ PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 CLAUDE="/Users/tttksj/.local/bin/claude"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 DISABLE_AUTOFIX="${QUANT_HEALTH_AUDIT_DISABLE_AUTOFIX:-0}"
+ALLOW_RESTART="${QUANT_HEALTH_AUDIT_ALLOW_RESTART:-0}"
 
 slot_pid() {
     if [ -f "$1" ]; then
@@ -37,6 +38,12 @@ pgrep_count() {
     pattern="$1"
     count="$(pgrep -f "$pattern" 2>/dev/null | wc -l | tr -d ' ')"
     printf '%s' "${count:-0}"
+}
+
+clear_live_stop_files() {
+    if [ "$ALLOW_RESTART" = "1" ]; then
+        rm -f "$REPO/scripts/_supervisor_stop" "$REPO/scripts/_safety_guardian_stop"
+    fi
 }
 
 latest_child_pid_from_log() {
@@ -675,11 +682,17 @@ ${AUDIT_SUMMARY}
     $PYTHON "$REPO/scripts/yolo_health_check.py" 2>&1
     YOLO_EXIT=$?
     if [ "$YOLO_EXIT" -eq 1 ]; then
-        echo "[YOLO] 자동 수정 완료 — 봇 재시작"
-        pkill -f 'quant_binance.runtime --mode live-auto-trade-daemon' 2>/dev/null || true
-        sleep 3
-        nohup bash "$REPO/scripts/quant_run_live_orders.sh" > /dev/null 2>&1 &
-        echo "[YOLO] 봇 재시작됨 (PID: $!)"
+        if [ "$ALLOW_RESTART" = "1" ]; then
+            echo "[YOLO] 자동 수정 완료 — 봇 재시작 허용됨"
+            pkill -f 'quant_binance.runtime --mode live-auto-trade-daemon' 2>/dev/null || true
+            sleep 3
+            clear_live_stop_files
+            echo "[YOLO] stop sentinels cleared before restart"
+            nohup bash "$REPO/scripts/quant_run_live_orders.sh" > /dev/null 2>&1 &
+            echo "[YOLO] 봇 재시작됨 (PID: $!)"
+        else
+            warn "한탕 모드 자동 수정 완료 — 재시작은 QUANT_HEALTH_AUDIT_ALLOW_RESTART=1 없어서 차단"
+        fi
     elif [ "$YOLO_EXIT" -eq 2 ]; then
         crit "한탕 모드 수동 개입 필요"
     else

@@ -55,7 +55,9 @@ class QuantLiveWatchdog:
         self.supervisor_pid_path = self.log_dir / "live_supervisor.pid"
         self.watchdog_pid_path = self.log_dir / "live_supervisor_watchdog.pid"
         self.health_state_path = self.log_dir / "live_supervisor_health.json"
-        self.supervisor_stop_path = self.repo_root / "scripts" / "_supervisor_stop"
+        self.supervisor_stop_path = Path(
+            os.environ.get("QUANT_SUPERVISOR_STOP_FILE", str(self.repo_root / "scripts" / "_supervisor_stop"))
+        )
         self.summary_path = self.output_base / "output" / "paper-live-shell" / "latest" / "summary.state.json"
         self.started_at = time.time()
         digest = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
@@ -78,6 +80,13 @@ class QuantLiveWatchdog:
         self.closed_trades_path = self.output_base / "output" / "paper-live-shell" / "latest" / "logs" / "closed_trades.jsonl"
         self.strategy_override_path = self.output_base / "artifacts" / "strategy_override.approved.json"
         self.strategy_health_path = self.log_dir / "health_status.json"
+
+    def _read_json_object(self, path: Path) -> dict:
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+        return data if isinstance(data, dict) else {}
 
     def supervisor_stop_requested(self) -> bool:
         try:
@@ -216,6 +225,27 @@ class QuantLiveWatchdog:
             invalid_reason="invalid_health_state",
             stale_reason="health_state_stale",
         )
+
+    def startup_failure_is_transport(self) -> bool:
+        transport_markers = (
+            "transport error",
+            "dns resolution",
+            "nodename",
+            "name or service",
+            "temporary failure",
+            "urlopen error",
+            "connection reset",
+            "network is unreachable",
+            "timed out",
+        )
+        for path in (self.summary_path, self.health_state_path):
+            data = self._read_json_object(path)
+            if str(data.get("status") or "") != "startup_failed" and str(data.get("reason") or "") != "startup_failed":
+                continue
+            error_text = f"{data.get('error') or ''} {data.get('summary') or ''}".lower()
+            if any(marker in error_text for marker in transport_markers):
+                return True
+        return False
 
     def child_alive(self) -> bool:
         try:
@@ -696,6 +726,10 @@ class QuantLiveWatchdog:
         combined_reason = f"summary={summary_health.reason},health={health_state.reason},child_alive={child_alive},supervisor_alive={supervisor_alive}"
         if self.within_startup_grace():
             self.log(f"{combined_reason} during startup grace; waiting")
+            return
+
+        if supervisor_alive and self.startup_failure_is_transport():
+            self.log(f"startup transport failure; leaving supervisor alive for controlled backoff ({combined_reason})")
             return
 
         if supervisor_alive:

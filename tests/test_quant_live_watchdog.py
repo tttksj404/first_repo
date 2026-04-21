@@ -25,6 +25,7 @@ class QuantLiveWatchdogTests(unittest.TestCase):
                 "QUANT_SUPERVISOR_WATCHDOG_STALE_SECONDS": "1",
                 "QUANT_SUPERVISOR_WATCHDOG_RESTART_COOLDOWN_SECONDS": "1",
                 "QUANT_LIVE_STARTUP_GRACE_SECONDS": "0",
+                "QUANT_SUPERVISOR_STOP_FILE": str(supervisor_stub.with_name("nonexistent_supervisor_stop")),
             }
         )
         return env
@@ -117,6 +118,29 @@ class QuantLiveWatchdogTests(unittest.TestCase):
 
         self.assertFalse(health.fresh)
         self.assertEqual(health.reason, "startup_failed")
+
+    def test_watchdog_classifies_startup_transport_failure(self) -> None:
+        from scripts.quant_live_watchdog import QuantLiveWatchdog
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            output_dir = Path(tempdir) / "runtime"
+            latest_dir = output_dir / "output" / "paper-live-shell" / "latest"
+            latest_dir.mkdir(parents=True, exist_ok=True)
+            (latest_dir / "summary.state.json").write_text(
+                textwrap.dedent(
+                    f"""\
+                    {{
+                      "status": "startup_failed",
+                      "updated_at": "{datetime.now(timezone.utc).isoformat()}",
+                      "error": "Bitget transport error: DNS resolution failed: nodename nor servname provided"
+                    }}
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            watchdog = QuantLiveWatchdog(output_base=output_dir)
+            self.assertTrue(watchdog.startup_failure_is_transport())
 
     @unittest.skipIf(os.name == "nt", "watchdog shell integration requires POSIX /bin/sh")
     def test_watchdog_skips_restart_when_summary_is_fresh(self) -> None:
