@@ -1,0 +1,46 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\runtime.py", line 378, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\runtime.py", line 306, in main
+    result = run_live_paper_daemon(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\daemon.py", line 359, in run_live_paper_daemon
+    store = seed_market_store_from_rest(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\data\rest_seed.py", line 57, in seed_market_store_from_rest
+    spot_exchange_info = client.get_exchange_info(market="spot")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1028, in get_exchange_info
+    payload = self.send(self.build_public_request(path=path, params=params))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1058, in send
+    with urlopen(request, timeout=15, context=context) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1317, in do_open
+    h = http_class(host, timeout=req.timeout, **http_conn_args)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1430, in __init__
+    super(HTTPSConnection, self).__init__(host, port, timeout,
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 865, in __init__
+    self._validate_host(self.host)
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1256, in _validate_host
+    raise InvalidURL(f"URL can't contain control characters. {host!r} "
+http.client.InvalidURL: URL can't contain control characters. ' ' (found at least ' ')

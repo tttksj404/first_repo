@@ -1,0 +1,25 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 1,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 1,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 1
+  },
+  "observation_count": 1,
+  "symbols": {
+    "ETHUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": -8.8871248856751,
+        "mode": "futures",
+        "observations": [
+          -8.8871248856751
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}

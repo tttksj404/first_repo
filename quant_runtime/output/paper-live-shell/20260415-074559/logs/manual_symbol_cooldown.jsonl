@@ -1,2 +1,0 @@
-{"action": "set", "current_until": null, "effective_until": "2026-04-15T08:05:00+00:00", "extend_active": true, "new_until": "2026-04-15T08:05:00+00:00", "source": "SIGNAL_REVERSAL", "symbol": "SOLUSDT", "timestamp": "2026-04-15T07:50:00+00:00"}
-{"action": "set", "current_until": null, "effective_until": "2026-04-15T08:35:00+00:00", "extend_active": true, "new_until": "2026-04-15T08:35:00+00:00", "source": "CAPITAL_REALLOCATION", "symbol": "SOLUSDT", "timestamp": "2026-04-15T08:30:00+00:00"}

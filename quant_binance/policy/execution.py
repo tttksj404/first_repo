@@ -50,6 +50,7 @@ def is_major_strong_futures_decision(*, decision: DecisionIntent, major_symbols:
     if decision.final_mode != "futures" or not is_major_futures_symbol(decision.symbol, major_symbols=major_symbols):
         return False
     edge_to_cost_multiple = float("inf") if decision.estimated_round_trip_cost_bps <= 0.0 else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
+    min_strong_net_edge_bps = max(exposure.min_entry_net_edge_bps, exposure.pyramid_min_net_edge_bps)
     return (
         decision.predictability_score >= thresholds.futures_score_min + exposure.strong_score_buffer
         and decision.trend_strength >= exposure.strong_trend_strength_min
@@ -57,6 +58,7 @@ def is_major_strong_futures_decision(*, decision: DecisionIntent, major_symbols:
         and decision.liquidity_score >= exposure.strong_liquidity_min
         and decision.volatility_penalty <= exposure.strong_volatility_penalty_max
         and decision.overheat_penalty <= exposure.strong_overheat_penalty_max
+        and decision.net_expected_edge_bps >= min_strong_net_edge_bps
         and edge_to_cost_multiple >= exposure.strong_edge_to_cost_multiple_min
     )
 
@@ -72,6 +74,6 @@ def is_major_medium_futures_decision(*, decision: DecisionIntent, major_symbols:
         and decision.trend_strength >= exposure.pyramid_min_trend_strength
         and decision.volume_confirmation >= exposure.pyramid_min_volume_confirmation
         and decision.liquidity_score >= exposure.soft_liquidity_floor
-        and decision.net_expected_edge_bps >= max(exposure.min_entry_net_edge_bps, exposure.pyramid_min_net_edge_bps - 2.0)
+        and decision.net_expected_edge_bps >= max(exposure.min_entry_net_edge_bps, exposure.pyramid_min_net_edge_bps)
         and edge_to_cost_multiple >= max(exposure.priority_edge_to_cost_multiple_min, 1.0)
     )

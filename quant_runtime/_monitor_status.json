@@ -1,33 +1,21 @@
 {
-  "ts": "2026-04-15T08:52:20.012262+00:00",
-  "cycle": 67,
+  "ts": "2026-04-17T04:38:50.164299+00:00",
+  "cycle": 15,
   "heartbeats": {
-    "events": 342125,
-    "decisions": 347,
-    "live_orders": 2,
-    "tested_orders": 1
+    "events": 26575,
+    "decisions": 17,
+    "live_orders": 0,
+    "tested_orders": 0
   },
   "error_counts_recent": {
     "45122": 0,
     "trailing_stop_failures": 0,
     "websocket_errors": 3,
-    "http_4xx_5xx": 1,
+    "http_4xx_5xx": 0,
     "tracebacks": 0
   },
   "bitget": {
-    "equity_usdt": 34.024534211561,
-    "positions": [
-      {
-        "symbol": "PEPEUSDT",
-        "side": "long",
-        "qty": 125667000.0,
-        "entry": "0.00000356680876",
-        "mark": "0.0000035662",
-        "uPL": "-0.07650104292",
-        "stopLoss": "0.0000034923",
-        "takeProfit": "0.0000072881",
-        "protection_source": "plan_order"
-      }
-    ]
+    "equity_usdt": 42.320131516614,
+    "positions": []
   }
 }

@@ -1,0 +1,22 @@
+{
+  "unique_internal_urls_seen": 2518,
+  "pages_crawled_success": 2502,
+  "urls_with_errors": 16,
+  "missing_from_success": 16,
+  "missing_due_to_known_errors": 16,
+  "missing_unaccounted": 0,
+  "fully_covered_accessible": true,
+  "types": {
+    "home": 42,
+    "category": 105,
+    "other": 592,
+    "tag": 1282,
+    "non_html": 2,
+    "guestbook": 1,
+    "post": 239,
+    "post_mobile": 239
+  },
+  "unique_post_ids_discovered": 239,
+  "post_id_min": 1,
+  "post_id_max": 309
+}

@@ -192,6 +192,7 @@ def run_paper_live_shell_mode(
         primitive_builder=lambda symbol, decision_time: by_key[(symbol, decision_time.isoformat())].primitive_inputs,
         history_provider=lambda symbol, decision_time: by_key[(symbol, decision_time.isoformat())].history,
         decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
+        decision_interval_seconds=settings.decision_engine.decision_interval_seconds,
     )
     payloads: list[dict[str, object]] = []
     for cycle in cycles:

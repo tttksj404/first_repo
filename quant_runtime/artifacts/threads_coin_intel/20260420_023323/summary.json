@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-04-20T02:49:03.611963+00:00",
+  "threads_total_posts": 186,
+  "threads_usable_posts": 4,
+  "external_total_pages": 77,
+  "external_usable_pages": 0,
+  "combined_usable_count": 4,
+  "unique_threads_users": 60,
+  "unique_external_domains": 17,
+  "tag_counts": {
+    "execution_discipline": 2,
+    "derivatives": 1,
+    "risk_management": 1
+  },
+  "top_usable_samples": [
+    {
+      "url": "https://www.threads.com/@bc_co_kr/post/DXIQNC8Esve",
+      "source_kind": "threads_post",
+      "username": "bc_co_kr",
+      "score": 4,
+      "tags": [
+        "execution_discipline"
+      ],
+      "text_preview": "비트코인 급등 이유는?\n\n사람들이 억지로 사게 만들어서 오름.\n\n7만6천 달러를 찍은 상승\n\n겉으로 보면 호재\n\n근데 실제로는 공매도 6.5억 달러 청산"
+    },
+    {
+      "url": "https://www.threads.com/@tradenalytics/post/DXFHwN8mDgf",
+      "source_kind": "threads_post",
+      "username": "tradenalytics",
+      "score": 3,
+      "tags": [
+        "derivatives"
+      ],
+      "text_preview": "$BTC I'm still quite reluctant to buy Bitcoin yet because the retail shorts activity in my Futures Analyzer is not signaling bottom. \n\nDuring 2023, this signal peaked and there were non stop red signals getting spammed as seen below. \n\nNo s"
+    },
+    {
+      "url": "https://www.threads.com/@tradenalytics/post/DUcp1A7kUM_",
+      "source_kind": "threads_post",
+      "username": "tradenalytics",
+      "score": 3,
+      "tags": [
+        "execution_discipline"
+      ],
+      "text_preview": "$BTC sorry guys I don't make the rules.\n\nI was off by $2K, but I managed to predict this in November 2024. \n\nIn the meantime I was away from crypto, trading only stocks. \n\nThis helped my sanity alot to be buying stuff that don't crash -50% "
+    },
+    {
+      "url": "https://www.threads.com/@lastdance2050/post/DXQOU6SAVKp",
+      "source_kind": "threads_post",
+      "username": "lastdance2050",
+      "score": 3,
+      "tags": [
+        "risk_management"
+      ],
+      "text_preview": "$BTC\n\n비트코인 달라진 것은 없었고 뻔한자리\n\n1월 말에 있었던 97k처럼 78k까지 올리는 것은 충분히 가능한 구간이였고 테스트 자리였음\n\n올릴때 마다 공매도로 대응하여 매집했을 때 오히려 리스크가 거의 없는 구간임\n\n이제는 84k CME gap 채우러 간다고 하지만 모두가 생각하고 원하는 자리는 도달하기 어려울 가능성이 크다\n\n상승에 대한 되돌림으로 이제부터 하방으로 내려갈 것"
+    }
+  ]
+}

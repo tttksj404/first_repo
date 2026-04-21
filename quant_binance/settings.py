@@ -25,6 +25,7 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 @dataclass(frozen=True)
 class DecisionEngineConfig:
     decision_interval_minutes: int
+    decision_interval_seconds: int = 0
 
 
 @dataclass(frozen=True)
@@ -123,6 +124,12 @@ class ExitRuleConfig:
     futures_profit_protection_retrace_roe_percent: float = 3.0
     futures_proactive_take_profit_roe_thresholds_percent: tuple[float, ...] = ()
     futures_proactive_take_profit_fraction: float = 0.25
+    futures_proactive_take_profit_min_roe_percent: float = 10.0
+    futures_early_invalid_exit_max_holding_minutes: float = 0.0
+    futures_early_invalid_exit_min_loss_usd: float = 0.0
+    futures_early_invalid_exit_min_score_drop: float = 0.0
+    futures_early_invalid_exit_min_edge_drop_bps: float = 0.0
+    futures_early_invalid_exit_max_peak_roe_percent: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -238,6 +245,9 @@ class FuturesExposureConfig:
     high_conviction_recent_opposite_max_age_minutes: int = 0
     high_conviction_recent_reversal_unlock_enabled: bool = False
     high_conviction_recent_reversal_unlock_confirmations: int = 0
+    high_conviction_max_decision_age_seconds: int = 0
+    high_conviction_recent_weak_block_enabled: bool = False
+    high_conviction_recent_weak_max_age_seconds: int = 0
     funding_bias_enabled: bool = False
     funding_bias_min_abs_bps: float = 0.0
     funding_bias_max_abs_bps: float = 6.0

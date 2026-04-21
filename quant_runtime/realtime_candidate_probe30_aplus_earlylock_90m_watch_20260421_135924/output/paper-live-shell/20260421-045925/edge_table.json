@@ -1,0 +1,37 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 1,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 2,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 3
+  },
+  "observation_count": 3,
+  "symbols": {
+    "ETHUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 19.22628254426287,
+        "mode": "futures",
+        "observations": [
+          19.22628254426287,
+          -7.085641207323583
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": -22.654553098068828,
+        "mode": "futures",
+        "observations": [
+          -22.654553098068828
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}
