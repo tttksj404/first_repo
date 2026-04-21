@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-04-22 - PEPE runtime overnight health triage
+- Summary: Checked whether the PEPE live trading runtime failed overnight and separated transport downtime from market/strategy gating.
+- What was done: Correlated process status, supervisor health, DNS startup failures, decision/preflight forensics, account sync, live order history, and manual-close sync state; confirmed recovery without code changes and documented the current blocker category.
+- Competency mapping: Data pipeline and system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add clearer downtime-window summaries so runtime automation can distinguish external transport failures from actionable software regressions faster.
+
 ### 2026-04-21 - PEPE runtime supervisor and watchdog recovery
 - Summary: Diagnosed PEPE live-runtime health after stop sentinels, DNS startup failures, and stale summary handling caused repeated supervised restarts.
 - What was done: Correlated supervisor logs, health snapshots, runtime summaries, decision/preflight forensics, manual-close sync, and process sentinel state; patched audit restart sentinel clearing, restored startup-grace stale-summary handling, added startup-failure backoff, and taught the watchdog to leave DNS/API startup failures in controlled supervisor backoff.
