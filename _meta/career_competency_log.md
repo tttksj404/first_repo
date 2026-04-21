@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-04-21 - PEPE runtime supervisor and watchdog recovery
+- Summary: Diagnosed PEPE live-runtime health after stop sentinels, DNS startup failures, and stale summary handling caused repeated supervised restarts.
+- What was done: Correlated supervisor logs, health snapshots, runtime summaries, decision/preflight forensics, manual-close sync, and process sentinel state; patched audit restart sentinel clearing, restored startup-grace stale-summary handling, added startup-failure backoff, and taught the watchdog to leave DNS/API startup failures in controlled supervisor backoff.
+- Competency mapping: Data pipeline and system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add clearer provenance for stop-sentinel writers so operational automation can distinguish intentional manual stops from stale-state blockers.
+
 ### 2026-04-17 - PEPE runtime dust-conversion triage
 - Summary: Investigated the PEPE live runtime health, separated market-driven `observe_only` behavior from software defects, and fixed a repeated dust-BTC auto-conversion error path.
 - What was done: Read live supervisor health/logs and the latest paper-live summary, confirmed decisions/orders were progressing with thin-sample gating rather than strategy failure, traced repeated Bitget `45110` minimum-amount errors to the stranded-spot conversion path, added a spot-notional guard in the session runtime, and verified the fix with a focused regression test.
