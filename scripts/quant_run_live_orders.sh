@@ -53,6 +53,7 @@ WATCHDOG_STALE_SECONDS="${QUANT_LIVE_WATCHDOG_STALE_SECONDS:-150}"
 WATCHDOG_DECISION_STALL_SECONDS="${QUANT_LIVE_WATCHDOG_DECISION_STALL_SECONDS:-420}"
 STARTUP_GRACE_SECONDS="${QUANT_LIVE_STARTUP_GRACE_SECONDS:-120}"
 RESTART_SLEEP_SECONDS="${QUANT_LIVE_RESTART_SLEEP_SECONDS:-5}"
+STARTUP_FAILURE_BACKOFF_SECONDS="${QUANT_LIVE_STARTUP_FAILURE_BACKOFF_SECONDS:-180}"
 REPORT_INTERVAL_SECONDS="${QUANT_REPORT_INTERVAL_SECONDS:-14400}"
 REPORT_PROVIDER="${QUANT_REPORT_PROVIDER:-codex}"
 REPORT_MODE="${QUANT_REPORT_MODE:-advisor}"
@@ -212,6 +213,7 @@ start_news_loop() {
 }
 
 run_child() {
+  CHILD_STARTED_AT_EPOCH="$(date +%s)"
   "$PYTHON_BIN" -m quant_binance.runtime \
     --mode live-auto-trade-daemon \
     --exchange "bitget" \
@@ -229,7 +231,7 @@ run_child() {
 }
 
 health_check() {
-  "$PYTHON_BIN" - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH"
+  "$PYTHON_BIN" - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH" "${CHILD_STARTED_AT_EPOCH:-0}"
 import json
 import sys
 from datetime import datetime, timezone
@@ -240,6 +242,7 @@ stale_seconds = int(sys.argv[2])
 decision_stall_seconds = int(sys.argv[3])
 startup_grace_seconds = int(sys.argv[4])
 state_path = Path(sys.argv[5])
+child_started_epoch = float(sys.argv[6] or 0)
 summary_state_path = output_base / "output" / "paper-live-shell" / "latest" / "summary.state.json"
 now = datetime.now(tz=timezone.utc)
 
@@ -274,6 +277,16 @@ payload = {
     "last_decision_emitted_at": decision_emitted_at.isoformat() if decision_emitted_at else None,
     "decision_age_seconds": round(decision_age_seconds, 3) if decision_age_seconds is not None else None,
 }
+
+if child_started_epoch > 0 and updated_at.timestamp() < child_started_epoch:
+    child_age_seconds = max(now.timestamp() - child_started_epoch, 0.0)
+    if child_age_seconds <= startup_grace_seconds:
+        payload["status"] = "starting"
+        payload["reason"] = "previous_summary_state_startup_grace"
+        payload["child_started_at_epoch"] = round(child_started_epoch, 3)
+        payload["child_age_seconds"] = round(child_age_seconds, 3)
+        state_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+        sys.exit(0)
 
 if runtime_status == "startup_failed":
     payload["status"] = "unhealthy"
@@ -346,6 +359,10 @@ PY
       printf '[SUPERVISOR] restarting unhealthy child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
       if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
         "$PYTHON_BIN" scripts/quant_notify_runtime_event.py unhealthy "$OUTPUT_BASE" "child_pid=$CHILD_PID" "reason=$HEALTH_REASON" >>"$SUPERVISOR_LOG" 2>&1 || true
+      fi
+      if [ "$HEALTH_REASON" = "startup_failed" ] && [ "$STARTUP_FAILURE_BACKOFF_SECONDS" -gt 0 ]; then
+        printf '[SUPERVISOR] startup_failed; backing off %ss before restart at %s\n' "$STARTUP_FAILURE_BACKOFF_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+        sleep "$STARTUP_FAILURE_BACKOFF_SECONDS"
       fi
       kill "$CHILD_PID" 2>/dev/null || true
       wait "$CHILD_PID" 2>/dev/null || true

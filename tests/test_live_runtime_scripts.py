@@ -20,6 +20,25 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("refusing to start", script)
         self.assertIn("not restarting", script)
 
+    def test_quant_run_live_orders_ignores_previous_summary_during_startup_grace(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("CHILD_STARTED_AT_EPOCH", script)
+        self.assertIn("updated_at.timestamp() < child_started_epoch", script)
+        self.assertIn("previous_summary_state_startup_grace", script)
+        self.assertLess(script.index("previous_summary_state_startup_grace"), script.index('runtime_status == "startup_failed"'))
+
+    def test_quant_run_live_orders_backs_off_startup_failures(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_LIVE_STARTUP_FAILURE_BACKOFF_SECONDS", script)
+        self.assertIn('[ "$HEALTH_REASON" = "startup_failed" ]', script)
+        self.assertIn("startup_failed; backing off", script)
+
     def test_quant_stop_stops_supervisor_watchdog_and_writes_stop_files(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_stop.sh").read_text(
             encoding="utf-8"
@@ -29,6 +48,21 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("_safety_guardian_stop", script)
         self.assertIn("live_supervisor_watchdog.pid", script)
         self.assertIn("scripts/quant_run_live_orders.sh", script)
+
+    def test_quant_health_audit_requires_explicit_restart_permission(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_HEALTH_AUDIT_ALLOW_RESTART", script)
+        self.assertIn("clear_live_stop_files()", script)
+        self.assertIn("$REPO/scripts/_supervisor_stop", script)
+        self.assertIn("$REPO/scripts/_safety_guardian_stop", script)
+        restart_block = script.split('if [ "$YOLO_EXIT" -eq 1 ]; then', maxsplit=1)[1]
+        self.assertIn('if [ "$ALLOW_RESTART" = "1" ]; then', restart_block)
+        self.assertIn("재시작은 QUANT_HEALTH_AUDIT_ALLOW_RESTART=1 없어서 차단", restart_block)
+        allowed_block = restart_block.split('if [ "$ALLOW_RESTART" = "1" ]; then', maxsplit=1)[1]
+        self.assertLess(allowed_block.index("clear_live_stop_files"), allowed_block.index("nohup bash"))
 
     def test_quant_run_live_orders_logs_watchdog_start_failure_without_aborting(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
