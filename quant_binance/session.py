@@ -1430,10 +1430,11 @@ class LivePaperSession:
             base_threshold = min(base_threshold, 0.09)
         if self._fee_sensitive_execution_enabled() and decision.final_mode in {"spot", "futures"}:
             effective_notional = decision.order_intent_notional_usd if notional_usd is None else notional_usd
+            fee_drag_multiplier = 4.0 if self.equity_usd <= 10.0 else 2.0
             fee_drag_floor = self._estimated_round_trip_fee_usd(
                 market=decision.final_mode,
                 notional_usd=effective_notional,
-            ) * 2.0
+            ) * fee_drag_multiplier
             base_threshold = max(base_threshold, fee_drag_floor)
         return base_threshold
 
@@ -5686,6 +5687,33 @@ class LivePaperSession:
         )
         if fraction < 0.999:
             self._reset_live_position_breakeven_protection(position=position)
+        elif payload["accepted"]:
+            self._sync_paper_position_after_live_full_close(
+                live_position=position,
+                reason=reason,
+                timestamp=payload["timestamp"],
+            )
+
+    def _sync_paper_position_after_live_full_close(
+        self,
+        *,
+        live_position: dict[str, Any],
+        reason: str,
+        timestamp: datetime,
+    ) -> None:
+        symbol = str(live_position.get("symbol", "") or "")
+        paper_position = self.paper_positions.get(symbol)
+        if paper_position is None or paper_position.quantity_remaining <= 0.0:
+            return
+        exit_price = self._live_position_reference_price(symbol=symbol, position=live_position)
+        if exit_price <= 0.0:
+            exit_price = paper_position.current_price if paper_position.current_price > 0.0 else paper_position.entry_price
+        self._close_position(
+            position=paper_position,
+            exit_price=exit_price,
+            timestamp=timestamp,
+            exit_reason=reason,
+        )
 
     def _evaluate_live_positions(self) -> None:
         cfg = self.runtime.paper_service.settings.live_position_risk
@@ -5825,12 +5853,20 @@ class LivePaperSession:
                 holding_minutes=holding_minutes,
                 now=now,
             )
+            short_turnaround_rebound_grace = (
+                is_short_position
+                and cfg.short_profit_flip_take_profit_fraction > 0.0
+                and cfg.short_profit_flip_fast_take_profit_roe_percent > 0.0
+                and worst_roe <= cfg.soft_stop_roe_percent
+                and roe > cfg.stop_loss_roe_percent
+            )
             if (
                 self._standard_stop_loss_exits_enabled()
                 and not long_disable_standard_stop
                 and roe <= cfg.soft_stop_roe_percent
                 and not turnaround_grace
                 and not major_drawdown_grace
+                and not short_turnaround_rebound_grace
             ):
                 self._close_live_position(position=position, reason="LIVE_POSITION_SOFT_STOP_LOSS")
                 continue
