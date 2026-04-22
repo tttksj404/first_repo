@@ -4464,6 +4464,40 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(capped.final_mode, "cash")
         self.assertIn("EXPECTED_PROFIT_TOO_SMALL_AFTER_CAP", capped.rejection_reasons)
 
+    def test_data_collection_mode_relaxes_expected_profit_floor_after_notional_cap(self) -> None:
+        settings = replace(
+            self.settings,
+            data_collection_mode=True,
+            data_collection_min_trades=500,
+            risk=replace(
+                self.settings.risk,
+                min_meaningful_futures_notional_usd=0.0,
+                min_expected_profit_usd_per_trade=2.0,
+                max_futures_leverage=1.0,
+                target_futures_leverage=1.0,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 100.0,
+            "futures_available_balance_usd": 100.0,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.001},
+            ],
+        }
+        decision = make_decision(
+            timestamp=datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            order_intent_notional_usd=100.0,
+            net_expected_edge_bps=100.0,
+        )
+
+        capped = session._cap_live_order_decision(decision, reference_price=100.0)
+
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertNotIn("EXPECTED_PROFIT_TOO_SMALL_AFTER_CAP", capped.rejection_reasons)
+
     def test_small_live_equity_requires_wider_fee_profit_buffer(self) -> None:
         class AcceptedLiveExecutor:
             def _exchange_id(self) -> str:

@@ -3530,7 +3530,11 @@ class LivePaperSession:
         # Data collection mode: relax notional floor and expected profit checks to allow
         # small-capital accounts to accumulate live trade evidence.
         _dcm_settings = self.runtime.paper_service.settings
-        if _dcm_settings.data_collection_mode and len(self.closed_trades) < _dcm_settings.data_collection_min_trades:
+        data_collection_relaxes_expected_profit = (
+            _dcm_settings.data_collection_mode
+            and len(self.closed_trades) < _dcm_settings.data_collection_min_trades
+        )
+        if data_collection_relaxes_expected_profit:
             meaningful_notional_floor = min(meaningful_notional_floor, min_notional)
             expected_profit_usd = max(expected_profit_usd, self._min_expected_profit_usd_threshold(decision))
         if decision.order_intent_notional_usd < meaningful_notional_floor:
@@ -3557,10 +3561,13 @@ class LivePaperSession:
             floored_notional = round(max_notional, 6)
             candidate = replace(decision, order_intent_notional_usd=floored_notional)
         candidate_expected_profit_usd = self._expected_net_profit_usd(candidate)
-        if candidate_expected_profit_usd < self._min_expected_profit_usd_threshold(
+        candidate_expected_profit_threshold = self._min_expected_profit_usd_threshold(
             candidate,
             notional_usd=candidate.order_intent_notional_usd,
-        ):
+        )
+        if data_collection_relaxes_expected_profit:
+            candidate_expected_profit_usd = max(candidate_expected_profit_usd, candidate_expected_profit_threshold)
+        if candidate_expected_profit_usd < candidate_expected_profit_threshold:
             return replace(
                 candidate,
                 final_mode="cash",

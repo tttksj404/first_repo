@@ -610,3 +610,69 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Backtraced recent blocked BTC/ETH/SOL/XRP/DOGE/PEPE decisions against forward 1m Bitget candles, identified PEPEUSDT 06:10 short as a possible missed entry caused mainly by PEPE stop-width gating, kept DOGE as watch-only, loosened only PEPEUSDT max stop-distance threshold, and relaunched the read-only paper daemon with live/test orders still at zero.
 - Mapped competencies: Per-asset quantitative diagnostics, experiment-driven threshold tuning, live paper validation, risk-aware data pipeline operation, concise technical reporting.
 - Next skill to sharpen: Persist missed-entry labels and forward returns into a structured dataset for more robust per-symbol calibration.
+
+## 2026-04-22 - Latest-pull paper50 live-data restart
+- Conversation/topic: Restarted the current strategy after pulling the latest repo state into a no-live-order 50 USDT paper run.
+- What was done: Preserved local drift in a stash, fast-forwarded to the latest branch commit, disabled live-auto with stop guards, launched Bitget read-only paper50 monitoring, verified healthy runtime state, direct exchange positions at zero, and live orders at zero.
+- Mapped competencies: Git/runtime hygiene, live data pipeline operation, paper-trading experiment setup, evidence-backed operational reporting.
+- Next skill to sharpen: Automate Mac-native paper50 launch scripts so latest-pull validation and read-only daemon restart are repeatable without ad hoc launchctl commands.
+
+## 2026-04-22 - Overnight paper50 runtime hardening
+- Conversation/topic: Hardened the 50 USDT Bitget live-data paper monitor for overnight operation without real order execution.
+- What was done: Added a Mac-native read-only paper50 launcher, installed a persistent LaunchAgent, kept live-auto stop guards fail-closed, verified automatic restart after a controlled termination, and confirmed healthy paper artifacts with live orders and real positions at zero.
+- Mapped competencies: Runtime reliability engineering, operational safety controls, live data monitoring, quant experiment continuity, evidence-backed validation.
+- Next skill to sharpen: Add automatic rolling summaries for overnight paper decisions and missed-entry counterfactuals.
+
+## 2026-04-22 - Continuous paper50 counterfactual monitoring
+- Conversation/topic: Added ongoing per-coin market counterfactual checks to the paper50 monitor.
+- What was done: Created a read-only Bitget candle backtrace script for blocked entries, wrote the latest counterfactual artifact, verified the script, and updated the heartbeat automation to include per-symbol missed-entry/filter verdicts every monitoring cycle.
+- Mapped competencies: Counterfactual quant validation, live data extraction, strategy filter diagnostics, automation design, evidence-backed monitoring.
+- Next skill to sharpen: Turn repeated missed-entry labels into threshold-change proposals with minimum sample gates.
+
+## 2026-04-22 - Counterfactual-driven paper50 filter tuning
+- Conversation/topic: Improved overly conservative paper50 entry filters after per-coin market backtracing.
+- What was done: Used blocked-entry counterfactuals to narrowly relax BTC, DOGE, PEPE, SOL, and ETH symbol filters while leaving weak XRP signals unchanged, validated JSON/settings loading, restarted the read-only paper daemon, and confirmed healthy status with live orders and real positions at zero.
+- Mapped competencies: Quant threshold tuning, counterfactual experiment interpretation, operational safety validation, per-symbol strategy diagnostics.
+- Next skill to sharpen: Compare post-tuning accepted/missed signals against a pre-tuning baseline over a larger overnight sample.
+
+## 2026-04-22 - Paper50 adaptive filter guard
+- Conversation/topic: Made the paper50 runtime guard continuously evaluate and tune entry-filter appropriateness from market counterfactuals.
+- What was done: Added a bounded filter-guard script that uses only fresh post-config counterfactual evidence, prevents duplicate tuning from stale missed entries, applies paper-only symbol-scoped threshold changes, and restarts only the read-only paper daemon when changes are made.
+- Mapped competencies: Adaptive quant monitoring, guardrail design, experiment automation, overfitting control, live data validation.
+- Next skill to sharpen: Add statistical confidence gates that compare post-tune realized paper entries against the missed-entry counterfactual baseline.
+
+## 2026-04-22 - PEPE runtime cap-gate bugfix
+- Conversation/topic: Monitored PEPE live-runtime health, stale supervisor state, and recent executable decisions.
+- What was done: Found the live stack stopped with fresh stop sentinels, traced recent PEPE long decisions to `EXPECTED_PROFIT_TOO_SMALL_AFTER_CAP`, fixed data-collection mode so the expected-profit relaxation applies after live notional capping, and verified with focused regression tests.
+- Mapped competencies: Runtime/config drift diagnosis, trading-system risk gate debugging, test-backed data pipeline integration, evidence-based incident communication.
+- Next skill to sharpen: Add restart-readiness telemetry that distinguishes intentional stop files from stale/unhealthy runtime artifacts.
+
+## 2026-04-23 - PEPE/paper50 runtime mode audit
+- Conversation/topic: Checked PEPE live-runtime health against the active read-only paper50 monitor.
+- What was done: Confirmed live-auto is intentionally held down by stop sentinels while `quant_runtime_paper50` is fresh and healthy, with no live/test orders, no futures mismatch, and recent decisions blocked by paper-only profile gates rather than software errors.
+- Mapped competencies: Runtime mode-drift diagnosis, trading data pipeline monitoring, safety-state verification, concise operational reporting.
+- Next skill to sharpen: Add a health view that labels intentional paper-only mode separately from stale live-runtime failure.
+
+## 2026-04-23 - Paper50 health-audit routing fix
+- Conversation/topic: Monitored PEPE runtime health and corrected false unhealthy audit signals for the active paper50 monitor.
+- What was done: Verified paper50 heartbeats, decisions, order counts, account sync, and PEPE preflight gates; patched the health audit to support `quant_runtime_paper50`, flat forensics logs, paper50 heartbeat liveness, and process-table restricted environments; validated with focused script tests and a no-autofix audit run.
+- Mapped competencies: Runtime/config drift diagnosis, live data pipeline observability, operational safety controls, test-backed infrastructure repair.
+- Next skill to sharpen: Split live-auto and read-only paper health audits into explicit modes with separate alert thresholds.
+
+## 2026-04-23 - PEPE runtime guard health pass
+- Conversation/topic: Recurring guard check for PEPE/paper50 runtime health after the health-audit routing fix.
+- What was done: Confirmed the active paper50 monitor was healthy with fresh heartbeats, zero live/test orders, clean account sync, no futures mismatch, and PEPE decisions blocked by market/filter gates rather than actionable software defects.
+- Mapped competencies: Live trading data observability, runtime safety verification, operational incident triage, evidence-backed technical communication.
+- Next skill to sharpen: Add first-class reporting that separates sandbox probe failures from exchange/runtime connectivity.
+
+## 2026-04-23 - Overnight PEPE runtime health validation
+- Conversation/topic: Checked whether the PEPE/paper50 runtime had any overnight operational problems.
+- What was done: Verified the active read-only paper50 daemon stayed alive with fresh heartbeats, fresh account/open-order sync, zero live/test orders, no futures mismatch, and PEPE entries blocked by market/filter gates; fixed a health-audit false-positive where heartbeat counters could be miscounted as HTTP 429 rate-limit errors.
+- Mapped competencies: Runtime observability, log-signal hygiene, quant execution safety monitoring, test-backed operational tooling.
+- Next skill to sharpen: Add structured event classification so websocket reconnects, true HTTP errors, and benign counters cannot blur together.
+
+## 2026-04-23 - PEPE stop-sentinel health classification
+- Conversation/topic: Monitored PEPE live-runtime health after the live-auto supervisor stop sentinels were present.
+- What was done: Confirmed stale PEPE live-runtime artifacts came from an intentional stop state, added audit classification for stop sentinels so absent processes/stale health are reported as stopped rather than daemon failure, and validated with no-autofix audit plus focused script tests.
+- Mapped competencies: Runtime/config drift diagnosis, safety-state modeling, operational observability, test-backed infrastructure maintenance.
+- Next skill to sharpen: Expose a single runtime-mode summary that separates stopped live-auto, active paper-only monitoring, and true runtime failures.

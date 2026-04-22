@@ -50,6 +50,8 @@ quant_runtime_paper50/execution_quality_state.json
 latest/
 logs/
 .tmp-test-logs/
+scripts/_safety_guardian_stop
+scripts/_supervisor_stop
 quant_runtime/**/*.err
 quant_runtime/**/*.log
 quant_runtime/**/*.out
