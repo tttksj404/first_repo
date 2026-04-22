@@ -29,7 +29,7 @@ from quant_binance.observability.report import build_persisted_policy_state
 from quant_binance.service import PaperTradingService
 from quant_binance.session import AsyncLivePaperRunner, BackoffPolicy, LivePaperSession, LivePaperShell, PaperPosition
 from quant_binance.self_healing import KNOWN_CATEGORY_MISSING_MARKET_STATE, RuntimeSelfHealing
-from quant_binance.settings import Settings
+from quant_binance.settings import Settings, SymbolFilterProfileConfig
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -282,6 +282,173 @@ class QuantBinanceSessionTests(unittest.TestCase):
             order_tester=DecisionOrderTestAdapter(FakeOrderTestClient()),  # type: ignore[arg-type]
             sync_interval_seconds=1,
         )
+
+    def test_schedulable_symbols_follow_configured_universe_priority(self) -> None:
+        settings = replace(self.settings, universe=("PEPEUSDT", "DOGEUSDT", "BTCUSDT"))
+        session = self._build_session(settings=settings)
+        store = session.runtime.dispatcher.store
+        btc_state = store.get("BTCUSDT")
+        assert btc_state is not None
+        store.put(replace(btc_state, symbol="DOGEUSDT"))
+        store.put(replace(btc_state, symbol="PEPEUSDT"))
+        session.runtime.eligible_symbols = {"BTCUSDT", "DOGEUSDT", "PEPEUSDT"}
+
+        self.assertEqual(session._iter_schedulable_symbols(), ["PEPEUSDT", "DOGEUSDT", "BTCUSDT"])
+
+    def test_single_slot_priority_fallback_runs_universe_order_on_direct_websocket_decision(self) -> None:
+        settings = replace(
+            self.settings,
+            universe=("PEPEUSDT", "DOGEUSDT", "BTCUSDT"),
+            portfolio_focus=replace(self.settings.portfolio_focus, enabled=True, futures_top_n=1),
+            operational_limits=replace(self.settings.operational_limits, max_concurrent_futures_symbols=1),
+        )
+        session = self._build_session(settings=settings)
+        store = session.runtime.dispatcher.store
+        btc_state = store.get("BTCUSDT")
+        assert btc_state is not None
+        store.put(replace(btc_state, symbol="DOGEUSDT"))
+        store.put(replace(btc_state, symbol="PEPEUSDT"))
+        session.runtime.eligible_symbols = {"BTCUSDT", "DOGEUSDT", "PEPEUSDT"}
+        timestamp = datetime(2026, 4, 22, 4, 15, tzinfo=timezone.utc)
+        decision = make_decision(timestamp=timestamp, symbol="DOGEUSDT")
+        session.runtime.on_payload = Mock(return_value=decision)
+        session.runtime.paper_service.run_cycle = Mock(
+            side_effect=lambda state, decision_time, **kwargs: make_decision(
+                timestamp=decision_time,
+                symbol=state.symbol,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+            )
+        )
+
+        session.process_payload({"stream": "dogeusdt@kline_5m", "data": {}}, now=timestamp)
+
+        self.assertEqual([decision.symbol for decision in session.decisions], ["PEPEUSDT", "DOGEUSDT", "BTCUSDT"])
+        self.assertGreater(session.next_scheduled_decision_at, timestamp)
+
+    def test_single_slot_priority_fallback_defers_future_direct_websocket_decision(self) -> None:
+        settings = replace(
+            self.settings,
+            universe=("PEPEUSDT", "DOGEUSDT", "BTCUSDT"),
+            portfolio_focus=replace(self.settings.portfolio_focus, enabled=True, futures_top_n=1),
+            operational_limits=replace(self.settings.operational_limits, max_concurrent_futures_symbols=1),
+        )
+        session = self._build_session(settings=settings)
+        store = session.runtime.dispatcher.store
+        btc_state = store.get("BTCUSDT")
+        assert btc_state is not None
+        store.put(replace(btc_state, symbol="DOGEUSDT"))
+        store.put(replace(btc_state, symbol="PEPEUSDT"))
+        session.runtime.eligible_symbols = {"BTCUSDT", "DOGEUSDT", "PEPEUSDT"}
+        event_time = datetime(2026, 4, 22, 4, 17, tzinfo=timezone.utc)
+        future_decision_time = datetime(2026, 4, 22, 4, 20, tzinfo=timezone.utc)
+        session.runtime.on_payload = Mock(return_value=make_decision(timestamp=future_decision_time, symbol="DOGEUSDT"))
+        session.runtime.paper_service.run_cycle = Mock()
+
+        session.process_payload({"stream": "dogeusdt@kline_5m", "data": {}}, now=event_time)
+
+        self.assertEqual(session.decisions, [])
+        session.runtime.paper_service.run_cycle.assert_not_called()
+        self.assertEqual(session.next_scheduled_decision_at, future_decision_time)
+
+    def test_single_slot_priority_scheduled_cycle_uses_stale_snapshot_fallback(self) -> None:
+        settings = replace(
+            self.settings,
+            universe=("PEPEUSDT", "DOGEUSDT", "BTCUSDT"),
+            portfolio_focus=replace(self.settings.portfolio_focus, enabled=True, futures_top_n=1),
+            operational_limits=replace(self.settings.operational_limits, max_concurrent_futures_symbols=1),
+        )
+        session = self._build_session(settings=settings)
+        store = session.runtime.dispatcher.store
+        btc_state = store.get("BTCUSDT")
+        assert btc_state is not None
+        stale_state = replace(
+            btc_state,
+            last_update_time=datetime(2026, 4, 22, 4, 30, tzinfo=timezone.utc),
+            top_of_book=replace(btc_state.top_of_book, updated_at=datetime(2026, 4, 22, 4, 30, tzinfo=timezone.utc)),
+        )
+        for symbol in ("BTCUSDT", "DOGEUSDT", "PEPEUSDT"):
+            store.put(replace(stale_state, symbol=symbol))
+        session.runtime.eligible_symbols = {"BTCUSDT", "DOGEUSDT", "PEPEUSDT"}
+        decision_time = datetime(2026, 4, 22, 4, 40, tzinfo=timezone.utc)
+        session.next_scheduled_decision_at = decision_time
+        session.runtime.paper_service.run_cycle = Mock(
+            side_effect=lambda state, decision_time, **kwargs: make_decision(
+                timestamp=decision_time,
+                symbol=state.symbol,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+            )
+        )
+
+        session._maybe_run_scheduled_decision_cycle(decision_time)
+
+        self.assertEqual([decision.symbol for decision in session.decisions], ["PEPEUSDT", "DOGEUSDT", "BTCUSDT"])
+
+    def test_scheduled_cycle_corrects_diverged_reference_price_from_top_of_book(self) -> None:
+        settings = replace(self.settings, universe=("XRPUSDT",))
+        session = self._build_session(settings=settings)
+        decision_time = datetime(2026, 4, 22, 5, 5, tzinfo=timezone.utc)
+        store = session.runtime.dispatcher.store
+        btc_state = store.get("BTCUSDT")
+        assert btc_state is not None
+        store.put(
+            replace(
+                btc_state,
+                symbol="XRPUSDT",
+                last_trade_price=1.4239,
+                top_of_book=TopOfBook(1.4452, 1000.0, 1.4453, 1000.0, decision_time),
+                last_update_time=decision_time,
+            )
+        )
+        session.runtime.eligible_symbols = {"XRPUSDT"}
+        observed_reference_prices: list[float] = []
+
+        def run_cycle(state, decision_time, **kwargs):  # type: ignore[no-untyped-def]
+            observed_reference_prices.append(state.last_trade_price)
+            return make_decision(
+                timestamp=decision_time,
+                symbol=state.symbol,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+            )
+
+        session.runtime.paper_service.run_cycle = Mock(side_effect=run_cycle)
+
+        session._run_scheduled_decision_boundary_with_options(
+            decision_time,
+            allow_stale_snapshot=True,
+        )
+
+        self.assertEqual(len(observed_reference_prices), 1)
+        self.assertAlmostEqual(observed_reference_prices[0], 1.44525, places=8)
+        self.assertEqual(session.reference_price_guard_counts, {"XRPUSDT": 1})
+        guard_event = session.reference_price_guard_last_by_symbol["XRPUSDT"]
+        self.assertEqual(guard_event["observed_at"], decision_time.isoformat())
+        self.assertAlmostEqual(float(guard_event["last_trade_price"]), 1.4239, places=8)
+        self.assertAlmostEqual(float(guard_event["top_mid"]), 1.44525, places=8)
+        self.assertGreater(float(guard_event["deviation_bps"]), 50.0)
+
+    def test_paper_verify_front_gate_blocks_fee_drag_candidate_before_preflight(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        decision = make_decision(
+            timestamp=datetime(2026, 4, 22, 4, 45, tzinfo=timezone.utc),
+            net_expected_edge_bps=1.0,
+            gross_expected_edge_bps=9.0,
+            order_intent_notional_usd=200.0,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            session._record_decision(decision=decision, state=state, timestamp=decision.timestamp)
+
+        self.assertEqual(session.decisions[-1].final_mode, "cash")
+        self.assertEqual(session.decisions[-1].side, "flat")
+        self.assertIn("EXPECTED_PROFIT_TOO_SMALL", session.decisions[-1].rejection_reasons)
 
     def test_auto_convert_skips_spot_dust_below_exchange_minimum_notional(self) -> None:
         class DustSpotRestClient(FakeRestClient):
@@ -3480,9 +3647,9 @@ class QuantBinanceSessionTests(unittest.TestCase):
 
         self.assertEqual(len(session.paper_positions), 1)
         self.assertEqual(len(session.closed_trades), 1)
-        self.assertEqual(session.closed_trades[0]["exit_reason"], "PARTIAL_TAKE_PROFIT")
+        self.assertEqual(session.closed_trades[0]["exit_reason"], "PROACTIVE_PARTIAL_TAKE_PROFIT")
         self.assertEqual(len(session.tested_orders), 1)
-        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 460.0)
+        self.assertEqual(session.remaining_portfolio_capacity_usd, starting_capacity - 730.0)
 
         breakeven_time = datetime(2026, 3, 8, 12, 15, tzinfo=timezone.utc)
         state.last_trade_price = 100.0
@@ -3501,10 +3668,10 @@ class QuantBinanceSessionTests(unittest.TestCase):
         state_path = ROOT / "tests" / "tmp_session_profit_state.json"
         try:
             summary = session.flush(summary_path=summary_path, state_path=state_path)
-            self.assertEqual(summary["closed_trades"][0]["exit_reason"], "PARTIAL_TAKE_PROFIT")
+            self.assertEqual(summary["closed_trades"][0]["exit_reason"], "PROACTIVE_PARTIAL_TAKE_PROFIT")
             self.assertEqual(summary["closed_trades"][-1]["exit_reason"], "BREAKEVEN_STOP")
             self.assertEqual(summary["open_futures_positions"], [])
-            self.assertEqual(summary["realized_pnl_usd_estimate"], 40.0)
+            self.assertEqual(summary["realized_pnl_usd_estimate"], 20.0)
             state_payload = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertEqual(state_payload["closed_trade_count"], 2)
             self.assertEqual(state_payload["open_futures_position_count"], 0)
@@ -5260,6 +5427,37 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertGreater(position.quantity_remaining, original_quantity)
         self.assertEqual(session.futures_pyramid_add_counts["PEPEUSDT"], 1)
 
+    def test_paper_position_payload_preserves_micro_price_precision(self) -> None:
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        position = PaperPosition(
+            symbol="PEPEUSDT",
+            market="futures",
+            side="long",
+            entry_time=entry_time,
+            entry_price=0.0000038851,
+            current_price=0.0000038827,
+            quantity_opened=51478726.41630846,
+            quantity_remaining=51478726.41630846,
+            stop_distance_bps=278.352828,
+            active_stop_price=0.0000037769,
+            best_price=0.000003887,
+            worst_price=0.0000038802,
+            entry_predictability_score=75.438915,
+            entry_liquidity_score=0.544041,
+            entry_net_expected_edge_bps=42.138166,
+            entry_estimated_round_trip_cost_bps=8.772181,
+            entry_planned_leverage=8,
+        )
+
+        payload = position.as_dict()
+
+        self.assertEqual(payload["entry_price"], 0.0000038851)
+        self.assertEqual(payload["current_price"], 0.0000038827)
+        self.assertEqual(payload["active_stop_price"], 0.0000037769)
+        self.assertEqual(payload["best_price"], 0.000003887)
+        self.assertEqual(payload["worst_price"], 0.0000038802)
+        self.assertNotEqual(payload["entry_price"], 0.000004)
+
     def test_session_does_not_retrigger_same_proactive_roe_threshold(self) -> None:
         session = self._build_session()
         state = session.runtime.dispatcher.store.get("BTCUSDT")
@@ -5408,6 +5606,39 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertTrue(session.runtime.kill_switch.armed)
         self.assertIn("DAILY_REALIZED_LOSS_LIMIT", session.runtime.kill_switch.reasons)
         self.assertTrue(any("DAILY_REALIZED_LOSS_LIMIT" in call.args[0] for call in mock_send.call_args_list))
+
+    def test_paper_verify_kill_switch_keeps_decisions_but_blocks_new_submissions(self) -> None:
+        session = self._build_session()
+        decision_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state.last_update_time = decision_time
+        state.top_of_book = replace(state.top_of_book, updated_at=decision_time)
+        session.runtime.paper_service.run_cycle = Mock(
+            return_value=make_decision(
+                timestamp=decision_time,
+                side="long",
+                net_expected_edge_bps=25.0,
+                order_intent_notional_usd=1000.0,
+            )
+        )
+        session.runtime.kill_switch.arm("DAILY_REALIZED_LOSS_LIMIT")
+        session.next_scheduled_decision_at = decision_time
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session.log_store = JsonlLogStore(Path(tmpdir))
+            with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+                session._maybe_run_scheduled_decision_cycle(decision_time)
+
+            preflight_rows = session.log_store.read("execution_preflight")
+
+        self.assertEqual(len(session.decisions), 1)
+        self.assertEqual(len(session.tested_orders), 0)
+        self.assertEqual(session.paper_positions, {})
+        self.assertEqual(preflight_rows[-1]["allow_new_submission"], False)
+        self.assertEqual(preflight_rows[-1]["kill_switch_armed"], True)
+        self.assertIn("DAILY_REALIZED_LOSS_LIMIT", preflight_rows[-1]["kill_switch_reasons"])
+        self.assertGreater(session.next_scheduled_decision_at, decision_time)
 
     @patch("quant_binance.session.send_telegram_message")
     def test_session_closes_live_position_on_take_profit_roe(self, mock_send) -> None:
@@ -7586,6 +7817,95 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertIn("BTCUSDT", session.paper_positions)
         self.assertEqual(len(session.closed_trades), 0)
 
+    def test_symbol_profile_liquidity_collapse_overrides_fee_negative_confirmation_delay(self) -> None:
+        settings = replace(
+            self.settings,
+            symbol_filter_profiles={
+                "PEPEUSDT": SymbolFilterProfileConfig(min_liquidity_score=0.55),
+            },
+        )
+        session = self._build_session(settings=settings)
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        state = replace(state, symbol="PEPEUSDT", last_trade_price=0.0000038841)
+        session.runtime.dispatcher.store.put(state)
+
+        entry_time = datetime(2026, 4, 22, 6, 55, tzinfo=timezone.utc)
+        pending_entry = make_decision(
+            timestamp=entry_time,
+            symbol="PEPEUSDT",
+            final_mode="futures",
+            side="long",
+            predictability_score=74.98,
+            liquidity_score=0.5729,
+            net_expected_edge_bps=39.45,
+            estimated_round_trip_cost_bps=8.77,
+            order_intent_notional_usd=200.0,
+        )
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            session._record_decision(
+                decision=replace(pending_entry, divergence_code="ENTRY_CONFIRMATION_REQUIRED"),
+                state=state,
+                timestamp=entry_time,
+            )
+
+            fail_time = entry_time + timedelta(minutes=5)
+            state.last_trade_price = 0.0000038850
+            session._record_decision(
+                decision=make_decision(
+                    timestamp=fail_time,
+                    symbol="PEPEUSDT",
+                    final_mode="cash",
+                    side="flat",
+                    predictability_score=69.68,
+                    liquidity_score=0.4379,
+                    net_expected_edge_bps=20.12,
+                    estimated_round_trip_cost_bps=15.72,
+                    order_intent_notional_usd=0.0,
+                ),
+                state=state,
+                timestamp=fail_time,
+            )
+
+        self.assertNotIn("PEPEUSDT", session.paper_positions)
+        self.assertEqual(session.closed_trades[-1]["exit_reason"], "ENTRY_CONFIRMATION_FAILED")
+
+    def test_paper_verification_restores_paper_only_open_position_without_exchange_position(self) -> None:
+        session = self._build_session()
+        entry_time = datetime(2026, 4, 22, 6, 55, tzinfo=timezone.utc)
+        persisted = PaperPosition(
+            symbol="PEPEUSDT",
+            market="futures",
+            side="long",
+            entry_time=entry_time,
+            entry_price=0.0000038841,
+            current_price=0.0000038850,
+            quantity_opened=51491980.12409568,
+            quantity_remaining=51491980.12409568,
+            stop_distance_bps=278.424492,
+            active_stop_price=0.000003775957,
+            best_price=0.0000038850,
+            worst_price=0.0000038841,
+            entry_predictability_score=74.98349,
+            entry_liquidity_score=0.572929,
+            entry_net_expected_edge_bps=39.44549,
+            entry_estimated_round_trip_cost_bps=8.77238,
+            entry_planned_leverage=8,
+            confirmation_pending=True,
+            confirmation_pending_since=entry_time,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            restored = session.restore_futures_state_from_runtime(
+                state_payload={"paper_open_futures_positions": [persisted.as_dict()]},
+                summary_payload={},
+            )
+
+        self.assertEqual(restored, 1)
+        self.assertIn("PEPEUSDT", session.paper_positions)
+        self.assertTrue(session.paper_positions["PEPEUSDT"].confirmation_pending)
+        self.assertAlmostEqual(session.paper_positions["PEPEUSDT"].entry_price, 0.0000038841)
+
     def test_paper_verify_fee_drag_loss_guard_closes_eroded_futures_position(self) -> None:
         session = self._build_session()
         now = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
@@ -7616,25 +7936,35 @@ class QuantBinanceSessionTests(unittest.TestCase):
         assert state is not None
         state.last_trade_price = 99.8
 
-        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
-            session._record_decision(
-                decision=make_decision(
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session.log_store = JsonlLogStore(Path(tmpdir))
+            with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+                session._record_decision(
+                    decision=make_decision(
+                        timestamp=now,
+                        symbol="BTCUSDT",
+                        final_mode="futures",
+                        side="long",
+                        predictability_score=65.0,
+                        liquidity_score=0.5,
+                        net_expected_edge_bps=18.0,
+                        estimated_round_trip_cost_bps=12.0,
+                        order_intent_notional_usd=1000.0,
+                    ),
+                    state=state,
                     timestamp=now,
-                    symbol="BTCUSDT",
-                    final_mode="futures",
-                    side="long",
-                    predictability_score=65.0,
-                    liquidity_score=0.5,
-                    net_expected_edge_bps=18.0,
-                    estimated_round_trip_cost_bps=12.0,
-                    order_intent_notional_usd=1000.0,
-                ),
-                state=state,
-                timestamp=now,
-            )
+                )
+
+            gate_rows = session.log_store.read("position_management_gate")
+            preflight_rows = session.log_store.read("execution_preflight")
 
         self.assertNotIn("BTCUSDT", session.paper_positions)
         self.assertEqual(session.closed_trades[-1]["exit_reason"], "PAPER_VERIFY_FEE_DRAG_LOSS_GUARD")
+        self.assertEqual(session.closed_trades[-1]["risk_limit_evaluation"], "skipped_paper_verification")
+        self.assertFalse(session.runtime.kill_switch.armed)
+        self.assertIn("PAPER_VERIFY_FEE_DRAG_LOSS_GUARD", gate_rows[-1]["reasons"])
+        self.assertTrue(gate_rows[-1]["closed_during_management"])
+        self.assertEqual(preflight_rows[-1]["position_close_reason"], "PAPER_VERIFY_FEE_DRAG_LOSS_GUARD")
 
     def test_paper_verify_aplus_full_size_locks_profit_before_fee_drag_reversal(self) -> None:
         settings = replace(
@@ -9224,7 +9554,7 @@ class QuantBinanceSessionTests(unittest.TestCase):
         )
 
         follow_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
-        state.last_trade_price = 103.0
+        state.last_trade_price = 100.2
         session._record_decision(
             decision=make_decision(timestamp=follow_time, order_intent_notional_usd=1400.0),
             state=state,
@@ -9234,6 +9564,53 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(len(session.paper_positions), 1)
         self.assertEqual(len(session.closed_trades), 0)
         self.assertEqual(len(session.tested_orders), 1)
+
+    def test_paper_verification_reversal_closes_and_reopens_simulated_position(self) -> None:
+        session = self._build_session()
+        state = session.runtime.dispatcher.store.get("BTCUSDT")
+        assert state is not None
+        entry_time = datetime(2026, 3, 8, 12, 5, tzinfo=timezone.utc)
+        session.paper_positions["BTCUSDT"] = PaperPosition(
+            symbol="BTCUSDT",
+            market="futures",
+            side="short",
+            entry_time=entry_time,
+            entry_price=100.0,
+            current_price=100.0,
+            quantity_opened=10.0,
+            quantity_remaining=10.0,
+            stop_distance_bps=500.0,
+            active_stop_price=105.0,
+            best_price=100.0,
+            worst_price=100.0,
+            entry_predictability_score=82.0,
+            entry_liquidity_score=0.8,
+            entry_net_expected_edge_bps=28.0,
+            entry_estimated_round_trip_cost_bps=10.0,
+            entry_planned_leverage=30,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            reverse_time = datetime(2026, 3, 8, 12, 10, tzinfo=timezone.utc)
+            state.last_trade_price = 100.2
+            session._record_decision(
+                decision=make_decision(
+                    timestamp=reverse_time,
+                    side="long",
+                    gross_expected_edge_bps=38.0,
+                    net_expected_edge_bps=28.0,
+                    order_intent_notional_usd=1000.0,
+                ),
+                state=state,
+                timestamp=reverse_time,
+            )
+
+        self.assertEqual(len(session.closed_trades), 1)
+        self.assertEqual(session.closed_trades[0]["exit_reason"], "PAPER_VERIFY_SIGNAL_REVERSAL")
+        self.assertEqual(len(session.tested_orders), 1)
+        self.assertIn("BTCUSDT", session.paper_positions)
+        self.assertEqual(session.paper_positions["BTCUSDT"].side, "long")
+        self.assertEqual(len(session.live_orders), 0)
 
     def test_futures_reallocation_has_no_effect_when_entry_is_not_blocked(self) -> None:
         settings = self._focus_settings(futures_top_n=2)
@@ -9623,6 +10000,355 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertIn("FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED", blocked.rejection_reasons)
         self.assertEqual(allowed.final_mode, "futures")
         self.assertNotIn("FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED", allowed.rejection_reasons)
+
+    def test_paper_verify_blocks_fragile_full_leverage_short_entry(self) -> None:
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=False,
+            ),
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 50.0,
+            "futures_available_balance_usd": 50.0,
+            "futures_requirements": [
+                {"symbol": "PEPEUSDT", "min_notional_usd": 5.0, "min_quantity": 1000.0},
+            ],
+        }
+        fragile_short = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 22, 1, 25, tzinfo=timezone.utc),
+                symbol="PEPEUSDT",
+                side="short",
+                predictability_score=72.3018,
+                liquidity_score=0.538923,
+                gross_expected_edge_bps=46.165268,
+                net_expected_edge_bps=37.374421,
+                estimated_round_trip_cost_bps=8.790847,
+                order_intent_notional_usd=1500.0,
+                stop_distance_bps=354.186594,
+            ),
+            volume_confirmation=0.561133,
+            trend_strength=0.813067,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            capped = session._cap_live_order_decision(fragile_short, reference_price=0.0000037934)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertEqual(capped.side, "flat")
+        self.assertIn("PAPER_VERIFY_FRAGILE_FEE_DRAG_ENTRY", capped.rejection_reasons)
+
+    def test_paper_verify_allows_marginal_liquidity_strong_continuation_entry(self) -> None:
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=False,
+            ),
+            symbol_filter_profiles={
+                "ETHUSDT": SymbolFilterProfileConfig(
+                    reversal_prone_guard_enabled=True,
+                    reversal_guard_marginal_score=75.0,
+                    reversal_guard_marginal_trend_strength=0.70,
+                    reversal_guard_marginal_volume_confirmation=0.58,
+                    reversal_guard_min_net_edge_bps=30.0,
+                    reversal_guard_min_edge_to_cost=3.25,
+                    reversal_guard_min_expected_profit_multiplier=2.0,
+                    reversal_guard_min_expected_profit_extra_usd=0.75,
+                ),
+            },
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 50.0,
+            "futures_available_balance_usd": 50.0,
+            "futures_requirements": [
+                {"symbol": "PEPEUSDT", "min_notional_usd": 5.0, "min_quantity": 1000.0},
+            ],
+        }
+        strong_continuation = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 22, 2, 35, tzinfo=timezone.utc),
+                symbol="PEPEUSDT",
+                side="long",
+                predictability_score=70.711595,
+                liquidity_score=0.538608,
+                gross_expected_edge_bps=39.195934,
+                net_expected_edge_bps=30.418994,
+                estimated_round_trip_cost_bps=8.77694,
+                order_intent_notional_usd=1500.0,
+                stop_distance_bps=229.8,
+            ),
+            volume_confirmation=0.743405,
+            trend_strength=0.808792,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            capped = session._cap_live_order_decision(strong_continuation, reference_price=0.0000038613)
+
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertEqual(capped.side, "long")
+        self.assertNotIn("PAPER_VERIFY_FRAGILE_FEE_DRAG_ENTRY", capped.rejection_reasons)
+        self.assertNotIn("FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED", capped.rejection_reasons)
+
+    def test_paper_verify_blocks_unconfirmed_reversal_prone_major_entry(self) -> None:
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=False,
+            ),
+            symbol_filter_profiles={
+                "BTCUSDT": SymbolFilterProfileConfig(
+                    reversal_prone_guard_enabled=True,
+                    reversal_guard_marginal_score=75.0,
+                    reversal_guard_marginal_trend_strength=0.70,
+                    reversal_guard_marginal_volume_confirmation=0.58,
+                    reversal_guard_min_net_edge_bps=30.0,
+                    reversal_guard_min_edge_to_cost=3.25,
+                    reversal_guard_min_expected_profit_multiplier=2.0,
+                    reversal_guard_min_expected_profit_extra_usd=0.75,
+                ),
+            },
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 50.0,
+            "futures_available_balance_usd": 50.0,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.00001},
+            ],
+        }
+        reversal_prone = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 22, 3, 10, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                side="long",
+                predictability_score=70.604535,
+                liquidity_score=0.711646,
+                gross_expected_edge_bps=32.148908,
+                net_expected_edge_bps=24.145038,
+                estimated_round_trip_cost_bps=8.00387,
+                order_intent_notional_usd=225.0,
+                stop_distance_bps=82.50608,
+            ),
+            volume_confirmation=0.555694,
+            trend_strength=0.679367,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            capped = session._apply_fee_sensitive_entry_quality_buffer(reversal_prone)
+
+        self.assertEqual(capped.final_mode, "cash")
+        self.assertEqual(capped.side, "flat")
+        self.assertIn("PAPER_VERIFY_REVERSAL_PRONE_ENTRY", capped.rejection_reasons)
+
+    def test_reversal_prone_guard_is_symbol_profile_scoped(self) -> None:
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=False,
+            ),
+            symbol_filter_profiles={
+                "ETHUSDT": SymbolFilterProfileConfig(
+                    reversal_prone_guard_enabled=True,
+                    reversal_guard_marginal_score=75.0,
+                    reversal_guard_marginal_trend_strength=0.70,
+                    reversal_guard_marginal_volume_confirmation=0.58,
+                    reversal_guard_min_net_edge_bps=30.0,
+                    reversal_guard_min_edge_to_cost=3.25,
+                    reversal_guard_min_expected_profit_multiplier=2.0,
+                    reversal_guard_min_expected_profit_extra_usd=0.75,
+                ),
+            },
+        )
+        session = self._build_session(settings=settings)
+        reversal_prone = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 22, 3, 10, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                side="long",
+                predictability_score=70.604535,
+                liquidity_score=0.711646,
+                gross_expected_edge_bps=32.148908,
+                net_expected_edge_bps=24.145038,
+                estimated_round_trip_cost_bps=8.00387,
+                order_intent_notional_usd=225.0,
+                stop_distance_bps=82.50608,
+            ),
+            volume_confirmation=0.555694,
+            trend_strength=0.679367,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            capped = session._apply_fee_sensitive_entry_quality_buffer(reversal_prone)
+
+        self.assertNotIn("PAPER_VERIFY_REVERSAL_PRONE_ENTRY", capped.rejection_reasons)
+
+    def test_paper_verify_allows_high_conviction_reversal_entry_after_loss_guard(self) -> None:
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=False,
+            ),
+            symbol_filter_profiles={
+                "BTCUSDT": SymbolFilterProfileConfig(
+                    reversal_prone_guard_enabled=True,
+                    reversal_guard_marginal_score=75.0,
+                    reversal_guard_marginal_trend_strength=0.70,
+                    reversal_guard_marginal_volume_confirmation=0.58,
+                    reversal_guard_min_net_edge_bps=30.0,
+                    reversal_guard_min_edge_to_cost=3.25,
+                    reversal_guard_min_expected_profit_multiplier=2.0,
+                    reversal_guard_min_expected_profit_extra_usd=0.75,
+                ),
+            },
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 50.0,
+            "futures_available_balance_usd": 50.0,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.00001},
+            ],
+        }
+        high_conviction_short = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 22, 3, 20, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                side="short",
+                predictability_score=92.869715,
+                liquidity_score=0.899408,
+                gross_expected_edge_bps=61.535115,
+                net_expected_edge_bps=53.496371,
+                estimated_round_trip_cost_bps=8.038744,
+                order_intent_notional_usd=225.0,
+                stop_distance_bps=84.336194,
+            ),
+            volume_confirmation=0.807143,
+            trend_strength=0.959286,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            capped = session._apply_fee_sensitive_entry_quality_buffer(high_conviction_short)
+
+        self.assertEqual(capped.final_mode, "futures")
+        self.assertEqual(capped.side, "short")
+        self.assertNotIn("PAPER_VERIFY_REVERSAL_PRONE_ENTRY", capped.rejection_reasons)
+
+    def test_symbol_filter_profiles_apply_distinct_coin_entry_gates(self) -> None:
+        settings = replace(
+            self.settings,
+            risk=replace(
+                self.settings.risk,
+                max_futures_leverage=30.0,
+                target_futures_leverage=30.0,
+            ),
+            live_position_risk=replace(
+                self.settings.live_position_risk,
+                long_only_turnaround_mode=False,
+            ),
+            symbol_filter_profiles={
+                "BTCUSDT": SymbolFilterProfileConfig(
+                    min_predictability_score=68.0,
+                    min_liquidity_score=0.48,
+                    min_volume_confirmation=0.45,
+                    min_net_edge_bps=18.0,
+                    min_edge_to_cost=1.6,
+                    max_stop_distance_bps=280.0,
+                    min_expected_profit_multiplier=1.2,
+                    bypass_fee_edge_buffer=True,
+                ),
+                "DOGEUSDT": SymbolFilterProfileConfig(
+                    min_predictability_score=73.0,
+                    min_liquidity_score=0.54,
+                    min_volume_confirmation=0.58,
+                    min_net_edge_bps=32.0,
+                    min_edge_to_cost=3.0,
+                    max_stop_distance_bps=240.0,
+                    min_expected_profit_multiplier=1.6,
+                ),
+            },
+        )
+        session = self._build_session(settings=settings)
+        session.capital_report = {
+            "can_trade_futures_any": True,
+            "futures_execution_balance_usd": 50.0,
+            "futures_available_balance_usd": 50.0,
+            "futures_requirements": [
+                {"symbol": "BTCUSDT", "min_notional_usd": 5.0, "min_quantity": 0.00001},
+                {"symbol": "DOGEUSDT", "min_notional_usd": 5.0, "min_quantity": 1.0},
+            ],
+        }
+        btc_candidate = make_decision(
+            timestamp=datetime(2026, 4, 22, 3, 0, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            predictability_score=76.0,
+            liquidity_score=0.50,
+            gross_expected_edge_bps=42.0,
+            net_expected_edge_bps=32.0,
+            estimated_round_trip_cost_bps=10.0,
+            order_intent_notional_usd=750.0,
+            stop_distance_bps=220.0,
+        )
+        doge_candidate = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 22, 3, 0, tzinfo=timezone.utc),
+                symbol="DOGEUSDT",
+                predictability_score=74.0,
+                liquidity_score=0.55,
+                gross_expected_edge_bps=36.0,
+                net_expected_edge_bps=28.8,
+                estimated_round_trip_cost_bps=11.1,
+                order_intent_notional_usd=750.0,
+                stop_distance_bps=220.0,
+            ),
+            volume_confirmation=0.60,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            btc_capped = session._cap_live_order_decision(btc_candidate, reference_price=77500.0)
+            doge_capped = session._cap_live_order_decision(doge_candidate, reference_price=0.15)
+
+        self.assertEqual(btc_capped.final_mode, "futures")
+        self.assertEqual(btc_capped.side, "long")
+        self.assertEqual(doge_capped.final_mode, "cash")
+        self.assertIn("SYMBOL_PROFILE_EDGE_TOO_THIN", doge_capped.rejection_reasons)
+        self.assertIn("SYMBOL_PROFILE_EDGE_COST_TOO_THIN", doge_capped.rejection_reasons)
 
     def test_futures_entry_uses_total_reusable_balance_when_execution_balance_is_low(self) -> None:
         from quant_binance.models import DecisionIntent

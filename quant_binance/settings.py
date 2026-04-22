@@ -284,6 +284,31 @@ class SymbolEligibilityConfig:
 
 
 @dataclass(frozen=True)
+class SymbolFilterProfileConfig:
+    min_predictability_score: float = 0.0
+    min_liquidity_score: float = 0.0
+    min_volume_confirmation: float = 0.0
+    min_net_edge_bps: float = 0.0
+    min_edge_to_cost: float = 0.0
+    max_stop_distance_bps: float = 0.0
+    min_expected_profit_multiplier: float = 0.0
+    min_expected_profit_extra_usd: float = 0.0
+    size_multiplier: float = 1.0
+    bypass_fee_edge_buffer: bool = False
+    reversal_prone_guard_enabled: bool = False
+    reversal_guard_confirmation_window_minutes: float = 15.0
+    reversal_guard_min_notional_to_equity: float = 4.0
+    reversal_guard_marginal_score: float = 75.0
+    reversal_guard_marginal_trend_strength: float = 0.70
+    reversal_guard_marginal_volume_confirmation: float = 0.58
+    reversal_guard_min_net_edge_bps: float = 30.0
+    reversal_guard_min_edge_to_cost: float = 3.25
+    reversal_guard_min_expected_profit_multiplier: float = 2.0
+    reversal_guard_min_expected_profit_extra_usd: float = 0.75
+    rejection_reason: str = "SYMBOL_FILTER_PROFILE"
+
+
+@dataclass(frozen=True)
 class LivePositionRiskConfig:
     enabled: bool
     take_profit_roe_percent: float
@@ -429,6 +454,7 @@ class Settings:
     data_collection_mode: bool = False
     data_collection_min_trades: int = 50
     b3_msb: B3MsbConfig = B3MsbConfig()
+    symbol_filter_profiles: dict[str, SymbolFilterProfileConfig] | None = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -469,6 +495,10 @@ class Settings:
             "cooldown_minutes": 0,
         }
         loss_combo_downgrade_raw.update(raw.get("loss_combo_downgrade", {}))
+        symbol_filter_profiles = {
+            str(symbol).upper(): SymbolFilterProfileConfig(**dict(profile or {}))
+            for symbol, profile in dict(raw.get("symbol_filter_profiles", {}) or {}).items()
+        }
         return cls(
             config_version=raw["config_version"],
             snapshot_schema_version=raw["snapshot_schema_version"],
@@ -505,4 +535,5 @@ class Settings:
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
             data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
             b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
+            symbol_filter_profiles=symbol_filter_profiles,
         )

@@ -45,6 +45,48 @@ from quant_binance.runtime_universe import build_runtime_universe_hydration
 _log = logging.getLogger(__name__)
 
 
+class ReadOnlyExchangeClient:
+    """Proxy that allows market/account reads while hiding exchange write APIs."""
+
+    _BLOCKED_METHODS = {
+        "cancel_futures_plan_orders",
+        "cancel_order",
+        "place_futures_position_tpsl",
+        "place_order",
+        "place_spot_plan_order",
+        "test_order",
+        "transfer_asset",
+        "transfer_spot_to_futures",
+    }
+
+    def __init__(self, client: Any) -> None:
+        self._client = client
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self._BLOCKED_METHODS:
+            raise AttributeError(f"{name} is disabled in read-only paper mode")
+        return getattr(self._client, name)
+
+
+class SimulatedOrderTestClient:
+    """Local-only test-order client for read-only paper runs."""
+
+    def __init__(self, exchange_id: str) -> None:
+        self.exchange_id = exchange_id
+
+    def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "status": "SIMULATED_READ_ONLY",
+            "market": market,
+            "order_params": dict(order_params),
+            "read_only": True,
+        }
+
+
+def _truthy_env(name: str, default: str = "0") -> bool:
+    return str(os.environ.get(name, default) or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _next_decision_boundary(timestamp, interval_minutes: int):
     floored = timestamp.replace(
         minute=(timestamp.minute // interval_minutes) * interval_minutes,
@@ -56,6 +98,14 @@ def _next_decision_boundary(timestamp, interval_minutes: int):
 
         return floored + timedelta(minutes=interval_minutes)
     return floored
+
+
+def _decision_boundary_at_or_before(timestamp: datetime, interval_minutes: int) -> datetime:
+    return timestamp.replace(
+        minute=(timestamp.minute // interval_minutes) * interval_minutes,
+        second=0,
+        microsecond=0,
+    )
 
 
 def _decision_interval_label(interval_minutes: int) -> str:
@@ -72,7 +122,12 @@ def _normalized_closed_decision_time(timestamp: datetime) -> datetime:
     return timestamp + timedelta(milliseconds=1)
 
 
-def _bootstrap_decision_time(*, store, interval_minutes: int):
+def _bootstrap_decision_time(*, store, interval_minutes: int, now: datetime | None = None):
+    latest_allowed = (
+        _decision_boundary_at_or_before(now.astimezone(timezone.utc), interval_minutes)
+        if now is not None
+        else None
+    )
     interval_label = _decision_interval_label(interval_minutes)
     latest_closed = None
     for state in getattr(store, "_states", {}).values():
@@ -89,12 +144,19 @@ def _bootstrap_decision_time(*, store, interval_minutes: int):
             and latest_closed.microsecond == 0
             and latest_closed.minute % interval_minutes == 0
         ):
-            return latest_closed
-        return _next_decision_boundary(aligned, interval_minutes)
-    return _next_decision_boundary(
+            candidate = latest_closed
+        else:
+            candidate = _next_decision_boundary(aligned, interval_minutes)
+        if latest_allowed is not None and candidate > latest_allowed:
+            return latest_allowed
+        return candidate
+    candidate = _next_decision_boundary(
         next(iter(store._states.values())).last_update_time,
         interval_minutes,
     )
+    if latest_allowed is not None and candidate > latest_allowed:
+        return latest_allowed
+    return candidate
 
 
 def _runtime_snapshot_futures_position_keys(
@@ -326,6 +388,11 @@ def run_live_paper_daemon(
             raise RuntimeError(
                 "Bitget live order daemon requires BITGET_API_KEY, BITGET_API_SECRET, and BITGET_API_PASSPHRASE"
             )
+        read_only_paper_mode = (not execute_live_orders) and _truthy_env("QUANT_READ_ONLY_PAPER_MODE")
+        if read_only_paper_mode:
+            print("[daemon] read-only paper mode enabled: exchange write APIs and test orders disabled", flush=True)
+            rest_client = ReadOnlyExchangeClient(rest_client)
+
         if supports_private_reads:
             def _build_capital_report():
                 spot_account = rest_client.get_account(market="spot")
@@ -433,7 +500,9 @@ def run_live_paper_daemon(
             sync_interval_seconds=sync_interval_seconds,
             flush_interval_seconds=min(sync_interval_seconds, 15),
             rest_client=rest_client if supports_private_reads else None,
-            order_tester=DecisionOrderTestAdapter(rest_client),
+            order_tester=DecisionOrderTestAdapter(
+                SimulatedOrderTestClient(exchange_id) if read_only_paper_mode else rest_client
+            ),
             live_order_executor=DecisionLiveOrderAdapter(rest_client, settings) if execute_live_orders else None,
             learner=learner,
             learner_output_path=run_paths.root / "edge_table.json",
@@ -533,15 +602,20 @@ def run_live_paper_daemon(
         bootstrap_time = _bootstrap_decision_time(
             store=store,
             interval_minutes=settings.decision_engine.decision_interval_minutes,
+            now=datetime.now(tz=timezone.utc),
         )
         bootstrap_records: list[tuple[Any, Any]] = []
         hydration_rows_by_symbol = dict(runtime_universe_hydration.get("rows_by_symbol", {}) or {})
+        universe_rank = {symbol: index for index, symbol in enumerate(settings.universe)}
         bootstrap_symbols = sorted(
             runtime_symbols,
-            key=lambda symbol: tuple(
-                dict(hydration_rows_by_symbol.get(symbol, {}) or {}).get(
-                    "sort_key",
-                    (0, 1 if symbol not in set(settings.futures_exposure.major_symbols) else 0, 1, 0, symbol),
+            key=lambda symbol: (
+                universe_rank.get(symbol, len(universe_rank)),
+                tuple(
+                    dict(hydration_rows_by_symbol.get(symbol, {}) or {}).get(
+                        "sort_key",
+                        (0, 1 if symbol not in set(settings.futures_exposure.major_symbols) else 0, 1, 0, symbol),
+                    )
                 )
             ),
         )
