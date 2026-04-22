@@ -38,3 +38,27 @@ ENV/
 # Project Specific
 notion_automation/**/notion_key.txt
 notion_automation/**/notion_auth.py
+
+# Runtime outputs (paper50)
+quant_runtime_paper50/_paper50*.log
+quant_runtime_paper50/artifacts/
+quant_runtime_paper50/forensics/
+quant_runtime_paper50/output/
+quant_runtime_paper50/execution_quality_state.json
+
+# Runtime/generated trading outputs
+latest/
+logs/
+.tmp-test-logs/
+quant_runtime/**/*.err
+quant_runtime/**/*.log
+quant_runtime/**/*.out
+quant_runtime/**/*.jsonl
+quant_runtime/forensics/
+quant_runtime/output/
+quant_runtime_paper50/*.err
+quant_runtime_paper50/*.log
+quant_runtime_paper50/artifacts/
+quant_runtime_paper50/execution_quality_state.json
+quant_runtime_paper50/forensics/
+quant_runtime_paper50/output/
