@@ -585,6 +585,44 @@ class QuantBinanceDaemonTests(unittest.TestCase):
 
         self.assertEqual(bootstrap_time.isoformat(), "2026-03-14T00:20:00+00:00")
 
+    def test_bootstrap_decision_time_caps_seeded_future_kline_to_current_boundary(self) -> None:
+        state = SymbolMarketState(
+            symbol="BTCUSDT",
+            top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc)),
+            last_trade_price=50000.0,
+            funding_rate=0.0001,
+            open_interest=1080000.0,
+            basis_bps=3.0,
+            last_update_time=datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc),
+            klines={
+                "5m": [
+                    KlineBar(
+                        symbol="BTCUSDT",
+                        interval="5m",
+                        start_time=datetime(2026, 3, 14, 0, 25, tzinfo=timezone.utc),
+                        close_time=datetime(2026, 3, 14, 0, 30, tzinfo=timezone.utc),
+                        open_price=50000.0,
+                        high_price=50100.0,
+                        low_price=49900.0,
+                        close_price=50050.0,
+                        volume=10.0,
+                        quote_volume=500000.0,
+                        is_closed=True,
+                    )
+                ]
+            },
+        )
+        store = MarketStateStore()
+        store.put(state)
+
+        bootstrap_time = _bootstrap_decision_time(
+            store=store,
+            interval_minutes=5,
+            now=datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc),
+        )
+
+        self.assertEqual(bootstrap_time.isoformat(), "2026-03-14T00:20:00+00:00")
+
     def test_run_live_paper_daemon_keeps_first_live_close_after_bootstrap(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
             config_path = Path(output_dir) / "config.json"

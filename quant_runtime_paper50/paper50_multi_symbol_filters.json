@@ -1,0 +1,149 @@
+{
+  "universe": [
+    "PEPEUSDT",
+    "DOGEUSDT",
+    "XRPUSDT",
+    "SOLUSDT",
+    "ETHUSDT",
+    "BTCUSDT"
+  ],
+  "spot_support": {
+    "priority_symbols": [
+      "PEPEUSDT"
+    ]
+  },
+  "futures_exposure": {
+    "major_symbols": [
+      "PEPEUSDT"
+    ],
+    "priority_symbols": [
+      "PEPEUSDT"
+    ]
+  },
+  "portfolio_focus": {
+    "enabled": true,
+    "futures_top_n": 1
+  },
+  "operational_limits": {
+    "max_concurrent_futures_symbols": 1
+  },
+  "symbol_filter_profiles": {
+    "BTCUSDT": {
+      "min_predictability_score": 80.0,
+      "min_liquidity_score": 0.48,
+      "min_volume_confirmation": 0.45,
+      "min_net_edge_bps": 36.0,
+      "min_edge_to_cost": 4.0,
+      "max_stop_distance_bps": 280.0,
+      "min_expected_profit_multiplier": 1.8,
+      "bypass_fee_edge_buffer": true,
+      "reversal_prone_guard_enabled": true,
+      "reversal_guard_confirmation_window_minutes": 15.0,
+      "reversal_guard_min_notional_to_equity": 4.0,
+      "reversal_guard_marginal_score": 82.0,
+      "reversal_guard_marginal_trend_strength": 0.7,
+      "reversal_guard_marginal_volume_confirmation": 0.62,
+      "reversal_guard_min_net_edge_bps": 36.0,
+      "reversal_guard_min_edge_to_cost": 4.0,
+      "reversal_guard_min_expected_profit_multiplier": 2.4,
+      "reversal_guard_min_expected_profit_extra_usd": 1.0
+    },
+    "ETHUSDT": {
+      "min_predictability_score": 68.0,
+      "min_liquidity_score": 0.48,
+      "min_volume_confirmation": 0.45,
+      "min_net_edge_bps": 20.0,
+      "min_edge_to_cost": 1.8,
+      "max_stop_distance_bps": 280.0,
+      "min_expected_profit_multiplier": 1.25,
+      "bypass_fee_edge_buffer": true,
+      "reversal_prone_guard_enabled": true,
+      "reversal_guard_confirmation_window_minutes": 15.0,
+      "reversal_guard_min_notional_to_equity": 4.0,
+      "reversal_guard_marginal_score": 78.0,
+      "reversal_guard_marginal_trend_strength": 0.72,
+      "reversal_guard_marginal_volume_confirmation": 0.6,
+      "reversal_guard_min_net_edge_bps": 32.0,
+      "reversal_guard_min_edge_to_cost": 3.4,
+      "reversal_guard_min_expected_profit_multiplier": 2.1,
+      "reversal_guard_min_expected_profit_extra_usd": 0.85
+    },
+    "SOLUSDT": {
+      "min_predictability_score": 70.0,
+      "min_liquidity_score": 0.5,
+      "min_volume_confirmation": 0.5,
+      "min_net_edge_bps": 24.0,
+      "min_edge_to_cost": 2.0,
+      "max_stop_distance_bps": 260.0,
+      "min_expected_profit_multiplier": 1.35,
+      "bypass_fee_edge_buffer": true,
+      "reversal_prone_guard_enabled": true,
+      "reversal_guard_confirmation_window_minutes": 20.0,
+      "reversal_guard_min_notional_to_equity": 3.5,
+      "reversal_guard_marginal_score": 80.0,
+      "reversal_guard_marginal_trend_strength": 0.74,
+      "reversal_guard_marginal_volume_confirmation": 0.62,
+      "reversal_guard_min_net_edge_bps": 34.0,
+      "reversal_guard_min_edge_to_cost": 3.6,
+      "reversal_guard_min_expected_profit_multiplier": 2.2,
+      "reversal_guard_min_expected_profit_extra_usd": 0.9
+    },
+    "XRPUSDT": {
+      "min_predictability_score": 72.0,
+      "min_liquidity_score": 0.54,
+      "min_volume_confirmation": 0.56,
+      "min_net_edge_bps": 30.0,
+      "min_edge_to_cost": 2.8,
+      "max_stop_distance_bps": 240.0,
+      "min_expected_profit_multiplier": 1.55,
+      "reversal_prone_guard_enabled": true,
+      "reversal_guard_confirmation_window_minutes": 20.0,
+      "reversal_guard_min_notional_to_equity": 3.5,
+      "reversal_guard_marginal_score": 82.0,
+      "reversal_guard_marginal_trend_strength": 0.76,
+      "reversal_guard_marginal_volume_confirmation": 0.64,
+      "reversal_guard_min_net_edge_bps": 38.0,
+      "reversal_guard_min_edge_to_cost": 3.8,
+      "reversal_guard_min_expected_profit_multiplier": 2.35,
+      "reversal_guard_min_expected_profit_extra_usd": 1.0
+    },
+    "DOGEUSDT": {
+      "min_predictability_score": 73.0,
+      "min_liquidity_score": 0.54,
+      "min_volume_confirmation": 0.58,
+      "min_net_edge_bps": 32.0,
+      "min_edge_to_cost": 3.0,
+      "max_stop_distance_bps": 240.0,
+      "min_expected_profit_multiplier": 1.6,
+      "reversal_prone_guard_enabled": true,
+      "reversal_guard_confirmation_window_minutes": 20.0,
+      "reversal_guard_min_notional_to_equity": 3.0,
+      "reversal_guard_marginal_score": 84.0,
+      "reversal_guard_marginal_trend_strength": 0.78,
+      "reversal_guard_marginal_volume_confirmation": 0.66,
+      "reversal_guard_min_net_edge_bps": 42.0,
+      "reversal_guard_min_edge_to_cost": 4.0,
+      "reversal_guard_min_expected_profit_multiplier": 2.5,
+      "reversal_guard_min_expected_profit_extra_usd": 1.1
+    },
+    "PEPEUSDT": {
+      "min_predictability_score": 70.0,
+      "min_liquidity_score": 0.55,
+      "min_volume_confirmation": 0.55,
+      "min_net_edge_bps": 28.0,
+      "min_edge_to_cost": 3.0,
+      "max_stop_distance_bps": 320.0,
+      "min_expected_profit_multiplier": 1.6,
+      "reversal_prone_guard_enabled": true,
+      "reversal_guard_confirmation_window_minutes": 25.0,
+      "reversal_guard_min_notional_to_equity": 3.0,
+      "reversal_guard_marginal_score": 86.0,
+      "reversal_guard_marginal_trend_strength": 0.8,
+      "reversal_guard_marginal_volume_confirmation": 0.68,
+      "reversal_guard_min_net_edge_bps": 46.0,
+      "reversal_guard_min_edge_to_cost": 4.2,
+      "reversal_guard_min_expected_profit_multiplier": 2.7,
+      "reversal_guard_min_expected_profit_extra_usd": 1.25
+    }
+  }
+}
