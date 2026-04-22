@@ -1,5 +1,5 @@
 {
-  "decision_count": 3,
+  "decision_count": 0,
   "exchange_live_futures_position_count": 0,
   "exchange_live_futures_positions": [],
   "futures_available_balance_usd": null,
@@ -13,62 +13,16 @@
     "armed": false,
     "reasons": []
   },
-  "last_decision_emitted_at": "2026-04-21T13:49:36.145154+00:00",
-  "last_decision_timestamp": "2026-03-08T12:15:00+00:00",
+  "last_decision_emitted_at": null,
+  "last_decision_timestamp": null,
   "last_event_timestamp": null,
   "live_order_count": 0,
-  "realized_pnl_usd_estimate": 40.0,
-  "recent_decisions": [
-    {
-      "candidate_mode": "futures",
-      "entry_relaxations": [],
-      "estimated_round_trip_cost_bps": 10.0,
-      "execution_quality_trade_restraint": "none",
-      "macro_trade_restraint": "none",
-      "mode": "futures",
-      "net_expected_edge_bps": 18.0,
-      "reasons": [],
-      "score": 82.0,
-      "side": "long",
-      "size_boost_reasons": [],
-      "strategy_size_multiplier": 1.0,
-      "symbol": "BTCUSDT"
-    },
-    {
-      "candidate_mode": "futures",
-      "entry_relaxations": [],
-      "estimated_round_trip_cost_bps": 10.0,
-      "execution_quality_trade_restraint": "none",
-      "macro_trade_restraint": "none",
-      "mode": "futures",
-      "net_expected_edge_bps": 18.0,
-      "reasons": [],
-      "score": 82.0,
-      "side": "long",
-      "size_boost_reasons": [],
-      "strategy_size_multiplier": 1.0,
-      "symbol": "BTCUSDT"
-    },
-    {
-      "candidate_mode": "futures",
-      "entry_relaxations": [],
-      "estimated_round_trip_cost_bps": 10.0,
-      "execution_quality_trade_restraint": "none",
-      "macro_trade_restraint": "none",
-      "mode": "futures",
-      "net_expected_edge_bps": 18.0,
-      "reasons": [],
-      "score": 82.0,
-      "side": "long",
-      "size_boost_reasons": [],
-      "strategy_size_multiplier": 1.0,
-      "symbol": "BTCUSDT"
-    }
-  ],
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [],
   "spot_available_balance_usd": null,
   "status": "healthy",
-  "tested_order_count": 1,
+  "tested_order_count": 0,
   "top_rejection_reasons": {},
   "unrealized_pnl_usd_estimate": 0,
-  "updated_at": "2026-04-21T13:49:36.154350+00:00"
+  "updated_at": "2026-04-22T04:01:50.596171+00:00"
 }

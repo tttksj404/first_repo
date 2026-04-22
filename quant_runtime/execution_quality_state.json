@@ -88,7 +88,7 @@
             "avg_slippage_bps": 0.0,
             "degraded": false,
             "edge_penalty_bps": 0.0,
-            "effective_sample_size": 0.982164,
+            "effective_sample_size": 0.97658,
             "entry_threshold_bps": 0.0,
             "exchange_id": "bitget",
             "expected_profit_floor_bps": 0.0,
@@ -147,5 +147,5 @@
       "weighted_timeouts": 0.0
     }
   },
-  "updated_at": "2026-04-21T21:13:25.416899+00:00"
+  "updated_at": "2026-04-21T23:59:16.780695+00:00"
 }

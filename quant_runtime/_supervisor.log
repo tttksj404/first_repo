@@ -137,3 +137,11 @@
 [2026-04-17T04:24:46+00:00] live universe locked: PEPEUSDT
 [2026-04-17T04:24:46+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
 [2026-04-17T04:24:46+00:00] daemon pid=1216 started
+[2026-04-21T23:56:53+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-21T23:56:53+00:00] live universe locked: PEPEUSDT
+[2026-04-21T23:56:53+00:00] runtime policy guardrail bypass disabled (default safe mode)
+[2026-04-21T23:56:53+00:00] daemon pid=38592 started
+[2026-04-21T23:59:15+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-21T23:59:15+00:00] live universe locked: PEPEUSDT
+[2026-04-21T23:59:15+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-21T23:59:15+00:00] daemon pid=23584 started
