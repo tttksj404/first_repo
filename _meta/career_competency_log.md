@@ -551,3 +551,62 @@ This file stores only the conversations and work that materially connect to the 
 - 2026-04-21 | PEPE runtime capital-risk health audit | Monitored the active PEPE live runtime through supervisor heartbeats, live summaries, decision/preflight logs, order/manual-close/account-sync traces, and classified the current trade block as capital/risk gating after drawdown rather than stale state or a software regression. | Competencies: runtime/system integration diagnosis, real-time data pipeline health monitoring, risk-signal interpretation, evidence-backed technical communication. | Next skill: add an operator-facing health summary that separates process-visibility limits from live heartbeat evidence.
 - 2026-04-22 | PEPE runtime underfunded-entry triage | Rechecked the live PEPE supervisor after DNS recovery, tied accepted strategy decisions to preflight cap rewrites, and classified the current no-order state as underfunded futures/capital gating rather than stale state or a live-order software regression. | Competencies: runtime/system integration diagnosis, real-time data pipeline health monitoring, stale-state detection, risk-signal interpretation, evidence-backed technical communication. | Next skill: make health summaries surface the exact capital delta needed to re-enable futures entries.
 - 2026-04-22 | PEPE runtime DNS startup guard | Audited the PEPE supervisor after stop-file interruption, cleared stale stop sentinels, relaunched the supervised runtime path, verified supervisor/watchdog liveness via pid slots plus `lsof`, and classified the remaining startup failure as Bitget DNS resolution rather than strategy, manual-close sync, or paper/exchange state drift. | Competencies: runtime/system integration diagnosis, data pipeline health monitoring, stale-state detection, evidence-backed technical communication. | Next skill: add a non-mutating restart readiness check that separates intentional stop sentinels, sandbox process visibility, and external API/DNS reachability.
+- 2026-04-22 | Read-only live-data paper trading validation | Added a guarded read-only exchange proxy plus simulated local order tester, stopped live-order daemon, and launched a PEPEUSDT live-data paper run with 50 USDT paper equity. | Mapped competencies: data pipeline/system integration safety, runtime verification, trading log interpretation, technical communication. | Next skill to sharpen: separating live execution, paper simulation, and exchange test-order paths with explicit config flags and automated assertions.
+- 2026-04-22 | Paper50 kill-switch sampling continuity fix | Split paper-verification kill-switch behavior so read-only strategy decisions keep flowing while new submissions/test fills are blocked and preflight logs carry kill-switch evidence; restarted the PEPEUSDT paper50 daemon and verified read-only safety. | Mapped competencies: runtime drift diagnosis, risk-control implementation, real-time strategy validation, evidence-backed verification. | Next skill to sharpen: add a dedicated paper-observe mode that reports counterfactual entries separately from executable paper fills.
+- 2026-04-22 | Paper50 fee-drag close isolation | Audited the PEPEUSDT paper close path, separated legitimate paper fee-drag exits from the kill-switch sampling stall, prevented same-cycle fee-drag re-entry, added exact close-reason observability, and verified the read-only daemon after restart. | Mapped competencies: quantitative risk-control debugging, runtime observability design, paper/live safety separation, regression-backed strategy validation. | Next skill to sharpen: build counterfactual post-exit replay metrics to compare hold-vs-close outcomes after fee-drag exits.
+
+- 2026-04-22 | Paper50 fragile fee-drag entry guard | Reconstructed a losing PEPEUSDT paper short from ex-ante decision metrics and added a capital-aware guard for high-notional weak-microstructure entries, with regression coverage. | Mapped competencies: data analysis/optimization, trading-system risk controls, test-backed technical communication. | Next skill: validate threshold sensitivity across replay windows before promotion.
+
+- 2026-04-22 | Paper50 missed-entry counterfactual audit | Compared blocked PEPEUSDT futures candidates against subsequent live book/mark/trade prices, separating hindsight-only favorable moves from ex-ante plausible missed opportunities and expanded the heartbeat monitor to track missed-entry risk. | Mapped competencies: data analysis/optimization, quantitative experiment design, runtime observability, evidence-backed technical communication. | Next skill: add a reusable missed-entry report artifact with threshold sensitivity by horizon.
+
+- 2026-04-22 | Paper50 missed-entry guard refinement | Identified that the fragile fee-drag guard was overblocking a strong-continuation marginal-liquidity PEPEUSDT long, added a paper-only narrow fast path, verified regression coverage, and restarted the read-only paper50 daemon. | Mapped competencies: quantitative signal evaluation, risk-control optimization, test-backed system integration, technical communication. | Next skill: compare the new fast path against several live windows before promoting beyond paper verification.
+
+- 2026-04-22 | Multi-symbol paper50 observation expansion | Diagnosed PEPE-only runtime override drift, disabled file runtime overrides for the paper monitor, relaunched read-only paper50 across BTC/ETH/SOL/XRP/DOGE/PEPE, and updated monitoring to compare per-symbol decisions and missed-entry risk. | Mapped competencies: runtime configuration drift analysis, multi-asset data pipeline validation, quantitative experiment design, safety-focused technical communication. | Next skill: build per-symbol paper equity allocation and event-coverage dashboards.
+
+## 2026-04-22 - Paper50 multi-symbol strategy guard tuning
+- Conversation/topic: Read-only paper50 live-data strategy validation across BTC/ETH/SOL/XRP/DOGE/PEPE with 50 USDT capital assumptions.
+- What was done: Added per-symbol filter profiles, verified fee/capital-aware entry gating, preserved live-order safety, and restarted the real-time paper daemon with evidence from logs/tests.
+- Mapped competencies: Data analysis and optimization, trading-data pipeline/runtime integration, experiment validation, risk-aware automated decisioning, technical communication from live operational evidence.
+- Next skill to sharpen: Design statistically grounded per-symbol threshold tuning using larger replay windows and live paper counterfactuals.
+
+## 2026-04-22 - Paper-only reversal loss guard
+- Conversation/topic: Root-caused a BTCUSDT paper-only reversal loss during live-data paper50 monitoring.
+- What was done: Compared entry/exit signal quality, added a reversal-prone entry guard for thin unconfirmed 50 USDT paper entries, validated with targeted and runtime regression tests, and restarted the read-only daemon.
+- Mapped competencies: Quant experiment diagnostics, risk-aware strategy optimization, live runtime validation, data-driven root-cause analysis, technical communication under operational constraints.
+- Next skill to sharpen: Convert live paper loss events into a rolling counterfactual dataset for parameter sweeps.
+
+## 2026-04-22 - Per-symbol reversal guard correction
+- Conversation/topic: Corrected the paper50 reversal-loss guard from a global behavior into per-symbol profile parameters.
+- What was done: Added symbol-scoped reversal-prone guard fields, configured distinct BTC/ETH/SOL/XRP/DOGE/PEPE thresholds, verified scoping with regression tests, and restarted the read-only daemon.
+- Mapped competencies: Parameterized strategy design, data-driven risk controls, live paper validation, per-asset optimization, technical communication.
+- Next skill to sharpen: Build per-symbol replay sweeps to calibrate thresholds from larger samples rather than single-event tuning.
+
+## 2026-04-22 - PEPE-first fallback runtime restoration
+- Conversation/topic: Verified whether the small-capital PEPE-first fallback strategy was still active in the paper50 multi-symbol runtime.
+- What was done: Found config/runtime drift where the paper50 launcher evaluated all symbols with BTC first and 6 concurrent futures slots, restored PEPE-first universe ordering with single-futures-slot fallback, preserved configured order in scheduled/bootstrap decision loops, validated with focused tests, and confirmed live logs now evaluate PEPE -> DOGE -> XRP -> SOL -> ETH -> BTC with no live orders.
+- Mapped competencies: Runtime configuration drift analysis, quantitative strategy orchestration, per-asset prioritization, live data pipeline verification, safety-focused experiment operation.
+- Next skill to sharpen: Add explicit priority-fallback telemetry that records which higher-priority symbol blocked or yielded each fallback candidate.
+
+## 2026-04-22 - Priority fallback event-order hardening
+- Conversation/topic: Live paper50 heartbeat found PEPE-first ordering still vulnerable to direct WebSocket decision timing after the first fix.
+- What was done: Added direct WebSocket deferral that actively triggers a universe-order PEPE-first decision boundary in single-slot fallback mode, reduced duplicate direct-event recording, validated with focused regression tests, restarted the read-only daemon, and confirmed PEPE-DOGE-XRP-SOL-ETH-BTC ordering with live/test orders at zero.
+- Mapped competencies: Real-time data pipeline debugging, event-order determinism, quant strategy safety controls, runtime verification, technical incident communication.
+- Next skill to sharpen: Add explicit boundary-level telemetry for priority fallback triggers, skipped stale snapshots, and fallback candidate selection.
+
+## 2026-04-22 - Blocked-signal counterfactual validation
+- Conversation/topic: Backtraced blocked paper50 entry signals against post-decision Bitget 5m candles.
+- What was done: Compared blocked PEPE/DOGE/XRP/SOL/ETH/BTC decisions to 5-15 minute forward returns, separated valid blocks from apparent misses, identified XRP apparent misses as reference-price/data-integrity drift, added a runtime top-of-book reference-price guard, verified with focused regression tests, and restarted the read-only paper daemon.
+- Mapped competencies: Counterfactual strategy evaluation, live market data validation, data quality controls, per-asset diagnostics, risk-aware quant experimentation.
+- Next skill to sharpen: Persist blocked-signal counterfactual metrics as a rolling dataset for symbol-specific threshold calibration.
+
+## 2026-04-22 - Paper50 live guard telemetry and timestamp hardening
+- Conversation/topic: Verified SOL reference-price divergence recurrence, ETH/SOL blocked-signal outcomes, and PEPE-first fallback integrity during the read-only paper50 live-data monitor.
+- What was done: Backtraced ETH/SOL blocked entries against Bitget candles/tickers, found repeated SOL/PEPE/XRP reference-price guard events, added summary/state/overview telemetry for guard counts, capped bootstrap decisions so they cannot be future-dated beyond the current boundary, deferred future direct WebSocket fallback triggers, validated focused regressions, and relaunched the read-only daemon.
+- Mapped competencies: Live data-quality diagnostics, counterfactual strategy validation, real-time pipeline hardening, per-symbol risk-control monitoring, evidence-backed technical communication.
+- Next skill to sharpen: Convert reference-price guard events and blocked-signal forward returns into a persistent per-symbol calibration dataset.
+
+## 2026-04-22 - Per-symbol missed-market tuning loop
+- Conversation/topic: Continued live paper50 monitoring for missed blocked entries and coin-specific threshold tuning.
+- What was done: Backtraced recent blocked BTC/ETH/SOL/XRP/DOGE/PEPE decisions against forward 1m Bitget candles, identified PEPEUSDT 06:10 short as a possible missed entry caused mainly by PEPE stop-width gating, kept DOGE as watch-only, loosened only PEPEUSDT max stop-distance threshold, and relaunched the read-only paper daemon with live/test orders still at zero.
+- Mapped competencies: Per-asset quantitative diagnostics, experiment-driven threshold tuning, live paper validation, risk-aware data pipeline operation, concise technical reporting.
+- Next skill to sharpen: Persist missed-entry labels and forward returns into a structured dataset for more robust per-symbol calibration.
