@@ -64,6 +64,37 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         allowed_block = restart_block.split('if [ "$ALLOW_RESTART" = "1" ]; then', maxsplit=1)[1]
         self.assertLess(allowed_block.index("clear_live_stop_files"), allowed_block.index("nohup bash"))
 
+    def test_quant_health_audit_classifies_stop_sentinel_as_stopped(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("live_stop_requested()", script)
+        self.assertIn("STOP_REQUESTED=1", script)
+        self.assertIn("runtime intentionally stopped", script)
+        self.assertIn("quant_binance process absent as expected", script)
+        self.assertIn("health stale while runtime is intentionally stopped", script)
+
+    def test_quant_health_audit_supports_paper50_runtime_layout(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_HEALTH_AUDIT_RUNTIME", script)
+        self.assertIn("_paper50.out.log", script)
+        self.assertIn("PAPER50_MODE=1", script)
+        self.assertIn("process table unavailable, but runtime heartbeat log is fresh", script)
+        self.assertIn("FORENSICS_ROOT", script)
+        self.assertIn('grep "HEARTBEAT" >/dev/null', script)
+
+    def test_quant_health_audit_does_not_count_heartbeat_numbers_as_429s(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("HTTP[[:space:]/_-]*429", script)
+        self.assertNotIn('"429\\|rate.limit"', script)
+
     def test_quant_run_live_orders_logs_watchdog_start_failure_without_aborting(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
             encoding="utf-8"

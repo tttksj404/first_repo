@@ -4,12 +4,46 @@
 
 set -uo pipefail
 REPO="/Users/tttksj/first_repo"
-RUNTIME="$REPO/quant_runtime"
+RUNTIME="${QUANT_HEALTH_AUDIT_RUNTIME:-$REPO/quant_runtime}"
 PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 CLAUDE="/Users/tttksj/.local/bin/claude"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 DISABLE_AUTOFIX="${QUANT_HEALTH_AUDIT_DISABLE_AUTOFIX:-0}"
 ALLOW_RESTART="${QUANT_HEALTH_AUDIT_ALLOW_RESTART:-0}"
+
+SUPERVISOR_LOG="$RUNTIME/live_supervisor.log"
+PAPER50_MODE=0
+if [ ! -f "$SUPERVISOR_LOG" ] && [ -f "$RUNTIME/_paper50.out.log" ]; then
+    SUPERVISOR_LOG="$RUNTIME/_paper50.out.log"
+    PAPER50_MODE=1
+fi
+OUTPUT_MODE_ROOT="$RUNTIME/output/paper-live-shell"
+FORENSICS_ROOT="$OUTPUT_MODE_ROOT"
+if [ -d "$RUNTIME/forensics" ]; then
+    FORENSICS_ROOT="$RUNTIME/forensics"
+fi
+SUMMARY_ROOT="$OUTPUT_MODE_ROOT/latest"
+
+file_age_seconds() {
+    "$PYTHON" - "$1" <<'PY' 2>/dev/null
+from datetime import datetime, timezone
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+if not path.exists():
+    raise SystemExit(1)
+age = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)).total_seconds()
+print(f"{age:.0f}")
+PY
+}
+
+fresh_heartbeat_log() {
+    [ -f "$SUPERVISOR_LOG" ] || return 1
+    age="$(file_age_seconds "$SUPERVISOR_LOG" || echo 999999)"
+    [ "${age:-999999}" -le "${1:-900}" ] || return 1
+    tail -500 "$SUPERVISOR_LOG" | grep "HEARTBEAT" >/dev/null
+}
 
 slot_pid() {
     if [ -f "$1" ]; then
@@ -46,9 +80,16 @@ clear_live_stop_files() {
     fi
 }
 
+live_stop_requested() {
+    for stop_file in "$REPO/scripts/_supervisor_stop" "$REPO/scripts/_safety_guardian_stop"; do
+        [ -f "$stop_file" ] && grep -qi 'stop' "$stop_file" 2>/dev/null && return 0
+    done
+    return 1
+}
+
 latest_child_pid_from_log() {
-    if [ -f "$RUNTIME/live_supervisor.log" ]; then
-        grep -a "started child pid=" "$RUNTIME/live_supervisor.log" \
+    if [ -f "$SUPERVISOR_LOG" ]; then
+        grep -a "started child pid=" "$SUPERVISOR_LOG" \
             | sed -n 's/.*started child pid=\([0-9][0-9]*\).*/\1/p' \
             | tail -1
     fi
@@ -61,9 +102,27 @@ echo "============================================"
 WARNINGS=0
 CRITICALS=0
 ISSUES=""
+STOP_REQUESTED=0
+if live_stop_requested; then
+    STOP_REQUESTED=1
+fi
 
 warn() { echo "  WARNING: $1"; WARNINGS=$((WARNINGS+1)); ISSUES="$ISSUES [W] $1"; }
 crit() { echo "  CRITICAL: $1"; CRITICALS=$((CRITICALS+1)); ISSUES="$ISSUES [C] $1"; }
+warn_unless_stopped() {
+    if [ "$STOP_REQUESTED" = "1" ]; then
+        echo "  STOPPED: $1"
+    else
+        warn "$1"
+    fi
+}
+crit_unless_stopped() {
+    if [ "$STOP_REQUESTED" = "1" ]; then
+        echo "  STOPPED: $1"
+    else
+        crit "$1"
+    fi
+}
 
 # ============================================
 # 1. 프로세스 상태
@@ -71,21 +130,34 @@ crit() { echo "  CRITICAL: $1"; CRITICALS=$((CRITICALS+1)); ISSUES="$ISSUES [C] 
 echo ""
 echo "[1] 프로세스 상태"
 
+if [ "$STOP_REQUESTED" = "1" ]; then
+    echo "  STOPPED: live stop sentinel present — runtime intentionally stopped"
+fi
+
 PROCS=$(pgrep_count "quant_binance")
-if [ "$PROCS" -ge 1 ]; then
+if [ "$STOP_REQUESTED" = "1" ] && [ "$PROCS" -eq 0 ]; then
+    echo "  OK: stop sentinel present; quant_binance process absent as expected"
+elif [ "$PROCS" -ge 1 ]; then
     echo "  OK: quant_binance ${PROCS}개 실행 중"
 else
     CHILD_PID="$(latest_child_pid_from_log)"
     if pid_is_visible "$CHILD_PID"; then
         echo "  OK: quant_binance child pid=${CHILD_PID} 실행 중 (pid/lsof fallback)"
         PROCS=1
+    elif fresh_heartbeat_log 900; then
+        echo "  OK: process table unavailable, but runtime heartbeat log is fresh"
+        PROCS=1
     else
-        crit "quant_binance 프로세스 없음"
+        crit_unless_stopped "quant_binance 프로세스 없음"
     fi
 fi
 
 SUPERVISOR_PID="$(slot_pid "$RUNTIME/live_supervisor.pid")"
-if pid_is_visible "$SUPERVISOR_PID"; then
+if [ "$STOP_REQUESTED" = "1" ]; then
+    echo "  OK: stop sentinel present; supervisor pid check skipped"
+elif [ "$PAPER50_MODE" = "1" ]; then
+    echo "  OK: paper50 read-only runtime detected; supervisor pid check skipped"
+elif pid_is_visible "$SUPERVISOR_PID"; then
     echo "  OK: supervisor pid=${SUPERVISOR_PID} 실행 중"
 else
     warn "supervisor pid 확인 불가"
@@ -93,7 +165,11 @@ fi
 
 # Watchdog 프로세스
 WD=$(pgrep_count "quant_live_watchdog.py")
-if [ "$WD" -ge 1 ]; then
+if [ "$STOP_REQUESTED" = "1" ]; then
+    echo "  OK: stop sentinel present; watchdog check skipped"
+elif [ "$PAPER50_MODE" = "1" ]; then
+    echo "  OK: paper50 read-only runtime detected; watchdog check skipped"
+elif [ "$WD" -ge 1 ]; then
     echo "  OK: watchdog ${WD}개 실행 중"
 else
     WATCHDOG_PID="$(slot_pid "$RUNTIME/live_supervisor_watchdog.pid")"
@@ -110,51 +186,65 @@ if [ -f "$RUNTIME/live_supervisor_health.json" ]; then
     STATUS=$($PYTHON -c "import json; d=json.load(open('$RUNTIME/live_supervisor_health.json')); print(d.get('status','unknown'))" 2>/dev/null || echo "parse_error")
     echo "  Health status: $STATUS"
     if [ "$STATUS" != "healthy" ]; then
-        warn "health status=$STATUS"
+        warn_unless_stopped "health status=$STATUS"
     fi
+elif [ "$PAPER50_MODE" = "1" ] && fresh_heartbeat_log 900; then
+    echo "  Health status: inferred healthy from fresh paper50 heartbeat"
 else
     warn "health file missing"
 fi
 
 # Health file 갱신 시간
 if [ -f "$RUNTIME/live_supervisor_health.json" ]; then
-    $PYTHON -c "
-import json, sys
+    HEALTH_AGE_OUTPUT="$($PYTHON - "$RUNTIME/live_supervisor_health.json" "$STOP_REQUESTED" <<'PY' 2>/dev/null
+import json
+import sys
 from datetime import datetime, timezone
-d = json.load(open('$RUNTIME/live_supervisor_health.json'))
-updated = d.get('updated_at','')
+
+path = sys.argv[1]
+stopped = sys.argv[2] == "1"
+d = json.load(open(path))
+updated = d.get("updated_at", "")
 if updated:
     t = datetime.fromisoformat(updated)
     age_min = (datetime.now(tz=timezone.utc) - t).total_seconds() / 60
-    print(f'  Health 갱신: {age_min:.0f}분 전')
+    print(f"  Health 갱신: {age_min:.0f}분 전")
     if age_min > 30:
-        print(f'  WARNING: health 파일 {age_min:.0f}분 미갱신 — 데몬 stall 가능')
+        if not stopped:
+            print(f"  WARNING: health 파일 {age_min:.0f}분 미갱신 — 데몬 stall 가능")
         sys.exit(1)
-" 2>/dev/null
-    if [ $? -ne 0 ]; then
+PY
+)"
+    HEALTH_AGE_STATUS=$?
+    if [ -n "$HEALTH_AGE_OUTPUT" ]; then
+        printf '%s\n' "$HEALTH_AGE_OUTPUT"
+    fi
+    if [ "$HEALTH_AGE_STATUS" -ne 0 ] && [ "$STOP_REQUESTED" != "1" ]; then
         warn "health 파일 30분 이상 미갱신"
+    elif [ "$STOP_REQUESTED" = "1" ]; then
+        echo "  STOPPED: health stale while runtime is intentionally stopped"
     fi
 fi
 
 # Recent errors in supervisor log
-if [ -f "$RUNTIME/live_supervisor.log" ]; then
-    ERROR_COUNT=$(tail -200 "$RUNTIME/live_supervisor.log" | grep -ci "error\|traceback\|exception" 2>/dev/null; true)
+if [ -f "$SUPERVISOR_LOG" ]; then
+    ERROR_COUNT=$(tail -200 "$SUPERVISOR_LOG" | grep -ci "error\|traceback\|exception" 2>/dev/null; true)
     ERROR_COUNT=${ERROR_COUNT:-0}
     echo "  Recent errors (last 200 lines): $ERROR_COUNT"
     if [ "$ERROR_COUNT" -gt 20 ]; then
-        crit "에러 폭발 (${ERROR_COUNT}건/200줄)"
+        crit_unless_stopped "에러 폭발 (${ERROR_COUNT}건/200줄)"
     elif [ "$ERROR_COUNT" -gt 10 ]; then
-        warn "에러 다수 (${ERROR_COUNT}건/200줄)"
+        warn_unless_stopped "에러 다수 (${ERROR_COUNT}건/200줄)"
     fi
 fi
 
 # Heartbeat recency — 마지막 HEARTBEAT 시간
-if [ -f "$RUNTIME/live_supervisor.log" ]; then
-    LAST_HB=$(tail -100 "$RUNTIME/live_supervisor.log" | grep "HEARTBEAT" | tail -1 2>/dev/null || true)
+if [ -f "$SUPERVISOR_LOG" ]; then
+    LAST_HB=$(tail -100 "$SUPERVISOR_LOG" | grep "HEARTBEAT" | tail -1 2>/dev/null || true)
     if [ -n "$LAST_HB" ]; then
         echo "  마지막 heartbeat: $(echo "$LAST_HB" | head -c 80)"
     else
-        warn "최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능"
+        warn_unless_stopped "최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능"
     fi
 fi
 
@@ -168,8 +258,14 @@ import json, sys
 from pathlib import Path
 from datetime import datetime, timezone
 
-summary_path = Path('$RUNTIME/output/paper-live-shell/latest/summary.json')
+summary_path = Path('$SUMMARY_ROOT/summary.json')
 if not summary_path.exists():
+    decisions_path = Path('$FORENSICS_ROOT/decisions.jsonl')
+    if decisions_path.exists():
+        lines = sum(1 for _ in decisions_path.open())
+        age_min = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(decisions_path.stat().st_mtime, tz=timezone.utc)).total_seconds() / 60
+        print(f'  summary.json not present; using forensics decisions ({lines}건, {age_min:.0f}분 전)')
+        sys.exit(0)
     print('  WARNING: summary.json not found')
     sys.exit(1)
 
@@ -236,8 +332,13 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 # state file
-state_path = Path('$RUNTIME/output/paper-live-shell/latest/summary.state.json')
+state_path = Path('$SUMMARY_ROOT/summary.state.json')
 if not state_path.exists():
+    eq_path = Path('$RUNTIME/execution_quality_state.json')
+    if eq_path.exists():
+        age_min = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(eq_path.stat().st_mtime, tz=timezone.utc)).total_seconds() / 60
+        print(f'  summary.state.json not present; execution_quality_state.json exists ({age_min:.0f}분 전)')
+        sys.exit(0)
     print('  WARNING: state file missing')
     sys.exit(1)
 
@@ -287,9 +388,9 @@ echo ""
 echo "[4] 리소스"
 
 # Supervisor log size
-if [ -f "$RUNTIME/live_supervisor.log" ]; then
-    LOG_MB=$(du -m "$RUNTIME/live_supervisor.log" | cut -f1)
-    echo "  supervisor.log: ${LOG_MB}MB"
+if [ -f "$SUPERVISOR_LOG" ]; then
+    LOG_MB=$(du -m "$SUPERVISOR_LOG" | cut -f1)
+    echo "  runtime log: ${LOG_MB}MB ($(basename "$SUPERVISOR_LOG"))"
     if [ "$LOG_MB" -gt 200 ]; then
         warn "supervisor.log ${LOG_MB}MB (>200MB)"
     fi
@@ -339,10 +440,10 @@ echo "[4b] 자동 디스크 정리"
 CLEANED=0
 
 # 1. supervisor.log 200MB 넘으면 로테이션
-if [ -f "$RUNTIME/live_supervisor.log" ]; then
-    LOG_SZ=$(du -m "$RUNTIME/live_supervisor.log" | cut -f1)
+if [ "$PAPER50_MODE" != "1" ] && [ -f "$SUPERVISOR_LOG" ]; then
+    LOG_SZ=$(du -m "$SUPERVISOR_LOG" | cut -f1)
     if [ "$LOG_SZ" -gt 200 ]; then
-        mv "$RUNTIME/live_supervisor.log" "$RUNTIME/live_supervisor.log.old" 2>/dev/null
+        mv "$SUPERVISOR_LOG" "$SUPERVISOR_LOG.old" 2>/dev/null
         echo "  supervisor.log ${LOG_SZ}MB → rotated"
         CLEANED=$((CLEANED+1))
     fi
@@ -371,7 +472,9 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
 cutoff = datetime.now(tz=timezone.utc) - timedelta(days=7)
-base = Path('$RUNTIME/output/paper-live-shell')
+base = Path('$OUTPUT_MODE_ROOT')
+if not base.exists():
+    raise SystemExit(0)
 removed = 0
 for d in sorted(base.iterdir()):
     if not d.is_dir() or d.name == 'latest':
@@ -454,7 +557,11 @@ from collections import Counter
 from datetime import datetime, timezone, timedelta
 
 events = []
-for f in Path('$RUNTIME/output/paper-live-shell').rglob('self_healing.jsonl'):
+roots = [Path('$OUTPUT_MODE_ROOT'), Path('$FORENSICS_ROOT')]
+for root in roots:
+  if not root.exists():
+    continue
+  for f in root.rglob('self_healing.jsonl'):
     for line in f.open():
         try: events.append(json.loads(line))
         except: pass
@@ -493,18 +600,29 @@ from pathlib import Path
 
 for log_name in ['live_orders', 'tested_orders']:
     total = 0
-    for f in Path('$RUNTIME/output/paper-live-shell').rglob(f'{log_name}.jsonl'):
+    paths = []
+    flat = Path('$FORENSICS_ROOT') / f'{log_name}.jsonl'
+    if flat.exists():
+        paths.append(flat)
+    out_root = Path('$OUTPUT_MODE_ROOT')
+    if out_root.exists():
+        paths.extend(out_root.rglob(f'{log_name}.jsonl'))
+    seen = set()
+    for f in paths:
+        if f in seen:
+            continue
+        seen.add(f)
         total += sum(1 for _ in f.open())
     print(f'  {log_name}: {total}건')
 " 2>/dev/null || echo "  API check skipped"
 
 # 429/5xx in supervisor log
-if [ -f "$RUNTIME/live_supervisor.log" ]; then
-    RATE_LIMIT=$(tail -500 "$RUNTIME/live_supervisor.log" | grep -ci "429\|rate.limit" 2>/dev/null; true)
+if [ -f "$SUPERVISOR_LOG" ]; then
+    RATE_LIMIT=$(tail -500 "$SUPERVISOR_LOG" | grep -Eci "HTTP[[:space:]/_-]*429|status[=: ][[:space:]]*429|code[=: ][[:space:]]*429|rate[._ -]?limit|too many requests" 2>/dev/null; true)
     RATE_LIMIT=${RATE_LIMIT:-0}
-    SERVER_ERR=$(tail -500 "$RUNTIME/live_supervisor.log" | grep -ci "HTTP 50[0-9]" 2>/dev/null; true)
+    SERVER_ERR=$(tail -500 "$SUPERVISOR_LOG" | grep -ci "HTTP 50[0-9]" 2>/dev/null; true)
     SERVER_ERR=${SERVER_ERR:-0}
-    TRANSPORT_ERR=$(tail -500 "$RUNTIME/live_supervisor.log" | grep -ci "transport error\|DNS resolution\|connection reset" 2>/dev/null; true)
+    TRANSPORT_ERR=$(tail -500 "$SUPERVISOR_LOG" | grep -ci "transport error\|DNS resolution\|connection reset" 2>/dev/null; true)
     TRANSPORT_ERR=${TRANSPORT_ERR:-0}
     echo "  최근 429 에러: ${RATE_LIMIT}건"
     echo "  최근 5xx 에러: ${SERVER_ERR}건"
@@ -544,7 +662,12 @@ from datetime import datetime, timezone, timedelta
 from collections import Counter
 
 decs = []
-for f in Path('$RUNTIME/output/paper-live-shell').rglob('decisions.jsonl'):
+flat = Path('$FORENSICS_ROOT') / 'decisions.jsonl'
+if flat.exists():
+    paths = [flat]
+else:
+    paths = list(Path('$OUTPUT_MODE_ROOT').rglob('decisions.jsonl')) if Path('$OUTPUT_MODE_ROOT').exists() else []
+for f in paths:
     for line in f.open():
         try: decs.append(json.loads(line))
         except: pass
@@ -580,7 +703,12 @@ import json
 from pathlib import Path
 
 syncs = []
-for f in Path('$RUNTIME/output/paper-live-shell').rglob('account_sync.jsonl'):
+flat = Path('$FORENSICS_ROOT') / 'account_sync.jsonl'
+if flat.exists():
+    paths = [flat]
+else:
+    paths = list(Path('$OUTPUT_MODE_ROOT').rglob('account_sync.jsonl')) if Path('$OUTPUT_MODE_ROOT').exists() else []
+for f in paths:
     for line in f.open():
         try: syncs.append(json.loads(line))
         except: pass
