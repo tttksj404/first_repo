@@ -1,0 +1,2 @@
+{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-22", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.0279 limit=0.0200"}
+{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-22", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.0558 limit=0.0250"}

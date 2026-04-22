@@ -1,0 +1,55 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 2,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 4,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 5
+  },
+  "observation_count": 5,
+  "symbols": {
+    "BTCUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": -11.50651498362348,
+        "mode": "futures",
+        "observations": [
+          -11.50651498362348
+        ],
+        "trend_direction": 1
+      },
+      {
+        "bucket": 7,
+        "median_bps": -27.281410717910312,
+        "mode": "futures",
+        "observations": [
+          -27.281410717910312
+        ],
+        "trend_direction": -1
+      }
+    ],
+    "PEPEUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": -9.490167132387429,
+        "mode": "futures",
+        "observations": [
+          -9.490167132387429
+        ],
+        "trend_direction": -1
+      },
+      {
+        "bucket": 7,
+        "median_bps": -2.573936320816706,
+        "mode": "futures",
+        "observations": [
+          -2.573936320816706,
+          -8.21460659735654
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}
