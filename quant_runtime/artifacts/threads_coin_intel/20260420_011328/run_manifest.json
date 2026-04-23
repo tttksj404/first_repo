@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-04-20T01:14:22.506243+00:00",
+  "query_count": 15,
+  "queries": [
+    "bitcoin",
+    "btc",
+    "#bitcoin",
+    "#btc",
+    "#crypto",
+    "crypto trading",
+    "trading strategy",
+    "day trading",
+    "futures trading",
+    "automated trading",
+    "비트코인",
+    "암호화폐",
+    "코인",
+    "가상자산",
+    "트레이딩"
+  ],
+  "args": {
+    "output_root": "quant_runtime\\artifacts\\threads_coin_intel",
+    "queries_file": null,
+    "search_scrolls": 0,
+    "profile_scrolls": 0,
+    "wait_ms": 800,
+    "max_posts_per_query": 2,
+    "max_profile_users": 0,
+    "max_posts_per_profile": 15,
+    "http_timeout_s": 25,
+    "locale": "ko-KR"
+  },
+  "raw_hits": 28,
+  "unique_posts": 25,
+  "enriched_posts": 25,
+  "usable_posts": 3
+}

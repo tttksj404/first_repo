@@ -1,0 +1,10 @@
+﻿{
+    "target_seconds":  1800,
+    "pid":  13940,
+    "probe":  "C:\\Users\\SSAFY\\Downloads\\first_repo-main\\quant_runtime\\realtime_candidate_probe20_long_watch_30m_20260421_084211",
+    "started_at":  "2026-04-21T08:42:11.7356411+09:00",
+    "strategy":  "rotation_30x_candidate_long_watch",
+    "paper_only":  true,
+    "equity_usd":  50,
+    "capacity_usd":  1500
+}

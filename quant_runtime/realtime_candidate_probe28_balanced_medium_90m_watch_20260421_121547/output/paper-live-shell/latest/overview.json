@@ -1,0 +1,135 @@
+{
+  "decision_count": 500,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 50.0,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 50.0,
+  "futures_manual_handling_balance_usd": 1.115724,
+  "futures_total_reusable_balance_usd": 50.0,
+  "futures_transferable_execution_balance_usd": 0.007689,
+  "heartbeat_count": 327621,
+  "kill_switch": {
+    "armed": true,
+    "reasons": [
+      "DAILY_REALIZED_LOSS_LIMIT",
+      "INTRADAY_DRAWDOWN_LIMIT"
+    ]
+  },
+  "last_decision_emitted_at": "2026-04-21T04:08:18.630252+00:00",
+  "last_decision_timestamp": "2026-04-21T03:16:00+00:00",
+  "last_event_timestamp": "2026-04-21T04:21:25.256445+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": -1.712512,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 10.857895,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 23.235801,
+      "reasons": [],
+      "score": 66.07,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.129785,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -20.129785,
+      "reasons": [
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "LIQUIDITY_TOO_WEAK",
+        "SCORE_TOO_LOW"
+      ],
+      "score": 56.41,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "cash",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.519062,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -8.211025,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 44.69,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 15.416405,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 10.303071,
+      "reasons": [],
+      "score": 63.47,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "PEPEUSDT"
+    },
+    {
+      "candidate_mode": "cash",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 36.042781,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -16.422956,
+      "reasons": [
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 34.58,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "PEPEUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.007689,
+  "status": "healthy",
+  "tested_order_count": 1,
+  "top_rejection_reasons": {
+    "BUYING_INTO_RESISTANCE": 60,
+    "DIRECTION_CONFLICT": 155,
+    "EDGE_BELOW_COST": 196,
+    "EDGE_TOO_THIN": 162,
+    "LIQUIDITY_TOO_WEAK": 214,
+    "SCORE_TOO_LOW": 214,
+    "SENTIMENT_CAUTION": 32,
+    "SUPPORT_NOT_CONFIRMED": 28
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-04-21T04:21:25.534418+00:00"
+}

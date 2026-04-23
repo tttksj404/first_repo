@@ -1,0 +1,4 @@
+
+=== supervisor spawn @ 2026-04-17T03:21:02+00:00 ===
+[daemon] restored 29 learning observations from quant_runtime\output\paper-live-shell\20260417-030827\edge_table.json
+[daemon] equity auto-detected: $41.03 USDT ¡æ capacity: $1230.98 (was $10,000 / $5,000 defaults)

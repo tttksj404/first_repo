@@ -100,17 +100,17 @@
   ],
   "regime_actions": [],
   "replay_provenance": {
-    "classification": "projected_evidence",
-    "decision_surface": "staged_candidate",
+    "classification": "mixed_root_summary_fallback",
+    "decision_surface": "not_available",
     "has_bucket_reference": false,
     "has_runtime_summary_anchor": false,
     "policy_bucket": "not_available",
-    "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+    "reason_code": "root",
     "source": "root",
-    "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+    "summary": "mixed_root_summary_fallback:root",
     "uses_direct_bucket_replay": false,
-    "uses_mixed_root_summary_fallback": false,
-    "uses_projected_evidence": true
+    "uses_mixed_root_summary_fallback": true,
+    "uses_projected_evidence": false
   },
   "sample_quality_watchdog_status": "thin",
   "symbol_actions": [],

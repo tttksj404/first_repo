@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-04-20T01:48:34.791232+00:00",
+  "threads_total_posts": 182,
+  "threads_usable_posts": 2,
+  "external_total_pages": 37,
+  "external_usable_pages": 0,
+  "combined_usable_count": 2,
+  "unique_threads_users": 60,
+  "unique_external_domains": 13,
+  "tag_counts": {
+    "derivatives": 1,
+    "execution_discipline": 1
+  },
+  "top_usable_samples": [
+    {
+      "url": "https://www.threads.com/@tradenalytics/post/DXFHwN8mDgf",
+      "source_kind": "threads_post",
+      "username": "tradenalytics",
+      "score": 3,
+      "tags": [
+        "derivatives"
+      ],
+      "text_preview": "$BTC I'm still quite reluctant to buy Bitcoin yet because the retail shorts activity in my Futures Analyzer is not signaling bottom. \n\nDuring 2023, this signal peaked and there were non stop red signals getting spammed as seen below. \n\nNo s"
+    },
+    {
+      "url": "https://www.threads.com/@tradenalytics/post/DUcp1A7kUM_",
+      "source_kind": "threads_post",
+      "username": "tradenalytics",
+      "score": 3,
+      "tags": [
+        "execution_discipline"
+      ],
+      "text_preview": "$BTC sorry guys I don't make the rules.\n\nI was off by $2K, but I managed to predict this in November 2024. \n\nIn the meantime I was away from crypto, trading only stocks. \n\nThis helped my sanity alot to be buying stuff that don't crash -50% "
+    }
+  ]
+}

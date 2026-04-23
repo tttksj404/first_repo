@@ -1,0 +1,1292 @@
+{
+  "accepted_live_order_count": 0,
+  "account_snapshot": {
+    "accounts": [
+      {
+        "accountEquity": "57.69769354",
+        "assetList": [
+          {
+            "available": "0",
+            "balance": "0",
+            "coin": "BTC"
+          }
+        ],
+        "assetMode": "single",
+        "available": "57.69769354",
+        "btcEquity": "0.000730613017",
+        "coupon": "0",
+        "crossedMargin": "0",
+        "crossedMaxAvailable": "57.69769354",
+        "crossedRiskRate": "0",
+        "crossedUnrealizedPL": "",
+        "grant": "",
+        "isolatedMargin": "0",
+        "isolatedMaxAvailable": "57.69769354",
+        "isolatedUnrealizedPL": "",
+        "locked": "0",
+        "marginCoin": "USDT",
+        "maxTransferOut": "57.69769354",
+        "unionAvailable": "57.69769354",
+        "unionMm": "0",
+        "unionTotalMargin": "57.69769354",
+        "unrealizedPL": "0",
+        "usdtEquity": "57.697693548592"
+      }
+    ],
+    "availableBalance": 57.69769354,
+    "crossedMaxAvailable": 57.69769354,
+    "executionAvailableBalance": 57.69769354,
+    "raw": {
+      "code": "00000",
+      "data": [
+        {
+          "accountEquity": "57.69769354",
+          "assetList": [
+            {
+              "available": "0",
+              "balance": "0",
+              "coin": "BTC"
+            }
+          ],
+          "assetMode": "single",
+          "available": "57.69769354",
+          "btcEquity": "0.000730613017",
+          "coupon": "0",
+          "crossedMargin": "0",
+          "crossedMaxAvailable": "57.69769354",
+          "crossedRiskRate": "0",
+          "crossedUnrealizedPL": "",
+          "grant": "",
+          "isolatedMargin": "0",
+          "isolatedMaxAvailable": "57.69769354",
+          "isolatedUnrealizedPL": "",
+          "locked": "0",
+          "marginCoin": "USDT",
+          "maxTransferOut": "57.69769354",
+          "unionAvailable": "57.69769354",
+          "unionMm": "0",
+          "unionTotalMargin": "57.69769354",
+          "unrealizedPL": "0",
+          "usdtEquity": "57.697693548592"
+        }
+      ],
+      "msg": "success",
+      "requestTime": 1776867373738
+    },
+    "unionAvailable": 57.69769354
+  },
+  "adopted_futures_position_count": 0,
+  "adopted_futures_positions": [],
+  "avg_edge_retention_ratio": 0.0,
+  "avg_expected_edge_bps": 0.0,
+  "avg_fill_ratio": 0.0,
+  "avg_realized_edge_bps": 0.0,
+  "avg_slippage_bps": 0.0,
+  "candidate_policy": {
+    "adjustments": [],
+    "decomposition_summary": {
+      "candidate_adjustment_rows": [],
+      "dominant_regime_mode": "",
+      "elite_regime_modes": [],
+      "runtime_pruning_recommendation_count": 0,
+      "runtime_symbol_recommendation_count": 0,
+      "runtime_symbol_scorecard_count": 0,
+      "score_delta_total": 0,
+      "supportive_regime_modes": []
+    },
+    "signal_sources": [],
+    "status": "insufficient_data"
+  },
+  "capital_report": {
+    "can_trade_any": true,
+    "can_trade_futures_any": true,
+    "can_trade_spot_any": true,
+    "capital_transfer_routes": [
+      {
+        "asset": "USDT",
+        "auto_transfer_supported": true,
+        "capacity_effect": "spot_execution",
+        "note": "Futures USDT can be transferred back to spot for spot execution funding.",
+        "requires_manual_transfer": false,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 57.69769354,
+        "source_market": "futures",
+        "target_market": "spot",
+        "transferable_usd": 57.697694
+      },
+      {
+        "asset": "USDT",
+        "auto_transfer_supported": true,
+        "capacity_effect": "direct_execution",
+        "note": "Spot USDT can be moved into futures as immediate execution balance.",
+        "requires_manual_transfer": false,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 0.01173858,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.011739
+      },
+      {
+        "asset": "XRP",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot XRP can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 0.425,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.6205
+      },
+      {
+        "asset": "BABYDOGE",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot BABYDOGE can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1000000000.0,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.44
+      },
+      {
+        "asset": "BTC",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot BTC can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1.13e-06,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.089002
+      },
+      {
+        "asset": "ETH",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot ETH can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 8e-07,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.001934
+      },
+      {
+        "asset": "VIRTUAL",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot VIRTUAL can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 0.0026,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.001863
+      },
+      {
+        "asset": "SOL",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot SOL can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1.48e-05,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 0.00132
+      },
+      {
+        "asset": "TRX",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot TRX can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 2.4e-05,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 8e-06
+      },
+      {
+        "asset": "DOGE",
+        "auto_transfer_supported": false,
+        "capacity_effect": "manual_conversion",
+        "note": "Spot DOGE can be transferred into futures, but non-USDT assets still require conversion or manual collateral handling before new futures execution.",
+        "requires_manual_transfer": true,
+        "route_type": "wallet_transfer",
+        "source_free_amount": 1.49e-05,
+        "source_market": "spot",
+        "target_market": "futures",
+        "transferable_usd": 1e-06
+      }
+    ],
+    "futures_available_balance_usd": 50.0,
+    "futures_collateral_candidate_balance_usd": 0,
+    "futures_execution_balance_usd": 50.0,
+    "futures_funding_assets": [
+      {
+        "asset": "USDT",
+        "free": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "locked": 0.0,
+        "margin_available": true,
+        "total": 57.69769354,
+        "total_balance_usd": 57.697694
+      }
+    ],
+    "futures_manual_handling_balance_usd": 1.154628,
+    "futures_recognized_balance_usd": 50.0,
+    "futures_requirements": [
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 1000.0,
+        "symbol": "PEPEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 1.0,
+        "symbol": "DOGEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 1.0,
+        "symbol": "XRPUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.1,
+        "symbol": "SOLUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.01,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 18.382353,
+        "market": "futures",
+        "min_equity_usd": 14.705882,
+        "min_notional_usd": 5.0,
+        "min_quantity": 0.0001,
+        "symbol": "BTCUSDT"
+      }
+    ],
+    "futures_total_reusable_balance_usd": 50.0,
+    "futures_transferable_execution_balance_usd": 0.011739,
+    "max_futures_to_spot_transfer_usd": 57.697694,
+    "max_spot_to_futures_transfer_usd": 0.6205,
+    "minimum_full_universe_balance_usd": 18.382353,
+    "minimum_operational_balance_usd": 3.676471,
+    "note": "5% \uc218\uc775 \ubcf4\uc7a5\uc740 \ubd88\uac00\ud558\uba70, \uc544\ub798 \uae08\uc561\uc740 \ud604\uc7ac \uc124\uc815\uacfc \ucd5c\uc18c \uc8fc\ubb38 \uc870\uac74 \uae30\uc900\uc758 \uc6b4\uc601 \uac00\ub2a5 \uc790\uae08 \ucd94\uc815\uce58\uc785\ub2c8\ub2e4.",
+    "pending_symbols": [],
+    "recommended_balance_usd": 29.411765,
+    "spot_available_balance_usd": 0.011739,
+    "spot_execution_routes": [
+      {
+        "base_asset": "BTC",
+        "execution_symbol": "BTCUSDT",
+        "free_balance": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "BTCUSDT"
+      },
+      {
+        "base_asset": "BTC",
+        "execution_symbol": "BTCUSDT",
+        "free_balance": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "BTCUSDT"
+      },
+      {
+        "base_asset": "DOGE",
+        "execution_symbol": "DOGEUSDT",
+        "free_balance": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "DOGEUSDT"
+      },
+      {
+        "base_asset": "DOGE",
+        "execution_symbol": "DOGEBTC",
+        "free_balance": 1.13e-06,
+        "free_balance_usd": 0.089002,
+        "funding_asset": "BTC",
+        "funding_source_market": "spot",
+        "min_notional_usd": 78762.831858,
+        "min_quantity": 0.0,
+        "quote_asset": "BTC",
+        "quote_asset_usd_price": 78762.831858,
+        "requires_wallet_transfer": false,
+        "route_type": "cross_quote",
+        "target_symbol": "DOGEUSDT"
+      },
+      {
+        "base_asset": "DOGE",
+        "execution_symbol": "DOGEUSDT",
+        "free_balance": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "DOGEUSDT"
+      },
+      {
+        "base_asset": "ETH",
+        "execution_symbol": "ETHUSDT",
+        "free_balance": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "ETHUSDT"
+      },
+      {
+        "base_asset": "ETH",
+        "execution_symbol": "ETHBTC",
+        "free_balance": 1.13e-06,
+        "free_balance_usd": 0.089002,
+        "funding_asset": "BTC",
+        "funding_source_market": "spot",
+        "min_notional_usd": 78762.831858,
+        "min_quantity": 0.0,
+        "quote_asset": "BTC",
+        "quote_asset_usd_price": 78762.831858,
+        "requires_wallet_transfer": false,
+        "route_type": "cross_quote",
+        "target_symbol": "ETHUSDT"
+      },
+      {
+        "base_asset": "ETH",
+        "execution_symbol": "ETHUSDT",
+        "free_balance": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "ETHUSDT"
+      },
+      {
+        "base_asset": "PEPE",
+        "execution_symbol": "PEPEUSDT",
+        "free_balance": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "PEPEUSDT"
+      },
+      {
+        "base_asset": "PEPE",
+        "execution_symbol": "PEPEUSDT",
+        "free_balance": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "PEPEUSDT"
+      },
+      {
+        "base_asset": "SOL",
+        "execution_symbol": "SOLUSDT",
+        "free_balance": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "SOLUSDT"
+      },
+      {
+        "base_asset": "SOL",
+        "execution_symbol": "SOLBTC",
+        "free_balance": 1.13e-06,
+        "free_balance_usd": 0.089002,
+        "funding_asset": "BTC",
+        "funding_source_market": "spot",
+        "min_notional_usd": 78762.831858,
+        "min_quantity": 0.0,
+        "quote_asset": "BTC",
+        "quote_asset_usd_price": 78762.831858,
+        "requires_wallet_transfer": false,
+        "route_type": "cross_quote",
+        "target_symbol": "SOLUSDT"
+      },
+      {
+        "base_asset": "SOL",
+        "execution_symbol": "SOLUSDT",
+        "free_balance": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "SOLUSDT"
+      },
+      {
+        "base_asset": "XRP",
+        "execution_symbol": "XRPUSDT",
+        "free_balance": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "funding_asset": "USDT",
+        "funding_source_market": "spot",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": false,
+        "route_type": "direct",
+        "target_symbol": "XRPUSDT"
+      },
+      {
+        "base_asset": "XRP",
+        "execution_symbol": "XRPBTC",
+        "free_balance": 1.13e-06,
+        "free_balance_usd": 0.089002,
+        "funding_asset": "BTC",
+        "funding_source_market": "spot",
+        "min_notional_usd": 78762.831858,
+        "min_quantity": 0.0,
+        "quote_asset": "BTC",
+        "quote_asset_usd_price": 78762.831858,
+        "requires_wallet_transfer": false,
+        "route_type": "cross_quote",
+        "target_symbol": "XRPUSDT"
+      },
+      {
+        "base_asset": "XRP",
+        "execution_symbol": "XRPETH",
+        "free_balance": 8e-07,
+        "free_balance_usd": 0.001934,
+        "funding_asset": "ETH",
+        "funding_source_market": "spot",
+        "min_notional_usd": 2417.5,
+        "min_quantity": 0.0,
+        "quote_asset": "ETH",
+        "quote_asset_usd_price": 2417.5,
+        "requires_wallet_transfer": false,
+        "route_type": "cross_quote",
+        "target_symbol": "XRPUSDT"
+      },
+      {
+        "base_asset": "XRP",
+        "execution_symbol": "XRPUSDT",
+        "free_balance": 57.69769354,
+        "free_balance_usd": 57.697694,
+        "funding_asset": "USDT",
+        "funding_source_market": "futures",
+        "min_notional_usd": 1.000036,
+        "min_quantity": 0.0,
+        "quote_asset": "USDT",
+        "quote_asset_usd_price": 1.000036,
+        "requires_wallet_transfer": true,
+        "route_type": "transfer_direct",
+        "target_symbol": "XRPUSDT"
+      }
+    ],
+    "spot_funding_assets": [
+      {
+        "asset": "XRP",
+        "free": 0.425,
+        "free_balance_usd": 0.6205,
+        "locked": 0.0,
+        "total": 0.425,
+        "total_balance_usd": 0.6205
+      },
+      {
+        "asset": "BABYDOGE",
+        "free": 1000000000.0,
+        "free_balance_usd": 0.44,
+        "locked": 0.0,
+        "total": 1000000000.0,
+        "total_balance_usd": 0.44
+      },
+      {
+        "asset": "BTC",
+        "free": 1.13e-06,
+        "free_balance_usd": 0.089002,
+        "locked": 0.0,
+        "total": 1.13e-06,
+        "total_balance_usd": 0.089002
+      },
+      {
+        "asset": "USDT",
+        "free": 0.01173858,
+        "free_balance_usd": 0.011739,
+        "locked": 0.0,
+        "total": 0.01173858,
+        "total_balance_usd": 0.011739
+      },
+      {
+        "asset": "ETH",
+        "free": 8e-07,
+        "free_balance_usd": 0.001934,
+        "locked": 0.0,
+        "total": 8e-07,
+        "total_balance_usd": 0.001934
+      },
+      {
+        "asset": "VIRTUAL",
+        "free": 0.0026,
+        "free_balance_usd": 0.001863,
+        "locked": 0.0,
+        "total": 0.0026,
+        "total_balance_usd": 0.001863
+      },
+      {
+        "asset": "SOL",
+        "free": 1.48e-05,
+        "free_balance_usd": 0.00132,
+        "locked": 0.0,
+        "total": 1.48e-05,
+        "total_balance_usd": 0.00132
+      },
+      {
+        "asset": "TRX",
+        "free": 2.4e-05,
+        "free_balance_usd": 8e-06,
+        "locked": 0.0,
+        "total": 2.4e-05,
+        "total_balance_usd": 8e-06
+      },
+      {
+        "asset": "DOGE",
+        "free": 1.49e-05,
+        "free_balance_usd": 1e-06,
+        "locked": 0.0,
+        "total": 1.49e-05,
+        "total_balance_usd": 1e-06
+      }
+    ],
+    "spot_recognized_balance_usd": 1.166367,
+    "spot_requirements": [
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "PEPEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "DOGEUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "XRPUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "SOLUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "ETHUSDT"
+      },
+      {
+        "buffered_min_equity_usd": 3.676471,
+        "market": "spot",
+        "min_equity_usd": 2.941176,
+        "min_notional_usd": 1.0,
+        "min_quantity": 0.0,
+        "symbol": "BTCUSDT"
+      }
+    ]
+  },
+  "closed_trade_count": 0,
+  "closed_trades": [],
+  "decision_count": 12,
+  "estimated_round_trip_fee_usd": 0,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "execution_audit_by_symbol": [],
+  "execution_outcome_counts": {},
+  "execution_quality": {
+    "active_overlays": {},
+    "contexts": {},
+    "decay_half_life_days": 14.0,
+    "degraded_keys": [],
+    "degraded_overlays": {},
+    "minimum_sample_size": 3,
+    "policy_bucket_contexts": {},
+    "symbols": {},
+    "updated_at": "2026-04-22T14:17:00.547604+00:00"
+  },
+  "executive_operating_verdict": {
+    "confidence": "high",
+    "reasons": [
+      "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+    ],
+    "replay_provenance": {
+      "checkpoint_auto_judge": {
+        "classification": "not_available",
+        "decision_surface": "checkpoint_auto_judge",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "NOT_AVAILABLE",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "primary": {
+        "classification": "mixed_root_summary_fallback",
+        "decision_surface": "not_available",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": true,
+        "policy_bucket": "not_available",
+        "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+        "source": "root",
+        "summary": "mixed_root_summary_fallback:root",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": true,
+        "uses_projected_evidence": false
+      },
+      "staged_candidate": {
+        "classification": "not_available",
+        "decision_surface": "staged_candidate",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "NOT_AVAILABLE",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      }
+    },
+    "signals": {
+      "active_policy_bucket_available": false,
+      "auto_mode": "normal",
+      "baseline_control_bucket_available": false,
+      "blocked_symbols": [],
+      "cautious_symbols": [],
+      "checkpoint_evidence_policy_bucket": "not_available",
+      "checkpoint_evidence_source": "not_available",
+      "checkpoint_verdict": "not_available",
+      "micro_live_status": "not_available",
+      "operational_status": "hold",
+      "policy_lineage_status": "unknown",
+      "policy_validation_status": "fail",
+      "promotion_status": "keep",
+      "requested_status": "keep",
+      "review_symbols": [],
+      "sample_quality_watchdog_status": "not_available",
+      "simple_baseline_gate_status": "not_available",
+      "staged_candidate_bucket_available": false
+    },
+    "source_reason_codes": {
+      "auto_mode": [],
+      "checkpoint_auto_judge": [],
+      "operational": [
+        "INSUFFICIENT_LIVE_ORDERS"
+      ],
+      "policy_validation": [
+        "NO_CANDIDATE_ADJUSTMENTS",
+        "NO_PROMOTION_ACTION",
+        "REPLAY_DRAWDOWN_TOO_HIGH",
+        "SHADOW_ALIGNMENT_TOO_LOW"
+      ],
+      "promotion": [
+        "INSUFFICIENT_ATTRIBUTION_DATA"
+      ]
+    },
+    "verdict": "rollback"
+  },
+  "exit_reason_counts": {},
+  "futures_position_mismatch": false,
+  "futures_position_mismatch_details": {
+    "missing_in_paper": [],
+    "missing_on_exchange": []
+  },
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "live_order_count": 0,
+  "live_orders": [],
+  "live_positions": [],
+  "macro_runtime": {
+    "active_symbols": [],
+    "cash_rejections": 0,
+    "regime": "neutral",
+    "symbol_bias": "neutral",
+    "trade_restraint": "none"
+  },
+  "major_entry_relaxation_count": 12,
+  "major_size_boost_count": 0,
+  "modes": [
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash",
+    "cash"
+  ],
+  "observe_only_symbols": [],
+  "open_futures_positions": [],
+  "open_orders_snapshot": {
+    "orders": {
+      "endId": null,
+      "entrustedList": null
+    },
+    "raw": {
+      "code": "00000",
+      "data": {
+        "endId": null,
+        "entrustedList": null
+      },
+      "msg": "success",
+      "requestTime": 1776867373954
+    }
+  },
+  "open_spot_positions": [],
+  "operational_verdict": {
+    "metrics": {
+      "avg_edge_retention_ratio": 0.0,
+      "avg_fill_ratio": 0.0,
+      "avg_realized_edge_bps": 0.0,
+      "live_order_count": 0,
+      "protection_degraded_rate": 0.0,
+      "realized_vs_expected_edge_gap_bps": 0.0,
+      "reject_rate": 0.0
+    },
+    "reasons": [
+      "INSUFFICIENT_LIVE_ORDERS"
+    ],
+    "status": "hold"
+  },
+  "paper_open_futures_position_count": 0,
+  "paper_open_futures_positions": [],
+  "paper_verification_mode": true,
+  "pending_external_futures_position_count": 0,
+  "pending_external_futures_positions": [],
+  "performance_attribution": [],
+  "policy_state": {
+    "active_policy": {
+      "adjustments": [],
+      "auto_mode": {},
+      "executive_operating_verdict": {
+        "confidence": "high",
+        "reasons": [
+          "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+        ],
+        "replay_provenance": {
+          "checkpoint_auto_judge": {
+            "classification": "not_available",
+            "decision_surface": "checkpoint_auto_judge",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "primary": {
+            "classification": "mixed_root_summary_fallback",
+            "decision_surface": "not_available",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": true,
+            "policy_bucket": "not_available",
+            "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+            "source": "root",
+            "summary": "mixed_root_summary_fallback:root",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": true,
+            "uses_projected_evidence": false
+          },
+          "staged_candidate": {
+            "classification": "not_available",
+            "decision_surface": "staged_candidate",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          }
+        },
+        "signals": {
+          "active_policy_bucket_available": false,
+          "auto_mode": "normal",
+          "baseline_control_bucket_available": false,
+          "blocked_symbols": [],
+          "cautious_symbols": [],
+          "checkpoint_evidence_policy_bucket": "not_available",
+          "checkpoint_evidence_source": "not_available",
+          "checkpoint_verdict": "not_available",
+          "micro_live_status": "not_available",
+          "operational_status": "hold",
+          "policy_lineage_status": "unknown",
+          "policy_validation_status": "fail",
+          "promotion_status": "keep",
+          "requested_status": "keep",
+          "review_symbols": [],
+          "sample_quality_watchdog_status": "not_available",
+          "simple_baseline_gate_status": "not_available",
+          "staged_candidate_bucket_available": false
+        },
+        "source_reason_codes": {
+          "auto_mode": [],
+          "checkpoint_auto_judge": [],
+          "operational": [
+            "INSUFFICIENT_LIVE_ORDERS"
+          ],
+          "policy_validation": [
+            "NO_CANDIDATE_ADJUSTMENTS",
+            "NO_PROMOTION_ACTION",
+            "REPLAY_DRAWDOWN_TOO_HIGH",
+            "SHADOW_ALIGNMENT_TOO_LOW"
+          ],
+          "promotion": [
+            "INSUFFICIENT_ATTRIBUTION_DATA"
+          ]
+        },
+        "verdict": "rollback"
+      },
+      "lifecycle_stage": "baseline",
+      "micro_live_gate": {},
+      "micro_live_readiness": "not_available",
+      "policy_lineage": {
+        "adjustment_count": 0,
+        "adjustment_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "keep",
+        "rollout_phase": "baseline",
+        "source": "ephemeral_policy_state",
+        "structural_key": "1fc1b037426836cda7df24ab7772579c7c0226516ee08658567d2962a5ae5551",
+        "symbols": [],
+        "updated_at": "",
+        "version": 0,
+        "versioned_key": "6eed748c0014dac7652612ebd7cb869e28d6e0f060755071b6892b70a7605b28"
+      },
+      "status": "keep"
+    },
+    "auto_mode": {},
+    "candidate_policy": {
+      "adjustments": [],
+      "decomposition_summary": {
+        "candidate_adjustment_rows": [],
+        "dominant_regime_mode": "",
+        "elite_regime_modes": [],
+        "runtime_pruning_recommendation_count": 0,
+        "runtime_symbol_recommendation_count": 0,
+        "runtime_symbol_scorecard_count": 0,
+        "score_delta_total": 0,
+        "supportive_regime_modes": []
+      },
+      "signal_sources": [],
+      "status": "insufficient_data"
+    },
+    "executive_operating_verdict": {
+      "confidence": "high",
+      "reasons": [
+        "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+      ],
+      "replay_provenance": {
+        "checkpoint_auto_judge": {
+          "classification": "not_available",
+          "decision_surface": "checkpoint_auto_judge",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "NOT_AVAILABLE",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "primary": {
+          "classification": "mixed_root_summary_fallback",
+          "decision_surface": "not_available",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": true,
+          "policy_bucket": "not_available",
+          "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+          "source": "root",
+          "summary": "mixed_root_summary_fallback:root",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": true,
+          "uses_projected_evidence": false
+        },
+        "staged_candidate": {
+          "classification": "not_available",
+          "decision_surface": "staged_candidate",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "NOT_AVAILABLE",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        }
+      },
+      "signals": {
+        "active_policy_bucket_available": false,
+        "auto_mode": "normal",
+        "baseline_control_bucket_available": false,
+        "blocked_symbols": [],
+        "cautious_symbols": [],
+        "checkpoint_evidence_policy_bucket": "not_available",
+        "checkpoint_evidence_source": "not_available",
+        "checkpoint_verdict": "not_available",
+        "micro_live_status": "not_available",
+        "operational_status": "hold",
+        "policy_lineage_status": "unknown",
+        "policy_validation_status": "fail",
+        "promotion_status": "keep",
+        "requested_status": "keep",
+        "review_symbols": [],
+        "sample_quality_watchdog_status": "not_available",
+        "simple_baseline_gate_status": "not_available",
+        "staged_candidate_bucket_available": false
+      },
+      "source_reason_codes": {
+        "auto_mode": [],
+        "checkpoint_auto_judge": [],
+        "operational": [
+          "INSUFFICIENT_LIVE_ORDERS"
+        ],
+        "policy_validation": [
+          "NO_CANDIDATE_ADJUSTMENTS",
+          "NO_PROMOTION_ACTION",
+          "REPLAY_DRAWDOWN_TOO_HIGH",
+          "SHADOW_ALIGNMENT_TOO_LOW"
+        ],
+        "promotion": [
+          "INSUFFICIENT_ATTRIBUTION_DATA"
+        ]
+      },
+      "verdict": "rollback"
+    },
+    "policy_lineage": {
+      "adjustment_count": 0,
+      "adjustment_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "available": true,
+      "basis": "adjustments",
+      "policy_status": "keep",
+      "rollout_phase": "baseline",
+      "source": "ephemeral_policy_state",
+      "structural_key": "1fc1b037426836cda7df24ab7772579c7c0226516ee08658567d2962a5ae5551",
+      "symbols": [],
+      "updated_at": "",
+      "version": 0,
+      "versioned_key": "6eed748c0014dac7652612ebd7cb869e28d6e0f060755071b6892b70a7605b28"
+    },
+    "promotion_verdict": {
+      "blocked_reasons": [],
+      "effective_status": "keep",
+      "micro_live_gate": {},
+      "micro_live_readiness": "not_available",
+      "reasons": [
+        "INSUFFICIENT_ATTRIBUTION_DATA"
+      ],
+      "requested_status": "keep",
+      "rollout_stage": "baseline",
+      "status": "keep"
+    },
+    "status": "keep"
+  },
+  "policy_validation": {
+    "evidence": {
+      "avg_realized_edge_bps": 0.0,
+      "avg_retention": 0.0,
+      "max_protection_degraded_rate": 1.0,
+      "max_reject_rate": 1.0,
+      "replay_like_drawdown_ratio": 1.0,
+      "sample_count": 0,
+      "shadow_alignment_score": 0.0
+    },
+    "reasons": [
+      "NO_CANDIDATE_ADJUSTMENTS",
+      "NO_PROMOTION_ACTION",
+      "REPLAY_DRAWDOWN_TOO_HIGH",
+      "SHADOW_ALIGNMENT_TOO_LOW"
+    ],
+    "status": "fail"
+  },
+  "promotion_verdict": {
+    "blocked_reasons": [],
+    "effective_status": "keep",
+    "micro_live_gate": {},
+    "micro_live_readiness": "not_available",
+    "reasons": [
+      "INSUFFICIENT_ATTRIBUTION_DATA"
+    ],
+    "requested_status": "keep",
+    "rollout_stage": "baseline",
+    "status": "keep"
+  },
+  "protection_degraded_count": 0,
+  "protection_degraded_rate": 0.0,
+  "realized_pnl_net_usd_estimate": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "realized_vs_expected_edge_gap_bps": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.055301,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 24.433133,
+      "reasons": [
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN",
+        "SYMBOL_PROFILE_EDGE_TOO_THIN",
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_VOLUME_TOO_WEAK"
+      ],
+      "score": 71.57,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.55,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 10.054232,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 34.77381,
+      "reasons": [
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 72.06,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.55,
+      "symbol": "XRPUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.361006,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 46.72466,
+      "reasons": [
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_STOP_TOO_WIDE"
+      ],
+      "score": 81.77,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.55,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.12387,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 54.825634,
+      "reasons": [
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_STOP_TOO_WIDE"
+      ],
+      "score": 87.4,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.75,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.003795,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 54.262772,
+      "reasons": [
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL"
+      ],
+      "score": 86.95,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.45,
+      "symbol": "BTCUSDT"
+    }
+  ],
+  "reference_price_guard": {
+    "counts_by_symbol": {},
+    "last_by_symbol": {},
+    "total_count": 0
+  },
+  "rejected_live_order_count": 0,
+  "self_healing": {
+    "active_guards": {
+      "live_order_cooldown_until": null,
+      "manual_symbol_cooldowns": [],
+      "mismatch_active": false,
+      "mismatch_details": {
+        "missing_in_paper": [],
+        "missing_on_exchange": []
+      },
+      "missing_market_state_symbols": [],
+      "stall_restart_budget_remaining": 999,
+      "symbol_order_cooldowns": []
+    },
+    "issue_counts": {},
+    "recent_events": [],
+    "recovery_counts": {},
+    "status": "healthy"
+  },
+  "session_current_equity_usdt": 57.697693548592,
+  "session_equity_delta_usdt": 0.0,
+  "session_start_equity_usdt": 57.697693548592,
+  "symbol_performance": [],
+  "symbols": [
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT",
+    "PEPEUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "telegram_alerts": [],
+  "tested_order_count": 0,
+  "tested_orders": [],
+  "top_rejection_reasons": {
+    "SYMBOL_PROFILE_EDGE_COST_TOO_THIN": 4,
+    "SYMBOL_PROFILE_EDGE_TOO_THIN": 6,
+    "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL": 12,
+    "SYMBOL_PROFILE_LIQUIDITY_TOO_WEAK": 2,
+    "SYMBOL_PROFILE_SCORE_TOO_LOW": 2,
+    "SYMBOL_PROFILE_STOP_TOO_WIDE": 4,
+    "SYMBOL_PROFILE_VOLUME_TOO_WEAK": 5
+  },
+  "unrealized_futures_pnl_usd_estimate": 0,
+  "unrealized_pnl_usd_estimate": 0,
+  "unrealized_spot_pnl_usd_estimate": 0
+}

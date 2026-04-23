@@ -1,0 +1,72 @@
+Traceback (most recent call last):
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1348, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1303, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1349, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1298, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1058, in _send_output
+    self.send(msg)
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 996, in send
+    self.connect()
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1468, in connect
+    super().connect()
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 962, in connect
+    self.sock = self._create_connection(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 851, in create_connection
+    raise exceptions[0]
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 836, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] 대상 컴퓨터에서 연결을 거부했으므로 연결하지 못했습니다
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1058, in send
+    with urlopen(request, timeout=15, context=context) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1351, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [WinError 10061] 대상 컴퓨터에서 연결을 거부했으므로 연결하지 못했습니다>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\runtime.py", line 378, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\runtime.py", line 306, in main
+    result = run_live_paper_daemon(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\daemon.py", line 359, in run_live_paper_daemon
+    store = seed_market_store_from_rest(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\data\rest_seed.py", line 57, in seed_market_store_from_rest
+    spot_exchange_info = client.get_exchange_info(market="spot")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1028, in get_exchange_info
+    payload = self.send(self.build_public_request(path=path, params=params))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1080, in send
+    raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
+RuntimeError: Bitget transport error for https://api.bitget.com/api/v2/spot/public/symbols (host=127.0.0.1:9): [WinError 10061] 대상 컴퓨터에서 연결을 거부했으므로 연결하지 못했습니다

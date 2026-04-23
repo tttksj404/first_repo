@@ -1,4 +1,0 @@
-{"key": "live-position-close:SOLUSDT:1776240002383:CAPITAL_REALLOCATION:1.0000", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[CAPITAL_REALLOCATION] SOLUSDT\nroe_percent=-3.98\nunrealized_pl=-1.12"}
-{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-15", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.0390 limit=0.0200"}
-{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-15", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.0740 limit=0.0250"}
-{"key": "live-entry:1428227115496124417:2026-04-15 08:30:00+00:00", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[LIVE_ENTRY] PEPEUSDT\nmarket=futures\nside=BUY\nquantity=125667000.00000000\nreference_price=0.0000\norder_id=1428227115496124417"}

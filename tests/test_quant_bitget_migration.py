@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -191,6 +192,28 @@ class QuantBitgetMigrationTests(unittest.TestCase):
             readiness = runtime_readiness("bitget")
             self.assertTrue(readiness.is_ready)
 
+    def test_bitget_set_leverage_request_can_include_hold_side(self) -> None:
+        client = BitgetRestClient(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        captured: list[dict[str, object]] = []
+
+        def fake_send(request):  # type: ignore[no-untyped-def]
+            captured.append(json.loads((request.data or b"{}").decode("utf-8")))
+            return {"code": "00000", "data": {"longLeverage": "20"}}
+
+        with patch.object(client, "send", side_effect=fake_send):
+            response = client.set_futures_leverage(symbol="DOGEUSDT", leverage=20, hold_side="long")
+
+        self.assertEqual(captured[0]["holdSide"], "long")
+        self.assertEqual(captured[0]["leverage"], "20")
+        self.assertEqual(response["longLeverage"], "20")
+
     def test_sign_and_request_builders_follow_bitget_headers_and_paths(self) -> None:
         signature = sign_bitget_request(
             secret="secret",
@@ -283,7 +306,7 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(live_client.orders[0][1]["size"], "0.05000000")
         self.assertEqual(live_client.protection_orders, [])
 
-    def test_bitget_live_order_ignores_margin_leverage_update_error(self) -> None:
+    def test_bitget_live_order_aborts_when_margin_leverage_update_fails(self) -> None:
         class FlakyLeverageClient(FakeBitgetLiveClient):
             def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
                 raise RuntimeError(
@@ -293,15 +316,67 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         live_client = FlakyLeverageClient()
         live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
 
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=50000.0,
-        )
+        with self.assertRaisesRegex(RuntimeError, "FUTURES_LEVERAGE_SET_FAILED"):
+            live_adapter.execute_decision(
+                decision=self._decision(final_mode="futures"),
+                reference_price=50000.0,
+            )
 
-        self.assertIsNotNone(result)
+        self.assertEqual(live_client.orders, [])
+
+    def test_bitget_live_order_sets_planned_leverage_with_hold_side_before_entry(self) -> None:
+        class HoldSideLeverageClient(FakeBitgetLiveClient):
+            def __init__(self) -> None:
+                super().__init__()
+                self.hold_side_calls: list[tuple[str, int, str | None]] = []
+
+            def set_futures_leverage(self, *, symbol, leverage, hold_side=None):  # type: ignore[no-untyped-def]
+                self.hold_side_calls.append((symbol, leverage, hold_side))
+                return {"symbol": symbol, "leverage": leverage, "holdSide": hold_side, "status": "SUCCESS"}
+
+        decision = DecisionIntent(
+            **{
+                **self._decision(final_mode="futures").as_dict(),
+                "timestamp": self._decision(final_mode="futures").timestamp,
+                "symbol": "DOGEUSDT",
+                "planned_leverage": 20,
+            }
+        )
+        live_client = HoldSideLeverageClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(decision=decision, reference_price=0.094)
+
         assert result is not None
-        self.assertEqual(result.market, "futures")
-        self.assertEqual(len(live_client.orders), 1)
+        self.assertTrue(result.accepted)
+        self.assertEqual(live_client.hold_side_calls, [("DOGEUSDT", 20, "long")])
+
+    def test_bitget_live_order_aborts_when_exchange_reports_different_leverage(self) -> None:
+        class WrongLeverageClient(FakeBitgetLiveClient):
+            def set_futures_leverage(self, *, symbol, leverage, hold_side=None):  # type: ignore[no-untyped-def]
+                return {
+                    "symbol": symbol,
+                    "leverage": leverage,
+                    "longLeverage": "10",
+                    "holdSide": hold_side,
+                    "status": "SUCCESS",
+                }
+
+        decision = DecisionIntent(
+            **{
+                **self._decision(final_mode="futures").as_dict(),
+                "timestamp": self._decision(final_mode="futures").timestamp,
+                "symbol": "DOGEUSDT",
+                "planned_leverage": 20,
+            }
+        )
+        live_client = WrongLeverageClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        with self.assertRaisesRegex(RuntimeError, "FUTURES_LEVERAGE_MISMATCH"):
+            live_adapter.execute_decision(decision=decision, reference_price=0.094)
+
+        self.assertEqual(live_client.orders, [])
 
     def test_bitget_live_order_fail_closes_when_protection_cannot_be_armed(self) -> None:
         class FlakyProtectionClient(FakeBitgetLiveClient):
@@ -350,6 +425,29 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(result.protection_error, "")
         self.assertGreaterEqual(live_client.protection_calls, 2)
         self.assertGreaterEqual(len(result.protection_orders), 1)
+
+    def test_bitget_live_order_fail_closes_when_protection_response_is_rejected(self) -> None:
+        class RejectedProtectionClient(FakeBitgetLiveClient):
+            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
+                self.protection_orders.append(("futures", order_params))
+                return {
+                    "status": "REQUEST FAILED",
+                    "raw": {"code": "43059", "msg": "Request failed, please try again"},
+                }
+
+        live_client = RejectedProtectionClient()
+        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
+
+        result = live_adapter.execute_decision(
+            decision=self._decision(final_mode="futures"),
+            reference_price=50000.0,
+        )
+
+        assert result is not None
+        self.assertFalse(result.accepted)
+        self.assertEqual(len(live_client.orders), 2)
+        self.assertIn("PROTECTION_ORDER_REJECTED", result.protection_error)
+        self.assertIn("EMERGENCY_CLOSE_OK", result.protection_error)
 
     def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40762(self) -> None:
         class RetryClient(FakeBitgetLiveClient):

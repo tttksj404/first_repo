@@ -26,3 +26,122 @@
 [2026-04-15T07:45:58+00:00] live universe locked: PEPEUSDT,DOGEUSDT,SOLUSDT
 [2026-04-15T07:45:58+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
 [2026-04-15T07:45:58+00:00] daemon pid=38704 started
+[2026-04-15T09:02:24+00:00] daemon pid=38704 exited with code 1073807364; restarting in 5s
+[2026-04-16T05:19:51+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T05:19:51+00:00] live universe locked: PEPEUSDT
+[2026-04-16T05:19:51+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T05:19:51+00:00] daemon pid=36788 started
+[2026-04-16T05:41:42+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T05:41:42+00:00] live universe locked: PEPEUSDT
+[2026-04-16T05:41:42+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T05:41:42+00:00] daemon pid=5300 started
+[2026-04-16T05:44:18+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T05:44:18+00:00] live universe locked: PEPEUSDT
+[2026-04-16T05:44:18+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T05:44:18+00:00] daemon pid=17032 started
+[2026-04-16T06:01:56+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T06:01:56+00:00] live universe locked: PEPEUSDT
+[2026-04-16T06:01:56+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T06:01:56+00:00] daemon pid=22220 started
+[2026-04-16T06:48:44+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T06:48:44+00:00] live universe locked: PEPEUSDT
+[2026-04-16T06:48:44+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T06:48:44+00:00] daemon pid=2724 started
+[2026-04-16T06:56:48+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T06:56:48+00:00] live universe locked: PEPEUSDT
+[2026-04-16T06:56:48+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T06:56:48+00:00] daemon pid=21484 started
+[2026-04-16T07:02:34+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:02:34+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:02:34+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:02:34+00:00] daemon pid=30984 started
+[2026-04-16T07:11:23+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:11:23+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:11:23+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:11:23+00:00] daemon pid=3828 started
+[2026-04-16T07:34:07+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:34:07+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:34:07+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:34:07+00:00] daemon pid=39716 started
+[2026-04-16T07:40:24+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:40:24+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:40:24+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:40:24+00:00] daemon pid=34876 started
+[2026-04-16T07:49:03+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:49:03+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:49:03+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:49:03+00:00] daemon pid=38012 started
+[2026-04-16T07:53:20+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:53:20+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:53:20+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:53:20+00:00] daemon pid=30480 started
+[2026-04-16T07:57:38+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T07:57:38+00:00] live universe locked: PEPEUSDT
+[2026-04-16T07:57:38+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T07:57:38+00:00] daemon pid=35852 started
+[2026-04-16T08:09:10+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T08:09:10+00:00] live universe locked: PEPEUSDT
+[2026-04-16T08:09:10+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T08:09:10+00:00] daemon pid=31780 started
+[2026-04-16T08:27:20+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-16T08:27:20+00:00] live universe locked: PEPEUSDT
+[2026-04-16T08:27:20+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-16T08:27:20+00:00] daemon pid=6312 started
+[2026-04-17T01:48:27+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T01:48:27+00:00] live universe locked: PEPEUSDT
+[2026-04-17T01:48:27+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T01:48:27+00:00] daemon pid=20576 started
+[2026-04-17T01:57:08+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T01:57:08+00:00] live universe locked: PEPEUSDT
+[2026-04-17T01:57:08+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T01:57:08+00:00] daemon pid=38344 started
+[2026-04-17T02:09:27+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T02:09:27+00:00] live universe locked: PEPEUSDT
+[2026-04-17T02:09:27+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T02:09:28+00:00] daemon pid=6616 started
+[2026-04-17T02:48:14+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T02:48:14+00:00] live universe locked: PEPEUSDT
+[2026-04-17T02:48:14+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T02:48:14+00:00] daemon pid=14032 started
+[2026-04-17T02:57:40+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T02:57:40+00:00] live universe locked: PEPEUSDT
+[2026-04-17T02:57:40+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T02:57:40+00:00] daemon pid=23404 started
+[2026-04-17T03:04:01+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T03:04:01+00:00] live universe locked: PEPEUSDT
+[2026-04-17T03:04:01+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T03:04:01+00:00] daemon pid=27532 started
+[2026-04-17T03:08:27+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T03:08:27+00:00] live universe locked: PEPEUSDT
+[2026-04-17T03:08:27+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T03:08:27+00:00] daemon pid=32552 started
+[2026-04-17T03:21:02+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T03:21:02+00:00] live universe locked: PEPEUSDT
+[2026-04-17T03:21:02+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T03:21:02+00:00] daemon pid=7728 started
+[2026-04-17T03:21:05+00:00] startup blocked by an unknown/external exchange position while disable_position_adoption=true; supervisor will not auto-restart until you resolve it.
+[2026-04-17T03:21:05+00:00] RuntimeError: STRICT_STARTUP_POSITION_BLOCK: found live startup position(s) that are not present in the previous runtime snapshot while disable_position_adoption=true. Refusing startup for unknown/external positions. Symbols: PEPEUSDT:long
+[2026-04-17T03:21:05+00:00] Resolve the listed symbol on the exchange first, or restore a matching runtime snapshot, then run: python scripts/start_live_trading.py
+[2026-04-17T03:48:24+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T03:48:24+00:00] live universe locked: PEPEUSDT
+[2026-04-17T03:48:24+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T03:48:24+00:00] daemon pid=26016 started
+[2026-04-17T03:48:27+00:00] startup blocked by an unknown/external exchange position while disable_position_adoption=true; supervisor will not auto-restart until you resolve it.
+[2026-04-17T03:48:27+00:00] RuntimeError: STRICT_STARTUP_POSITION_BLOCK: found live startup position(s) that are not present in the previous runtime snapshot while disable_position_adoption=true. Refusing startup for unknown/external positions. Symbols: PEPEUSDT:long
+[2026-04-17T03:48:27+00:00] Resolve the listed symbol on the exchange first, or restore a matching runtime snapshot, then run: python scripts/start_live_trading.py
+[2026-04-17T03:53:01+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T03:53:01+00:00] live universe locked: PEPEUSDT
+[2026-04-17T03:53:01+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T03:53:01+00:00] daemon pid=2668 started
+[2026-04-17T04:24:46+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-17T04:24:46+00:00] live universe locked: PEPEUSDT
+[2026-04-17T04:24:46+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-17T04:24:46+00:00] daemon pid=1216 started
+[2026-04-21T23:56:53+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-21T23:56:53+00:00] live universe locked: PEPEUSDT
+[2026-04-21T23:56:53+00:00] runtime policy guardrail bypass disabled (default safe mode)
+[2026-04-21T23:56:53+00:00] daemon pid=38592 started
+[2026-04-21T23:59:15+00:00] spawning daemon (restart #1 in last hour)
+[2026-04-21T23:59:15+00:00] live universe locked: PEPEUSDT
+[2026-04-21T23:59:15+00:00] runtime policy guardrail bypass ENABLED (QUANT_BYPASS_POLICY_GUARDRAILS=1)
+[2026-04-21T23:59:15+00:00] daemon pid=23584 started

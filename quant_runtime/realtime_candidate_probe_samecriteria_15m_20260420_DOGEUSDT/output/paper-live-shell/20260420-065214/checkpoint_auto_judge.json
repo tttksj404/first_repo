@@ -1,0 +1,221 @@
+{
+  "baseline_control_comparison": {
+    "artifact_path": "",
+    "available": false,
+    "bucket_replay_ready": false,
+    "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_TESTED_ORDER_LOGS_AND_LIVE_ORDER_LOGS_AND_CLOSED_TRADE_LOGS",
+    "bucket_replay_reference_bucket": "active_policy",
+    "bucket_replay_required_for_expansion": true,
+    "current_policy_bucket_replay": {
+      "available": true,
+      "bucket_name": "active_policy",
+      "bucket_replay_ready": false,
+      "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_MISSING_TESTED_ORDER_LOGS_AND_LIVE_ORDER_LOGS_AND_CLOSED_TRADE_LOGS",
+      "decision_count": 9,
+      "micro_live_status": "not_available",
+      "missing_surfaces": [
+        "tested_order_logs",
+        "live_order_logs",
+        "closed_trade_logs"
+      ],
+      "replay_source": "observed_runtime_policy_bucket_artifacts",
+      "run_count": 1,
+      "total_closed_trade_count": 0,
+      "total_live_order_count": 0,
+      "total_tested_order_count": 0
+    },
+    "evidence_source": "summary_artifact+policy_bucket_replay",
+    "lineage_scope_status": "aligned",
+    "reason": "NO_RECENT_BASELINE_CONTROL_ARTIFACT",
+    "replay_grounding": "strategy_comparison_recent_summary+policy_bucket_replay",
+    "replay_provenance": {
+      "classification": "bucket_replay_evidence",
+      "decision_surface": "baseline_control",
+      "has_bucket_reference": true,
+      "has_runtime_summary_anchor": false,
+      "policy_bucket": "baseline_control",
+      "reason_code": "BASELINE_BUCKET_REPLAY_SOURCE",
+      "source": "summary_artifact+policy_bucket_replay",
+      "summary": "bucket_replay_evidence:BASELINE_BUCKET_REPLAY_SOURCE",
+      "uses_direct_bucket_replay": true,
+      "uses_mixed_root_summary_fallback": false,
+      "uses_projected_evidence": false
+    },
+    "staged_candidate_bucket_replay": {
+      "available": false,
+      "bucket_name": "staged_candidate",
+      "bucket_replay_ready": false,
+      "bucket_replay_reason": "BASELINE_CONTROL_BUCKET_REPLAY_NOT_AVAILABLE",
+      "decision_count": 0,
+      "micro_live_status": "not_available",
+      "missing_surfaces": [
+        "decision_logs",
+        "tested_order_logs",
+        "live_order_logs",
+        "closed_trade_logs"
+      ],
+      "replay_source": "",
+      "run_count": 0,
+      "total_closed_trade_count": 0,
+      "total_live_order_count": 0,
+      "total_tested_order_count": 0
+    },
+    "verdict": "not_available"
+  },
+  "comparison_score_delta": 2.0,
+  "comparison_verdict": "candidate_better",
+  "confidence": "low",
+  "current_policy_status": "demote",
+  "evidence": {
+    "decision_count": 9,
+    "evidence_source": "policy_bucket",
+    "policy_bucket": "active_policy",
+    "run_count": 1,
+    "runner_avg_edge_retention_ratio": 0.0,
+    "runner_drawdown_to_pnl_ratio": 0.0,
+    "runner_positive_walk_forward_ratio": 0.0,
+    "runner_protection_degraded_rate": 0.0,
+    "runner_reject_rate": 0.0,
+    "runner_total_realized_pnl_usd": 0.0,
+    "total_closed_trade_count": 0,
+    "total_live_order_count": 0,
+    "total_tested_order_count": 0
+  },
+  "evidence_bucket_available": true,
+  "evidence_policy_bucket": "active_policy",
+  "evidence_source": "policy_bucket",
+  "policy_guardrails": {
+    "allow_alt_promotions": false,
+    "max_positive_symbols": 1,
+    "non_major_positive_bias": "observe_only",
+    "prefer_majors_only": true,
+    "promotion_intensity_cap": 0.8
+  },
+  "raw_verdict": "tighten",
+  "reason_codes": [
+    "CHECKPOINT_POLICY_BUCKET_ACTIVE_POLICY_USED",
+    "RUNNER_EXECUTION_EVIDENCE_REQUIRES_TIGHTENING",
+    "SAMPLE_QUALITY_WATCHDOG_THIN"
+  ],
+  "regime_actions": [
+    {
+      "action": "tighten",
+      "avg_net_edge_bps": -23.185468,
+      "decision_count": 39,
+      "mode": "cash",
+      "reason_codes": [
+        "REGIME_EDGE_NON_POSITIVE"
+      ]
+    },
+    {
+      "action": "hold",
+      "avg_net_edge_bps": 22.101085,
+      "decision_count": 54,
+      "mode": "futures",
+      "reason_codes": [
+        "REGIME_WITHIN_THRESHOLDS"
+      ]
+    }
+  ],
+  "replay_provenance": {
+    "classification": "bucket_replay_evidence",
+    "decision_surface": "active_policy",
+    "has_bucket_reference": true,
+    "has_runtime_summary_anchor": false,
+    "policy_bucket": "active_policy",
+    "reason_code": "CHECKPOINT_BUCKET_REPLAY_SOURCE",
+    "source": "policy_bucket",
+    "summary": "bucket_replay_evidence:CHECKPOINT_BUCKET_REPLAY_SOURCE",
+    "uses_direct_bucket_replay": true,
+    "uses_mixed_root_summary_fallback": false,
+    "uses_projected_evidence": false
+  },
+  "sample_quality_watchdog_status": "thin",
+  "symbol_actions": [
+    {
+      "active_policy_action": "demote",
+      "lifecycle_action": "hold",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "prune",
+      "sample_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "DOGEUSDT",
+      "trade_count": 0
+    }
+  ],
+  "symbol_lifecycle": [
+    {
+      "active_policy_action": "demote",
+      "baseline_gate": "not_available",
+      "baseline_verdict": "not_available",
+      "checkpoint_verdict": "tighten",
+      "current_state": "demoted",
+      "evidence_generated_at": "2026-04-20T07:07:08.718325+00:00",
+      "policy_context_alignment": {
+        "aligned": true,
+        "reason": "POLICY_LINEAGE_MATCH",
+        "status": "aligned"
+      },
+      "policy_context_bucket_evidence_available": true,
+      "policy_context_fresh": true,
+      "policy_lineage": {
+        "adjustment_count": 1,
+        "adjustment_signature": "18526c5dce545a1c58a6661fbf456b92ea334e16d5dba9b940e87403f0b94688",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "demote",
+        "rollout_phase": "baseline",
+        "source": "active_policy_context",
+        "structural_key": "9331dd917011798240246a5b40c82eda040b81390679aab9459691ee8b3e579f",
+        "symbols": [
+          "DOGEUSDT"
+        ],
+        "updated_at": "2026-04-20T07:07:08.718325+00:00",
+        "version": 58,
+        "versioned_key": "e88d9d48b7c463252b50530b2eba381248134f844faaf168aed06e465e80e6d7"
+      },
+      "previous_state": "observe_only",
+      "pruning_recommendation": "prune",
+      "reason_codes": [
+        "CHECKPOINT_VERDICT_TIGHTEN",
+        "POLICY_CONTEXT_BUCKET_ACTIVE_POLICY_USED",
+        "SAMPLE_QUALITY_WATCHDOG_THIN",
+        "SYMBOL_EVIDENCE_DEGRADED"
+      ],
+      "recommendation": "prune",
+      "recommended_action": "hold",
+      "required_trade_count_for_validation": 0,
+      "rolling_positive_window_ratio": 0.0,
+      "rolling_recent_run_consistency": 0.0,
+      "rollout_phase": "baseline",
+      "sample_watchdog_status": "thin",
+      "scorecard_recommendation": "keep",
+      "symbol": "DOGEUSDT",
+      "symbol_evidence_bucket": "active_policy",
+      "symbol_evidence_source": "policy_context_bucket",
+      "target_state": "demoted",
+      "trade_count": 0,
+      "transition": "demoted_steady",
+      "validation_ready": true
+    }
+  ],
+  "symbol_lifecycle_summary": {
+    "action_counts": {
+      "hold": 1
+    },
+    "actionable_symbol_count": 1,
+    "actionable_symbols": [
+      "DOGEUSDT"
+    ],
+    "state_counts": {
+      "demoted": 1
+    },
+    "symbol_count": 1
+  },
+  "verdict": "tighten"
+}

@@ -11,6 +11,99 @@ from scripts.start_live_trading import _resolve_python_executable, _rotate_runti
 
 
 class LiveRuntimeScriptTests(unittest.TestCase):
+    def test_quant_run_live_orders_honors_supervisor_stop_file(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("SUPERVISOR_STOP_FILE", script)
+        self.assertIn("refusing to start", script)
+        self.assertIn("not restarting", script)
+
+    def test_quant_run_live_orders_ignores_previous_summary_during_startup_grace(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("CHILD_STARTED_AT_EPOCH", script)
+        self.assertIn("updated_at.timestamp() < child_started_epoch", script)
+        self.assertIn("previous_summary_state_startup_grace", script)
+        self.assertLess(script.index("previous_summary_state_startup_grace"), script.index('runtime_status == "startup_failed"'))
+
+    def test_quant_run_live_orders_backs_off_startup_failures(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_LIVE_STARTUP_FAILURE_BACKOFF_SECONDS", script)
+        self.assertIn('[ "$HEALTH_REASON" = "startup_failed" ]', script)
+        self.assertIn("startup_failed; backing off", script)
+
+    def test_quant_stop_stops_supervisor_watchdog_and_writes_stop_files(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_stop.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("_supervisor_stop", script)
+        self.assertIn("_safety_guardian_stop", script)
+        self.assertIn("live_supervisor_watchdog.pid", script)
+        self.assertIn("scripts/quant_run_live_orders.sh", script)
+
+    def test_quant_health_audit_requires_explicit_restart_permission(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_HEALTH_AUDIT_ALLOW_RESTART", script)
+        self.assertIn("clear_live_stop_files()", script)
+        self.assertIn("$REPO/scripts/_supervisor_stop", script)
+        self.assertIn("$REPO/scripts/_safety_guardian_stop", script)
+        restart_block = script.split('if [ "$YOLO_EXIT" -eq 1 ]; then', maxsplit=1)[1]
+        self.assertIn('if [ "$ALLOW_RESTART" = "1" ]; then', restart_block)
+        self.assertIn("재시작은 QUANT_HEALTH_AUDIT_ALLOW_RESTART=1 없어서 차단", restart_block)
+        allowed_block = restart_block.split('if [ "$ALLOW_RESTART" = "1" ]; then', maxsplit=1)[1]
+        self.assertLess(allowed_block.index("clear_live_stop_files"), allowed_block.index("nohup bash"))
+
+    def test_quant_health_audit_classifies_stop_sentinel_as_stopped(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("live_stop_requested()", script)
+        self.assertIn("STOP_REQUESTED=1", script)
+        self.assertIn("runtime intentionally stopped", script)
+        self.assertIn("quant_binance process absent as expected", script)
+        self.assertIn("health stale while runtime is intentionally stopped", script)
+
+    def test_quant_health_audit_supports_paper50_runtime_layout(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_HEALTH_AUDIT_RUNTIME", script)
+        self.assertIn("_paper50.out.log", script)
+        self.assertIn("PAPER50_MODE=1", script)
+        self.assertIn("process table unavailable, but runtime heartbeat log is fresh", script)
+        self.assertIn("FORENSICS_ROOT", script)
+        self.assertIn('grep "HEARTBEAT" >/dev/null', script)
+
+    def test_quant_health_audit_does_not_count_heartbeat_numbers_as_429s(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("HTTP[[:space:]/_-]*429", script)
+        self.assertNotIn('"429\\|rate.limit"', script)
+
+    def test_quant_run_live_orders_logs_watchdog_start_failure_without_aborting(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("watchdog_start_status=$?", script)
+        self.assertIn("watchdog start request failed", script)
+        self.assertIn("requested watchdog start pid=", script)
+
     def test_tail_strips_nul_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             path = Path(tempdir) / "runtime.err.log"

@@ -1,0 +1,47 @@
+{
+  "capital_report": {},
+  "closed_trade_count": 0,
+  "decision_count": 0,
+  "error": "RuntimeError('Bitget transport error for https://api.bitget.com/api/v2/spot/public/symbols (host=127.0.0.1:9): [WinError 10061] \ub300\uc0c1 \ucef4\ud4e8\ud130\uc5d0\uc11c \uc5f0\uacb0\uc744 \uac70\ubd80\ud588\uc73c\ubbc0\ub85c \uc5f0\uacb0\ud558\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4')",
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_missing_in_paper_counts": {},
+  "futures_missing_on_exchange_counts": {},
+  "futures_position_mismatch": false,
+  "futures_position_mismatch_details": {
+    "missing_in_paper": [],
+    "missing_on_exchange": []
+  },
+  "heartbeat_count": 0,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_timestamp": null,
+  "last_event_timestamp": null,
+  "live_decision_loop": {},
+  "live_order_count": 0,
+  "open_futures_position_count": 0,
+  "open_spot_position_count": 0,
+  "paper_open_futures_position_count": 0,
+  "paper_open_futures_positions": [],
+  "self_healing": {
+    "active_guards": {},
+    "issue_counts": {
+      "startup_failure": 1
+    },
+    "recent_events": [
+      {
+        "action": "report_only",
+        "category": "startup_failure",
+        "status": "active",
+        "summary": "Bitget transport error for https://api.bitget.com/api/v2/spot/public/symbols (host=127.0.0.1:9): [WinError 10061] \ub300\uc0c1 \ucef4\ud4e8\ud130\uc5d0\uc11c \uc5f0\uacb0\uc744 \uac70\ubd80\ud588\uc73c\ubbc0\ub85c \uc5f0\uacb0\ud558\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4"
+      }
+    ],
+    "recovery_counts": {},
+    "status": "startup_failed"
+  },
+  "status": "startup_failed",
+  "tested_order_count": 0,
+  "updated_at": "2026-04-21T06:06:04.573179+00:00"
+}

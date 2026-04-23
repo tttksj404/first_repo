@@ -6,15 +6,44 @@ slot_pid() {
   awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
 }
 
+pid_is_visible() {
+  pid="$1"
+  case "$pid" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+  if kill -0 "$pid" 2>/dev/null; then
+    return 0
+  fi
+  if command -v lsof >/dev/null 2>&1 && lsof -a -p "$pid" -d cwd >/dev/null 2>&1; then
+    return 0
+  fi
+  if ps -p "$pid" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+SUPERVISOR_STOP_FILE="$REPO_ROOT/scripts/_supervisor_stop"
+
+supervisor_stop_requested() {
+  [ -f "$SUPERVISOR_STOP_FILE" ] && grep -qi 'stop' "$SUPERVISOR_STOP_FILE" 2>/dev/null
+}
+
 OUTPUT_BASE="${1:-quant_runtime}"
 LOG_DIR="$OUTPUT_BASE"
 SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
 
 mkdir -p "$LOG_DIR"
+if supervisor_stop_requested; then
+  printf '[SUPERVISOR] stop file present; refusing to start at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  exit 0
+fi
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
   EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
-  if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+  if pid_is_visible "$EXISTING_SUPERVISOR_PID"; then
     printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -41,6 +70,7 @@ WATCHDOG_STALE_SECONDS="${QUANT_LIVE_WATCHDOG_STALE_SECONDS:-150}"
 WATCHDOG_DECISION_STALL_SECONDS="${QUANT_LIVE_WATCHDOG_DECISION_STALL_SECONDS:-420}"
 STARTUP_GRACE_SECONDS="${QUANT_LIVE_STARTUP_GRACE_SECONDS:-120}"
 RESTART_SLEEP_SECONDS="${QUANT_LIVE_RESTART_SLEEP_SECONDS:-5}"
+STARTUP_FAILURE_BACKOFF_SECONDS="${QUANT_LIVE_STARTUP_FAILURE_BACKOFF_SECONDS:-180}"
 REPORT_INTERVAL_SECONDS="${QUANT_REPORT_INTERVAL_SECONDS:-14400}"
 REPORT_PROVIDER="${QUANT_REPORT_PROVIDER:-codex}"
 REPORT_MODE="${QUANT_REPORT_MODE:-advisor}"
@@ -61,14 +91,14 @@ acquire_supervisor_lock() {
 
   if [ -f "$SUPERVISOR_PID_PATH" ]; then
     EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
-    if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+    if pid_is_visible "$EXISTING_SUPERVISOR_PID"; then
       printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
       exit 0
     fi
   fi
 
   LOCK_OWNER_PID="$(slot_pid "$SUPERVISOR_LOCK_DIR/pid")"
-  if [ -n "$LOCK_OWNER_PID" ] && kill -0 "$LOCK_OWNER_PID" 2>/dev/null; then
+  if pid_is_visible "$LOCK_OWNER_PID"; then
     printf '[SUPERVISOR] supervisor lock held by pid=%s at %s\n' "$LOCK_OWNER_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -87,7 +117,7 @@ acquire_supervisor_lock
 
 if [ -f "$SUPERVISOR_PID_PATH" ]; then
   EXISTING_SUPERVISOR_PID="$(slot_pid "$SUPERVISOR_PID_PATH")"
-  if [ -n "$EXISTING_SUPERVISOR_PID" ] && kill -0 "$EXISTING_SUPERVISOR_PID" 2>/dev/null; then
+  if pid_is_visible "$EXISTING_SUPERVISOR_PID"; then
     printf '[SUPERVISOR] existing supervisor pid=%s already running at %s\n' "$EXISTING_SUPERVISOR_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -157,7 +187,13 @@ start_watchdog() {
     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS" \
     PYTHON_BIN="$PYTHON_BIN" \
     "$PYTHON_BIN" scripts/quant_live_watchdog.py "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
-  printf '[SUPERVISOR] requested watchdog start at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+  watchdog_start_status=$?
+  watchdog_pid=$!
+  if [ "$watchdog_start_status" -ne 0 ]; then
+    printf '[SUPERVISOR] watchdog start request failed status=%s at %s\n' "$watchdog_start_status" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    return 0
+  fi
+  printf '[SUPERVISOR] requested watchdog start pid=%s at %s\n' "$watchdog_pid" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 }
 
 run_report_cycle() {
@@ -194,6 +230,7 @@ start_news_loop() {
 }
 
 run_child() {
+  CHILD_STARTED_AT_EPOCH="$(date +%s)"
   "$PYTHON_BIN" -m quant_binance.runtime \
     --mode live-auto-trade-daemon \
     --exchange "bitget" \
@@ -211,7 +248,7 @@ run_child() {
 }
 
 health_check() {
-  "$PYTHON_BIN" - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH"
+  "$PYTHON_BIN" - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH" "${CHILD_STARTED_AT_EPOCH:-0}"
 import json
 import sys
 from datetime import datetime, timezone
@@ -222,6 +259,7 @@ stale_seconds = int(sys.argv[2])
 decision_stall_seconds = int(sys.argv[3])
 startup_grace_seconds = int(sys.argv[4])
 state_path = Path(sys.argv[5])
+child_started_epoch = float(sys.argv[6] or 0)
 summary_state_path = output_base / "output" / "paper-live-shell" / "latest" / "summary.state.json"
 now = datetime.now(tz=timezone.utc)
 
@@ -231,6 +269,7 @@ if not summary_state_path.exists():
     sys.exit(0)
 
 data = json.loads(summary_state_path.read_text(encoding="utf-8"))
+runtime_status = str(data.get("status") or "")
 updated_at_raw = data.get("updated_at")
 updated_at = datetime.fromisoformat(updated_at_raw) if isinstance(updated_at_raw, str) else None
 if updated_at is None:
@@ -255,6 +294,24 @@ payload = {
     "last_decision_emitted_at": decision_emitted_at.isoformat() if decision_emitted_at else None,
     "decision_age_seconds": round(decision_age_seconds, 3) if decision_age_seconds is not None else None,
 }
+
+if child_started_epoch > 0 and updated_at.timestamp() < child_started_epoch:
+    child_age_seconds = max(now.timestamp() - child_started_epoch, 0.0)
+    if child_age_seconds <= startup_grace_seconds:
+        payload["status"] = "starting"
+        payload["reason"] = "previous_summary_state_startup_grace"
+        payload["child_started_at_epoch"] = round(child_started_epoch, 3)
+        payload["child_age_seconds"] = round(child_age_seconds, 3)
+        state_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+        sys.exit(0)
+
+if runtime_status == "startup_failed":
+    payload["status"] = "unhealthy"
+    payload["reason"] = "startup_failed"
+    if data.get("error"):
+        payload["error"] = str(data.get("error"))
+    state_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    sys.exit(1)
 
 if age_seconds > stale_seconds:
     payload["status"] = "unhealthy"
@@ -284,12 +341,23 @@ start_news_loop
 start_watchdog
 
 while :; do
+  if supervisor_stop_requested; then
+    printf '[SUPERVISOR] stop file present; exiting supervisor loop at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
   run_child
   while kill -0 "$CHILD_PID" 2>/dev/null; do
     sleep "$WATCHDOG_POLL_SECONDS"
+    if supervisor_stop_requested; then
+      printf '[SUPERVISOR] stop file present; stopping child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+      kill "$CHILD_PID" 2>/dev/null || true
+      wait "$CHILD_PID" 2>/dev/null || true
+      exit 0
+    fi
     # Auto-restart watchdog if it died
     if [ "${QUANT_ENABLE_SUPERVISOR_WATCHDOG:-1}" = "1" ]; then
-      if ! pgrep -f "quant_live_watchdog.py" >/dev/null 2>&1; then
+      WATCHDOG_SLOT_PID="$(slot_pid "$SUPERVISOR_WATCHDOG_PID_PATH")"
+      if ! pid_is_visible "$WATCHDOG_SLOT_PID"; then
         printf '[SUPERVISOR] watchdog died, restarting at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
         start_watchdog
       fi
@@ -310,6 +378,10 @@ PY
       if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
         "$PYTHON_BIN" scripts/quant_notify_runtime_event.py unhealthy "$OUTPUT_BASE" "child_pid=$CHILD_PID" "reason=$HEALTH_REASON" >>"$SUPERVISOR_LOG" 2>&1 || true
       fi
+      if [ "$HEALTH_REASON" = "startup_failed" ] && [ "$STARTUP_FAILURE_BACKOFF_SECONDS" -gt 0 ]; then
+        printf '[SUPERVISOR] startup_failed; backing off %ss before restart at %s\n' "$STARTUP_FAILURE_BACKOFF_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+        sleep "$STARTUP_FAILURE_BACKOFF_SECONDS"
+      fi
       kill "$CHILD_PID" 2>/dev/null || true
       wait "$CHILD_PID" 2>/dev/null || true
       break
@@ -317,6 +389,10 @@ PY
   done
   CHILD_EXIT_CODE=0
   wait "$CHILD_PID" 2>/dev/null || CHILD_EXIT_CODE=$?
+  if supervisor_stop_requested; then
+    printf '[SUPERVISOR] stop file present after child exit; not restarting at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+    exit 0
+  fi
   printf '[SUPERVISOR] child exited, restarting in %ss at %s\n' "$RESTART_SLEEP_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
     "$PYTHON_BIN" scripts/quant_notify_runtime_event.py exited "$OUTPUT_BASE" "child_pid=$CHILD_PID" "exit_code=$CHILD_EXIT_CODE" >>"$SUPERVISOR_LOG" 2>&1 || true

@@ -50,6 +50,7 @@ def build_runtime_overview(*, summary: dict[str, Any], state: dict[str, Any]) ->
         "realized_pnl_usd_estimate": summary.get("realized_pnl_usd_estimate", 0.0),
         "unrealized_pnl_usd_estimate": summary.get("unrealized_pnl_usd_estimate", 0.0),
         "kill_switch": summary.get("kill_switch") or state.get("kill_switch") or {"armed": False, "reasons": []},
+        "reference_price_guard": summary.get("reference_price_guard") or state.get("reference_price_guard") or {},
         "top_rejection_reasons": summary.get("top_rejection_reasons") or {},
         "recent_decisions": summary.get("recent_decisions") or [],
         "exchange_live_futures_position_count": summary.get(

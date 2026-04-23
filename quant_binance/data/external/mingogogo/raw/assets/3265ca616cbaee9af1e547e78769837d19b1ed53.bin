@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMING Excuse Generator | 파밍 현실적 핑계 시스템 v4.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00f5ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff88;
+            --neon-orange: #ff6b35;
+            --neon-yellow: #ffd700;
+            --neon-purple: #bf00ff;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050508;
+            --card-bg: rgba(15, 15, 25, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: #e8e8e8;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 배경 애니메이션 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255, 0, 255, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 60%);
+            animation: bgPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        /* 그리드 패턴 */
+        .grid-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        /* 메인 컨테이너 */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 상단 SNS 링크 바 */
+        .top-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 255, 0.08));
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sns-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 18px;
+            background: linear-gradient(145deg, rgba(20, 20, 35, 0.9), rgba(10, 10, 20, 0.9));
+            border-radius: 14px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 90px;
+        }
+
+        .sns-link:hover {
+            transform: translateY(-8px) scale(1.05);
+            border-color: var(--neon-cyan);
+            box-shadow: 
+                0 15px 40px rgba(0, 245, 255, 0.3),
+                0 0 30px rgba(0, 245, 255, 0.2),
+                inset 0 0 20px rgba(0, 245, 255, 0.1);
+        }
+
+        .sns-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            color: var(--dark-bg);
+            transition: all 0.3s ease;
+        }
+
+        .sns-link:hover .sns-icon {
+            transform: rotate(360deg) scale(1.1);
+        }
+
+        .sns-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #b8b8c8;
+            letter-spacing: 0.5px;
+        }
+
+        /* 메인 헤더 */
+        .main-header {
+            text-align: center;
+            padding: 50px 20px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(0, 245, 255, 0.5);
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(0, 245, 255, 0.5)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 40px rgba(255, 0, 255, 0.7)); }
+        }
+
+        .sub-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            font-weight: 500;
+            color: #8888aa;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        /* 생성기 메인 영역 */
+        .generator-section {
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            padding: 50px 40px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(30px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generator-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-green), var(--neon-cyan));
+            background-size: 300% 100%;
+            animation: gradientMove 4s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        /* 카테고리 선택 버튼 */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .category-btn {
+            padding: 18px 15px;
+            border: 2px solid rgba(0, 245, 255, 0.3);
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.8), rgba(10, 10, 25, 0.8));
+            border-radius: 16px;
+            color: #c8c8d8;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .category-btn:hover::before {
+            left: 100%;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            transform: translateY(-5px);
+            box-shadow: 
+                0 10px 30px rgba(0, 245, 255, 0.25),
+                0 0 20px rgba(0, 245, 255, 0.15);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(145deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05));
+        }
+
+        .category-emoji {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* 결과 표시 영역 */
+        .result-container {
+            background: linear-gradient(145deg, rgba(10, 10, 20, 0.95), rgba(5, 5, 15, 0.95));
+            border-radius: 24px;
+            border: 2px solid rgba(0, 245, 255, 0.15);
+            padding: 40px;
+            margin-bottom: 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(0, 245, 255, 0.03), transparent 30%);
+            animation: rotateBg 10s linear infinite;
+        }
+
+        @keyframes rotateBg {
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--neon-cyan);
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-text {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 700;
+            line-height: 1.6;
+            color: #ffffff;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .result-category {
+            margin-top: 20px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 245, 255, 0.2));
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #b8b8c8;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 버튼 영역 */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .generate-btn {
+            padding: 20px 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .generate-btn.primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-green));
+            color: var(--dark-bg);
+            box-shadow: 
+                0 10px 40px rgba(0, 245, 255, 0.4),
+                0 0 60px rgba(0, 245, 255, 0.2);
+        }
+
+        .generate-btn.primary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 20px 60px rgba(0, 245, 255, 0.5),
+                0 0 80px rgba(0, 245, 255, 0.3);
+        }
+
+        .generate-btn.secondary {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-orange));
+            color: #ffffff;
+        }
+
+        .generate-btn.secondary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 20px 60px rgba(255, 0, 255, 0.4),
+                0 0 80px rgba(255, 0, 255, 0.2);
+        }
+
+        .copy-btn {
+            padding: 18px 40px;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 50px;
+            color: var(--neon-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 245, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* 통계 영역 */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.7), rgba(10, 10, 25, 0.7));
+            border-radius: 16px;
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            padding: 25px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 245, 255, 0.3);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #8888aa;
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* 전체 핑계 리스트 */
+        .excuse-list-section {
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            padding: 50px 40px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(30px);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .excuse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .excuse-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .excuse-grid::-webkit-scrollbar-track {
+            background: rgba(20, 20, 40, 0.5);
+            border-radius: 4px;
+        }
+
+        .excuse-grid::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--neon-cyan), var(--neon-pink));
+            border-radius: 4px;
+        }
+
+        .excuse-item {
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.6), rgba(10, 10, 25, 0.6));
+            border-radius: 12px;
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .excuse-item:hover {
+            transform: translateX(10px);
+            border-color: var(--neon-cyan);
+            background: linear-gradient(145deg, rgba(0, 245, 255, 0.1), rgba(20, 20, 40, 0.8));
+        }
+
+        .excuse-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            min-width: 45px;
+        }
+
+        .excuse-text {
+            font-size: 14px;
+            color: #c8c8d8;
+            line-height: 1.4;
+        }
+
+        /* 하단 영역 */
+        .footer-section {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), rgba(255, 0, 255, 0.05));
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            padding: 50px 40px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .donation-box {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 53, 0.1));
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .donation-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--neon-yellow);
+            margin-bottom: 15px;
+        }
+
+        .donation-account {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .donation-name {
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .donation-desc {
+            font-size: 13px;
+            color: #9999aa;
+            line-height: 1.8;
+            margin-top: 15px;
+        }
+
+        .creator-info {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .creator-label {
+            font-size: 12px;
+            color: #6666aa;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .creator-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .company-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #8888aa;
+            letter-spacing: 4px;
+        }
+
+        /* 파티클 효과 */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: float 15s infinite;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .generator-section, .excuse-list-section, .footer-section {
+                padding: 30px 20px;
+                border-radius: 20px;
+            }
+
+            .result-container {
+                padding: 30px 20px;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .generate-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* 복사 성공 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            color: var(--dark-bg);
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* 검색 필터 */
+        .search-box {
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 18px 30px;
+            background: rgba(10, 10, 20, 0.8);
+            border: 2px solid rgba(0, 245, 255, 0.2);
+            border-radius: 50px;
+            color: #ffffff;
+            font-size: 16px;
+            font-family: 'Noto Sans KR', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: #666688;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-pattern"></div>
+
+    <div class="container">
+        <!-- 상단 SNS 링크 -->
+        <div class="top-links">
+            <a href="https://www.youtube.com/@%EC%BD%94%EC%9D%B8%ED%8C%8C%EB%B0%8D" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #FF0000, #CC0000);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2c-.3-1-1-1.8-2-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.5.6c-1 .3-1.7 1.1-2 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1 1.8 2 2.1 1.9.6 9.5.6 9.5.6s7.6 0 9.5-.6c1-.3 1.7-1.1 2-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 15.5v-7l6.4 3.5-6.4 3.5z"/></svg>
+                </div>
+                <span class="sns-name">코인파밍</span>
+            </a>
+            <a href="https://www.youtube.com/@민지네일상" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #FF6B6B, #FF0000);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2c-.3-1-1-1.8-2-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.5.6c-1 .3-1.7 1.1-2 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1 1 1.8 2 2.1 1.9.6 9.5.6 9.5.6s7.6 0 9.5-.6c1-.3 1.7-1.1 2-2.1.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 15.5v-7l6.4 3.5-6.4 3.5z"/></svg>
+                </div>
+                <span class="sns-name">민지네일상</span>
+            </a>
+            <a href="https://www.tiktok.com/@jjinbbin" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #00F2EA, #FF0050);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/></svg>
+                </div>
+                <span class="sns-name">TikTok</span>
+            </a>
+            <a href="https://www.instagram.com/coin.ming" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF, #515BD4);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.43.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.43.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.43-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.43-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.78.3-1.44.71-2.1 1.37-.66.66-1.07 1.32-1.37 2.1-.3.76-.5 1.64-.56 2.91C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.78.71 1.44 1.37 2.1.66.66 1.32 1.07 2.1 1.37.76.3 1.64.5 2.91.56 1.28.06 1.69.07 4.95.07s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.78-.3 1.44-.71 2.1-1.37.66-.66 1.07-1.32 1.37-2.1.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.78-.71-1.44-1.37-2.1-.66-.66-1.32-1.07-2.1-1.37-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm7.85-10.4a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
+                </div>
+                <span class="sns-name">Instagram</span>
+            </a>
+            <a href="https://www.threads.net/@minjinehot" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #000000, #333333);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.96-.065-1.182.408-2.256 1.332-3.023.9-.746 2.17-1.201 3.574-1.28.988-.055 1.904-.008 2.752.106-.082-.521-.238-.978-.477-1.382-.389-.656-1.018-1.096-1.96-1.207-.818-.096-1.534.057-2.13.455l-1.17-1.703c.956-.64 2.102-.95 3.403-.82 1.49.148 2.62.818 3.36 1.989.595.94.947 2.12 1.073 3.564 1.071.322 1.973.822 2.687 1.46 1.433 1.28 1.732 2.985 1.398 4.39-.451 1.9-1.867 3.592-3.997 4.775C17.27 23.21 14.863 24 12.186 24z"/></svg>
+                </div>
+                <span class="sns-name">Threads</span>
+            </a>
+            <a href="https://mingogogo.tistory.com/" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #FF5A4A, #FF2F00);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.5 17.5h-11v-2h11v2zm0-4h-11v-2h11v2zm0-4h-11v-2h11v2z"/></svg>
+                </div>
+                <span class="sns-name">코인블로그</span>
+            </a>
+            <a href="https://tt10119.tistory.com/" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #FFB347, #FF7043);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.5 17.5h-11v-2h11v2zm0-4h-11v-2h11v2zm0-4h-11v-2h11v2z"/></svg>
+                </div>
+                <span class="sns-name">민지네일상</span>
+            </a>
+            <a href="https://open.kakao.com/o/pcrL4j6h" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #FEE500, #F9D000);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.84 1.9 5.34 4.75 6.73-.17.63-.63 2.27-.72 2.62-.11.42.15.41.32.3.13-.09 2.09-1.38 2.93-1.93.87.13 1.77.2 2.72.2 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+                </div>
+                <span class="sns-name">코인오픈톡</span>
+            </a>
+            <a href="https://open.kakao.com/me/paming" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #00C73C, #00A32A);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.84 1.9 5.34 4.75 6.73-.17.63-.63 2.27-.72 2.62-.11.42.15.41.32.3.13-.09 2.09-1.38 2.93-1.93.87.13 1.77.2 2.72.2 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+                </div>
+                <span class="sns-name">1:1 상담</span>
+            </a>
+            <a href="https://t.me/MINJINE_FARMING" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #0088CC, #229ED9);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                </div>
+                <span class="sns-name">Telegram</span>
+            </a>
+            <a href="https://cafe.naver.com/mingogo" target="_blank" class="sns-link">
+                <div class="sns-icon" style="background: linear-gradient(135deg, #03C75A, #00B843);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/></svg>
+                </div>
+                <span class="sns-name">부업카페</span>
+            </a>
+        </div>
+
+        <!-- 메인 헤더 -->
+        <header class="main-header">
+            <h1 class="main-title">FARMING Excuse Generator</h1>
+            <p class="sub-title">현실적 핑계 생성기 Pro v4.0</p>
+        </header>
+
+        <!-- 생성기 메인 영역 -->
+        <section class="generator-section">
+            <!-- 카테고리 선택 -->
+            <div class="category-grid">
+                <button class="category-btn active" data-category="all">
+                    <span class="category-emoji">🎲</span>
+                    전체
+                </button>
+                <button class="category-btn" data-category="health">
+                    <span class="category-emoji">🏥</span>
+                    건강/의료
+                </button>
+                <button class="category-btn" data-category="family">
+                    <span class="category-emoji">👨‍👩‍👧</span>
+                    가족
+                </button>
+                <button class="category-btn" data-category="emergency">
+                    <span class="category-emoji">🚨</span>
+                    긴급상황
+                </button>
+                <button class="category-btn" data-category="transport">
+                    <span class="category-emoji">🚗</span>
+                    교통
+                </button>
+                <button class="category-btn" data-category="home">
+                    <span class="category-emoji">🏠</span>
+                    집/주거
+                </button>
+                <button class="category-btn" data-category="official">
+                    <span class="category-emoji">📋</span>
+                    공적업무
+                </button>
+                <button class="category-btn" data-category="mental">
+                    <span class="category-emoji">🧠</span>
+                    정신건강
+                </button>
+                <button class="category-btn" data-category="pet">
+                    <span class="category-emoji">🐕</span>
+                    반려동물
+                </button>
+                <button class="category-btn" data-category="weather">
+                    <span class="category-emoji">🌧️</span>
+                    날씨/재해
+                </button>
+            </div>
+
+            <!-- 결과 표시 -->
+            <div class="result-container" id="resultContainer">
+                <div class="result-number" id="resultNumber">EXCUSE #000</div>
+                <div class="result-text" id="resultText">버튼을 눌러 핑계를 생성하세요</div>
+                <div class="result-category" id="resultCategory">READY</div>
+            </div>
+
+            <!-- 버튼 그룹 -->
+            <div class="button-group">
+                <button class="generate-btn primary" id="generateBtn">
+                    ⚡ GENERATE
+                </button>
+                <button class="generate-btn secondary" id="randomBtn">
+                    🎰 RANDOM ALL
+                </button>
+                <button class="copy-btn" id="copyBtn">
+                    📋 COPY
+                </button>
+            </div>
+
+            <!-- 통계 바 -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCount">300</div>
+                    <div class="stat-label">Total Excuses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="usedCount">0</div>
+                    <div class="stat-label">Generated</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="currentCategory">ALL</div>
+                    <div class="stat-label">Category</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="successRate">100%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 전체 핑계 리스트 -->
+        <section class="excuse-list-section">
+            <h2 class="section-title">📑 COMPLETE EXCUSE DATABASE</h2>
+            
+            <div class="search-box" style="text-align: center;">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 핑계 검색...">
+            </div>
+
+            <div class="excuse-grid" id="excuseGrid">
+                <!-- 동적으로 생성됨 -->
+            </div>
+        </section>
+
+        <!-- 하단 후원/정보 -->
+        <footer class="footer-section">
+            <!-- 프로그램 제작 문의 -->
+            <div class="inquiry-box" style="background: linear-gradient(145deg, rgba(0, 245, 255, 0.1), rgba(191, 0, 255, 0.1)); border: 2px solid rgba(0, 245, 255, 0.3); border-radius: 20px; padding: 30px; margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                <div style="font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--neon-cyan); margin-bottom: 15px;">💻 프로그램 제작 문의</div>
+                <div style="font-size: 15px; color: #c8c8d8; line-height: 1.8; margin-bottom: 20px;">
+                    코인 분석 프로그램 / 자동매매 봇 / 텔레그램 알림 시스템<br>
+                    맞춤형 트레이딩 도구 / 웹 대시보드 / 각종 유틸리티 제작
+                </div>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;">
+                    <a href="https://open.kakao.com/me/paming" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 25px; background: linear-gradient(135deg, #FEE500, #F9D000); border-radius: 30px; text-decoration: none; color: #3C1E1E; font-weight: 700; font-size: 14px; transition: all 0.3s ease;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3c-5.52 0-10 3.58-10 8 0 2.84 1.9 5.34 4.75 6.73-.17.63-.63 2.27-.72 2.62-.11.42.15.41.32.3.13-.09 2.09-1.38 2.93-1.93.87.13 1.77.2 2.72.2 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+                        카카오톡 1:1 상담
+                    </a>
+                    <a href="https://t.me/MINJINE_FARMING" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 25px; background: linear-gradient(135deg, #0088CC, #229ED9); border-radius: 30px; text-decoration: none; color: white; font-weight: 700; font-size: 14px; transition: all 0.3s ease;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        텔레그램 문의
+                    </a>
+                </div>
+            </div>
+
+            <div class="donation-box">
+                <div class="donation-title">💎 SUPPORT & DONATION</div>
+                <div class="donation-account">
+                    KBank <span class="donation-name">100-165-970266</span>
+                </div>
+                <div class="donation-account donation-name">서교민</div>
+                <div class="donation-desc">
+                    여러분의 소중한 후원금은 프로그램 개발 및 유지보수, 오픈톡방 이벤트 진행,<br>
+                    그리고 수익의 20%는 사회 기부에 사용됩니다. 감사합니다! 🙏
+                </div>
+            </div>
+
+            <!-- 바이낸스 추천인 -->
+            <div style="background: linear-gradient(145deg, rgba(243, 186, 47, 0.1), rgba(243, 186, 47, 0.05)); border: 1px solid rgba(243, 186, 47, 0.3); border-radius: 15px; padding: 20px; margin: 20px auto; max-width: 500px;">
+                <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; color: #F3BA2F; margin-bottom: 10px;">🔥 바이낸스 추천인 코드</div>
+                <div style="font-family: 'Rajdhani', monospace; font-size: 1.3rem; font-weight: 700; color: #ffffff; letter-spacing: 3px;">GRO_28502_M2YOL</div>
+                <div style="font-size: 12px; color: #888; margin-top: 8px;">가입 시 수수료 할인 혜택!</div>
+            </div>
+
+            <div class="creator-info">
+                <div class="creator-label">Created by</div>
+                <div class="creator-name">FARMING (서교민)</div>
+                <div class="company-name">MINJINE</div>
+                <div style="font-size: 12px; color: #6666aa; margin-top: 10px;">사업자등록번호: 507-05-99353 | 공동대표: 서교민, 박선영</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 토스트 메시지 -->
+    <div class="toast" id="toast">✅ 클립보드에 복사되었습니다!</div>
+
+    <script>
+        // 300가지 현실적인 핑계 데이터베이스 v4.0
+        const excusesDatabase = {
+            health: [
+                "어젯밤에 뭘 잘못 먹었는지 새벽부터 배가 계속 아파요",
+                "아침에 일어났는데 목이 부어서 침 삼키기가 힘들어요",
+                "두통약 먹어도 머리가 안 낫네요, 좀 누워있어야 할 것 같아요",
+                "어제부터 열이 좀 있었는데 오늘 38도 넘었어요",
+                "허리를 삐끗한 것 같아요, 일어나기가 힘드네요",
+                "체한 것 같아요, 속이 계속 울렁거려요",
+                "감기 기운이 있어서 좀 쉬는 게 나을 것 같아요",
+                "어젯밤에 잠을 거의 못 자서 컨디션이 안 좋아요",
+                "생리통이 심해서 진통제 먹고 좀 쉬어야 할 것 같아요",
+                "치통이 갑자기 심해져서 치과 가봐야 할 것 같아요",
+                "장염인 것 같아요, 화장실을 계속 가고 있어서요",
+                "아침에 일어나는데 어지러워서 좀 쉬어야겠어요",
+                "목이 잠겨서 말하기가 힘들어요",
+                "콧물이 멈추지 않아서 좀 그래요",
+                "소화가 안 돼서 밤새 잠도 못 잤어요",
+                "몸살 기운이 있어서 온몸이 쑤셔요",
+                "두통이랑 메스꺼움이 같이 와서요",
+                "속쓰림이 심해서 아무것도 못 먹고 있어요",
+                "귀가 먹먹하고 아파서 이비인후과 가봐야겠어요",
+                "눈이 충혈되고 따가워서요",
+                "알레르기가 올라와서 온몸이 가려워요",
+                "코가 막혀서 숨쉬기가 힘들어요",
+                "기침이 멈추지 않아서요",
+                "손목이 아파서 타자 치기가 힘들어요",
+                "목덜미가 뻣뻣해서 고개를 못 돌리겠어요",
+                "발목을 접질렀어요",
+                "무릎이 아파서 걷기가 힘들어요",
+                "어깨가 너무 아파요",
+                "피로가 너무 쌓여서 몸이 안 움직여져요",
+                "밤새 설사를 해서 탈수 증상이 있어요"
+            ],
+            family: [
+                "아이가 아침에 열이 나서 어린이집에 못 보냈어요",
+                "어머니 병원 가시는데 모셔다드려야 해요",
+                "학교에서 아이 데리러 오라고 연락 왔어요",
+                "아버지가 갑자기 어지러우시다고 해서 가봐야 해요",
+                "아이가 토해서 소아과 먼저 가봐야겠어요",
+                "배우자가 갑자기 아파서 병원에 데려가야 해요",
+                "부모님 댁 보일러가 고장났는데 가봐야 할 것 같아요",
+                "아이 담임선생님이 오늘 꼭 상담하자고 하셔서요",
+                "동생 이사 도와주기로 했어요",
+                "아이 예방접종 예약이 오늘이에요",
+                "할머니가 편찮으셔서 내려가봐야 해요",
+                "친척 경조사가 있어서요",
+                "아이가 학교에서 다쳤다고 연락 왔어요",
+                "친정/시댁에서 급히 오라고 해서요",
+                "부모님 건강검진 결과 상담이 오늘이에요",
+                "가족 중에 확진자가 나와서 저도 검사받아봐야 해요",
+                "아이 학교 행사가 오늘이에요",
+                "배우자 수술인데 보호자가 있어야 해요",
+                "아이가 밤새 안 자서 저도 못 잤어요",
+                "아이 치과 예약이 오늘뿐이에요",
+                "부모님 댁에 급한 일이 생겼어요",
+                "어머니 생신이에요",
+                "형제 결혼식 준비 도와줘야 해요",
+                "아이 유치원 행사에 부모가 참석해야 해요",
+                "가족 병문안 가야 해요",
+                "아이 학원 상담이 잡혀있어요",
+                "시부모님/장인어른이 오신대요",
+                "조카 돌잔치에요",
+                "아이가 아파서 돌봐줘야 해요",
+                "부모님 모시고 병원 가야 해요"
+            ],
+            emergency: [
+                "지갑을 잃어버려서 카드 정지하러 가야 해요",
+                "집에 물이 새서 확인하러 가야 해요",
+                "통장에서 이상한 출금이 있어서 은행 가봐야 해요",
+                "자동차 보험 오늘까지 갱신해야 하는데 깜빡했어요",
+                "주민센터에서 급히 처리해야 할 서류가 있대요",
+                "집에서 가스 냄새가 나서 확인해야 해요",
+                "신분증 재발급받으러 가야 해요",
+                "아파트에서 단수/단전 예정이래서 해결하러 가야 해요",
+                "보험 청구 마감이 오늘까지예요",
+                "부동산 계약 잔금일이에요",
+                "은행 대출 서류 마감이 오늘이에요",
+                "차량 등록 관련 업무가 있어요",
+                "건강보험 관련해서 급히 처리할 게 있어요",
+                "등기우편 수령해야 하는데 오늘까지예요",
+                "연말정산 서류 제출 마감이에요",
+                "여권 갱신하러 가야 해요",
+                "자동차 검사 예약이 오늘이에요",
+                "면허증 갱신해야 해요",
+                "세금 납부 마감일이에요",
+                "공과금 납부 마감이에요",
+                "카드 재발급받으러 가야 해요",
+                "핸드폰을 잃어버려서 찾고 있어요",
+                "집 열쇠를 잃어버려서 열쇠 업체 불렀어요",
+                "차 사고 접수하러 가야 해요",
+                "보험사 방문해야 해요",
+                "은행 급한 업무가 있어요",
+                "관공서 업무 마감이 오늘이에요",
+                "인감증명서 떼러 가야 해요",
+                "등본 떼러 주민센터 가야 해요",
+                "통신사 가서 처리할 일이 있어요"
+            ],
+            transport: [
+                "차 시동이 안 걸려요",
+                "지하철이 고장나서 한참 멈춰있어요",
+                "버스를 잘못 타서 반대 방향으로 갔어요",
+                "타이어 펑크가 났어요",
+                "접촉사고가 나서 처리 중이에요",
+                "배터리가 방전됐어요",
+                "주차장에서 다른 차가 막아서 못 나가요",
+                "출근길이 사고로 막혔어요",
+                "차 열쇠를 집에 두고 왔어요",
+                "택시가 안 잡혀요",
+                "지하철이 너무 꽉 차서 못 탔어요",
+                "길이 막혀서 안 움직여요",
+                "앞차 추돌사고가 나서 처리 중이에요",
+                "차에서 이상한 소리가 나서 정비소 들러야 해요",
+                "버스가 그냥 지나갔어요",
+                "고속도로 정체가 심해요",
+                "차 문이 안 열려요",
+                "지하철역 에스컬레이터가 고장났어요",
+                "앞에서 공사 중이라 우회하고 있어요",
+                "신호등이 고장나서 막혀요",
+                "지하철에서 환자가 발생해서 멈춰있어요",
+                "주차장 출구가 막혀서 못 나가요",
+                "네비가 이상한 데로 안내했어요",
+                "기름이 떨어져서 주유소 들렀어요",
+                "출근길에 사고 현장이라 우회 중이에요",
+                "환승역에서 놓쳤어요",
+                "버스가 배차 간격이 너무 길어요",
+                "차가 갑자기 시동이 꺼졌어요",
+                "견인차 기다리고 있어요",
+                "렌터카 반납하러 가야 해요"
+            ],
+            home: [
+                "집에 수도가 터져서 기사님 기다리고 있어요",
+                "보일러가 고장났어요",
+                "화장실이 막혔어요",
+                "천장에서 물이 새요",
+                "인터넷이 안 돼서 기사님 방문 예약했어요",
+                "택배가 오늘 도착하는데 부재 시 반송이래요",
+                "도어락이 안 열려요",
+                "에어컨에서 물이 떨어져요",
+                "가스 점검 기사님이 오늘 오신대요",
+                "냉장고가 고장났어요",
+                "세탁기가 안 돌아가요",
+                "아파트 점검이 오늘이에요",
+                "이사 업체가 오늘 와요",
+                "가구 배송이 오늘이에요",
+                "가전제품 설치 기사님이 오셔요",
+                "집에 벌레가 나와서 방역 불렀어요",
+                "하수구가 역류해요",
+                "전기가 자꾸 나가요",
+                "관리사무소에서 오늘 만나자고 해요",
+                "엘리베이터가 고장났어요",
+                "집 열쇠를 잃어버렸어요",
+                "온수가 안 나와요",
+                "가스레인지가 안 켜져요",
+                "정수기 AS 기사님이 오셔요",
+                "세탁기 배수가 안 돼요",
+                "창문이 안 닫혀요",
+                "난방이 안 돼요",
+                "전등이 나갔는데 혼자 못 갈아요",
+                "환기팬이 고장났어요",
+                "현관문 잠금장치가 이상해요"
+            ],
+            official: [
+                "건강검진 예약이 오늘이에요",
+                "치과 예약이 오늘이에요",
+                "병원 검사 예약이 오늘이에요",
+                "물리치료 예약이 잡혀있어요",
+                "안과 예약이 오늘이에요",
+                "피부과 예약이 있어요",
+                "한의원 예약이 있어요",
+                "자격증 시험이 오늘이에요",
+                "면허 시험이 오늘이에요",
+                "회사 밖에서 미팅이 잡혀있어요",
+                "거래처 방문 일정이 있어요",
+                "세미나 참석해야 해요",
+                "교육 들으러 가야 해요",
+                "은행 업무 보러 가야 해요",
+                "관공서 업무가 있어요",
+                "변호사 상담 예약이 있어요",
+                "학부모 상담이 있어요",
+                "대학원 수업이 있어요",
+                "직업훈련 수업이 있어요",
+                "외부 미팅이 잡혀있어요",
+                "협력업체 미팅이에요",
+                "본사 미팅이 있어요",
+                "출장 가야 해요",
+                "워크샵이에요",
+                "컨퍼런스 참석해야 해요",
+                "면접 보러 가야 해요",
+                "인터뷰가 잡혀있어요",
+                "시험 보러 가야 해요",
+                "공인중개사 시험이에요",
+                "토익 시험이에요"
+            ],
+            mental: [
+                "컨디션이 안 좋아서 좀 쉬어야 할 것 같아요",
+                "어젯밤에 잠을 거의 못 자서 피곤해요",
+                "좀 쉬어야 할 것 같아요",
+                "오늘 컨디션이 안 좋네요",
+                "몸이 피곤해서 좀 충전이 필요해요",
+                "개인적인 일로 좀 신경 쓸 게 있어요",
+                "가족 일로 좀 힘들어요",
+                "컨디션 조절이 필요해서 반차 쓰려고요",
+                "병원 상담 예약이 있어요",
+                "요즘 잠을 못 자서요",
+                "체력이 너무 떨어졌어요",
+                "개인적으로 좀 힘든 일이 있어요",
+                "오늘은 좀 쉬는 게 나을 것 같아요",
+                "푹 쉬고 내일 올게요",
+                "개인적으로 챙겨야 할 일이 있어요",
+                "몸이 안 좋아서요",
+                "기분이 안 좋아서 좀 쉬어야겠어요",
+                "정신적으로 좀 쉬어야 할 것 같아요",
+                "요즘 너무 무리해서요",
+                "에너지가 없어요",
+                "머리가 복잡해서 정리 좀 해야겠어요",
+                "오늘은 집중이 안 될 것 같아요",
+                "좀 쉬면서 컨디션 회복해야 할 것 같아요",
+                "마음이 좀 안 좋아요",
+                "스트레스가 너무 쌓였어요",
+                "번아웃이 온 것 같아요",
+                "쉬어야 할 것 같아요",
+                "오늘 하루 좀 쉴게요",
+                "몸도 마음도 좀 쉬어야겠어요",
+                "재충전 시간이 필요해요"
+            ],
+            pet: [
+                "강아지가 토해서 병원 가봐야 할 것 같아요",
+                "고양이가 밥을 안 먹어서 병원 데려가야 해요",
+                "반려동물 예방접종 예약이 오늘이에요",
+                "강아지 미용 예약이 오늘이에요",
+                "고양이가 아파 보여서 병원 가봐야겠어요",
+                "강아지가 다리를 절어요",
+                "반려동물 건강검진 예약이에요",
+                "강아지 훈련소 상담이 있어요",
+                "고양이가 밤새 울어서 저도 못 잤어요",
+                "반려동물 약 타러 병원 가야 해요",
+                "강아지 수술 날짜예요",
+                "고양이가 탈출했어요",
+                "반려동물 펫시터 인수인계해야 해요",
+                "강아지가 다쳤어요",
+                "고양이 입원 중인데 면회 가야 해요",
+                "반려동물 피부병 치료 중이에요",
+                "강아지 치과 예약이 있어요",
+                "반려동물 알레르기 검사받으러 가야 해요",
+                "강아지 심장사상충 검사일이에요",
+                "고양이가 변을 못 봐서 병원 가야 해요",
+                "반려동물 보험 서류 내러 가야 해요",
+                "강아지 물리치료 받아야 해요",
+                "고양이 눈이 이상해요",
+                "반려동물 실밥 빼러 가야 해요",
+                "강아지가 뭘 삼켰어요",
+                "고양이 귀 치료 중이에요",
+                "강아지가 아파요",
+                "고양이가 아파요",
+                "반려동물 병원 예약이 오늘이에요",
+                "펫시터 만나야 해요"
+            ],
+            weather: [
+                "눈이 많이 와서 차가 안 빠져나가요",
+                "비가 너무 많이 와서 집 앞이 침수됐어요",
+                "도로가 얼어서 운전이 무서워요",
+                "안개가 너무 심해서 앞이 안 보여요",
+                "태풍 때문에 대중교통이 운행 중단됐어요",
+                "폭우로 지하철역이 침수됐대요",
+                "눈이 와서 버스가 안 다녀요",
+                "미세먼지가 심해서 숨쉬기가 힘들어요",
+                "정전이 돼서 준비를 못했어요",
+                "집 앞 도로가 물에 잠겼어요",
+                "한파로 수도관이 얼었어요",
+                "열대야 때문에 밤새 못 잤어요",
+                "빙판길에서 넘어졌어요",
+                "차 위에 눈이 쌓여서 치우고 있어요",
+                "비 때문에 시야가 안 나와요",
+                "대설 특보가 내려왔어요",
+                "도로 결빙으로 사고가 많이 났대요",
+                "기상 악화로 교통 상황이 안 좋아요",
+                "폭설로 출입구가 막혔어요",
+                "강풍이 심해서 밖에 나가기가 무서워요",
+                "비가 너무 많이 와요",
+                "눈이 너무 많이 와요",
+                "날씨가 너무 안 좋아요",
+                "출근 자제 권고가 내려왔어요",
+                "기온이 갑자기 떨어져서 몸이 안 좋아요",
+                "더위 먹은 것 같아요",
+                "황사가 심해서요",
+                "장마 때문에 집에 문제가 생겼어요",
+                "우박이 와서 밖에 못 나가요",
+                "천둥번개가 심해서 무서워요"
+            ]
+        };
+
+        // 변수 초기화
+        let currentCategory = 'all';
+        let usedCount = 0;
+        let currentExcuse = '';
+        let allExcuses = [];
+
+        // 모든 핑계 평탄화
+        function flattenExcuses() {
+            allExcuses = [];
+            let idx = 1;
+            Object.entries(excusesDatabase).forEach(([cat, excuses]) => {
+                excuses.forEach(excuse => {
+                    allExcuses.push({
+                        id: idx++,
+                        category: cat,
+                        text: excuse
+                    });
+                });
+            });
+        }
+
+        // 카테고리 한글명
+        const categoryNames = {
+            all: '전체',
+            health: '건강/의료',
+            family: '가족',
+            emergency: '긴급상황',
+            transport: '교통',
+            home: '집/주거',
+            official: '공적업무',
+            mental: '정신건강',
+            pet: '반려동물',
+            weather: '날씨/재해'
+        };
+
+        // 초기화
+        flattenExcuses();
+        renderExcuseList();
+        createParticles();
+
+        // 카테고리 버튼 이벤트
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                document.getElementById('currentCategory').textContent = currentCategory.toUpperCase();
+                filterExcuseList();
+            });
+        });
+
+        // 생성 버튼 이벤트
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            generateExcuse(currentCategory);
+        });
+
+        // 랜덤 버튼 이벤트
+        document.getElementById('randomBtn').addEventListener('click', function() {
+            generateExcuse('all');
+        });
+
+        // 복사 버튼 이벤트
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            if (currentExcuse) {
+                navigator.clipboard.writeText(currentExcuse).then(() => {
+                    showToast();
+                });
+            }
+        });
+
+        // 검색 이벤트
+        document.getElementById('searchInput').addEventListener('input', function() {
+            filterExcuseList(this.value);
+        });
+
+        // 핑계 생성 함수
+        function generateExcuse(category) {
+            let pool = category === 'all' ? allExcuses : allExcuses.filter(e => e.category === category);
+            let selected = pool[Math.floor(Math.random() * pool.length)];
+            
+            currentExcuse = selected.text;
+            usedCount++;
+            
+            // 애니메이션 효과
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.style.transform = 'scale(0.95)';
+            resultContainer.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                document.getElementById('resultNumber').textContent = `EXCUSE #${String(selected.id).padStart(3, '0')}`;
+                document.getElementById('resultText').textContent = selected.text;
+                document.getElementById('resultCategory').textContent = categoryNames[selected.category].toUpperCase();
+                document.getElementById('usedCount').textContent = usedCount;
+                
+                resultContainer.style.transform = 'scale(1)';
+                resultContainer.style.opacity = '1';
+            }, 200);
+        }
+
+        // 핑계 리스트 렌더링
+        function renderExcuseList() {
+            const grid = document.getElementById('excuseGrid');
+            grid.innerHTML = allExcuses.map(excuse => `
+                <div class="excuse-item" data-category="${excuse.category}" onclick="selectExcuse(${excuse.id})">
+                    <span class="excuse-num">#${String(excuse.id).padStart(3, '0')}</span>
+                    <span class="excuse-text">${excuse.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // 핑계 리스트 필터링
+        function filterExcuseList(searchTerm = '') {
+            const items = document.querySelectorAll('.excuse-item');
+            items.forEach(item => {
+                const matchCategory = currentCategory === 'all' || item.dataset.category === currentCategory;
+                const matchSearch = !searchTerm || item.querySelector('.excuse-text').textContent.includes(searchTerm);
+                item.style.display = matchCategory && matchSearch ? 'flex' : 'none';
+            });
+        }
+
+        // 핑계 선택
+        function selectExcuse(id) {
+            const excuse = allExcuses.find(e => e.id === id);
+            if (excuse) {
+                currentExcuse = excuse.text;
+                usedCount++;
+                
+                document.getElementById('resultNumber').textContent = `EXCUSE #${String(excuse.id).padStart(3, '0')}`;
+                document.getElementById('resultText').textContent = excuse.text;
+                document.getElementById('resultCategory').textContent = categoryNames[excuse.category].toUpperCase();
+                document.getElementById('usedCount').textContent = usedCount;
+                
+                // 스크롤 업
+                document.querySelector('.generator-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 토스트 표시
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 파티클 생성
+        function createParticles() {
+            const colors = ['#00f5ff', '#ff00ff', '#00ff88', '#ffd700'];
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = particle.style.height = Math.random() * 8 + 4 + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = Math.random() * 10 + 15 + 's';
+                document.body.appendChild(particle);
+            }
+        }
+    </script>
+</body>
+</html>

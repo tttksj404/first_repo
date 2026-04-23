@@ -197,6 +197,8 @@ class CapitalReportShell(FakeShell):
             "status": "ok",
             "capital_report": self.session.capital_report,
             "account_snapshot": self.session.account_snapshot,
+            "equity_usd": self.session.equity_usd,
+            "remaining_portfolio_capacity_usd": self.session.remaining_portfolio_capacity_usd,
         }
 
 
@@ -288,6 +290,30 @@ class QuantBinanceDaemonTests(unittest.TestCase):
         self.assertEqual(len(client.clients), 2)
         self.assertTrue(all(isinstance(item, BitgetWebSocketClient) for item in client.clients))
         self.assertEqual(client.clients[0].subscription_args()[0], {"instType": "SPOT", "channel": "trade", "instId": "BTCUSDT"})
+
+    def test_build_live_ws_client_includes_fast_futures_decision_interval(self) -> None:
+        client = _build_live_ws_client(
+            exchange_id="binance",
+            symbols=("BTCUSDT",),
+            allow_insecure_ssl=True,
+            decision_interval_minutes=1,
+        )
+
+        futures_client = client.clients[1]
+        self.assertIn("btcusdt@kline_1m", futures_client.streams)
+        self.assertIn("btcusdt@kline_5m", futures_client.streams)
+
+    def test_build_live_ws_client_includes_fast_bitget_futures_decision_interval(self) -> None:
+        client = _build_live_ws_client(
+            exchange_id="bitget",
+            symbols=("BTCUSDT",),
+            allow_insecure_ssl=True,
+            decision_interval_minutes=1,
+        )
+
+        futures_args = client.clients[1].subscription_args()
+        self.assertIn({"instType": "USDT-FUTURES", "channel": "candle1m", "instId": "BTCUSDT"}, futures_args)
+        self.assertIn({"instType": "USDT-FUTURES", "channel": "candle5m", "instId": "BTCUSDT"}, futures_args)
 
     def test_build_live_ws_client_shards_bitget_connections_for_large_symbol_sets(self) -> None:
         client = _build_live_ws_client(
@@ -489,6 +515,25 @@ class QuantBinanceDaemonTests(unittest.TestCase):
         self.assertTrue(capital_report["can_trade_futures_any"])
         self.assertEqual(float(capital_report["futures_execution_balance_usd"]), 5.0)
 
+    def test_run_live_paper_daemon_can_override_equity_for_paper_verification_only(self) -> None:
+        with tempfile.TemporaryDirectory() as output_dir:
+            with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}):
+                with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakePrivateDaemonClient()):
+                    with patch("quant_binance.daemon.LivePaperShell", CapitalReportShell):
+                        result = run_live_paper_daemon(
+                            config_path=CONFIG_PATH,
+                            output_base_dir=output_dir,
+                            exchange="binance",
+                            max_retries=1,
+                            execute_live_orders=False,
+                        )
+
+        self.assertEqual(result["summary"]["equity_usd"], 50.0)
+        self.assertEqual(result["summary"]["remaining_portfolio_capacity_usd"], 125.0)
+        capital_report = result["summary"]["capital_report"]
+        assert isinstance(capital_report, dict)
+        self.assertEqual(float(capital_report["futures_execution_balance_usd"]), 50.0)
+
     def test_run_live_paper_daemon_subscribes_only_seeded_symbols(self) -> None:
         with tempfile.TemporaryDirectory() as output_dir:
             config_path = Path(output_dir) / "config.json"
@@ -537,6 +582,44 @@ class QuantBinanceDaemonTests(unittest.TestCase):
         store.put(state)
 
         bootstrap_time = _bootstrap_decision_time(store=store, interval_minutes=5)
+
+        self.assertEqual(bootstrap_time.isoformat(), "2026-03-14T00:20:00+00:00")
+
+    def test_bootstrap_decision_time_caps_seeded_future_kline_to_current_boundary(self) -> None:
+        state = SymbolMarketState(
+            symbol="BTCUSDT",
+            top_of_book=TopOfBook(49999.5, 1.0, 50000.5, 1.2, datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc)),
+            last_trade_price=50000.0,
+            funding_rate=0.0001,
+            open_interest=1080000.0,
+            basis_bps=3.0,
+            last_update_time=datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc),
+            klines={
+                "5m": [
+                    KlineBar(
+                        symbol="BTCUSDT",
+                        interval="5m",
+                        start_time=datetime(2026, 3, 14, 0, 25, tzinfo=timezone.utc),
+                        close_time=datetime(2026, 3, 14, 0, 30, tzinfo=timezone.utc),
+                        open_price=50000.0,
+                        high_price=50100.0,
+                        low_price=49900.0,
+                        close_price=50050.0,
+                        volume=10.0,
+                        quote_volume=500000.0,
+                        is_closed=True,
+                    )
+                ]
+            },
+        )
+        store = MarketStateStore()
+        store.put(state)
+
+        bootstrap_time = _bootstrap_decision_time(
+            store=store,
+            interval_minutes=5,
+            now=datetime(2026, 3, 14, 0, 22, 33, tzinfo=timezone.utc),
+        )
 
         self.assertEqual(bootstrap_time.isoformat(), "2026-03-14T00:20:00+00:00")
 

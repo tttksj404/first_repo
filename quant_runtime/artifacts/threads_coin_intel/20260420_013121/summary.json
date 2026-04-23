@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-04-20T01:39:18.172166+00:00",
+  "threads_total_posts": 179,
+  "threads_usable_posts": 4,
+  "external_total_pages": 22,
+  "external_usable_pages": 0,
+  "combined_usable_count": 4,
+  "unique_threads_users": 57,
+  "unique_external_domains": 11,
+  "tag_counts": {
+    "execution_discipline": 3,
+    "derivatives": 1
+  },
+  "top_usable_samples": [
+    {
+      "url": "https://www.threads.com/@bc_co_kr/post/DXIQNC8Esve",
+      "source_kind": "threads_post",
+      "username": "bc_co_kr",
+      "score": 4,
+      "tags": [
+        "execution_discipline"
+      ],
+      "text_preview": "비트코인 급등 이유는?\n\n사람들이 억지로 사게 만들어서 오름.\n\n7만6천 달러를 찍은 상승\n\n겉으로 보면 호재\n\n근데 실제로는 공매도 6.5억 달러 청산"
+    },
+    {
+      "url": "https://www.threads.com/@tradenalytics/post/DXFHwN8mDgf",
+      "source_kind": "threads_post",
+      "username": "tradenalytics",
+      "score": 3,
+      "tags": [
+        "derivatives"
+      ],
+      "text_preview": "$BTC I'm still quite reluctant to buy Bitcoin yet because the retail shorts activity in my Futures Analyzer is not signaling bottom. \n\nDuring 2023, this signal peaked and there were non stop red signals getting spammed as seen below. \n\nNo s"
+    },
+    {
+      "url": "https://www.threads.com/@tradenalytics/post/DUcp1A7kUM_",
+      "source_kind": "threads_post",
+      "username": "tradenalytics",
+      "score": 3,
+      "tags": [
+        "execution_discipline"
+      ],
+      "text_preview": "$BTC sorry guys I don't make the rules.\n\nI was off by $2K, but I managed to predict this in November 2024. \n\nIn the meantime I was away from crypto, trading only stocks. \n\nThis helped my sanity alot to be buying stuff that don't crash -50% "
+    },
+    {
+      "url": "https://www.threads.com/@cryptohouzi/post/DXNpIYnkhMy",
+      "source_kind": "threads_post",
+      "username": "cryptohouzi",
+      "score": 3,
+      "tags": [
+        "execution_discipline"
+      ],
+      "text_preview": "크립토 '핵심 뉴스' 딱 3가지만 챙겨가세요!✅\n\n📉 미 국회 'CLARITY Act(가상자산 법안)' 협상 최종 단계 진입\n\n📉 모건스탠리 디지털 자산 책임자, \"가상자산은 이제 기업의 일상적 비즈니스\"\n\n📉 ETH/BTC 비율 10주 최고치 기록… \"이더리움의 반격 시작\""
+    }
+  ]
+}
