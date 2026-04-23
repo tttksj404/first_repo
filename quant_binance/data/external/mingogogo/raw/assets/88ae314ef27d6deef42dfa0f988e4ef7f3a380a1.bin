@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>파밍 알트코인 추세확인 - 최종 안정화 버전</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+  <style>
+    :root{--primary-gradient:linear-gradient(135deg,#667eea 0%,#764ba2 100%);--dark-gradient:linear-gradient(135deg,#0b0b12 0%,#151a2b 50%,#101a2f 100%);--glass-bg:rgba(255,255,255,0.08);--glass-border:rgba(255,255,255,0.18);--text-primary:#fff;--text-secondary:rgba(255,255,255,0.72);--text-accent:#64ffda;--shadow-primary:0 8px 32px rgba(31,38,135,0.37);--shadow-intense:0 20px 60px rgba(31,38,135,0.5);--glow-neon:0 0 30px rgba(100,255,218,0.6)}
+    *{box-sizing:border-box}
+    body{margin:0;padding:18px 16px;font-family:'Exo 2',system-ui,sans-serif;background:var(--dark-gradient);color:var(--text-primary);display:flex;flex-direction:column;align-items:center;min-height:100vh}
+    .glass{background:var(--glass-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:18px;box-shadow:var(--shadow-primary)}
+    .wrap{width:100%;max-width:1180px}
+    .top{display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 14px}
+    .title{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;letter-spacing:0.5px;background:linear-gradient(135deg,#64ffda 0%,#448aff 35%,#7c4dff 70%,#ff4081 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .badge{margin-top:-6px;padding:6px 12px;border-radius:22px;background:var(--primary-gradient);box-shadow:var(--glow-neon);font-weight:700}
+    .copyright-warning{width:100%;background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.5);border-radius:15px;padding:1rem;margin-top:1rem;text-align:center}.copyright-warning h3{color:#f44336;margin-bottom:.5rem}.copyright-warning p{color:rgba(255,255,255,0.8);font-size:.9rem;line-height:1.6}
+    .social-links{display:flex;justify-content:center;gap:1.5rem;margin:1.5rem 0;width:100%;flex-wrap:wrap}.social-link{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--text-secondary);transition:all .3s}.social-link:hover{color:var(--text-accent);transform:translateY(-3px)}.social-icon{font-size:1.8rem;margin-bottom:.5rem}.social-name{font-size:.7rem;font-weight:600;text-transform:uppercase}
+    .info{width:100%;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px 14px}
+    .info .item{font-family:'Orbitron',monospace;color:var(--text-accent);font-weight:700;font-size:13px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:7px 12px;border-radius:12px;border:1px solid var(--glass-border);background:rgba(255,255,255,.08);color:var(--text-secondary);font-weight:700;font-size:13px;cursor:pointer;transition:.2s}
+    .btn:hover{transform:translateY(-1px);color:#fff;border-color:var(--text-accent)}
+    .btn.active{background:var(--primary-gradient);color:#fff;border-color:transparent}
+    .panel{width:100%;padding:14px}
+    .canvas-box{position:relative;width:100%;height:min(56vh,520px);border-radius:14px;overflow:hidden;background:rgba(0,0,0,.28)}
+    .bar{margin-top:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+    .switch{position:relative;display:inline-block;width:48px;height:26px}.switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.22);border-radius:26px;transition:.25s}.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s}input:checked+.slider{background:var(--text-accent)}input:checked+.slider:before{transform:translateX(22px)}
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:.2s;z-index:10}.modal.show{opacity:1;visibility:visible}.modal .content{width:min(92vw,920px);max-height:84vh;overflow:auto;border-radius:16px}.modal .head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--glass-border)}.modal .head h3{margin:0;font-family:'Orbitron',monospace;color:var(--text-accent)}.modal .body{padding:14px 18px;color:var(--text-secondary);font-size:15px;line-height:1.7}
+    .act{padding:10px 14px;margin-top:8px;border-radius:12px;border:1px solid var(--glass-border);background:var(--primary-gradient);color:#fff;font-weight:800;cursor:pointer}
+    @media (max-width:720px){.title{font-size:22px}.canvas-box{height:52vh}}
+  </style>
+</head>
+<body>
+  <audio id="buy-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+  <audio id="sell-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-system-beep-buzzer-fail-2960.mp3" preload="auto"></audio>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="title">통합 시장 추세 분석</div>
+      <div class="badge glass">최근 100캔들 기준</div>
+    </div>
+    
+    <div class="copyright-warning">
+      <h3><i class="fas fa-exclamation-triangle"></i> 강력 경고</h3>
+      <p>본 프로그램은 파밍(서교민)에게 저작권이 귀속되어 있으며, 저작권법에 의해 보호받습니다.<br>
+      무단 복제, 수정, 배포, 판매 등 저작권을 침해하는 모든 행위는 엄격히 금지됩니다.<br>
+      위반 시 관련 법령(저작권법 제136조)에 따라 **5년 이하의 징역 또는 5천만원 이하의 벌금**에 처해질 수 있으며,<br>
+      이와는 별도로 발생한 **피해액에 따라 최대 수억 원의 민사상 손해배상**을 청구할 수 있습니다.</p>
+    </div>
+
+    <div class="social-links">
+        <a href="https://mingogogo.tistory.com/" target="_blank" class="social-link"><div class="social-icon"><i class="fas fa-blog"></i></div><div class="social-name">티스토리</div></a>
+        <a href="https://www.tiktok.com/@jjinbbin" target="_blank" class="social-link"><div class="social-icon"><i class="fab fa-tiktok"></i></div><div class="social-name">틱톡</div></a>
+        <a href="https://www.youtube.com/@%EC%BD%94%EC%9D%B8%ED%8C%8C%EB%B0%8D/shorts" target="_blank" class="social-link"><div class="social-icon"><i class="fab fa-youtube"></i></div><div class="social-name">유튜브</div></a>
+        <a href="https://www.instagram.com/coin.ming?igsh=MTNjODI0NzQ3YWo5bg==" target="_blank" class="social-link"><div class="social-icon"><i class="fab fa-instagram"></i></div><div class="social-name">인스타</div></a>
+    </div>
+
+    <div class="glass info">
+      <div class="item">현재 시각 <span id="now"></span></div>
+      <div class="item">API <span id="api">0</span></div>
+      <div class="item">알림
+        <label class="switch"><input id="alert" type="checkbox"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="panel glass">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <div class="controls" id="controls">
+          <button class="btn" data-period="1min">1분</button>
+          <button class="btn" data-period="3min">3분</button>
+          <button class="btn" data-period="5min">5분</button>
+          <button class="btn" data-period="15min">15분</button>
+          <button class="btn" data-period="30min">30분</button>
+          <button class="btn active" data-period="1hour">1시간</button>
+          <button class="btn" data-period="4hour">4시간</button>
+          <button class="btn" data-period="1day">1일</button>
+        </div>
+        <button id="brief" class="act">단기·중기·장기 종합분석</button>
+      </div>
+      <div class="canvas-box">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="glass bar">
+      <div id="msg" style="color:#ffc107;font-weight:700">참고용 도구입니다. 책임은 본인에게 있습니다.</div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="content glass">
+      <div class="head">
+        <h3>종합분석</h3>
+        <button id="close" class="btn">닫기</button>
+      </div>
+      <div id="body" class="body">분석 준비 중...</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const FRAME = {
+    '1min':  { api:'minutes/1',   unit:'minute' }, '3min':  { api:'minutes/3',   unit:'minute' },
+    '5min':  { api:'minutes/5',   unit:'minute' }, '15min': { api:'minutes/15',  unit:'minute' },
+    '30min': { api:'minutes/30',  unit:'minute' }, '1hour': { api:'minutes/60',  unit:'hour'   },
+    '4hour': { api:'minutes/240', unit:'hour'   }, '1day':  { api:'days',        unit:'day'    },
+  };
+  const COUNT = 100;
+  const SMA_N = 12;
+  const API_BASE = 'https://api.upbit.com/v1';
+  const el = {
+    now: document.getElementById('now'), api: document.getElementById('api'), alert: document.getElementById('alert'),
+    controls: document.getElementById('controls'), brief: document.getElementById('brief'), chart: document.getElementById('chart'),
+    msg: document.getElementById('msg'), modal: document.getElementById('modal'), body: document.getElementById('body'),
+    close: document.getElementById('close'), buy: document.getElementById('buy-sound'), sell: document.getElementById('sell-sound'),
+  };
+
+  let active = '1hour', apiCount = 0, chart, topAlt = [], alertOn = false;
+  let bases = { btc: 0, eth: 0, alt: 0 };
+  let alertSide = { 'KRW-BTC': null, 'KRW-ETH': null, 'ALT': null };
+  let fullUpdateTimer = null, streamTimer = null;
+
+  function tickClock(){ el.now.textContent = new Date().toLocaleString('ko-KR'); }
+  setInterval(tickClock, 1000); tickClock();
+
+  async function fetchJson(url) {
+    apiCount++; el.api.textContent = apiCount;
+    const res = await fetch(url, { cache:'no-cache', headers:{ 'Accept':'application/json' } });
+    if (!res.ok) throw new Error('API ' + res.status);
+    return res.json();
+  }
+
+  function sma(series, n=SMA_N){
+    if (!series || series.length < n) return [];
+    const out = [];
+    for (let i=n-1; i<series.length; i++){
+      let s = 0;
+      for (let j=0; j<n; j++) s += series[i-j].y;
+      out.push({ x: series[i].x, y: s/n });
+    }
+    return out;
+  }
+
+  function initChart(){
+    const ctx = el.chart.getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: { datasets: [
+        { label:'BTC', borderColor:'#f7931a', backgroundColor:'#f7931a33', tension:.35, borderWidth:2, pointRadius:0, fill:true },
+        { label:'ETH', borderColor:'#627eea', backgroundColor:'#627eea33', tension:.35, borderWidth:2, pointRadius:0, fill:true },
+        { label:'알트 평균', borderColor:'#64ffda', backgroundColor:'#64ffda33', tension:.35, borderWidth:2, pointRadius:0, fill:true },
+        { label:'BTC SMA', borderColor:'#f7931a', borderDash:[5,5], tension:.1, borderWidth:1.3, pointRadius:0, fill:false },
+        { label:'ETH SMA', borderColor:'#627eea', borderDash:[5,5], tension:.1, borderWidth:1.3, pointRadius:0, fill:false },
+        { label:'알트 SMA', borderColor:'#64ffda', borderDash:[5,5], tension:.1, borderWidth:1.3, pointRadius:0, fill:false },
+      ]},
+      options: {
+        responsive:true, maintainAspectRatio:false, animation:false,
+        interaction:{ mode:'index', intersect:false },
+        plugins:{
+          legend:{ labels:{ color:'rgba(255,255,255,.8)', filter: l => !l.text.includes('SMA') } },
+          annotation:{ annotations:{
+            top:{ type:'line', borderColor:'rgba(255,99,132,.6)', borderWidth:1.5, borderDash:[6,6], label:{ enabled:true, content:'최고', backgroundColor:'rgba(255,99,132,.6)' } },
+            bot:{ type:'line', borderColor:'rgba(30,136,229,.6)', borderWidth:1.5, borderDash:[6,6], label:{ enabled:true, content:'최저', backgroundColor:'rgba(30,136,229,.6)' } }
+          }}
+        },
+        scales:{
+          x:{ type:'time', time:{ unit: FRAME[active].unit, tooltipFormat:'yyyy-MM-dd HH:mm' }, grid:{ color:'rgba(255,255,255,.1)' }, ticks:{ color:'rgba(255,255,255,.75)' } },
+          y:{ grid:{ color:'rgba(255,255,255,.1)' }, ticks:{ color:'rgba(255,255,255,.8)', callback:v => v.toFixed(1)+'%' } }
+        }
+      }
+    });
+  }
+
+  async function fullUpdate() {
+    el.msg.textContent = '데이터 갱신 중...';
+    try {
+      const iv = FRAME[active].api;
+      chart.options.scales.x.time.unit = FRAME[active].unit;
+      
+      const marketAll = await fetchJson(`${API_BASE}/market/all?isDetails=true`);
+      const krw = marketAll.filter(m => m.market.startsWith('KRW-'));
+      const tickers = await fetchJson(`${API_BASE}/ticker?markets=${krw.slice(0,120).map(m=>m.market).join(',')}`);
+      topAlt = tickers.filter(t => !['KRW-BTC','KRW-ETH'].includes(t.market)).sort((a,b)=>b.acc_trade_price_24h - b.acc_trade_price_24h).slice(0,5);
+
+      const [btc, eth] = await Promise.all([
+        fetchJson(`${API_BASE}/candles/${iv}?market=KRW-BTC&count=${COUNT}`),
+        fetchJson(`${API_BASE}/candles/${iv}?market=KRW-ETH&count=${COUNT}`),
+      ]);
+      if (!btc || !eth) throw new Error('메인 코인 캔들 로딩 실패');
+      
+      const btcR = btc.slice().reverse(); bases.btc = btcR[0].trade_price;
+      const ethR = eth.slice().reverse(); bases.eth = ethR[0].trade_price;
+      const fmt = (cs, base) => cs.map(c => ({ x: new Date(c.candle_date_time_kst).getTime(), y: ((c.trade_price/base)-1)*100 }));
+
+      chart.data.datasets[0].data = fmt(btcR, bases.btc);
+      chart.data.datasets[1].data = fmt(ethR, bases.eth);
+
+      const altReq = topAlt.map(a => fetchJson(`${API_BASE}/candles/${iv}?market=${a.market}&count=${btc.length}`));
+      const altRes = (await Promise.all(altReq)).filter(a => Array.isArray(a) && a.length === btc.length);
+      
+      if (altRes.length) {
+        const avg = [];
+        for (let i=0; i<btc.length; i++){ avg.push(altRes.reduce((acc, arr) => acc + arr.slice().reverse()[i].trade_price, 0) / altRes.length); }
+        bases.alt = avg[0];
+        chart.data.datasets[2].data = avg.map((v,i) => ({ x: new Date(btcR[i].candle_date_time_kst).getTime(), y: ((v/bases.alt)-1)*100 }));
+      } else { chart.data.datasets[2].data = []; }
+      
+      chart.data.datasets[3].data = sma(chart.data.datasets[0].data);
+      chart.data.datasets[4].data = sma(chart.data.datasets[1].data);
+      chart.data.datasets[5].data = sma(chart.data.datasets[2].data);
+      
+      const last = arr => arr.length ? arr[arr.length-1].y : null;
+      alertSide['KRW-BTC'] = last(chart.data.datasets[0].data) > last(chart.data.datasets[3].data) ? 'above':'below';
+      alertSide['KRW-ETH'] = last(chart.data.datasets[1].data) > last(chart.data.datasets[4].data) ? 'above':'below';
+      alertSide['ALT']     = last(chart.data.datasets[2].data) > last(chart.data.datasets[5].data) ? 'above':'below';
+
+      autoY(); chart.update('none'); el.msg.textContent = '정상';
+    } catch (e) { el.msg.textContent = '업데이트 오류: ' + e.message; }
+  }
+
+  async function streamUpdate() {
+    try {
+      const mkts = ['KRW-BTC', 'KRW-ETH', ...topAlt.map(a => a.market)];
+      const t = await fetchJson(`${API_BASE}/ticker?markets=${mkts.join(',')}`);
+      if (!t || !t.length) return;
+
+      const find = m => t.find(x => x.market === m)?.trade_price;
+      const now = new Date().getTime();
+
+      const updateDataset = (market, base, dsIndex, smaIndex) => {
+        const price = find(market);
+        if (!price || !base) return;
+        const y = ((price/base)-1)*100;
+        
+        const priceDs = chart.data.datasets[dsIndex].data;
+        if (priceDs.length >= COUNT) priceDs.shift();
+        priceDs.push({ x: now, y });
+
+        chart.data.datasets[smaIndex].data = sma(priceDs);
+        
+        if (alertOn) {
+            const smaDs = chart.data.datasets[smaIndex].data;
+            if(smaDs.length > 0) {
+                const lastS = smaDs[smaDs.length - 1].y;
+                const prev = alertSide[market];
+                const cur = y > lastS ? 'above' : 'below';
+                if (prev === 'below' && cur === 'above') el.buy.play();
+                if (prev === 'above' && cur === 'below') el.sell.play();
+                alertSide[market] = cur;
+            }
+        }
+      };
+
+      updateDataset('KRW-BTC', bases.btc, 0, 3);
+      updateDataset('KRW-ETH', bases.eth, 1, 4);
+
+      if (topAlt.length) {
+        const vals = topAlt.map(a => find(a.market)).filter(Boolean);
+        if (vals.length) {
+          const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+          const ds = chart.data.datasets[2].data;
+          const y = ((avg/bases.alt)-1)*100;
+          if (ds.length >= COUNT) ds.shift();
+          ds.push({ x: now, y });
+          chart.data.datasets[5].data = sma(ds);
+          if (alertOn) {
+            const smaDs = chart.data.datasets[5].data;
+            if(smaDs.length > 0) {
+                const lastS = smaDs[smaDs.length - 1].y;
+                const prev = alertSide['ALT'];
+                const cur = y > lastS ? 'above' : 'below';
+                if (prev === 'below' && cur === 'above') el.buy.play();
+                if (prev === 'above' && cur === 'below') el.sell.play();
+                alertSide['ALT'] = cur;
+            }
+          }
+        }
+      }
+      autoY(); chart.update('none');
+    } catch(e) { console.warn('stream 실패', e.message); }
+  }
+
+  function autoY(){
+    const datasets = [chart.data.datasets[0], chart.data.datasets[1], chart.data.datasets[2]];
+    const recentData = datasets.flatMap(ds => ds.data.slice(-15).map(p => p.y));
+    if (!recentData.length) return;
+    
+    const max = Math.max(...recentData);
+    const min = Math.min(...recentData);
+    const pad = Math.max(0.1, (max - min) * 0.15);
+    
+    chart.options.scales.y.max = max + pad;
+    chart.options.scales.y.min = min - pad;
+
+    const fullData = datasets.flatMap(ds => ds.data.map(p => p.y));
+    const fullMax = Math.max(...fullData);
+    const fullMin = Math.min(...fullData);
+    
+    const annotations = chart.options.plugins.annotation.annotations;
+    annotations.top.yMin = annotations.top.yMax = fullMax;
+    annotations.top.label.content = `전체 최고 ${fullMax.toFixed(2)}%`;
+    annotations.bot.yMin = annotations.bot.yMax = fullMin;
+    annotations.bot.label.content = `전체 최저 ${fullMin.toFixed(2)}%`;
+  }
+
+  async function briefing(){
+    el.modal.classList.add('show');
+    el.body.textContent = '분석 중...';
+    const groups = { '단기 종합': ['1min','3min','15min'], '중기 종합': ['15min','30min','1hour'], '장기 종합': ['1hour','4hour','1day'] };
+    const label = p => ({'1min':'1분','3min':'3분','5min':'5분','15min':'15분','30min':'30분','1hour':'1시간','4hour':'4시간','1day':'1일'})[p]||p;
+    const sum = s => {
+      const last = s[s.length-1].y, mid = s[Math.floor(s.length/2)].y;
+      const slope = last - mid, ys = s.map(v=>v.y);
+      const max = Math.max(...ys), min = Math.min(...ys), span = max-min;
+      const pos = span===0 ? 50 : ((last-min)/span)*100;
+      return { dir:slope>0.15?'상승':(slope<-0.15?'하락':'횡보'), vol:span>3?'변동성 큼':(span>1.5?'보통':'낮음'), where:pos>85?'고점권':(pos<15?'저점권':'중간') };
+    };
+    const load = async p => {
+      const [b,e] = await Promise.all([ fetchJson(`${API_BASE}/candles/${FRAME[p].api}?market=KRW-BTC&count=${COUNT}`), fetchJson(`${API_BASE}/candles/${FRAME[p].api}?market=KRW-ETH&count=${COUNT}`) ]);
+      if (!b || !e) return `${label(p)} 데이터 없음`;
+      const fmt = (cs, base) => cs.map(c=>({ y:((c.trade_price/base)-1)*100 }));
+      const s1 = sum(fmt(b.slice().reverse(), b[b.length-1].trade_price));
+      const s2 = sum(fmt(e.slice().reverse(), e[e.length-1].trade_price));
+      return `${label(p)} — BTC ${s1.dir}, ETH ${s2.dir}, ${s1.vol}, ${s1.where}`;
+    };
+    const parts = [];
+    for (const [title, arr] of Object.entries(groups)){
+      const rows = await Promise.all(arr.map(load));
+      parts.push(`<h4 style="color:#64ffda;margin:10px 0 6px">${title}</h4>${rows.map(r=>`<p style="margin:4px 0">${r}</p>`).join('')}`);
+    }
+    el.body.innerHTML = parts.join('') + `<p style="opacity:.75;margin-top:6px">최근 100캔들 기준 요약입니다.</p>`;
+  }
+
+  function wire(){
+    el.alert.addEventListener('change', e => alertOn = e.target.checked);
+    el.controls.addEventListener('click', e => {
+      if (!e.target.classList.contains('btn') || e.target.classList.contains('active')) return;
+      Array.from(el.controls.children).forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      active = e.target.dataset.period;
+      clearInterval(fullUpdateTimer); clearInterval(streamTimer);
+      fullUpdate().then(() => {
+        fullUpdateTimer = setInterval(fullUpdate, 60*1000);
+        streamTimer  = setInterval(streamUpdate, 3000);
+      });
+    });
+    el.brief.addEventListener('click', briefing);
+    el.close.addEventListener('click', () => el.modal.classList.remove('show'));
+    window.addEventListener('resize', () => chart?.resize());
+  }
+
+  function start(){
+    initChart();
+    wire();
+    fullUpdate().then(() => {
+      fullUpdateTimer = setInterval(fullUpdate, 60*1000);
+      streamTimer  = setInterval(streamUpdate, 3000);
+    });
+  }
+  start();
+})();
+</script>
+</body>
+</html>

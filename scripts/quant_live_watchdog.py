@@ -55,6 +55,9 @@ class QuantLiveWatchdog:
         self.supervisor_pid_path = self.log_dir / "live_supervisor.pid"
         self.watchdog_pid_path = self.log_dir / "live_supervisor_watchdog.pid"
         self.health_state_path = self.log_dir / "live_supervisor_health.json"
+        self.supervisor_stop_path = Path(
+            os.environ.get("QUANT_SUPERVISOR_STOP_FILE", str(self.repo_root / "scripts" / "_supervisor_stop"))
+        )
         self.summary_path = self.output_base / "output" / "paper-live-shell" / "latest" / "summary.state.json"
         self.started_at = time.time()
         digest = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
@@ -77,6 +80,19 @@ class QuantLiveWatchdog:
         self.closed_trades_path = self.output_base / "output" / "paper-live-shell" / "latest" / "logs" / "closed_trades.jsonl"
         self.strategy_override_path = self.output_base / "artifacts" / "strategy_override.approved.json"
         self.strategy_health_path = self.log_dir / "health_status.json"
+
+    def _read_json_object(self, path: Path) -> dict:
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+        return data if isinstance(data, dict) else {}
+
+    def supervisor_stop_requested(self) -> bool:
+        try:
+            return "stop" in self.supervisor_stop_path.read_text(encoding="utf-8", errors="ignore").lower()
+        except OSError:
+            return False
 
     def _resolve_python_bin(self) -> str:
         requested = os.environ.get("PYTHON_BIN")
@@ -174,6 +190,7 @@ class QuantLiveWatchdog:
         except (OSError, json.JSONDecodeError):
             return SummaryHealth(fresh=False, reason=invalid_reason, age_seconds=None)
 
+        status = str(data.get("status") or "")
         updated_at_raw = data.get("updated_at")
         if not isinstance(updated_at_raw, str):
             return SummaryHealth(fresh=False, reason=f"{invalid_reason}:missing_updated_at", age_seconds=None)
@@ -184,6 +201,11 @@ class QuantLiveWatchdog:
             return SummaryHealth(fresh=False, reason=f"{invalid_reason}:invalid_updated_at", age_seconds=None)
 
         age_seconds = max((datetime.now(timezone.utc) - updated_at).total_seconds(), 0.0)
+        if status == "startup_failed":
+            return SummaryHealth(fresh=False, reason="startup_failed", age_seconds=age_seconds)
+        if status == "unhealthy":
+            reason = str(data.get("reason") or "unhealthy")
+            return SummaryHealth(fresh=False, reason=reason, age_seconds=age_seconds)
         if age_seconds > self.stale_seconds:
             return SummaryHealth(fresh=False, reason=stale_reason, age_seconds=age_seconds)
         return SummaryHealth(fresh=True, reason="fresh", age_seconds=age_seconds)
@@ -203,6 +225,27 @@ class QuantLiveWatchdog:
             invalid_reason="invalid_health_state",
             stale_reason="health_state_stale",
         )
+
+    def startup_failure_is_transport(self) -> bool:
+        transport_markers = (
+            "transport error",
+            "dns resolution",
+            "nodename",
+            "name or service",
+            "temporary failure",
+            "urlopen error",
+            "connection reset",
+            "network is unreachable",
+            "timed out",
+        )
+        for path in (self.summary_path, self.health_state_path):
+            data = self._read_json_object(path)
+            if str(data.get("status") or "") != "startup_failed" and str(data.get("reason") or "") != "startup_failed":
+                continue
+            error_text = f"{data.get('error') or ''} {data.get('summary') or ''}".lower()
+            if any(marker in error_text for marker in transport_markers):
+                return True
+        return False
 
     def child_alive(self) -> bool:
         try:
@@ -238,6 +281,9 @@ class QuantLiveWatchdog:
         return False
 
     def restart_supervisor(self) -> None:
+        if self.supervisor_stop_requested():
+            self.log("supervisor stop file present; refusing restart")
+            return
         if self._check_circuit_breaker():
             return
 
@@ -640,6 +686,9 @@ class QuantLiveWatchdog:
         self._write_strategy_health(overall, checks, auto_actions)
 
     def step(self) -> None:
+        if self.supervisor_stop_requested():
+            self.log("supervisor stop file present; watchdog exiting")
+            raise SystemExit(0)
         if not self.owns_watchdog_slot():
             current_pid, current_version = self.read_slot(self.watchdog_pid_path)
             self.log(f"watchdog slot lost to pid={current_pid} {current_version or ''}".strip())
@@ -667,12 +716,20 @@ class QuantLiveWatchdog:
         if runtime_fresh:
             if child_alive:
                 return
-            self.log(f"child missing but runtime state still fresh; waiting summary={summary_health.reason} health={health_state.reason}")
+            self.log(
+                "supervisor missing but summary still fresh; waiting "
+                f"child_alive={child_alive} supervisor_alive={supervisor_alive} "
+                f"summary={summary_health.reason} health={health_state.reason}"
+            )
             return
 
         combined_reason = f"summary={summary_health.reason},health={health_state.reason},child_alive={child_alive},supervisor_alive={supervisor_alive}"
         if self.within_startup_grace():
             self.log(f"{combined_reason} during startup grace; waiting")
+            return
+
+        if supervisor_alive and self.startup_failure_is_transport():
+            self.log(f"startup transport failure; leaving supervisor alive for controlled backoff ({combined_reason})")
             return
 
         if supervisor_alive:

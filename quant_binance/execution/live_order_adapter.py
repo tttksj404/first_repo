@@ -4,6 +4,7 @@ import logging
 import re
 from decimal import Decimal, ROUND_HALF_UP
 from dataclasses import dataclass
+from inspect import signature
 from typing import Any, Protocol
 
 _log = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ class SupportsLiveOrder(Protocol):
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         ...
 
-    def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
+    def set_futures_leverage(self, *, symbol: str, leverage: int, hold_side: str | None = None) -> dict[str, Any]:
         ...
 
     def place_futures_position_tpsl(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
@@ -104,22 +105,88 @@ class DecisionLiveOrderAdapter:
             settings=self.settings,
         )
 
+    def _set_futures_leverage_call(
+        self,
+        *,
+        symbol: str,
+        leverage: int,
+        hold_side: str,
+    ) -> dict[str, Any]:
+        setter = self.client.set_futures_leverage
+        try:
+            params = signature(setter).parameters
+        except (TypeError, ValueError):
+            params = {}
+        if "hold_side" in params:
+            return setter(symbol=symbol, leverage=leverage, hold_side=hold_side)
+        return setter(symbol=symbol, leverage=leverage)
+
+    def _response_raw_code(self, response: dict[str, Any]) -> str:
+        raw = response.get("raw")
+        if isinstance(raw, dict):
+            return str(raw.get("code", "") or "")
+        return str(response.get("code", "") or "")
+
+    def _response_status_ok(self, response: dict[str, Any]) -> bool:
+        raw_code = self._response_raw_code(response)
+        if raw_code and raw_code != "00000":
+            return False
+        status = str(response.get("status", "") or "").strip().upper()
+        return status in {"", "SUCCESS", "FILLED", "PARTIALLY_FILLED"}
+
+    def _response_leverage(self, response: dict[str, Any], *, hold_side: str) -> float | None:
+        keys = (
+            "longLeverage" if hold_side == "long" else "shortLeverage",
+            "crossMarginLeverage",
+            "crossedMarginLeverage",
+            "isolatedMarginLeverage",
+            "leverage",
+        )
+        for key in keys:
+            value = response.get(key)
+            if value in (None, ""):
+                raw = response.get("raw")
+                data = raw.get("data") if isinstance(raw, dict) else None
+                if isinstance(data, dict):
+                    value = data.get(key)
+            if value in (None, ""):
+                continue
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                continue
+        return None
+
     def _set_futures_leverage_if_supported(self, *, decision: DecisionIntent) -> None:
-        if self.settings is None:
+        if decision.side not in {"long", "short"}:
             return
         leverage = self._target_futures_leverage(decision)
+        if leverage <= 0:
+            return
+        hold_side = "long" if decision.side == "long" else "short"
         try:
-            response = self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
-            if self._exchange_id() == "bitget":
-                margin_mode = str((response or {}).get("marginMode", "") or "").strip().lower()
-                if margin_mode in {"crossed", "isolated"}:
-                    self._bitget_margin_mode_by_symbol[decision.symbol] = margin_mode
+            response = self._set_futures_leverage_call(
+                symbol=decision.symbol,
+                leverage=leverage,
+                hold_side=hold_side,
+            )
         except Exception as exc:
-            if self._exchange_id() == "bitget":
-                message = str(exc)
-                if "40893" in message or "Unable to update the leverage factor" in message:
-                    return
-            raise
+            raise RuntimeError(
+                f"FUTURES_LEVERAGE_SET_FAILED:{decision.symbol}:{hold_side}:{leverage}:{exc!r}"
+            ) from exc
+        if self._exchange_id() == "bitget" and not self._response_status_ok(response or {}):
+            raise RuntimeError(
+                f"FUTURES_LEVERAGE_SET_REJECTED:{decision.symbol}:{hold_side}:{leverage}:{response}"
+            )
+        actual_leverage = self._response_leverage(response or {}, hold_side=hold_side)
+        if actual_leverage is not None and int(actual_leverage) != int(leverage):
+            raise RuntimeError(
+                f"FUTURES_LEVERAGE_MISMATCH:{decision.symbol}:{hold_side}:requested={leverage}:actual={actual_leverage}"
+            )
+        if self._exchange_id() == "bitget":
+            margin_mode = str((response or {}).get("marginMode", "") or "").strip().lower()
+            if margin_mode in {"crossed", "isolated"}:
+                self._bitget_margin_mode_by_symbol[decision.symbol] = margin_mode
 
     def _bitget_margin_mode_for_symbol(self, symbol: str) -> str:
         cached = str(self._bitget_margin_mode_by_symbol.get(symbol, "") or "").strip().lower()
@@ -562,6 +629,8 @@ class DecisionLiveOrderAdapter:
                     result = submit(order_params=order_params)
                 else:
                     raise
+            if not self._response_status_ok(result or {}):
+                raise RuntimeError(f"PROTECTION_ORDER_REJECTED:{market}:{result}")
             results.append(
                 {
                     "market": market,

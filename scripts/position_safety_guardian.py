@@ -9,6 +9,10 @@ exchange-side SL, position bleeding unprotected for ~3 minutes).
 
 Behavior:
   - Polls Bitget positions every GUARDIAN_INTERVAL (default 20s).
+  - Waits GUARDIAN_GRACE_SECONDS (default 60s) after first seeing a missing SL
+    before taking action, giving the daemon/order adapter time to arm TPSL.
+  - By default only acts on unmanaged/adopted/manual positions. Strategy-managed
+    positions are left to the daemon unless GUARDIAN_UNMANAGED_ONLY=0.
   - For each open position with stopLoss empty/missing, registers an emergency SL
     using the same ROE/leverage rules the daemon uses (loaded from
     strategy_override.approved.json).
@@ -64,6 +68,74 @@ def _load_override(project_root: Path) -> dict:
         return json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+
+def _load_latest_runtime_state(project_root: Path) -> dict:
+    base = project_root / "quant_runtime" / "output" / "paper-live-shell"
+    candidates = [base / "latest" / "summary.state.json"]
+    try:
+        candidates.extend(
+            sorted(
+                base.glob("*/summary.state.json"),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+        )
+    except Exception:
+        pass
+    for path in candidates:
+        try:
+            if path.exists():
+                return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+    return {}
+
+
+def _position_side(value: object) -> str:
+    side = str(value or "").strip().lower()
+    if side in {"buy", "long"}:
+        return "long"
+    if side in {"sell", "short"}:
+        return "short"
+    return side
+
+
+def _position_key(symbol: object, side: object) -> str:
+    normalized_symbol = str(symbol or "").strip().upper()
+    normalized_side = _position_side(side)
+    if not normalized_symbol or normalized_side not in {"long", "short"}:
+        return ""
+    return f"{normalized_symbol}:{normalized_side}"
+
+
+def _runtime_position_key(row: dict) -> str:
+    side = row.get("side", row.get("holdSide", row.get("posSide", "")))
+    return _position_key(row.get("symbol", ""), side)
+
+
+def _is_strategy_managed_runtime_position(row: dict) -> bool:
+    origin = str(row.get("origin", "strategy") or "strategy").strip().lower()
+    if origin == "adopted":
+        return False
+    if row.get("adopted_at") is not None:
+        return False
+    if str(row.get("adoption_source", "") or "").strip():
+        return False
+    return True
+
+
+def _strategy_managed_position_keys(runtime_state: dict) -> set[str]:
+    keys: set[str] = set()
+    for row in runtime_state.get("paper_open_futures_positions", []) or []:
+        if not isinstance(row, dict):
+            continue
+        if not _is_strategy_managed_runtime_position(row):
+            continue
+        key = _runtime_position_key(row)
+        if key:
+            keys.add(key)
+    return keys
 
 
 def _stop_fraction(override: dict) -> float:
@@ -135,6 +207,7 @@ def main() -> int:
 
     interval = int(os.environ.get("GUARDIAN_INTERVAL", "20"))
     grace_seconds = int(os.environ.get("GUARDIAN_GRACE_SECONDS", "60"))
+    unmanaged_only = os.environ.get("GUARDIAN_UNMANAGED_ONLY", "1").strip().lower() not in {"0", "false", "no", "off"}
 
     from quant_binance.execution.client_factory import build_exchange_rest_client
     from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
@@ -142,7 +215,10 @@ def main() -> int:
     client = build_exchange_rest_client(exchange="bitget", allow_insecure_ssl=True)
     adapter = DecisionLiveOrderAdapter(client, None)
 
-    _log(f"guardian starting; interval={interval}s grace={grace_seconds}s", log_path)
+    _log(
+        f"guardian starting; interval={interval}s grace={grace_seconds}s unmanaged_only={unmanaged_only}",
+        log_path,
+    )
 
     fail_counts: dict[str, int] = {}
     last_attempt: dict[str, float] = {}
@@ -156,6 +232,8 @@ def main() -> int:
 
         override = _load_override(project_root)
         stop_fraction = _stop_fraction(override)
+        runtime_state = _load_latest_runtime_state(project_root) if unmanaged_only else {}
+        managed_keys = _strategy_managed_position_keys(runtime_state) if unmanaged_only else set()
         try:
             pos_resp = client.send(client.build_positions_request())
         except Exception as exc:
@@ -214,6 +292,10 @@ def main() -> int:
             if elapsed < grace_seconds:
                 # Give daemon/order pipeline time to register protection before
                 # guardian intervenes (prevents SL overwrite loops).
+                continue
+            if unmanaged_only and key.upper() in {item.upper() for item in managed_keys}:
+                # The daemon owns protection and exits for strategy positions.
+                # Guardian remains a backstop for manual/adopted/unmanaged gaps.
                 continue
             if key in last_attempt and (now_s - last_attempt[key]) < backoff_seconds:
                 continue

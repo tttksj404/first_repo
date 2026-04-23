@@ -1,0 +1,189 @@
+{
+  "version": "v0.1-inferred-from-blog",
+  "disclaimer": "?? ??? ?? ?? ??. ?? ?? ??? ?? ? ??.",
+  "target": "?? ?? ?? ? 3? ?? ??",
+  "pipeline": [
+    {
+      "step": 1,
+      "name": "candidate_universe_filter",
+      "description": "????/???? ?? ?? ??? ??",
+      "features": [
+        "volume_rank",
+        "value_traded",
+        "recent_momentum"
+      ],
+      "evidence_post_ids": [
+        308,
+        262,
+        263
+      ]
+    },
+    {
+      "step": 2,
+      "name": "indicator_feature_engineering",
+      "description": "RSI/MACD/RCI/CCI/OBV/EMA/SMA ? ???? ??",
+      "features": [
+        "RSI",
+        "MACD",
+        "RCI",
+        "CCI",
+        "OBV",
+        "EMA",
+        "SMA"
+      ],
+      "evidence_post_ids": [
+        121,
+        126,
+        76,
+        84,
+        262,
+        263
+      ]
+    },
+    {
+      "step": 3,
+      "name": "multi_channel_scoring",
+      "description": "?? ?? ???? ???(?: 8? ??) ? ???? ?? ??",
+      "features": [
+        "cross_channel_consensus",
+        "strong_reco_score",
+        "engine_score"
+      ],
+      "evidence_post_ids": [
+        308,
+        262,
+        263
+      ]
+    },
+    {
+      "step": 4,
+      "name": "multi_timeframe_alignment",
+      "description": "??~?? ????? ???/?? ?? ??",
+      "features": [
+        "tf_5m",
+        "tf_15m",
+        "tf_1h",
+        "tf_4h",
+        "sync_score"
+      ],
+      "evidence_post_ids": [
+        308,
+        262,
+        263
+      ]
+    },
+    {
+      "step": 5,
+      "name": "pattern_and_flow_boost",
+      "description": "??? ??, ?? ??, ???? ?? ? ??? ??",
+      "features": [
+        "harmonic_pattern",
+        "accumulation_signal",
+        "value_spike"
+      ],
+      "evidence_post_ids": [
+        308,
+        182,
+        181
+      ]
+    },
+    {
+      "step": 6,
+      "name": "risk_filter",
+      "description": "?? ??/??? ??? ?? ?? ??",
+      "features": [
+        "drawdown_alert",
+        "volatility_guard",
+        "crash_warning"
+      ],
+      "evidence_post_ids": [
+        293,
+        206,
+        208
+      ]
+    },
+    {
+      "step": 7,
+      "name": "ranking_and_output",
+      "description": "?? ?? ?? ????? ??",
+      "features": [
+        "final_score",
+        "rank",
+        "confidence_bucket"
+      ],
+      "evidence_post_ids": [
+        214,
+        216,
+        217,
+        218,
+        221,
+        222,
+        223,
+        224,
+        226,
+        228,
+        229,
+        230,
+        231,
+        237,
+        238,
+        239,
+        240,
+        308
+      ]
+    },
+    {
+      "step": 8,
+      "name": "post_hoc_performance_tracking",
+      "description": "3? ??(??/??/???) ???",
+      "features": [
+        "avg_return_pct",
+        "best_return_pct",
+        "accuracy_pct",
+        "start_price",
+        "peak_price"
+      ],
+      "evidence_post_ids": [
+        214,
+        216,
+        217,
+        218,
+        221,
+        222,
+        223,
+        224,
+        226,
+        228,
+        229,
+        230,
+        231,
+        237,
+        238,
+        239,
+        240
+      ]
+    }
+  ],
+  "scoring_hints": {
+    "observed_score_range": [
+      10,
+      173
+    ],
+    "example_high_scores": [
+      173,
+      168,
+      166
+    ],
+    "note": "??? ???/???? ?????? ?? ??"
+  },
+  "output_schema": [
+    "timestamp",
+    "symbol",
+    "score",
+    "signal_type",
+    "entry_price",
+    "peak_price_3d",
+    "return_pct_3d",
+    "risk_flag"
+  ]
+}

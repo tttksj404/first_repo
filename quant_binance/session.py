@@ -46,6 +46,19 @@ from quant_binance.self_healing import RuntimeSelfHealing, parse_error_code
 from quant_binance.telegram_notify import send_telegram_message, telegram_report_only_enabled
 
 
+def _reference_price_guard_max_bps() -> float:
+    raw = os.getenv("QUANT_REFERENCE_PRICE_GUARD_MAX_BPS", "50")
+    try:
+        return max(float(raw), 0.0)
+    except (TypeError, ValueError):
+        return 50.0
+
+
+def _payload_price(value: float) -> float:
+    """Preserve micro-price symbols in JSON payloads without noisy float tails."""
+    return round(float(value), 12)
+
+
 class SupportsAccountSync(Protocol):
     def get_account(self, *, market: str) -> dict[str, Any]:
         ...
@@ -215,16 +228,16 @@ class PaperPosition:
             "market": self.market,
             "side": self.side,
             "entry_time": self.entry_time,
-            "entry_price": round(self.entry_price, 6),
-            "current_price": round(self.current_price, 6),
+            "entry_price": _payload_price(self.entry_price),
+            "current_price": _payload_price(self.current_price),
             "quantity_opened": round(self.quantity_opened, 8),
             "quantity_remaining": round(self.quantity_remaining, 8),
             "current_notional_usd_estimate": self.current_notional_usd_estimate(),
             "unrealized_pnl_usd_estimate": self.unrealized_pnl_usd_estimate(),
             "stop_distance_bps": round(self.stop_distance_bps, 6),
-            "active_stop_price": round(self.active_stop_price, 6),
-            "best_price": round(self.best_price, 6),
-            "worst_price": round(self.worst_price, 6),
+            "active_stop_price": _payload_price(self.active_stop_price),
+            "best_price": _payload_price(self.best_price),
+            "worst_price": _payload_price(self.worst_price),
             "partial_take_profit_taken": self.partial_take_profit_taken,
             "r_multiple_partial_take_profit_taken": self.r_multiple_partial_take_profit_taken,
             "profit_protection_retrace_taken": self.profit_protection_retrace_taken,
@@ -310,6 +323,7 @@ class LivePaperSession:
     live_major_drawdown_grace_started_at_by_identity: dict[str, datetime] = field(default_factory=dict)
     live_entry_starvation_attempts_by_symbol: dict[str, int] = field(default_factory=dict)
     live_entry_starvation_last_at_by_symbol: dict[str, datetime] = field(default_factory=dict)
+    recent_weak_preflight_by_symbol: dict[str, tuple[datetime, tuple[str, ...]]] = field(default_factory=dict)
     live_trailing_stop_prices: dict[str, float] = field(default_factory=dict)  # identity → current trailing SL price
     live_portfolio_peak_unrealized_ratio: float = 0.0
     live_portfolio_profit_lock_taken: bool = False
@@ -330,7 +344,10 @@ class LivePaperSession:
     last_decision_emitted_at: datetime | None = None
     next_scheduled_decision_at: datetime | None = None
     last_recorded_decision_time_by_symbol: dict[str, datetime] = field(default_factory=dict)
+    reference_price_guard_counts: dict[str, int] = field(default_factory=dict)
+    reference_price_guard_last_by_symbol: dict[str, dict[str, object]] = field(default_factory=dict)
     minimum_live_decision_timestamp: datetime | None = None
+    recent_paper_management_close_reasons: dict[str, str] = field(default_factory=dict)
     _last_sync_at: datetime | None = None
     _last_flush_at: datetime | None = None
     _execution_quality_state: ExecutionQualityState = field(init=False, repr=False)
@@ -352,6 +369,63 @@ class LivePaperSession:
         if len(learner_path.parents) >= 4 and learner_path.parents[2].name == "output":
             return learner_path.parents[3] / "execution_quality_state.json"
         return None
+
+    def _paper_verification_equity_override(self) -> tuple[float, float] | None:
+        if self.live_order_executor is not None:
+            return None
+        equity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_EQUITY_USD", "") or "").strip()
+        if not equity_raw:
+            return None
+        try:
+            equity = float(equity_raw)
+        except (TypeError, ValueError):
+            return None
+        if equity <= 0.0:
+            return None
+        leverage_cap = max(self.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
+        capacity = round(equity * leverage_cap, 6)
+        capacity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_CAPACITY_USD", "") or "").strip()
+        if capacity_raw:
+            try:
+                capacity = max(float(capacity_raw), 0.0)
+            except (TypeError, ValueError):
+                pass
+        return equity, capacity
+
+    def _paper_verification_mode_enabled(self) -> bool:
+        return self._paper_verification_equity_override() is not None
+
+    def _paper_verification_continue_decisions_after_kill_switch(self) -> bool:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        stop_raw = str(os.environ.get("QUANT_PAPER_VERIFY_STOP_ON_KILL_SWITCH", "") or "").strip().lower()
+        return stop_raw not in {"1", "true", "yes", "on"}
+
+    def _paper_verification_skip_risk_kill_switch(self, *, exit_reason: str) -> bool:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        if not exit_reason.startswith("PAPER_VERIFY_"):
+            return False
+        arm_raw = str(os.environ.get("QUANT_PAPER_VERIFY_ARM_RISK_KILL_SWITCH", "") or "").strip().lower()
+        return arm_raw not in {"1", "true", "yes", "on"}
+
+    def _apply_paper_verification_account_override(self) -> None:
+        override = self._paper_verification_equity_override()
+        if override is None:
+            return
+        equity, capacity = override
+        open_notional = sum(
+            position.current_notional_usd_estimate()
+            for position in self.paper_positions.values()
+            if position.quantity_remaining > 0.0
+        )
+        self.equity_usd = equity
+        self.max_portfolio_capacity_usd = capacity
+        self.remaining_portfolio_capacity_usd = max(capacity - open_notional, 0.0)
+        self.capital_report["futures_available_balance_usd"] = equity
+        self.capital_report["futures_execution_balance_usd"] = equity
+        self.capital_report["futures_recognized_balance_usd"] = equity
+        self.capital_report["futures_total_reusable_balance_usd"] = equity
 
     def process_payload(self, payload: dict[str, Any], *, now: datetime | None = None) -> DecisionIntent | None:
         timestamp = now or datetime.now(tz=timezone.utc)
@@ -429,7 +503,37 @@ class LivePaperSession:
             )
         if decision is not None:
             state = self.runtime.dispatcher.store.get(decision.symbol)
-            self._record_decision(decision=decision, state=state, timestamp=timestamp)
+            if self._single_slot_priority_fallback_mode_enabled():
+                decision_timestamp = decision.timestamp
+                comparable_decision_timestamp = decision_timestamp
+                if comparable_decision_timestamp.tzinfo is None:
+                    comparable_decision_timestamp = comparable_decision_timestamp.replace(tzinfo=timezone.utc)
+                comparable_event_timestamp = timestamp
+                if comparable_event_timestamp.tzinfo is None:
+                    comparable_event_timestamp = comparable_event_timestamp.replace(tzinfo=timezone.utc)
+                if comparable_decision_timestamp > comparable_event_timestamp:
+                    if self.verbose and self.heartbeat_count % 250 == 0:
+                        print(
+                            f"[PRIORITY_FALLBACK] deferred future direct {decision.symbol} websocket decision "
+                            f"timestamp={decision_timestamp.isoformat()} event={timestamp.isoformat()}",
+                            flush=True,
+                        )
+                elif self._priority_fallback_boundary_has_pending_symbols(decision_timestamp):
+                    if self.verbose:
+                        print(
+                            f"[PRIORITY_FALLBACK] running universe-order cycle for {decision_timestamp.isoformat()} "
+                            f"after direct {decision.symbol} websocket decision",
+                            flush=True,
+                        )
+                    self._run_priority_fallback_decision_boundary(decision_timestamp)
+                elif self.verbose and self.heartbeat_count % 250 == 0:
+                    print(
+                        f"[PRIORITY_FALLBACK] deferred direct {decision.symbol} websocket decision "
+                        "to scheduled universe-order cycle",
+                        flush=True,
+                    )
+            else:
+                self._record_decision(decision=decision, state=state, timestamp=timestamp)
         self._maybe_run_scheduled_decision_cycle(timestamp)
         return decision
 
@@ -535,6 +639,7 @@ class LivePaperSession:
             if self.max_portfolio_capacity_usd is None or new_capacity > self.remaining_portfolio_capacity_usd:
                 self.remaining_portfolio_capacity_usd = new_capacity
                 self.max_portfolio_capacity_usd = new_capacity
+        self._apply_paper_verification_account_override()
 
     # ------------------------------------------------------------------
     # COIN-Futures → USDT auto-conversion
@@ -1040,6 +1145,21 @@ class LivePaperSession:
             live_positions=self.live_positions_snapshot,
             self_healing=self_healing_status,
         )
+        if self._paper_verification_mode_enabled():
+            mismatch_details_payload = dict(summary.get("futures_position_mismatch_details") or {})
+            mismatch_details_payload["missing_on_exchange"] = []
+            summary["futures_position_mismatch_details"] = mismatch_details_payload
+            summary["futures_position_mismatch"] = bool(mismatch_details_payload.get("missing_in_paper"))
+            summary["paper_verification_mode"] = True
+        reference_price_guard = {
+            "total_count": sum(self.reference_price_guard_counts.values()),
+            "counts_by_symbol": dict(sorted(self.reference_price_guard_counts.items())),
+            "last_by_symbol": {
+                symbol: dict(payload)
+                for symbol, payload in sorted(self.reference_price_guard_last_by_symbol.items())
+            },
+        }
+        summary["reference_price_guard"] = reference_price_guard
         summary["macro_runtime"] = macro_runtime
         summary["execution_quality"] = self._execution_quality_snapshot()
         current_equity = self._extract_total_usdt_equity()
@@ -1152,6 +1272,7 @@ class LivePaperSession:
                 "futures_position_mismatch_details": summary["futures_position_mismatch_details"],
                 "futures_missing_in_paper_counts": dict(sorted(self.futures_missing_in_paper_counts.items())),
                 "futures_missing_on_exchange_counts": dict(sorted(self.futures_missing_on_exchange_counts.items())),
+                "reference_price_guard": reference_price_guard,
                 "self_healing": self_healing_status,
                 "macro_runtime": macro_runtime,
                 "execution_quality": summary["execution_quality"],
@@ -1188,6 +1309,7 @@ class LivePaperSession:
                 "pending_external_futures_position_count": summary["pending_external_futures_position_count"],
                 "pending_external_futures_positions": summary["pending_external_futures_positions"],
                 "capital_report": self.capital_report,
+                "reference_price_guard": reference_price_guard,
                 "self_healing": self_healing_status,
                 "macro_runtime": macro_runtime,
                 "execution_quality": summary["execution_quality"],
@@ -1340,19 +1462,509 @@ class LivePaperSession:
             return max(base_reserve, float(reserve_overrides.get("when_futures_enabled", base_reserve) or base_reserve))
         return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
 
-    def _min_expected_profit_usd_threshold(self, decision: DecisionIntent) -> float:
+    def _fee_bps_for_market(self, market: str) -> float:
+        fees = self.runtime.paper_service.settings.fees
+        if market == "futures":
+            return max(float(fees.futures_taker_fee_bps), 0.0)
+        if market == "spot":
+            return max(float(fees.spot_taker_fee_bps), 0.0)
+        return 0.0
+
+    def _estimated_round_trip_fee_usd(self, *, market: str, notional_usd: float) -> float:
+        return max(float(notional_usd), 0.0) * self._fee_bps_for_market(market) * 2.0 / 10000.0
+
+    def _estimated_one_way_fee_usd(self, *, market: str, notional_usd: float) -> float:
+        return max(float(notional_usd), 0.0) * self._fee_bps_for_market(market) / 10000.0
+
+    def _fee_sensitive_execution_enabled(self) -> bool:
+        return self.live_order_executor is not None or self._paper_verification_mode_enabled()
+
+    def _expected_net_profit_usd(self, decision: DecisionIntent, *, notional_usd: float | None = None) -> float:
+        effective_notional = decision.order_intent_notional_usd if notional_usd is None else notional_usd
+        return max(float(effective_notional), 0.0) * max(float(decision.net_expected_edge_bps), 0.0) / 10000.0
+
+    def _min_expected_profit_usd_threshold(
+        self,
+        decision: DecisionIntent,
+        *,
+        notional_usd: float | None = None,
+    ) -> float:
         base_threshold = float(self.runtime.paper_service.settings.risk.min_expected_profit_usd_per_trade)
         base_threshold = max(0.0, base_threshold + self._policy_expected_profit_floor_adjustment_usd(decision))
         base_threshold = max(0.0, base_threshold + self._execution_quality_expected_profit_floor_adjustment_usd(decision))
-        if base_threshold <= 0.0:
-            return 0.0
         if (
             self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
             and decision.final_mode == "futures"
             and self._is_major_futures_symbol(decision.symbol)
+            and base_threshold > 0.0
         ):
-            return min(base_threshold, 0.1)
+            base_threshold = min(base_threshold, 0.09)
+        if self._fee_sensitive_execution_enabled() and decision.final_mode in {"spot", "futures"}:
+            effective_notional = decision.order_intent_notional_usd if notional_usd is None else notional_usd
+            fee_drag_multiplier = 4.0 if self.equity_usd <= 10.0 else 2.0
+            fee_drag_floor = self._estimated_round_trip_fee_usd(
+                market=decision.final_mode,
+                notional_usd=effective_notional,
+            ) * fee_drag_multiplier
+            base_threshold = max(base_threshold, fee_drag_floor)
         return base_threshold
+
+    def _policy_alignment_fast_path_passes(self, decision: DecisionIntent, *, elite: bool = False) -> bool:
+        if decision.final_mode != "futures" or decision.side != "long":
+            return False
+        notional = max(float(decision.order_intent_notional_usd), 0.0)
+        threshold = self._min_expected_profit_usd_threshold(decision, notional_usd=notional)
+        expected_profit = self._expected_net_profit_usd(decision, notional_usd=notional)
+        edge_to_cost = (
+            float("inf")
+            if decision.estimated_round_trip_cost_bps <= 0.0
+            else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
+        )
+        if elite:
+            return (
+                expected_profit >= max(threshold * 2.5, threshold + 1.0)
+                and edge_to_cost >= 3.0
+                and decision.predictability_score >= 75.0
+                and decision.liquidity_score >= 0.60
+                and decision.volume_confirmation >= 0.60
+            )
+        return (
+            expected_profit >= max(threshold * 1.75, threshold + 0.5)
+            and edge_to_cost >= 2.0
+            and decision.predictability_score >= 70.0
+            and decision.liquidity_score >= 0.55
+            and decision.volume_confirmation >= 0.55
+        )
+
+    def _apply_policy_alignment_entry_gate(
+        self,
+        decision: DecisionIntent,
+        *,
+        policy_entry_context: dict[str, object] | None = None,
+    ) -> DecisionIntent:
+        if not self._fee_sensitive_execution_enabled():
+            return decision
+        if decision.final_mode != "futures" or decision.side != "long" or decision.order_intent_notional_usd <= 0.0:
+            return decision
+        context = dict(policy_entry_context or self._policy_entry_context_snapshot())
+        source = str(context.get("entry_policy_context_source", "") or "").strip().lower()
+        if source not in {"active_policy", "candidate_policy"}:
+            return decision
+        available = bool(context.get("entry_policy_bucket_available", False))
+        alignment = str(context.get("entry_policy_bucket_alignment_status", "") or "").strip().lower()
+        policy_lineage = dict(context.get("entry_policy_lineage", {}) or {})
+        policy_status = str(policy_lineage.get("policy_status", "") or "").strip().lower()
+        if policy_status in {"demote", "disable", "disabled", "rollback", "hold"}:
+            policy_symbols = tuple(
+                str(symbol).strip().upper()
+                for symbol in list(policy_lineage.get("symbols", []) or [])
+                if str(symbol).strip()
+            )
+            decision_symbol = decision.symbol.strip().upper()
+            if not policy_symbols or decision_symbol in policy_symbols:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(
+                        sorted(set(decision.rejection_reasons + ("POLICY_ALIGNMENT_DEMOTED_BUCKET",)))
+                    ),
+                )
+            return decision
+        if available and alignment == "aligned":
+            return decision
+        if self._policy_alignment_fast_path_passes(decision, elite=not available):
+            return decision
+        return replace(
+            decision,
+            final_mode="cash",
+            side="flat",
+            order_intent_notional_usd=0.0,
+            stop_distance_bps=0.0,
+            rejection_reasons=tuple(
+                sorted(set(decision.rejection_reasons + ("POLICY_ALIGNMENT_CONFIRMATION_REQUIRED",)))
+            ),
+        )
+
+    def _apply_fee_sensitive_entry_quality_buffer(self, decision: DecisionIntent) -> DecisionIntent:
+        if not self._fee_sensitive_execution_enabled():
+            return decision
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return decision
+        if decision.order_intent_notional_usd <= 0.0:
+            return decision
+        threshold = self._min_expected_profit_usd_threshold(
+            decision,
+            notional_usd=decision.order_intent_notional_usd,
+        )
+        expected_profit = self._expected_net_profit_usd(
+            decision,
+            notional_usd=decision.order_intent_notional_usd,
+        )
+        symbol_profile = self._symbol_filter_profile_for_decision(decision)
+        symbol_profile_decision = self._apply_symbol_filter_profile_entry_gate(
+            decision,
+            expected_profit_usd=expected_profit,
+            threshold_usd=threshold,
+        )
+        if symbol_profile_decision.final_mode != "futures" or symbol_profile_decision.order_intent_notional_usd <= 0.0:
+            return symbol_profile_decision
+        if symbol_profile_decision is not decision:
+            decision = symbol_profile_decision
+            threshold = self._min_expected_profit_usd_threshold(
+                decision,
+                notional_usd=decision.order_intent_notional_usd,
+            )
+            expected_profit = self._expected_net_profit_usd(
+                decision,
+                notional_usd=decision.order_intent_notional_usd,
+            )
+        microstructure_strong = (
+            decision.predictability_score >= 70.0
+            and decision.liquidity_score >= 0.55
+            and decision.volume_confirmation >= 0.55
+        )
+        if self._paper_verification_marginal_liquidity_continuation_entry(
+            decision,
+            expected_profit_usd=expected_profit,
+            threshold_usd=threshold,
+        ):
+            return decision
+        if self._paper_verification_fragile_fee_drag_entry(
+            decision,
+            expected_profit_usd=expected_profit,
+            threshold_usd=threshold,
+        ):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("PAPER_VERIFY_FRAGILE_FEE_DRAG_ENTRY",)))
+                ),
+            )
+        if self._paper_verification_reversal_prone_entry(
+            decision,
+            expected_profit_usd=expected_profit,
+            threshold_usd=threshold,
+        ):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("PAPER_VERIFY_REVERSAL_PRONE_ENTRY",)))
+                ),
+            )
+        if symbol_profile is not None and symbol_profile.bypass_fee_edge_buffer:
+            return decision
+        if microstructure_strong:
+            return decision
+        if expected_profit >= max(threshold * 1.75, threshold + 0.5):
+            return decision
+        return replace(
+            decision,
+            final_mode="cash",
+            side="flat",
+            order_intent_notional_usd=0.0,
+            stop_distance_bps=0.0,
+            rejection_reasons=tuple(
+                sorted(set(decision.rejection_reasons + ("FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED",)))
+            ),
+        )
+
+    def _symbol_filter_profile_for_decision(self, decision: DecisionIntent):
+        profiles = self.runtime.paper_service.settings.symbol_filter_profiles or {}
+        return profiles.get(decision.symbol.strip().upper())
+
+    def _apply_symbol_filter_profile_entry_gate(
+        self,
+        decision: DecisionIntent,
+        *,
+        expected_profit_usd: float,
+        threshold_usd: float,
+    ) -> DecisionIntent:
+        profile = self._symbol_filter_profile_for_decision(decision)
+        if profile is None:
+            return decision
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return decision
+        if decision.order_intent_notional_usd <= 0.0:
+            return decision
+        edge_to_cost = (
+            float("inf")
+            if decision.estimated_round_trip_cost_bps <= 0.0
+            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
+        )
+        rejections: list[str] = []
+        if profile.min_predictability_score > 0.0 and decision.predictability_score < profile.min_predictability_score:
+            rejections.append("SYMBOL_PROFILE_SCORE_TOO_LOW")
+        if profile.min_liquidity_score > 0.0 and decision.liquidity_score < profile.min_liquidity_score:
+            rejections.append("SYMBOL_PROFILE_LIQUIDITY_TOO_WEAK")
+        if profile.min_volume_confirmation > 0.0 and decision.volume_confirmation < profile.min_volume_confirmation:
+            rejections.append("SYMBOL_PROFILE_VOLUME_TOO_WEAK")
+        if profile.min_net_edge_bps > 0.0 and decision.net_expected_edge_bps < profile.min_net_edge_bps:
+            rejections.append("SYMBOL_PROFILE_EDGE_TOO_THIN")
+        if profile.min_edge_to_cost > 0.0 and edge_to_cost < profile.min_edge_to_cost:
+            rejections.append("SYMBOL_PROFILE_EDGE_COST_TOO_THIN")
+        if profile.max_stop_distance_bps > 0.0 and decision.stop_distance_bps > profile.max_stop_distance_bps:
+            rejections.append("SYMBOL_PROFILE_STOP_TOO_WIDE")
+        if (
+            profile.min_expected_profit_multiplier > 0.0
+            and expected_profit_usd
+            < max(
+                threshold_usd * profile.min_expected_profit_multiplier,
+                threshold_usd + profile.min_expected_profit_extra_usd,
+            )
+        ):
+            rejections.append("SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL")
+        if rejections:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + tuple(rejections)))),
+            )
+        if profile.size_multiplier > 0.0 and profile.size_multiplier < 0.999999:
+            return replace(
+                decision,
+                order_intent_notional_usd=round(decision.order_intent_notional_usd * profile.size_multiplier, 6),
+                size_boost_reasons=tuple(
+                    sorted(set(decision.size_boost_reasons + (f"SYMBOL_FILTER_PROFILE_SIZE:{decision.symbol}",)))
+                ),
+            )
+        return decision
+
+    def _apply_paper_verification_front_entry_gate(self, decision: DecisionIntent) -> DecisionIntent:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return decision
+        if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
+            return decision
+        if decision.order_intent_notional_usd <= 0.0:
+            return decision
+        threshold = self._min_expected_profit_usd_threshold(
+            decision,
+            notional_usd=decision.order_intent_notional_usd,
+        )
+        expected_profit = self._expected_net_profit_usd(
+            decision,
+            notional_usd=decision.order_intent_notional_usd,
+        )
+        if decision.final_mode == "futures":
+            profiled = self._apply_symbol_filter_profile_entry_gate(
+                decision,
+                expected_profit_usd=expected_profit,
+                threshold_usd=threshold,
+            )
+            if profiled.final_mode != "futures" or profiled.order_intent_notional_usd <= 0.0:
+                return profiled
+            decision = profiled
+        if expected_profit < threshold:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("EXPECTED_PROFIT_TOO_SMALL",)))),
+            )
+        return decision
+
+    def _paper_verification_marginal_liquidity_continuation_entry(
+        self,
+        decision: DecisionIntent,
+        *,
+        expected_profit_usd: float,
+        threshold_usd: float,
+    ) -> bool:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return False
+        if decision.stop_distance_bps <= 0.0 or decision.order_intent_notional_usd <= 0.0:
+            return False
+        if not (0.535 <= decision.liquidity_score < 0.55):
+            return False
+        if decision.stop_distance_bps > 250.0:
+            return False
+        edge_to_cost = (
+            float("inf")
+            if decision.estimated_round_trip_cost_bps <= 0.0
+            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
+        )
+        return (
+            decision.predictability_score >= 70.0
+            and decision.volume_confirmation >= 0.70
+            and decision.trend_strength >= 0.75
+            and decision.net_expected_edge_bps >= 28.0
+            and edge_to_cost >= 3.0
+            and expected_profit_usd >= max(threshold_usd * 1.6, threshold_usd + 1.0)
+        )
+
+    def _paper_verification_fragile_fee_drag_entry(
+        self,
+        decision: DecisionIntent,
+        *,
+        expected_profit_usd: float,
+        threshold_usd: float,
+    ) -> bool:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
+            return False
+        if decision.stop_distance_bps <= 0.0:
+            return False
+        if expected_profit_usd < max(threshold_usd * 1.75, threshold_usd + 0.5):
+            return False
+        paper_equity = self.equity_usd
+        paper_override = self._paper_verification_equity_override()
+        if paper_override is not None:
+            paper_equity = paper_override[0]
+        elif self.capital_report:
+            paper_equity = float(
+                self.capital_report.get(
+                    "futures_execution_balance_usd",
+                    self.capital_report.get("futures_available_balance_usd", paper_equity),
+                )
+                or paper_equity
+            )
+        if paper_equity <= 0.0:
+            return False
+        notional_to_equity = decision.order_intent_notional_usd / paper_equity
+        if notional_to_equity < 20.0:
+            return False
+        edge_to_stop = max(decision.net_expected_edge_bps, 0.0) / decision.stop_distance_bps
+        fragile_microstructure = (
+            decision.liquidity_score < 0.55
+            or decision.volume_confirmation < 0.58
+        )
+        fee_drag_prone_edge = decision.net_expected_edge_bps < max(
+            decision.estimated_round_trip_cost_bps * 4.5,
+            32.0,
+        )
+        return fragile_microstructure and edge_to_stop < 0.15 and fee_drag_prone_edge
+
+    def _paper_verification_reversal_prone_entry(
+        self,
+        decision: DecisionIntent,
+        *,
+        expected_profit_usd: float,
+        threshold_usd: float,
+    ) -> bool:
+        profile = self._symbol_filter_profile_for_decision(decision)
+        if profile is None or not profile.reversal_prone_guard_enabled:
+            return False
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return False
+        if decision.order_intent_notional_usd <= 0.0 or decision.stop_distance_bps <= 0.0:
+            return False
+        if self.paper_positions.get(decision.symbol) is not None:
+            return False
+        if self._paper_verification_recent_same_side_confirmation(
+            decision,
+            window_minutes=profile.reversal_guard_confirmation_window_minutes,
+        ):
+            return False
+
+        paper_equity = self.equity_usd
+        paper_override = self._paper_verification_equity_override()
+        if paper_override is not None:
+            paper_equity = paper_override[0]
+        elif self.capital_report:
+            paper_equity = float(
+                self.capital_report.get(
+                    "futures_execution_balance_usd",
+                    self.capital_report.get("futures_available_balance_usd", paper_equity),
+                )
+                or paper_equity
+            )
+        if paper_equity <= 0.0:
+            return False
+        edge_to_cost = (
+            float("inf")
+            if decision.estimated_round_trip_cost_bps <= 0.0
+            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
+        )
+        notional_to_equity = decision.order_intent_notional_usd / paper_equity
+        if (
+            profile.reversal_guard_min_notional_to_equity > 0.0
+            and notional_to_equity < profile.reversal_guard_min_notional_to_equity
+        ):
+            return False
+        marginal_signal = (
+            (
+                profile.reversal_guard_marginal_score > 0.0
+                and decision.predictability_score < profile.reversal_guard_marginal_score
+            )
+            or (
+                profile.reversal_guard_marginal_trend_strength > 0.0
+                and decision.trend_strength < profile.reversal_guard_marginal_trend_strength
+            )
+            or (
+                profile.reversal_guard_marginal_volume_confirmation > 0.0
+                and decision.volume_confirmation < profile.reversal_guard_marginal_volume_confirmation
+            )
+        )
+        fee_thin_edge = (
+            (
+                profile.reversal_guard_min_net_edge_bps > 0.0
+                and decision.net_expected_edge_bps < profile.reversal_guard_min_net_edge_bps
+            )
+            or (
+                profile.reversal_guard_min_edge_to_cost > 0.0
+                and edge_to_cost < profile.reversal_guard_min_edge_to_cost
+            )
+            or (
+                profile.reversal_guard_min_expected_profit_multiplier > 0.0
+                and expected_profit_usd
+                < max(
+                    threshold_usd * profile.reversal_guard_min_expected_profit_multiplier,
+                    threshold_usd + profile.reversal_guard_min_expected_profit_extra_usd,
+                )
+            )
+        )
+        return marginal_signal and fee_thin_edge
+
+    def _paper_verification_recent_same_side_confirmation(
+        self,
+        decision: DecisionIntent,
+        *,
+        window_minutes: float,
+    ) -> bool:
+        confirmation_window_minutes = max(float(window_minutes), 0.0)
+        decision_time = decision.timestamp
+        if decision_time.tzinfo is None:
+            decision_time = decision_time.replace(tzinfo=timezone.utc)
+        for previous in reversed(self.decisions):
+            if previous.symbol != decision.symbol:
+                continue
+            previous_time = previous.timestamp
+            if previous_time.tzinfo is None:
+                previous_time = previous_time.replace(tzinfo=timezone.utc)
+            age_minutes = (decision_time - previous_time).total_seconds() / 60.0
+            if age_minutes < 0:
+                continue
+            if age_minutes > confirmation_window_minutes:
+                return False
+            if (
+                previous.final_mode == "futures"
+                and previous.side == decision.side
+                and previous.order_intent_notional_usd > 0.0
+            ):
+                return True
+            if previous.side in {"long", "short"} and previous.side != decision.side:
+                return False
+        return False
 
     def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float, decision: DecisionIntent | None = None) -> float:
         floor = max(float(configured_floor), 0.0)
@@ -1860,6 +2472,23 @@ class LivePaperSession:
         if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
             return decision
         _settings = self.runtime.paper_service.settings
+        if (
+            _settings.live_position_risk.long_only_turnaround_mode
+            and decision.final_mode == "futures"
+            and decision.side != "long"
+        ):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",)))
+                ),
+            )
+        if self.live_order_executor is None and os.getenv("QUANT_PAPER_VERIFY_RELAX_POLICY_GATES", "0") == "1":
+            return decision
         if _settings.data_collection_mode and len(self.closed_trades) < _settings.data_collection_min_trades:
             logger.info(
                 "[DATA_COLLECTION_MODE] symbol=%s closed_trades=%d/%d — bypassing policy guardrails to accumulate live evidence",
@@ -2128,6 +2757,398 @@ class LivePaperSession:
             return float(adjustment.get("size_multiplier", 1.0) or 1.0)
         return 1.0
 
+    def _high_conviction_recent_long_confirmation_passes(
+        self,
+        decision: DecisionIntent,
+        *,
+        is_major_strong_futures_decision: bool,
+        submission_time: datetime | None = None,
+    ) -> bool:
+        exposure = self.runtime.paper_service.settings.futures_exposure
+        required_confirmations = max(int(exposure.high_conviction_recent_long_confirmations), 0)
+        if required_confirmations <= 1:
+            return True
+        max_age_minutes = max(int(exposure.high_conviction_recent_max_age_minutes), 0)
+        min_trend_strength = max(float(exposure.high_conviction_recent_min_trend_strength), 0.0)
+        min_volume_confirmation = max(float(exposure.high_conviction_recent_min_volume_confirmation), 0.0)
+        min_liquidity = max(float(exposure.high_conviction_recent_min_liquidity), 0.0)
+        max_volatility_penalty = max(float(exposure.high_conviction_recent_max_volatility_penalty), 0.0)
+        max_overheat_penalty = max(float(exposure.high_conviction_recent_max_overheat_penalty), 0.0)
+        min_edge_to_cost_multiple = max(float(exposure.high_conviction_recent_min_edge_to_cost_multiple), 0.0)
+        if min_trend_strength <= 0.0:
+            min_trend_strength = (
+                float(exposure.strong_trend_strength_min)
+                if is_major_strong_futures_decision
+                else float(exposure.pyramid_min_trend_strength)
+            )
+        if min_volume_confirmation <= 0.0:
+            min_volume_confirmation = (
+                float(exposure.strong_volume_confirmation_min)
+                if is_major_strong_futures_decision
+                else float(exposure.pyramid_min_volume_confirmation)
+            )
+        if min_liquidity <= 0.0:
+            min_liquidity = (
+                float(exposure.strong_liquidity_min)
+                if is_major_strong_futures_decision
+                else float(exposure.soft_liquidity_floor)
+            )
+        if max_volatility_penalty <= 0.0:
+            max_volatility_penalty = (
+                float(exposure.strong_volatility_penalty_max)
+                if is_major_strong_futures_decision
+                else float(exposure.soft_volatility_penalty_max)
+            )
+        if max_overheat_penalty <= 0.0:
+            max_overheat_penalty = (
+                float(exposure.strong_overheat_penalty_max)
+                if is_major_strong_futures_decision
+                else float(exposure.soft_overheat_penalty_max)
+            )
+        if min_edge_to_cost_multiple <= 0.0:
+            min_edge_to_cost_multiple = (
+                float(exposure.strong_edge_to_cost_multiple_min)
+                if is_major_strong_futures_decision
+                else max(float(exposure.priority_edge_to_cost_multiple_min), 1.0)
+            )
+
+        def qualifies(candidate: DecisionIntent) -> bool:
+            if candidate.symbol != decision.symbol:
+                return False
+            if candidate.final_mode != "futures" or candidate.side != "long":
+                return False
+            if candidate.trend_direction <= 0:
+                return False
+            if candidate.trend_strength < min_trend_strength:
+                return False
+            if candidate.volume_confirmation < min_volume_confirmation:
+                return False
+            if candidate.liquidity_score < min_liquidity:
+                return False
+            if candidate.volatility_penalty > max_volatility_penalty:
+                return False
+            if candidate.overheat_penalty > max_overheat_penalty:
+                return False
+            edge_to_cost_multiple = (
+                float("inf")
+                if candidate.estimated_round_trip_cost_bps <= 0.0
+                else candidate.gross_expected_edge_bps / candidate.estimated_round_trip_cost_bps
+            )
+            return candidate.net_expected_edge_bps > 0.0 and edge_to_cost_multiple >= min_edge_to_cost_multiple
+
+        if not qualifies(decision):
+            return False
+        seen_decision_ids = {decision.decision_id}
+
+        if bool(getattr(exposure, "high_conviction_recent_weak_block_enabled", False)) and submission_time is not None:
+            decision_time = decision.timestamp
+            if decision_time.tzinfo is None:
+                decision_time = decision_time.replace(tzinfo=timezone.utc)
+            comparable_submission_time = submission_time
+            if comparable_submission_time.tzinfo is None:
+                comparable_submission_time = comparable_submission_time.replace(tzinfo=timezone.utc)
+            weak_max_age_seconds = max(
+                int(getattr(exposure, "high_conviction_recent_weak_max_age_seconds", 0) or 0),
+                0,
+            )
+            if weak_max_age_seconds <= 0:
+                weak_max_age_seconds = max(int(getattr(exposure, "high_conviction_max_decision_age_seconds", 0) or 0), 0)
+            if weak_max_age_seconds <= 0 and max_age_minutes > 0:
+                weak_max_age_seconds = max_age_minutes * 60
+            for previous in reversed(self.decisions):
+                if previous.decision_id in seen_decision_ids:
+                    continue
+                if previous.symbol != decision.symbol:
+                    continue
+                previous_time = previous.timestamp
+                if previous_time.tzinfo is None:
+                    previous_time = previous_time.replace(tzinfo=timezone.utc)
+                if previous_time <= decision_time:
+                    continue
+                age_to_submission_seconds = (comparable_submission_time - previous_time).total_seconds()
+                if age_to_submission_seconds < 0.0:
+                    continue
+                if weak_max_age_seconds > 0 and age_to_submission_seconds > weak_max_age_seconds:
+                    continue
+                if not qualifies(previous):
+                    return False
+
+        def clean_reversal_unlock_passes(*, opposite_max_age_minutes: int) -> bool:
+            if not bool(getattr(exposure, "high_conviction_recent_reversal_unlock_enabled", False)):
+                return False
+            unlock_confirmations = max(
+                int(getattr(exposure, "high_conviction_recent_reversal_unlock_confirmations", 0)),
+                0,
+            )
+            if unlock_confirmations <= 0:
+                unlock_confirmations = max(required_confirmations + 1, 3)
+            confirmations = 1
+            for previous in reversed(self.decisions):
+                if previous.decision_id in seen_decision_ids:
+                    continue
+                if previous.symbol != decision.symbol:
+                    continue
+                age_seconds = (decision.timestamp - previous.timestamp).total_seconds()
+                if age_seconds < 0:
+                    continue
+                if opposite_max_age_minutes > 0 and age_seconds > opposite_max_age_minutes * 60:
+                    return False
+                if (
+                    previous.final_mode == "futures"
+                    and previous.side == "short"
+                    and previous.order_intent_notional_usd > 0.0
+                ):
+                    return confirmations >= unlock_confirmations
+                if not qualifies(previous):
+                    return False
+                confirmations += 1
+                if confirmations >= unlock_confirmations:
+                    return True
+            return False
+
+        if bool(getattr(exposure, "high_conviction_recent_opposite_block_enabled", False)):
+            opposite_max_age_minutes = max(
+                int(getattr(exposure, "high_conviction_recent_opposite_max_age_minutes", 0)),
+                0,
+            )
+            if opposite_max_age_minutes <= 0:
+                opposite_max_age_minutes = max_age_minutes
+            if opposite_max_age_minutes > 0:
+                for previous in reversed(self.decisions):
+                    if previous.decision_id in seen_decision_ids:
+                        continue
+                    if previous.symbol != decision.symbol:
+                        continue
+                    age_seconds = (decision.timestamp - previous.timestamp).total_seconds()
+                    if age_seconds < 0 or age_seconds > opposite_max_age_minutes * 60:
+                        continue
+                    if (
+                        previous.final_mode == "futures"
+                        and previous.side == "short"
+                        and previous.order_intent_notional_usd > 0.0
+                    ):
+                        if clean_reversal_unlock_passes(opposite_max_age_minutes=opposite_max_age_minutes):
+                            break
+                        return False
+        confirmations = 1
+        for previous in reversed(self.decisions):
+            if previous.decision_id in seen_decision_ids:
+                continue
+            if previous.symbol != decision.symbol:
+                continue
+            if max_age_minutes > 0:
+                age_seconds = abs((decision.timestamp - previous.timestamp).total_seconds())
+                if age_seconds > max_age_minutes * 60:
+                    return False
+            if not qualifies(previous):
+                return False
+            confirmations += 1
+            if confirmations >= required_confirmations:
+                return True
+        return False
+
+    def _high_conviction_recent_weak_signal_seen(
+        self,
+        decision: DecisionIntent,
+        *,
+        submission_time: datetime | None,
+    ) -> bool:
+        exposure = self.runtime.paper_service.settings.futures_exposure
+        if not bool(getattr(exposure, "high_conviction_recent_weak_block_enabled", False)):
+            return False
+        if submission_time is None:
+            return False
+        if decision.final_mode != "futures" or decision.side != "long":
+            return False
+        decision_time = decision.timestamp
+        if decision_time.tzinfo is None:
+            decision_time = decision_time.replace(tzinfo=timezone.utc)
+        comparable_submission_time = submission_time
+        if comparable_submission_time.tzinfo is None:
+            comparable_submission_time = comparable_submission_time.replace(tzinfo=timezone.utc)
+        weak_max_age_seconds = max(
+            int(getattr(exposure, "high_conviction_recent_weak_max_age_seconds", 0) or 0),
+            0,
+        )
+        if weak_max_age_seconds <= 0:
+            weak_max_age_seconds = max(int(getattr(exposure, "high_conviction_max_decision_age_seconds", 0) or 0), 0)
+        blocking_flat_reasons = {
+            "DIRECTION_CONFLICT",
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "HIGH_CONVICTION_A_PLUS_REQUIRED",
+            "HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",
+            "LIQUIDITY_TOO_WEAK",
+            "LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",
+            "SCORE_TOO_LOW",
+        }
+        for previous in reversed(self.decisions):
+            if previous.decision_id == decision.decision_id:
+                continue
+            if previous.symbol != decision.symbol:
+                continue
+            previous_time = previous.timestamp
+            if previous_time.tzinfo is None:
+                previous_time = previous_time.replace(tzinfo=timezone.utc)
+            age_to_submission_seconds = (comparable_submission_time - previous_time).total_seconds()
+            if age_to_submission_seconds < 0.0:
+                continue
+            if weak_max_age_seconds > 0 and age_to_submission_seconds > weak_max_age_seconds:
+                continue
+            if previous.final_mode != "futures" or previous.side != "long" or previous.order_intent_notional_usd <= 0.0:
+                if not previous.rejection_reasons or blocking_flat_reasons.intersection(previous.rejection_reasons):
+                    return True
+            if previous.trend_direction <= 0 or previous.net_expected_edge_bps <= 0.0:
+                return True
+        weak_preflight = self.recent_weak_preflight_by_symbol.get(decision.symbol)
+        if weak_preflight is not None:
+            weak_at, _weak_reasons = weak_preflight
+            if weak_at.tzinfo is None:
+                weak_at = weak_at.replace(tzinfo=timezone.utc)
+            age_to_submission_seconds = (comparable_submission_time - weak_at).total_seconds()
+            if age_to_submission_seconds >= 0.0 and (
+                weak_max_age_seconds <= 0 or age_to_submission_seconds <= weak_max_age_seconds
+            ):
+                return True
+        return False
+
+    def _apply_high_conviction_futures_sizing(
+        self,
+        decision: DecisionIntent,
+        *,
+        execution_headroom: float,
+        leverage: float,
+        max_notional: float,
+        is_major_strong_futures_decision: bool,
+        is_major_medium_futures_decision: bool,
+        submission_time: datetime | None = None,
+    ) -> DecisionIntent:
+        exposure = self.runtime.paper_service.settings.futures_exposure
+        if not exposure.high_conviction_sizing_enabled:
+            return decision
+        if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
+            return decision
+        if not self._is_major_futures_symbol(decision.symbol):
+            return decision
+        if decision.side != "long":
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_LONG_ONLY",)))),
+            )
+        if execution_headroom <= 0.0 or leverage <= 0.0 or max_notional <= 0.0:
+            return decision
+        max_decision_age_seconds = max(
+            int(getattr(exposure, "high_conviction_max_decision_age_seconds", 0) or 0),
+            0,
+        )
+        if max_decision_age_seconds > 0 and submission_time is not None:
+            decision_time = decision.timestamp
+            if decision_time.tzinfo is None:
+                decision_time = decision_time.replace(tzinfo=timezone.utc)
+            comparable_submission_time = submission_time
+            if comparable_submission_time.tzinfo is None:
+                comparable_submission_time = comparable_submission_time.replace(tzinfo=timezone.utc)
+            decision_age_seconds = (comparable_submission_time - decision_time).total_seconds()
+            if decision_age_seconds < 0.0 or decision_age_seconds > max_decision_age_seconds:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(
+                        sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_STALE_DECISION",)))
+                    ),
+                )
+        if self._high_conviction_recent_weak_signal_seen(decision, submission_time=submission_time):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_RECENT_WEAK_SIGNAL",)))
+                ),
+            )
+        if not self._high_conviction_recent_long_confirmation_passes(
+            decision,
+            is_major_strong_futures_decision=is_major_strong_futures_decision,
+            submission_time=submission_time,
+        ):
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(
+                    sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",)))
+                ),
+            )
+        target_margin_fraction = 0.0
+        boost_reason = ""
+        if is_major_strong_futures_decision:
+            target_margin_fraction = max(float(exposure.high_conviction_target_margin_fraction), 0.0)
+            boost_reason = "HIGH_CONVICTION_A_PLUS_SIZE"
+        elif is_major_medium_futures_decision:
+            target_margin_fraction = max(float(exposure.high_conviction_medium_margin_fraction), 0.0)
+            boost_reason = "HIGH_CONVICTION_MEDIUM_SIZE"
+        elif exposure.high_conviction_block_non_strong:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_A_PLUS_REQUIRED",)))),
+            )
+        if target_margin_fraction <= 0.0:
+            if exposure.high_conviction_block_non_strong:
+                return replace(
+                    decision,
+                    final_mode="cash",
+                    side="flat",
+                    order_intent_notional_usd=0.0,
+                    stop_distance_bps=0.0,
+                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_A_PLUS_REQUIRED",)))),
+                )
+            return decision
+        target_notional = execution_headroom * min(target_margin_fraction, 1.0) * max(leverage, 1.0)
+        target_notional = min(target_notional, max_notional)
+        min_notional = max(float(exposure.high_conviction_min_notional_usd), 0.0)
+        if min_notional > 0.0 and target_notional < min_notional:
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_NOTIONAL_TOO_SMALL",)))),
+            )
+        target_notional = round(max(target_notional, 0.0), 6)
+        if target_notional <= 0.0:
+            return decision
+        if target_notional <= decision.order_intent_notional_usd:
+            scale = target_notional / max(decision.order_intent_notional_usd, 1e-9)
+            return replace(
+                decision,
+                order_intent_notional_usd=target_notional,
+                strategy_size_multiplier=round(decision.strategy_size_multiplier * scale, 6),
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (boost_reason,)))),
+            )
+        scale = target_notional / max(decision.order_intent_notional_usd, 1e-9)
+        return replace(
+            decision,
+            order_intent_notional_usd=target_notional,
+            strategy_size_multiplier=round(decision.strategy_size_multiplier * scale, 6),
+            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (boost_reason,)))),
+        )
+
     def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
         decision = self._direct_policy_evidence_guardrails(decision)
         if decision.final_mode == "cash" or decision.order_intent_notional_usd <= 0.0:
@@ -2255,6 +3276,8 @@ class LivePaperSession:
         extra_spot_transfer_asset: str = "",
         extra_futures_execution_balance_usd: float = 0.0,
         allow_transfer_hints: bool = True,
+        policy_entry_context: dict[str, object] | None = None,
+        submission_time: datetime | None = None,
     ) -> DecisionIntent:
         decision = self._apply_operational_self_correction(decision)
         if not self.capital_report:
@@ -2402,6 +3425,17 @@ class LivePaperSession:
                     )
                 safety_cap = execution_headroom * safety_cap_fraction
                 max_notional = min(max_notional, safety_cap)
+            decision = self._apply_high_conviction_futures_sizing(
+                decision,
+                execution_headroom=execution_headroom,
+                leverage=leverage,
+                max_notional=max_notional,
+                is_major_strong_futures_decision=is_major_strong_futures_decision,
+                is_major_medium_futures_decision=is_major_medium_futures_decision,
+                submission_time=submission_time,
+            )
+            if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
+                return decision
         else:
             return decision
         rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
@@ -2492,11 +3526,15 @@ class LivePaperSession:
                     rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MIN_MEANINGFUL_NOTIONAL",)))),
                 )
             decision = replace(decision, order_intent_notional_usd=round(major_strong_entry_floor, 6))
-        expected_profit_usd = decision.order_intent_notional_usd * max(decision.net_expected_edge_bps, 0.0) / 10000.0
+        expected_profit_usd = self._expected_net_profit_usd(decision)
         # Data collection mode: relax notional floor and expected profit checks to allow
         # small-capital accounts to accumulate live trade evidence.
         _dcm_settings = self.runtime.paper_service.settings
-        if _dcm_settings.data_collection_mode and len(self.closed_trades) < _dcm_settings.data_collection_min_trades:
+        data_collection_relaxes_expected_profit = (
+            _dcm_settings.data_collection_mode
+            and len(self.closed_trades) < _dcm_settings.data_collection_min_trades
+        )
+        if data_collection_relaxes_expected_profit:
             meaningful_notional_floor = min(meaningful_notional_floor, min_notional)
             expected_profit_usd = max(expected_profit_usd, self._min_expected_profit_usd_threshold(decision))
         if decision.order_intent_notional_usd < meaningful_notional_floor:
@@ -2522,6 +3560,29 @@ class LivePaperSession:
         else:
             floored_notional = round(max_notional, 6)
             candidate = replace(decision, order_intent_notional_usd=floored_notional)
+        candidate_expected_profit_usd = self._expected_net_profit_usd(candidate)
+        candidate_expected_profit_threshold = self._min_expected_profit_usd_threshold(
+            candidate,
+            notional_usd=candidate.order_intent_notional_usd,
+        )
+        if data_collection_relaxes_expected_profit:
+            candidate_expected_profit_usd = max(candidate_expected_profit_usd, candidate_expected_profit_threshold)
+        if candidate_expected_profit_usd < candidate_expected_profit_threshold:
+            return replace(
+                candidate,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(candidate.rejection_reasons + ("EXPECTED_PROFIT_TOO_SMALL_AFTER_CAP",)))),
+            )
+        candidate = self._apply_policy_alignment_entry_gate(
+            candidate,
+            policy_entry_context=policy_entry_context,
+        )
+        candidate = self._apply_fee_sensitive_entry_quality_buffer(candidate)
+        if candidate.final_mode not in {"spot", "futures"} or candidate.order_intent_notional_usd <= 0.0:
+            return candidate
         if reference_price is not None and min_quantity > 0.0:
             quantity_reference_price = reference_price
             if candidate.final_mode == "spot" and (candidate.spot_quote_asset or "USDT") != "USDT":
@@ -2731,8 +3792,15 @@ class LivePaperSession:
         *,
         decision: DecisionIntent,
         reference_price: float,
+        policy_entry_context: dict[str, object] | None = None,
+        submission_time: datetime | None = None,
     ) -> DecisionIntent:
-        executable = self._cap_live_order_decision(decision, reference_price=reference_price)
+        executable = self._cap_live_order_decision(
+            decision,
+            reference_price=reference_price,
+            policy_entry_context=policy_entry_context,
+            submission_time=submission_time,
+        )
         if self.rest_client is None:
             return executable
         transfer_method = getattr(self.rest_client, "transfer_wallet_balance", None)
@@ -2846,6 +3914,7 @@ class LivePaperSession:
             extra_spot_available_balance_usd=amount if target_market == "spot" else 0.0,
             extra_spot_transfer_asset=transfer_asset if target_market == "spot" else "",
             extra_futures_execution_balance_usd=amount if target_market == "futures" else 0.0,
+            policy_entry_context=policy_entry_context,
         )
 
     def _normalize_live_position_side(self, position: dict[str, Any]) -> str:
@@ -3015,7 +4084,8 @@ class LivePaperSession:
     def _futures_proactive_take_profit_thresholds(self) -> tuple[float, ...]:
         exit_rules = self.runtime.paper_service.settings.exit_rules
         raw_thresholds = getattr(exit_rules, "futures_proactive_take_profit_roe_thresholds_percent", ())
-        normalized = sorted({round(float(threshold), 6) for threshold in raw_thresholds if float(threshold) >= 10.0})
+        min_threshold = max(float(getattr(exit_rules, "futures_proactive_take_profit_min_roe_percent", 10.0) or 10.0), 0.0)
+        normalized = sorted({round(float(threshold), 6) for threshold in raw_thresholds if float(threshold) >= min_threshold})
         return tuple(normalized)
 
     def _futures_proactive_take_profit_fraction(self) -> float:
@@ -3156,8 +4226,8 @@ class LivePaperSession:
             "side": position.side,
             "entry_time": position.entry_time,
             "exit_time": exit_time,
-            "entry_price": round(position.entry_price, 6),
-            "exit_price": round(exit_price, 6),
+            "entry_price": _payload_price(position.entry_price),
+            "exit_price": _payload_price(exit_price),
             "quantity": round(quantity_closed, 8),
             "realized_pnl_usd_estimate": round(realized, 6),
             "realized_pnl_net_usd_estimate": round(realized_net, 6),
@@ -3174,8 +4244,8 @@ class LivePaperSession:
             # Learning context: price action during hold
             "holding_minutes": round(holding_minutes, 1),
             "entry_hour_utc": entry_hour_utc,
-            "best_price": round(position.best_price, 6),
-            "worst_price": round(position.worst_price, 6),
+            "best_price": _payload_price(position.best_price),
+            "worst_price": _payload_price(position.worst_price),
             "best_return_bps": round(best_return_bps, 2),
             "worst_return_bps": round(worst_return_bps, 2),
             "peak_roe_percent": round(position.peak_roe_percent, 4),
@@ -3198,6 +4268,9 @@ class LivePaperSession:
             # Execution quality snapshot at close time
             "execution_quality_snapshot": self._safe_execution_quality_snapshot(position.symbol),
         }
+        risk_kill_switch_skipped = self._paper_verification_skip_risk_kill_switch(exit_reason=exit_reason)
+        if risk_kill_switch_skipped:
+            trade["risk_limit_evaluation"] = "skipped_paper_verification"
         self.closed_trades.append(trade)
         self._update_loss_combo_downgrade_state(
             combo_key=loss_combo_key,
@@ -3222,7 +4295,8 @@ class LivePaperSession:
         if self.log_store is not None:
             self.log_store.append("closed_trades", trade)
         self._send_trade_alert(trade)
-        self._enforce_risk_limits(exit_time)
+        if not risk_kill_switch_skipped:
+            self._enforce_risk_limits(exit_time)
 
     def _send_telegram_alert(self, *, key: str, text: str) -> None:
         if key in self.sent_alert_keys:
@@ -4340,10 +5414,6 @@ class LivePaperSession:
     ) -> int:
         live_positions_by_symbol = self._active_live_futures_positions_by_symbol()
         live_symbols = set(live_positions_by_symbol)
-        if not live_symbols:
-            self.futures_missing_in_paper_counts = {}
-            self.futures_missing_on_exchange_counts = {}
-            return 0
         summary = summary_payload or {}
         candidate_positions = (
             state_payload.get("paper_open_futures_positions")
@@ -4351,6 +5421,22 @@ class LivePaperSession:
             or summary.get("open_futures_positions")
             or []
         )
+        if not live_symbols:
+            self.futures_missing_in_paper_counts = {}
+            self.futures_missing_on_exchange_counts = {}
+            if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+                return 0
+            restored_paper_only = 0
+            for item in candidate_positions:
+                if not isinstance(item, dict):
+                    continue
+                position = self._paper_position_from_runtime_payload(item)
+                if position is None or position.exchange_synced or position.symbol in self.paper_positions:
+                    continue
+                self.paper_positions[position.symbol] = position
+                self._reserve_capacity_for_reconciled_position(position)
+                restored_paper_only += 1
+            return restored_paper_only
         restored = 0
         for item in candidate_positions:
             if not isinstance(item, dict):
@@ -4489,6 +5575,12 @@ class LivePaperSession:
         paper_positions_by_symbol = self._open_paper_futures_positions_by_symbol()
         missing_in_paper = set(live_positions_by_symbol) - set(paper_positions_by_symbol)
         missing_on_exchange = set(paper_positions_by_symbol) - set(live_positions_by_symbol)
+        if self._paper_verification_mode_enabled():
+            # In paper-only verification, strategy positions are intentionally not
+            # present on the exchange. Keep unmanaged live-position adoption checks,
+            # but do not close simulated positions as manual exchange syncs.
+            missing_on_exchange = set()
+            self.futures_missing_on_exchange_counts = {}
         self._update_consecutive_mismatch_counts(
             counts=self.futures_missing_in_paper_counts,
             active_symbols=missing_in_paper,
@@ -5032,6 +6124,33 @@ class LivePaperSession:
         )
         if fraction < 0.999:
             self._reset_live_position_breakeven_protection(position=position)
+        elif payload["accepted"]:
+            self._sync_paper_position_after_live_full_close(
+                live_position=position,
+                reason=reason,
+                timestamp=payload["timestamp"],
+            )
+
+    def _sync_paper_position_after_live_full_close(
+        self,
+        *,
+        live_position: dict[str, Any],
+        reason: str,
+        timestamp: datetime,
+    ) -> None:
+        symbol = str(live_position.get("symbol", "") or "")
+        paper_position = self.paper_positions.get(symbol)
+        if paper_position is None or paper_position.quantity_remaining <= 0.0:
+            return
+        exit_price = self._live_position_reference_price(symbol=symbol, position=live_position)
+        if exit_price <= 0.0:
+            exit_price = paper_position.current_price if paper_position.current_price > 0.0 else paper_position.entry_price
+        self._close_position(
+            position=paper_position,
+            exit_price=exit_price,
+            timestamp=timestamp,
+            exit_reason=reason,
+        )
 
     def _evaluate_live_positions(self) -> None:
         cfg = self.runtime.paper_service.settings.live_position_risk
@@ -5171,12 +6290,20 @@ class LivePaperSession:
                 holding_minutes=holding_minutes,
                 now=now,
             )
+            short_turnaround_rebound_grace = (
+                is_short_position
+                and cfg.short_profit_flip_take_profit_fraction > 0.0
+                and cfg.short_profit_flip_fast_take_profit_roe_percent > 0.0
+                and worst_roe <= cfg.soft_stop_roe_percent
+                and roe > cfg.stop_loss_roe_percent
+            )
             if (
                 self._standard_stop_loss_exits_enabled()
                 and not long_disable_standard_stop
                 and roe <= cfg.soft_stop_roe_percent
                 and not turnaround_grace
                 and not major_drawdown_grace
+                and not short_turnaround_rebound_grace
             ):
                 self._close_live_position(position=position, reason="LIVE_POSITION_SOFT_STOP_LOSS")
                 continue
@@ -5550,7 +6677,7 @@ class LivePaperSession:
         price: float,
     ) -> None:
         exposure = self.runtime.paper_service.settings.futures_exposure
-        if decision.order_intent_notional_usd <= 0 or price <= 0.01:
+        if decision.order_intent_notional_usd <= 0 or price <= 0.0:
             return
         added_notional = decision.order_intent_notional_usd * max(exposure.pyramid_size_multiplier, 0.0)
         if added_notional <= 0.0:
@@ -5583,7 +6710,13 @@ class LivePaperSession:
         )
         self.futures_pyramid_add_counts[position.symbol] = self.futures_pyramid_add_counts.get(position.symbol, 0) + 1
 
-    def _open_paper_position(self, *, decision: DecisionIntent, price: float) -> bool:
+    def _open_paper_position(
+        self,
+        *,
+        decision: DecisionIntent,
+        price: float,
+        exchange_synced: bool = False,
+    ) -> bool:
         if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
             return False
         if price <= 0 or decision.order_intent_notional_usd <= 0:
@@ -5639,6 +6772,7 @@ class LivePaperSession:
             latest_trend_strength=decision.trend_strength,
             latest_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
             latest_decision_time=decision.timestamp,
+            exchange_synced=exchange_synced,
             confirmation_pending=(decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED"),
             confirmation_pending_since=decision.timestamp if decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED" else None,
             entry_policy_context_source=str(policy_entry_context.get("entry_policy_context_source", "") or ""),
@@ -5670,7 +6804,46 @@ class LivePaperSession:
             minutes = base_minutes
         return timestamp + timedelta(minutes=max(minutes, 1))
 
+    def _last_closed_trade_realized_pnl(self) -> float:
+        if not self.closed_trades:
+            return 0.0
+        try:
+            return float(self.closed_trades[-1].get("realized_pnl_usd_estimate", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _position_has_profit_milestone(self, position: PaperPosition) -> bool:
+        return (
+            position.partial_take_profit_taken
+            or position.r_multiple_partial_take_profit_taken
+            or position.profit_protection_retrace_taken
+            or bool(position.proactive_take_profit_thresholds_hit)
+        )
+
+    def _profit_exit_reentry_cooldown_reason(self, *, position: PaperPosition, realized_pnl: float, exit_reason: str) -> str:
+        if position.market != "futures" or not self._is_major_futures_symbol(position.symbol):
+            return ""
+        if self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes <= 0:
+            return ""
+        has_profit_milestone = self._position_has_profit_milestone(position)
+        if realized_pnl <= 0.0 and not has_profit_milestone:
+            return ""
+        profit_exit_reasons = {
+            "PORTFOLIO_FULL_EXIT",
+            "MAX_HOLDING_TIME",
+            "TAKE_PROFIT",
+            "BREAKEVEN_STOP",
+            "PARTIAL_TAKE_PROFIT",
+            "PROACTIVE_PARTIAL_TAKE_PROFIT",
+            "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT",
+        }
+        if exit_reason in profit_exit_reasons or has_profit_milestone:
+            return "PROFIT_REENTRY_COOLDOWN"
+        return ""
+
     def _close_position(self, *, position: PaperPosition, exit_price: float, timestamp: datetime, exit_reason: str) -> None:
+        closed_trade_count = len(self.closed_trades)
+        self.recent_paper_management_close_reasons[position.symbol] = exit_reason
         self._record_closed_trade(
             position=position,
             exit_price=exit_price,
@@ -5678,9 +6851,25 @@ class LivePaperSession:
             exit_time=timestamp,
             exit_reason=exit_reason,
         )
+        realized_pnl = self._last_closed_trade_realized_pnl() if len(self.closed_trades) > closed_trade_count else 0.0
         if position.market == "futures" and exit_reason == "CAPITAL_REALLOCATION":
             cooldown_until = self._manual_reentry_cooldown_until(timestamp)
             self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp, source=exit_reason)
+        profit_cooldown_source = self._profit_exit_reentry_cooldown_reason(
+            position=position,
+            realized_pnl=realized_pnl,
+            exit_reason=exit_reason,
+        )
+        if profit_cooldown_source:
+            cooldown_until = timestamp + timedelta(
+                minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
+            )
+            self._set_manual_symbol_cooldown(
+                symbol=position.symbol,
+                until=cooldown_until,
+                timestamp=timestamp,
+                source=profit_cooldown_source,
+            )
         if (
             position.market == "futures"
             and self._is_major_futures_symbol(position.symbol)
@@ -5701,7 +6890,7 @@ class LivePaperSession:
             and self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_cooldown_minutes > 0
             and self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd > 0.0
             and self.closed_trades
-            and float(self.closed_trades[-1].get("realized_pnl_usd_estimate", 0.0)) <= -self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd
+            and realized_pnl <= -self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd
         ):
             cooldown_until = timestamp + timedelta(
                 minutes=self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_cooldown_minutes
@@ -5712,6 +6901,96 @@ class LivePaperSession:
         self.paper_positions.pop(position.symbol, None)
         # Cleanup identity-keyed dicts to prevent memory leaks
         self._cleanup_identity_state(position)
+
+    def _estimated_paper_exit_net_usd(self, *, position: PaperPosition, exit_price: float) -> float:
+        quantity = max(float(position.quantity_remaining), 0.0)
+        if quantity <= 0.0:
+            return 0.0
+        if position.side == "short":
+            realized = (position.entry_price - exit_price) * quantity
+        else:
+            realized = (exit_price - position.entry_price) * quantity
+        entry_notional = position.entry_price * quantity
+        exit_notional = exit_price * quantity
+        fee_bps = self._fee_bps_for_market(position.market)
+        return realized - ((entry_notional + exit_notional) * fee_bps / 10000.0)
+
+    def _should_delay_fee_negative_soft_exit(
+        self,
+        *,
+        position: PaperPosition,
+        decision: DecisionIntent | None = None,
+        exit_price: float,
+    ) -> bool:
+        gross_pnl = position.unrealized_pnl_usd_estimate()
+        if gross_pnl <= 0.0:
+            return False
+        if decision is not None and self._paper_verification_mode_enabled():
+            profile = self._symbol_filter_profile_for_decision(decision)
+            if profile is not None and profile.min_liquidity_score > 0.0:
+                liquidity_collapse_floor = max(profile.min_liquidity_score - 0.05, 0.45)
+                if decision.liquidity_score < liquidity_collapse_floor:
+                    return False
+        return self._estimated_paper_exit_net_usd(position=position, exit_price=exit_price) < 0.0
+
+    def _paper_verification_fee_drag_loss_guard_triggered(
+        self,
+        *,
+        position: PaperPosition,
+        holding_minutes: float,
+    ) -> bool:
+        if not self._paper_verification_mode_enabled():
+            return False
+        if position.market != "futures" or position.quantity_remaining <= 0.0:
+            return False
+        if holding_minutes < 1.0:
+            return False
+        loss_usd = -position.unrealized_pnl_usd_estimate()
+        if loss_usd <= 0.0:
+            return False
+        fee_floor = self._estimated_round_trip_fee_usd(
+            market=position.market,
+            notional_usd=position.current_notional_usd_estimate(),
+        )
+        edge_erosion_floor = max(
+            position.entry_estimated_round_trip_cost_bps,
+            position.entry_net_expected_edge_bps * 0.75,
+        )
+        return loss_usd >= max(fee_floor, 0.5) and position.latest_net_expected_edge_bps < edge_erosion_floor
+
+    def _paper_early_invalid_exit_triggered(
+        self,
+        *,
+        position: PaperPosition,
+        decision: DecisionIntent,
+        holding_minutes: float,
+    ) -> bool:
+        if position.market != "futures" or not self._is_major_futures_symbol(position.symbol):
+            return False
+        if position.partial_take_profit_taken or position.proactive_take_profit_thresholds_hit:
+            return False
+        exit_rules = self.runtime.paper_service.settings.exit_rules
+        max_holding_minutes = max(float(getattr(exit_rules, "futures_early_invalid_exit_max_holding_minutes", 0.0) or 0.0), 0.0)
+        if max_holding_minutes <= 0.0 or holding_minutes > max_holding_minutes:
+            return False
+        max_peak_roe = float(getattr(exit_rules, "futures_early_invalid_exit_max_peak_roe_percent", 0.0) or 0.0)
+        if position.peak_roe_percent > max_peak_roe:
+            return False
+        min_loss_usd = max(float(getattr(exit_rules, "futures_early_invalid_exit_min_loss_usd", 0.0) or 0.0), 0.0)
+        if min_loss_usd > 0.0 and position.unrealized_pnl_usd_estimate() > -min_loss_usd:
+            return False
+        min_score_drop = max(float(getattr(exit_rules, "futures_early_invalid_exit_min_score_drop", 0.0) or 0.0), 0.0)
+        min_edge_drop = max(float(getattr(exit_rules, "futures_early_invalid_exit_min_edge_drop_bps", 0.0) or 0.0), 0.0)
+        score_drop = position.entry_predictability_score - decision.predictability_score
+        edge_drop = position.entry_net_expected_edge_bps - decision.net_expected_edge_bps
+        signal_invalid = (
+            decision.final_mode == "cash"
+            or decision.final_mode != position.market
+            or decision.side != position.side
+            or decision.net_expected_edge_bps <= 0.0
+            or decision.trend_direction <= 0
+        )
+        return signal_invalid and score_drop >= min_score_drop and edge_drop >= min_edge_drop
 
     def _cleanup_identity_state(self, position: PaperPosition) -> None:
         """Remove stale identity-keyed entries when a position closes."""
@@ -5756,6 +7035,30 @@ class LivePaperSession:
         reward_bps = self._reward_bps(position=position, price=price)
         current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
         position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
+        holding_minutes = (timestamp - position.entry_time).total_seconds() / 60.0
+        if self._paper_early_invalid_exit_triggered(
+            position=position,
+            decision=decision,
+            holding_minutes=holding_minutes,
+        ):
+            self._close_position(
+                position=position,
+                exit_price=price,
+                timestamp=timestamp,
+                exit_reason="EARLY_INVALIDATION_EXIT",
+            )
+            return
+        if self._paper_verification_fee_drag_loss_guard_triggered(
+            position=position,
+            holding_minutes=holding_minutes,
+        ):
+            self._close_position(
+                position=position,
+                exit_price=price,
+                timestamp=timestamp,
+                exit_reason="PAPER_VERIFY_FEE_DRAG_LOSS_GUARD",
+            )
+            return
         if position.exchange_synced and not (
             position.is_adopted()
             and self._should_manage_adopted_position_with_strategy(position=position, decision=decision)
@@ -5771,6 +7074,8 @@ class LivePaperSession:
                 and decision.liquidity_score >= max(position.entry_liquidity_score - 0.05, 0.45)
             )
             if not confirmed:
+                if self._should_delay_fee_negative_soft_exit(position=position, decision=decision, exit_price=price):
+                    return
                 self._close_position(
                     position=position,
                     exit_price=price,
@@ -5881,7 +7186,6 @@ class LivePaperSession:
             self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason=exit_reason)
             return
 
-        holding_minutes = (timestamp - position.entry_time).total_seconds() / 60.0
         max_holding_minutes = (
             exit_rules.futures_max_holding_minutes if position.market == "futures" else exit_rules.spot_max_holding_minutes
         )
@@ -5933,6 +7237,22 @@ class LivePaperSession:
     ) -> bool:
         return False
 
+    def _paper_verification_reversal_entry_requested(
+        self,
+        *,
+        position: PaperPosition,
+        decision: DecisionIntent,
+    ) -> bool:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        if position.exchange_synced or position.quantity_remaining <= 0.0:
+            return False
+        if decision.final_mode != position.market or decision.final_mode not in {"spot", "futures"}:
+            return False
+        if decision.side not in {"long", "short"} or decision.side == position.side:
+            return False
+        return decision.order_intent_notional_usd > 0.0
+
     def _apply_paper_trade_management(
         self,
         *,
@@ -5946,11 +7266,24 @@ class LivePaperSession:
             fallback_price = position.current_price if position.current_price > 0 else position.entry_price
         price = self._market_price(state=state, fallback=fallback_price)
         if position is None:
+            if os.getenv("QUANT_PAPER_VERIFY_USE_CAPPED_ENTRY", "0") == "1":
+                decision = self._cap_live_order_decision(decision, reference_price=price)
             return self._open_paper_position(decision=decision, price=price), False
         if position.is_adopted() and not self._should_manage_adopted_position_with_strategy(position=position, decision=decision):
             self._refresh_observed_paper_position(position=position, price=price)
             return False, False
         self._update_paper_position(position=position, decision=decision, price=price, timestamp=timestamp)
+        position = self.paper_positions.get(decision.symbol)
+        if position is None:
+            return False, False
+        if self._paper_verification_reversal_entry_requested(position=position, decision=decision):
+            self._close_position(
+                position=position,
+                exit_price=price,
+                timestamp=timestamp,
+                exit_reason="PAPER_VERIFY_SIGNAL_REVERSAL",
+            )
+            return True, False
         pyramid_requested = self._should_pyramid_futures_position(
             position=position,
             decision=decision,
@@ -5967,6 +7300,14 @@ class LivePaperSession:
         if not positive_limits:
             return 0
         return min(positive_limits)
+
+    def _single_slot_priority_fallback_mode_enabled(self) -> bool:
+        settings = self.runtime.paper_service.settings
+        return (
+            len(tuple(settings.universe or ())) > 1
+            and bool(settings.portfolio_focus.enabled)
+            and self._futures_slot_limit() == 1
+        )
 
     def _is_strong_reallocation_candidate(self, decision: DecisionIntent) -> bool:
         settings = self.runtime.paper_service.settings
@@ -6269,10 +7610,26 @@ class LivePaperSession:
         if self.log_store is None or existing_paper_position is None:
             return
         reasons: list[str] = []
+        current_position = self.paper_positions.get(decision.symbol)
+        closed_during_management = current_position is None
         if existing_paper_position.is_adopted():
             reasons.append("ADOPTED_POSITION_OBSERVE_ONLY")
-        if existing_paper_position.side != decision.side and decision.side in {"long", "short"}:
-            reasons.append("EXISTING_SIDE_CONFLICT")
+        if closed_during_management:
+            reasons.append(
+                self.recent_paper_management_close_reasons.get(
+                    decision.symbol,
+                    "PAPER_POSITION_CLOSED_DURING_MANAGEMENT",
+                )
+            )
+        elif existing_paper_position.side != decision.side and decision.side in {"long", "short"}:
+            if (
+                allow_new_submission
+                and self._paper_verification_mode_enabled()
+                and current_position is None
+            ):
+                reasons.append("PAPER_VERIFY_REVERSAL_CLOSE")
+            else:
+                reasons.append("EXISTING_SIDE_CONFLICT")
         if order_cooldown_active:
             reasons.append("ORDER_COOLDOWN_ACTIVE")
         if manual_symbol_cooldown_active:
@@ -6292,6 +7649,7 @@ class LivePaperSession:
                 "decision_mode": decision.final_mode,
                 "allow_new_submission": allow_new_submission,
                 "pyramid_requested": pyramid_requested,
+                "closed_during_management": closed_during_management,
                 "existing_position": {
                     "symbol": existing_paper_position.symbol,
                     "side": existing_paper_position.side,
@@ -6318,8 +7676,25 @@ class LivePaperSession:
         manual_symbol_cooldown_active: bool,
         pending_external_live_position: bool,
     ) -> None:
+        self._remember_high_conviction_weak_preflight(timestamp=timestamp, decision=prepared_decision)
         if self.log_store is None:
             return
+        def decision_timing(decision: DecisionIntent) -> dict[str, object]:
+            decision_time = decision.timestamp
+            if decision_time.tzinfo is None:
+                decision_time = decision_time.replace(tzinfo=timezone.utc)
+            comparable_timestamp = timestamp
+            if comparable_timestamp.tzinfo is None:
+                comparable_timestamp = comparable_timestamp.replace(tzinfo=timezone.utc)
+            return {
+                "decision_timestamp": decision_time,
+                "decision_age_seconds": round((comparable_timestamp - decision_time).total_seconds(), 3),
+            }
+
+        managed_timing = decision_timing(managed_decision)
+        prepared_timing = decision_timing(prepared_decision)
+        kill_switch_status = self.runtime.kill_switch.status()
+        position_close_reason = self.recent_paper_management_close_reasons.get(managed_decision.symbol, "")
         changed = (
             managed_decision.final_mode != prepared_decision.final_mode
             or managed_decision.side != prepared_decision.side
@@ -6327,6 +7702,18 @@ class LivePaperSession:
             != round(prepared_decision.order_intent_notional_usd, 6)
             or tuple(managed_decision.rejection_reasons) != tuple(prepared_decision.rejection_reasons)
             or managed_decision.execution_symbol != prepared_decision.execution_symbol
+        )
+        would_enter_if_relaxed = (
+            bool(
+                {
+                    "POLICY_ALIGNMENT_CONFIRMATION_REQUIRED",
+                    "FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED",
+                }
+                & set(prepared_decision.rejection_reasons)
+            )
+            and managed_decision.final_mode in {"spot", "futures"}
+            and managed_decision.side in {"long", "short"}
+            and managed_decision.order_intent_notional_usd > 0.0
         )
         if not changed and allow_new_submission and prepared_decision.final_mode in {"spot", "futures"} and prepared_decision.order_intent_notional_usd > 0:
             payload = {
@@ -6337,6 +7724,9 @@ class LivePaperSession:
                 "order_cooldown_active": order_cooldown_active,
                 "manual_symbol_cooldown_active": manual_symbol_cooldown_active,
                 "pending_external_live_position": pending_external_live_position,
+                "kill_switch_armed": bool(kill_switch_status.get("armed")),
+                "kill_switch_reasons": list(kill_switch_status.get("reasons", [])),
+                "position_close_reason": position_close_reason,
                 "managed": {
                     "final_mode": managed_decision.final_mode,
                     "side": managed_decision.side,
@@ -6344,6 +7734,7 @@ class LivePaperSession:
                     "rejection_reasons": list(managed_decision.rejection_reasons),
                     "entry_relaxation_reasons": list(managed_decision.entry_relaxation_reasons),
                     "size_boost_reasons": list(managed_decision.size_boost_reasons),
+                    **managed_timing,
                 },
                 "prepared": {
                     "final_mode": prepared_decision.final_mode,
@@ -6351,8 +7742,10 @@ class LivePaperSession:
                     "order_intent_notional_usd": round(prepared_decision.order_intent_notional_usd, 6),
                     "rejection_reasons": list(prepared_decision.rejection_reasons),
                     "execution_symbol": prepared_decision.execution_symbol,
+                    **prepared_timing,
                 },
                 "cap_changed": False,
+                "would_enter_if_relaxed": would_enter_if_relaxed,
             }
             if self.verbose:
                 managed_mode = managed_decision.final_mode
@@ -6376,6 +7769,9 @@ class LivePaperSession:
             "order_cooldown_active": order_cooldown_active,
             "manual_symbol_cooldown_active": manual_symbol_cooldown_active,
             "pending_external_live_position": pending_external_live_position,
+            "kill_switch_armed": bool(kill_switch_status.get("armed")),
+            "kill_switch_reasons": list(kill_switch_status.get("reasons", [])),
+            "position_close_reason": position_close_reason,
             "managed": {
                 "final_mode": managed_decision.final_mode,
                 "side": managed_decision.side,
@@ -6383,6 +7779,7 @@ class LivePaperSession:
                 "rejection_reasons": list(managed_decision.rejection_reasons),
                 "entry_relaxation_reasons": list(managed_decision.entry_relaxation_reasons),
                 "size_boost_reasons": list(managed_decision.size_boost_reasons),
+                **managed_timing,
             },
             "prepared": {
                 "final_mode": prepared_decision.final_mode,
@@ -6390,7 +7787,9 @@ class LivePaperSession:
                 "order_intent_notional_usd": round(prepared_decision.order_intent_notional_usd, 6),
                 "rejection_reasons": list(prepared_decision.rejection_reasons),
                 "execution_symbol": prepared_decision.execution_symbol,
+                **prepared_timing,
             },
+            "would_enter_if_relaxed": would_enter_if_relaxed,
         }
         if changed:
             payload["cap_changed"] = True
@@ -6407,6 +7806,38 @@ class LivePaperSession:
                 flush=True,
             )
         self.log_store.append("execution_preflight", payload)
+
+    def _remember_high_conviction_weak_preflight(self, *, timestamp: datetime, decision: DecisionIntent) -> None:
+        exposure = self.runtime.paper_service.settings.futures_exposure
+        if not bool(getattr(exposure, "high_conviction_recent_weak_block_enabled", False)):
+            return
+        if not self._is_major_futures_symbol(decision.symbol):
+            return
+        blocking_flat_reasons = {
+            "BUYING_INTO_RESISTANCE",
+            "DIRECTION_CONFLICT",
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "HIGH_CONVICTION_A_PLUS_REQUIRED",
+            "HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",
+            "LIQUIDITY_TOO_WEAK",
+            "LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "SENTIMENT_TOO_WEAK",
+            "SUPPORT_NOT_CONFIRMED",
+        }
+        reasons = tuple(str(reason) for reason in decision.rejection_reasons)
+        weak = (
+            decision.final_mode != "futures"
+            or decision.side != "long"
+            or decision.order_intent_notional_usd <= 0.0
+            or bool(blocking_flat_reasons.intersection(reasons))
+            or decision.trend_direction <= 0
+            or decision.net_expected_edge_bps <= 0.0
+        )
+        if weak:
+            self.recent_weak_preflight_by_symbol[decision.symbol] = (timestamp, reasons)
 
     def _max_futures_reallocation_replacements(self) -> int:
         return 2
@@ -6573,6 +8004,22 @@ class LivePaperSession:
             focus.min_incremental_pnl_usd - (exposure.major_reallocation_incremental_pnl_relaxation_usd if major_reallocation else 0.0),
             0.0,
         )
+        if self._fee_sensitive_execution_enabled():
+            target_close_fee_usd = sum(
+                self._estimated_one_way_fee_usd(
+                    market=target.market,
+                    notional_usd=target.current_notional_usd_estimate(),
+                )
+                for target in selected_targets
+            )
+            candidate_entry_fee_usd = self._estimated_one_way_fee_usd(
+                market=candidate.final_mode,
+                notional_usd=candidate.order_intent_notional_usd,
+            )
+            required_incremental_pnl = max(
+                required_incremental_pnl,
+                target_close_fee_usd + candidate_entry_fee_usd,
+            )
         if score_advantage < required_score_advantage:
             self._log_futures_reallocation_event(
                 timestamp=timestamp,
@@ -6716,8 +8163,15 @@ class LivePaperSession:
         ):
             return
         last_recorded = self.last_recorded_decision_time_by_symbol.get(decision.symbol)
-        if last_recorded == decision.timestamp:
-            return
+        if last_recorded is not None:
+            comparable_last_recorded = last_recorded
+            if comparable_last_recorded.tzinfo is None:
+                comparable_last_recorded = comparable_last_recorded.replace(tzinfo=timezone.utc)
+            comparable_decision_time = decision.timestamp
+            if comparable_decision_time.tzinfo is None:
+                comparable_decision_time = comparable_decision_time.replace(tzinfo=timezone.utc)
+            if comparable_decision_time <= comparable_last_recorded:
+                return
         managed_decision = self._apply_loss_combo_downgrade(decision=decision)
         policy_entry_context = self._policy_entry_context_snapshot()
         managed_decision = self._execution_quality_state.apply_overlay(
@@ -6755,6 +8209,7 @@ class LivePaperSession:
                 rejection_reasons=restored_reasons,
             )
         managed_decision = self._enforce_configured_universe_guard(managed_decision)
+        managed_decision = self._apply_paper_verification_front_entry_gate(managed_decision)
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
         self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp
@@ -6810,6 +8265,7 @@ class LivePaperSession:
         order_cooldown_active = self._is_order_cooldown_active(managed_decision.symbol, timestamp)
         manual_symbol_cooldown_active = self._is_manual_symbol_cooldown_active(managed_decision.symbol, timestamp)
         live_orders_allowed = not self.self_healing.is_live_order_cooldown_active(now=timestamp)
+        kill_switch_armed = self.runtime.kill_switch.armed
         if state is not None:
             self._align_major_cross_symbol_positions(
                 decision=managed_decision,
@@ -6832,6 +8288,7 @@ class LivePaperSession:
                 or
                 order_cooldown_active
                 or manual_symbol_cooldown_active
+                or kill_switch_armed
                 or (self.live_order_executor is not None and not live_orders_allowed)
             )
         ):
@@ -6853,11 +8310,15 @@ class LivePaperSession:
             allow_new_submission = False
         if manual_symbol_cooldown_active:
             allow_new_submission = False
+        if kill_switch_armed and (pyramid_requested or self.paper_positions.get(managed_decision.symbol) is None):
+            allow_new_submission = False
+            pyramid_requested = False
         if self.verbose:
             print(
                 f"[SUBMISSION_GATE] {managed_decision.symbol} allow={allow_new_submission} can_open={can_open_new_paper_position} "
                 f"existing={'yes' if existing_paper_position is not None else 'no'} pending_external={pending_external_live_position} "
-                f"order_cooldown={order_cooldown_active} manual_cooldown={manual_symbol_cooldown_active} live_allowed={live_orders_allowed}",
+                f"order_cooldown={order_cooldown_active} manual_cooldown={manual_symbol_cooldown_active} "
+                f"live_allowed={live_orders_allowed} kill_switch={kill_switch_armed}",
                 flush=True,
             )
         prepared_execution_decision = managed_decision
@@ -6867,9 +8328,16 @@ class LivePaperSession:
                 self._prepare_live_execution_decision(
                     decision=managed_decision,
                     reference_price=state.last_trade_price,
+                    policy_entry_context=self._policy_entry_context_snapshot(),
+                    submission_time=timestamp,
                 )
                 if self.live_order_executor is not None
-                else self._cap_live_order_decision(managed_decision, reference_price=state.last_trade_price)
+                else self._cap_live_order_decision(
+                    managed_decision,
+                    reference_price=state.last_trade_price,
+                    policy_entry_context=self._policy_entry_context_snapshot(),
+                    submission_time=timestamp,
+                )
             )
             prepared_execution_intent = build_execution_intent(decision=prepared_execution_decision)
         if state is not None:
@@ -7041,6 +8509,7 @@ class LivePaperSession:
                                 self._open_paper_position(
                                     decision=executable_decision,
                                     price=state.last_trade_price,
+                                    exchange_synced=True,
                                 )
                             if pyramid_requested:
                                 paper_position = self.paper_positions.get(executable_decision.symbol)
@@ -7164,7 +8633,7 @@ class LivePaperSession:
                     if test_result is not None:
                         if (
                             self.live_order_executor is None
-                            and existing_paper_position is None
+                            and self.paper_positions.get(test_result.symbol) is None
                             and test_result.accepted
                             and not pyramid_requested
                         ):
@@ -7208,34 +8677,120 @@ class LivePaperSession:
                             )
 
     def _scheduled_decision_boundary_after(self, timestamp: datetime) -> datetime:
-        interval = max(int(self.runtime.decision_interval_minutes), 1)
-        floored = timestamp.replace(
-            minute=(timestamp.minute // interval) * interval,
-            second=0,
-            microsecond=0,
+        interval_seconds = max(
+            int(
+                getattr(
+                    self.runtime,
+                    "decision_interval_seconds",
+                    int(self.runtime.decision_interval_minutes) * 60,
+                )
+            ),
+            1,
         )
+        floored_epoch = int(timestamp.timestamp() // interval_seconds) * interval_seconds
+        floored = datetime.fromtimestamp(floored_epoch, tz=timezone.utc)
         if floored <= timestamp:
-            floored += timedelta(minutes=interval)
+            floored += timedelta(seconds=interval_seconds)
         return floored
 
     def _scheduled_decision_catchup_cutoff(self, now: datetime) -> datetime:
-        interval = max(int(self.runtime.decision_interval_minutes), 1)
-        return now - timedelta(minutes=interval)
+        interval_seconds = max(
+            int(
+                getattr(
+                    self.runtime,
+                    "decision_interval_seconds",
+                    int(self.runtime.decision_interval_minutes) * 60,
+                )
+            ),
+            1,
+        )
+        return now - timedelta(seconds=interval_seconds)
 
     def _iter_schedulable_symbols(self) -> list[str]:
-        store_symbols = sorted(getattr(self.runtime.dispatcher.store, "_states", {}).keys())
+        store_symbols = {str(symbol) for symbol in getattr(self.runtime.dispatcher.store, "_states", {}).keys()}
+        configured_order = [
+            str(symbol)
+            for symbol in list(self.runtime.paper_service.settings.universe or ())
+            if str(symbol) in store_symbols
+        ]
+        trailing_symbols = sorted(store_symbols - set(configured_order))
+        ordered_symbols = configured_order + trailing_symbols
         if self.runtime.eligible_symbols is None:
-            return store_symbols
-        return [symbol for symbol in store_symbols if symbol in self.runtime.eligible_symbols]
+            return ordered_symbols
+        return [symbol for symbol in ordered_symbols if symbol in self.runtime.eligible_symbols]
 
     def _run_scheduled_decision_boundary(self, decision_time: datetime) -> None:
+        self._run_scheduled_decision_boundary_with_options(decision_time, allow_stale_snapshot=False)
+
+    def _record_reference_price_guard(
+        self,
+        *,
+        symbol: str,
+        last_trade_price: float,
+        top_mid: float,
+        deviation_bps: float,
+        timestamp: datetime | None,
+    ) -> None:
+        self.reference_price_guard_counts[symbol] = self.reference_price_guard_counts.get(symbol, 0) + 1
+        observed_at = timestamp or datetime.now(tz=timezone.utc)
+        self.reference_price_guard_last_by_symbol[symbol] = {
+            "observed_at": observed_at.isoformat(),
+            "last_trade_price": last_trade_price,
+            "top_mid": top_mid,
+            "deviation_bps": round(deviation_bps, 6),
+        }
+
+    def _state_with_reference_price_guard(self, state: Any, *, timestamp: datetime | None = None) -> Any:
+        top_of_book = getattr(state, "top_of_book", None)
+        bid_price = float(getattr(top_of_book, "bid_price", 0.0) or 0.0)
+        ask_price = float(getattr(top_of_book, "ask_price", 0.0) or 0.0)
+        last_trade_price = float(getattr(state, "last_trade_price", 0.0) or 0.0)
+        if bid_price <= 0.0 or ask_price <= 0.0 or ask_price < bid_price or last_trade_price <= 0.0:
+            return state
+        midpoint = (bid_price + ask_price) / 2.0
+        if midpoint <= 0.0:
+            return state
+        deviation_bps = abs(midpoint - last_trade_price) / max(last_trade_price, 1e-12) * 10000.0
+        max_deviation_bps = _reference_price_guard_max_bps()
+        if max_deviation_bps <= 0.0 or deviation_bps <= max_deviation_bps:
+            return state
+        symbol = str(getattr(state, "symbol", "") or "")
+        self._record_reference_price_guard(
+            symbol=symbol,
+            last_trade_price=last_trade_price,
+            top_mid=midpoint,
+            deviation_bps=deviation_bps,
+            timestamp=timestamp,
+        )
+        guarded = replace(state, last_trade_price=midpoint)
+        if self.verbose:
+            print(
+                "[REFERENCE_PRICE_GUARD] "
+                f"{symbol} last_trade_price={last_trade_price:.12g} "
+                f"top_mid={midpoint:.12g} deviation_bps={deviation_bps:.2f}",
+                flush=True,
+            )
+        return guarded
+
+    def _run_scheduled_decision_boundary_with_options(
+        self,
+        decision_time: datetime,
+        *,
+        allow_stale_snapshot: bool,
+    ) -> None:
         for symbol in self._iter_schedulable_symbols():
             state = self.runtime.dispatcher.store.get(symbol)
             if state is None:
                 continue
             stale_ms = state.freshness_ms(decision_time)
             if stale_ms > self.runtime.paper_service.settings.operational_limits.stale_data_alarm_sla_seconds * 1000:
-                continue
+                if not allow_stale_snapshot:
+                    continue
+                state = replace(
+                    state,
+                    last_update_time=decision_time,
+                    top_of_book=replace(state.top_of_book, updated_at=decision_time),
+                )
             evaluation_state = state
             if stale_ms < 0:
                 evaluation_state = replace(
@@ -7243,6 +8798,7 @@ class LivePaperSession:
                     last_update_time=decision_time,
                     top_of_book=replace(state.top_of_book, updated_at=decision_time),
                 )
+            evaluation_state = self._state_with_reference_price_guard(evaluation_state, timestamp=decision_time)
             primitive_inputs = self.runtime.primitive_builder(symbol, decision_time)
             history = self.runtime.history_provider(symbol, decision_time)
             decision = self.runtime.paper_service.run_cycle(
@@ -7257,8 +8813,32 @@ class LivePaperSession:
             self.runtime.loop_stats.note_emitted_decision(symbol=symbol, decision_time=decision_time)
             self._record_decision(decision=decision, state=evaluation_state, timestamp=decision_time)
 
+    def _priority_fallback_boundary_has_pending_symbols(self, decision_time: datetime) -> bool:
+        comparable_decision_time = decision_time
+        if comparable_decision_time.tzinfo is None:
+            comparable_decision_time = comparable_decision_time.replace(tzinfo=timezone.utc)
+        for symbol in self._iter_schedulable_symbols():
+            last_recorded = self.last_recorded_decision_time_by_symbol.get(symbol)
+            if last_recorded is None:
+                return True
+            comparable_last_recorded = last_recorded
+            if comparable_last_recorded.tzinfo is None:
+                comparable_last_recorded = comparable_last_recorded.replace(tzinfo=timezone.utc)
+            if comparable_last_recorded < comparable_decision_time:
+                return True
+        return False
+
+    def _run_priority_fallback_decision_boundary(self, decision_time: datetime) -> None:
+        self._run_scheduled_decision_boundary_with_options(
+            decision_time,
+            allow_stale_snapshot=True,
+        )
+        next_boundary = self._scheduled_decision_boundary_after(decision_time)
+        if self.next_scheduled_decision_at is None or self.next_scheduled_decision_at <= decision_time:
+            self.next_scheduled_decision_at = next_boundary
+
     def _maybe_run_scheduled_decision_cycle(self, now: datetime) -> None:
-        if self.runtime.kill_switch.armed:
+        if self.runtime.kill_switch.armed and not self._paper_verification_continue_decisions_after_kill_switch():
             return
         if self.next_scheduled_decision_at is None:
             anchor = self.last_decision_timestamp or now
@@ -7269,7 +8849,10 @@ class LivePaperSession:
             self.next_scheduled_decision_at = self._scheduled_decision_boundary_after(now)
         while self.next_scheduled_decision_at is not None and now >= self.next_scheduled_decision_at:
             boundary = self.next_scheduled_decision_at
-            self._run_scheduled_decision_boundary(boundary)
+            if self._single_slot_priority_fallback_mode_enabled():
+                self._run_priority_fallback_decision_boundary(boundary)
+            else:
+                self._run_scheduled_decision_boundary(boundary)
             self.next_scheduled_decision_at = self._scheduled_decision_boundary_after(boundary)
 
 
