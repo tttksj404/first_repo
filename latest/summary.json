@@ -1,9 +1,6 @@
 {
   "accepted_live_order_count": 0,
-  "account_snapshot": {
-    "balance": 1000,
-    "market": "futures"
-  },
+  "account_snapshot": {},
   "adopted_futures_position_count": 0,
   "adopted_futures_positions": [],
   "avg_edge_retention_ratio": 0.0,
@@ -198,17 +195,17 @@
     ],
     "regime_actions": [],
     "replay_provenance": {
-      "classification": "projected_evidence",
-      "decision_surface": "staged_candidate",
+      "classification": "mixed_root_summary_fallback",
+      "decision_surface": "not_available",
       "has_bucket_reference": false,
       "has_runtime_summary_anchor": false,
       "policy_bucket": "not_available",
-      "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+      "reason_code": "root",
       "source": "root",
-      "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+      "summary": "mixed_root_summary_fallback:root",
       "uses_direct_bucket_replay": false,
-      "uses_mixed_root_summary_fallback": false,
-      "uses_projected_evidence": true
+      "uses_mixed_root_summary_fallback": true,
+      "uses_projected_evidence": false
     },
     "sample_quality_watchdog_status": "thin",
     "symbol_actions": [],
@@ -224,7 +221,7 @@
   },
   "closed_trade_count": 0,
   "closed_trades": [],
-  "decision_count": 1,
+  "decision_count": 0,
   "estimated_round_trip_fee_usd": 0,
   "exchange_live_futures_position_count": 0,
   "exchange_live_futures_positions": [],
@@ -239,7 +236,7 @@
     "minimum_sample_size": 3,
     "policy_bucket_contexts": {},
     "symbols": {},
-    "updated_at": "2026-04-15T05:47:56.443785+00:00"
+    "updated_at": "2026-04-22T04:01:50.472398+00:00"
   },
   "executive_operating_verdict": {
     "confidence": "high",
@@ -299,6 +296,47 @@
     "reasons": [
       "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
     ],
+    "replay_provenance": {
+      "checkpoint_auto_judge": {
+        "classification": "not_available",
+        "decision_surface": "checkpoint_auto_judge",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "NOT_AVAILABLE",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "primary": {
+        "classification": "mixed_root_summary_fallback",
+        "decision_surface": "not_available",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": true,
+        "policy_bucket": "not_available",
+        "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+        "source": "root",
+        "summary": "mixed_root_summary_fallback:root",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": true,
+        "uses_projected_evidence": false
+      },
+      "staged_candidate": {
+        "classification": "not_available",
+        "decision_surface": "staged_candidate",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "NOT_AVAILABLE",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      }
+    },
     "signals": {
       "active_policy_bucket_available": true,
       "auto_mode": "normal",
@@ -426,15 +464,10 @@
   },
   "major_entry_relaxation_count": 0,
   "major_size_boost_count": 0,
-  "modes": [
-    "cash"
-  ],
+  "modes": [],
   "observe_only_symbols": [],
   "open_futures_positions": [],
-  "open_orders_snapshot": {
-    "market": "futures",
-    "orders": []
-  },
+  "open_orders_snapshot": {},
   "open_spot_positions": [],
   "operational_verdict": {
     "metrics": {
@@ -624,17 +657,17 @@
           ],
           "regime_actions": [],
           "replay_provenance": {
-            "classification": "projected_evidence",
-            "decision_surface": "staged_candidate",
+            "classification": "mixed_root_summary_fallback",
+            "decision_surface": "not_available",
             "has_bucket_reference": false,
             "has_runtime_summary_anchor": false,
             "policy_bucket": "not_available",
-            "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+            "reason_code": "root",
             "source": "root",
-            "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+            "summary": "mixed_root_summary_fallback:root",
             "uses_direct_bucket_replay": false,
-            "uses_mixed_root_summary_fallback": false,
-            "uses_projected_evidence": true
+            "uses_mixed_root_summary_fallback": true,
+            "uses_projected_evidence": false
           },
           "sample_quality_watchdog_status": "thin",
           "symbol_actions": [],
@@ -821,7 +854,6 @@
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
               "updated_at": "",
-              "version": null,
               "versioned_key": ""
             },
             "policy_lineage_alignment": {
@@ -852,7 +884,6 @@
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
         "updated_at": "",
-        "version": null,
         "versioned_key": ""
       },
       "policy_application": {
@@ -885,9 +916,9 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-15T05:47:55.510759+00:00",
-        "version": 8,
-        "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+        "updated_at": "2026-04-22T04:01:49.366892+00:00",
+        "version": 54,
+        "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
       },
       "replay_summary": {
         "baseline_policy_pressure": 0.0,
@@ -1230,17 +1261,17 @@
           ],
           "regime_actions": [],
           "replay_provenance": {
-            "classification": "projected_evidence",
-            "decision_surface": "staged_candidate",
+            "classification": "mixed_root_summary_fallback",
+            "decision_surface": "not_available",
             "has_bucket_reference": false,
             "has_runtime_summary_anchor": false,
             "policy_bucket": "not_available",
-            "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+            "reason_code": "root",
             "source": "root",
-            "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+            "summary": "mixed_root_summary_fallback:root",
             "uses_direct_bucket_replay": false,
-            "uses_mixed_root_summary_fallback": false,
-            "uses_projected_evidence": true
+            "uses_mixed_root_summary_fallback": true,
+            "uses_projected_evidence": false
           },
           "sample_quality_watchdog_status": "thin",
           "symbol_actions": [],
@@ -1427,7 +1458,6 @@
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
               "updated_at": "",
-              "version": null,
               "versioned_key": ""
             },
             "policy_lineage_alignment": {
@@ -1458,7 +1488,6 @@
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
         "updated_at": "",
-        "version": null,
         "versioned_key": ""
       },
       "policy_application": {
@@ -1491,9 +1520,9 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-15T05:47:55.256357+00:00",
-        "version": 7,
-        "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+        "updated_at": "2026-04-22T04:01:48.054566+00:00",
+        "version": 53,
+        "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
       },
       "replay_summary": {
         "baseline_policy_pressure": 0.0,
@@ -1935,9 +1964,9 @@
     "source": "persisted_policy_state",
     "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
     "symbols": [],
-    "updated_at": "2026-04-15T05:47:55.510759+00:00",
-    "version": 8,
-    "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+    "updated_at": "2026-04-22T04:01:49.366892+00:00",
+    "version": 54,
+    "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
   },
   "policy_state": {
     "active_policy": {
@@ -2058,6 +2087,47 @@
         "reasons": [
           "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
         ],
+        "replay_provenance": {
+          "checkpoint_auto_judge": {
+            "classification": "not_available",
+            "decision_surface": "checkpoint_auto_judge",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "primary": {
+            "classification": "mixed_root_summary_fallback",
+            "decision_surface": "not_available",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": true,
+            "policy_bucket": "not_available",
+            "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+            "source": "root",
+            "summary": "mixed_root_summary_fallback:root",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": true,
+            "uses_projected_evidence": false
+          },
+          "staged_candidate": {
+            "classification": "not_available",
+            "decision_surface": "staged_candidate",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "NOT_AVAILABLE",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          }
+        },
         "signals": {
           "active_policy_bucket_available": true,
           "auto_mode": "normal",
@@ -2182,9 +2252,9 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-15T05:47:55.510759+00:00",
-        "version": 8,
-        "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+        "updated_at": "2026-04-22T04:01:49.366892+00:00",
+        "version": 54,
+        "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
       },
       "requested_status": "keep",
       "retention_monitor_status": "inactive",
@@ -2480,6 +2550,47 @@
       "reasons": [
         "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
       ],
+      "replay_provenance": {
+        "checkpoint_auto_judge": {
+          "classification": "not_available",
+          "decision_surface": "checkpoint_auto_judge",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "NOT_AVAILABLE",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "primary": {
+          "classification": "mixed_root_summary_fallback",
+          "decision_surface": "not_available",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": true,
+          "policy_bucket": "not_available",
+          "reason_code": "MIXED_ROOT_SUMMARY_FALLBACK",
+          "source": "root",
+          "summary": "mixed_root_summary_fallback:root",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": true,
+          "uses_projected_evidence": false
+        },
+        "staged_candidate": {
+          "classification": "not_available",
+          "decision_surface": "staged_candidate",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "NOT_AVAILABLE",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        }
+      },
       "signals": {
         "active_policy_bucket_available": true,
         "auto_mode": "normal",
@@ -2768,17 +2879,17 @@
             ],
             "regime_actions": [],
             "replay_provenance": {
-              "classification": "projected_evidence",
-              "decision_surface": "staged_candidate",
+              "classification": "mixed_root_summary_fallback",
+              "decision_surface": "not_available",
               "has_bucket_reference": false,
               "has_runtime_summary_anchor": false,
               "policy_bucket": "not_available",
-              "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+              "reason_code": "root",
               "source": "root",
-              "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+              "summary": "mixed_root_summary_fallback:root",
               "uses_direct_bucket_replay": false,
-              "uses_mixed_root_summary_fallback": false,
-              "uses_projected_evidence": true
+              "uses_mixed_root_summary_fallback": true,
+              "uses_projected_evidence": false
             },
             "sample_quality_watchdog_status": "thin",
             "symbol_actions": [],
@@ -2965,7 +3076,6 @@
                 "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                 "symbols": [],
                 "updated_at": "",
-                "version": null,
                 "versioned_key": ""
               },
               "policy_lineage_alignment": {
@@ -2996,7 +3106,6 @@
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
           "updated_at": "",
-          "version": null,
           "versioned_key": ""
         },
         "policy_application": {
@@ -3029,9 +3138,9 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-15T05:47:55.510759+00:00",
-          "version": 8,
-          "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+          "updated_at": "2026-04-22T04:01:49.366892+00:00",
+          "version": 54,
+          "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
         },
         "replay_summary": {
           "baseline_policy_pressure": 0.0,
@@ -3374,17 +3483,17 @@
             ],
             "regime_actions": [],
             "replay_provenance": {
-              "classification": "projected_evidence",
-              "decision_surface": "staged_candidate",
+              "classification": "mixed_root_summary_fallback",
+              "decision_surface": "not_available",
               "has_bucket_reference": false,
               "has_runtime_summary_anchor": false,
               "policy_bucket": "not_available",
-              "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+              "reason_code": "root",
               "source": "root",
-              "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+              "summary": "mixed_root_summary_fallback:root",
               "uses_direct_bucket_replay": false,
-              "uses_mixed_root_summary_fallback": false,
-              "uses_projected_evidence": true
+              "uses_mixed_root_summary_fallback": true,
+              "uses_projected_evidence": false
             },
             "sample_quality_watchdog_status": "thin",
             "symbol_actions": [],
@@ -3571,7 +3680,6 @@
                 "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                 "symbols": [],
                 "updated_at": "",
-                "version": null,
                 "versioned_key": ""
               },
               "policy_lineage_alignment": {
@@ -3602,7 +3710,6 @@
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
           "updated_at": "",
-          "version": null,
           "versioned_key": ""
         },
         "policy_application": {
@@ -3635,9 +3742,9 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-15T05:47:55.256357+00:00",
-          "version": 7,
-          "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+          "updated_at": "2026-04-22T04:01:48.054566+00:00",
+          "version": 53,
+          "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
         },
         "replay_summary": {
           "baseline_policy_pressure": 0.0,
@@ -4079,9 +4186,9 @@
       "source": "persisted_policy_state",
       "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
       "symbols": [],
-      "updated_at": "2026-04-15T05:47:55.510759+00:00",
-      "version": 8,
-      "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+      "updated_at": "2026-04-22T04:01:49.366892+00:00",
+      "version": 54,
+      "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
     },
     "policy_validation": {
       "evidence": {
@@ -4095,9 +4202,9 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-15T05:47:55.510759+00:00",
-          "version": 8,
-          "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+          "updated_at": "2026-04-22T04:01:49.366892+00:00",
+          "version": 54,
+          "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
         },
         "auto_mode": {
           "expansion_blocked": true,
@@ -4466,17 +4573,17 @@
           ],
           "regime_actions": [],
           "replay_provenance": {
-            "classification": "projected_evidence",
-            "decision_surface": "staged_candidate",
+            "classification": "mixed_root_summary_fallback",
+            "decision_surface": "not_available",
             "has_bucket_reference": false,
             "has_runtime_summary_anchor": false,
             "policy_bucket": "not_available",
-            "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+            "reason_code": "root",
             "source": "root",
-            "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+            "summary": "mixed_root_summary_fallback:root",
             "uses_direct_bucket_replay": false,
-            "uses_mixed_root_summary_fallback": false,
-            "uses_projected_evidence": true
+            "uses_mixed_root_summary_fallback": true,
+            "uses_projected_evidence": false
           },
           "sample_quality_watchdog_status": "thin",
           "symbol_actions": [],
@@ -5582,7 +5689,6 @@
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
           "updated_at": "",
-          "version": null,
           "versioned_key": ""
         },
         "current_policy_lineage": {
@@ -5595,9 +5701,9 @@
           "source": "current_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-15T05:47:55.510759+00:00",
-          "version": 7,
-          "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+          "updated_at": "2026-04-22T04:01:49.366892+00:00",
+          "version": 53,
+          "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
         },
         "current_policy_score": 0.0,
         "current_replay_summary": {
@@ -5748,9 +5854,9 @@
             "source": "current_policy_state",
             "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
             "symbols": [],
-            "updated_at": "2026-04-15T05:47:55.510759+00:00",
-            "version": 7,
-            "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+            "updated_at": "2026-04-22T04:01:49.366892+00:00",
+            "version": 53,
+            "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
           },
           "aligned_run_count": 0,
           "applied": false,
@@ -5770,7 +5876,6 @@
             "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
             "symbols": [],
             "updated_at": "",
-            "version": null,
             "versioned_key": ""
           },
           "current_policy_lineage": {
@@ -5783,9 +5888,9 @@
             "source": "current_policy_state",
             "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
             "symbols": [],
-            "updated_at": "2026-04-15T05:47:55.510759+00:00",
-            "version": 7,
-            "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+            "updated_at": "2026-04-22T04:01:49.366892+00:00",
+            "version": 53,
+            "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
           },
           "known_run_lineage_count": 0,
           "mismatched_run_count": 0,
@@ -6122,17 +6227,17 @@
                 ],
                 "regime_actions": [],
                 "replay_provenance": {
-                  "classification": "projected_evidence",
-                  "decision_surface": "staged_candidate",
+                  "classification": "mixed_root_summary_fallback",
+                  "decision_surface": "not_available",
                   "has_bucket_reference": false,
                   "has_runtime_summary_anchor": false,
                   "policy_bucket": "not_available",
-                  "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+                  "reason_code": "root",
                   "source": "root",
-                  "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+                  "summary": "mixed_root_summary_fallback:root",
                   "uses_direct_bucket_replay": false,
-                  "uses_mixed_root_summary_fallback": false,
-                  "uses_projected_evidence": true
+                  "uses_mixed_root_summary_fallback": true,
+                  "uses_projected_evidence": false
                 },
                 "sample_quality_watchdog_status": "thin",
                 "symbol_actions": [],
@@ -6319,7 +6424,6 @@
                     "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                     "symbols": [],
                     "updated_at": "",
-                    "version": null,
                     "versioned_key": ""
                   },
                   "policy_lineage_alignment": {
@@ -6350,7 +6454,6 @@
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
               "updated_at": "",
-              "version": null,
               "versioned_key": ""
             },
             "policy_application": {
@@ -6383,9 +6486,9 @@
               "source": "persisted_policy_state",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-15T05:47:55.510759+00:00",
-              "version": 8,
-              "versioned_key": "3b4c44b0ed3aad252c5cdde1dea651bb489b9216728c2c329dc2d4b3ebffd653"
+              "updated_at": "2026-04-22T04:01:49.366892+00:00",
+              "version": 54,
+              "versioned_key": "1961de3275590ca95bf169ff72a73792f942e32b475b819214909ae1a3beb806"
             },
             "replay_summary": {
               "baseline_policy_pressure": 0.0,
@@ -6728,17 +6831,17 @@
                 ],
                 "regime_actions": [],
                 "replay_provenance": {
-                  "classification": "projected_evidence",
-                  "decision_surface": "staged_candidate",
+                  "classification": "mixed_root_summary_fallback",
+                  "decision_surface": "not_available",
                   "has_bucket_reference": false,
                   "has_runtime_summary_anchor": false,
                   "policy_bucket": "not_available",
-                  "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+                  "reason_code": "root",
                   "source": "root",
-                  "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+                  "summary": "mixed_root_summary_fallback:root",
                   "uses_direct_bucket_replay": false,
-                  "uses_mixed_root_summary_fallback": false,
-                  "uses_projected_evidence": true
+                  "uses_mixed_root_summary_fallback": true,
+                  "uses_projected_evidence": false
                 },
                 "sample_quality_watchdog_status": "thin",
                 "symbol_actions": [],
@@ -6925,7 +7028,6 @@
                     "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                     "symbols": [],
                     "updated_at": "",
-                    "version": null,
                     "versioned_key": ""
                   },
                   "policy_lineage_alignment": {
@@ -6956,7 +7058,6 @@
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
               "updated_at": "",
-              "version": null,
               "versioned_key": ""
             },
             "policy_application": {
@@ -6989,9 +7090,9 @@
               "source": "persisted_policy_state",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-15T05:47:55.256357+00:00",
-              "version": 7,
-              "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+              "updated_at": "2026-04-22T04:01:48.054566+00:00",
+              "version": 53,
+              "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
             },
             "replay_summary": {
               "baseline_policy_pressure": 0.0,
@@ -7766,8 +7867,8 @@
       "state_counts": {},
       "symbol_count": 0
     },
-    "updated_at": "2026-04-15T05:47:56.520289+00:00",
-    "version": 8
+    "updated_at": "2026-04-22T04:01:50.516791+00:00",
+    "version": 54
   },
   "policy_validation": {
     "evidence": {
@@ -8138,17 +8239,17 @@
         ],
         "regime_actions": [],
         "replay_provenance": {
-          "classification": "projected_evidence",
-          "decision_surface": "staged_candidate",
+          "classification": "mixed_root_summary_fallback",
+          "decision_surface": "not_available",
           "has_bucket_reference": false,
           "has_runtime_summary_anchor": false,
           "policy_bucket": "not_available",
-          "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+          "reason_code": "root",
           "source": "root",
-          "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+          "summary": "mixed_root_summary_fallback:root",
           "uses_direct_bucket_replay": false,
-          "uses_mixed_root_summary_fallback": false,
-          "uses_projected_evidence": true
+          "uses_mixed_root_summary_fallback": true,
+          "uses_projected_evidence": false
         },
         "sample_quality_watchdog_status": "thin",
         "symbol_actions": [],
@@ -9254,7 +9355,6 @@
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
         "updated_at": "",
-        "version": null,
         "versioned_key": ""
       },
       "current_policy_lineage": {
@@ -9267,9 +9367,9 @@
         "source": "current_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-15T05:47:55.510759+00:00",
-        "version": 7,
-        "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+        "updated_at": "2026-04-22T04:01:49.366892+00:00",
+        "version": 53,
+        "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
       },
       "current_policy_score": 0.0,
       "current_replay_summary": {
@@ -9420,9 +9520,9 @@
           "source": "current_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-15T05:47:55.510759+00:00",
-          "version": 7,
-          "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+          "updated_at": "2026-04-22T04:01:49.366892+00:00",
+          "version": 53,
+          "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
         },
         "aligned_run_count": 0,
         "applied": false,
@@ -9442,7 +9542,6 @@
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
           "updated_at": "",
-          "version": null,
           "versioned_key": ""
         },
         "current_policy_lineage": {
@@ -9455,9 +9554,9 @@
           "source": "current_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-15T05:47:55.510759+00:00",
-          "version": 7,
-          "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+          "updated_at": "2026-04-22T04:01:49.366892+00:00",
+          "version": 53,
+          "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
         },
         "known_run_lineage_count": 0,
         "mismatched_run_count": 0,
@@ -9794,17 +9893,17 @@
               ],
               "regime_actions": [],
               "replay_provenance": {
-                "classification": "projected_evidence",
-                "decision_surface": "staged_candidate",
+                "classification": "mixed_root_summary_fallback",
+                "decision_surface": "not_available",
                 "has_bucket_reference": false,
                 "has_runtime_summary_anchor": false,
                 "policy_bucket": "not_available",
-                "reason_code": "PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+                "reason_code": "root",
                 "source": "root",
-                "summary": "projected_evidence:PROJECTED_CHECKPOINT_REPLAY_SOURCE",
+                "summary": "mixed_root_summary_fallback:root",
                 "uses_direct_bucket_replay": false,
-                "uses_mixed_root_summary_fallback": false,
-                "uses_projected_evidence": true
+                "uses_mixed_root_summary_fallback": true,
+                "uses_projected_evidence": false
               },
               "sample_quality_watchdog_status": "thin",
               "symbol_actions": [],
@@ -9991,7 +10090,6 @@
                   "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
                   "symbols": [],
                   "updated_at": "",
-                  "version": null,
                   "versioned_key": ""
                 },
                 "policy_lineage_alignment": {
@@ -10022,7 +10120,6 @@
             "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
             "symbols": [],
             "updated_at": "",
-            "version": null,
             "versioned_key": ""
           },
           "policy_application": {
@@ -10055,9 +10152,9 @@
             "source": "current_policy_state",
             "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
             "symbols": [],
-            "updated_at": "2026-04-15T05:47:55.510759+00:00",
-            "version": 7,
-            "versioned_key": "f497fd6f96468c0d210d84cf99f03a9c40dd442a2e7191bb6d77d909f410591c"
+            "updated_at": "2026-04-22T04:01:49.366892+00:00",
+            "version": 53,
+            "versioned_key": "4799b84e85bd3a44aff036308d8439e179a66e1dbb292753987023129b2e1b93"
           },
           "replay_summary": {
             "baseline_policy_pressure": 0.0,
@@ -10877,26 +10974,7 @@
   "realized_pnl_net_usd_estimate": 0,
   "realized_pnl_usd_estimate": 0.0,
   "realized_vs_expected_edge_gap_bps": 0.0,
-  "recent_decisions": [
-    {
-      "candidate_mode": "futures",
-      "entry_relaxations": [],
-      "estimated_round_trip_cost_bps": 26.0,
-      "execution_quality_trade_restraint": "none",
-      "macro_trade_restraint": "none",
-      "mode": "cash",
-      "net_expected_edge_bps": 34.904788,
-      "reasons": [
-        "NO_ENSEMBLE_SIGNAL",
-        "SUPPORT_NOT_CONFIRMED"
-      ],
-      "score": 82.22,
-      "side": "flat",
-      "size_boost_reasons": [],
-      "strategy_size_multiplier": 1.0,
-      "symbol": "BTCUSDT"
-    }
-  ],
+  "recent_decisions": [],
   "rejected_live_order_count": 0,
   "retention_monitor": {
     "reasons": [],
@@ -10953,7 +11031,7 @@
         },
         "status": "applied",
         "summary": "Restarted websocket after 1s without progress",
-        "timestamp": "2026-04-15T05:47:55.183579+00:00"
+        "timestamp": "2026-04-22T04:01:49.320589+00:00"
       }
     ],
     "recovery_counts": {
@@ -10965,16 +11043,11 @@
   "session_equity_delta_usdt": null,
   "session_start_equity_usdt": null,
   "symbol_performance": [],
-  "symbols": [
-    "BTCUSDT"
-  ],
+  "symbols": [],
   "telegram_alerts": [],
   "tested_order_count": 0,
   "tested_orders": [],
-  "top_rejection_reasons": {
-    "NO_ENSEMBLE_SIGNAL": 1,
-    "SUPPORT_NOT_CONFIRMED": 1
-  },
+  "top_rejection_reasons": {},
   "unrealized_futures_pnl_usd_estimate": 0,
   "unrealized_pnl_usd_estimate": 0,
   "unrealized_spot_pnl_usd_estimate": 0

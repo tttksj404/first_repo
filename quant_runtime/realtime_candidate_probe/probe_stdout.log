@@ -1,0 +1,15 @@
+[daemon] equity auto-detected: $4.33 USDT ¡æ capacity: $129.79 (was $10,000 / $5,000 defaults)
+[DECISION] 2026-04-20T02:45:00+00:00 DOGEUSDT mode=futures side=long score=66.46
+[DECISION] 2026-04-20T02:45:00+00:00 ETHUSDT mode=cash side=flat score=71.84
+[DECISION] 2026-04-20T02:45:00+00:00 PEPEUSDT mode=futures side=long score=65.75
+[DECISION] 2026-04-20T02:45:00+00:00 SOLUSDT mode=futures side=long score=65.74
+[SUBMISSION_GATE] DOGEUSDT allow=True can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] DOGEUSDT allow=True live_allowed=True managed=futures:129.79 prepared=cash:0.00 reasons=HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED
+[SUBMISSION_GATE] ETHUSDT allow=False can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] ETHUSDT allow=False live_allowed=True managed=cash:0.00 prepared=cash:0.00 reasons=DIRECTION_CONFLICT,EDGE_BELOW_COST,LIQUIDITY_TOO_WEAK,SCORE_TOO_LOW
+[SUBMISSION_GATE] PEPEUSDT allow=True can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] PEPEUSDT allow=True live_allowed=True managed=futures:129.79 prepared=cash:0.00 reasons=HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED
+[SUBMISSION_GATE] SOLUSDT allow=True can_open=True existing=no pending_external=False order_cooldown=False manual_cooldown=False live_allowed=True
+[EXEC_PREFLIGHT] SOLUSDT allow=True live_allowed=True managed=futures:129.79 prepared=cash:0.00 reasons=HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED
+[CONNECT] websocket attempt=1
+[ERROR] websocket attempt=1 error=ssl=None is incompatible with a wss:// URI

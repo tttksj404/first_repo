@@ -1,0 +1,64 @@
+{
+  "diagnostics": {
+    "learning_active": false,
+    "min_observations_threshold": 200,
+    "pooled_buckets": 2,
+    "pooled_buckets_qualified": 0,
+    "symbol_buckets": 4,
+    "symbol_buckets_qualified": 0,
+    "total_observations": 10
+  },
+  "observation_count": 10,
+  "symbols": {
+    "DOGEUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 62.46691371095746,
+        "mode": "futures",
+        "observations": [
+          62.46691371095746,
+          62.46691371095746
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "bucket": 8,
+        "median_bps": 72.07599790831428,
+        "mode": "futures",
+        "observations": [
+          72.07599790831428,
+          127.72354889314948,
+          -6.057172738366425
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "PEPEUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 60.90719666613244,
+        "mode": "futures",
+        "observations": [
+          60.90719666613244,
+          9.616925789388915
+        ],
+        "trend_direction": 1
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "bucket": 7,
+        "median_bps": 56.53710247349702,
+        "mode": "futures",
+        "observations": [
+          62.77974087161381,
+          56.53710247349702,
+          54.53474676089445
+        ],
+        "trend_direction": 1
+      }
+    ]
+  }
+}

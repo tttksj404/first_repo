@@ -1,10 +1,12 @@
 {
-  "checked_at": "2026-04-07T00:24:31.392181+00:00",
-  "decision_age_seconds": 86.311,
-  "decision_count": 3,
-  "heartbeat_count": 12326,
-  "last_decision_emitted_at": "2026-04-07T00:23:05.081304+00:00",
-  "status": "healthy",
-  "updated_age_seconds": 9.197,
-  "updated_at": "2026-04-07T00:24:22.194799+00:00"
+  "checked_at": "2026-04-21T23:47:54.963096+00:00",
+  "decision_age_seconds": null,
+  "decision_count": 0,
+  "error": "RuntimeError('Bitget transport error for https://api.bitget.com/api/v2/spot/public/symbols (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known')",
+  "heartbeat_count": 0,
+  "last_decision_emitted_at": null,
+  "reason": "startup_failed",
+  "status": "unhealthy",
+  "updated_age_seconds": 28.677,
+  "updated_at": "2026-04-21T23:47:26.286220+00:00"
 }

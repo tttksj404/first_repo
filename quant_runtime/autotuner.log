@@ -526,3 +526,35 @@
 }
 [AUTOTUNER] Cycle complete
 
+============================================
+[AUTOTUNER] 2026-04-21 19:47:00 KST
+============================================
+[AUTOTUNER] Skipped: daemon not healthy (status=unhealthy)
+============================================
+[AUTOTUNER] 2026-04-22 01:47:00 KST
+============================================
+[AUTOTUNER] Skipped: daemon not healthy (status=unhealthy)
+============================================
+[AUTOTUNER] 2026-04-22 07:47:00 KST
+============================================
+[AUTOTUNER] valid_trades=0 < 50: dry-run mode (waiting for data)
+{
+  "action": "insufficient_data",
+  "deltas_approved": [],
+  "deltas_proposed": [],
+  "dry_run": true,
+  "rejections": [],
+  "timestamp": "2026-04-21T22:47:00.368307+00:00",
+  "total_trades": 0,
+  "valid_trades": 0
+}
+[AUTOTUNER] Cycle complete
+
+============================================
+[AUTOTUNER] 2026-04-23 01:47:00 KST
+============================================
+[AUTOTUNER] Skipped: daemon not healthy (status=unhealthy)
+============================================
+[AUTOTUNER] 2026-04-23 07:47:00 KST
+============================================
+[AUTOTUNER] Skipped: daemon not healthy (status=unhealthy)

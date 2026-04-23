@@ -25,6 +25,7 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 @dataclass(frozen=True)
 class DecisionEngineConfig:
     decision_interval_minutes: int
+    decision_interval_seconds: int = 0
 
 
 @dataclass(frozen=True)
@@ -123,6 +124,12 @@ class ExitRuleConfig:
     futures_profit_protection_retrace_roe_percent: float = 3.0
     futures_proactive_take_profit_roe_thresholds_percent: tuple[float, ...] = ()
     futures_proactive_take_profit_fraction: float = 0.25
+    futures_proactive_take_profit_min_roe_percent: float = 10.0
+    futures_early_invalid_exit_max_holding_minutes: float = 0.0
+    futures_early_invalid_exit_min_loss_usd: float = 0.0
+    futures_early_invalid_exit_min_score_drop: float = 0.0
+    futures_early_invalid_exit_min_edge_drop_bps: float = 0.0
+    futures_early_invalid_exit_max_peak_roe_percent: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -221,6 +228,29 @@ class FuturesExposureConfig:
     major_strong_min_entry_notional_usd: float = 0.0
     major_strong_total_notional_fraction_relaxation: float = 0.0
     major_strong_safety_cap_fraction: float = 0.5
+    high_conviction_sizing_enabled: bool = False
+    high_conviction_block_non_strong: bool = False
+    high_conviction_target_margin_fraction: float = 0.0
+    high_conviction_medium_margin_fraction: float = 0.0
+    high_conviction_min_notional_usd: float = 0.0
+    high_conviction_recent_long_confirmations: int = 0
+    high_conviction_recent_max_age_minutes: int = 0
+    high_conviction_recent_min_trend_strength: float = 0.0
+    high_conviction_recent_min_volume_confirmation: float = 0.0
+    high_conviction_recent_min_liquidity: float = 0.0
+    high_conviction_recent_max_volatility_penalty: float = 0.0
+    high_conviction_recent_max_overheat_penalty: float = 0.0
+    high_conviction_recent_min_edge_to_cost_multiple: float = 0.0
+    high_conviction_recent_opposite_block_enabled: bool = False
+    high_conviction_recent_opposite_max_age_minutes: int = 0
+    high_conviction_recent_reversal_unlock_enabled: bool = False
+    high_conviction_recent_reversal_unlock_confirmations: int = 0
+    high_conviction_max_decision_age_seconds: int = 0
+    high_conviction_recent_weak_block_enabled: bool = False
+    high_conviction_recent_weak_max_age_seconds: int = 0
+    funding_bias_enabled: bool = False
+    funding_bias_min_abs_bps: float = 0.0
+    funding_bias_max_abs_bps: float = 6.0
     pyramid_enabled: bool = False
     pyramid_major_only: bool = True
     pyramid_min_roe_percent: float = 0.0
@@ -257,6 +287,31 @@ class SymbolEligibilityConfig:
     observe_only_liquidity_max: float
     observe_only_alt_liquidity_max: float
     observe_only_cost_bps_min: float
+
+
+@dataclass(frozen=True)
+class SymbolFilterProfileConfig:
+    min_predictability_score: float = 0.0
+    min_liquidity_score: float = 0.0
+    min_volume_confirmation: float = 0.0
+    min_net_edge_bps: float = 0.0
+    min_edge_to_cost: float = 0.0
+    max_stop_distance_bps: float = 0.0
+    min_expected_profit_multiplier: float = 0.0
+    min_expected_profit_extra_usd: float = 0.0
+    size_multiplier: float = 1.0
+    bypass_fee_edge_buffer: bool = False
+    reversal_prone_guard_enabled: bool = False
+    reversal_guard_confirmation_window_minutes: float = 15.0
+    reversal_guard_min_notional_to_equity: float = 4.0
+    reversal_guard_marginal_score: float = 75.0
+    reversal_guard_marginal_trend_strength: float = 0.70
+    reversal_guard_marginal_volume_confirmation: float = 0.58
+    reversal_guard_min_net_edge_bps: float = 30.0
+    reversal_guard_min_edge_to_cost: float = 3.25
+    reversal_guard_min_expected_profit_multiplier: float = 2.0
+    reversal_guard_min_expected_profit_extra_usd: float = 0.75
+    rejection_reason: str = "SYMBOL_FILTER_PROFILE"
 
 
 @dataclass(frozen=True)
@@ -407,6 +462,7 @@ class Settings:
     data_collection_mode: bool = False
     data_collection_min_trades: int = 50
     b3_msb: B3MsbConfig = B3MsbConfig()
+    symbol_filter_profiles: dict[str, SymbolFilterProfileConfig] | None = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -447,6 +503,10 @@ class Settings:
             "cooldown_minutes": 0,
         }
         loss_combo_downgrade_raw.update(raw.get("loss_combo_downgrade", {}))
+        symbol_filter_profiles = {
+            str(symbol).upper(): SymbolFilterProfileConfig(**dict(profile or {}))
+            for symbol, profile in dict(raw.get("symbol_filter_profiles", {}) or {}).items()
+        }
         return cls(
             config_version=raw["config_version"],
             snapshot_schema_version=raw["snapshot_schema_version"],
@@ -483,4 +543,5 @@ class Settings:
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
             data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
             b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
+            symbol_filter_profiles=symbol_filter_profiles,
         )

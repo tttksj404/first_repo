@@ -164,12 +164,14 @@ class BitgetWebSocketClient:
         # websockets client's ping/pong lifecycle, which has been causing
         # false-positive disconnects and unclean close errors on long-lived
         # Bitget sessions.
-        return {
-            "ssl": ssl_context,
+        kwargs: dict[str, Any] = {
             "ping_interval": None,
             "ping_timeout": None,
             "close_timeout": 1,
         }
+        if ssl_context is not None:
+            kwargs["ssl"] = ssl_context
+        return kwargs
 
     async def run(self, handler: MessageHandler) -> None:
         if websockets is None:
