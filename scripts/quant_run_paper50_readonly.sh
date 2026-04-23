@@ -2,14 +2,19 @@
 set -eu
 
 OUTPUT_BASE="${1:-quant_runtime_paper50}"
-REPO_ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 mkdir -p "$OUTPUT_BASE" scripts
 
-# Keep real live-auto paths fail-closed while this read-only paper monitor runs.
-printf 'stop\n' > scripts/_supervisor_stop
-printf 'stop\n' > scripts/_safety_guardian_stop
+# Optional fail-closed mode for operators who intentionally want a paper-only
+# session to block the live-auto wrappers. Keep the default side-effect free so
+# read-only research probes never modify live stop sentinels.
+if [ "${QUANT_PAPER50_BLOCK_LIVE_AUTO:-0}" = "1" ]; then
+  printf 'stop\n' > scripts/_supervisor_stop
+  printf 'stop\n' > scripts/_safety_guardian_stop
+fi
 
 rotate_if_large() {
   path="$1"
@@ -47,7 +52,7 @@ export http_proxy=
 export https_proxy=
 export all_proxy=
 
-exec "${PYTHON_BIN:-python3}" -m quant_binance.runtime \
+exec sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.runtime \
   --mode live-paper-daemon \
   --exchange bitget \
   --output-base "$OUTPUT_BASE" \

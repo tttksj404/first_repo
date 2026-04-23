@@ -9,11 +9,13 @@ fi
 FIXTURE="$1"
 OUTPUT="${2:-}"
 export STRATEGY_PROFILE="${STRATEGY_PROFILE:-active}"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 
-cd "$(dirname "$0")/.."
+cd "$REPO_ROOT"
 
 if [ -n "$OUTPUT" ]; then
-  python3 -m quant_binance.compare --fixture "$FIXTURE" --output "$OUTPUT"
+  sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.compare --fixture "$FIXTURE" --output "$OUTPUT"
 else
-  python3 -m quant_binance.compare --fixture "$FIXTURE"
+  sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.compare --fixture "$FIXTURE"
 fi

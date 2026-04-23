@@ -4,7 +4,8 @@
 
 set -euo pipefail
 
-REPO_DIR="/Users/tttksj/first_repo"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_DIR/quant_runtime/output/conviction-sniper-v3"
 PIDFILE="$LOG_DIR/daemon.pid"
 MAX_BACKOFF=60
@@ -25,7 +26,7 @@ while true; do
     cd "$REPO_DIR"
     env STRATEGY_PROFILE=conviction-sniper \
         UNIVERSE_SYMBOLS=BTCUSDT,ETHUSDT,SOLUSDT \
-        python3 -m quant_binance.runtime \
+        sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.runtime \
             --mode live-paper-daemon \
             --config quant_binance/config.example.json \
             --output-base "$LOG_DIR" \
