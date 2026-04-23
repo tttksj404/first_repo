@@ -1,0 +1,201 @@
+{
+  "decision_count": 500,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 50.0,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 50.0,
+  "futures_manual_handling_balance_usd": 1.124533,
+  "futures_total_reusable_balance_usd": 50.0,
+  "futures_transferable_execution_balance_usd": 0.011739,
+  "heartbeat_count": 7519815,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-04-23T00:25:00.210681+00:00",
+  "last_decision_timestamp": "2026-04-23T00:25:00+00:00",
+  "last_event_timestamp": "2026-04-23T00:29:53.675498+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.123698,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 21.510605,
+      "reasons": [
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN",
+        "SYMBOL_PROFILE_EDGE_TOO_THIN",
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_SCORE_TOO_LOW"
+      ],
+      "score": 66.05,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.55,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 10.103492,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 24.881407,
+      "reasons": [
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN",
+        "SYMBOL_PROFILE_EDGE_TOO_THIN",
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 66.55,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.55,
+      "symbol": "XRPUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.461405,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 1.785018,
+      "reasons": [
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN",
+        "SYMBOL_PROFILE_EDGE_TOO_THIN",
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 49.57,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.55,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.126756,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 16.984365,
+      "reasons": [
+        "SYMBOL_PROFILE_EDGE_TOO_THIN",
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_SCORE_TOO_LOW"
+      ],
+      "score": 63.0,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.75,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.038358,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 14.537804,
+      "reasons": [
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN",
+        "SYMBOL_PROFILE_EDGE_TOO_THIN",
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL",
+        "SYMBOL_PROFILE_SCORE_TOO_LOW"
+      ],
+      "score": 57.1,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 0.45,
+      "symbol": "BTCUSDT"
+    }
+  ],
+  "reference_price_guard": {
+    "counts_by_symbol": {
+      "BTCUSDT": 10,
+      "DOGEUSDT": 2,
+      "ETHUSDT": 5,
+      "PEPEUSDT": 9,
+      "SOLUSDT": 6,
+      "XRPUSDT": 1
+    },
+    "last_by_symbol": {
+      "BTCUSDT": {
+        "deviation_bps": 269.492337,
+        "last_trade_price": 76241.5,
+        "observed_at": "2026-04-22T23:30:00+00:00",
+        "top_mid": 78296.15
+      },
+      "DOGEUSDT": {
+        "deviation_bps": 259.938838,
+        "last_trade_price": 0.09483,
+        "observed_at": "2026-04-22T18:35:00+00:00",
+        "top_mid": 0.09729499999999999
+      },
+      "ETHUSDT": {
+        "deviation_bps": 398.092559,
+        "last_trade_price": 2303.61,
+        "observed_at": "2026-04-22T22:30:00+00:00",
+        "top_mid": 2395.315
+      },
+      "PEPEUSDT": {
+        "deviation_bps": 81.584463,
+        "last_trade_price": 3.7691e-06,
+        "observed_at": "2026-04-22T23:35:00+00:00",
+        "top_mid": 3.7998499999999997e-06
+      },
+      "SOLUSDT": {
+        "deviation_bps": 63.952492,
+        "last_trade_price": 87.565,
+        "observed_at": "2026-04-23T00:05:00+00:00",
+        "top_mid": 87.005
+      },
+      "XRPUSDT": {
+        "deviation_bps": 139.737691,
+        "last_trade_price": 1.4563,
+        "observed_at": "2026-04-22T23:05:00+00:00",
+        "top_mid": 1.43595
+      }
+    },
+    "total_count": 33
+  },
+  "spot_available_balance_usd": 0.011739,
+  "status": "healthy",
+  "tested_order_count": 0,
+  "top_rejection_reasons": {
+    "DIRECTION_CONFLICT": 116,
+    "EDGE_BELOW_COST": 120,
+    "SCORE_TOO_LOW": 131,
+    "SYMBOL_PROFILE_EDGE_COST_TOO_THIN": 218,
+    "SYMBOL_PROFILE_EDGE_TOO_THIN": 248,
+    "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL": 326,
+    "SYMBOL_PROFILE_SCORE_TOO_LOW": 276,
+    "SYMBOL_PROFILE_VOLUME_TOO_WEAK": 183
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-04-23T00:29:53.726993+00:00"
+}
