@@ -1621,6 +1621,9 @@ class LivePaperSession:
                 decision,
                 notional_usd=decision.order_intent_notional_usd,
             )
+        delayed_entry_gate = self._apply_paper_verification_delayed_entry_gate(decision)
+        if delayed_entry_gate.final_mode != "futures" or delayed_entry_gate.order_intent_notional_usd <= 0.0:
+            return delayed_entry_gate
         microstructure_strong = (
             decision.predictability_score >= 70.0
             and decision.liquidity_score >= 0.55
@@ -1776,7 +1779,106 @@ class LivePaperSession:
                 stop_distance_bps=0.0,
                 rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("EXPECTED_PROFIT_TOO_SMALL",)))),
             )
+        if decision.final_mode == "futures":
+            delayed_entry_gate = self._apply_paper_verification_delayed_entry_gate(decision)
+            if delayed_entry_gate.final_mode != "futures" or delayed_entry_gate.order_intent_notional_usd <= 0.0:
+                return delayed_entry_gate
         return decision
+
+    def _paper_verification_delayed_entry_gate_enabled(self) -> bool:
+        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
+            return False
+        raw = str(os.getenv("QUANT_PAPER_VERIFY_DELAYED_ENTRY_GATE", "") or "").strip().lower()
+        if raw in {"0", "false", "off", "no"}:
+            return False
+        if raw in {"1", "true", "on", "yes"}:
+            return True
+        return self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
+
+    def _paper_verification_delayed_entry_fast_path_passes(self, decision: DecisionIntent) -> bool:
+        edge_to_cost = (
+            float("inf")
+            if decision.estimated_round_trip_cost_bps <= 0.0
+            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
+        )
+        return (
+            decision.predictability_score >= 88.0
+            and decision.net_expected_edge_bps >= 50.0
+            and edge_to_cost >= 6.0
+            and decision.volume_confirmation >= 0.70
+            and decision.trend_strength >= 0.85
+        )
+
+    def _paper_verification_delayed_entry_candidate_side(self, decision: DecisionIntent) -> str:
+        if decision.side in {"long", "short"}:
+            return decision.side
+        if decision.trend_direction > 0:
+            return "long"
+        if decision.trend_direction < 0:
+            return "short"
+        return ""
+
+    def _paper_verification_recent_delayed_entry_confirmation(
+        self,
+        decision: DecisionIntent,
+        *,
+        window_minutes: float,
+    ) -> bool:
+        confirmation_window_minutes = max(float(window_minutes), 0.0)
+        decision_time = decision.timestamp
+        if decision_time.tzinfo is None:
+            decision_time = decision_time.replace(tzinfo=timezone.utc)
+        for previous in reversed(self.decisions):
+            if previous.symbol != decision.symbol:
+                continue
+            previous_time = previous.timestamp
+            if previous_time.tzinfo is None:
+                previous_time = previous_time.replace(tzinfo=timezone.utc)
+            age_minutes = (decision_time - previous_time).total_seconds() / 60.0
+            if age_minutes < 0:
+                continue
+            if age_minutes > confirmation_window_minutes:
+                return False
+            previous_side = self._paper_verification_delayed_entry_candidate_side(previous)
+            if previous_side in {"long", "short"} and previous_side != decision.side:
+                return False
+            if (
+                previous.candidate_mode == "futures"
+                and previous_side == decision.side
+                and "PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED" in set(previous.rejection_reasons)
+            ):
+                return True
+        return False
+
+    def _paper_verification_delayed_entry_confirmation_required(self, decision: DecisionIntent) -> bool:
+        if not self._paper_verification_delayed_entry_gate_enabled():
+            return False
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return False
+        if decision.order_intent_notional_usd <= 0.0:
+            return False
+        if self.paper_positions.get(decision.symbol) is not None:
+            return False
+        if self._paper_verification_delayed_entry_fast_path_passes(decision):
+            return False
+        return not self._paper_verification_recent_delayed_entry_confirmation(
+            decision,
+            window_minutes=6.0,
+        )
+
+    def _apply_paper_verification_delayed_entry_gate(self, decision: DecisionIntent) -> DecisionIntent:
+        if not self._paper_verification_delayed_entry_confirmation_required(decision):
+            return decision
+        return replace(
+            decision,
+            final_mode="cash",
+            side="flat",
+            order_intent_notional_usd=0.0,
+            stop_distance_bps=0.0,
+            rejection_reasons=tuple(
+                sorted(set(decision.rejection_reasons + ("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED",)))
+            ),
+        )
 
     def _paper_verification_marginal_liquidity_continuation_entry(
         self,
@@ -7088,6 +7190,14 @@ class LivePaperSession:
         exit_rules = self.runtime.paper_service.settings.exit_rules
         live_risk = self.runtime.paper_service.settings.live_position_risk
         partial_action_taken = False
+        proactive_threshold = (
+            self._pending_proactive_take_profit_threshold(
+                current_roe_percent=current_roe_percent,
+                thresholds_hit=position.proactive_take_profit_thresholds_hit,
+            )
+            if position.market == "futures"
+            else None
+        )
 
         if (
             live_risk.portfolio_full_exit_only
@@ -7109,6 +7219,7 @@ class LivePaperSession:
             and not position.partial_take_profit_taken
             and not position.r_multiple_partial_take_profit_taken
             and position.stop_distance_bps > 0
+            and proactive_threshold is None
             and reward_bps
             > position.stop_distance_bps
             * (
@@ -7135,10 +7246,6 @@ class LivePaperSession:
             and position.market == "futures"
             and not position.r_multiple_partial_take_profit_taken
         ):
-            proactive_threshold = self._pending_proactive_take_profit_threshold(
-                current_roe_percent=current_roe_percent,
-                thresholds_hit=position.proactive_take_profit_thresholds_hit,
-            )
             if proactive_threshold is not None and self._take_partial_paper_profit(
                 position=position,
                 exit_price=price,

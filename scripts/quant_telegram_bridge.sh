@@ -1,5 +1,7 @@
 #!/bin/sh
 set -eu
 
-cd "$(dirname "$0")/.."
-python3 scripts/quant_telegram_bridge.py
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+sh "$SCRIPT_DIR/quant_python.sh" scripts/quant_telegram_bridge.py

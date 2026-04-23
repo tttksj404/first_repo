@@ -26,6 +26,11 @@ pid_is_visible() {
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 SUPERVISOR_STOP_FILE="$REPO_ROOT/scripts/_supervisor_stop"
+PYTHON_LAUNCHER="$SCRIPT_DIR/quant_python.sh"
+
+run_python() {
+  sh "$PYTHON_LAUNCHER" "$@"
+}
 
 supervisor_stop_requested() {
   [ -f "$SUPERVISOR_STOP_FILE" ] && grep -qi 'stop' "$SUPERVISOR_STOP_FILE" 2>/dev/null
@@ -49,20 +54,10 @@ if [ -f "$SUPERVISOR_PID_PATH" ]; then
   fi
 fi
 
-HOST_PYTHON_DEFAULT="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
-PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
-export PATH
-if [ -x "$HOST_PYTHON_DEFAULT" ]; then
-  PYTHON_BIN="$HOST_PYTHON_DEFAULT"
-elif [ -x /usr/bin/python3 ]; then
-  PYTHON_BIN="/usr/bin/python3"
-elif PATH_PYTHON_BIN="$(command -v python3 2>/dev/null || true)" && [ -n "$PATH_PYTHON_BIN" ] && [ -x "$PATH_PYTHON_BIN" ]; then
-  PYTHON_BIN="$PATH_PYTHON_BIN"
-else
-  printf '[BOOT] fixed python bootstrap failed in %s at %s PATH=%s\n' "$0" "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$PATH" >&2
+if [ ! -f "$PYTHON_LAUNCHER" ]; then
+  printf '[BOOT] python launcher missing: %s\n' "$PYTHON_LAUNCHER" >&2
   exit 1
 fi
-export PYTHON_BIN
 
 SYNC_INTERVAL_SECONDS="${SYNC_INTERVAL_SECONDS:-15}"
 WATCHDOG_POLL_SECONDS="${QUANT_LIVE_WATCHDOG_POLL_SECONDS:-30}"
@@ -139,7 +134,7 @@ fi
 export TELEGRAM_REPORT_ONLY="${TELEGRAM_REPORT_ONLY:-1}"
 export QUANT_BYPASS_POLICY_GUARDRAILS="${QUANT_BYPASS_POLICY_GUARDRAILS:-1}"
 
-cd "$(dirname "$0")/.."
+cd "$REPO_ROOT"
 
 CHILD_PID=""
 REPORT_PID=""
@@ -164,7 +159,7 @@ cleanup() {
   fi
   if [ -n "${CHILD_PID:-}" ] && kill -0 "$CHILD_PID" 2>/dev/null; then
     if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-      "$PYTHON_BIN" scripts/quant_notify_runtime_event.py stopped "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
+      run_python scripts/quant_notify_runtime_event.py stopped "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
     fi
     kill "$CHILD_PID" 2>/dev/null || true
     wait "$CHILD_PID" 2>/dev/null || true
@@ -173,7 +168,7 @@ cleanup() {
 }
 
 printf '%s %s\n' "$$" "v1:$(cksum "$0" | awk '{print $1}')" >"$SUPERVISOR_PID_PATH"
-printf '[SUPERVISOR] python_bin=%s at %s\n' "$PYTHON_BIN" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
+printf '[SUPERVISOR] python_launcher=%s at %s\n' "$PYTHON_LAUNCHER" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
 trap cleanup INT TERM EXIT
 
 start_watchdog() {
@@ -181,12 +176,12 @@ start_watchdog() {
     printf '[SUPERVISOR] watchdog autostart disabled at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     return 0
   fi
-  /usr/bin/nohup env \
+  nohup env \
     PATH="$PATH" \
     QUANT_TELEGRAM_NOTIFICATIONS="$QUANT_TELEGRAM_NOTIFICATIONS" \
     QUANT_BYPASS_POLICY_GUARDRAILS="$QUANT_BYPASS_POLICY_GUARDRAILS" \
-    PYTHON_BIN="$PYTHON_BIN" \
-    "$PYTHON_BIN" scripts/quant_live_watchdog.py "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
+    QUANT_PYTHON_BIN="${QUANT_PYTHON_BIN:-}" \
+    sh "$PYTHON_LAUNCHER" scripts/quant_live_watchdog.py "$OUTPUT_BASE" >>"$SUPERVISOR_LOG" 2>&1 &
   watchdog_start_status=$?
   watchdog_pid=$!
   if [ "$watchdog_start_status" -ne 0 ]; then
@@ -231,7 +226,7 @@ start_news_loop() {
 
 run_child() {
   CHILD_STARTED_AT_EPOCH="$(date +%s)"
-  "$PYTHON_BIN" -m quant_binance.runtime \
+  run_python -m quant_binance.runtime \
     --mode live-auto-trade-daemon \
     --exchange "bitget" \
     --output-base "$OUTPUT_BASE" \
@@ -243,12 +238,12 @@ run_child() {
   CHILD_PID=$!
   printf '[SUPERVISOR] started child pid=%s supervisor_pid=%s at %s\n' "$CHILD_PID" "$$" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-    "$PYTHON_BIN" scripts/quant_notify_runtime_event.py started "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
+    run_python scripts/quant_notify_runtime_event.py started "$OUTPUT_BASE" "child_pid=$CHILD_PID" >>"$SUPERVISOR_LOG" 2>&1 || true
   fi
 }
 
 health_check() {
-  "$PYTHON_BIN" - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH" "${CHILD_STARTED_AT_EPOCH:-0}"
+  run_python - <<'PY' "$OUTPUT_BASE" "$WATCHDOG_STALE_SECONDS" "$WATCHDOG_DECISION_STALL_SECONDS" "$STARTUP_GRACE_SECONDS" "$HEALTH_STATE_PATH" "${CHILD_STARTED_AT_EPOCH:-0}"
 import json
 import sys
 from datetime import datetime, timezone
@@ -363,7 +358,7 @@ while :; do
       fi
     fi
     if ! health_check; then
-      HEALTH_REASON="$("$PYTHON_BIN" - <<'PY' "$HEALTH_STATE_PATH"
+      HEALTH_REASON="$(run_python - <<'PY' "$HEALTH_STATE_PATH"
 import json, sys
 from pathlib import Path
 path = Path(sys.argv[1])
@@ -376,7 +371,7 @@ PY
 )"
       printf '[SUPERVISOR] restarting unhealthy child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
       if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-        "$PYTHON_BIN" scripts/quant_notify_runtime_event.py unhealthy "$OUTPUT_BASE" "child_pid=$CHILD_PID" "reason=$HEALTH_REASON" >>"$SUPERVISOR_LOG" 2>&1 || true
+        run_python scripts/quant_notify_runtime_event.py unhealthy "$OUTPUT_BASE" "child_pid=$CHILD_PID" "reason=$HEALTH_REASON" >>"$SUPERVISOR_LOG" 2>&1 || true
       fi
       if [ "$HEALTH_REASON" = "startup_failed" ] && [ "$STARTUP_FAILURE_BACKOFF_SECONDS" -gt 0 ]; then
         printf '[SUPERVISOR] startup_failed; backing off %ss before restart at %s\n' "$STARTUP_FAILURE_BACKOFF_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
@@ -395,7 +390,7 @@ PY
   fi
   printf '[SUPERVISOR] child exited, restarting in %ss at %s\n' "$RESTART_SLEEP_SECONDS" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ]; then
-    "$PYTHON_BIN" scripts/quant_notify_runtime_event.py exited "$OUTPUT_BASE" "child_pid=$CHILD_PID" "exit_code=$CHILD_EXIT_CODE" >>"$SUPERVISOR_LOG" 2>&1 || true
+    run_python scripts/quant_notify_runtime_event.py exited "$OUTPUT_BASE" "child_pid=$CHILD_PID" "exit_code=$CHILD_EXIT_CODE" >>"$SUPERVISOR_LOG" 2>&1 || true
   fi
   sleep "$RESTART_SLEEP_SECONDS"
 done

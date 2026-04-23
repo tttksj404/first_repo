@@ -11,5 +11,8 @@ if [ "$SEND_FLAG" = "--send-telegram" ]; then
   ARGS="$ARGS --send-telegram"
 fi
 
-cd "$(dirname "$0")/.."
-python3 -m quant_binance.report_strategy_advisor $ARGS
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+
+cd "$REPO_ROOT"
+sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.report_strategy_advisor $ARGS

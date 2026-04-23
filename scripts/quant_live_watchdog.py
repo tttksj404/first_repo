@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -13,10 +14,6 @@ from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-
-
-HOST_PYTHON_DEFAULT = "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
-SYSTEM_PYTHON_DEFAULT = "/usr/bin/python3"
 
 
 @dataclass(frozen=True)
@@ -96,7 +93,20 @@ class QuantLiveWatchdog:
 
     def _resolve_python_bin(self) -> str:
         requested = os.environ.get("PYTHON_BIN")
-        for candidate in (requested, sys.executable, HOST_PYTHON_DEFAULT, SYSTEM_PYTHON_DEFAULT):
+        candidates = [
+            requested,
+            os.environ.get("QUANT_PYTHON_BIN"),
+            str(self.repo_root / "scripts" / "quant_python.sh"),
+            sys.executable,
+            str(self.repo_root / ".venv" / "bin" / "python"),
+            str(self.repo_root / "venv" / "bin" / "python"),
+            str(self.repo_root / ".venv" / "Scripts" / "python.exe"),
+            str(self.repo_root / "venv" / "Scripts" / "python.exe"),
+            shutil.which("python3"),
+            shutil.which("python"),
+            shutil.which("py"),
+        ]
+        for candidate in candidates:
             if candidate and Path(candidate).exists() and os.access(candidate, os.X_OK):
                 return str(candidate)
         raise RuntimeError("python interpreter unavailable for watchdog restarts")
@@ -288,8 +298,8 @@ class QuantLiveWatchdog:
             return
 
         env = os.environ.copy()
-        env["PATH"] = "/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         env["PYTHON_BIN"] = self.python_bin
+        env["QUANT_PYTHON_BIN"] = self.python_bin
         env["QUANT_TELEGRAM_NOTIFICATIONS"] = env.get("QUANT_TELEGRAM_NOTIFICATIONS", "0")
         env["QUANT_BYPASS_POLICY_GUARDRAILS"] = env.get("QUANT_BYPASS_POLICY_GUARDRAILS", "1")
 
