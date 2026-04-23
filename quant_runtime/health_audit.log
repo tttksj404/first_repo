@@ -5685,3 +5685,491 @@ RuntimeError: Bitget transport error for https://api.bitget.com/api/v2/spot/acco
 ============================================
 
 [SKIP] 정상 — Claude Code 실행 불필요
+============================================
+[HEALTH_AUDIT] 2026-04-23 00:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: supervisor pid 확인 불가
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 930분 전
+  WARNING: health 파일 930분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 21
+  CRITICAL: 에러 폭발 (21건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 189분 전
+  WARNING: summary.json 189분 미갱신
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 3시간 전
+
+[4] 리소스
+  supervisor.log: 27MB
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 160MB
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 100%
+  WARNING: CPU 100% (>90%) — 과부하
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 6건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 3건
+  모드: {'cash': 1, 'futures': 2}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+
+[8] 포지션 sync
+  account_sync 이벤트: 16건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=1 WARNING=6
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=6
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_ISSUE] Bot status: unhealthy
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=78961 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-23 02:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: supervisor pid 확인 불가
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 1050분 전
+  WARNING: health 파일 1050분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 21
+  CRITICAL: 에러 폭발 (21건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 309분 전
+  WARNING: summary.json 309분 미갱신
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 5시간 전
+
+[4] 리소스
+  supervisor.log: 27MB
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 266MB
+  디스크 여유: 75GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 16%
+
+[5] Self-healing
+  이벤트 없음
+
+[6] Bitget API
+  live_orders: 0건
+  tested_orders: 0건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 6건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 3건
+  모드: {'cash': 1, 'futures': 2}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+
+[8] 포지션 sync
+  account_sync 이벤트: 16건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 7건
+
+============================================
+[RESULT] CRITICAL=1 WARNING=5
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=5
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_ISSUE] Bot status: unhealthy
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=88077 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-23 04:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: supervisor pid 확인 불가
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 1170분 전
+  WARNING: health 파일 1170분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 21
+  CRITICAL: 에러 폭발 (21건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 429분 전
+  WARNING: summary.json 429분 미갱신
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 7시간 전
+
+[4] 리소스
+  runtime log: 27MB (live_supervisor.log)
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 358MB
+  디스크 여유: 74GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 100%
+  WARNING: CPU 100% (>90%) — 과부하
+
+[5] Self-healing
+  총 이벤트: 51건, 최근 20건:
+    daemon_stalled: 18건
+    persistent_futures_mismatch: 2건
+  WARNING: daemon_stalled 반복 (18/20건)
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 1건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 6건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 208건
+  모드: {'cash': 178, 'futures': 30}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 86%
+
+[8] 포지션 sync
+  account_sync 이벤트: 440건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 9건
+
+============================================
+[RESULT] CRITICAL=1 WARNING=6
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=6
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_ISSUE] Bot status: unhealthy
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=97918 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-23 06:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  OK: quant_binance 1개 실행 중
+  WARNING: supervisor pid 확인 불가
+  WARNING: watchdog 프로세스 없음 — 자동 재시작 보호 없음
+  Health status: unhealthy
+  WARNING: health status=unhealthy
+  Health 갱신: 1290분 전
+  WARNING: health 파일 1290분 미갱신 — 데몬 stall 가능
+  WARNING: health 파일 30분 이상 미갱신
+  Recent errors (last 200 lines): 21
+  CRITICAL: 에러 폭발 (21건/200줄)
+  WARNING: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 549분 전
+  WARNING: summary.json 549분 미갱신
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 9시간 전
+
+[4] 리소스
+  runtime log: 27MB (live_supervisor.log)
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 446MB
+  디스크 여유: 74GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 7%
+
+[5] Self-healing
+  총 이벤트: 51건, 최근 20건:
+    daemon_stalled: 18건
+    persistent_futures_mismatch: 2건
+  WARNING: daemon_stalled 반복 (18/20건)
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 1건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 6건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 208건
+  모드: {'cash': 178, 'futures': 30}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 86%
+
+[8] 포지션 sync
+  account_sync 이벤트: 440건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 9건
+
+============================================
+[RESULT] CRITICAL=1 WARNING=5
+[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행
+============================================
+
+[CLAUDE] 자동 수정 시작: CRITICAL=1 WARNING=5
+
+[YOLO] 한탕 모드 자동 점검
+[YOLO_HEALTH] 1. Spot 잔류 자금 체크
+[YOLO_HEALTH] 2. Execution Quality 패널티 체크
+[YOLO_HEALTH] 3. Strategy Override 설정 검증
+[YOLO_HEALTH] 4. 포지션 볼륨 검증 + 유니버스 외 포지션 청산
+[YOLO_HEALTH] 5. Capacity 검증
+[YOLO_ISSUE] Bot status: unhealthy
+[YOLO_HEALTH] 완료: fixes=0 issues=1 manual=0
+[YOLO] 정상 — 수정 불필요
+[CLAUDE] PID=11887 백그라운드 실행
+============================================
+[HEALTH_AUDIT] 2026-04-23 08:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  STOPPED: live stop sentinel present — runtime intentionally stopped
+  OK: quant_binance 1개 실행 중
+  OK: stop sentinel present; supervisor pid check skipped
+  OK: stop sentinel present; watchdog check skipped
+  Health status: unhealthy
+  STOPPED: health status=unhealthy
+  Health 갱신: 1410분 전
+  STOPPED: health stale while runtime is intentionally stopped
+  Recent errors (last 200 lines): 21
+  STOPPED: 에러 폭발 (21건/200줄)
+  STOPPED: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 669분 전
+  WARNING: summary.json 669분 미갱신
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 11시간 전
+
+[4] 리소스
+  runtime log: 27MB (live_supervisor.log)
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 541MB
+  디스크 여유: 72GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 16%
+
+[5] Self-healing
+  총 이벤트: 51건, 최근 20건:
+    daemon_stalled: 18건
+    persistent_futures_mismatch: 2건
+  WARNING: daemon_stalled 반복 (18/20건)
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 1건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 6건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 208건
+  모드: {'cash': 178, 'futures': 30}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 86%
+
+[8] 포지션 sync
+  account_sync 이벤트: 440건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 9건
+
+============================================
+[RESULT] CRITICAL=0 WARNING=0
+[STATUS] 정상 — 수정 불필요
+============================================
+
+[SKIP] 정상 — Claude Code 실행 불필요
+============================================
+[HEALTH_AUDIT] 2026-04-23 09:17:00 KST
+============================================
+
+[1] 프로세스 상태
+  STOPPED: live stop sentinel present — runtime intentionally stopped
+  OK: quant_binance 1개 실행 중
+  OK: stop sentinel present; supervisor pid check skipped
+  OK: stop sentinel present; watchdog check skipped
+  Health status: unhealthy
+  STOPPED: health status=unhealthy
+  Health 갱신: 1470분 전
+  STOPPED: health stale while runtime is intentionally stopped
+  Recent errors (last 200 lines): 21
+  STOPPED: 에러 폭발 (21건/200줄)
+  STOPPED: 최근 100줄에 HEARTBEAT 없음 — 데몬 stall 가능
+
+[2] 데이터 품질
+  summary.json 갱신: 729분 전
+  WARNING: summary.json 729분 미갱신
+  총 청산: 0건 (전략=0, 채택=0)
+  학습 가능 데이터: 0건 / 50건 임계치 (0%)
+  유효 PnL 데이터(!=0bps): 0/1건
+
+[3] 상태 파일 무결성
+  state file: 0.4MB
+  활성 paper 포지션: 0건
+  cost_calibration.json: 12시간 전
+
+[4] 리소스
+  runtime log: 27MB (live_supervisor.log)
+  output 디렉토리: 159MB
+  health_audit.log: 1MB
+  quant_binance 메모리: 586MB
+  디스크 여유: 72GB
+
+[4b] 자동 디스크 정리
+  정리 불필요
+  quant_binance CPU: 17%
+
+[5] Self-healing
+  총 이벤트: 51건, 최근 20건:
+    daemon_stalled: 18건
+    persistent_futures_mismatch: 2건
+  WARNING: daemon_stalled 반복 (18/20건)
+
+[6] Bitget API
+  live_orders: 1건
+  tested_orders: 1건
+  최근 429 에러: 0건
+  최근 5xx 에러: 0건
+  최근 transport 에러: 6건
+  Bitget API: OK (HTTP 200)
+
+[7] 의사결정 흐름
+  총 의사결정: 208건
+  모드: {'cash': 178, 'futures': 30}
+  최근 6h 의사결정: 0건
+  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재
+  cash(미진입) 비율: 86%
+
+[8] 포지션 sync
+  account_sync 이벤트: 440건
+  OK: 최근 sync 정상
+
+[9] Git 상태
+  브랜치: codex/unified-green-plus-pepe-guard
+  소스코드 uncommitted 변경: 1건
+
+============================================
+[RESULT] CRITICAL=0 WARNING=0
+[STATUS] 정상 — 수정 불필요
+============================================
+
+[SKIP] 정상 — Claude Code 실행 불필요
