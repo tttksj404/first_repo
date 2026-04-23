@@ -61,6 +61,38 @@ class QuantBinanceSymbolLifecycleTests(unittest.TestCase):
         self.assertEqual(row["policy_context_alignment"]["reason"], "POLICY_VERSION_MISMATCH")
         self.assertIn("POLICY_VERSION_MISMATCH", row["reason_codes"])
 
+    def test_build_symbol_lifecycle_keeps_previous_state_when_structural_lineage_matches(self) -> None:
+        active_adjustments = [{"symbol": "BTCUSDT", "action": "promote"}]
+
+        rows = build_symbol_lifecycle(
+            active_adjustments=active_adjustments,
+            previous_rows=[
+                {
+                    "symbol": "BTCUSDT",
+                    "current_state": "promoted",
+                    "target_state": "promoted",
+                    "active_policy_action": "promote",
+                    "policy_lineage": build_policy_lineage_snapshot(
+                        policy={"status": "promote", "adjustments": active_adjustments},
+                        rollout_phase="full",
+                        policy_status="promote",
+                        version=1,
+                        updated_at="2026-03-18T00:00:00+00:00",
+                        source="test_previous_state",
+                    ),
+                }
+            ],
+            active_policy={"status": "promote", "adjustments": active_adjustments},
+            rollout_phase="full",
+            policy_version=2,
+            evaluated_at="2026-03-19T00:00:00+00:00",
+        )
+
+        row = rows[0]
+        self.assertEqual(row["current_state"], "promoted")
+        self.assertTrue(row["policy_context_fresh"])
+        self.assertEqual(row["policy_context_alignment"]["reason"], "POLICY_LINEAGE_MATCH")
+
     def test_build_auto_tune_policy_blocks_symbol_promotion_when_lifecycle_requires_review(self) -> None:
         policy = build_auto_tune_policy(
             [],

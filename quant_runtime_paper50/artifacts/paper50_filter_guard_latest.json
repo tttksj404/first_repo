@@ -3,8 +3,8 @@
   "apply_requested": true,
   "changes": {},
   "evidence": {},
-  "evidence_after": "2026-04-22T14:16:31.718558+00:00",
-  "generated_at": "2026-04-23T00:05:46.062494+00:00",
+  "evidence_after": "0001-01-01T00:00:00+00:00",
+  "generated_at": "2026-04-23T17:12:22.539773+00:00",
   "mode": "paper50_filter_guard",
   "restart_requested": true
 }

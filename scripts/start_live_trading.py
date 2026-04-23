@@ -35,7 +35,7 @@ BASE_COMPONENTS = [
     {
         "name": "monitor",
         "script": "scripts/monitor_daemon_health.py",
-        "stop_file": None,  # monitor self-exits after MONITOR_MINUTES
+        "stop_file": None,  # monitor runs until stopped; MONITOR_MINUTES can cap duration explicitly
         "match_substr": "monitor_daemon_health.py",
     },
 ]

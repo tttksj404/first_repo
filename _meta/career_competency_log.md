@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-04-24 - PEPE runtime stop-sentinel health guard
+- Summary: Fixed PEPE runtime health automation so intentional stop state is no longer misclassified as an actionable runtime failure.
+- What was done: Audited supervisor health, latest paper-live summaries, stop sentinels, and startup-failure logs; identified false autofix/escalation during intentional stop; patched the health audit and YOLO fixer to short-circuit on stop sentinels; and verified the behavior with focused runtime-script tests plus direct script execution.
+- Competency mapping: Data pipeline and system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Tighten health-audit severity accounting so intentionally stopped runtimes also suppress non-actionable warning noise from stale summaries and connectivity probes.
+
 ### 2026-04-22 - PEPE runtime overnight health triage
 - Summary: Checked whether the PEPE live trading runtime failed overnight and separated transport downtime from market/strategy gating.
 - What was done: Correlated process status, supervisor health, DNS startup failures, decision/preflight forensics, account sync, live order history, and manual-close sync state; confirmed recovery without code changes and documented the current blocker category.
@@ -676,3 +682,33 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Confirmed stale PEPE live-runtime artifacts came from an intentional stop state, added audit classification for stop sentinels so absent processes/stale health are reported as stopped rather than daemon failure, and validated with no-autofix audit plus focused script tests.
 - Mapped competencies: Runtime/config drift diagnosis, safety-state modeling, operational observability, test-backed infrastructure maintenance.
 - Next skill to sharpen: Expose a single runtime-mode summary that separates stopped live-auto, active paper-only monitoring, and true runtime failures.
+
+## 2026-04-23 - PEPE runtime no-action health pass
+- Conversation/topic: Monitored active PEPE/paper50 runtime behavior and recent entry blocks.
+- What was done: Confirmed the read-only paper50 daemon was alive with fresh summaries, account sync, zero live/test orders, no stale manual-close mismatch, and PEPE decisions blocked by market/filter gates rather than software regressions.
+- Mapped competencies: Runtime observability, data pipeline health checks, trading-signal triage, evidence-backed operational reporting.
+- Next skill to sharpen: Add concise guard telemetry that distinguishes no-op restart recommendations from actual pending config changes.
+
+## 2026-04-23 - Paper50 policy-lineage stale-state fix
+- Conversation/topic: Monitored PEPE/paper50 runtime health and investigated repeated policy lineage mismatch signals.
+- What was done: Found that report version churn made structurally unchanged active policies look stale, changed lineage alignment to trust matching structural keys before version differences, added focused regression coverage, and verified the active paper50 monitor remained healthy though sandbox permissions blocked daemon restart.
+- Mapped competencies: Runtime drift diagnosis, state-lineage modeling, test-backed pipeline repair, safety-focused operational reporting.
+- Next skill to sharpen: Add a supervised restart path that works in restricted process-visibility environments.
+
+## 2026-04-24 - Paper50 monitor runtime auto-detection
+- Conversation/topic: Monitored PEPE runtime health and corrected stale observability routing for the active paper50 daemon.
+- What was done: Verified fresh paper50 heartbeats, sync status, zero live/test orders, and PEPE market/filter blocks; patched the monitor script to resolve the active runtime base and matching log files instead of assuming `quant_runtime`, then validated with focused runtime-script tests.
+- Mapped competencies: Runtime/config drift diagnosis, trading observability repair, operational health verification, test-backed infrastructure maintenance.
+- Next skill to sharpen: Unify live-auto and paper50 health surfaces so stale legacy artifacts cannot outrank the active runtime.
+
+## 2026-04-24 - PEPE paper50 blocker classification refresh
+- Conversation/topic: Re-checked current PEPE/paper50 runtime health to separate software issues from live market/filter blocks.
+- What was done: Verified the active paper50 daemon, fresh runtime artifacts, current account sync, zero position mismatches, and recent PEPE rejection reasons; identified stale repo-root `latest/` artifacts as non-active observability residue rather than the live blocker.
+- Mapped competencies: Runtime observability, config/runtime drift triage, evidence-backed trading blocker classification, technical operational communication.
+- Next skill to sharpen: Consolidate legacy and active summary locations so monitoring never has to distinguish stale compatibility artifacts manually.
+
+## 2026-04-24 - Paper50 monitor stale-health fallback fix
+- Conversation/topic: Monitored PEPE runtime health and repaired stale monitor-state behavior while separating observability defects from market-driven no-trade conditions.
+- What was done: Confirmed the live paper50 daemon was still healthy and PEPE was blocked by thin-edge/profile gates, then fixed the monitor to run indefinitely by default and fall back to fresh daemon account-sync artifacts when direct Bitget probes fail; validated with focused runtime-script tests and a refreshed monitor snapshot.
+- Mapped competencies: Runtime observability engineering, stale-state mitigation, system-integration diagnosis, concise technical incident reporting.
+- Next skill to sharpen: Add a supervised long-lived monitor lifecycle so sidecar refresh does not depend on ad hoc manual invocation.

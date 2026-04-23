@@ -1,5 +1,5 @@
 {
-  "_lock": "PEPE single-focus aggression revision (2026-04-16 r11): keep 30x and turnaround-style long holding, but loosen cost/score/caution gates so qualified long entries trigger more often under live conditions.",
+  "_lock": "PEPE single-focus aggression revision (2026-04-23 r13): keep 30x and turnaround-style long holding, but slightly widen cost/edge gates while preserving liquidity and sentiment safeguards.",
   "ensemble_signal_required": false,
   "data_collection_min_trades": 500,
   "data_collection_mode": true,
@@ -10,7 +10,7 @@
   "force_auto_mode": "normal",
   "futures_exposure": {
     "macro_allow_caution": true,
-    "macro_edge_to_cost_multiple_min": 0.72,
+    "macro_edge_to_cost_multiple_min": 0.66,
     "macro_liquidity_relaxation": 0.2,
     "macro_min_entry_net_edge_bps": 0.5,
     "macro_overheat_relaxation": 0.2,
@@ -27,8 +27,8 @@
     "major_symbols": [
       "PEPEUSDT"
     ],
-    "min_entry_net_edge_bps": 0.75,
-    "reduced_entry_net_edge_bps": 0.75,
+    "min_entry_net_edge_bps": 0.25,
+    "reduced_entry_net_edge_bps": 0.25,
     "priority_allow_caution": true,
     "priority_edge_to_cost_multiple_min": 0.68,
     "priority_min_entry_net_edge_bps": 0.0,
@@ -127,7 +127,7 @@
     "spot_block_penalty": 1.05
   },
   "mode_thresholds": {
-    "futures_score_min": 48,
+    "futures_score_min": 45,
     "futures_trend_strength_min": 0.05,
     "futures_liquidity_min": 0.16,
     "futures_volatility_penalty_max": 1.25,
@@ -136,7 +136,7 @@
     "spot_liquidity_min": 999
   },
   "cost_gate": {
-    "edge_to_cost_multiple_min": 0.78
+    "edge_to_cost_multiple_min": 0.68
   },
   "portfolio_focus": {
     "enabled": true,
