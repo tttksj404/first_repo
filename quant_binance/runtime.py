@@ -311,6 +311,7 @@ def main(argv: list[str] | None = None) -> int:
             max_retries=args.max_retries,
             execute_live_orders=False,
             exchange=args.exchange or None,
+            sync_interval_seconds=args.sync_interval_seconds,
         )
         print(
             json.dumps(
@@ -342,6 +343,7 @@ def main(argv: list[str] | None = None) -> int:
             max_retries=args.max_retries,
             execute_live_orders=True,
             exchange=args.exchange or None,
+            sync_interval_seconds=args.sync_interval_seconds,
         )
         print(
             json.dumps(
