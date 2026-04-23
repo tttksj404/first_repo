@@ -3,11 +3,45 @@ set -eu
 
 BASE_DIR="${1:-quant_runtime}"
 OVERVIEW_FILE="$(python3 - <<'PY' "$BASE_DIR"
+from datetime import datetime
+import json
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
 latest = base / 'output' / 'paper-live-shell' / 'latest' / 'overview.json'
-print(latest if latest.exists() else '')
+state = latest.with_name('summary.state.json')
+if not latest.exists():
+    print('')
+    raise SystemExit
+
+def parse_updated_at(path):
+    try:
+        raw = json.loads(path.read_text(encoding='utf-8')).get('updated_at')
+    except Exception:
+        return None
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+
+overview_updated_at = parse_updated_at(latest)
+state_updated_at = parse_updated_at(state) if state.exists() else None
+overview_mtime = latest.stat().st_mtime
+state_mtime = state.stat().st_mtime if state.exists() else 0
+
+if state.exists() and (
+    state_mtime > overview_mtime
+    or (
+        overview_updated_at is not None
+        and state_updated_at is not None
+        and state_updated_at > overview_updated_at
+    )
+):
+    print('')
+else:
+    print(latest)
 PY
 )"
 if [ -n "$OVERVIEW_FILE" ]; then

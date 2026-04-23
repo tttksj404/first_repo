@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -166,6 +167,46 @@ class QuantBinanceLiveTests(unittest.TestCase):
             equity_usd=10000.0,
             remaining_portfolio_capacity_usd=5000.0,
         )
+        self.assertIsNotNone(decision)
+        self.assertEqual(runtime.loop_stats.closed_decision_kline_count, 1)
+        self.assertEqual(runtime.loop_stats.emitted_decision_count, 1)
+
+    def test_live_runtime_triggers_on_fast_closed_1m_kline_when_configured(self) -> None:
+        store, _ = self._make_runtime()
+        settings = replace(
+            self.settings,
+            decision_engine=replace(self.settings.decision_engine, decision_interval_minutes=1),
+        )
+        runtime = LivePaperRuntime(
+            dispatcher=EventDispatcher(store),
+            paper_service=PaperTradingService(settings, router=ExecutionRouter()),
+            primitive_builder=lambda symbol, decision_time: make_primitive(),
+            history_provider=lambda symbol, decision_time: make_history(),
+            decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
+        )
+        decision = runtime.on_payload(
+            {
+                "stream": "btcusdt@kline_1m",
+                "data": {
+                    "s": "BTCUSDT",
+                    "k": {
+                        "i": "1m",
+                        "t": 1770000000000,
+                        "T": 1770000059999,
+                        "o": "49900",
+                        "h": "50100",
+                        "l": "49850",
+                        "c": "50050",
+                        "v": "12",
+                        "q": "600000",
+                        "x": True,
+                    },
+                },
+            },
+            equity_usd=10000.0,
+            remaining_portfolio_capacity_usd=5000.0,
+        )
+
         self.assertIsNotNone(decision)
         self.assertEqual(runtime.loop_stats.closed_decision_kline_count, 1)
         self.assertEqual(runtime.loop_stats.emitted_decision_count, 1)

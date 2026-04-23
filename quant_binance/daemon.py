@@ -45,6 +45,48 @@ from quant_binance.runtime_universe import build_runtime_universe_hydration
 _log = logging.getLogger(__name__)
 
 
+class ReadOnlyExchangeClient:
+    """Proxy that allows market/account reads while hiding exchange write APIs."""
+
+    _BLOCKED_METHODS = {
+        "cancel_futures_plan_orders",
+        "cancel_order",
+        "place_futures_position_tpsl",
+        "place_order",
+        "place_spot_plan_order",
+        "test_order",
+        "transfer_asset",
+        "transfer_spot_to_futures",
+    }
+
+    def __init__(self, client: Any) -> None:
+        self._client = client
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self._BLOCKED_METHODS:
+            raise AttributeError(f"{name} is disabled in read-only paper mode")
+        return getattr(self._client, name)
+
+
+class SimulatedOrderTestClient:
+    """Local-only test-order client for read-only paper runs."""
+
+    def __init__(self, exchange_id: str) -> None:
+        self.exchange_id = exchange_id
+
+    def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "status": "SIMULATED_READ_ONLY",
+            "market": market,
+            "order_params": dict(order_params),
+            "read_only": True,
+        }
+
+
+def _truthy_env(name: str, default: str = "0") -> bool:
+    return str(os.environ.get(name, default) or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _next_decision_boundary(timestamp, interval_minutes: int):
     floored = timestamp.replace(
         minute=(timestamp.minute // interval_minutes) * interval_minutes,
@@ -56,6 +98,14 @@ def _next_decision_boundary(timestamp, interval_minutes: int):
 
         return floored + timedelta(minutes=interval_minutes)
     return floored
+
+
+def _decision_boundary_at_or_before(timestamp: datetime, interval_minutes: int) -> datetime:
+    return timestamp.replace(
+        minute=(timestamp.minute // interval_minutes) * interval_minutes,
+        second=0,
+        microsecond=0,
+    )
 
 
 def _decision_interval_label(interval_minutes: int) -> str:
@@ -72,7 +122,12 @@ def _normalized_closed_decision_time(timestamp: datetime) -> datetime:
     return timestamp + timedelta(milliseconds=1)
 
 
-def _bootstrap_decision_time(*, store, interval_minutes: int):
+def _bootstrap_decision_time(*, store, interval_minutes: int, now: datetime | None = None):
+    latest_allowed = (
+        _decision_boundary_at_or_before(now.astimezone(timezone.utc), interval_minutes)
+        if now is not None
+        else None
+    )
     interval_label = _decision_interval_label(interval_minutes)
     latest_closed = None
     for state in getattr(store, "_states", {}).values():
@@ -89,12 +144,19 @@ def _bootstrap_decision_time(*, store, interval_minutes: int):
             and latest_closed.microsecond == 0
             and latest_closed.minute % interval_minutes == 0
         ):
-            return latest_closed
-        return _next_decision_boundary(aligned, interval_minutes)
-    return _next_decision_boundary(
+            candidate = latest_closed
+        else:
+            candidate = _next_decision_boundary(aligned, interval_minutes)
+        if latest_allowed is not None and candidate > latest_allowed:
+            return latest_allowed
+        return candidate
+    candidate = _next_decision_boundary(
         next(iter(store._states.values())).last_update_time,
         interval_minutes,
     )
+    if latest_allowed is not None and candidate > latest_allowed:
+        return latest_allowed
+    return candidate
 
 
 def _runtime_snapshot_futures_position_keys(
@@ -116,6 +178,17 @@ def _runtime_snapshot_futures_position_keys(
         symbol = str(item.get("symbol", "") or "").strip()
         side = str(item.get("side", "") or item.get("holdSide", "") or "").strip().lower()
         if not symbol:
+            continue
+        keys.add((symbol, side))
+    for item in list(summary.get("live_orders") or []):
+        if not isinstance(item, dict) or not bool(item.get("accepted", False)):
+            continue
+        if str(item.get("market", "") or "") != "futures":
+            continue
+        symbol = str(item.get("symbol", "") or "").strip()
+        order_side = str(item.get("side", "") or "").strip().lower()
+        side = "long" if order_side == "buy" else "short" if order_side == "sell" else ""
+        if not symbol or not side:
             continue
         keys.add((symbol, side))
     return keys
@@ -161,7 +234,11 @@ def _build_live_ws_client(
     exchange_id: str,
     symbols: tuple[str, ...],
     allow_insecure_ssl: bool,
+    decision_interval_minutes: int = 5,
 ) -> CombinedWebSocketClient:
+    decision_interval = f"{max(int(decision_interval_minutes), 1)}m"
+    spot_intervals = tuple(dict.fromkeys(("1m", "5m", "1h", "4h", decision_interval)))
+    futures_intervals = tuple(dict.fromkeys(("5m", decision_interval)))
     if exchange_id == "bitget":
         def _chunk_symbols(symbols_in: tuple[str, ...], *, streams_per_symbol: int) -> list[tuple[str, ...]]:
             max_symbols = max(1, BITGET_MAX_CHANNELS_PER_CONNECTION // max(streams_per_symbol, 1))
@@ -171,22 +248,24 @@ def _build_live_ws_client(
             ]
 
         clients: list[BitgetWebSocketClient] = []
-        for chunk in _chunk_symbols(symbols, streams_per_symbol=6):
+        spot_streams_per_symbol = 2 + len(spot_intervals)
+        futures_streams_per_symbol = 2 + len(futures_intervals)
+        for chunk in _chunk_symbols(symbols, streams_per_symbol=spot_streams_per_symbol):
             clients.append(
                 BitgetWebSocketClient(
                     market="spot",
                     symbols=chunk,
-                    intervals=("1m", "5m", "1h", "4h"),
+                    intervals=spot_intervals,
                     allow_insecure_ssl=allow_insecure_ssl,
                     label=f"spot-{chunk[0].lower()}",
                 )
             )
-        for chunk in _chunk_symbols(symbols, streams_per_symbol=3):
+        for chunk in _chunk_symbols(symbols, streams_per_symbol=futures_streams_per_symbol):
             clients.append(
                 BitgetWebSocketClient(
                     market="futures",
                     symbols=chunk,
-                    intervals=("5m",),
+                    intervals=futures_intervals,
                     allow_insecure_ssl=allow_insecure_ssl,
                     label=f"futures-{chunk[0].lower()}",
                 )
@@ -197,8 +276,8 @@ def _build_live_ws_client(
     spot_streams = []
     futures_streams = []
     for symbol in symbols:
-        spot_streams.extend(build_spot_streams(symbol, ("1m", "5m", "1h", "4h")))
-        futures_streams.extend(build_futures_streams(symbol, ("5m",)))
+        spot_streams.extend(build_spot_streams(symbol, spot_intervals))
+        futures_streams.extend(build_futures_streams(symbol, futures_intervals))
         futures_streams.append(f"{symbol.lower()}@openInterest")
     return CombinedWebSocketClient(
         [
@@ -309,6 +388,11 @@ def run_live_paper_daemon(
             raise RuntimeError(
                 "Bitget live order daemon requires BITGET_API_KEY, BITGET_API_SECRET, and BITGET_API_PASSPHRASE"
             )
+        read_only_paper_mode = (not execute_live_orders) and _truthy_env("QUANT_READ_ONLY_PAPER_MODE")
+        if read_only_paper_mode:
+            print("[daemon] read-only paper mode enabled: exchange write APIs and test orders disabled", flush=True)
+            rest_client = ReadOnlyExchangeClient(rest_client)
+
         if supports_private_reads:
             def _build_capital_report():
                 spot_account = rest_client.get_account(market="spot")
@@ -401,6 +485,7 @@ def run_live_paper_daemon(
             primitive_builder=lambda symbol, decision_time: extractor.build_primitive_inputs(store.get(symbol)),  # type: ignore[arg-type]
             history_provider=lambda symbol, decision_time: extractor.build_history_context(store.get(symbol)),  # type: ignore[arg-type]
             decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
+            decision_interval_seconds=settings.decision_engine.decision_interval_seconds,
             eligible_symbols=eligible_symbols,
         )
         log_store = JsonlLogStore(
@@ -415,7 +500,9 @@ def run_live_paper_daemon(
             sync_interval_seconds=sync_interval_seconds,
             flush_interval_seconds=min(sync_interval_seconds, 15),
             rest_client=rest_client if supports_private_reads else None,
-            order_tester=DecisionOrderTestAdapter(rest_client),
+            order_tester=DecisionOrderTestAdapter(
+                SimulatedOrderTestClient(exchange_id) if read_only_paper_mode else rest_client
+            ),
             live_order_executor=DecisionLiveOrderAdapter(rest_client, settings) if execute_live_orders else None,
             learner=learner,
             learner_output_path=run_paths.root / "edge_table.json",
@@ -473,6 +560,34 @@ def run_live_paper_daemon(
                         "Check API credentials/account scope, or set ALLOW_DAEMON_EQUITY_FALLBACK=1 to override."
                     )
                 print("[daemon] WARNING: could not detect account equity — keeping $10,000 default. Check API credentials.")
+            if not execute_live_orders:
+                paper_equity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_EQUITY_USD", "") or "").strip()
+                if paper_equity_raw:
+                    try:
+                        paper_equity = float(paper_equity_raw)
+                    except (TypeError, ValueError):
+                        paper_equity = 0.0
+                    if paper_equity > 0.0:
+                        _leverage_cap = max(session.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
+                        paper_capacity = round(paper_equity * _leverage_cap, 6)
+                        capacity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_CAPACITY_USD", "") or "").strip()
+                        if capacity_raw:
+                            try:
+                                paper_capacity = max(float(capacity_raw), 0.0)
+                            except (TypeError, ValueError):
+                                pass
+                        session.equity_usd = paper_equity
+                        session.remaining_portfolio_capacity_usd = paper_capacity
+                        session.max_portfolio_capacity_usd = paper_capacity
+                        session.capital_report["futures_available_balance_usd"] = paper_equity
+                        session.capital_report["futures_execution_balance_usd"] = paper_equity
+                        session.capital_report["futures_recognized_balance_usd"] = paper_equity
+                        session.capital_report["futures_total_reusable_balance_usd"] = paper_equity
+                        print(
+                            f"[daemon] paper verification equity override: ${paper_equity:.2f} USDT "
+                            f"-> capacity: ${paper_capacity:.2f}",
+                            flush=True,
+                        )
             previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
             _enforce_strict_startup_position_block(
                 session=session,
@@ -487,15 +602,20 @@ def run_live_paper_daemon(
         bootstrap_time = _bootstrap_decision_time(
             store=store,
             interval_minutes=settings.decision_engine.decision_interval_minutes,
+            now=datetime.now(tz=timezone.utc),
         )
         bootstrap_records: list[tuple[Any, Any]] = []
         hydration_rows_by_symbol = dict(runtime_universe_hydration.get("rows_by_symbol", {}) or {})
+        universe_rank = {symbol: index for index, symbol in enumerate(settings.universe)}
         bootstrap_symbols = sorted(
             runtime_symbols,
-            key=lambda symbol: tuple(
-                dict(hydration_rows_by_symbol.get(symbol, {}) or {}).get(
-                    "sort_key",
-                    (0, 1 if symbol not in set(settings.futures_exposure.major_symbols) else 0, 1, 0, symbol),
+            key=lambda symbol: (
+                universe_rank.get(symbol, len(universe_rank)),
+                tuple(
+                    dict(hydration_rows_by_symbol.get(symbol, {}) or {}).get(
+                        "sort_key",
+                        (0, 1 if symbol not in set(settings.futures_exposure.major_symbols) else 0, 1, 0, symbol),
+                    )
                 )
             ),
         )
@@ -544,6 +664,7 @@ def run_live_paper_daemon(
                 exchange_id=exchange_id,
                 symbols=runtime_symbols,
                 allow_insecure_ssl=allow_insecure_ssl,
+                decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
             ),
             session=session,
             backoff_policy=BackoffPolicy(max_attempts=max_retries),

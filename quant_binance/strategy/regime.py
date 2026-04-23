@@ -138,17 +138,39 @@ def _select_major_candidate_mode(*, symbol: str, candidate_mode: str, spot_predi
         return "futures"
     return candidate_mode
 
+
+def configured_funding_drag_bps(snapshot: MarketSnapshot, settings: Settings) -> float:
+    exposure = settings.futures_exposure
+    if not exposure.funding_bias_enabled:
+        return 0.0
+    direction = int(snapshot.feature_values.trend_direction)
+    if direction not in {-1, 1}:
+        return 0.0
+    raw_drag_bps = float(snapshot.funding_rate or 0.0) * 10000.0 * float(direction)
+    if abs(raw_drag_bps) < max(float(exposure.funding_bias_min_abs_bps), 0.0):
+        return 0.0
+    cap = max(float(exposure.funding_bias_max_abs_bps), 0.0)
+    if cap > 0.0:
+        raw_drag_bps = max(-cap, min(raw_drag_bps, cap))
+    return round(raw_drag_bps, 6)
+
+
 def build_strategy_prediction(
     snapshot: MarketSnapshot,
     settings: Settings,
     *,
-    expected_funding_drag_bps: float = 0.0,
+    expected_funding_drag_bps: float | None = None,
 ) -> StrategyPrediction:
+    funding_drag_bps = (
+        configured_funding_drag_bps(snapshot, settings)
+        if expected_funding_drag_bps is None
+        else float(expected_funding_drag_bps)
+    )
     futures_features = apply_score_and_costs(
         snapshot.feature_values,
         settings=settings,
         mode="futures",
-        expected_funding_drag_bps=expected_funding_drag_bps,
+        expected_funding_drag_bps=funding_drag_bps,
     )
     spot_features = apply_score_and_costs(
         snapshot.feature_values,
@@ -980,14 +1002,19 @@ def evaluate_snapshot(
     settings: Settings,
     equity_usd: float,
     remaining_portfolio_capacity_usd: float,
-    expected_funding_drag_bps: float = 0.0,
+    expected_funding_drag_bps: float | None = None,
     cash_reserve_fraction: float = 0.0,
 ) -> DecisionIntent:
     thresholds = settings.mode_thresholds
+    funding_drag_bps = (
+        configured_funding_drag_bps(snapshot, settings)
+        if expected_funding_drag_bps is None
+        else float(expected_funding_drag_bps)
+    )
     prediction = build_strategy_prediction(
         snapshot,
         settings,
-        expected_funding_drag_bps=expected_funding_drag_bps,
+        expected_funding_drag_bps=funding_drag_bps,
     )
     futures_prediction = prediction.futures
     spot_prediction = prediction.spot
@@ -995,7 +1022,7 @@ def evaluate_snapshot(
         snapshot.feature_values,
         settings=settings,
         mode="futures",
-        expected_funding_drag_bps=expected_funding_drag_bps,
+        expected_funding_drag_bps=funding_drag_bps,
     )
     spot_features = apply_score_and_costs(
         snapshot.feature_values,
