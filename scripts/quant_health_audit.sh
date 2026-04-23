@@ -745,7 +745,9 @@ fi
 echo ""
 echo "============================================"
 echo "[RESULT] CRITICAL=$CRITICALS WARNING=$WARNINGS"
-if [ "$DISABLE_AUTOFIX" = "1" ] && { [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; }; then
+if [ "$STOP_REQUESTED" = "1" ]; then
+    echo "[STATUS] intentionally stopped — autofix suppressed"
+elif [ "$DISABLE_AUTOFIX" = "1" ] && { [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; }; then
     echo "[ACTION] issues found — autofix disabled"
 elif [ "$CRITICALS" -gt 0 ]; then
     echo "[ACTION] CRITICAL 발견 — Claude Code 자동 수정 실행"
@@ -760,7 +762,9 @@ echo ""
 # ============================================
 # 10. Claude Code 자동 수정
 # ============================================
-if [ "$DISABLE_AUTOFIX" != "1" ] && { [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; }; then
+if [ "$STOP_REQUESTED" = "1" ]; then
+    echo "[SKIP] runtime intentionally stopped — autofix suppressed"
+elif [ "$DISABLE_AUTOFIX" != "1" ] && { [ "$CRITICALS" -gt 0 ] || [ "$WARNINGS" -ge 1 ]; }; then
     AUDIT_SUMMARY="health audit at $TIMESTAMP: CRITICAL=$CRITICALS WARNING=$WARNINGS.$ISSUES"
 
     echo "[CLAUDE] 자동 수정 시작: CRITICAL=$CRITICALS WARNING=$WARNINGS"

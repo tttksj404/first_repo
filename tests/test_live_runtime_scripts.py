@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from scripts.daemon_supervisor import _extract_strict_startup_block, _read_stderr_chunk
-from scripts.monitor_daemon_health import _tail
+from scripts.monitor_daemon_health import (
+    _bitget_state_from_account_sync,
+    _resolve_monitor_end_time,
+    _resolve_runtime_dir,
+    _select_log_paths,
+    _tail,
+)
 from scripts.start_live_trading import _resolve_python_executable, _rotate_runtime_logs, _wait_for_stack_boot
 
 
@@ -74,6 +81,18 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("runtime intentionally stopped", script)
         self.assertIn("quant_binance process absent as expected", script)
         self.assertIn("health stale while runtime is intentionally stopped", script)
+        self.assertIn('if [ "$STOP_REQUESTED" = "1" ]; then', script)
+        self.assertIn("[STATUS] intentionally stopped — autofix suppressed", script)
+        self.assertIn("[SKIP] runtime intentionally stopped — autofix suppressed", script)
+
+    def test_yolo_health_check_skips_exchange_actions_when_stop_sentinel_present(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "yolo_health_check.py").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("def live_stop_requested()", script)
+        self.assertIn("live stop sentinel present — skip automated health fixes", script)
+        self.assertLess(script.index("if live_stop_requested():"), script.index("creds = load_exchange_credentials_from_env()"))
 
     def test_quant_health_audit_supports_paper50_runtime_layout(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
@@ -121,6 +140,82 @@ class LiveRuntimeScriptTests(unittest.TestCase):
             lines = _tail(path, 10)
 
             self.assertEqual(lines, ["alphabeta", "line2"])
+
+    def test_monitor_resolves_fresher_paper50_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            legacy = root / "quant_runtime"
+            paper50 = root / "quant_runtime_paper50"
+            legacy.mkdir(parents=True, exist_ok=True)
+            paper50.mkdir(parents=True, exist_ok=True)
+            stale_log = legacy / "_live_auto_trade_live_restart.log"
+            fresh_log = paper50 / "_paper50.out.log"
+            stale_log.write_text("legacy\n", encoding="utf-8")
+            fresh_log.write_text("paper50\n", encoding="utf-8")
+            os.utime(stale_log, (1, 1))
+            os.utime(fresh_log, None)
+
+            runtime = _resolve_runtime_dir(root)
+
+            self.assertEqual(runtime, paper50)
+
+    def test_monitor_selects_paper50_logs_when_they_are_freshest(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            runtime = Path(tempdir) / "quant_runtime_paper50"
+            runtime.mkdir(parents=True, exist_ok=True)
+            paper_out = runtime / "_paper50.out.log"
+            paper_err = runtime / "_paper50.err.log"
+            live_out = runtime / "_live_auto_trade_live_restart.log"
+            paper_out.write_text("paper50\n", encoding="utf-8")
+            paper_err.write_text("", encoding="utf-8")
+            live_out.write_text("legacy\n", encoding="utf-8")
+            os.utime(live_out, (1, 1))
+            os.utime(paper_out, None)
+
+            log_path, err_path = _select_log_paths(runtime)
+
+            self.assertEqual(log_path, paper_out)
+            self.assertEqual(err_path, paper_err)
+
+    def test_monitor_defaults_to_indefinite_runtime(self) -> None:
+        with patch.dict(os.environ, {}, clear=False):
+            self.assertIsNone(_resolve_monitor_end_time(now_ts=100.0))
+
+    def test_monitor_respects_explicit_duration_minutes(self) -> None:
+        with patch.dict(os.environ, {"MONITOR_MINUTES": "15"}, clear=False):
+            self.assertEqual(_resolve_monitor_end_time(now_ts=100.0), 100.0 + 15 * 60)
+
+    def test_monitor_uses_account_sync_fallback_when_direct_probe_is_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            runtime = Path(tempdir) / "quant_runtime_paper50"
+            account_sync = runtime / "forensics" / "account_sync.jsonl"
+            overview = runtime / "output" / "paper-live-shell" / "latest" / "overview.json"
+            account_sync.parent.mkdir(parents=True, exist_ok=True)
+            overview.parent.mkdir(parents=True, exist_ok=True)
+            account_sync.write_text(
+                (
+                    '{"account_snapshot":{"accounts":[{"marginCoin":"USDT","usdtEquity":"57.25"}],'
+                    '"unionAvailable":57.25},"timestamp":"2026-04-23T20:08:11.741657+00:00"}\n'
+                ),
+                encoding="utf-8",
+            )
+            overview.write_text(
+                '{"exchange_live_futures_positions":[{"symbol":"PEPEUSDT","side":"long","qty":12345}]}',
+                encoding="utf-8",
+            )
+
+            payload = _bitget_state_from_account_sync(
+                runtime,
+                error_message="Bitget transport error for https://api.bitget.com: DNS resolution failed",
+            )
+
+            self.assertIsNotNone(payload)
+            assert payload is not None
+            self.assertEqual(payload["source"], "account_sync_fallback")
+            self.assertEqual(payload["equity_usdt"], 57.25)
+            self.assertEqual(payload["positions"], [{"symbol": "PEPEUSDT", "side": "long", "qty": 12345}])
+            self.assertEqual(payload["synced_at"], "2026-04-23T20:08:11.741657+00:00")
+            self.assertIn("DNS resolution failed", payload["warning"])
 
     def test_rotate_runtime_logs_archives_previous_restart_logs(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
