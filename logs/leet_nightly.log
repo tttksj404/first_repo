@@ -181,3 +181,16 @@
 2026-04-23 00:01:04 [INFO] === Nightly review complete: 2026-04-23 ===
 [WARN] CBT generation failed: 
 [OK] Review notification sent for 2026-04-23
+2026-04-24 00:00:00 [INFO] === Nightly review start: 2026-04-24 ===
+2026-04-24 00:00:00 [INFO] Completion: 0% (0/129), edited=False
+2026-04-24 00:00:00 [INFO] Errors total: 0, Scores total: 0
+2026-04-24 00:00:00 [INFO] Error trend: stable, Score rec: normal, Skip rec: simplify
+2026-04-24 00:00:00 [WARNING] FULL DEFERRAL: 129 tasks
+2026-04-24 00:00:00 [INFO] CBT generation: type=추리논증, topic=None, cmd=/Users/tttksj/.local/bin/claude -p --dangerously-skip-permissions --no-session-persistence...
+2026-04-24 00:00:07 [ERROR] Claude Code exit 1: 
+2026-04-24 00:00:07 [INFO] Injected adaptive content into 2026-04-25.md
+2026-04-24 00:00:17 [INFO] Calendar changes: ['전체 블록: 간소화 모드']
+2026-04-24 00:00:17 [INFO] Coach note saved: /Users/tttksj/Library/Mobile Documents/iCloud~md~obsidian/Documents/note/01. Areas/LEET/Daily/Coach Notes/2026-04-24_coach.md
+2026-04-24 00:00:18 [INFO] === Nightly review complete: 2026-04-24 ===
+[WARN] CBT generation failed: 
+[OK] Review notification sent for 2026-04-24
