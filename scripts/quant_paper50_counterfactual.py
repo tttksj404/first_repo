@@ -239,10 +239,17 @@ def main() -> int:
     if args.write_latest:
         artifact_dir = Path(args.output_base) / "artifacts"
         artifact_dir.mkdir(parents=True, exist_ok=True)
-        (artifact_dir / "paper50_counterfactual_latest.json").write_text(
-            json.dumps(payload, indent=2, sort_keys=True),
-            encoding="utf-8",
-        )
+        latest_path = artifact_dir / "paper50_counterfactual_latest.json"
+        if results:
+            latest_path.write_text(
+                json.dumps(payload, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+        else:
+            (artifact_dir / "paper50_counterfactual_last_error.json").write_text(
+                json.dumps(payload, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
 
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
     return 0 if not errors else 1
