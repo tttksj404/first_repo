@@ -1,0 +1,166 @@
+{
+  "decision_count": 0,
+  "error_count": 72,
+  "errors": [
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867060000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776866100000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T13:55:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867360000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776866400000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:00:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867660000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776866700000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:05:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867960000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867000000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:10:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867960000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867000000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:10:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868260000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867300000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:15:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868260000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867300000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:15:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868560000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867600000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:20:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868860000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867900000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:25:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776869160000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776868200000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:30:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776869460000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776868500000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:35:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776869760000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776868800000&symbol=PEPEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "PEPEUSDT",
+      "timestamp": "2026-04-22T14:40:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867060000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776866100000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T13:55:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867360000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776866400000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:00:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867660000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776866700000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:05:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867960000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867000000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:10:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776867960000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867000000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:10:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868260000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867300000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:15:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868260000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867300000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:15:00+00:00"
+    },
+    {
+      "error": "Bitget transport error for https://api.bitget.com/api/v2/mix/market/candles?endTime=1776868560000&granularity=1m&limit=20&productType=USDT-FUTURES&startTime=1776867600000&symbol=DOGEUSDT (host=api.bitget.com): DNS resolution failed: [Errno 8] nodename nor servname provided, or not known",
+      "symbol": "DOGEUSDT",
+      "timestamp": "2026-04-22T14:20:00+00:00"
+    }
+  ],
+  "generated_at": "2026-04-22T15:19:35.701363+00:00",
+  "mode": "paper50_blocked_entry_counterfactual",
+  "possible_missed_entries": [],
+  "possible_missed_entry_count": 0,
+  "symbol_summaries": {
+    "BTCUSDT": {
+      "avg_net_after_cost_bps": null,
+      "best_net_after_cost_bps": null,
+      "decision_count": 0,
+      "label_counts": {},
+      "recent_possible_missed_entries": [],
+      "verdict": "healthy",
+      "worst_net_after_cost_bps": null
+    },
+    "DOGEUSDT": {
+      "avg_net_after_cost_bps": null,
+      "best_net_after_cost_bps": null,
+      "decision_count": 0,
+      "label_counts": {},
+      "recent_possible_missed_entries": [],
+      "verdict": "healthy",
+      "worst_net_after_cost_bps": null
+    },
+    "ETHUSDT": {
+      "avg_net_after_cost_bps": null,
+      "best_net_after_cost_bps": null,
+      "decision_count": 0,
+      "label_counts": {},
+      "recent_possible_missed_entries": [],
+      "verdict": "healthy",
+      "worst_net_after_cost_bps": null
+    },
+    "PEPEUSDT": {
+      "avg_net_after_cost_bps": null,
+      "best_net_after_cost_bps": null,
+      "decision_count": 0,
+      "label_counts": {},
+      "recent_possible_missed_entries": [],
+      "verdict": "healthy",
+      "worst_net_after_cost_bps": null
+    },
+    "SOLUSDT": {
+      "avg_net_after_cost_bps": null,
+      "best_net_after_cost_bps": null,
+      "decision_count": 0,
+      "label_counts": {},
+      "recent_possible_missed_entries": [],
+      "verdict": "healthy",
+      "worst_net_after_cost_bps": null
+    },
+    "XRPUSDT": {
+      "avg_net_after_cost_bps": null,
+      "best_net_after_cost_bps": null,
+      "decision_count": 0,
+      "label_counts": {},
+      "recent_possible_missed_entries": [],
+      "verdict": "healthy",
+      "worst_net_after_cost_bps": null
+    }
+  }
+}
