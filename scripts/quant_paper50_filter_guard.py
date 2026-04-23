@@ -141,6 +141,11 @@ def _window_key(rows: list[dict[str, Any]]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _config_digest(payload: dict[str, Any]) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 def _quality_missed_entries(
     entries: list[dict[str, Any]],
     *,
@@ -237,20 +242,18 @@ def _propose_symbol_changes(
 
 
 def _kickstart_paper50() -> None:
+    if not hasattr(os, "getuid"):
+        return
     uid = os.getuid()
-    subprocess.run(
-        ["launchctl", "kickstart", "-k", f"gui/{uid}/com.tttksj.quant-paper50"],
-        check=False,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-
-def _write_stop_guards() -> None:
-    scripts = ROOT / "scripts"
-    scripts.mkdir(exist_ok=True)
-    (scripts / "_supervisor_stop").write_text("stop\n", encoding="utf-8")
-    (scripts / "_safety_guardian_stop").write_text("stop\n", encoding="utf-8")
+    try:
+        subprocess.run(
+            ["launchctl", "kickstart", "-k", f"gui/{uid}/com.tttksj.quant-paper50"],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        return
 
 
 def main() -> int:
@@ -272,9 +275,13 @@ def main() -> int:
     counterfactual = _read_json(counterfactual_path)
     state = _read_json(state_path) if state_path.exists() else {}
 
-    config_mtime = datetime.fromtimestamp(filters_path.stat().st_mtime, UTC)
+    config_digest = _config_digest(config)
     last_applied_at = _parse_ts(state.get("last_applied_at")) or datetime.min.replace(tzinfo=UTC)
-    evidence_after = max(config_mtime, last_applied_at)
+    # Git syncs and artifact copies rewrite file mtimes, which can make old
+    # runtime evidence look newer than the local config even when the embedded
+    # decision timestamps are the true source of time. Gate on guard state
+    # instead of filesystem mtime so copied paper artifacts remain usable.
+    evidence_after = last_applied_at
     profiles = dict(config.get("symbol_filter_profiles") or {})
     entries_by_symbol: dict[str, list[dict[str, Any]]] = {}
     for row in list(counterfactual.get("possible_missed_entries") or []):
@@ -320,15 +327,16 @@ def main() -> int:
         for symbol, symbol_evidence in evidence.items():
             state["window_keys"][symbol] = symbol_evidence["window_key"]
         state["last_applied_at"] = payload["generated_at"]
+        state["previous_config_digest"] = config_digest
+        state["config_digest"] = _config_digest(config)
         _write_json(state_path, state)
         _append_audit(audit_path, payload)
-        _write_stop_guards()
         if args.restart_paper50:
             _kickstart_paper50()
         payload["applied"] = True
     else:
         payload["applied"] = False
-        _write_json(DEFAULT_OUTPUT_BASE / "artifacts" / "paper50_filter_guard_latest.json", payload)
+        _write_json(state_path.with_name("paper50_filter_guard_latest.json"), payload)
 
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
     return 0

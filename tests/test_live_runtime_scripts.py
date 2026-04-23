@@ -87,6 +87,15 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("FORENSICS_ROOT", script)
         self.assertIn('grep "HEARTBEAT" >/dev/null', script)
 
+    def test_quant_run_paper50_readonly_only_blocks_live_when_requested(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_paper50_readonly.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_PAPER50_BLOCK_LIVE_AUTO", script)
+        self.assertIn("_supervisor_stop", script)
+        self.assertLess(script.index("QUANT_PAPER50_BLOCK_LIVE_AUTO"), script.index("_supervisor_stop"))
+
     def test_quant_health_audit_does_not_count_heartbeat_numbers_as_429s(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
             encoding="utf-8"
