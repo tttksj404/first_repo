@@ -3,10 +3,12 @@
 # crontab: 17 0,2,4,6,9,12,14,16,18 * * * ...
 
 set -uo pipefail
-REPO="/Users/tttksj/first_repo"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 RUNTIME="${QUANT_HEALTH_AUDIT_RUNTIME:-$REPO/quant_runtime}"
-PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
-CLAUDE="/Users/tttksj/.local/bin/claude"
+PYTHON="$SCRIPT_DIR/quant_python.sh"
+CLAUDE="${CLAUDE_BIN:-$(command -v claude 2>/dev/null || true)}"
+chmod +x "$PYTHON" 2>/dev/null || true
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 DISABLE_AUTOFIX="${QUANT_HEALTH_AUDIT_DISABLE_AUTOFIX:-0}"
 ALLOW_RESTART="${QUANT_HEALTH_AUDIT_ALLOW_RESTART:-0}"
