@@ -4,14 +4,16 @@ set -eu
 BASE_DIR="${1:-quant_runtime}"
 CONFIG_PATH="${2:-quant_binance/config.example.json}"
 EXCHANGE_ID="${EXCHANGE:-bitget}"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 
-cd "$(dirname "$0")/.."
+cd "$REPO_ROOT"
 
-python3 -m quant_binance.report_performance --base-dir "$BASE_DIR"
-python3 -m quant_binance.report_validation --base-dir "$BASE_DIR"
-python3 -m quant_binance.report_execution_quality --base-dir "$BASE_DIR"
-python3 -m quant_binance.compare_recent --config "$CONFIG_PATH" --base-dir "$BASE_DIR"
-python3 - <<'PY' "$BASE_DIR/artifacts/optimization" "$EXCHANGE_ID" "$CONFIG_PATH"
+sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.report_performance --base-dir "$BASE_DIR"
+sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.report_validation --base-dir "$BASE_DIR"
+sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.report_execution_quality --base-dir "$BASE_DIR"
+sh "$SCRIPT_DIR/quant_python.sh" -m quant_binance.compare_recent --config "$CONFIG_PATH" --base-dir "$BASE_DIR"
+sh "$SCRIPT_DIR/quant_python.sh" - <<'PY' "$BASE_DIR/artifacts/optimization" "$EXCHANGE_ID" "$CONFIG_PATH"
 from quant_binance.execution.client_factory import build_exchange_rest_client
 from quant_binance.optimization import run_sandbox_optimization
 import sys
@@ -28,4 +30,4 @@ path = run_sandbox_optimization(
 )
 print(path)
 PY
-python3 -c "from quant_binance.promotion import build_strategy_proposal; import json; print(json.dumps(build_strategy_proposal(base_dir='$BASE_DIR'), indent=2, sort_keys=True))"
+sh "$SCRIPT_DIR/quant_python.sh" -c "from quant_binance.promotion import build_strategy_proposal; import json; print(json.dumps(build_strategy_proposal(base_dir='$BASE_DIR'), indent=2, sort_keys=True))"

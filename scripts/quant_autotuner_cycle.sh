@@ -3,9 +3,10 @@
 # crontab: 47 1,7,13,19 * * * /Users/tttksj/first_repo/scripts/quant_autotuner_cycle.sh >> quant_runtime/autotuner.log 2>&1
 
 set -uo pipefail
-REPO="/Users/tttksj/first_repo"
-RUNTIME="$REPO/quant_runtime"
-PYTHON="/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+RUNTIME="${QUANT_AUTOTUNER_RUNTIME:-$REPO/quant_runtime}"
+PYTHON="$SCRIPT_DIR/quant_python.sh"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 
 echo "============================================"
@@ -13,7 +14,7 @@ echo "[AUTOTUNER] $TIMESTAMP"
 echo "============================================"
 
 # Pre-check: daemon must be healthy
-STATUS=$($PYTHON -c "import json; d=json.load(open('$RUNTIME/live_supervisor_health.json')); print(d.get('status','unknown'))" 2>/dev/null || echo "unknown")
+STATUS=$(sh "$PYTHON" -c "import json; d=json.load(open('$RUNTIME/live_supervisor_health.json')); print(d.get('status','unknown'))" 2>/dev/null || echo "unknown")
 if [ "$STATUS" != "healthy" ]; then
     echo "[AUTOTUNER] Skipped: daemon not healthy (status=$STATUS)"
     exit 0
@@ -22,7 +23,7 @@ fi
 cd "$REPO"
 
 # Auto-detect: dry-run until 50+ valid trades accumulated
-VALID_TRADES=$($PYTHON -c "
+VALID_TRADES=$(sh "$PYTHON" -c "
 import json
 from pathlib import Path
 trades = []
@@ -40,12 +41,12 @@ print(len(trades))
 
 if [ "$VALID_TRADES" -ge 50 ]; then
     echo "[AUTOTUNER] valid_trades=$VALID_TRADES >= 50: LIVE mode"
-    $PYTHON -m quant_binance.autotuner.analyzer \
+    sh "$PYTHON" -m quant_binance.autotuner.analyzer \
         --base-dir "$RUNTIME" \
         2>&1
 else
     echo "[AUTOTUNER] valid_trades=$VALID_TRADES < 50: dry-run mode (waiting for data)"
-    $PYTHON -m quant_binance.autotuner.analyzer \
+    sh "$PYTHON" -m quant_binance.autotuner.analyzer \
         --base-dir "$RUNTIME" \
         --dry-run \
         2>&1
