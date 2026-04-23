@@ -2,7 +2,10 @@
 set -eu
 
 BASE_DIR="${1:-quant_runtime}"
-STATE_FILE="$(python3 - <<'PY' "$BASE_DIR"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+run_python() { sh "$SCRIPT_DIR/quant_python.sh" "$@"; }
+
+STATE_FILE="$(run_python - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
@@ -29,7 +32,7 @@ if [ -n "$STATE_FILE" ]; then
 fi
 
 if [ -z "$SUMMARY_FILE" ]; then
-  SUMMARY_FILE="$(python3 - <<'PY' "$BASE_DIR"
+  SUMMARY_FILE="$(run_python - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
@@ -53,7 +56,7 @@ if [ -z "$SUMMARY_FILE" ] || [ -z "$STATE_FILE" ]; then
   exit 1
 fi
 
-python3 - <<'PY' "$SUMMARY_FILE" "$STATE_FILE"
+run_python - <<'PY' "$SUMMARY_FILE" "$STATE_FILE"
 import json, sys
 summary = json.load(open(sys.argv[1], encoding='utf-8'))
 state = json.load(open(sys.argv[2], encoding='utf-8'))

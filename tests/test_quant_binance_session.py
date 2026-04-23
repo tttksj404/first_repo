@@ -10304,6 +10304,170 @@ class QuantBinanceSessionTests(unittest.TestCase):
         self.assertEqual(capped.side, "short")
         self.assertNotIn("PAPER_VERIFY_REVERSAL_PRONE_ENTRY", capped.rejection_reasons)
 
+    def test_paper_verify_delayed_entry_gate_blocks_first_non_elite_signal(self) -> None:
+        settings = replace(self.settings, strategy_profile="live-ultra-aggressive")
+        session = self._build_session(settings=settings)
+        first_signal = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 23, 5, 50, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                side="long",
+                predictability_score=87.0,
+                gross_expected_edge_bps=88.0,
+                net_expected_edge_bps=80.0,
+                estimated_round_trip_cost_bps=8.0,
+                order_intent_notional_usd=1000.0,
+                stop_distance_bps=120.0,
+            ),
+            volume_confirmation=0.78,
+            trend_strength=0.86,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            gated = session._apply_paper_verification_front_entry_gate(first_signal)
+
+        self.assertEqual(gated.final_mode, "cash")
+        self.assertEqual(gated.side, "flat")
+        self.assertEqual(gated.order_intent_notional_usd, 0.0)
+        self.assertIn("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED", gated.rejection_reasons)
+
+    def test_paper_verify_delayed_entry_gate_allows_recent_same_side_confirmation(self) -> None:
+        settings = replace(self.settings, strategy_profile="live-ultra-aggressive")
+        session = self._build_session(settings=settings)
+        blocked_time = datetime(2026, 4, 23, 5, 50, tzinfo=timezone.utc)
+        prior_blocked = replace(
+            make_decision(
+                timestamp=blocked_time,
+                symbol="PEPEUSDT",
+                side="long",
+                predictability_score=76.0,
+                gross_expected_edge_bps=58.0,
+                net_expected_edge_bps=50.0,
+                estimated_round_trip_cost_bps=8.0,
+                order_intent_notional_usd=750.0,
+                stop_distance_bps=220.0,
+            ),
+            final_mode="cash",
+            side="flat",
+            order_intent_notional_usd=0.0,
+            stop_distance_bps=0.0,
+            rejection_reasons=("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED",),
+        )
+        session.decisions.append(prior_blocked)
+        confirmed_signal = replace(
+            make_decision(
+                timestamp=blocked_time + timedelta(minutes=5),
+                symbol="PEPEUSDT",
+                side="long",
+                predictability_score=77.0,
+                gross_expected_edge_bps=60.0,
+                net_expected_edge_bps=52.0,
+                estimated_round_trip_cost_bps=8.0,
+                order_intent_notional_usd=750.0,
+                stop_distance_bps=220.0,
+            ),
+            volume_confirmation=0.76,
+            trend_strength=0.84,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            gated = session._apply_paper_verification_front_entry_gate(confirmed_signal)
+
+        self.assertEqual(gated.final_mode, "futures")
+        self.assertEqual(gated.side, "long")
+        self.assertNotIn("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED", gated.rejection_reasons)
+
+    def test_paper_verify_delayed_entry_gate_rejects_stale_or_opposite_confirmation(self) -> None:
+        settings = replace(self.settings, strategy_profile="live-ultra-aggressive")
+        base_time = datetime(2026, 4, 23, 5, 50, tzinfo=timezone.utc)
+        current_signal = replace(
+            make_decision(
+                timestamp=base_time + timedelta(minutes=7),
+                symbol="BTCUSDT",
+                side="long",
+                predictability_score=86.0,
+                gross_expected_edge_bps=72.0,
+                net_expected_edge_bps=64.0,
+                estimated_round_trip_cost_bps=8.0,
+                order_intent_notional_usd=1000.0,
+                stop_distance_bps=120.0,
+            ),
+            volume_confirmation=0.76,
+            trend_strength=0.84,
+        )
+        stale_session = self._build_session(settings=settings)
+        stale_session.decisions.append(
+            replace(
+                make_decision(timestamp=base_time, symbol="BTCUSDT", side="long"),
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED",),
+            )
+        )
+        opposite_session = self._build_session(settings=settings)
+        opposite_session.decisions.append(
+            replace(
+                make_decision(timestamp=base_time + timedelta(minutes=5), symbol="BTCUSDT", side="short"),
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED",),
+            )
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            stale_gated = stale_session._apply_paper_verification_front_entry_gate(current_signal)
+            opposite_gated = opposite_session._apply_paper_verification_front_entry_gate(current_signal)
+
+        self.assertEqual(stale_gated.final_mode, "cash")
+        self.assertIn("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED", stale_gated.rejection_reasons)
+        self.assertEqual(opposite_gated.final_mode, "cash")
+        self.assertIn("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED", opposite_gated.rejection_reasons)
+
+    def test_paper_verify_delayed_entry_gate_skips_live_executor_and_elite_fast_path(self) -> None:
+        settings = replace(self.settings, strategy_profile="live-ultra-aggressive")
+        live_session = self._build_session(settings=settings)
+        live_session.live_order_executor = Mock()
+        non_elite_signal = make_decision(
+            timestamp=datetime(2026, 4, 23, 5, 50, tzinfo=timezone.utc),
+            symbol="BTCUSDT",
+            side="long",
+            predictability_score=87.0,
+            gross_expected_edge_bps=88.0,
+            net_expected_edge_bps=80.0,
+            estimated_round_trip_cost_bps=8.0,
+            order_intent_notional_usd=1000.0,
+            stop_distance_bps=120.0,
+        )
+        elite_session = self._build_session(settings=settings)
+        elite_signal = replace(
+            make_decision(
+                timestamp=datetime(2026, 4, 23, 5, 55, tzinfo=timezone.utc),
+                symbol="BTCUSDT",
+                side="short",
+                predictability_score=92.0,
+                gross_expected_edge_bps=63.0,
+                net_expected_edge_bps=55.0,
+                estimated_round_trip_cost_bps=8.0,
+                order_intent_notional_usd=1000.0,
+                stop_distance_bps=120.0,
+            ),
+            volume_confirmation=0.78,
+            trend_strength=0.90,
+        )
+
+        with patch.dict("os.environ", {"QUANT_PAPER_VERIFY_EQUITY_USD": "50"}, clear=False):
+            live_gated = live_session._apply_paper_verification_front_entry_gate(non_elite_signal)
+            elite_gated = elite_session._apply_paper_verification_front_entry_gate(elite_signal)
+
+        self.assertEqual(live_gated.final_mode, "futures")
+        self.assertNotIn("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED", live_gated.rejection_reasons)
+        self.assertEqual(elite_gated.final_mode, "futures")
+        self.assertNotIn("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED", elite_gated.rejection_reasons)
+
     def test_symbol_filter_profiles_apply_distinct_coin_entry_gates(self) -> None:
         settings = replace(
             self.settings,

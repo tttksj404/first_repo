@@ -31,23 +31,47 @@ def _parse_timestamp(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
 
 
-def _load_decisions(path: Path, *, symbols: set[str], min_age_minutes: int) -> list[dict[str, Any]]:
-    if not path.exists():
+def _default_decision_paths(output_base: Path) -> list[Path]:
+    forensics_path = output_base / "forensics" / "decisions.jsonl"
+    if forensics_path.exists():
+        return [forensics_path]
+
+    shell_root = output_base / "output" / "paper-live-shell"
+    if not shell_root.exists():
         return []
+    paths: list[Path] = []
+    for run_dir in sorted(shell_root.iterdir(), key=lambda item: item.name):
+        if not run_dir.is_dir() or run_dir.name == "latest":
+            continue
+        decisions_path = run_dir / "logs" / "decisions.jsonl"
+        if decisions_path.exists():
+            paths.append(decisions_path)
+    return paths
+
+
+def _load_decisions(paths: list[Path], *, symbols: set[str], min_age_minutes: int) -> list[dict[str, Any]]:
     now = datetime.now(UTC)
     rows: list[dict[str, Any]] = []
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        try:
-            row = json.loads(line)
-            symbol = str(row.get("symbol") or "").upper()
-            timestamp = _parse_timestamp(str(row.get("timestamp") or ""))
-        except Exception:
+    seen: set[str] = set()
+    for path in paths:
+        if not path.exists():
             continue
-        if symbol not in symbols:
-            continue
-        if timestamp > now - timedelta(minutes=min_age_minutes):
-            continue
-        rows.append(row)
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                row = json.loads(line)
+                symbol = str(row.get("symbol") or "").upper()
+                timestamp = _parse_timestamp(str(row.get("timestamp") or ""))
+            except Exception:
+                continue
+            if symbol not in symbols:
+                continue
+            if timestamp > now - timedelta(minutes=min_age_minutes):
+                continue
+            key = str(row.get("decision_id") or row.get("decision_hash") or f"{symbol}:{timestamp.isoformat()}")
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(row)
     return rows
 
 
@@ -56,6 +80,23 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _is_blocked_entry(row: dict[str, Any]) -> bool:
+    if bool(row.get("rejected")):
+        return True
+    if str(row.get("side") or "").lower() == "flat":
+        return True
+    if str(row.get("final_mode") or "").lower() == "cash":
+        return True
+    if row.get("rejection_reasons"):
+        return True
+    if (
+        str(row.get("final_mode") or "").lower() in {"spot", "futures"}
+        and _safe_float(row.get("order_intent_notional_usd")) > 0.0
+    ):
+        return False
+    return False
 
 
 def _close_at_or_before(bars: list[dict[str, Any]], target_ms: int) -> float | None:
@@ -205,12 +246,20 @@ def main() -> int:
     parser.add_argument("--forward-minutes", type=int, default=15)
     parser.add_argument("--min-age-minutes", type=int, default=16)
     parser.add_argument("--per-symbol-limit", type=int, default=20)
+    parser.add_argument(
+        "--decisions-path",
+        action="append",
+        default=[],
+        help="Explicit decisions.jsonl path; may be provided multiple times.",
+    )
     parser.add_argument("--write-latest", action="store_true")
     args = parser.parse_args()
 
     symbols = tuple(symbol.strip().upper() for symbol in args.symbols.split(",") if symbol.strip())
-    decisions_path = Path(args.output_base) / "forensics" / "decisions.jsonl"
-    rows = _load_decisions(decisions_path, symbols=set(symbols), min_age_minutes=args.min_age_minutes)
+    output_base = Path(args.output_base)
+    decision_paths = [Path(path) for path in args.decisions_path] or _default_decision_paths(output_base)
+    rows = _load_decisions(decision_paths, symbols=set(symbols), min_age_minutes=args.min_age_minutes)
+    rows = [row for row in rows if _is_blocked_entry(row)]
     per_symbol: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         per_symbol[str(row.get("symbol") or "").upper()].append(row)

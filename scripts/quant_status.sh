@@ -2,7 +2,11 @@
 set -eu
 
 BASE_DIR="${1:-quant_runtime}"
-OVERVIEW_FILE="$(python3 - <<'PY' "$BASE_DIR"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+run_python() { sh "$SCRIPT_DIR/quant_python.sh" "$@"; }
+
+OVERVIEW_FILE="$(run_python - <<'PY' "$BASE_DIR"
 from datetime import datetime
 import json
 from pathlib import Path
@@ -47,7 +51,7 @@ PY
 if [ -n "$OVERVIEW_FILE" ]; then
   echo "OVERVIEW_FILE=$OVERVIEW_FILE"
   echo
-  python3 - <<'PY' "$OVERVIEW_FILE"
+  run_python - <<'PY' "$OVERVIEW_FILE"
 import json, sys
 from pathlib import Path
 overview_path = Path(sys.argv[1])
@@ -109,7 +113,7 @@ for item in recent_live_orders[-5:]:
 PY
   exit 0
 fi
-STATE_FILE="$(python3 - <<'PY' "$BASE_DIR"
+STATE_FILE="$(run_python - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
@@ -136,7 +140,7 @@ if [ -n "$STATE_FILE" ]; then
 fi
 
 if [ -z "$SUMMARY_FILE" ]; then
-  SUMMARY_FILE="$(python3 - <<'PY' "$BASE_DIR"
+  SUMMARY_FILE="$(run_python - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
@@ -163,7 +167,7 @@ fi
 echo "STATE_FILE=$STATE_FILE"
 [ -n "$SUMMARY_FILE" ] && echo "SUMMARY_FILE=$SUMMARY_FILE"
 echo
-python3 - <<'PY' "$STATE_FILE" "$SUMMARY_FILE"
+run_python - <<'PY' "$STATE_FILE" "$SUMMARY_FILE"
 import json, sys
 from pathlib import Path
 
