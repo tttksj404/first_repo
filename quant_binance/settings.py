@@ -312,6 +312,15 @@ class SymbolFilterProfileConfig:
     reversal_guard_min_expected_profit_multiplier: float = 2.0
     reversal_guard_min_expected_profit_extra_usd: float = 0.75
     rejection_reason: str = "SYMBOL_FILTER_PROFILE"
+    paper_recovery_enabled: bool = False
+    paper_recovery_side: str = ""
+    paper_recovery_min_score: float = 0.0
+    paper_recovery_min_volume_confirmation: float = 0.0
+    paper_recovery_min_net_edge_bps: float = 0.0
+    paper_recovery_min_edge_to_cost: float = 0.0
+    paper_recovery_max_cost_bps: float = 0.0
+    paper_recovery_allowed_rejections: tuple[str, ...] = ()
+    paper_recovery_reason: str = "PAPER_SYMBOL_FILTER_RECOVERY"
 
 
 @dataclass(frozen=True)
