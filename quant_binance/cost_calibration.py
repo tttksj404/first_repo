@@ -8,6 +8,9 @@ from statistics import median
 from typing import Any
 
 
+MIN_TRUSTED_SLIPPAGE_SAMPLES = 200
+
+
 @dataclass(frozen=True)
 class SymbolCostCalibration:
     symbol: str
@@ -16,6 +19,7 @@ class SymbolCostCalibration:
     empirical_exit_slippage_bps: float = 0.0
     fee_sample_count: int = 0
     slippage_sample_count: int = 0
+    slippage_untrusted: bool = True
 
 
 @dataclass(frozen=True)
@@ -25,6 +29,7 @@ class CostCalibration:
     global_empirical_fee_bps: float = 0.0
     global_empirical_entry_slippage_bps: float = 0.0
     global_empirical_exit_slippage_bps: float = 0.0
+    slippage_untrusted: bool = True
     symbol_calibrations: tuple[SymbolCostCalibration, ...] = field(default_factory=tuple)
 
     def as_dict(self) -> dict[str, object]:
@@ -150,6 +155,7 @@ def build_cost_calibration(
             empirical_exit_slippage_bps=round(median(slip_samples_by_symbol.get(symbol, [0.0])), 6),
             fee_sample_count=len(fee_samples_by_symbol.get(symbol, [])),
             slippage_sample_count=len(slip_samples_by_symbol.get(symbol, [])),
+            slippage_untrusted=len(slip_samples_by_symbol.get(symbol, [])) < MIN_TRUSTED_SLIPPAGE_SAMPLES,
         )
         for symbol in symbols
     )
@@ -159,6 +165,7 @@ def build_cost_calibration(
         global_empirical_fee_bps=round(median(global_fee_samples), 6) if global_fee_samples else 0.0,
         global_empirical_entry_slippage_bps=round(median(global_slip_samples), 6) if global_slip_samples else 0.0,
         global_empirical_exit_slippage_bps=round(median(global_slip_samples), 6) if global_slip_samples else 0.0,
+        slippage_untrusted=len(global_slip_samples) < MIN_TRUSTED_SLIPPAGE_SAMPLES,
         symbol_calibrations=symbol_calibrations,
     )
 
@@ -175,6 +182,7 @@ def load_cost_calibration(path: str | Path) -> CostCalibration | None:
         global_empirical_fee_bps=_safe_float(payload.get("global_empirical_fee_bps")),
         global_empirical_entry_slippage_bps=_safe_float(payload.get("global_empirical_entry_slippage_bps")),
         global_empirical_exit_slippage_bps=_safe_float(payload.get("global_empirical_exit_slippage_bps")),
+        slippage_untrusted=bool(payload.get("slippage_untrusted", True)),
         symbol_calibrations=rows,
     )
 

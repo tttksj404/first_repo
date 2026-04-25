@@ -4,7 +4,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from quant_binance.cost_calibration import build_cost_calibration, load_cost_calibration, write_cost_calibration
+from quant_binance.cost_calibration import (
+    MIN_TRUSTED_SLIPPAGE_SAMPLES,
+    build_cost_calibration,
+    load_cost_calibration,
+    write_cost_calibration,
+)
 
 
 class QuantBinanceCostCalibrationTests(unittest.TestCase):
@@ -60,6 +65,63 @@ class QuantBinanceCostCalibrationTests(unittest.TestCase):
             loaded.for_symbol("ETHUSDT").empirical_fee_bps,
             calibration.for_symbol("ETHUSDT").empirical_fee_bps,
         )
+
+
+    def test_below_threshold_marks_slippage_untrusted(self) -> None:
+        calibration = build_cost_calibration(
+            fill_rows=[
+                {
+                    "symbol": "BTCUSDT",
+                    "orderId": "o-1",
+                    "price": "70200",
+                    "quoteVolume": "35.1",
+                    "feeDetail": [{"totalFee": "-0.01404"}],
+                }
+            ],
+            order_refs={"o-1": {"symbol": "BTCUSDT", "reference_price": 70190.0}},
+        )
+        self.assertTrue(calibration.slippage_untrusted)
+        self.assertTrue(calibration.for_symbol("BTCUSDT").slippage_untrusted)
+
+    def test_at_or_above_threshold_marks_slippage_trusted(self) -> None:
+        fill_rows: list[dict[str, object]] = []
+        order_refs: dict[str, dict[str, float | str]] = {}
+        for index in range(MIN_TRUSTED_SLIPPAGE_SAMPLES):
+            order_id = f"o-{index}"
+            fill_rows.append(
+                {
+                    "symbol": "BTCUSDT",
+                    "orderId": order_id,
+                    "price": "70200",
+                    "quoteVolume": "35.1",
+                    "feeDetail": [{"totalFee": "-0.01404"}],
+                }
+            )
+            order_refs[order_id] = {"symbol": "BTCUSDT", "reference_price": 70190.0}
+        calibration = build_cost_calibration(fill_rows=fill_rows, order_refs=order_refs)
+        self.assertFalse(calibration.slippage_untrusted)
+        self.assertFalse(calibration.for_symbol("BTCUSDT").slippage_untrusted)
+
+    def test_round_trip_preserves_slippage_untrusted(self) -> None:
+        calibration = build_cost_calibration(
+            fill_rows=[
+                {
+                    "symbol": "ETHUSDT",
+                    "orderId": "o-1",
+                    "price": "2100",
+                    "quoteVolume": "42.0",
+                    "feeDetail": [{"totalFee": "-0.0168"}],
+                }
+            ],
+            order_refs={"o-1": {"symbol": "ETHUSDT", "reference_price": 2098.0}},
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "cost_calibration.json"
+            write_cost_calibration(calibration=calibration, output_path=path)
+            loaded = load_cost_calibration(path)
+        assert loaded is not None
+        self.assertTrue(loaded.slippage_untrusted)
+        self.assertTrue(loaded.for_symbol("ETHUSDT").slippage_untrusted)
 
 
 if __name__ == "__main__":

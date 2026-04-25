@@ -42,6 +42,7 @@ notion_automation/**/notion_auth.py
 # Runtime outputs (paper50)
 quant_runtime_paper50/_paper50*.log
 quant_runtime_paper50/artifacts/
+quant_runtime_paper50/cache/
 quant_runtime_paper50/forensics/
 quant_runtime_paper50/output/
 quant_runtime_paper50/execution_quality_state.json
