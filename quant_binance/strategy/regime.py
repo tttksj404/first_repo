@@ -282,14 +282,21 @@ def _macro_spot_risk_reasons(features: FeatureVector, *, symbol: str) -> list[st
 def _is_objectively_strong_futures_setup(
     features: FeatureVector,
     settings: Settings,
+    *,
+    symbol: str = "",
 ) -> bool:
     thresholds = settings.mode_thresholds
     exposure = settings.futures_exposure
+    strong_liquidity_min = max(exposure.strong_liquidity_min, 0.82)
+    if symbol == "PEPEUSDT":
+        # PEPE has its own validated high-beta profile; do not force it to clear the same
+        # liquidity floor as majors if the rest of the setup is already strong.
+        strong_liquidity_min = max(exposure.strong_liquidity_min, 0.50)
     return (
         features.predictability_score >= thresholds.futures_score_min + exposure.strong_score_buffer
         and features.trend_strength >= exposure.strong_trend_strength_min
         and features.volume_confirmation >= exposure.strong_volume_confirmation_min
-        and features.liquidity_score >= exposure.strong_liquidity_min
+        and features.liquidity_score >= strong_liquidity_min
         and features.volatility_penalty <= exposure.strong_volatility_penalty_max
         and features.overheat_penalty <= exposure.strong_overheat_penalty_max
         and features.macro_risk_penalty < settings.macro_gates.futures_block_penalty
@@ -307,7 +314,7 @@ def _is_objectively_medium_major_futures_setup(
     exposure = settings.futures_exposure
     if symbol not in set(exposure.major_symbols):
         return False
-    if _is_objectively_strong_futures_setup(features, settings):
+    if _is_objectively_strong_futures_setup(features, settings, symbol=symbol):
         return False
     return (
         features.predictability_score >= exposure.pyramid_min_predictability_score
@@ -322,6 +329,8 @@ def _is_objectively_medium_major_futures_setup(
 def _strong_futures_size_multiplier(
     features: FeatureVector,
     settings: Settings,
+    *,
+    symbol: str = "",
 ) -> float:
     thresholds = settings.mode_thresholds
     exposure = settings.futures_exposure
@@ -346,9 +355,12 @@ def _strong_futures_size_multiplier(
         exposure.strong_volume_confirmation_min,
         0.3,
     )
+    strong_liquidity_min = max(exposure.strong_liquidity_min, 0.82)
+    if symbol == "PEPEUSDT":
+        strong_liquidity_min = max(exposure.strong_liquidity_min, 0.50)
     liquidity_strength = _normalized(
         features.liquidity_score,
-        exposure.strong_liquidity_min,
+        strong_liquidity_min,
         0.35,
     )
     edge_strength = _normalized(
@@ -476,12 +488,19 @@ def _short_entry_strict_reasons(
     min_entry_net_edge_bps: float,
 ) -> list[str]:
     if features.trend_direction >= 0:
+        # Long / flat trend: short-side gating is not applicable.
         return []
+    if settings.futures_exposure.short_disabled:
+        return ["SHORT_DISABLED"]
     reasons: list[str] = []
-    short_score_floor = max(futures_score_min + 4.0, settings.mode_thresholds.futures_score_min + 1.0)
-    short_liquidity_floor = max(futures_liquidity_min + 0.08, settings.futures_exposure.soft_liquidity_floor + 0.08)
-    short_edge_floor = max(min_entry_net_edge_bps + 1.5, settings.futures_exposure.reduced_entry_net_edge_bps + 1.0)
-    short_cost_multiple_floor = max(settings.cost_gate.edge_to_cost_multiple_min + 0.18, 0.95)
+    extra_score = settings.futures_exposure.short_extra_score_floor
+    extra_edge = settings.futures_exposure.short_extra_edge_bps
+    extra_liq = settings.futures_exposure.short_extra_liquidity_floor
+    extra_cost = settings.futures_exposure.short_extra_cost_multiple_floor
+    short_score_floor = max(futures_score_min + extra_score, settings.mode_thresholds.futures_score_min + 1.0)
+    short_liquidity_floor = max(futures_liquidity_min + extra_liq, settings.futures_exposure.soft_liquidity_floor + extra_liq)
+    short_edge_floor = max(min_entry_net_edge_bps + extra_edge, settings.futures_exposure.reduced_entry_net_edge_bps + 1.0)
+    short_cost_multiple_floor = max(settings.cost_gate.edge_to_cost_multiple_min + extra_cost, 0.95)
     short_trend_strength_floor = max(settings.mode_thresholds.futures_trend_strength_min + 0.02, 0.12)
     short_volume_floor = 0.48
 
@@ -846,7 +865,7 @@ def _futures_entry_plan(
         return False, ["EDGE_TOO_THIN"], 0.0, (), (), effective_direction
     if reduced_size and alt_symbol and exposure.alt_reduced_size_multiplier > 0.0:
         size_multiplier = min(size_multiplier, exposure.alt_reduced_size_multiplier)
-    strong_setup = _is_objectively_strong_futures_setup(features, settings)
+    strong_setup = _is_objectively_strong_futures_setup(features, settings, symbol=symbol)
     # ADX+cross confirms strong trend: size boost for profiled coins
     adx_strong_trend = (
         is_profiled(symbol)
@@ -857,7 +876,7 @@ def _futures_entry_plan(
     if adx_strong_trend and not reduced_size:
         strong_setup = True  # ADX-confirmed trend qualifies as strong
     if not reduced_size and strong_setup:
-        size_multiplier = max(size_multiplier, _strong_futures_size_multiplier(features, settings))
+        size_multiplier = max(size_multiplier, _strong_futures_size_multiplier(features, settings, symbol=symbol))
     boosted_size_multiplier = _btc_eth_strong_size_boost_multiplier(
         features,
         settings,

@@ -173,6 +173,7 @@ def build_payload(
     symbols: tuple[str, ...],
     min_age_minutes: int,
     forward_minutes: int,
+    max_evaluated: int | None = None,
 ) -> dict[str, Any]:
     now = datetime.now(UTC)
     maturity_cutoff = now - timedelta(minutes=max(min_age_minutes, 0))
@@ -185,7 +186,10 @@ def build_payload(
     client = build_exchange_rest_client(exchange="bitget", allow_insecure_ssl=True, allow_missing_credentials=True)
     evaluated: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
-    for row in mature_blocked:
+    selected_mature_blocked = sorted(mature_blocked, key=lambda row: str(row.get("timestamp") or ""))
+    if max_evaluated is not None and max_evaluated > 0:
+        selected_mature_blocked = selected_mature_blocked[-max_evaluated:]
+    for row in selected_mature_blocked:
         try:
             evaluated.append(counterfactual._evaluate_decision(client, row, forward_minutes=max(forward_minutes, 1)))
         except Exception as exc:
@@ -203,6 +207,8 @@ def build_payload(
         "generated_at": now.isoformat(),
         "mode": "paper50_block_reason_full_validation",
         "method": "bitget_public_candles_forward_5_10_15_after_cost",
+        "mature_blocked_available": len(mature_blocked),
+        "max_evaluated": max_evaluated,
         "mature_blocked_evaluated": len(evaluated),
         "pending_not_yet_15m_mature_count": len(pending_blocked),
         "pending_not_yet_15m_mature": _pending_rows_payload(pending_blocked),
@@ -238,6 +244,7 @@ def main() -> int:
     parser.add_argument("--symbols", default=",".join(DEFAULT_SYMBOLS))
     parser.add_argument("--min-age-minutes", type=int, default=21)
     parser.add_argument("--forward-minutes", type=int, default=15)
+    parser.add_argument("--max-evaluated", type=int)
     parser.add_argument("--decisions-path", action="append", default=[])
     parser.add_argument("--output-full", default=str(DEFAULT_FULL_OUTPUT))
     parser.add_argument("--output-summary", default=str(DEFAULT_SUMMARY_OUTPUT))
@@ -253,6 +260,7 @@ def main() -> int:
         symbols=symbols,
         min_age_minutes=max(args.min_age_minutes, 0),
         forward_minutes=max(args.forward_minutes, 1),
+        max_evaluated=args.max_evaluated,
     )
     summary_payload = _summary_payload(full_payload)
 
