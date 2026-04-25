@@ -1189,6 +1189,136 @@ class QuantPaper50ScriptTests(unittest.TestCase):
                     sleep_fn=lambda _: None,
                 )
 
+    def test_decompose_costs_uses_calibration_when_available(self) -> None:
+        from quant_binance.cost_calibration import CostCalibration, SymbolCostCalibration
+
+        calibration = CostCalibration(
+            generated_at="2026-04-25T00:00:00+00:00",
+            lookback_hours=72,
+            global_empirical_fee_bps=4.0,
+            global_empirical_entry_slippage_bps=2.0,
+            global_empirical_exit_slippage_bps=2.0,
+            slippage_untrusted=True,
+            symbol_calibrations=(
+                SymbolCostCalibration(
+                    symbol="DOGEUSDT",
+                    empirical_fee_bps=5.0,
+                    empirical_entry_slippage_bps=1.5,
+                    empirical_exit_slippage_bps=1.5,
+                    fee_sample_count=200,
+                    slippage_sample_count=200,
+                    slippage_untrusted=False,
+                ),
+            ),
+        )
+        breakdown = counterfactual._decompose_costs(
+            symbol="DOGEUSDT",
+            direction="short",
+            upstream_cost_bps=12.0,
+            calibration=calibration,
+            forward_minutes=15,
+            funding_rate_8h=0.0001,
+        )
+        self.assertEqual(breakdown["entry_fee_bps"], 5.0)
+        self.assertEqual(breakdown["exit_fee_bps"], 5.0)
+        self.assertEqual(breakdown["entry_slippage_bps"], 1.5)
+        self.assertEqual(breakdown["exit_slippage_bps"], 1.5)
+        # Short with positive funding rate => receives funding => negative bps
+        self.assertLess(breakdown["funding_bps"], 0.0)
+        self.assertFalse(breakdown["slippage_untrusted"])
+        self.assertEqual(breakdown["source"], "calibration")
+
+    def test_decompose_costs_falls_back_when_no_calibration(self) -> None:
+        breakdown = counterfactual._decompose_costs(
+            symbol="BTCUSDT",
+            direction="long",
+            upstream_cost_bps=12.0,
+            calibration=None,
+            forward_minutes=15,
+        )
+        self.assertEqual(breakdown["entry_fee_bps"], 6.0)
+        self.assertEqual(breakdown["exit_fee_bps"], 6.0)
+        self.assertEqual(breakdown["entry_slippage_bps"], 0.0)
+        self.assertTrue(breakdown["slippage_untrusted"])
+        self.assertEqual(breakdown["source"], "fallback_no_calibration")
+
+    def test_decompose_costs_reconciliation_diff_tracks_drift(self) -> None:
+        from quant_binance.cost_calibration import CostCalibration, SymbolCostCalibration
+
+        calibration = CostCalibration(
+            generated_at="2026-04-25T00:00:00+00:00",
+            lookback_hours=72,
+            global_empirical_fee_bps=4.0,
+            global_empirical_entry_slippage_bps=2.0,
+            global_empirical_exit_slippage_bps=2.0,
+            slippage_untrusted=False,
+            symbol_calibrations=(
+                SymbolCostCalibration(
+                    symbol="ETHUSDT",
+                    empirical_fee_bps=4.0,
+                    empirical_entry_slippage_bps=2.0,
+                    empirical_exit_slippage_bps=2.0,
+                    fee_sample_count=200,
+                    slippage_sample_count=200,
+                    slippage_untrusted=False,
+                ),
+            ),
+        )
+        breakdown = counterfactual._decompose_costs(
+            symbol="ETHUSDT",
+            direction="long",
+            upstream_cost_bps=20.0,
+            calibration=calibration,
+            forward_minutes=15,
+            funding_rate_8h=0.0001,
+        )
+        # 4+4+2+2 + (positive funding for long) = 12 + tiny funding ~= 12.03
+        # upstream is 20 -> diff ~= -7.97 means upstream is more conservative
+        self.assertLess(breakdown["reconciliation_diff_bps"], 0.0)
+        self.assertGreater(breakdown["total_modeled_bps"], 11.9)
+        self.assertLess(breakdown["total_modeled_bps"], 12.1)
+
+    def test_compute_slippage_stress_marks_unsurvivable_at_10bps(self) -> None:
+        breakdown = {
+            "entry_fee_bps": 5.0,
+            "exit_fee_bps": 5.0,
+            "funding_bps": 0.0,
+        }
+        # forward_ret 15bps, fees 10bps total => base_net 5bps. At 10bps stress
+        # (20bps total slippage cost) => net = -15bps => unsurvivable.
+        stress = counterfactual._compute_slippage_stress(
+            forward_ret_bps=15.0,
+            breakdown=breakdown,
+        )
+        self.assertTrue(stress["available"])
+        self.assertEqual(stress["base_net_bps"], 5.0)
+        self.assertEqual(stress["net_at_0bps"], 5.0)
+        self.assertEqual(stress["net_at_10bps"], -15.0)
+        self.assertTrue(stress["cost_unsurvivable"])
+
+    def test_compute_slippage_stress_survives_when_edge_large(self) -> None:
+        breakdown = {
+            "entry_fee_bps": 2.0,
+            "exit_fee_bps": 2.0,
+            "funding_bps": 0.0,
+        }
+        # forward_ret 50bps, fees 4bps => base 46. At 10bps stress => net = 26.
+        stress = counterfactual._compute_slippage_stress(
+            forward_ret_bps=50.0,
+            breakdown=breakdown,
+        )
+        self.assertTrue(stress["available"])
+        self.assertEqual(stress["net_at_10bps"], 26.0)
+        self.assertFalse(stress["cost_unsurvivable"])
+
+    def test_compute_slippage_stress_handles_missing_forward_ret(self) -> None:
+        stress = counterfactual._compute_slippage_stress(
+            forward_ret_bps=None,
+            breakdown={"entry_fee_bps": 2.0, "exit_fee_bps": 2.0, "funding_bps": 0.0},
+        )
+        self.assertFalse(stress["available"])
+        self.assertFalse(stress["cost_unsurvivable"])
+
 
 if __name__ == "__main__":
     unittest.main()
