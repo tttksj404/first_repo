@@ -1126,6 +1126,69 @@ class QuantPaper50ScriptTests(unittest.TestCase):
         self.assertEqual(sample_booster._next_action(weak, target_sample=12), "collect_more_samples")
         self.assertEqual(sample_booster._next_action(strong, target_sample=12), "review_paper_candidate")
 
+    def test_fetch_klines_cached_retries_then_succeeds(self) -> None:
+        attempts: list[int] = []
+
+        def flaky_fetcher(**_kwargs: object) -> list[dict[str, object]]:
+            attempts.append(1)
+            if len(attempts) < 3:
+                raise ConnectionError("dns failure")
+            return [{"open_time": 1_000, "close_price": 100.0}]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            bars = counterfactual.fetch_klines_cached(
+                flaky_fetcher,
+                symbol="BTCUSDT",
+                start_ms=1_000,
+                end_ms=2_000,
+                forward_minutes=15,
+                cache_dir=Path(tmp),
+                sleep_fn=lambda _: None,
+            )
+            self.assertEqual(len(attempts), 3)
+            self.assertEqual(bars[0]["close_price"], 100.0)
+            cached = json.loads((Path(tmp) / "BTCUSDT_1000_2000.json").read_text())
+            self.assertEqual(cached, bars)
+
+    def test_fetch_klines_cached_returns_cache_without_calling_fetcher(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            cache_dir = Path(tmp)
+            cache_dir.mkdir(exist_ok=True)
+            (cache_dir / "ETHUSDT_500_1500.json").write_text(
+                json.dumps([{"open_time": 500, "close_price": 42.0}])
+            )
+
+            def must_not_be_called(**_kwargs: object) -> list[dict[str, object]]:
+                raise AssertionError("fetcher should not be called on cache hit")
+
+            bars = counterfactual.fetch_klines_cached(
+                must_not_be_called,
+                symbol="ETHUSDT",
+                start_ms=500,
+                end_ms=1_500,
+                forward_minutes=15,
+                cache_dir=cache_dir,
+                sleep_fn=lambda _: None,
+            )
+            self.assertEqual(bars[0]["close_price"], 42.0)
+
+    def test_fetch_klines_cached_raises_after_max_retries(self) -> None:
+        def always_fails(**_kwargs: object) -> list[dict[str, object]]:
+            raise ConnectionError("dns")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(RuntimeError):
+                counterfactual.fetch_klines_cached(
+                    always_fails,
+                    symbol="DOGEUSDT",
+                    start_ms=0,
+                    end_ms=1,
+                    forward_minutes=15,
+                    cache_dir=Path(tmp),
+                    max_retries=2,
+                    sleep_fn=lambda _: None,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
