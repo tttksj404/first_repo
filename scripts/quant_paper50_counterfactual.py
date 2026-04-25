@@ -195,8 +195,10 @@ def _evaluate_decision(client: Any, row: dict[str, Any], *, forward_minutes: int
 
 def _summarize(results: list[dict[str, Any]], *, symbols: tuple[str, ...]) -> dict[str, Any]:
     by_symbol: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_direction: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in results:
         by_symbol[str(row.get("symbol") or "")].append(row)
+        by_direction[str(row.get("direction") or "unknown")].append(row)
 
     symbol_summaries: dict[str, dict[str, Any]] = {}
     all_possible: list[dict[str, Any]] = []
@@ -225,6 +227,27 @@ def _summarize(results: list[dict[str, Any]], *, symbols: tuple[str, ...]) -> di
             "recent_possible_missed_entries": possible[-5:],
         }
 
+    side_summaries: dict[str, dict[str, Any]] = {}
+    for direction in ("long", "short"):
+        rows = by_direction.get(direction, [])
+        label_counts = Counter(str(row.get("label") or "unknown") for row in rows)
+        net_values = [
+            float(row["net_after_cost_bps"])
+            for row in rows
+            if row.get("net_after_cost_bps") is not None
+        ]
+        possible = [row for row in rows if row.get("label") == "possible_missed_entry"]
+        side_summaries[direction] = {
+            "decision_count": len(rows),
+            "label_counts": dict(label_counts),
+            "possible_missed_entry_count": len(possible),
+            "avg_net_after_cost_bps": round(sum(net_values) / len(net_values), 6) if net_values else None,
+            "best_net_after_cost_bps": round(max(net_values), 6) if net_values else None,
+            "worst_net_after_cost_bps": round(min(net_values), 6) if net_values else None,
+            "symbol_counts": dict(Counter(str(row.get("symbol") or "") for row in rows)),
+            "recent_possible_missed_entries": possible[-5:],
+        }
+
     return {
         "generated_at": datetime.now(UTC).isoformat(),
         "mode": "paper50_blocked_entry_counterfactual",
@@ -235,6 +258,7 @@ def _summarize(results: list[dict[str, Any]], *, symbols: tuple[str, ...]) -> di
             key=lambda row: float(row.get("net_after_cost_bps") or 0.0),
             reverse=True,
         )[:20],
+        "side_summaries": side_summaries,
         "symbol_summaries": symbol_summaries,
     }
 

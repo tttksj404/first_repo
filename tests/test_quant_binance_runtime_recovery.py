@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -223,6 +224,141 @@ class RuntimeRecoveryTests(unittest.TestCase):
         self.assertIn("/latest/summary.state.json", status_proc.stdout)
         self.assertIn("self_healing_status: guarded", report_proc.stdout)
         self.assertIn("self_healing_status: guarded", status_proc.stdout)
+
+    @unittest.skipIf(os.name == "nt", "shell script integration requires sh")
+    def test_status_script_surfaces_intentional_stop_over_stale_healthy_snapshot(self) -> None:
+        runtime_dir = ROOT / "tests" / "tmp_runtime_status_stop"
+        stop_file = ROOT / "scripts" / "_supervisor_stop"
+        original_stop_contents = stop_file.read_text(encoding="utf-8") if stop_file.exists() else None
+        if runtime_dir.exists():
+            shutil.rmtree(runtime_dir)
+        try:
+            latest_run = runtime_dir / "output" / "paper-live-shell" / "latest"
+            latest_run.mkdir(parents=True, exist_ok=True)
+            stop_file.write_text("stop\n", encoding="utf-8")
+
+            latest_summary = build_runtime_summary(decisions=[])
+            latest_summary["status"] = "healthy"
+            (latest_run / "summary.json").write_text(json.dumps(latest_summary), encoding="utf-8")
+            (latest_run / "summary.state.json").write_text(
+                json.dumps(
+                    {
+                        "updated_at": "2026-04-22T00:13:28.848828+00:00",
+                        "heartbeat_count": 26853,
+                        "decision_count": 3,
+                        "tested_order_count": 0,
+                        "live_order_count": 0,
+                        "last_event_timestamp": "2026-04-22T00:13:28.706510+00:00",
+                        "last_decision_timestamp": "2026-04-22T00:10:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (latest_run / "overview.json").write_text(
+                (
+                    '{"updated_at":"2026-04-22T00:13:28.875387+00:00","status":"healthy",'
+                    '"decision_count":3,"heartbeat_count":26853,"last_event_timestamp":"2026-04-22T00:13:28.706510+00:00",'
+                    '"last_decision_timestamp":"2026-04-22T00:10:00+00:00","last_decision_emitted_at":"2026-04-22T00:10:00.465764+00:00",'
+                    '"live_order_count":0,"tested_order_count":0,"realized_pnl_usd_estimate":0.0,"unrealized_pnl_usd_estimate":0.0,'
+                    '"kill_switch":{"armed":false,"reasons":[]},"top_rejection_reasons":{},"recent_decisions":[],'
+                    '"exchange_live_futures_positions":[]}'
+                ),
+                encoding="utf-8",
+            )
+            (runtime_dir / "live_supervisor_health.json").write_text(
+                (
+                    '{'
+                    '"checked_at":"2026-04-24T06:20:12.363880+00:00",'
+                    '"reason":"supervisor_stop_requested",'
+                    '"status":"stopped",'
+                    '"summary":"runtime intentionally stopped via supervisor stop sentinel",'
+                    '"updated_at":"2026-04-24T06:20:12.363880+00:00"'
+                    '}'
+                ),
+                encoding="utf-8",
+            )
+
+            status_proc = subprocess.run(
+                ["sh", "scripts/quant_status.sh", str(runtime_dir)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        finally:
+            if original_stop_contents is None:
+                stop_file.unlink(missing_ok=True)
+            else:
+                stop_file.write_text(original_stop_contents, encoding="utf-8")
+            if runtime_dir.exists():
+                shutil.rmtree(runtime_dir)
+
+        self.assertIn("status: stopped", status_proc.stdout)
+        self.assertIn("summary_status: healthy", status_proc.stdout)
+        self.assertIn("stop_requested: True", status_proc.stdout)
+        self.assertIn("supervisor_status: stopped", status_proc.stdout)
+        self.assertIn("status_reason: supervisor_stop_requested", status_proc.stdout)
+
+    @unittest.skipIf(os.name == "nt", "shell script integration requires sh")
+    def test_status_script_ignores_live_stop_sentinel_for_paper50_runtime(self) -> None:
+        runtime_dir = ROOT / "tests" / "tmp_runtime_paper50_status_stop"
+        stop_file = ROOT / "scripts" / "_supervisor_stop"
+        original_stop_contents = stop_file.read_text(encoding="utf-8") if stop_file.exists() else None
+        if runtime_dir.exists():
+            shutil.rmtree(runtime_dir)
+        try:
+            latest_run = runtime_dir / "output" / "paper-live-shell" / "latest"
+            latest_run.mkdir(parents=True, exist_ok=True)
+            stop_file.write_text("stop\n", encoding="utf-8")
+
+            latest_summary = build_runtime_summary(decisions=[])
+            latest_summary["status"] = "healthy"
+            (latest_run / "summary.json").write_text(json.dumps(latest_summary), encoding="utf-8")
+            (latest_run / "summary.state.json").write_text(
+                json.dumps(
+                    {
+                        "updated_at": "2026-04-25T07:34:29.000000+00:00",
+                        "heartbeat_count": 566450,
+                        "decision_count": 72,
+                        "tested_order_count": 0,
+                        "live_order_count": 0,
+                        "last_event_timestamp": "2026-04-25T07:34:25.139671+00:00",
+                        "last_decision_timestamp": "2026-04-25T07:30:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (latest_run / "overview.json").write_text(
+                (
+                    '{"updated_at":"2026-04-25T07:34:29.000000+00:00","status":"healthy",'
+                    '"decision_count":72,"heartbeat_count":566450,"last_event_timestamp":"2026-04-25T07:34:25.139671+00:00",'
+                    '"last_decision_timestamp":"2026-04-25T07:30:00+00:00","last_decision_emitted_at":"2026-04-25T07:30:00.279728+00:00",'
+                    '"live_order_count":0,"tested_order_count":0,"realized_pnl_usd_estimate":0.0,"unrealized_pnl_usd_estimate":0.0,'
+                    '"kill_switch":{"armed":false,"reasons":[]},"top_rejection_reasons":{},"recent_decisions":[],'
+                    '"exchange_live_futures_positions":[]}'
+                ),
+                encoding="utf-8",
+            )
+
+            status_proc = subprocess.run(
+                ["sh", "scripts/quant_status.sh", str(runtime_dir)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        finally:
+            if original_stop_contents is None:
+                stop_file.unlink(missing_ok=True)
+            else:
+                stop_file.write_text(original_stop_contents, encoding="utf-8")
+            if runtime_dir.exists():
+                shutil.rmtree(runtime_dir)
+
+        self.assertIn("status: healthy", status_proc.stdout)
+        self.assertIn("stop_requested: False", status_proc.stdout)
+        self.assertIn("supervisor_status: unavailable", status_proc.stdout)
+        self.assertNotIn("status_reason: supervisor_stop_requested", status_proc.stdout)
 
     def test_restore_futures_state_from_runtime_rehydrates_live_positions(self) -> None:
         session = self._build_session()

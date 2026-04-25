@@ -24,6 +24,8 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         )
 
         self.assertIn("SUPERVISOR_STOP_FILE", script)
+        self.assertIn("mark_stopped_health", script)
+        self.assertIn('"stopped"', script)
         self.assertIn("refusing to start", script)
         self.assertIn("not restarting", script)
 
@@ -53,6 +55,8 @@ class LiveRuntimeScriptTests(unittest.TestCase):
 
         self.assertIn("_supervisor_stop", script)
         self.assertIn("_safety_guardian_stop", script)
+        self.assertIn("live_supervisor_health.json", script)
+        self.assertIn("stopped_by_quant_stop", script)
         self.assertIn("live_supervisor_watchdog.pid", script)
         self.assertIn("scripts/quant_run_live_orders.sh", script)
 
@@ -77,13 +81,33 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         )
 
         self.assertIn("live_stop_requested()", script)
+        self.assertIn("live_stop_state_applies()", script)
+        self.assertIn("health_state_indicates_intentional_stop()", script)
+        self.assertIn("describe_stop_requested()", script)
+        self.assertIn("persisted stop health detected", script)
+        self.assertIn("supervisor_stop_requested|stopped_by_quant_stop", script)
         self.assertIn("STOP_REQUESTED=1", script)
         self.assertIn("runtime intentionally stopped", script)
-        self.assertIn("quant_binance process absent as expected", script)
+        self.assertIn('printf \'%s\' "stop sentinel present"', script)
+        self.assertIn('printf \'%s\' "persisted stop health present"', script)
+        self.assertIn("$(describe_stop_requested); quant_binance process absent as expected", script)
+        self.assertIn("$(describe_stop_requested); supervisor pid check skipped", script)
+        self.assertIn("$(describe_stop_requested); watchdog check skipped", script)
+        self.assertIn("health file reflects intentional stop", script)
         self.assertIn("health stale while runtime is intentionally stopped", script)
         self.assertIn('if [ "$STOP_REQUESTED" = "1" ]; then', script)
         self.assertIn("[STATUS] intentionally stopped — autofix suppressed", script)
         self.assertIn("[SKIP] runtime intentionally stopped — autofix suppressed", script)
+        self.assertIn("if live_stop_state_applies && live_stop_requested; then", script)
+
+    def test_quant_health_audit_uses_macos_safe_claude_timeout_guard(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("macOS에는 timeout 명령 없음", script)
+        self.assertIn('( sleep 600 && kill "$CLAUDE_PID" 2>/dev/null ) &', script)
+        self.assertNotIn('timeout 600 "$CLAUDE"', script)
 
     def test_yolo_health_check_skips_exchange_actions_when_stop_sentinel_present(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "yolo_health_check.py").read_text(
@@ -99,12 +123,27 @@ class LiveRuntimeScriptTests(unittest.TestCase):
             encoding="utf-8"
         )
 
+        self.assertIn('RUNTIME_INPUT="${1:-${QUANT_HEALTH_AUDIT_RUNTIME:-quant_runtime}}"', script)
+        self.assertIn('*) RUNTIME="$REPO/$RUNTIME_INPUT" ;;', script)
         self.assertIn("QUANT_HEALTH_AUDIT_RUNTIME", script)
         self.assertIn("_paper50.out.log", script)
         self.assertIn("PAPER50_MODE=1", script)
+        self.assertIn("RUNTIME_BASENAME", script)
         self.assertIn("process table unavailable, but runtime heartbeat log is fresh", script)
         self.assertIn("FORENSICS_ROOT", script)
         self.assertIn('grep "HEARTBEAT" >/dev/null', script)
+        self.assertIn("summary_count_keys", script)
+        self.assertIn("use_overview_fallback", script)
+
+    def test_quant_health_audit_does_not_apply_live_stop_to_paper50_runtime(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('quant_runtime_paper50*|*paper50*', script)
+        self.assertIn('live_stop_state_applies() {', script)
+        self.assertIn('[ "$PAPER50_MODE" != "1" ]', script)
+        self.assertIn("elif live_stop_state_applies && health_state_indicates_intentional_stop; then", script)
 
     def test_quant_run_paper50_readonly_only_blocks_live_when_requested(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_paper50_readonly.sh").read_text(
@@ -114,6 +153,15 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("QUANT_PAPER50_BLOCK_LIVE_AUTO", script)
         self.assertIn("_supervisor_stop", script)
         self.assertLess(script.index("QUANT_PAPER50_BLOCK_LIVE_AUTO"), script.index("_supervisor_stop"))
+
+    def test_quant_run_paper50_readonly_starts_monitor_sidecar(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_paper50_readonly.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("scripts/monitor_daemon_health.py", script)
+        self.assertIn("_monitor.pid", script)
+        self.assertLess(script.index("monitor_daemon_health.py"), script.index("quant_binance.runtime"))
 
     def test_quant_health_audit_does_not_count_heartbeat_numbers_as_429s(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(

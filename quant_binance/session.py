@@ -1727,7 +1727,15 @@ class LivePaperSession:
             )
         ):
             rejections.append("SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL")
+        recovery_reason = ""
         if rejections:
+            recovery_reason = self._paper_symbol_filter_recovery_reason(
+                decision,
+                profile=profile,
+                rejections=tuple(rejections),
+                edge_to_cost=edge_to_cost,
+            )
+        if rejections and not recovery_reason:
             return replace(
                 decision,
                 final_mode="cash",
@@ -1741,10 +1749,53 @@ class LivePaperSession:
                 decision,
                 order_intent_notional_usd=round(decision.order_intent_notional_usd * profile.size_multiplier, 6),
                 size_boost_reasons=tuple(
-                    sorted(set(decision.size_boost_reasons + (f"SYMBOL_FILTER_PROFILE_SIZE:{decision.symbol}",)))
+                    sorted(
+                        set(
+                            decision.size_boost_reasons
+                            + (f"SYMBOL_FILTER_PROFILE_SIZE:{decision.symbol}",)
+                            + ((recovery_reason,) if recovery_reason else ())
+                        )
+                    )
                 ),
             )
+        if recovery_reason:
+            return replace(
+                decision,
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (recovery_reason,)))),
+            )
         return decision
+
+    def _paper_symbol_filter_recovery_reason(
+        self,
+        decision: DecisionIntent,
+        *,
+        profile,
+        rejections: tuple[str, ...],
+        edge_to_cost: float,
+    ) -> str:
+        if self.live_order_executor is not None or not self._paper_verification_mode_enabled():
+            return ""
+        if not bool(getattr(profile, "paper_recovery_enabled", False)):
+            return ""
+        side = str(getattr(profile, "paper_recovery_side", "") or "").strip().lower()
+        if side and decision.side != side:
+            return ""
+        allowed = set(getattr(profile, "paper_recovery_allowed_rejections", ()) or ())
+        if allowed and not set(rejections).issubset(allowed):
+            return ""
+        if decision.predictability_score < float(getattr(profile, "paper_recovery_min_score", 0.0) or 0.0):
+            return ""
+        if decision.volume_confirmation < float(getattr(profile, "paper_recovery_min_volume_confirmation", 0.0) or 0.0):
+            return ""
+        if decision.net_expected_edge_bps < float(getattr(profile, "paper_recovery_min_net_edge_bps", 0.0) or 0.0):
+            return ""
+        if edge_to_cost < float(getattr(profile, "paper_recovery_min_edge_to_cost", 0.0) or 0.0):
+            return ""
+        max_cost = float(getattr(profile, "paper_recovery_max_cost_bps", 0.0) or 0.0)
+        if max_cost > 0.0 and decision.estimated_round_trip_cost_bps > max_cost:
+            return ""
+        reason = str(getattr(profile, "paper_recovery_reason", "") or "PAPER_SYMBOL_FILTER_RECOVERY")
+        return f"{reason}:{decision.symbol}:{decision.side}"
 
     def _apply_paper_verification_front_entry_gate(self, decision: DecisionIntent) -> DecisionIntent:
         if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:

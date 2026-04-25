@@ -5,7 +5,11 @@
 set -uo pipefail
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
-RUNTIME="${QUANT_HEALTH_AUDIT_RUNTIME:-$REPO/quant_runtime}"
+RUNTIME_INPUT="${1:-${QUANT_HEALTH_AUDIT_RUNTIME:-quant_runtime}}"
+case "$RUNTIME_INPUT" in
+    /*) RUNTIME="$RUNTIME_INPUT" ;;
+    *) RUNTIME="$REPO/$RUNTIME_INPUT" ;;
+esac
 PYTHON="$SCRIPT_DIR/quant_python.sh"
 CLAUDE="${CLAUDE_BIN:-$(command -v claude 2>/dev/null || true)}"
 chmod +x "$PYTHON" 2>/dev/null || true
@@ -13,9 +17,17 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 DISABLE_AUTOFIX="${QUANT_HEALTH_AUDIT_DISABLE_AUTOFIX:-0}"
 ALLOW_RESTART="${QUANT_HEALTH_AUDIT_ALLOW_RESTART:-0}"
 
+RUNTIME_BASENAME="$(basename "$RUNTIME")"
 SUPERVISOR_LOG="$RUNTIME/live_supervisor.log"
 PAPER50_MODE=0
-if [ ! -f "$SUPERVISOR_LOG" ] && [ -f "$RUNTIME/_paper50.out.log" ]; then
+case "$RUNTIME_BASENAME" in
+    quant_runtime_paper50*|*paper50*)
+        PAPER50_MODE=1
+        ;;
+esac
+if [ "$PAPER50_MODE" = "1" ] && [ -f "$RUNTIME/_paper50.out.log" ]; then
+    SUPERVISOR_LOG="$RUNTIME/_paper50.out.log"
+elif [ ! -f "$SUPERVISOR_LOG" ] && [ -f "$RUNTIME/_paper50.out.log" ]; then
     SUPERVISOR_LOG="$RUNTIME/_paper50.out.log"
     PAPER50_MODE=1
 fi
@@ -25,6 +37,21 @@ if [ -d "$RUNTIME/forensics" ]; then
     FORENSICS_ROOT="$RUNTIME/forensics"
 fi
 SUMMARY_ROOT="$OUTPUT_MODE_ROOT/latest"
+HEALTH_STATE_PATH="$RUNTIME/live_supervisor_health.json"
+
+read_health_state() {
+    [ -f "$HEALTH_STATE_PATH" ] || return 1
+    "$PYTHON" - "$HEALTH_STATE_PATH" <<'PY' 2>/dev/null
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+for key in ("status", "reason", "summary"):
+    value = payload.get(key, "")
+    print("" if value is None else str(value))
+PY
+}
 
 file_age_seconds() {
     "$PYTHON" - "$1" <<'PY' 2>/dev/null
@@ -89,6 +116,34 @@ live_stop_requested() {
     return 1
 }
 
+health_state_indicates_intentional_stop() {
+    [ "${HEALTH_STATUS:-}" = "stopped" ] || return 1
+    case "${HEALTH_REASON:-}" in
+        supervisor_stop_requested|stopped_by_quant_stop)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+live_stop_state_applies() {
+    [ "$PAPER50_MODE" != "1" ]
+}
+
+describe_stop_requested() {
+    case "${STOP_REQUESTED_SOURCE:-}" in
+        stop_sentinel)
+            printf '%s' "stop sentinel present"
+            ;;
+        health_state)
+            printf '%s' "persisted stop health present"
+            ;;
+        *)
+            printf '%s' "intentional stop detected"
+            ;;
+    esac
+}
+
 latest_child_pid_from_log() {
     if [ -f "$SUPERVISOR_LOG" ]; then
         grep -a "started child pid=" "$SUPERVISOR_LOG" \
@@ -104,9 +159,18 @@ echo "============================================"
 WARNINGS=0
 CRITICALS=0
 ISSUES=""
+HEALTH_STATE_OUTPUT="$(read_health_state || true)"
+HEALTH_STATUS="$(printf '%s\n' "$HEALTH_STATE_OUTPUT" | sed -n '1p')"
+HEALTH_REASON="$(printf '%s\n' "$HEALTH_STATE_OUTPUT" | sed -n '2p')"
+HEALTH_SUMMARY="$(printf '%s\n' "$HEALTH_STATE_OUTPUT" | sed -n '3p')"
 STOP_REQUESTED=0
-if live_stop_requested; then
+STOP_REQUESTED_SOURCE=""
+if live_stop_state_applies && live_stop_requested; then
     STOP_REQUESTED=1
+    STOP_REQUESTED_SOURCE="stop_sentinel"
+elif live_stop_state_applies && health_state_indicates_intentional_stop; then
+    STOP_REQUESTED=1
+    STOP_REQUESTED_SOURCE="health_state"
 fi
 
 warn() { echo "  WARNING: $1"; WARNINGS=$((WARNINGS+1)); ISSUES="$ISSUES [W] $1"; }
@@ -133,12 +197,16 @@ echo ""
 echo "[1] 프로세스 상태"
 
 if [ "$STOP_REQUESTED" = "1" ]; then
-    echo "  STOPPED: live stop sentinel present — runtime intentionally stopped"
+    if [ "$STOP_REQUESTED_SOURCE" = "health_state" ]; then
+        echo "  STOPPED: persisted stop health detected — runtime intentionally stopped ($HEALTH_REASON)"
+    else
+        echo "  STOPPED: live stop sentinel present — runtime intentionally stopped"
+    fi
 fi
 
 PROCS=$(pgrep_count "quant_binance")
 if [ "$STOP_REQUESTED" = "1" ] && [ "$PROCS" -eq 0 ]; then
-    echo "  OK: stop sentinel present; quant_binance process absent as expected"
+    echo "  OK: $(describe_stop_requested); quant_binance process absent as expected"
 elif [ "$PROCS" -ge 1 ]; then
     echo "  OK: quant_binance ${PROCS}개 실행 중"
 else
@@ -156,7 +224,7 @@ fi
 
 SUPERVISOR_PID="$(slot_pid "$RUNTIME/live_supervisor.pid")"
 if [ "$STOP_REQUESTED" = "1" ]; then
-    echo "  OK: stop sentinel present; supervisor pid check skipped"
+    echo "  OK: $(describe_stop_requested); supervisor pid check skipped"
 elif [ "$PAPER50_MODE" = "1" ]; then
     echo "  OK: paper50 read-only runtime detected; supervisor pid check skipped"
 elif pid_is_visible "$SUPERVISOR_PID"; then
@@ -168,7 +236,7 @@ fi
 # Watchdog 프로세스
 WD=$(pgrep_count "quant_live_watchdog.py")
 if [ "$STOP_REQUESTED" = "1" ]; then
-    echo "  OK: stop sentinel present; watchdog check skipped"
+    echo "  OK: $(describe_stop_requested); watchdog check skipped"
 elif [ "$PAPER50_MODE" = "1" ]; then
     echo "  OK: paper50 read-only runtime detected; watchdog check skipped"
 elif [ "$WD" -ge 1 ]; then
@@ -185,7 +253,7 @@ fi
 
 # Health file
 if [ -f "$RUNTIME/live_supervisor_health.json" ]; then
-    STATUS=$($PYTHON -c "import json; d=json.load(open('$RUNTIME/live_supervisor_health.json')); print(d.get('status','unknown'))" 2>/dev/null || echo "parse_error")
+    STATUS="${HEALTH_STATUS:-$($PYTHON -c "import json; d=json.load(open('$RUNTIME/live_supervisor_health.json')); print(d.get('status','unknown'))" 2>/dev/null || echo "parse_error")}"
     echo "  Health status: $STATUS"
     if [ "$STATUS" != "healthy" ]; then
         warn_unless_stopped "health status=$STATUS"
@@ -223,8 +291,10 @@ PY
     fi
     if [ "$HEALTH_AGE_STATUS" -ne 0 ] && [ "$STOP_REQUESTED" != "1" ]; then
         warn "health 파일 30분 이상 미갱신"
-    elif [ "$STOP_REQUESTED" = "1" ]; then
+    elif [ "$HEALTH_AGE_STATUS" -ne 0 ] && [ "$STOP_REQUESTED" = "1" ]; then
         echo "  STOPPED: health stale while runtime is intentionally stopped"
+    elif [ "$STOP_REQUESTED" = "1" ]; then
+        echo "  OK: health file reflects intentional stop"
     fi
 fi
 
@@ -600,6 +670,22 @@ $PYTHON -c "
 import json
 from pathlib import Path
 
+summary_path = Path('$SUMMARY_ROOT/summary.json')
+summary = {}
+summary_mtime = 0.0
+if summary_path.exists():
+    try:
+        summary = json.loads(summary_path.read_text())
+        summary_mtime = summary_path.stat().st_mtime
+    except Exception:
+        summary = {}
+        summary_mtime = 0.0
+
+summary_count_keys = {
+    'live_orders': 'live_order_count',
+    'tested_orders': 'tested_order_count',
+}
+
 for log_name in ['live_orders', 'tested_orders']:
     total = 0
     paths = []
@@ -610,11 +696,25 @@ for log_name in ['live_orders', 'tested_orders']:
     if out_root.exists():
         paths.extend(out_root.rglob(f'{log_name}.jsonl'))
     seen = set()
+    freshest_log_mtime = 0.0
     for f in paths:
         if f in seen:
             continue
         seen.add(f)
+        try:
+            freshest_log_mtime = max(freshest_log_mtime, f.stat().st_mtime)
+        except OSError:
+            pass
         total += sum(1 for _ in f.open())
+    summary_count = summary.get(summary_count_keys[log_name])
+    try:
+        summary_count = int(summary_count or 0)
+    except (TypeError, ValueError):
+        summary_count = 0
+    if summary_mtime > freshest_log_mtime:
+        total = summary_count
+    elif total == 0 and summary_count:
+        total = summary_count
     print(f'  {log_name}: {total}건')
 " 2>/dev/null || echo "  API check skipped"
 
@@ -663,33 +763,75 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from collections import Counter
 
+overview_path = Path('$SUMMARY_ROOT/overview.json')
+overview = {}
+overview_mtime = 0.0
+if overview_path.exists():
+    try:
+        overview = json.loads(overview_path.read_text())
+        overview_mtime = overview_path.stat().st_mtime
+    except Exception:
+        overview = {}
+        overview_mtime = 0.0
+
 decs = []
 flat = Path('$FORENSICS_ROOT') / 'decisions.jsonl'
 if flat.exists():
     paths = [flat]
 else:
     paths = list(Path('$OUTPUT_MODE_ROOT').rglob('decisions.jsonl')) if Path('$OUTPUT_MODE_ROOT').exists() else []
+freshest_log_mtime = 0.0
 for f in paths:
+    try:
+        freshest_log_mtime = max(freshest_log_mtime, f.stat().st_mtime)
+    except OSError:
+        pass
     for line in f.open():
         try: decs.append(json.loads(line))
         except: pass
 
-print(f'  총 의사결정: {len(decs)}건')
-if decs:
+recent_decisions_fallback = overview.get('recent_decisions') if isinstance(overview.get('recent_decisions'), list) else []
+overview_decision_count = overview.get('decision_count')
+try:
+    overview_decision_count = int(overview_decision_count or 0)
+except (TypeError, ValueError):
+    overview_decision_count = 0
+use_overview_fallback = overview_mtime > freshest_log_mtime and overview_decision_count > 0
+decision_total = overview_decision_count if use_overview_fallback else len(decs)
+
+print(f'  총 의사결정: {decision_total}건')
+if decs or use_overview_fallback:
     modes = Counter(d.get('final_mode', d.get('mode','?')) for d in decs)
-    print(f'  모드: {dict(modes)}')
+    if use_overview_fallback and recent_decisions_fallback:
+        recent_modes = Counter(d.get('final_mode', d.get('mode','?')) for d in recent_decisions_fallback)
+        print(f'  최근 모드 샘플: {dict(recent_modes)}')
+    elif modes:
+        print(f'  모드: {dict(modes)}')
 
     # Recent decisions (last 6 hours)
     now = datetime.now(tz=timezone.utc)
     recent = [d for d in decs if d.get('timestamp') and (now - datetime.fromisoformat(d['timestamp'])).total_seconds() < 21600]
+    if use_overview_fallback:
+        last_decision_timestamp = overview.get('last_decision_timestamp')
+        try:
+            last_decision_at = datetime.fromisoformat(last_decision_timestamp) if last_decision_timestamp else None
+        except ValueError:
+            last_decision_at = None
+        if last_decision_at is not None and (now - last_decision_at).total_seconds() < 21600:
+            recent = recent_decisions_fallback or [{}]
     print(f'  최근 6h 의사결정: {len(recent)}건')
     if len(recent) == 0:
         print(f'  WARNING: 6시간 동안 의사결정 0건 — 데몬 stall 또는 데이터 부재')
 
     # cash ratio (전체 대비)
     cash_count = modes.get('cash', 0)
-    if len(decs) > 20:
-        cash_pct = cash_count / len(decs) * 100
+    if use_overview_fallback and recent_decisions_fallback:
+        cash_count = sum(1 for d in recent_decisions_fallback if d.get('final_mode', d.get('mode','?')) == 'cash')
+        cash_denominator = len(recent_decisions_fallback)
+    else:
+        cash_denominator = len(decs)
+    if cash_denominator > 20:
+        cash_pct = cash_count / cash_denominator * 100
         print(f'  cash(미진입) 비율: {cash_pct:.0f}%')
         if cash_pct > 95:
             print(f'  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적')
