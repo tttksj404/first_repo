@@ -52,15 +52,9 @@ logs/
 .tmp-test-logs/
 scripts/_safety_guardian_stop
 scripts/_supervisor_stop
-quant_runtime/**/*.err
-quant_runtime/**/*.log
-quant_runtime/**/*.out
-quant_runtime/**/*.jsonl
-quant_runtime/forensics/
-quant_runtime/output/
-quant_runtime_paper50/*.err
-quant_runtime_paper50/*.log
-quant_runtime_paper50/artifacts/
-quant_runtime_paper50/execution_quality_state.json
-quant_runtime_paper50/forensics/
-quant_runtime_paper50/output/
+
+# 2026-04-27: quant_runtime, quant_runtime_paper50 전체를
+# iCloudDrive/quant_archive/ 로 이전 (git history 정리).
+# 앞으로 이 폴더는 git 추적 대상 아님.
+quant_runtime/
+quant_runtime_paper50/
