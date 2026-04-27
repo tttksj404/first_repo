@@ -1,6 +1,8 @@
 # Environments & Secrets
 .env
 .env.*
+/env
+/env.*
 *.key
 *.token
 notion_key.txt
