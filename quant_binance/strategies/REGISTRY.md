@@ -17,9 +17,11 @@
 
 ## 전략 비교 표
 
-| ID | 가설 한 줄 | Status | 부모 | 변경 변수 | BT 승률 | BT 평균R | BT MDD | Live 승률 | Live PnL | 결론·다음 후보 |
-|---|---|---|---|---|---:|---:|---:|---:|---:|---|
-| [S001](S001_baseline/card.md) | 현 기본 config 그대로 — 베이스라인 측정 | bt-only | — | (베이스) | — | — | — | — | — | 모든 후속 전략의 비교 기준 |
+> 비고: `replay` 모드는 진입 의사결정만 평가 (PnL/승률/MDD/Sharpe N/A). closed-trade 메트릭 = `batch_backtest.py` (klines) 또는 페이퍼라이브 누적.
+
+| ID | 가설 한 줄 | Status | 부모 | 변경 변수 | 거래 | 진입률 | Gross bps | Net bps | 승률 | Live PnL | 결론·다음 후보 |
+|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| [S001](S001_baseline/card.md) | 현 기본 config 그대로 — 베이스라인 측정 | bt-only | — | (베이스) | 1,258 | 70% | **−1.16** | −17.16 | 35.9% | — | **신호 random 수준 + cost 못 이김. 진입 늘리기·레버리지 ↑ 모두 금지. 다음 후보: Universe=BTC 단독(S002), Cost 절감(S003), Holding 늘리기(S004)** |
 
 ## 사고 사이클 (반복할 것)
 
