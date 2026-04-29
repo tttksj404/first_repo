@@ -17,6 +17,7 @@ SCRIPTS = ROOT / "quant_binance" / "strategies" / "_scripts"
 UNIV_FULL = ["DOGEUSDT","PEPEUSDT","WIFUSDT","ARBUSDT","OPUSDT","AVAXUSDT","SUIUSDT","ADAUSDT","APTUSDT","BNBUSDT","DOTUSDT","LINKUSDT","LTCUSDT","NEARUSDT","SOLUSDT","UNIUSDT","XRPUSDT","BTCUSDT"]
 UNIV_NO_DEAD = [s for s in UNIV_FULL if s not in {"WIFUSDT","LTCUSDT","BTCUSDT"}]
 UNIV_TOP10 = ["DOGEUSDT","PEPEUSDT","SOLUSDT","ARBUSDT","ADAUSDT","LINKUSDT","DOTUSDT","NEARUSDT","AVAXUSDT","UNIUSDT"]
+UNIV_MEMECOIN = ["DOGEUSDT","PEPEUSDT","WIFUSDT"]
 
 STRATEGY_PARAMS = {
     "G185": {"folder":"G185_size40_100usd",          "size":0.40,"lev":5.0,"thr":80,"hold":24,"max_conc":5,"atr":8.0,"universe":UNIV_FULL},
@@ -48,6 +49,14 @@ STRATEGY_PARAMS = {
     "G405": {"folder":"G405_real100_20x_atr6",        "size":0.20,"lev":20.0,"thr":80,"hold":24,"max_conc":5,"atr":6.0,"universe":UNIV_NO_DEAD},
     "G406": {"folder":"G406_real100_15x_conc8",       "size":0.15,"lev":15.0,"thr":80,"hold":24,"max_conc":8,"atr":8.0,"universe":UNIV_NO_DEAD},
     "G408": {"folder":"G408_real100_10x_conc8",       "size":0.20,"lev":10.0,"thr":80,"hold":24,"max_conc":8,"atr":8.0,"universe":UNIV_NO_DEAD},
+    # G710 series — TRUE MAX GAMBLE on $50, size 1.0 + max_conc 1
+    # NOTE: equity=$50 implicit (per backtest); emulator template still uses $100 hardcoded so PnL scaling 2x — for paper-live comparison this is OK
+    "G710": {"folder":"G710_meme_lev20_size1",        "size":1.00,"lev":20.0,"thr":80,"hold":24,"max_conc":1,"atr":8.0,"universe":UNIV_MEMECOIN},
+    "G711": {"folder":"G711_meme_lev30_size1",        "size":1.00,"lev":30.0,"thr":80,"hold":24,"max_conc":1,"atr":8.0,"universe":UNIV_MEMECOIN},
+    # G800 series — grid search winners (1458 combos / 138 robust pass)
+    # Both use atr_min=3% (NEW dim: require minimum volatility for entry)
+    "G801": {"folder":"G801_atr3to10_lev20",          "size":0.20,"lev":20.0,"thr":80,"hold":24,"max_conc":5,"atr":10.0,"atr_min":3.0,"universe":UNIV_NO_DEAD},
+    "G802": {"folder":"G802_hold36_atr3to10",         "size":0.20,"lev":20.0,"thr":80,"hold":36,"max_conc":5,"atr":10.0,"atr_min":3.0,"universe":UNIV_NO_DEAD},
 }
 
 EMULATOR_TEMPLATE = r'''"""{SID} paper-live emulator (Linux/cloud)."""
@@ -69,7 +78,7 @@ LOG    = OUT / "emulator.log"
 
 UNIVERSE = {UNIVERSE_LIST}
 EQUITY_USD={EQUITY}; SIZE_PCT={SIZE}; LEVERAGE={LEV}; THRESHOLD={THR}; HOLD_BARS={HOLD}
-MAX_CONC={MAX_CONC}; ATR_GUARD_PCT={ATR}; COST_BPS_RT=16.0; CYCLE_SECONDS=300
+MAX_CONC={MAX_CONC}; ATR_GUARD_PCT={ATR}; ATR_MIN_PCT={ATR_MIN}; COST_BPS_RT=16.0; CYCLE_SECONDS=300
 BINANCE_KLINES="https://api.binance.com/api/v3/klines"
 
 def log(m):
@@ -151,6 +160,8 @@ def cycle(state):
         if info["score"]<THRESHOLD: continue
         if info["atr_pct"]>ATR_GUARD_PCT:
             log(f"  SKIP {{sym}}: score {{info['score']:.1f}} but ATR {{info['atr_pct']:.2f}}% > {{ATR_GUARD_PCT}}%"); continue
+        if info["atr_pct"]<ATR_MIN_PCT:
+            log(f"  SKIP {{sym}}: score {{info['score']:.1f}} but ATR {{info['atr_pct']:.2f}}% < {{ATR_MIN_PCT}}% (vol filter)"); continue
         pos={{"entry_ts_ms":now_ms,"entry_close":info["close"],"score":info["score"],"atr_pct":info["atr_pct"]}}
         open_pos[sym]=pos
         append_trade({{"type":"ENTRY","symbol":sym,"entry_ts_ms":now_ms,"entry_close":info["close"],
@@ -182,7 +193,7 @@ def render_emulator(sid: str) -> str:
     return EMULATOR_TEMPLATE.format(
         SID=sid, SID_LOWER=sid.lower(),
         EQUITY=100.0, SIZE=p["size"], LEV=p["lev"], THR=p["thr"], HOLD=p["hold"],
-        MAX_CONC=p["max_conc"], ATR=p["atr"],
+        MAX_CONC=p["max_conc"], ATR=p["atr"], ATR_MIN=p.get("atr_min", 0.0),
         UNIVERSE_LIST=repr(p["universe"]),
     )
 
