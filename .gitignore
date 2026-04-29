@@ -60,3 +60,7 @@ scripts/_supervisor_stop
 # 앞으로 이 폴더는 git 추적 대상 아님.
 quant_runtime/
 quant_runtime_paper50/
+
+# 2026-04-29: G185+ paper-live emulator local runtime
+quant_runtime_g185_paper/
+quant_binance/strategies/strategies/

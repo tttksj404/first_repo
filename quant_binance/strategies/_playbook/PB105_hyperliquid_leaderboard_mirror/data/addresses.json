@@ -1,0 +1,28 @@
+[
+  {
+    "address": "0x8cc94dc843e1ea7a19805e0cca43001123512b6a",
+    "equity_usd": 6655071.794592,
+    "open_positions": 139,
+    "fills_30d": 2000,
+    "meta": {
+      "n": 2000,
+      "span_h": 2.17,
+      "trades_per_hour": 922.605,
+      "open_ratio": 0.378,
+      "directional": false
+    }
+  },
+  {
+    "address": "0x010461c14e146ac35fe42271bdc1134ee31c703a",
+    "equity_usd": 113770267.510231,
+    "open_positions": 190,
+    "fills_30d": 2000,
+    "meta": {
+      "n": 2000,
+      "span_h": 0.28,
+      "trades_per_hour": 7112.27,
+      "open_ratio": 0.498,
+      "directional": false
+    }
+  }
+]
