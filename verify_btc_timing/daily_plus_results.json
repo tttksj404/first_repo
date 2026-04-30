@@ -1,0 +1,482 @@
+[
+  {
+    "label": "H9 asia thr0.8% SL3.0% m3.0",
+    "n": 3456,
+    "pnl": -105.95,
+    "wr": 47.4,
+    "mdd": -135.1,
+    "sharpe": -1.15,
+    "per_day": 9.47,
+    "final": -5.95
+  },
+  {
+    "label": "H9 asia thr0.8% SL3.0% m5.0",
+    "n": 3456,
+    "pnl": -176.58,
+    "wr": 47.4,
+    "mdd": -189.6,
+    "sharpe": -1.15,
+    "per_day": 9.47,
+    "final": -76.58
+  },
+  {
+    "label": "H9 asia thr0.8% SL5.0% m3.0",
+    "n": 3456,
+    "pnl": -77.89,
+    "wr": 48.8,
+    "mdd": -117.5,
+    "sharpe": -0.74,
+    "per_day": 9.47,
+    "final": 22.11
+  },
+  {
+    "label": "H9 asia thr0.8% SL5.0% m5.0",
+    "n": 3456,
+    "pnl": -129.81,
+    "wr": 48.8,
+    "mdd": -161.4,
+    "sharpe": -0.74,
+    "per_day": 9.47,
+    "final": -29.81
+  },
+  {
+    "label": "H9 asia thr0.8% SL8.0% m3.0",
+    "n": 3456,
+    "pnl": -53.95,
+    "wr": 49.1,
+    "mdd": -106.3,
+    "sharpe": -0.52,
+    "per_day": 9.47,
+    "final": 46.05
+  },
+  {
+    "label": "H9 asia thr0.8% SL8.0% m5.0",
+    "n": 3456,
+    "pnl": -89.92,
+    "wr": 49.1,
+    "mdd": -147.7,
+    "sharpe": -0.52,
+    "per_day": 9.47,
+    "final": 10.08
+  },
+  {
+    "label": "H10 LW k0.3 m3.0",
+    "n": 3225,
+    "pnl": -175.9,
+    "wr": 43.8,
+    "mdd": -163.1,
+    "sharpe": -3.0,
+    "per_day": 8.84,
+    "final": -75.9
+  },
+  {
+    "label": "H10 LW k0.3 m5.0",
+    "n": 3225,
+    "pnl": -293.16,
+    "wr": 43.8,
+    "mdd": -244.5,
+    "sharpe": -3.0,
+    "per_day": 8.84,
+    "final": -193.16
+  },
+  {
+    "label": "H8 sess p70/30 m3.0 L10.0",
+    "n": 3140,
+    "pnl": 118.22,
+    "wr": 46.1,
+    "mdd": -32.2,
+    "sharpe": 0.9,
+    "per_day": 8.6,
+    "final": 218.22
+  },
+  {
+    "label": "H8 sess p70/30 m3.0 L15.0",
+    "n": 3140,
+    "pnl": 177.32,
+    "wr": 46.1,
+    "mdd": -36.0,
+    "sharpe": 0.9,
+    "per_day": 8.6,
+    "final": 277.32
+  },
+  {
+    "label": "H8 sess p70/30 m5.0 L10.0",
+    "n": 3140,
+    "pnl": 197.03,
+    "wr": 46.1,
+    "mdd": -36.8,
+    "sharpe": 0.9,
+    "per_day": 8.6,
+    "final": 297.03
+  },
+  {
+    "label": "H8 sess p70/30 m5.0 L15.0",
+    "n": 3140,
+    "pnl": 295.54,
+    "wr": 46.1,
+    "mdd": -39.6,
+    "sharpe": 0.9,
+    "per_day": 8.6,
+    "final": 395.54
+  },
+  {
+    "label": "H8 sess p70/30 m8.0 L10.0",
+    "n": 3140,
+    "pnl": 315.24,
+    "wr": 46.1,
+    "mdd": -40.0,
+    "sharpe": 0.9,
+    "per_day": 8.6,
+    "final": 415.24
+  },
+  {
+    "label": "H8 sess p70/30 m8.0 L15.0",
+    "n": 3140,
+    "pnl": 472.86,
+    "wr": 46.1,
+    "mdd": -42.0,
+    "sharpe": 0.9,
+    "per_day": 8.6,
+    "final": 572.86
+  },
+  {
+    "label": "H9 asia thr1.0% SL3.0% m3.0",
+    "n": 3022,
+    "pnl": -91.88,
+    "wr": 47.4,
+    "mdd": -124.2,
+    "sharpe": -1.08,
+    "per_day": 8.28,
+    "final": 8.12
+  },
+  {
+    "label": "H9 asia thr1.0% SL3.0% m5.0",
+    "n": 3022,
+    "pnl": -153.14,
+    "wr": 47.4,
+    "mdd": -174.9,
+    "sharpe": -1.08,
+    "per_day": 8.28,
+    "final": -53.14
+  },
+  {
+    "label": "H9 asia thr1.0% SL5.0% m3.0",
+    "n": 3022,
+    "pnl": -62.08,
+    "wr": 49.1,
+    "mdd": -106.0,
+    "sharpe": -0.62,
+    "per_day": 8.28,
+    "final": 37.92
+  },
+  {
+    "label": "H9 asia thr1.0% SL5.0% m5.0",
+    "n": 3022,
+    "pnl": -103.47,
+    "wr": 49.1,
+    "mdd": -145.7,
+    "sharpe": -0.62,
+    "per_day": 8.28,
+    "final": -3.47
+  },
+  {
+    "label": "H9 asia thr1.0% SL8.0% m3.0",
+    "n": 3022,
+    "pnl": -44.8,
+    "wr": 49.3,
+    "mdd": -99.1,
+    "sharpe": -0.44,
+    "per_day": 8.28,
+    "final": 55.2
+  },
+  {
+    "label": "H9 asia thr1.0% SL8.0% m5.0",
+    "n": 3022,
+    "pnl": -74.66,
+    "wr": 49.3,
+    "mdd": -137.7,
+    "sharpe": -0.44,
+    "per_day": 8.28,
+    "final": 25.34
+  },
+  {
+    "label": "H8 sess p75/25 m3.0 L10.0",
+    "n": 2601,
+    "pnl": 100.21,
+    "wr": 46.3,
+    "mdd": -30.0,
+    "sharpe": 0.71,
+    "per_day": 7.13,
+    "final": 200.21
+  },
+  {
+    "label": "H8 sess p75/25 m3.0 L15.0",
+    "n": 2601,
+    "pnl": 150.32,
+    "wr": 46.3,
+    "mdd": -34.5,
+    "sharpe": 0.71,
+    "per_day": 7.13,
+    "final": 250.32
+  },
+  {
+    "label": "H8 sess p75/25 m5.0 L10.0",
+    "n": 2601,
+    "pnl": 167.02,
+    "wr": 46.3,
+    "mdd": -35.5,
+    "sharpe": 0.71,
+    "per_day": 7.13,
+    "final": 267.02
+  },
+  {
+    "label": "H8 sess p75/25 m5.0 L15.0",
+    "n": 2601,
+    "pnl": 250.54,
+    "wr": 46.3,
+    "mdd": -39.2,
+    "sharpe": 0.71,
+    "per_day": 7.13,
+    "final": 350.54
+  },
+  {
+    "label": "H8 sess p75/25 m8.0 L10.0",
+    "n": 2601,
+    "pnl": 267.24,
+    "wr": 46.3,
+    "mdd": -40.5,
+    "sharpe": 0.71,
+    "per_day": 7.13,
+    "final": 367.24
+  },
+  {
+    "label": "H8 sess p75/25 m8.0 L15.0",
+    "n": 2601,
+    "pnl": 400.86,
+    "wr": 46.3,
+    "mdd": -49.9,
+    "sharpe": 0.71,
+    "per_day": 7.13,
+    "final": 500.86
+  },
+  {
+    "label": "H10 LW k0.5 m3.0",
+    "n": 2222,
+    "pnl": -92.98,
+    "wr": 43.3,
+    "mdd": -97.2,
+    "sharpe": -1.84,
+    "per_day": 6.09,
+    "final": 7.02
+  },
+  {
+    "label": "H10 LW k0.5 m5.0",
+    "n": 2222,
+    "pnl": -154.96,
+    "wr": 43.3,
+    "mdd": -148.9,
+    "sharpe": -1.84,
+    "per_day": 6.09,
+    "final": -54.96
+  },
+  {
+    "label": "H9 asia thr1.5% SL3.0% m3.0",
+    "n": 2207,
+    "pnl": -66.59,
+    "wr": 48.3,
+    "mdd": -97.7,
+    "sharpe": -0.91,
+    "per_day": 6.05,
+    "final": 33.41
+  },
+  {
+    "label": "H9 asia thr1.5% SL3.0% m5.0",
+    "n": 2207,
+    "pnl": -110.98,
+    "wr": 48.3,
+    "mdd": -139.5,
+    "sharpe": -0.91,
+    "per_day": 6.05,
+    "final": -10.98
+  },
+  {
+    "label": "H9 asia thr1.5% SL5.0% m3.0",
+    "n": 2207,
+    "pnl": -43.69,
+    "wr": 50.3,
+    "mdd": -83.9,
+    "sharpe": -0.5,
+    "per_day": 6.05,
+    "final": 56.31
+  },
+  {
+    "label": "H9 asia thr1.5% SL5.0% m5.0",
+    "n": 2207,
+    "pnl": -72.81,
+    "wr": 50.3,
+    "mdd": -118.1,
+    "sharpe": -0.5,
+    "per_day": 6.05,
+    "final": 27.19
+  },
+  {
+    "label": "H9 asia thr1.5% SL8.0% m3.0",
+    "n": 2207,
+    "pnl": -28.64,
+    "wr": 50.7,
+    "mdd": -78.9,
+    "sharpe": -0.32,
+    "per_day": 6.05,
+    "final": 71.36
+  },
+  {
+    "label": "H9 asia thr1.5% SL8.0% m5.0",
+    "n": 2207,
+    "pnl": -47.74,
+    "wr": 50.7,
+    "mdd": -112.3,
+    "sharpe": -0.32,
+    "per_day": 6.05,
+    "final": 52.26
+  },
+  {
+    "label": "H8 sess p80/20 m3.0 L10.0",
+    "n": 2150,
+    "pnl": 98.92,
+    "wr": 46.6,
+    "mdd": -31.9,
+    "sharpe": 0.83,
+    "per_day": 5.89,
+    "final": 198.92
+  },
+  {
+    "label": "H8 sess p80/20 m3.0 L15.0",
+    "n": 2150,
+    "pnl": 148.37,
+    "wr": 46.6,
+    "mdd": -36.8,
+    "sharpe": 0.83,
+    "per_day": 5.89,
+    "final": 248.37
+  },
+  {
+    "label": "H8 sess p80/20 m5.0 L10.0",
+    "n": 2150,
+    "pnl": 164.86,
+    "wr": 46.6,
+    "mdd": -37.9,
+    "sharpe": 0.83,
+    "per_day": 5.89,
+    "final": 264.86
+  },
+  {
+    "label": "H8 sess p80/20 m5.0 L15.0",
+    "n": 2150,
+    "pnl": 247.29,
+    "wr": 46.6,
+    "mdd": -41.9,
+    "sharpe": 0.83,
+    "per_day": 5.89,
+    "final": 347.29
+  },
+  {
+    "label": "H8 sess p80/20 m8.0 L10.0",
+    "n": 2150,
+    "pnl": 263.78,
+    "wr": 46.6,
+    "mdd": -42.4,
+    "sharpe": 0.83,
+    "per_day": 5.89,
+    "final": 363.78
+  },
+  {
+    "label": "H8 sess p80/20 m8.0 L15.0",
+    "n": 2150,
+    "pnl": 395.66,
+    "wr": 46.6,
+    "mdd": -49.8,
+    "sharpe": 0.83,
+    "per_day": 5.89,
+    "final": 495.66
+  },
+  {
+    "label": "H9 asia thr2.0% SL3.0% m3.0",
+    "n": 1587,
+    "pnl": -58.62,
+    "wr": 49.0,
+    "mdd": -91.4,
+    "sharpe": -0.86,
+    "per_day": 4.35,
+    "final": 41.38
+  },
+  {
+    "label": "H9 asia thr2.0% SL3.0% m5.0",
+    "n": 1587,
+    "pnl": -97.7,
+    "wr": 49.0,
+    "mdd": -131.6,
+    "sharpe": -0.86,
+    "per_day": 4.35,
+    "final": 2.3
+  },
+  {
+    "label": "H9 asia thr2.0% SL5.0% m3.0",
+    "n": 1587,
+    "pnl": -34.89,
+    "wr": 51.4,
+    "mdd": -77.3,
+    "sharpe": -0.47,
+    "per_day": 4.35,
+    "final": 65.11
+  },
+  {
+    "label": "H9 asia thr2.0% SL5.0% m5.0",
+    "n": 1587,
+    "pnl": -58.15,
+    "wr": 51.4,
+    "mdd": -111.1,
+    "sharpe": -0.47,
+    "per_day": 4.35,
+    "final": 41.85
+  },
+  {
+    "label": "H9 asia thr2.0% SL8.0% m3.0",
+    "n": 1587,
+    "pnl": -23.7,
+    "wr": 51.9,
+    "mdd": -72.4,
+    "sharpe": -0.31,
+    "per_day": 4.35,
+    "final": 76.3
+  },
+  {
+    "label": "H9 asia thr2.0% SL8.0% m5.0",
+    "n": 1587,
+    "pnl": -39.5,
+    "wr": 51.9,
+    "mdd": -105.7,
+    "sharpe": -0.31,
+    "per_day": 4.35,
+    "final": 60.5
+  },
+  {
+    "label": "H10 LW k0.7 m3.0",
+    "n": 1504,
+    "pnl": -8.94,
+    "wr": 45.2,
+    "mdd": -44.3,
+    "sharpe": -0.21,
+    "per_day": 4.12,
+    "final": 91.06
+  },
+  {
+    "label": "H10 LW k0.7 m5.0",
+    "n": 1504,
+    "pnl": -14.9,
+    "wr": 45.2,
+    "mdd": -64.6,
+    "sharpe": -0.21,
+    "per_day": 4.12,
+    "final": 85.1
+  }
+]

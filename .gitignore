@@ -64,3 +64,7 @@ quant_runtime_paper50/artifacts/
 quant_runtime_paper50/execution_quality_state.json
 quant_runtime_paper50/forensics/
 quant_runtime_paper50/output/
+
+# verify_btc_timing: Binance public klines (8MB), regeneratable via fetch_history.py
+verify_btc_timing/data/
+verify_btc_timing/__pycache__/

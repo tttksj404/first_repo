@@ -1,0 +1,83 @@
+[
+  {
+    "label": "E1 S1 baseline (full)",
+    "n": 10,
+    "pnl": 76.11,
+    "wr": 30.0,
+    "mdd": -23.8,
+    "sharpe": 2.48,
+    "final": 176.11
+  },
+  {
+    "label": "E2 S2 DOGE-session (full)",
+    "n": 168,
+    "pnl": 184.81,
+    "wr": 48.8,
+    "mdd": -25.1,
+    "sharpe": 1.14,
+    "final": 284.81
+  },
+  {
+    "label": "E3 S1+S2 parallel(50/50)",
+    "n": 178,
+    "pnl": 130.46,
+    "wr": 47.8,
+    "mdd": -17.2,
+    "sharpe": 1.42,
+    "final": 230.46
+  },
+  {
+    "label": "  - E3.S1 sub",
+    "n": 10,
+    "pnl": 38.06,
+    "wr": 30.0,
+    "mdd": -23.8,
+    "sharpe": 2.48,
+    "final": 88.06
+  },
+  {
+    "label": "  - E3.S2 sub",
+    "n": 168,
+    "pnl": 92.4,
+    "wr": 48.8,
+    "mdd": -25.1,
+    "sharpe": 1.14,
+    "final": 142.4
+  },
+  {
+    "label": "E4 S1+Trendwise gate",
+    "n": 7,
+    "pnl": 87.24,
+    "wr": 42.9,
+    "mdd": -23.8,
+    "sharpe": 3.61,
+    "final": 187.24
+  },
+  {
+    "label": "E5 (S1+TW)+S2 parallel",
+    "n": 175,
+    "pnl": 136.02,
+    "wr": 48.6,
+    "mdd": -16.8,
+    "sharpe": 1.49,
+    "final": 236.02
+  },
+  {
+    "label": "E6 S1(thr75)+S2 parallel",
+    "n": 352,
+    "pnl": 124.9,
+    "wr": 34.9,
+    "mdd": -49.6,
+    "sharpe": 1.0,
+    "final": 224.9
+  },
+  {
+    "label": "E7 S1(thr75+TW)+S2",
+    "n": 232,
+    "pnl": 134.55,
+    "wr": 42.7,
+    "mdd": -31.9,
+    "sharpe": 1.29,
+    "final": 234.55
+  }
+]
