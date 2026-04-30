@@ -1,0 +1,605 @@
+[
+  {
+    "label": "H7 DOGE-WF fold1",
+    "n": 34,
+    "pnl": 101.71,
+    "final": 201.71,
+    "wr": 61.8,
+    "mdd": -13.3,
+    "avg": 2.992
+  },
+  {
+    "label": "H7 DOGE-WF fold2",
+    "n": 31,
+    "pnl": 64.69,
+    "final": 164.69,
+    "wr": 54.8,
+    "mdd": -45.0,
+    "avg": 2.087
+  },
+  {
+    "label": "H7 DOGE-WF fold3",
+    "n": 28,
+    "pnl": 30.57,
+    "final": 130.57,
+    "wr": 46.4,
+    "mdd": -30.8,
+    "avg": 1.092
+  },
+  {
+    "label": "H6 BTC-LINKUSDT z>2.5",
+    "n": 46,
+    "pnl": -33.88,
+    "final": 1,
+    "wr": 56.5,
+    "mdd": -152.6,
+    "avg": -0.737
+  },
+  {
+    "label": "H6 BTC-AVAXUSDT z>2.5",
+    "n": 44,
+    "pnl": -38.5,
+    "final": 1,
+    "wr": 54.5,
+    "mdd": -160.0,
+    "avg": -0.875
+  },
+  {
+    "label": "H6 BTC-LINKUSDT z>2.0",
+    "n": 84,
+    "pnl": -47.77,
+    "final": 1,
+    "wr": 50.0,
+    "mdd": -208.9,
+    "avg": -0.569
+  },
+  {
+    "label": "H6 BTC-DOGEUSDT z>2.0",
+    "n": 74,
+    "pnl": -48.08,
+    "final": 1,
+    "wr": 45.9,
+    "mdd": -139.2,
+    "avg": -0.65
+  },
+  {
+    "label": "H6 BTC-AVAXUSDT z>1.5",
+    "n": 154,
+    "pnl": -53.56,
+    "final": 1,
+    "wr": 52.6,
+    "mdd": -167.5,
+    "avg": -0.348
+  },
+  {
+    "label": "H6 BTC-SOLUSDT z>2.0",
+    "n": 78,
+    "pnl": -56.23,
+    "final": 1,
+    "wr": 43.6,
+    "mdd": -130.1,
+    "avg": -0.721
+  },
+  {
+    "label": "H6 BTC-AVAXUSDT z>2.0",
+    "n": 83,
+    "pnl": -65.17,
+    "final": 1,
+    "wr": 54.2,
+    "mdd": -144.1,
+    "avg": -0.785
+  },
+  {
+    "label": "H6 BTC-DOGEUSDT z>2.5",
+    "n": 34,
+    "pnl": -65.32,
+    "final": 1,
+    "wr": 44.1,
+    "mdd": -121.2,
+    "avg": -1.921
+  },
+  {
+    "label": "H6 BTC-SOLUSDT z>1.5",
+    "n": 143,
+    "pnl": -67.94,
+    "final": 1,
+    "wr": 46.9,
+    "mdd": -142.6,
+    "avg": -0.475
+  },
+  {
+    "label": "H6 BTC-SOLUSDT z>2.5",
+    "n": 44,
+    "pnl": -76.56,
+    "final": 1,
+    "wr": 40.9,
+    "mdd": -138.0,
+    "avg": -1.74
+  },
+  {
+    "label": "H6 BTC-LINKUSDT z>1.5",
+    "n": 147,
+    "pnl": -78.19,
+    "final": 1,
+    "wr": 52.4,
+    "mdd": -154.9,
+    "avg": -0.532
+  },
+  {
+    "label": "H7 DOGE-WF fold4",
+    "n": 31,
+    "pnl": -81.75,
+    "final": 18.25,
+    "wr": 38.7,
+    "mdd": -83.9,
+    "avg": -2.637
+  },
+  {
+    "label": "H6 BTC-BNBUSDT z>2.0",
+    "n": 84,
+    "pnl": -137.76,
+    "final": 1,
+    "wr": 48.8,
+    "mdd": -158.4,
+    "avg": -1.64
+  },
+  {
+    "label": "H6 BTC-BNBUSDT z>2.5",
+    "n": 51,
+    "pnl": -138.72,
+    "final": 1,
+    "wr": 37.3,
+    "mdd": -140.1,
+    "avg": -2.72
+  },
+  {
+    "label": "H6 BTC-DOGEUSDT z>1.5",
+    "n": 138,
+    "pnl": -163.06,
+    "final": 1,
+    "wr": 46.4,
+    "mdd": -293.1,
+    "avg": -1.182
+  },
+  {
+    "label": "H6 BTC-BNBUSDT z>1.5",
+    "n": 139,
+    "pnl": -212.8,
+    "final": 1,
+    "wr": 46.0,
+    "mdd": -209.8,
+    "avg": -1.531
+  },
+  {
+    "label": "H5 LW BTCUSDT k=0.7",
+    "n": 101,
+    "pnl": -614.66,
+    "final": 1,
+    "wr": 1.0,
+    "mdd": -651.4,
+    "avg": -6.086
+  },
+  {
+    "label": "H5 LW BNBUSDT k=0.7",
+    "n": 100,
+    "pnl": -634.76,
+    "final": 1,
+    "wr": 4.0,
+    "mdd": -661.6,
+    "avg": -6.348
+  },
+  {
+    "label": "H5 LW BNBUSDT k=0.5",
+    "n": 146,
+    "pnl": -670.63,
+    "final": 1,
+    "wr": 11.0,
+    "mdd": -677.1,
+    "avg": -4.593
+  },
+  {
+    "label": "H5 LW BTCUSDT k=0.3",
+    "n": 214,
+    "pnl": -674.47,
+    "final": 1,
+    "wr": 10.7,
+    "mdd": -588.9,
+    "avg": -3.152
+  },
+  {
+    "label": "H5 LW BNBUSDT k=0.3",
+    "n": 220,
+    "pnl": -679.53,
+    "final": 1,
+    "wr": 16.4,
+    "mdd": -675.6,
+    "avg": -3.089
+  },
+  {
+    "label": "H5 LW BTCUSDT k=0.5",
+    "n": 145,
+    "pnl": -695.02,
+    "final": 1,
+    "wr": 6.2,
+    "mdd": -670.9,
+    "avg": -4.793
+  },
+  {
+    "label": "H5 LW DOGEUSDT k=0.3",
+    "n": 205,
+    "pnl": -804.55,
+    "final": 1,
+    "wr": 17.6,
+    "mdd": -423.4,
+    "avg": -3.925
+  },
+  {
+    "label": "H5 LW DOTUSDT k=0.7",
+    "n": 91,
+    "pnl": -818.13,
+    "final": 1,
+    "wr": 6.6,
+    "mdd": -847.1,
+    "avg": -8.99
+  },
+  {
+    "label": "H5 LW XRPUSDT k=0.3",
+    "n": 217,
+    "pnl": -864.47,
+    "final": 1,
+    "wr": 14.3,
+    "mdd": -896.7,
+    "avg": -3.984
+  },
+  {
+    "label": "H5 LW XRPUSDT k=0.7",
+    "n": 96,
+    "pnl": -981.23,
+    "final": 1,
+    "wr": 1.0,
+    "mdd": -1022.1,
+    "avg": -10.221
+  },
+  {
+    "label": "H5 LW DOTUSDT k=0.5",
+    "n": 143,
+    "pnl": -988.92,
+    "final": 1,
+    "wr": 9.8,
+    "mdd": -697.2,
+    "avg": -6.915
+  },
+  {
+    "label": "H5 LW PEPEUSDT k=0.3",
+    "n": 209,
+    "pnl": -992.95,
+    "final": 1,
+    "wr": 15.3,
+    "mdd": -471.4,
+    "avg": -4.751
+  },
+  {
+    "label": "H5 LW DOTUSDT k=0.3",
+    "n": 208,
+    "pnl": -1001.34,
+    "final": 1,
+    "wr": 12.5,
+    "mdd": -635.6,
+    "avg": -4.814
+  },
+  {
+    "label": "H5 LW UNIUSDT k=0.3",
+    "n": 217,
+    "pnl": -1030.9,
+    "final": 1,
+    "wr": 13.4,
+    "mdd": -940.3,
+    "avg": -4.751
+  },
+  {
+    "label": "H5 LW AVAXUSDT k=0.7",
+    "n": 99,
+    "pnl": -1040.0,
+    "final": 1,
+    "wr": 5.1,
+    "mdd": -1182.1,
+    "avg": -10.505
+  },
+  {
+    "label": "H5 LW XRPUSDT k=0.5",
+    "n": 150,
+    "pnl": -1043.41,
+    "final": 1,
+    "wr": 8.0,
+    "mdd": -1079.1,
+    "avg": -6.956
+  },
+  {
+    "label": "H5 LW LINKUSDT k=0.7",
+    "n": 99,
+    "pnl": -1044.95,
+    "final": 1,
+    "wr": 5.1,
+    "mdd": -1220.1,
+    "avg": -10.555
+  },
+  {
+    "label": "H5 LW SOLUSDT k=0.7",
+    "n": 103,
+    "pnl": -1078.7,
+    "final": 1,
+    "wr": 1.9,
+    "mdd": -1155.2,
+    "avg": -10.473
+  },
+  {
+    "label": "H5 LW UNIUSDT k=0.7",
+    "n": 97,
+    "pnl": -1083.27,
+    "final": 1,
+    "wr": 3.1,
+    "mdd": -1147.6,
+    "avg": -11.168
+  },
+  {
+    "label": "H5 LW ARBUSDT k=0.3",
+    "n": 214,
+    "pnl": -1083.29,
+    "final": 1,
+    "wr": 17.3,
+    "mdd": -747.2,
+    "avg": -5.062
+  },
+  {
+    "label": "H5 LW SOLUSDT k=0.3",
+    "n": 217,
+    "pnl": -1100.84,
+    "final": 1,
+    "wr": 14.7,
+    "mdd": -852.2,
+    "avg": -5.073
+  },
+  {
+    "label": "H5 LW DOGEUSDT k=0.7",
+    "n": 105,
+    "pnl": -1107.67,
+    "final": 1,
+    "wr": 5.7,
+    "mdd": -1278.6,
+    "avg": -10.549
+  },
+  {
+    "label": "H5 LW APTUSDT k=0.7",
+    "n": 92,
+    "pnl": -1116.56,
+    "final": 1,
+    "wr": 1.1,
+    "mdd": -912.9,
+    "avg": -12.136
+  },
+  {
+    "label": "H5 LW LINKUSDT k=0.3",
+    "n": 223,
+    "pnl": -1130.84,
+    "final": 1,
+    "wr": 13.9,
+    "mdd": -924.6,
+    "avg": -5.071
+  },
+  {
+    "label": "H5 LW APTUSDT k=0.3",
+    "n": 208,
+    "pnl": -1141.35,
+    "final": 1,
+    "wr": 13.0,
+    "mdd": -822.6,
+    "avg": -5.487
+  },
+  {
+    "label": "H5 LW ADAUSDT k=0.3",
+    "n": 214,
+    "pnl": -1143.5,
+    "final": 1,
+    "wr": 12.6,
+    "mdd": -953.5,
+    "avg": -5.343
+  },
+  {
+    "label": "H5 LW AVAXUSDT k=0.3",
+    "n": 215,
+    "pnl": -1181.08,
+    "final": 1,
+    "wr": 13.5,
+    "mdd": -1246.5,
+    "avg": -5.493
+  },
+  {
+    "label": "H5 LW APTUSDT k=0.5",
+    "n": 144,
+    "pnl": -1181.27,
+    "final": 1,
+    "wr": 8.3,
+    "mdd": -849.4,
+    "avg": -8.203
+  },
+  {
+    "label": "H5 LW OPUSDT k=0.3",
+    "n": 221,
+    "pnl": -1184.99,
+    "final": 1,
+    "wr": 14.5,
+    "mdd": -639.9,
+    "avg": -5.362
+  },
+  {
+    "label": "H5 LW SUIUSDT k=0.7",
+    "n": 97,
+    "pnl": -1195.26,
+    "final": 1,
+    "wr": 1.0,
+    "mdd": -1569.1,
+    "avg": -12.322
+  },
+  {
+    "label": "H5 LW LINKUSDT k=0.5",
+    "n": 152,
+    "pnl": -1225.51,
+    "final": 1,
+    "wr": 6.6,
+    "mdd": -890.2,
+    "avg": -8.063
+  },
+  {
+    "label": "H5 LW UNIUSDT k=0.5",
+    "n": 145,
+    "pnl": -1232.75,
+    "final": 1,
+    "wr": 6.9,
+    "mdd": -1290.1,
+    "avg": -8.502
+  },
+  {
+    "label": "H5 LW OPUSDT k=0.5",
+    "n": 145,
+    "pnl": -1249.15,
+    "final": 1,
+    "wr": 11.0,
+    "mdd": -986.1,
+    "avg": -8.615
+  },
+  {
+    "label": "H5 LW NEARUSDT k=0.7",
+    "n": 106,
+    "pnl": -1250.18,
+    "final": 1,
+    "wr": 2.8,
+    "mdd": -1484.0,
+    "avg": -11.794
+  },
+  {
+    "label": "H5 LW NEARUSDT k=0.3",
+    "n": 222,
+    "pnl": -1273.59,
+    "final": 1,
+    "wr": 14.0,
+    "mdd": -1103.2,
+    "avg": -5.737
+  },
+  {
+    "label": "H5 LW SOLUSDT k=0.5",
+    "n": 154,
+    "pnl": -1275.91,
+    "final": 1,
+    "wr": 4.5,
+    "mdd": -1311.3,
+    "avg": -8.285
+  },
+  {
+    "label": "H5 LW DOGEUSDT k=0.5",
+    "n": 153,
+    "pnl": -1284.29,
+    "final": 1,
+    "wr": 8.5,
+    "mdd": -1205.1,
+    "avg": -8.394
+  },
+  {
+    "label": "H5 LW SUIUSDT k=0.5",
+    "n": 138,
+    "pnl": -1292.96,
+    "final": 1,
+    "wr": 4.3,
+    "mdd": -1635.4,
+    "avg": -9.369
+  },
+  {
+    "label": "H5 LW ADAUSDT k=0.7",
+    "n": 106,
+    "pnl": -1293.72,
+    "final": 1,
+    "wr": 0.9,
+    "mdd": -1473.8,
+    "avg": -12.205
+  },
+  {
+    "label": "H5 LW ADAUSDT k=0.5",
+    "n": 147,
+    "pnl": -1294.01,
+    "final": 1,
+    "wr": 4.8,
+    "mdd": -1441.9,
+    "avg": -8.803
+  },
+  {
+    "label": "H5 LW ARBUSDT k=0.7",
+    "n": 101,
+    "pnl": -1306.92,
+    "final": 1,
+    "wr": 3.0,
+    "mdd": -1039.4,
+    "avg": -12.94
+  },
+  {
+    "label": "H5 LW AVAXUSDT k=0.5",
+    "n": 150,
+    "pnl": -1325.5,
+    "final": 1,
+    "wr": 6.7,
+    "mdd": -1508.5,
+    "avg": -8.837
+  },
+  {
+    "label": "H5 LW ARBUSDT k=0.5",
+    "n": 152,
+    "pnl": -1352.08,
+    "final": 1,
+    "wr": 9.2,
+    "mdd": -918.5,
+    "avg": -8.895
+  },
+  {
+    "label": "H5 LW NEARUSDT k=0.5",
+    "n": 155,
+    "pnl": -1408.79,
+    "final": 1,
+    "wr": 7.1,
+    "mdd": -1629.0,
+    "avg": -9.089
+  },
+  {
+    "label": "H5 LW PEPEUSDT k=0.5",
+    "n": 148,
+    "pnl": -1455.6,
+    "final": 1,
+    "wr": 6.8,
+    "mdd": -715.2,
+    "avg": -9.835
+  },
+  {
+    "label": "H5 LW SUIUSDT k=0.3",
+    "n": 215,
+    "pnl": -1470.34,
+    "final": 1,
+    "wr": 10.2,
+    "mdd": -1097.6,
+    "avg": -6.839
+  },
+  {
+    "label": "H5 LW OPUSDT k=0.7",
+    "n": 108,
+    "pnl": -1473.31,
+    "final": 1,
+    "wr": 2.8,
+    "mdd": -1569.8,
+    "avg": -13.642
+  },
+  {
+    "label": "H5 LW PEPEUSDT k=0.7",
+    "n": 104,
+    "pnl": -1571.56,
+    "final": 1,
+    "wr": 1.9,
+    "mdd": -1698.6,
+    "avg": -15.111
+  }
+]
