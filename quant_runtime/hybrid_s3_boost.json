@@ -1,0 +1,294 @@
+{
+  "universe": [
+    "OPUSDT",
+    "NEARUSDT",
+    "SUIUSDT",
+    "ETHUSDT",
+    "UNIUSDT"
+  ],
+  "n_total_trades": 135,
+  "n_boost_long": 2,
+  "n_boost_total": 26,
+  "modes": [
+    {
+      "id": "M1_baseline_lev1x",
+      "label": "Baseline X1 lev 1x always (no boost)",
+      "lev_normal": 1.0,
+      "lev_boost": 1.0,
+      "boost_filter": "none",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.496,
+        "total_pnl_usd": 13.42,
+        "annual_return_pct_50equity": 26.8,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 63.42,
+        "p5_min_eq": 63.42
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.007,
+        "total_pnl_usd": 0.09,
+        "annual_return_pct_50equity": 0.2,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 50.09,
+        "p5_min_eq": 50.09
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 0.828,
+        "total_pnl_usd": -2.41,
+        "annual_return_pct_50equity": -4.8,
+        "max_dd_usd": 6.42,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 47.59,
+        "p5_min_eq": 47.59
+      }
+    },
+    {
+      "id": "M2_baseline_lev1.5x",
+      "label": "Baseline X1 lev 1.5x always (current S3)",
+      "lev_normal": 1.5,
+      "lev_boost": 1.5,
+      "boost_filter": "none",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.496,
+        "total_pnl_usd": 20.13,
+        "annual_return_pct_50equity": 40.3,
+        "max_dd_usd": 8.25,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 70.13,
+        "p5_min_eq": 70.13
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.007,
+        "total_pnl_usd": 0.14,
+        "annual_return_pct_50equity": 0.3,
+        "max_dd_usd": 8.25,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 50.14,
+        "p5_min_eq": 50.14
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 0.828,
+        "total_pnl_usd": -3.61,
+        "annual_return_pct_50equity": -7.2,
+        "max_dd_usd": 9.63,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 46.39,
+        "p5_min_eq": 46.39
+      }
+    },
+    {
+      "id": "M3_hybrid_long_only",
+      "label": "X1 lev 1x + X4-LONG boost lev 3x",
+      "lev_normal": 1.0,
+      "lev_boost": 3.0,
+      "boost_filter": "long_only",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.586,
+        "total_pnl_usd": 15.86,
+        "annual_return_pct_50equity": 31.7,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 65.86,
+        "p5_min_eq": 65.86
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.185,
+        "total_pnl_usd": 2.54,
+        "annual_return_pct_50equity": 5.1,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 52.54,
+        "p5_min_eq": 52.54
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 0.988,
+        "total_pnl_usd": -0.16,
+        "annual_return_pct_50equity": -0.3,
+        "max_dd_usd": 5.6,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 49.84,
+        "p5_min_eq": 49.84
+      }
+    },
+    {
+      "id": "M4_hybrid_long_lev2x",
+      "label": "X1 lev 1x + X4-LONG boost lev 2x (conservative boost)",
+      "lev_normal": 1.0,
+      "lev_boost": 2.0,
+      "boost_filter": "long_only",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.541,
+        "total_pnl_usd": 14.64,
+        "annual_return_pct_50equity": 29.3,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 64.64,
+        "p5_min_eq": 64.64
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.096,
+        "total_pnl_usd": 1.32,
+        "annual_return_pct_50equity": 2.6,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 51.32,
+        "p5_min_eq": 51.32
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 0.908,
+        "total_pnl_usd": -1.28,
+        "annual_return_pct_50equity": -2.6,
+        "max_dd_usd": 5.73,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 48.72,
+        "p5_min_eq": 48.72
+      }
+    },
+    {
+      "id": "M5_hybrid_symmetric",
+      "label": "X1 lev 1x + X4 (long+short) lev 3x",
+      "lev_normal": 1.0,
+      "lev_boost": 3.0,
+      "boost_filter": "symmetric",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.75,
+        "total_pnl_usd": 23.7,
+        "annual_return_pct_50equity": 47.4,
+        "max_dd_usd": 6.61,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 73.7,
+        "p5_min_eq": 73.7
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.392,
+        "total_pnl_usd": 5.38,
+        "annual_return_pct_50equity": 10.8,
+        "max_dd_usd": 5.5,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 55.38,
+        "p5_min_eq": 55.38
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.148,
+        "total_pnl_usd": 2.08,
+        "annual_return_pct_50equity": 4.2,
+        "max_dd_usd": 5.6,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 52.08,
+        "p5_min_eq": 52.08
+      }
+    },
+    {
+      "id": "M6_hybrid_aggressive",
+      "label": "X1 lev 1.5x + X4-LONG boost lev 4x",
+      "lev_normal": 1.5,
+      "lev_boost": 4.0,
+      "boost_filter": "long_only",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.571,
+        "total_pnl_usd": 23.18,
+        "annual_return_pct_50equity": 46.4,
+        "max_dd_usd": 8.25,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 73.18,
+        "p5_min_eq": 73.18
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.155,
+        "total_pnl_usd": 3.19,
+        "annual_return_pct_50equity": 6.4,
+        "max_dd_usd": 8.25,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 53.19,
+        "p5_min_eq": 53.19
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 0.962,
+        "total_pnl_usd": -0.81,
+        "annual_return_pct_50equity": -1.6,
+        "max_dd_usd": 8.4,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 49.19,
+        "p5_min_eq": 49.19
+      }
+    },
+    {
+      "id": "M7_hybrid_X1_15x_X4_25x",
+      "label": "X1 lev 1.5x + X4-LONG boost lev 2.5x",
+      "lev_normal": 1.5,
+      "lev_boost": 2.5,
+      "boost_filter": "long_only",
+      "full_year": {
+        "n": 135,
+        "wr": 0.889,
+        "pf": 1.526,
+        "total_pnl_usd": 21.35,
+        "annual_return_pct_50equity": 42.7,
+        "max_dd_usd": 8.25,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 71.35,
+        "p5_min_eq": 71.35
+      },
+      "test_0bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 1.066,
+        "total_pnl_usd": 1.36,
+        "annual_return_pct_50equity": 2.7,
+        "max_dd_usd": 8.25,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 51.36,
+        "p5_min_eq": 51.36
+      },
+      "test_5bps": {
+        "n": 50,
+        "wr": 0.88,
+        "pf": 0.882,
+        "total_pnl_usd": -2.49,
+        "annual_return_pct_50equity": -5.0,
+        "max_dd_usd": 8.94,
+        "mc_ruin_pct": 0.0,
+        "median_final_eq": 47.51,
+        "p5_min_eq": 47.51
+      }
+    }
+  ]
+}

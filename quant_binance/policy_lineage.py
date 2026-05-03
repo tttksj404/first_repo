@@ -242,13 +242,13 @@ def policy_lineage_alignment(
         bool(expected_payload.get("structural_key"))
         and expected_payload.get("structural_key") == observed_payload.get("structural_key")
     )
-    if version_match and structural_match and fresh:
+    if structural_match and fresh:
         return {
             "aligned": True,
             "status": "aligned",
             "reason": "POLICY_LINEAGE_MATCH",
         }
-    if version_match and structural_match:
+    if structural_match:
         return {
             "aligned": False,
             "status": "stale",
@@ -259,12 +259,6 @@ def policy_lineage_alignment(
             "aligned": False,
             "status": "mismatch",
             "reason": "POLICY_VERSION_MISMATCH",
-        }
-    if structural_match:
-        return {
-            "aligned": False,
-            "status": "stale",
-            "reason": "POLICY_LINEAGE_STALE",
         }
     return {
         "aligned": False,

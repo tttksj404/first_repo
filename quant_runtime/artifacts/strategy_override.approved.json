@@ -1,16 +1,16 @@
 {
-  "_lock": "PEPE single-focus (2026-04-18 r20): short disabled, TP [40,55], loss_combo tighter. Volume boost deferred to Phase 2.",
+  "_lock": "PEPE single-focus aggression revision (2026-04-23 r13): keep 30x and turnaround-style long holding, but slightly widen cost/edge gates while preserving liquidity and sentiment safeguards.",
   "ensemble_signal_required": false,
   "data_collection_min_trades": 500,
   "data_collection_mode": true,
-  "disable_position_adoption": false,
+  "disable_position_adoption": true,
   "decision_engine": {
     "decision_interval_minutes": 5
   },
   "force_auto_mode": "normal",
   "futures_exposure": {
     "macro_allow_caution": true,
-    "macro_edge_to_cost_multiple_min": 0.72,
+    "macro_edge_to_cost_multiple_min": 0.66,
     "macro_liquidity_relaxation": 0.2,
     "macro_min_entry_net_edge_bps": 0.5,
     "macro_overheat_relaxation": 0.2,
@@ -27,8 +27,8 @@
     "major_symbols": [
       "PEPEUSDT"
     ],
-    "min_entry_net_edge_bps": 0.75,
-    "reduced_entry_net_edge_bps": 0.75,
+    "min_entry_net_edge_bps": 0.25,
+    "reduced_entry_net_edge_bps": 0.25,
     "priority_allow_caution": true,
     "priority_edge_to_cost_multiple_min": 0.68,
     "priority_min_entry_net_edge_bps": 0.0,
@@ -37,7 +37,6 @@
       "PEPEUSDT"
     ],
     "priority_volatility_relaxation": 0.26,
-    "strong_size_multiplier": 2.4,
     "pyramid_enabled": false,
     "pyramid_major_only": true,
     "pyramid_max_adds_per_symbol": 0,
@@ -49,12 +48,7 @@
     "demoted_symbol_size_cap": 1.0,
     "soft_liquidity_floor": 0.08,
     "soft_overheat_penalty_max": 1.0,
-    "soft_volatility_penalty_max": 1.8,
-    "short_disabled": true,
-    "short_extra_score_floor": 20.0,
-    "short_extra_edge_bps": 10.0,
-    "short_extra_liquidity_floor": 0.15,
-    "short_extra_cost_multiple_floor": 0.40
+    "soft_volatility_penalty_max": 1.8
   },
   "exit_rules": {
     "liquidity_drop_exit_buffer": 0.35,
@@ -64,8 +58,8 @@
     "spot_max_holding_minutes": 4320,
     "futures_profit_protection_arm_roe_percent": 28.0,
     "futures_profit_protection_retrace_roe_percent": 9.0,
-    "futures_proactive_take_profit_roe_thresholds_percent": [40.0, 55.0],
-    "futures_proactive_take_profit_fraction": 0.10,
+    "futures_proactive_take_profit_roe_thresholds_percent": [24.0, 60.0],
+    "futures_proactive_take_profit_fraction": 0.25,
     "post_tp_stop_mode": "breakeven",
     "partial_take_profit_r": 2.0
   },
@@ -73,9 +67,7 @@
     "disable_standard_stop_loss_exits": false,
     "long_only_turnaround_mode": true,
     "long_disable_standard_stop_loss": true,
-    "short_only_turnaround_mode": true,
-    "short_disable_standard_stop_loss": true,
-    "major_drawdown_abort_roe_percent": -35.0,
+    "major_drawdown_abort_roe_percent": -20.0,
     "major_drawdown_grace_enabled": true,
     "major_drawdown_grace_minutes": 180,
     "major_drawdown_liquidity_min": 0.25,
@@ -87,9 +79,9 @@
     "major_low_signal_max_holding_minutes": 0,
     "major_low_signal_min_roe_percent": 1.0,
     "major_low_signal_min_unrealized_usd": 1.5,
-    "major_partial_exit_fraction": 0.25,
-    "major_profit_protection_arm_roe_percent": 28.0,
-    "major_profit_protection_retrace_roe_percent": 9.0,
+    "major_partial_exit_fraction": 0.50,
+    "major_profit_protection_arm_roe_percent": 14.0,
+    "major_profit_protection_retrace_roe_percent": 4.0,
     "short_profit_protection_arm_roe_percent": 10.0,
     "short_profit_protection_retrace_roe_percent": 3.0,
     "major_reentry_cooldown_minutes": 15,
@@ -98,7 +90,7 @@
     "non_core_take_profit_fraction": 1.0,
     "non_core_take_profit_min_usd": 0.2,
     "non_core_take_profit_roe_percent": 18,
-    "partial_exit_min_interval_minutes": 30,
+    "partial_exit_min_interval_minutes": 3,
     "portfolio_full_exit_only": false,
     "portfolio_full_exit_profit_ratio": 0.5,
     "portfolio_profit_lock_take_profit_fraction": 0.6,
@@ -111,23 +103,23 @@
     "profit_flip_take_profit_fraction": 1.0,
     "short_profit_flip_fast_take_profit_roe_percent": 1.5,
     "short_profit_flip_take_profit_fraction": 1.0,
-    "stop_loss_roe_percent": -40.0,
-    "soft_stop_roe_percent": -32.0,
-    "turnaround_abort_roe_percent": -45.0,
+    "stop_loss_roe_percent": -10.0,
+    "soft_stop_roe_percent": -8.0,
+    "turnaround_abort_roe_percent": -18.0,
     "turnaround_abort_volatility_adaptive": true,
     "turnaround_abort_volatility_floor_bps": 20.0,
     "turnaround_abort_volatility_scale": 0.2,
     "turnaround_abort_volatility_lookback_bars": 12,
-    "turnaround_abort_min_roe_percent": -38.0,
+    "turnaround_abort_min_roe_percent": -22.0,
     "take_profit_roe_percent": 32.0
   },
   "loss_combo_downgrade": {
-    "cooldown_loss_usd": 5.0,
-    "cooldown_minutes": 60,
+    "cooldown_loss_usd": 10.0,
+    "cooldown_minutes": 30,
     "enabled": true,
     "lookback_hours": 24,
-    "observe_only_loss_usd": 3.0,
-    "prune_loss_usd": 2.0,
+    "observe_only_loss_usd": 5.0,
+    "prune_loss_usd": 3.0,
     "time_bucket_minutes": 240
   },
   "macro_gates": {
@@ -135,7 +127,7 @@
     "spot_block_penalty": 1.05
   },
   "mode_thresholds": {
-    "futures_score_min": 48,
+    "futures_score_min": 45,
     "futures_trend_strength_min": 0.05,
     "futures_liquidity_min": 0.16,
     "futures_volatility_penalty_max": 1.25,
@@ -144,7 +136,7 @@
     "spot_liquidity_min": 999
   },
   "cost_gate": {
-    "edge_to_cost_multiple_min": 0.78
+    "edge_to_cost_multiple_min": 0.68
   },
   "portfolio_focus": {
     "enabled": true,

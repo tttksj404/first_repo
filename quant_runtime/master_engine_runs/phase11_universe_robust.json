@@ -1,0 +1,112 @@
+{
+  "PEPE_DOGE": {
+    "agg": {
+      "n": 25,
+      "wr": 0.56,
+      "pf": 2.302,
+      "total_pnl": 77.72,
+      "max_dd": 14.84,
+      "avg_win": 9.814,
+      "avg_loss": -5.425,
+      "max_consec_loss": 3,
+      "annual_pct": 155.4
+    },
+    "wf_pass": 3,
+    "folds": [
+      -1.19,
+      2.84,
+      75.52,
+      0.55
+    ],
+    "oos": 0.55,
+    "ruin": 3.64
+  },
+  "rotation_30x_orig": {
+    "agg": {
+      "n": 51,
+      "wr": 0.5098,
+      "pf": 1.597,
+      "total_pnl": 83.38,
+      "max_dd": 29.0,
+      "avg_win": 8.575,
+      "avg_loss": -5.582,
+      "max_consec_loss": 5,
+      "annual_pct": 166.8
+    },
+    "wf_pass": 3,
+    "folds": [
+      3.05,
+      4.2,
+      85.55,
+      -9.43
+    ],
+    "oos": -9.43,
+    "ruin": 15.72
+  },
+  "memes_first": {
+    "agg": {
+      "n": 35,
+      "wr": 0.4857,
+      "pf": 2.301,
+      "total_pnl": 134.1,
+      "max_dd": 20.6,
+      "avg_win": 13.951,
+      "avg_loss": -5.726,
+      "max_consec_loss": 4,
+      "annual_pct": 268.2
+    },
+    "wf_pass": 3,
+    "folds": [
+      33.03,
+      17.41,
+      93.59,
+      -9.93
+    ],
+    "oos": 17.43,
+    "ruin": 8.68
+  },
+  "memes_alts": {
+    "agg": {
+      "n": 47,
+      "wr": 0.4681,
+      "pf": 1.893,
+      "total_pnl": 130.33,
+      "max_dd": 35.97,
+      "avg_win": 12.557,
+      "avg_loss": -5.837,
+      "max_consec_loss": 6,
+      "annual_pct": 260.7
+    },
+    "wf_pass": 3,
+    "folds": [
+      27.32,
+      20.17,
+      96.57,
+      -19.52
+    ],
+    "oos": 13.62,
+    "ruin": 17.72
+  },
+  "wide_basket": {
+    "agg": {
+      "n": 65,
+      "wr": 0.4154,
+      "pf": 1.212,
+      "total_pnl": 46.61,
+      "max_dd": 49.35,
+      "avg_win": 9.865,
+      "avg_loss": -5.783,
+      "max_consec_loss": 6,
+      "annual_pct": 93.2
+    },
+    "wf_pass": 1,
+    "folds": [
+      -7.85,
+      -13.93,
+      95.04,
+      -32.44
+    ],
+    "oos": 0.7,
+    "ruin": 48.72
+  }
+}
