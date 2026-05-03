@@ -1,0 +1,89 @@
+# Multi-Arm Experiment — Final Comparison
+snapshot_ts: 2026-04-26T06:06:35.385991+00:00
+
+## Ranked composite score
+
+  1. A_live       score=+0.000 ← WINNER
+  2. E_aggressive  score=+0.000
+  3. F_lev_strong  score=+0.000
+  4. G_fut_active  score=+0.000
+  5. H_guard_on   score=+0.000
+
+## Per-arm detail
+
+### A_live  [alive]
+- decisions_total       : 3679
+- closed_trades         : 0
+- win_rate              : 0.000
+- realized_pnl_usd      : +0.0000
+- unrealized_pnl_usd_est: +0.0000
+- open_positions        : 0
+- cross_coin_blocked    : 0
+- cross_coin_top_priority: 0
+- cross_coin_size_boost : 0
+- intent_notional_usd   : 200.00
+- top_rejections        : {'SYMBOL_PROFILE_EDGE_COST_TOO_THIN': 1440, 'SYMBOL_PROFILE_EDGE_TOO_THIN': 1633, 'SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL': 2474, 'SYMBOL_PROFILE_SCORE_TOO_LOW': 1695, 'SYMBOL_PROFILE_VOLUME_TOO_WEAK': 1229}
+- top_exit_reasons      : {}
+
+### E_aggressive  [alive]
+- decisions_total       : 480
+- closed_trades         : 0
+- win_rate              : 0.000
+- realized_pnl_usd      : +0.0000
+- unrealized_pnl_usd_est: +0.0000
+- open_positions        : 0
+- cross_coin_blocked    : 0
+- cross_coin_top_priority: 0
+- cross_coin_size_boost : 0
+- intent_notional_usd   : 1350.00
+- top_rejections        : {'BUYING_INTO_RESISTANCE': 229, 'DIRECTION_CONFLICT': 293, 'EDGE_BELOW_COST': 296, 'SCORE_TOO_LOW': 234, 'SYMBOL_PROFILE_EDGE_TOO_THIN': 158}
+- top_exit_reasons      : {}
+
+### F_lev_strong  [alive]
+- decisions_total       : 480
+- closed_trades         : 0
+- win_rate              : 0.000
+- realized_pnl_usd      : +0.0000
+- unrealized_pnl_usd_est: +0.0000
+- open_positions        : 0
+- cross_coin_blocked    : 0
+- cross_coin_top_priority: 0
+- cross_coin_size_boost : 0
+- intent_notional_usd   : 2850.00
+- top_rejections        : {'BUYING_INTO_RESISTANCE': 280, 'EDGE_BELOW_COST': 288, 'EDGE_TOO_THIN': 233, 'LIQUIDITY_TOO_WEAK': 236, 'SCORE_TOO_LOW': 258}
+- top_exit_reasons      : {}
+
+### G_fut_active  [alive]
+- decisions_total       : 480
+- closed_trades         : 0
+- win_rate              : 0.000
+- realized_pnl_usd      : +0.0000
+- unrealized_pnl_usd_est: +0.0000
+- open_positions        : 0
+- cross_coin_blocked    : 0
+- cross_coin_top_priority: 0
+- cross_coin_size_boost : 0
+- intent_notional_usd   : 1950.00
+- top_rejections        : {'BUYING_INTO_RESISTANCE': 268, 'DIRECTION_CONFLICT': 244, 'EDGE_BELOW_COST': 277, 'LIQUIDITY_TOO_WEAK': 224, 'SCORE_TOO_LOW': 213}
+- top_exit_reasons      : {}
+
+### H_guard_on  [alive]
+- decisions_total       : 480
+- closed_trades         : 0
+- win_rate              : 0.000
+- realized_pnl_usd      : +0.0000
+- unrealized_pnl_usd_est: +0.0000
+- open_positions        : 0
+- cross_coin_blocked    : 0
+- cross_coin_top_priority: 0
+- cross_coin_size_boost : 0
+- intent_notional_usd   : 0.00
+- top_rejections        : {'EDGE_BELOW_COST': 164, 'SYMBOL_PROFILE_EDGE_COST_TOO_THIN': 189, 'SYMBOL_PROFILE_EDGE_TOO_THIN': 205, 'SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL': 287, 'SYMBOL_PROFILE_SCORE_TOO_LOW': 187}
+- top_exit_reasons      : {}
+
+## Recommendation
+
+Top two arms within 1.0 composite point — declare TIE between A_live and E_aggressive.
+Recommend running an additional cycle before promoting.
+
+ticks_in_log: 43

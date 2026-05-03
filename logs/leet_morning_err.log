@@ -13,3 +13,18 @@ Traceback (most recent call last):
     return f.read()
            ~~~~~~^^
 OSError: [Errno 11] Resource deadlock avoided
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/tttksj/first_repo/scripts/leet_nightly_review/notifier.py", line 201, in <module>
+    main()
+    ~~~~^^
+  File "/Users/tttksj/first_repo/scripts/leet_nightly_review/notifier.py", line 192, in main
+    morning_briefing()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Users/tttksj/first_repo/scripts/leet_nightly_review/notifier.py", line 74, in morning_briefing
+    text = coach_file.read_text(encoding='utf-8')
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 788, in read_text
+    return f.read()
+           ~~~~~~^^
+OSError: [Errno 11] Resource deadlock avoided

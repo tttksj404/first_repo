@@ -1,0 +1,228 @@
+{
+  "survey": [
+    {
+      "strategy": "confluence_cfg_1h_20",
+      "n_variants": 588,
+      "qualified": 6,
+      "best_total_pnl": 32.76
+    },
+    {
+      "strategy": "confluence_cfg_4h_4",
+      "n_variants": 240,
+      "qualified": 0,
+      "best_total_pnl": 0
+    },
+    {
+      "strategy": "bb_squeeze_20sym",
+      "n_variants": 324,
+      "qualified": 0,
+      "best_total_pnl": 0
+    },
+    {
+      "strategy": "donchian_trend_20sym",
+      "n_variants": 216,
+      "qualified": 0,
+      "best_total_pnl": 0
+    }
+  ],
+  "winners": [
+    {
+      "name": "X3_rsi25_70_macd_h24",
+      "params": {
+        "name": "X3_rsi25_70_macd_h24",
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "n_trades": 144,
+      "wr": 0.8819,
+      "pf": 1.162,
+      "pnl_full_year_usd": 10.43,
+      "max_dd_usd": 23.22,
+      "max_loss_streak": 3,
+      "wf_pass": "4/4",
+      "sym_diversification": "11/20",
+      "test_pnl_0bps": 6.73,
+      "test_pnl_5bps": 3.23,
+      "test_pnl_10bps": -0.27,
+      "safe_leverage": 1.08,
+      "annual_pnl_at_50equity_safelev": 5.61,
+      "annual_return_pct": 11.2
+    },
+    {
+      "name": "X4_rsi25_70_macd_vol1.3_h24",
+      "params": {
+        "name": "X4_rsi25_70_macd_vol1.3_h24",
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.3,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "n_trades": 93,
+      "wr": 0.8817,
+      "pf": 1.219,
+      "pnl_full_year_usd": 8.2,
+      "max_dd_usd": 11.54,
+      "max_loss_streak": 2,
+      "wf_pass": "4/4",
+      "sym_diversification": "12/20",
+      "test_pnl_0bps": 3.05,
+      "test_pnl_5bps": 0.75,
+      "test_pnl_10bps": -1.55,
+      "safe_leverage": 2.17,
+      "annual_pnl_at_50equity_safelev": 8.88,
+      "annual_return_pct": 17.8
+    },
+    {
+      "name": "X1_rsi30_70_macd_h24",
+      "params": {
+        "name": "X1_rsi30_70_macd_h24",
+        "rsi_long": 30,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "n_trades": 238,
+      "wr": 0.8824,
+      "pf": 1.325,
+      "pnl_full_year_usd": 32.76,
+      "max_dd_usd": 21.25,
+      "max_loss_streak": 2,
+      "wf_pass": "4/4",
+      "sym_diversification": "10/20",
+      "test_pnl_0bps": 7.38,
+      "test_pnl_5bps": -0.82,
+      "test_pnl_10bps": -9.02,
+      "safe_leverage": 1.18,
+      "annual_pnl_at_50equity_safelev": 19.27,
+      "annual_return_pct": 38.5
+    },
+    {
+      "name": "X2_rsi30_70_macd_h48",
+      "params": {
+        "name": "X2_rsi30_70_macd_h48",
+        "rsi_long": 30,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 48
+      },
+      "n_trades": 238,
+      "wr": 0.8866,
+      "pf": 1.306,
+      "pnl_full_year_usd": 31.45,
+      "max_dd_usd": 23.5,
+      "max_loss_streak": 2,
+      "wf_pass": "4/4",
+      "sym_diversification": "10/20",
+      "test_pnl_0bps": 7.38,
+      "test_pnl_5bps": -0.82,
+      "test_pnl_10bps": -9.02,
+      "safe_leverage": 1.06,
+      "annual_pnl_at_50equity_safelev": 16.73,
+      "annual_return_pct": 33.5
+    },
+    {
+      "name": "WR_C3_rsi30_macd_h24",
+      "params": {
+        "name": "WR_C3_rsi30_macd_h24",
+        "rsi_long": 30,
+        "rsi_short": 65,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "n_trades": 540,
+      "wr": 0.8593,
+      "pf": 0.934,
+      "pnl_full_year_usd": -18.43,
+      "max_dd_usd": 43.86,
+      "max_loss_streak": 2,
+      "wf_pass": "4/4",
+      "sym_diversification": "10/20",
+      "test_pnl_0bps": 0.7,
+      "test_pnl_5bps": -13.8,
+      "test_pnl_10bps": -28.3,
+      "safe_leverage": 0.57,
+      "annual_pnl_at_50equity_safelev": -5.25,
+      "annual_return_pct": -10.5
+    }
+  ],
+  "finals": [
+    {
+      "name": "X3_rsi25_70_macd_h24",
+      "params": {
+        "name": "X3_rsi25_70_macd_h24",
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "n_trades": 144,
+      "wr": 0.8819,
+      "pf": 1.162,
+      "pnl_full_year_usd": 10.43,
+      "max_dd_usd": 23.22,
+      "max_loss_streak": 3,
+      "wf_pass": "4/4",
+      "sym_diversification": "11/20",
+      "test_pnl_0bps": 6.73,
+      "test_pnl_5bps": 3.23,
+      "test_pnl_10bps": -0.27,
+      "safe_leverage": 1.08,
+      "annual_pnl_at_50equity_safelev": 5.61,
+      "annual_return_pct": 11.2
+    },
+    {
+      "name": "X4_rsi25_70_macd_vol1.3_h24",
+      "params": {
+        "name": "X4_rsi25_70_macd_vol1.3_h24",
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.3,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "n_trades": 93,
+      "wr": 0.8817,
+      "pf": 1.219,
+      "pnl_full_year_usd": 8.2,
+      "max_dd_usd": 11.54,
+      "max_loss_streak": 2,
+      "wf_pass": "4/4",
+      "sym_diversification": "12/20",
+      "test_pnl_0bps": 3.05,
+      "test_pnl_5bps": 0.75,
+      "test_pnl_10bps": -1.55,
+      "safe_leverage": 2.17,
+      "annual_pnl_at_50equity_safelev": 8.88,
+      "annual_return_pct": 17.8
+    }
+  ]
+}

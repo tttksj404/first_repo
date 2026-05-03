@@ -235,6 +235,19 @@ class DecisionIntent:
     spot_quote_asset: str = ""
     spot_funding_asset: str = ""
     spot_quote_asset_usd_price: float = 0.0
+    # Cross-coin OI quadrant gate metadata (Phase 1+2, opt-in via QUANT_CROSS_COIN_GATE).
+    # All fields default-empty so legacy code paths and disabled-gate runs stay byte-compatible.
+    cross_coin_own_quadrant: str = ""
+    cross_coin_own_dir: str = ""
+    cross_coin_leader_symbol: str = ""
+    cross_coin_leader_quadrant: str = ""
+    cross_coin_leader_dir: str = ""
+    cross_coin_ev_bps: float = 0.0
+    cross_coin_winrate: float = 0.0
+    cross_coin_n: int = 0
+    cross_coin_rank: int = 0
+    cross_coin_blocker_reason: str = ""
+    cross_coin_is_top_priority: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         data = asdict(self)

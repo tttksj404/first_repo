@@ -23,6 +23,12 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-04-25 - PEPE runtime stale stop-state audit fix
+- Summary: Corrected PEPE runtime health reporting so a persisted `stopped` health file is no longer misreported as a live stop-sentinel condition.
+- What was done: Audited supervisor health, monitor state, latest paper-live summaries, sync evidence, and startup error logs; confirmed no active manual-close or futures-position mismatch; traced misleading stopped-state output to `scripts/quant_health_audit.sh`; patched the stop-source reporting path; and verified it with focused runtime-script tests plus a live audit run.
+- Competency mapping: Data pipeline and system integration development, data analysis and optimization, logical data structuring, technical communication
+- Skill sharpened next: Add explicit blocker categorization for intentional stop vs external transport failure vs market/sample-thin hold so runtime triage can route action faster.
+
 ### 2026-04-24 - PEPE runtime stop-sentinel health guard
 - Summary: Fixed PEPE runtime health automation so intentional stop state is no longer misclassified as an actionable runtime failure.
 - What was done: Audited supervisor health, latest paper-live summaries, stop sentinels, and startup-failure logs; identified false autofix/escalation during intentional stop; patched the health audit and YOLO fixer to short-circuit on stop sentinels; and verified the behavior with focused runtime-script tests plus direct script execution.
@@ -712,3 +718,225 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Confirmed the live paper50 daemon was still healthy and PEPE was blocked by thin-edge/profile gates, then fixed the monitor to run indefinitely by default and fall back to fresh daemon account-sync artifacts when direct Bitget probes fail; validated with focused runtime-script tests and a refreshed monitor snapshot.
 - Mapped competencies: Runtime observability engineering, stale-state mitigation, system-integration diagnosis, concise technical incident reporting.
 - Next skill to sharpen: Add a supervised long-lived monitor lifecycle so sidecar refresh does not depend on ad hoc manual invocation.
+
+## 2026-04-24 - Paper50 launcher monitor sidecar fix
+- Conversation/topic: Investigated PEPE runtime health and corrected why paper50 observability went stale while the read-only daemon kept running.
+- What was done: Verified PEPE decisions were being blocked by thin edge/liquidity filters rather than stale state, traced stale `_monitor_status.json` to the LaunchAgent-backed paper50 launcher not starting `monitor_daemon_health.py`, patched the launcher to start a single monitor sidecar with pid-file dedupe, and validated with the full live-runtime script test suite.
+- Mapped competencies: Runtime root-cause analysis, observability pipeline repair, config/runtime mismatch diagnosis, test-backed operational hardening.
+- Next skill to sharpen: Add a repo-managed launchd/bootstrap health check so sidecars can be restarted cleanly without relying on external process tooling.
+
+## 2026-04-24 - PEPE live runtime stop-state triage
+- Conversation/topic: Monitored the current PEPE live trading runtime to decide whether the latest block was a software fault, stale state, or an intentional operational stop.
+- What was done: Verified the latest healthy PEPE run, traced later startup failures to external Bitget DNS transport errors, confirmed current `scripts/_supervisor_stop` and `scripts/_safety_guardian_stop` sentinels were deliberately set, and ruled out manual-close or futures-position sync mismatch in the latest state/log artifacts.
+- Mapped competencies: Runtime observability, integration-failure diagnosis, stale-state/mismatch triage, evidence-backed operational communication.
+- Next skill to sharpen: Add a clearer “operator stopped vs external transport outage” status surface so restart decisions require less log forensics.
+
+## 2026-04-24 - PEPE stop-health stale state fix
+- Conversation/topic: Repaired misleading PEPE live runtime stop-state reporting after confirming the stack was intentionally down rather than actively failing.
+- What was done: Patched the live supervisor and stop script to write a fresh `stopped` health snapshot on intentional stop paths, corrected the health audit so a fresh stopped state is no longer mislabeled stale, refreshed the current health artifact, and validated with focused runtime-script tests plus a rerun health audit.
+- Mapped competencies: Runtime state-model design, stale-state remediation, operational observability hardening, verification-first incident handling.
+- Next skill to sharpen: Centralize runtime state transitions so stop/start/reporting paths share one authoritative health writer.
+
+## 2026-04-24 - PEPE audit stop-intent inference fix
+- Conversation/topic: Monitored the current PEPE runtime and repaired a false-failure audit path that treated an intentionally stopped stack as a live outage.
+- What was done: Traced the mismatch to `quant_health_audit.sh` relying only on stop sentinels, patched it to honor persisted stop intent in `live_supervisor_health.json`, added regression coverage, and verified the audit now suppresses bogus CRITICALs while preserving sync/policy evidence.
+- Mapped competencies: Runtime observability repair, config/state drift diagnosis, test-backed operations hardening, concise technical incident reporting.
+- Next skill to sharpen: Add a shared runtime-state reader so monitor, audit, and restart paths classify operator stops consistently.
+
+## 2026-04-24 - PEPE runtime blocker verification refresh
+- Conversation/topic: Re-checked the current PEPE live runtime to confirm whether the latest block was software-driven or an intentional/operator state.
+- What was done: Validated the latest stop health, reran the health audit in no-autofix mode, confirmed no active futures/manual-close mismatch, and separated the present intentional stop from older Bitget DNS transport failures and stale March summary artifacts.
+- Mapped competencies: Runtime health verification, stale-state discrimination, exchange integration triage, evidence-based operational reporting.
+- Next skill to sharpen: Add freshness labels to legacy summary artifacts so stopped/live status cannot be conflated with archived decision state.
+
+## 2026-04-24 - PEPE audit portability regression guard
+- Conversation/topic: Revalidated PEPE runtime health on macOS and locked in the audit portability fix that had previously polluted automation logs.
+- What was done: Confirmed the current runtime blocker is an intentional supervisor stop, reran the health audit without autofix to verify the current script no longer emits `timeout: command not found`, and added regression coverage for the macOS-safe Claude timeout guard path.
+- Mapped competencies: Cross-platform runtime operations, observability validation, regression-proofing, concise technical incident communication.
+- Next skill to sharpen: Convert shell portability checks into reusable helpers so host-specific audit regressions are caught earlier.
+
+## 2026-04-25 - Quant strategy direction review
+- Conversation/topic: Reviewed whether to continue live/paper testing, add more crypto bot strategies, or focus on tuning the existing quant runtime.
+- What was done: Pulled the repo, inspected active/paper50 runtime status, promotion gates, autotuner/health logs, and compared the local evidence against common open-source crypto bot validation patterns from Freqtrade, Hummingbot, and Jesse.
+- Mapped competencies: Quant strategy evaluation, runtime evidence analysis, model/strategy validation planning, technical recommendation writing.
+- Next skill to sharpen: Build a repeatable experiment scorecard that ranks tuning candidates by paper/live attribution quality before promotion.
+
+## 2026-04-25 - Paper50 long/short scorecard
+- Conversation/topic: Verified whether short entries are used as a fallback when long entries fail and continued real-time paper50 tuning diagnostics.
+- What was done: Confirmed the runtime chooses one directional futures plan per snapshot rather than falling back from rejected long to short, added side-level counterfactual summaries and a local long/short scorecard, refreshed paper50 diagnostics, and verified with focused tests.
+- Mapped competencies: Strategy-path audit, long/short signal attribution, real-time paper validation, test-backed quant tooling.
+- Next skill to sharpen: Add scheduled side-scorecard reporting so long/short relaxation candidates are reviewed from fresh live-data windows.
+
+## 2026-04-25 - Bitget long-failure short overlay recovery
+- Conversation/topic: Checked whether the previously pushed short-overlay strategy was missing and integrated it safely into the current paper-only research path.
+- What was done: Located the uploaded `origin/codex/bitget-short-overlay` branch, verified it was not merged into the active branch, tested a clean integration worktree, applied the paper-only overlay scripts/config support to the active worktree, ran focused regression tests, and generated a fresh external-alpha shadow snapshot.
+- Mapped competencies: Git lineage diagnosis, strategy experiment integration, paper-only validation workflow, trading-signal observability.
+- Next skill to sharpen: Promote shadow overlays only after mature forward outcomes and matched long-failure evidence justify a bounded paper experiment.
+
+## 2026-04-25 - Three-hour Bitget short-overlay observer
+- Conversation/topic: Set up a bounded long-running paper-only observation window for the Bitget short-overlay strategy.
+- What was done: Added a supervisor script that refreshes external-alpha candidates, counterfactual outcomes, futures-signal outcomes, side scorecards, and long-failure short-overlay matching every five minutes; smoke-tested it; and launched it through macOS launchd for a three-hour observation run with a scheduled follow-up review.
+- Mapped competencies: Long-running experiment orchestration, paper-only trading validation, runtime safety monitoring, data-driven strategy promotion control.
+- Next skill to sharpen: Turn the observer output into a compact promotion checklist with minimum sample, win-rate, and drawdown thresholds.
+
+## 2026-04-25 - Paper-only quant strategy iteration guardrails
+- Conversation/topic: Continued developing the strategy after the three-hour Bitget short-overlay observation finished.
+- What was done: Tightened the long-failure short-overlay candidate builder so `shadow_watch` legs remain report-only instead of becoming enabled config legs, updated the recurring paper50 monitor to refresh short-overlay evidence, applied a bounded PEPE long paper-only filter relaxation from fresh missed-entry evidence, restarted the read-only paper daemon, and verified safety/test evidence.
+- Mapped competencies: Experiment promotion control, paper-only tuning workflow, automation update hygiene, evidence-backed quant risk management.
+- Next skill to sharpen: Add a single promotion checklist artifact that ranks long and short candidates by sample size, win rate, worst case, and live-readiness blockers.
+
+## 2026-04-25 - PEPE runtime audit drift repair
+- Conversation/topic: Monitored the active PEPE paper50 runtime and separated a real trading-state question from a broken audit path.
+- What was done: Verified live paper50 heartbeats/summaries and no sync mismatch, traced the false "intentionally stopped" diagnosis to `quant_health_audit.sh` ignoring its runtime argument and stale forensic fallbacks, patched the audit, and revalidated with focused tests plus a no-autofix audit run.
+- Mapped competencies: Runtime observability debugging, config/runtime drift diagnosis, evidence-based quant operations reporting, test-backed monitoring hardening.
+- Next skill to sharpen: Unify runtime health data sources so shell audits and live monitors read the same freshness-ranked status surface.
+
+## 2026-04-25 - PEPE runtime stop-state monitoring fix
+- Conversation/topic: Monitored the current PEPE runtime and checked whether missing activity was caused by market conditions or a repo-side runtime/monitoring problem.
+- What was done: Audited the latest runtime summary, supervisor health, stop sentinel, and startup-failure logs; confirmed the runtime is intentionally stopped and prior restart attempts were failing on DNS transport, not manual-close mismatch; patched `scripts/quant_status.sh` so stale healthy snapshots are overridden by supervisor stop/health state; and verified the fix with focused shell-script tests plus a live status run.
+- Mapped competencies: Runtime observability debugging, config/runtime drift diagnosis, evidence-backed blocker classification, test-backed monitoring hardening.
+- Next skill to sharpen: Add one shared health/blocker classifier so all PEPE runtime tools distinguish intentional stop, external transport failure, stale snapshot, and market/sample-thin hold the same way.
+
+## 2026-04-25 - BOJ bulk crawl and coding-test curriculum design
+- Conversation/topic: Requested urgent BOJ-wide problem collection and a practical curriculum aimed at reaching common corporate coding-test pass level.
+- What was done: Verified shutdown timing from official notices, built and ran a live BOJ crawler with topic/tier filters, generated deduplicated master CSV plus topic-problem mapping CSV, and auto-produced a 12-week curriculum with weekly targets and starter sets.
+- Mapped competencies: Web data extraction at scale, data structuring/deduplication, curriculum-oriented analysis design, technical communication with evidence-linked outputs.
+- Next skill to sharpen: Add adaptive sequencing (based on solved history and wrong-answer patterns) so the curriculum personalizes difficulty progression automatically.
+
+## 2026-04-25 - Finance-track BOJ curriculum and statement archive
+- Conversation/topic: Pivoted the BOJ study plan toward finance-sector coding tests and clarified coverage for full problem/answer crawling.
+- What was done: Generated a 12-week finance-focused BOJ problem pack (144 questions) from the crawled corpus, produced a finance curriculum artifact, and crawled each selected problem's statement/input/output/sample I/O into a reusable JSONL archive.
+- Mapped competencies: Domain-tailored data curation, structured text extraction pipeline design, learning-path optimization for hiring targets, transparent technical scope communication.
+- Next skill to sharpen: Add role-specific mock-test bundles (bank vs. securities vs. fintech) with timed scoring and weakness-based reassignment.
+
+## 2026-04-25 - Python offline judge for BOJ finance pack
+- Conversation/topic: Needed a post-BOJ fallback so curated problems can still be submitted and judged locally.
+- What was done: Implemented a Python-only offline sample judge with data preparation, per-problem judging, and batch judging by week; wired it to the archived finance JSONL dataset; and validated end-to-end execution with real sample passes.
+- Mapped competencies: Local evaluation pipeline engineering, subprocess/time-limit control, structured dataset operationalization, practical CLI tooling for algorithm training.
+- Next skill to sharpen: Expand from sample-only checks to richer local test generation and differential validation to better approximate hidden-test robustness.
+
+## 2026-04-25 - Re-verification of offline judge and finance curriculum quality
+- Conversation/topic: Rechecked whether the offline judging flow truly works and whether the finance-targeted curriculum is structurally sufficient.
+- What was done: Executed functional judge tests for PASS/WA/RTE/TLE and batch-summary paths, revalidated sample dataset integrity end-to-end, and computed week-by-week topic and difficulty distribution to assess hiring-readiness alignment.
+- Mapped competencies: Verification engineering, CLI reliability testing, data quality auditing, evidence-based curriculum evaluation.
+- Next skill to sharpen: Add adaptive rebalancing rules so late-week difficulty spikes are moderated according to measured solve-rate.
+
+## 2026-04-25 - Late-phase finance curriculum smoothing
+- Conversation/topic: Addressed concern that weeks 9-12 were too steep for stable finance coding-test progression.
+- What was done: Rebalanced late-phase week ranges, introduced supplemental problems for weeks 9-12, implemented stratified mixed-problem selection to prevent single-band concentration, regenerated pack/text archives, and revalidated judge-data consistency.
+- Mapped competencies: Difficulty calibration design, curriculum optimization, stratified sampling logic, end-to-end dataset regeneration and QA.
+- Next skill to sharpen: Add performance-feedback loops that auto-shift weekly bands based on rolling accuracy and solve-time metrics.
+
+## 2026-04-25 - Paper50 promotion checklist automation
+- Conversation/topic: Continued improving the Bitget paper-only quant strategy after the three-hour observation review.
+- What was done: Added a consolidated promotion checklist that ranks PEPE long tuning, long/short side scorecards, external-alpha candidates, and long-failure short overlays into halt/candidate/watch/hold actions with explicit safety gates; wired it into the shadow observer; and verified it with focused tests plus a live read-only observer cycle.
+- Mapped competencies: Quant experiment governance, signal promotion threshold design, real-time artifact integration, safety-first automation validation.
+- Next skill to sharpen: Feed post-tune trade outcomes back into the checklist so thresholds adapt from realized paper results rather than fixed guardrails alone.
+
+## 2026-04-25 - Paper50 post-tune feedback loop
+- Conversation/topic: Added the next improvement layer after PEPE paper-only filter tuning.
+- What was done: Built a post-tune feedback report that evaluates only post-apply paper futures signals, classifies keep/watch/capacity/rollback candidates, stores rollback profile values for future filter-guard applies, integrates the feedback into the promotion checklist and observer loop, and updated the recurring monitor automation.
+- Mapped competencies: Closed-loop experiment evaluation, rollback policy design, paper-trading outcome attribution, automation-safe model tuning.
+- Next skill to sharpen: Add an approved rollback applier that restores stored symbol profiles only after review gates and user approval.
+
+## 2026-04-25 - PEPE runtime monitor status correction
+- Conversation/topic: Monitored PEPE live/paper runtime health to separate software faults from strategy-driven trade suppression.
+- What was done: Traced live stop state, paper50 monitor outputs, decision logs, and position-sync state; fixed a runtime-status bug that falsely marked `paper50` as stopped when the global live stop sentinel existed; and added a regression test covering the live-stop vs. paper50-read-only split.
+- Mapped competencies: Runtime observability debugging, config/runtime drift detection, evidence-based production triage, technical communication of blocker categories.
+- Next skill to sharpen: Add explicit status tests for stale PID sidecars so monitor/process bookkeeping mismatches are caught before operational use.
+
+## 2026-04-25 - Symbol-scoped paper tuning attribution
+- Conversation/topic: Continued Paper50 strategy improvement after DOGE and PEPE paper-only filter tuning.
+- What was done: Split post-tune attribution by symbol-specific apply time, reconstructed legacy apply history from audit JSONL, updated the promotion checklist to surface PEPE and DOGE as separate observation windows, and added regression tests for cross-symbol timing contamination.
+- Mapped competencies: Experiment attribution, trading-system observability, audit-log reconstruction, regression-test design for tuning pipelines.
+- Next skill to sharpen: Build a bounded paper-only rollback executor that uses these symbol states after enough post-tune outcomes mature.
+
+## 2026-04-25 - Major 5m leverage profile research
+- Conversation/topic: Evaluated whether a 5x hold strategy or major-coin 5m trend strategy should be added to the Paper50 research loop.
+- What was done: Built a Binance public-data, paper-only 5m BTC/ETH/SOL trend research script that compares 15m/30m/60m/3h/6h holds across 1x/2x/5x, reports adverse-excursion risk, connected it to the shadow observer and recurring monitor, and verified the current sample rejects 5x hold profiles.
+- Mapped competencies: Strategy experiment design, leverage-risk attribution, time-series backtesting, automation-safe quant monitoring.
+- Next skill to sharpen: Add walk-forward parameter sweeps for the 5m overlay so thresholds are fitted on one window and judged on a later unseen window.
+
+## 2026-04-25 - PEPE runtime health triage follow-up
+- Conversation/topic: Revalidated whether the current PEPE runtime was blocked by new software faults or by strategy/market-quality gating.
+- What was done: Cross-checked live stop state, paper50 status snapshots, monitor cycles, PEPE runtime summary slices, and position-sync/manual-close indicators; confirmed the live runtime is intentionally stopped while the paper50 observer remains healthy with fresh heartbeats and zero mismatch/traceback signals; and separated stale PID metadata from actual runtime-health evidence.
+- Mapped competencies: Runtime observability triage, stale-state vs. live-state discrimination, evidence-based blocker classification, concise operational reporting.
+- Next skill to sharpen: Harden process bookkeeping so sidecar PID metadata stays aligned with fresh heartbeat evidence across restart cycles.
+
+## 2026-04-25 - Forced paper-only entry pilot loop
+- Conversation/topic: Responded to concern that the strategy waits too long before any real-money entry.
+- What was done: Added a forced paper-only pilot that selects high-scoring blocked futures decisions, tracks 5/10/15/30 minute outcomes without creating runtime positions or orders, wires the result into the shadow observer and promotion checklist, and validated the first BTC/ETH forced pilots against live public prices.
+- Mapped competencies: Quant experiment design, counterfactual trade validation, risk-controlled automation, evidence-backed promotion gating.
+- Next skill to sharpen: Add walk-forward thresholds for forced-pilot promotion so any future live pilot requires repeated out-of-sample positive net outcomes.
+
+## 2026-04-25 - Parallel paper50 research sweep
+- Conversation/topic: Asked whether the best path is to test all possible improvements in parallel and keep the best result.
+- What was done: Built and ran a bounded paper-only parallel research sweep across counterfactuals, forced pilots, external-alpha combos, 5m leverage profiles, filter guard, high-probability gates, outcome feedback, and promotion checklist; added timeout and sample caps so slow public-data probes do not block decisions.
+- Mapped competencies: Experiment orchestration, parallel evaluation design, quant candidate ranking, operational latency control.
+- Next skill to sharpen: Convert the parallel sweep into a recurring ranked dashboard with promotion thresholds and drift alerts.
+
+## 2026-04-25 - PEPE runtime blocker classification
+- Conversation/topic: Rechecked whether the current PEPE runtime needed a repo fix or was simply stopped and strategy-gated.
+- What was done: Verified the live stop sentinel, supervisor health, latest PEPE runtime snapshot, and recent supervisor failure traces; confirmed the current blocker is an intentional stop with historical external Bitget DNS startup failures, while the last PEPE decisions were suppressed by thin sample quality and weak edge/liquidity rather than a fresh software regression.
+- Mapped competencies: Runtime health triage, blocker classification, log-based root-cause isolation, evidence-first operational reporting.
+- Next skill to sharpen: Add deduplicated warning emission for repeated inherited manual-close contamination so long-run logs stay higher signal during monitoring.
+
+## 2026-04-26 - Runtime audit severity accounting fix
+- Conversation/topic: Monitored the PEPE runtime and corrected a monitoring-path bug in the health audit summary.
+- What was done: Confirmed the live runtime is intentionally stopped via the supervisor stop sentinel, verified manual-close and futures-sync state stayed clean, traced a mismatch where `quant_health_audit.sh` printed inline Python `WARNING` lines without incrementing final severity totals, patched the shell audit to count those severities consistently, and added a regression test covering the new counting path.
+- Mapped competencies: Production observability debugging, shell/Python boundary hardening, evidence-based runtime triage, regression-test design for monitoring accuracy.
+- Next skill to sharpen: Make stopped-runtime audits classify stale data and connectivity checks more explicitly so operator-stop states are easier to separate from actionable software faults.
+
+## 2026-04-26 - PEPE armC universe precedence fix
+- Conversation/topic: Investigated whether the live PEPE runtime was blocked by market conditions or an actionable runtime/config mismatch.
+- What was done: Verified `quant_runtime_armC` was live with fresh heartbeats, isolated a precedence bug where `UNIVERSE_SYMBOLS` was overwritten by the strategy override JSON, patched `Settings.load()` so environment-selected universes win over file overrides, and added a regression test proving `armC` now stays majors-only even with the live override file present.
+- Mapped competencies: Runtime/config drift diagnosis, environment-vs-file precedence design, trading-runtime guardrail hardening, targeted regression testing.
+- Next skill to sharpen: Add a lightweight startup assertion that logs the resolved universe for each arm so config drift is visible before decisions start.
+
+## 2026-04-26 - Multi-arm stale universe drift guard
+- Conversation/topic: Monitored the PEPE paper-live arms after the universe precedence fix to determine whether the runtime was still blocked by software drift.
+- What was done: Confirmed fresh heartbeats but stale pre-fix processes across `armB`/`armC`/`armD`, traced latest-cycle decision symbols to mismatched universes, patched the multi-arm monitor and watchdog to surface and recycle universe drift automatically, and added focused regression coverage for latest-cycle mismatch detection.
+- Mapped competencies: Runtime observability, stale-process drift detection, self-healing automation design, targeted monitoring-test coverage.
+- Next skill to sharpen: Connect host-side recycle evidence back into the summary artifact so watchdog-triggered restarts are visible without manual log inspection.
+
+## 2026-04-26 - PEPE runtime stale-arm recycle gate
+- Conversation/topic: Rechecked whether the current PEPE runtime blockage was market-driven or still pinned by actionable software/runtime drift.
+- What was done: Verified the main paper50 arm stayed healthy with fresh heartbeats and market-quality rejections, isolated that the sidecar multi-arm processes were still running pre-fix universes, patched the watchdog recycle path so future universe drift triggers respawn instead of logging-only, and confirmed the current shell could not safely restart Bitget-bound arms because DNS resolution was blocked.
+- Mapped competencies: Runtime blocker classification, stale-process remediation design, operational guardrail hardening, environment-constrained incident handling.
+- Next skill to sharpen: Add host-side restart evidence capture so stale-arm remediation can be proven immediately after recycle.
+
+## 2026-04-26 - PEPE paper50 observability guard fix
+- Conversation/topic: Monitored current PEPE paper50 runtime health to determine whether missing symbol coverage was market-driven or caused by runtime logic.
+- What was done: Traced the live paper50 restart sequence, showed `XRPUSDT` stopped receiving scheduled decisions after reconnect despite remaining in the configured universe, identified that daemon bootstrap/runtime eligibility was excluding observe-only guarded symbols from the decision loop, patched the daemon to keep those symbols observable while still blocked by policy gates, and validated the fix with focused daemon regression tests.
+- Mapped competencies: Runtime root-cause analysis, trading-system observability design, guardrail-preserving daemon refactoring, targeted regression validation.
+- Next skill to sharpen: Add explicit seeded-vs-configured universe evidence to runtime summaries so restart-time symbol loss is distinguishable from policy-side observe-only gating.
+
+## 2026-04-26 - Jackpot bot final live-risk gate
+- Conversation/topic: Ran the final adversarial go/no-go review for the Bitget 1h 10x `$50` jackpot futures bot after allocator, latency, black-swan, and micro-live plan updates.
+- What was done: Audited the live paper-bot implementation and Phase Z/AA/X/CC artifacts, quantified allocator drift and latency fragility, identified that the portfolio 7-day drawdown kill-switch is still a total-PnL proxy in code, and stress-reviewed remaining exchange/funding/maintenance attack vectors before issuing a final live score.
+- Mapped competencies: Quant risk review, evidence-based strategy validation, operational control-gap detection, technical decision communication.
+- Next skill to sharpen: Rebuild live approval gates around true rolling-window risk, measured execution latency, and symbol-specific funding data instead of static proxies.
+
+## 2026-04-26 - Round 4 micro-live promotion reassessment
+- Conversation/topic: Re-scored the same Bitget 1h 10x multi-strategy bot for `$5 -> $50` micro-live readiness after the owner closed all Round 3 must-fix items and added new Round 4 validation phases.
+- What was done: Rechecked the saved Phase QQ/SS/UU/VV/WW/XX/YY/ZZ artifacts, verified the portfolio now passes 13/13 walk-forward and 117/117 sensitivity cells with serialized profit and bounded drawdown, and isolated the remaining blockers as thin live-like runtime evidence, a `RETREAT` promotion-gate result from zero recent trades, and unresolved short-cluster conservatism.
+- Mapped competencies: Quant validation synthesis, robustness assessment, portfolio risk interpretation, evidence-first promotion gating.
+- Next skill to sharpen: Tie promotion scoring more explicitly to minimum live-like sample coverage so strong backtests do not outrun runtime evidence.
+
+## 2026-04-26 - DOGE high-upside overlay research
+- Conversation/topic: Reframed the paper50 Bitget strategy from conservative filtering toward a separate high-upside, one-shot profit sleeve.
+- What was done: Added a paper-only high-upside overlay report that reads external-alpha outcomes, scores DOGE/PEPE focus legs across 3x/5x/10x profiles, ranks upside-tail versus downside-tail risk, integrates the report into parallel research, and updates focused sample monitoring to keep collecting evidence before any live promotion.
+- Mapped competencies: Quant experiment design, risk-adjusted feature engineering, paper/live separation, automated evidence ranking, regression testing for trading research scripts.
+- Next skill to sharpen: Add richer path-dependent exit simulation using actual 5m/10m/15m paths so runner and scale-out estimates are less dependent on sparse horizon returns.
+
+## 2026-04-26 - 5m jackpot paper bot
+- Conversation/topic: Shifted from slow strategy searching to a live-data paper-only 5m high-upside experiment for faster evidence on one-shot profit potential.
+- What was done: Added a separate 5m Bitget public-data paper bot that evaluates BTC/ETH/SOL/DOGE long and short momentum bursts, simulates 5x TP/runner/SL/time-exit behavior, persists state/log/report artifacts, verifies zero order side effects, and folds the cycle into the recurring high-upside sample monitor.
+- Mapped competencies: Real-time experiment design, trading-simulator implementation, safety boundary validation, automated monitoring integration, targeted regression testing.
+- Next skill to sharpen: Add replay evaluation for the same 5m jackpot rules so live paper observations can be compared against larger historical samples before any live-risk decision.
+
+## 2026-04-26 - Jackpot bot risk-structure refinement
+- Conversation/topic: Reviewed whether the 5m high-upside bot had stop-loss discipline, excessive leverage, return-chasing bias, and overreliance on lagging indicators.
+- What was done: Refactored the paper bot to compare 3x and 5x profiles side by side, switched stop-loss sizing to ATR-aware ROE limits, reduced Bollinger/ADX/EMA from hard thesis drivers to weaker confirmation inputs, and moved entry selection toward 12-bar price-structure breakout plus volume expansion and BTC regime gating.
+- Mapped competencies: Risk-control design, leverage sensitivity testing, feature-bias reduction, live-paper experiment hardening, regression validation.
+- Next skill to sharpen: Build a replay/backtest harness for the exact 3x/5x profile logic to quantify chop sensitivity before live consideration.

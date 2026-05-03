@@ -15,7 +15,7 @@
     "minimum_sample_size": 3,
     "policy_bucket_contexts": {},
     "symbols": {},
-    "updated_at": "2026-04-23T11:11:41.471034+00:00"
+    "updated_at": "2026-04-25T15:42:03.996203+00:00"
   },
   "executive_operating_verdict": {
     "confidence": "high",
@@ -176,7 +176,7 @@
     "armed": false,
     "reasons": []
   },
-  "last_decision_emitted_at": "2026-04-23T11:11:41.470756+00:00",
+  "last_decision_emitted_at": "2026-04-25T15:42:03.995911+00:00",
   "last_decision_timestamp": "2026-03-08T12:15:00+00:00",
   "last_event_timestamp": null,
   "live_decision_loop": {
@@ -315,7 +315,7 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-23T11:11:41.473526+00:00",
+        "updated_at": "2026-04-25T15:42:03.998871+00:00",
         "version": 0,
         "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
       },
@@ -763,7 +763,7 @@
     "source": "persisted_policy_state",
     "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
     "symbols": [],
-    "updated_at": "2026-04-23T11:11:41.473526+00:00",
+    "updated_at": "2026-04-25T15:42:03.998871+00:00",
     "version": 0,
     "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
   },
@@ -1052,7 +1052,7 @@
         "source": "persisted_policy_state",
         "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
         "symbols": [],
-        "updated_at": "2026-04-23T11:11:41.473526+00:00",
+        "updated_at": "2026-04-25T15:42:03.998871+00:00",
         "version": 0,
         "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
       },
@@ -1565,7 +1565,7 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-23T11:11:41.473526+00:00",
+          "updated_at": "2026-04-25T15:42:03.998871+00:00",
           "version": 0,
           "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
         },
@@ -2013,7 +2013,7 @@
       "source": "persisted_policy_state",
       "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
       "symbols": [],
-      "updated_at": "2026-04-23T11:11:41.473526+00:00",
+      "updated_at": "2026-04-25T15:42:03.998871+00:00",
       "version": 0,
       "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
     },
@@ -2029,7 +2029,7 @@
           "source": "persisted_policy_state",
           "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
           "symbols": [],
-          "updated_at": "2026-04-23T11:11:41.473526+00:00",
+          "updated_at": "2026-04-25T15:42:03.998871+00:00",
           "version": 0,
           "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
         },
@@ -3867,7 +3867,7 @@
               "source": "persisted_policy_state",
               "structural_key": "c04fb2a0d5820d8b02eb34499b50531a55f1bc1f9524248f5105c5c4898c23b3",
               "symbols": [],
-              "updated_at": "2026-04-23T11:11:41.473526+00:00",
+              "updated_at": "2026-04-25T15:42:03.998871+00:00",
               "version": 0,
               "versioned_key": "27a7ef465049aaa816ee4d6f6d342c1c321910fa214f9aade019c32ecfb9be7b"
             },
@@ -4679,7 +4679,7 @@
       "state_counts": {},
       "symbol_count": 0
     },
-    "updated_at": "2026-04-23T11:11:41.473737+00:00",
+    "updated_at": "2026-04-25T15:42:03.999088+00:00",
     "version": 0
   },
   "reference_price_guard": {
@@ -4733,5 +4733,5 @@
   "session_equity_delta_usdt": null,
   "session_start_equity_usdt": null,
   "tested_order_count": 1,
-  "updated_at": "2026-04-23T11:11:41.477281+00:00"
+  "updated_at": "2026-04-25T15:42:04.005281+00:00"
 }

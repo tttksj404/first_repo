@@ -1,0 +1,1099 @@
+{
+  "candidates": [
+    {
+      "name": "X1_rsi30_70_macd_h24",
+      "params": {
+        "name": "X1_rsi30_70_macd_h24",
+        "rsi_long": 30,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "aggregate": {
+        "n": 238,
+        "wins": 210,
+        "wr": 0.8824,
+        "pnl_total_usd": 32.76,
+        "pnl_per_trade_usd": 0.1376,
+        "pf": 1.325,
+        "max_dd_usd": 21.25,
+        "max_consecutive_losses": 2
+      },
+      "per_symbol": {
+        "BTCUSDT": {
+          "n": 10,
+          "wins": 9,
+          "wr": 0.9,
+          "pnl": 0.61,
+          "pf": 1.581
+        },
+        "ETHUSDT": {
+          "n": 21,
+          "wins": 20,
+          "wr": 0.952,
+          "pnl": 6.96,
+          "pf": 3.747
+        },
+        "SOLUSDT": {
+          "n": 19,
+          "wins": 18,
+          "wr": 0.947,
+          "pnl": 5.06,
+          "pf": 2.64
+        },
+        "XRPUSDT": {
+          "n": 6,
+          "wins": 4,
+          "wr": 0.667,
+          "pnl": -4.24,
+          "pf": 0.354
+        },
+        "DOGEUSDT": {
+          "n": 8,
+          "wins": 7,
+          "wr": 0.875,
+          "pnl": -1.01,
+          "pf": 0.765
+        },
+        "ADAUSDT": {
+          "n": 8,
+          "wins": 5,
+          "wr": 0.625,
+          "pnl": -6.51,
+          "pf": 0.283
+        },
+        "APTUSDT": {
+          "n": 12,
+          "wins": 10,
+          "wr": 0.833,
+          "pnl": -0.3,
+          "pf": 0.952
+        },
+        "ARBUSDT": {
+          "n": 19,
+          "wins": 16,
+          "wr": 0.842,
+          "pnl": -0.88,
+          "pf": 0.913
+        },
+        "AVAXUSDT": {
+          "n": 13,
+          "wins": 12,
+          "wr": 0.923,
+          "pnl": 4.04,
+          "pf": 2.435
+        },
+        "BNBUSDT": {
+          "n": 8,
+          "wins": 7,
+          "wr": 0.875,
+          "pnl": -1.61,
+          "pf": 0.657
+        },
+        "DOTUSDT": {
+          "n": 13,
+          "wins": 11,
+          "wr": 0.846,
+          "pnl": -1.38,
+          "pf": 0.807
+        },
+        "LINKUSDT": {
+          "n": 10,
+          "wins": 9,
+          "wr": 0.9,
+          "pnl": 1.37,
+          "pf": 1.314
+        },
+        "LTCUSDT": {
+          "n": 5,
+          "wins": 5,
+          "wr": 1.0,
+          "pnl": 2.92,
+          "pf": null
+        },
+        "NEARUSDT": {
+          "n": 12,
+          "wins": 12,
+          "wr": 1.0,
+          "pnl": 9.18,
+          "pf": null
+        },
+        "OPUSDT": {
+          "n": 17,
+          "wins": 15,
+          "wr": 0.882,
+          "pnl": 12.21,
+          "pf": 6.727
+        },
+        "PEPEUSDT": {
+          "n": 9,
+          "wins": 8,
+          "wr": 0.889,
+          "pnl": -0.78,
+          "pf": 0.909
+        },
+        "SUIUSDT": {
+          "n": 14,
+          "wins": 13,
+          "wr": 0.929,
+          "pnl": 8.29,
+          "pf": 3.242
+        },
+        "UNIUSDT": {
+          "n": 9,
+          "wins": 9,
+          "wr": 1.0,
+          "pnl": 5.96,
+          "pf": null
+        },
+        "WIFUSDT": {
+          "n": 17,
+          "wins": 14,
+          "wr": 0.824,
+          "pnl": -0.12,
+          "pf": 0.992
+        },
+        "MATICUSDT": {
+          "n": 8,
+          "wins": 6,
+          "wr": 0.75,
+          "pnl": -6.99,
+          "pf": 0.286
+        }
+      },
+      "walk_forward_4fold": [
+        {
+          "fold": 1,
+          "n": 59,
+          "wr": 0.814,
+          "pnl": -11.2
+        },
+        {
+          "fold": 2,
+          "n": 49,
+          "wr": 0.898,
+          "pnl": 8.39
+        },
+        {
+          "fold": 3,
+          "n": 52,
+          "wr": 0.942,
+          "pnl": 31.1
+        },
+        {
+          "fold": 4,
+          "n": 78,
+          "wr": 0.885,
+          "pnl": 4.47
+        }
+      ],
+      "wf_pass_count": 4,
+      "slippage_stress": [
+        {
+          "extra_bps": 0.0,
+          "n": 82,
+          "wr": 0.89,
+          "pnl": 7.38
+        },
+        {
+          "extra_bps": 5.0,
+          "n": 82,
+          "wr": 0.89,
+          "pnl": -0.82
+        },
+        {
+          "extra_bps": 10.0,
+          "n": 82,
+          "wr": 0.841,
+          "pnl": -9.02
+        },
+        {
+          "extra_bps": 20.0,
+          "n": 82,
+          "wr": 0.5,
+          "pnl": -25.42
+        }
+      ]
+    },
+    {
+      "name": "X2_rsi30_70_macd_h48",
+      "params": {
+        "name": "X2_rsi30_70_macd_h48",
+        "rsi_long": 30,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 48
+      },
+      "aggregate": {
+        "n": 238,
+        "wins": 211,
+        "wr": 0.8866,
+        "pnl_total_usd": 31.45,
+        "pnl_per_trade_usd": 0.1322,
+        "pf": 1.306,
+        "max_dd_usd": 23.5,
+        "max_consecutive_losses": 2
+      },
+      "per_symbol": {
+        "BTCUSDT": {
+          "n": 10,
+          "wins": 9,
+          "wr": 0.9,
+          "pnl": 0.61,
+          "pf": 1.581
+        },
+        "ETHUSDT": {
+          "n": 21,
+          "wins": 20,
+          "wr": 0.952,
+          "pnl": 6.96,
+          "pf": 3.747
+        },
+        "SOLUSDT": {
+          "n": 19,
+          "wins": 18,
+          "wr": 0.947,
+          "pnl": 5.06,
+          "pf": 2.64
+        },
+        "XRPUSDT": {
+          "n": 6,
+          "wins": 4,
+          "wr": 0.667,
+          "pnl": -4.24,
+          "pf": 0.354
+        },
+        "DOGEUSDT": {
+          "n": 8,
+          "wins": 7,
+          "wr": 0.875,
+          "pnl": -1.01,
+          "pf": 0.765
+        },
+        "ADAUSDT": {
+          "n": 8,
+          "wins": 5,
+          "wr": 0.625,
+          "pnl": -6.51,
+          "pf": 0.283
+        },
+        "APTUSDT": {
+          "n": 12,
+          "wins": 10,
+          "wr": 0.833,
+          "pnl": -0.3,
+          "pf": 0.952
+        },
+        "ARBUSDT": {
+          "n": 19,
+          "wins": 16,
+          "wr": 0.842,
+          "pnl": -3.13,
+          "pf": 0.747
+        },
+        "AVAXUSDT": {
+          "n": 13,
+          "wins": 12,
+          "wr": 0.923,
+          "pnl": 4.04,
+          "pf": 2.435
+        },
+        "BNBUSDT": {
+          "n": 8,
+          "wins": 7,
+          "wr": 0.875,
+          "pnl": -1.61,
+          "pf": 0.657
+        },
+        "DOTUSDT": {
+          "n": 13,
+          "wins": 11,
+          "wr": 0.846,
+          "pnl": -1.38,
+          "pf": 0.807
+        },
+        "LINKUSDT": {
+          "n": 10,
+          "wins": 9,
+          "wr": 0.9,
+          "pnl": 1.37,
+          "pf": 1.314
+        },
+        "LTCUSDT": {
+          "n": 5,
+          "wins": 5,
+          "wr": 1.0,
+          "pnl": 2.92,
+          "pf": null
+        },
+        "NEARUSDT": {
+          "n": 12,
+          "wins": 12,
+          "wr": 1.0,
+          "pnl": 9.18,
+          "pf": null
+        },
+        "OPUSDT": {
+          "n": 17,
+          "wins": 16,
+          "wr": 0.941,
+          "pnl": 13.16,
+          "pf": 7.541
+        },
+        "PEPEUSDT": {
+          "n": 9,
+          "wins": 8,
+          "wr": 0.889,
+          "pnl": -0.78,
+          "pf": 0.909
+        },
+        "SUIUSDT": {
+          "n": 14,
+          "wins": 13,
+          "wr": 0.929,
+          "pnl": 8.29,
+          "pf": 3.242
+        },
+        "UNIUSDT": {
+          "n": 9,
+          "wins": 9,
+          "wr": 1.0,
+          "pnl": 5.96,
+          "pf": null
+        },
+        "WIFUSDT": {
+          "n": 17,
+          "wins": 14,
+          "wr": 0.824,
+          "pnl": -0.12,
+          "pf": 0.992
+        },
+        "MATICUSDT": {
+          "n": 8,
+          "wins": 6,
+          "wr": 0.75,
+          "pnl": -6.99,
+          "pf": 0.286
+        }
+      },
+      "walk_forward_4fold": [
+        {
+          "fold": 1,
+          "n": 59,
+          "wr": 0.814,
+          "pnl": -13.45
+        },
+        {
+          "fold": 2,
+          "n": 49,
+          "wr": 0.918,
+          "pnl": 9.34
+        },
+        {
+          "fold": 3,
+          "n": 52,
+          "wr": 0.942,
+          "pnl": 31.1
+        },
+        {
+          "fold": 4,
+          "n": 78,
+          "wr": 0.885,
+          "pnl": 4.47
+        }
+      ],
+      "wf_pass_count": 4,
+      "slippage_stress": [
+        {
+          "extra_bps": 0.0,
+          "n": 82,
+          "wr": 0.89,
+          "pnl": 7.38
+        },
+        {
+          "extra_bps": 5.0,
+          "n": 82,
+          "wr": 0.89,
+          "pnl": -0.82
+        },
+        {
+          "extra_bps": 10.0,
+          "n": 82,
+          "wr": 0.841,
+          "pnl": -9.02
+        },
+        {
+          "extra_bps": 20.0,
+          "n": 82,
+          "wr": 0.5,
+          "pnl": -25.42
+        }
+      ]
+    },
+    {
+      "name": "X3_rsi25_70_macd_h24",
+      "params": {
+        "name": "X3_rsi25_70_macd_h24",
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "aggregate": {
+        "n": 144,
+        "wins": 127,
+        "wr": 0.8819,
+        "pnl_total_usd": 10.43,
+        "pnl_per_trade_usd": 0.0724,
+        "pf": 1.162,
+        "max_dd_usd": 23.22,
+        "max_consecutive_losses": 3
+      },
+      "per_symbol": {
+        "BTCUSDT": {
+          "n": 7,
+          "wins": 6,
+          "wr": 0.857,
+          "pnl": -0.15,
+          "pf": 0.856
+        },
+        "ETHUSDT": {
+          "n": 18,
+          "wins": 17,
+          "wr": 0.944,
+          "pnl": 5.49,
+          "pf": 3.168
+        },
+        "SOLUSDT": {
+          "n": 13,
+          "wins": 12,
+          "wr": 0.923,
+          "pnl": 2.73,
+          "pf": 1.886
+        },
+        "XRPUSDT": {
+          "n": 4,
+          "wins": 2,
+          "wr": 0.5,
+          "pnl": -5.54,
+          "pf": 0.158
+        },
+        "DOGEUSDT": {
+          "n": 5,
+          "wins": 4,
+          "wr": 0.8,
+          "pnl": -2.71,
+          "pf": 0.373
+        },
+        "ADAUSDT": {
+          "n": 5,
+          "wins": 3,
+          "wr": 0.6,
+          "pnl": -5.23,
+          "pf": 0.218
+        },
+        "APTUSDT": {
+          "n": 6,
+          "wins": 5,
+          "wr": 0.833,
+          "pnl": -0.02,
+          "pf": 0.995
+        },
+        "ARBUSDT": {
+          "n": 11,
+          "wins": 9,
+          "wr": 0.818,
+          "pnl": -3.79,
+          "pf": 0.594
+        },
+        "AVAXUSDT": {
+          "n": 9,
+          "wins": 8,
+          "wr": 0.889,
+          "pnl": 1.1,
+          "pf": 1.389
+        },
+        "BNBUSDT": {
+          "n": 4,
+          "wins": 4,
+          "wr": 1.0,
+          "pnl": 1.85,
+          "pf": null
+        },
+        "DOTUSDT": {
+          "n": 7,
+          "wins": 6,
+          "wr": 0.857,
+          "pnl": -2.29,
+          "pf": 0.544
+        },
+        "LINKUSDT": {
+          "n": 5,
+          "wins": 5,
+          "wr": 1.0,
+          "pnl": 3.52,
+          "pf": null
+        },
+        "LTCUSDT": {
+          "n": 3,
+          "wins": 3,
+          "wr": 1.0,
+          "pnl": 1.48,
+          "pf": null
+        },
+        "NEARUSDT": {
+          "n": 8,
+          "wins": 8,
+          "wr": 1.0,
+          "pnl": 5.32,
+          "pf": null
+        },
+        "OPUSDT": {
+          "n": 11,
+          "wins": 10,
+          "wr": 0.909,
+          "pnl": 6.3,
+          "pf": 4.133
+        },
+        "PEPEUSDT": {
+          "n": 5,
+          "wins": 4,
+          "wr": 0.8,
+          "pnl": -5.13,
+          "pf": 0.398
+        },
+        "SUIUSDT": {
+          "n": 8,
+          "wins": 8,
+          "wr": 1.0,
+          "pnl": 7.07,
+          "pf": null
+        },
+        "UNIUSDT": {
+          "n": 5,
+          "wins": 5,
+          "wr": 1.0,
+          "pnl": 3.76,
+          "pf": null
+        },
+        "WIFUSDT": {
+          "n": 6,
+          "wins": 4,
+          "wr": 0.667,
+          "pnl": -5.11,
+          "pf": 0.457
+        },
+        "MATICUSDT": {
+          "n": 4,
+          "wins": 4,
+          "wr": 1.0,
+          "pnl": 1.76,
+          "pf": null
+        }
+      },
+      "walk_forward_4fold": [
+        {
+          "fold": 1,
+          "n": 43,
+          "wr": 0.791,
+          "pnl": -15.67
+        },
+        {
+          "fold": 2,
+          "n": 41,
+          "wr": 0.927,
+          "pnl": 9.64
+        },
+        {
+          "fold": 3,
+          "n": 26,
+          "wr": 0.923,
+          "pnl": 10.48
+        },
+        {
+          "fold": 4,
+          "n": 34,
+          "wr": 0.912,
+          "pnl": 5.98
+        }
+      ],
+      "wf_pass_count": 4,
+      "slippage_stress": [
+        {
+          "extra_bps": 0.0,
+          "n": 35,
+          "wr": 0.914,
+          "pnl": 6.73
+        },
+        {
+          "extra_bps": 5.0,
+          "n": 35,
+          "wr": 0.914,
+          "pnl": 3.23
+        },
+        {
+          "extra_bps": 10.0,
+          "n": 35,
+          "wr": 0.857,
+          "pnl": -0.27
+        },
+        {
+          "extra_bps": 20.0,
+          "n": 35,
+          "wr": 0.571,
+          "pnl": -7.27
+        }
+      ]
+    },
+    {
+      "name": "X4_rsi25_70_macd_vol1.3_h24",
+      "params": {
+        "name": "X4_rsi25_70_macd_vol1.3_h24",
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.3,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "aggregate": {
+        "n": 93,
+        "wins": 82,
+        "wr": 0.8817,
+        "pnl_total_usd": 8.2,
+        "pnl_per_trade_usd": 0.0882,
+        "pf": 1.219,
+        "max_dd_usd": 11.54,
+        "max_consecutive_losses": 2
+      },
+      "per_symbol": {
+        "BTCUSDT": {
+          "n": 7,
+          "wins": 6,
+          "wr": 0.857,
+          "pnl": -0.15,
+          "pf": 0.856
+        },
+        "ETHUSDT": {
+          "n": 14,
+          "wins": 13,
+          "wr": 0.929,
+          "pnl": 3.75,
+          "pf": 2.482
+        },
+        "SOLUSDT": {
+          "n": 9,
+          "wins": 8,
+          "wr": 0.889,
+          "pnl": 0.65,
+          "pf": 1.212
+        },
+        "XRPUSDT": {
+          "n": 1,
+          "wins": 0,
+          "wr": 0.0,
+          "pnl": -3.88,
+          "pf": 0.0
+        },
+        "DOGEUSDT": {
+          "n": 2,
+          "wins": 2,
+          "wr": 1.0,
+          "pnl": 0.66,
+          "pf": null
+        },
+        "ADAUSDT": {
+          "n": 4,
+          "wins": 3,
+          "wr": 0.75,
+          "pnl": -2.17,
+          "pf": 0.401
+        },
+        "APTUSDT": {
+          "n": 5,
+          "wins": 4,
+          "wr": 0.8,
+          "pnl": -0.4,
+          "pf": 0.871
+        },
+        "ARBUSDT": {
+          "n": 7,
+          "wins": 6,
+          "wr": 0.857,
+          "pnl": -1.06,
+          "pf": 0.782
+        },
+        "AVAXUSDT": {
+          "n": 6,
+          "wins": 5,
+          "wr": 0.833,
+          "pnl": -1.51,
+          "pf": 0.615
+        },
+        "BNBUSDT": {
+          "n": 3,
+          "wins": 3,
+          "wr": 1.0,
+          "pnl": 1.15,
+          "pf": null
+        },
+        "DOTUSDT": {
+          "n": 5,
+          "wins": 5,
+          "wr": 1.0,
+          "pnl": 2.39,
+          "pf": null
+        },
+        "LINKUSDT": {
+          "n": 2,
+          "wins": 2,
+          "wr": 1.0,
+          "pnl": 1.27,
+          "pf": null
+        },
+        "LTCUSDT": {
+          "n": 1,
+          "wins": 1,
+          "wr": 1.0,
+          "pnl": 0.38,
+          "pf": null
+        },
+        "NEARUSDT": {
+          "n": 4,
+          "wins": 4,
+          "wr": 1.0,
+          "pnl": 3.34,
+          "pf": null
+        },
+        "OPUSDT": {
+          "n": 8,
+          "wins": 7,
+          "wr": 0.875,
+          "pnl": 3.15,
+          "pf": 2.564
+        },
+        "PEPEUSDT": {
+          "n": 0,
+          "wins": 0,
+          "wr": 0.0,
+          "pnl": 0.0,
+          "pf": 0.0
+        },
+        "SUIUSDT": {
+          "n": 4,
+          "wins": 4,
+          "wr": 1.0,
+          "pnl": 2.94,
+          "pf": null
+        },
+        "UNIUSDT": {
+          "n": 3,
+          "wins": 3,
+          "wr": 1.0,
+          "pnl": 2.2,
+          "pf": null
+        },
+        "WIFUSDT": {
+          "n": 6,
+          "wins": 4,
+          "wr": 0.667,
+          "pnl": -5.11,
+          "pf": 0.457
+        },
+        "MATICUSDT": {
+          "n": 2,
+          "wins": 2,
+          "wr": 1.0,
+          "pnl": 0.6,
+          "pf": null
+        }
+      },
+      "walk_forward_4fold": [
+        {
+          "fold": 1,
+          "n": 32,
+          "wr": 0.844,
+          "pnl": -0.94
+        },
+        {
+          "fold": 2,
+          "n": 23,
+          "wr": 0.913,
+          "pnl": 4.67
+        },
+        {
+          "fold": 3,
+          "n": 16,
+          "wr": 0.875,
+          "pnl": 2.28
+        },
+        {
+          "fold": 4,
+          "n": 22,
+          "wr": 0.909,
+          "pnl": 2.19
+        }
+      ],
+      "wf_pass_count": 4,
+      "slippage_stress": [
+        {
+          "extra_bps": 0.0,
+          "n": 23,
+          "wr": 0.913,
+          "pnl": 3.05
+        },
+        {
+          "extra_bps": 5.0,
+          "n": 23,
+          "wr": 0.913,
+          "pnl": 0.75
+        },
+        {
+          "extra_bps": 10.0,
+          "n": 23,
+          "wr": 0.826,
+          "pnl": -1.55
+        },
+        {
+          "extra_bps": 20.0,
+          "n": 23,
+          "wr": 0.478,
+          "pnl": -6.15
+        }
+      ]
+    },
+    {
+      "name": "WR_C3_rsi30_macd_h24",
+      "params": {
+        "name": "WR_C3_rsi30_macd_h24",
+        "rsi_long": 30,
+        "rsi_short": 65,
+        "req_macd": true,
+        "req_ema": false,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "aggregate": {
+        "n": 540,
+        "wins": 464,
+        "wr": 0.8593,
+        "pnl_total_usd": -18.43,
+        "pnl_per_trade_usd": -0.0341,
+        "pf": 0.934,
+        "max_dd_usd": 43.86,
+        "max_consecutive_losses": 2
+      },
+      "per_symbol": {
+        "BTCUSDT": {
+          "n": 29,
+          "wins": 24,
+          "wr": 0.828,
+          "pnl": -3.38,
+          "pf": 0.571
+        },
+        "ETHUSDT": {
+          "n": 43,
+          "wins": 39,
+          "wr": 0.907,
+          "pnl": 2.69,
+          "pf": 1.209
+        },
+        "SOLUSDT": {
+          "n": 42,
+          "wins": 37,
+          "wr": 0.881,
+          "pnl": -2.25,
+          "pf": 0.877
+        },
+        "XRPUSDT": {
+          "n": 19,
+          "wins": 14,
+          "wr": 0.737,
+          "pnl": -9.68,
+          "pf": 0.379
+        },
+        "DOGEUSDT": {
+          "n": 22,
+          "wins": 20,
+          "wr": 0.909,
+          "pnl": 3.51,
+          "pf": 1.465
+        },
+        "ADAUSDT": {
+          "n": 22,
+          "wins": 20,
+          "wr": 0.909,
+          "pnl": 3.71,
+          "pf": 1.616
+        },
+        "APTUSDT": {
+          "n": 25,
+          "wins": 21,
+          "wr": 0.84,
+          "pnl": -1.64,
+          "pf": 0.88
+        },
+        "ARBUSDT": {
+          "n": 32,
+          "wins": 28,
+          "wr": 0.875,
+          "pnl": 2.32,
+          "pf": 1.159
+        },
+        "AVAXUSDT": {
+          "n": 28,
+          "wins": 23,
+          "wr": 0.821,
+          "pnl": -5.84,
+          "pf": 0.667
+        },
+        "BNBUSDT": {
+          "n": 25,
+          "wins": 23,
+          "wr": 0.92,
+          "pnl": 0.69,
+          "pf": 1.115
+        },
+        "DOTUSDT": {
+          "n": 23,
+          "wins": 20,
+          "wr": 0.87,
+          "pnl": -1.17,
+          "pf": 0.896
+        },
+        "LINKUSDT": {
+          "n": 29,
+          "wins": 21,
+          "wr": 0.724,
+          "pnl": -19.37,
+          "pf": 0.365
+        },
+        "LTCUSDT": {
+          "n": 18,
+          "wins": 17,
+          "wr": 0.944,
+          "pnl": 5.61,
+          "pf": 3.563
+        },
+        "NEARUSDT": {
+          "n": 27,
+          "wins": 22,
+          "wr": 0.815,
+          "pnl": 0.47,
+          "pf": 1.03
+        },
+        "OPUSDT": {
+          "n": 33,
+          "wins": 25,
+          "wr": 0.758,
+          "pnl": -12.58,
+          "pf": 0.62
+        },
+        "PEPEUSDT": {
+          "n": 27,
+          "wins": 26,
+          "wr": 0.963,
+          "pnl": 13.87,
+          "pf": 2.627
+        },
+        "SUIUSDT": {
+          "n": 26,
+          "wins": 23,
+          "wr": 0.885,
+          "pnl": 9.25,
+          "pf": 2.23
+        },
+        "UNIUSDT": {
+          "n": 18,
+          "wins": 17,
+          "wr": 0.944,
+          "pnl": 5.15,
+          "pf": 1.833
+        },
+        "WIFUSDT": {
+          "n": 32,
+          "wins": 27,
+          "wr": 0.844,
+          "pnl": -3.97,
+          "pf": 0.868
+        },
+        "MATICUSDT": {
+          "n": 20,
+          "wins": 17,
+          "wr": 0.85,
+          "pnl": -5.79,
+          "pf": 0.575
+        }
+      },
+      "walk_forward_4fold": [
+        {
+          "fold": 1,
+          "n": 135,
+          "wr": 0.785,
+          "pnl": -59.78
+        },
+        {
+          "fold": 2,
+          "n": 150,
+          "wr": 0.853,
+          "pnl": -3.68
+        },
+        {
+          "fold": 3,
+          "n": 119,
+          "wr": 0.95,
+          "pnl": 48.9
+        },
+        {
+          "fold": 4,
+          "n": 136,
+          "wr": 0.86,
+          "pnl": -3.87
+        }
+      ],
+      "wf_pass_count": 4,
+      "slippage_stress": [
+        {
+          "extra_bps": 0.0,
+          "n": 145,
+          "wr": 0.869,
+          "pnl": 0.7
+        },
+        {
+          "extra_bps": 5.0,
+          "n": 145,
+          "wr": 0.869,
+          "pnl": -13.8
+        },
+        {
+          "extra_bps": 10.0,
+          "n": 145,
+          "wr": 0.807,
+          "pnl": -28.3
+        },
+        {
+          "extra_bps": 20.0,
+          "n": 145,
+          "wr": 0.476,
+          "pnl": -57.3
+        }
+      ]
+    }
+  ]
+}

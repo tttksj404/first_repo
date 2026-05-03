@@ -152,7 +152,7 @@
       "walk_forward_window_count": 0,
       "window_size": 0
     },
-    "generated_at": "2026-04-23T11:11:41.471424+00:00",
+    "generated_at": "2026-04-25T15:42:03.996654+00:00",
     "lineage_attribution": {
       "aligned_run_count": 0,
       "applied": false,
@@ -292,7 +292,7 @@
     "total_live_order_count": 0,
     "total_tested_order_count": 0
   },
-  "generated_at": "2026-04-23T11:11:41.471424+00:00",
+  "generated_at": "2026-04-25T15:42:03.996654+00:00",
   "lineage_attribution": {
     "aligned_run_count": 0,
     "applied": false,

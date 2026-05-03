@@ -190,6 +190,31 @@ crit_unless_stopped() {
     fi
 }
 
+record_report_line() {
+    line="$1"
+    case "$line" in
+        "  WARNING: "*)
+            WARNINGS=$((WARNINGS+1))
+            ISSUES="$ISSUES [W] ${line#  WARNING: }"
+            ;;
+        "  CRITICAL: "*)
+            CRITICALS=$((CRITICALS+1))
+            ISSUES="$ISSUES [C] ${line#  CRITICAL: }"
+            ;;
+    esac
+    printf '%s\n' "$line"
+}
+
+emit_counted_text() {
+    text="${1-}"
+    [ -n "$text" ] || return 0
+    while IFS= read -r line || [ -n "$line" ]; do
+        record_report_line "$line"
+    done <<EOF
+$text
+EOF
+}
+
 # ============================================
 # 1. 프로세스 상태
 # ============================================
@@ -325,7 +350,7 @@ fi
 # ============================================
 echo ""
 echo "[2] 데이터 품질"
-$PYTHON -c "
+DATA_QUALITY_OUTPUT="$($PYTHON -c "
 import json, sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -391,14 +416,19 @@ if strat:
     print(f'  최근 24h 전략 진입: {len(recent)}건')
     if len(recent) == 0 and len(strat) > 0:
         print(f'  WARNING: 24시간 동안 전략 진입 0건 — 진입 조건 너무 엄격하거나 데몬 문제')
-" 2>/dev/null || { warn "data quality check failed"; }
+" 2>/dev/null)"
+DATA_QUALITY_STATUS=$?
+emit_counted_text "$DATA_QUALITY_OUTPUT"
+if [ "$DATA_QUALITY_STATUS" -ne 0 ]; then
+    warn "data quality check failed"
+fi
 
 # ============================================
 # 3. 상태 파일 무결성
 # ============================================
 echo ""
 echo "[3] 상태 파일 무결성"
-$PYTHON -c "
+STATE_FILE_OUTPUT="$($PYTHON -c "
 import json, sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -434,7 +464,12 @@ try:
             print(f'  WARNING: quantity=0 포지션 발견: {p.get(\"symbol\")}')
 except json.JSONDecodeError:
     print('  CRITICAL: state file JSON 파싱 실패 — 파일 손상!')
-" 2>/dev/null || { warn "state file check failed"; }
+" 2>/dev/null)"
+STATE_FILE_STATUS=$?
+emit_counted_text "$STATE_FILE_OUTPUT"
+if [ "$STATE_FILE_STATUS" -ne 0 ]; then
+    warn "state file check failed"
+fi
 
 # cost calibration freshness
 if [ -f "$RUNTIME/artifacts/cost_calibration.json" ]; then
@@ -622,7 +657,7 @@ fi
 # ============================================
 echo ""
 echo "[5] Self-healing"
-$PYTHON -c "
+SELF_HEALING_OUTPUT="$($PYTHON -c "
 import json, sys
 from pathlib import Path
 from collections import Counter
@@ -659,7 +694,12 @@ if events:
         print(f'  WARNING: futures mismatch 반복 ({len(mismatch)}/20건)')
 else:
     print('  이벤트 없음')
-" 2>/dev/null || echo "  self_healing check skipped"
+" 2>/dev/null)"
+SELF_HEALING_STATUS=$?
+emit_counted_text "$SELF_HEALING_OUTPUT"
+if [ "$SELF_HEALING_STATUS" -ne 0 ]; then
+    echo "  self_healing check skipped"
+fi
 
 # ============================================
 # 6. Bitget API 상태
@@ -741,7 +781,7 @@ if [ -f "$SUPERVISOR_LOG" ]; then
 fi
 
 # API connectivity quick check
-$PYTHON -c "
+BITGET_API_OUTPUT="$($PYTHON -c "
 import ssl
 from urllib.request import urlopen, Request
 try:
@@ -750,14 +790,19 @@ try:
     print(f'  Bitget API: OK (HTTP {r.status})')
 except Exception as e:
     print(f'  WARNING: Bitget API 연결 실패 — {e}')
-" 2>/dev/null || warn "Bitget API 연결 실패"
+" 2>/dev/null)"
+BITGET_API_STATUS=$?
+emit_counted_text "$BITGET_API_OUTPUT"
+if [ "$BITGET_API_STATUS" -ne 0 ]; then
+    warn "Bitget API 연결 실패"
+fi
 
 # ============================================
 # 7. 의사결정 흐름
 # ============================================
 echo ""
 echo "[7] 의사결정 흐름"
-$PYTHON -c "
+DECISION_FLOW_OUTPUT="$($PYTHON -c "
 import json
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
@@ -835,14 +880,19 @@ if decs or use_overview_fallback:
         print(f'  cash(미진입) 비율: {cash_pct:.0f}%')
         if cash_pct > 95:
             print(f'  WARNING: 95%+ cash — 진입 조건 너무 엄격하거나 시장 상황 극단적')
-" 2>/dev/null || echo "  decision flow check skipped"
+" 2>/dev/null)"
+DECISION_FLOW_STATUS=$?
+emit_counted_text "$DECISION_FLOW_OUTPUT"
+if [ "$DECISION_FLOW_STATUS" -ne 0 ]; then
+    echo "  decision flow check skipped"
+fi
 
 # ============================================
 # 8. 포지션 sync 상태
 # ============================================
 echo ""
 echo "[8] 포지션 sync"
-$PYTHON -c "
+SYNC_OUTPUT="$($PYTHON -c "
 import json
 from pathlib import Path
 
@@ -865,7 +915,12 @@ if syncs:
         print(f'  WARNING: 최근 10건 중 {len(mismatches)}건 포지션 불일치')
     else:
         print(f'  OK: 최근 sync 정상')
-" 2>/dev/null || echo "  sync check skipped"
+" 2>/dev/null)"
+SYNC_STATUS=$?
+emit_counted_text "$SYNC_OUTPUT"
+if [ "$SYNC_STATUS" -ne 0 ]; then
+    echo "  sync check skipped"
+fi
 
 # ============================================
 # 9. git 상태
