@@ -1,0 +1,77 @@
+{
+  "avg_roe_pct": -5.1975,
+  "close_reasons": {
+    "SL": 2
+  },
+  "cum_pnl_usd": -1.1035,
+  "daily_max_entries": 4,
+  "fetch_errors": {},
+  "last_event": "CLOSE balanced_3x:SL,jackpot_5x:SL",
+  "leverage": 5.0,
+  "leverage_profiles": [
+    {
+      "leverage": 3.0,
+      "max_sl_roe_pct": 4.0,
+      "min_sl_roe_pct": 1.8,
+      "profile_id": "balanced_3x",
+      "runner_tp_roe_pct": 9.0,
+      "tp_roe_pct": 4.5,
+      "trail_after_roe_pct": 3.8,
+      "trail_giveback_roe_pct": 1.5
+    },
+    {
+      "leverage": 5.0,
+      "max_sl_roe_pct": 6.0,
+      "min_sl_roe_pct": 2.5,
+      "profile_id": "jackpot_5x",
+      "runner_tp_roe_pct": 12.0,
+      "tp_roe_pct": 6.0,
+      "trail_after_roe_pct": 5.0,
+      "trail_giveback_roe_pct": 2.0
+    }
+  ],
+  "live_order_count": 0,
+  "live_ready": false,
+  "losses": 2,
+  "mode": "jackpot_paper_bot_v1",
+  "no_order_side_effects": true,
+  "open_position": null,
+  "open_positions": {},
+  "paper_margin_usd": 10.0,
+  "paper_only": true,
+  "profiles": {
+    "balanced_3x": {
+      "avg_roe_pct": -4.148,
+      "closed": 1,
+      "cum_pnl_usd": -0.4388,
+      "losses": 1,
+      "win_rate": 0.0,
+      "wins": 0
+    },
+    "jackpot_5x": {
+      "avg_roe_pct": -6.247,
+      "closed": 1,
+      "cum_pnl_usd": -0.6647,
+      "losses": 1,
+      "win_rate": 0.0,
+      "wins": 0
+    }
+  },
+  "runner_tp_roe_pct": 12.0,
+  "sl_roe_pct": -2.5,
+  "tested_order_count": 0,
+  "time_exit_minutes": 45,
+  "timeframe": "5m",
+  "total_closed": 2,
+  "total_entries": 1,
+  "tp_roe_pct": 6.0,
+  "universe": [
+    "BTC/USDT:USDT",
+    "ETH/USDT:USDT",
+    "SOL/USDT:USDT",
+    "DOGE/USDT:USDT"
+  ],
+  "updated_at": "2026-04-26T14:19:37.182377+00:00",
+  "win_rate": 0.0,
+  "wins": 0
+}

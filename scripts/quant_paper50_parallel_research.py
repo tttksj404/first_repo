@@ -216,6 +216,32 @@ def _major_5m(decision_root: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _high_upside_overlay(decision_root: Path) -> list[dict[str, Any]]:
+    payload = _read_json(decision_root / "artifacts" / "paper50_high_upside_overlay_latest.json")
+    rows = []
+    action_priority = {
+        "paper_high_upside_candidate": "paper_candidate",
+        "paper_watch": "watch",
+        "lottery_watch_only": "watch",
+        "watch_or_reject": "hold",
+    }
+    for row in list(payload.get("top_profiles") or [])[:8]:
+        high_score = _safe_float(row.get("high_upside_score"))
+        roe_bonus = min(max(_safe_float(row.get("p90_roe_bps")), 0.0), 500.0) / 20.0
+        tail_penalty = min(abs(min(_safe_float(row.get("worst_roe_bps")), 0.0)), 500.0) / 50.0
+        rows.append(
+            {
+                "id": f"high_upside:{row.get('id')}",
+                "source": "high_upside_overlay",
+                "action": action_priority.get(str(row.get("action")), "hold"),
+                "score": round(high_score + roe_bonus - tail_penalty, 6),
+                "metrics": row,
+                "blockers": list(row.get("blockers") or []),
+            }
+        )
+    return rows
+
+
 def _promotion_candidates(decision_root: Path) -> list[dict[str, Any]]:
     payload = _read_json(decision_root / "artifacts" / "paper50_promotion_checklist_latest.json")
     priority = {
@@ -252,6 +278,7 @@ def build_summary(*, decision_root: Path, alpha_dir: Path, output_dir: Path, com
     candidates.extend(_top_combo(output_dir))
     candidates.extend(_forced_pilot(decision_root))
     candidates.extend(_major_5m(decision_root))
+    candidates.extend(_high_upside_overlay(decision_root))
     candidates.extend(_promotion_candidates(decision_root))
     candidates.sort(key=lambda row: (_safe_float(row.get("score")), str(row.get("action") or "")), reverse=True)
 
@@ -282,6 +309,7 @@ def build_summary(*, decision_root: Path, alpha_dir: Path, output_dir: Path, com
             "promotion_checklist": str(decision_root / "artifacts" / "paper50_promotion_checklist_latest.json"),
             "forced_pilot": str(decision_root / "artifacts" / "paper50_forced_pilot_latest.json"),
             "major_5m": str(decision_root / "artifacts" / "major_5m_leverage_research_latest.json"),
+            "high_upside_overlay": str(decision_root / "artifacts" / "paper50_high_upside_overlay_latest.json"),
         },
     }
 
@@ -496,6 +524,29 @@ def main() -> int:
                 str(alpha_dir / "long_failure_overlay_check" / "long_failure_short_overlay_report.json"),
                 "--output",
                 str(high_probability_output),
+            ],
+        ),
+        (
+            "high_upside_overlay",
+            [
+                py,
+                "scripts/quant_paper50_high_upside_overlay.py",
+                "--alpha-outcomes",
+                str(alpha_dir / "external_alpha_outcomes.json"),
+                "--monitor-status",
+                str(decision_root / "_monitor_status.json"),
+                "--output",
+                str(decision_root / "artifacts" / "paper50_high_upside_overlay_latest.json"),
+                "--min-sample",
+                "40",
+                "--cost-bps",
+                "8",
+                "--leverage",
+                "3",
+                "--leverage",
+                "5",
+                "--leverage",
+                "10",
             ],
         ),
     ]

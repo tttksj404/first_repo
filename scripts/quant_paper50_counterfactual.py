@@ -277,7 +277,7 @@ def _evaluate_decision(
     row: dict[str, Any],
     *,
     forward_minutes: int,
-    cache_dir: Path,
+    cache_dir: Path | None = None,
     calibration: CostCalibration | None = None,
     funding_rate_8h: float = DEFAULT_FUNDING_RATE_8H,
 ) -> dict[str, Any]:
@@ -285,6 +285,7 @@ def _evaluate_decision(
     timestamp = _parse_timestamp(str(row.get("timestamp") or ""))
     start_ms = int(timestamp.timestamp() * 1000)
     end_ms = int((timestamp + timedelta(minutes=forward_minutes + 1)).timestamp() * 1000)
+    effective_cache_dir = cache_dir if cache_dir is not None else Path("quant_runtime_paper50") / "cache" / "klines"
     bars = sorted(
         fetch_klines_cached(
             client.get_klines,
@@ -292,7 +293,7 @@ def _evaluate_decision(
             start_ms=start_ms,
             end_ms=end_ms,
             forward_minutes=forward_minutes,
-            cache_dir=cache_dir,
+            cache_dir=effective_cache_dir,
         ),
         key=lambda item: int(item.get("open_time") or 0),
     )

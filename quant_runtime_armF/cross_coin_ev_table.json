@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "description": "Cross-coin OI quadrant EV table. Computed from 4-day Bitget paper50 forensics (2026-04-22 to 2026-04-25, 552 alt + 139 BTC joinable decisions).",
+  "ev_threshold_bps": 5.0,
+  "stale_minutes": 15,
+  "leader_per_symbol": {
+    "BTCUSDT": "ETHUSDT",
+    "ETHUSDT": "BTCUSDT",
+    "SOLUSDT": "BTCUSDT",
+    "DOGEUSDT": "BTCUSDT",
+    "PEPEUSDT": "BTCUSDT"
+  },
+  "scenarios": [
+    {
+      "rank": 1,
+      "symbol": "PEPEUSDT",
+      "side": "long",
+      "own_quadrant": "newLongs",
+      "leader_quadrant": "newLongs",
+      "leader_dir": null,
+      "n": 30,
+      "fwd_60m_bps": 15.272,
+      "winrate": 0.833,
+      "ev_bps": 12.71
+    },
+    {
+      "rank": 2,
+      "symbol": "BTCUSDT",
+      "side": "long",
+      "own_quadrant": "newLongs",
+      "leader_quadrant": "newShorts",
+      "leader_dir": null,
+      "n": 22,
+      "fwd_60m_bps": 7.076,
+      "winrate": 0.773,
+      "ev_bps": 5.47
+    },
+    {
+      "rank": 3,
+      "symbol": "PEPEUSDT",
+      "side": "long",
+      "own_quadrant": "newLongs",
+      "leader_quadrant": null,
+      "leader_dir": "up",
+      "n": 43,
+      "fwd_60m_bps": 7.257,
+      "winrate": 0.698,
+      "ev_bps": 5.06
+    },
+    {
+      "rank": 4,
+      "symbol": "BTCUSDT",
+      "side": "long",
+      "own_quadrant": "newLongs",
+      "leader_quadrant": null,
+      "leader_dir": "down",
+      "n": 25,
+      "fwd_60m_bps": 4.595,
+      "winrate": 0.68,
+      "ev_bps": 3.12
+    },
+    {
+      "rank": 5,
+      "symbol": "ETHUSDT",
+      "side": "short",
+      "own_quadrant": "newShorts",
+      "leader_quadrant": null,
+      "leader_dir": "up",
+      "n": 23,
+      "fwd_60m_bps": 3.331,
+      "winrate": 0.696,
+      "ev_bps": 2.32
+    },
+    {
+      "rank": 6,
+      "symbol": "DOGEUSDT",
+      "side": "long",
+      "own_quadrant": "newLongs",
+      "leader_quadrant": null,
+      "leader_dir": "up",
+      "n": 43,
+      "fwd_60m_bps": 3.385,
+      "winrate": 0.535,
+      "ev_bps": 1.81
+    },
+    {
+      "rank": 7,
+      "symbol": "SOLUSDT",
+      "side": "long",
+      "own_quadrant": "longUnwind",
+      "leader_quadrant": null,
+      "leader_dir": null,
+      "n": 52,
+      "fwd_60m_bps": 2.651,
+      "winrate": 0.635,
+      "ev_bps": 1.68
+    },
+    {
+      "rank": 8,
+      "symbol": "DOGEUSDT",
+      "side": "short",
+      "own_quadrant": "newShorts",
+      "leader_quadrant": null,
+      "leader_dir": null,
+      "n": 31,
+      "fwd_60m_bps": 1.693,
+      "winrate": 0.613,
+      "ev_bps": 1.04
+    }
+  ],
+  "blockers": [
+    {
+      "symbol": "PEPEUSDT",
+      "own_quadrant": "shortCover",
+      "leader_dir": "up",
+      "n": 26,
+      "fwd_60m_bps": -36.582,
+      "winrate": 0.269,
+      "reason": "PEPE shortCover with BTC up = market squeeze fake"
+    },
+    {
+      "symbol": "PEPEUSDT",
+      "own_quadrant": "longUnwind",
+      "leader_dir": "down",
+      "n": 28,
+      "fwd_60m_bps": -15.985,
+      "winrate": 0.286,
+      "reason": "PEPE longUnwind with BTC down = co-dump"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "own_quadrant": "shortCover",
+      "leader_dir": null,
+      "n": 29,
+      "fwd_60m_bps": -22.68,
+      "winrate": 0.207,
+      "reason": "DOGE shortCover trap (BTC-independent)"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "own_quadrant": "newLongs",
+      "leader_dir": "up",
+      "n": 46,
+      "fwd_60m_bps": -6.317,
+      "winrate": 0.326,
+      "reason": "ETH newLongs with BTC up = follow trap (counter-rotation works better)"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "own_quadrant": "shortCover",
+      "leader_quadrant": "newLongs",
+      "leader_dir": null,
+      "n": 24,
+      "fwd_60m_bps": -6.261,
+      "winrate": 0.208,
+      "reason": "BTC shortCover with ETH newLongs = BTC squeeze fake while ETH leading"
+    }
+  ]
+}

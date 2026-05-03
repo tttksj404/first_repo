@@ -171,6 +171,20 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("HTTP[[:space:]/_-]*429", script)
         self.assertNotIn('"429\\|rate.limit"', script)
 
+    def test_quant_health_audit_counts_inline_python_severities(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("record_report_line()", script)
+        self.assertIn("emit_counted_text()", script)
+        self.assertIn('emit_counted_text "$DATA_QUALITY_OUTPUT"', script)
+        self.assertIn('emit_counted_text "$STATE_FILE_OUTPUT"', script)
+        self.assertIn('emit_counted_text "$SELF_HEALING_OUTPUT"', script)
+        self.assertIn('emit_counted_text "$BITGET_API_OUTPUT"', script)
+        self.assertIn('emit_counted_text "$DECISION_FLOW_OUTPUT"', script)
+        self.assertIn('emit_counted_text "$SYNC_OUTPUT"', script)
+
     def test_quant_run_live_orders_logs_watchdog_start_failure_without_aborting(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_live_orders.sh").read_text(
             encoding="utf-8"

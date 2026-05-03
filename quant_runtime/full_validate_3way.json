@@ -1,0 +1,1169 @@
+{
+  "strategies": {
+    "OLD_X4": {
+      "config": {
+        "universe": [
+          "BTCUSDT",
+          "ETHUSDT",
+          "SOLUSDT",
+          "XRPUSDT",
+          "DOGEUSDT",
+          "ADAUSDT",
+          "APTUSDT",
+          "ARBUSDT",
+          "AVAXUSDT",
+          "BNBUSDT",
+          "DOTUSDT",
+          "LINKUSDT",
+          "LTCUSDT",
+          "NEARUSDT",
+          "OPUSDT",
+          "PEPEUSDT",
+          "SUIUSDT",
+          "UNIUSDT",
+          "WIFUSDT",
+          "MATICUSDT"
+        ],
+        "rsi_long": 25,
+        "rsi_short": 70,
+        "vol_min": 1.3,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "full_year": {
+        "n": 93,
+        "wr": 0.8817,
+        "pf": 1.216,
+        "total": 4.04,
+        "max_dd": 5.77,
+        "avg_win": 0.278,
+        "avg_loss": -1.704,
+        "max_consec_loss": 2,
+        "annual_pct": 8.1
+      },
+      "mc_ruin": {
+        "ruin_pct": 0.0,
+        "median_final_eq": 54.04,
+        "p5_final_eq": 54.04
+      },
+      "walk_forward": {
+        "pass_count": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "te_n": 23,
+            "te_wr": 0.913,
+            "te_pf": 1.758,
+            "te_total": 2.33
+          },
+          {
+            "fold": 1,
+            "te_n": 16,
+            "te_wr": 0.875,
+            "te_pf": 1.455,
+            "te_total": 1.13
+          },
+          {
+            "fold": 2,
+            "te_n": 22,
+            "te_wr": 0.9091,
+            "te_pf": 1.302,
+            "te_total": 1.08
+          },
+          {
+            "fold": 3,
+            "te_n": 0,
+            "te_wr": 0,
+            "te_pf": null,
+            "te_total": 0
+          }
+        ]
+      },
+      "slippage_stress": [
+        {
+          "bps": 0,
+          "n": 93,
+          "total": 4.04,
+          "wr": 0.8817,
+          "pf": 1.216
+        },
+        {
+          "bps": 5,
+          "n": 93,
+          "total": -0.61,
+          "wr": 0.8602,
+          "pf": 0.968
+        },
+        {
+          "bps": 10,
+          "n": 93,
+          "total": -5.26,
+          "wr": 0.828,
+          "pf": 0.738
+        },
+        {
+          "bps": 15,
+          "n": 93,
+          "total": -9.91,
+          "wr": 0.7419,
+          "pf": 0.531
+        },
+        {
+          "bps": 20,
+          "n": 93,
+          "total": -14.56,
+          "wr": 0.6237,
+          "pf": 0.356
+        }
+      ],
+      "per_symbol": {
+        "BTCUSDT": {
+          "n": 7,
+          "total": -0.08
+        },
+        "ETHUSDT": {
+          "n": 14,
+          "total": 1.88
+        },
+        "SOLUSDT": {
+          "n": 9,
+          "total": 0.32
+        },
+        "XRPUSDT": {
+          "n": 1,
+          "total": -1.94
+        },
+        "DOGEUSDT": {
+          "n": 2,
+          "total": 0.33
+        },
+        "ADAUSDT": {
+          "n": 4,
+          "total": -1.08
+        },
+        "APTUSDT": {
+          "n": 5,
+          "total": -0.2
+        },
+        "ARBUSDT": {
+          "n": 7,
+          "total": -0.53
+        },
+        "AVAXUSDT": {
+          "n": 6,
+          "total": -0.76
+        },
+        "BNBUSDT": {
+          "n": 3,
+          "total": 0.58
+        },
+        "DOTUSDT": {
+          "n": 5,
+          "total": 1.2
+        },
+        "LINKUSDT": {
+          "n": 2,
+          "total": 0.62
+        },
+        "LTCUSDT": {
+          "n": 1,
+          "total": 0.18
+        },
+        "NEARUSDT": {
+          "n": 4,
+          "total": 1.67
+        },
+        "OPUSDT": {
+          "n": 8,
+          "total": 1.57
+        },
+        "PEPEUSDT": {
+          "n": 0,
+          "total": 0
+        },
+        "SUIUSDT": {
+          "n": 4,
+          "total": 1.47
+        },
+        "UNIUSDT": {
+          "n": 3,
+          "total": 1.09
+        },
+        "WIFUSDT": {
+          "n": 6,
+          "total": -2.58
+        },
+        "MATICUSDT": {
+          "n": 2,
+          "total": 0.3
+        }
+      },
+      "sym_diversification": "12/20",
+      "param_sensitivity": {
+        "neighbors_positive": "27/27",
+        "best": {
+          "rsi_long": 30,
+          "sl": 3.0,
+          "hold": 36,
+          "n": 159,
+          "total": 7.67,
+          "wr": 0.8805
+        },
+        "worst": {
+          "rsi_long": 25,
+          "sl": 2.5,
+          "hold": 12,
+          "n": 93,
+          "total": 0.04,
+          "wr": 0.828
+        },
+        "grid": [
+          {
+            "rsi_long": 20,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 80,
+            "total": 5.57,
+            "wr": 0.8625
+          },
+          {
+            "rsi_long": 20,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 80,
+            "total": 6.84,
+            "wr": 0.8875
+          },
+          {
+            "rsi_long": 20,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 80,
+            "total": 6.84,
+            "wr": 0.8875
+          },
+          {
+            "rsi_long": 20,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 80,
+            "total": 5.88,
+            "wr": 0.875
+          },
+          {
+            "rsi_long": 20,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 80,
+            "total": 7.15,
+            "wr": 0.9
+          },
+          {
+            "rsi_long": 20,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 80,
+            "total": 7.15,
+            "wr": 0.9
+          },
+          {
+            "rsi_long": 20,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 80,
+            "total": 6.38,
+            "wr": 0.8875
+          },
+          {
+            "rsi_long": 20,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 80,
+            "total": 7.66,
+            "wr": 0.9125
+          },
+          {
+            "rsi_long": 20,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 80,
+            "total": 7.66,
+            "wr": 0.9125
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 93,
+            "total": 0.04,
+            "wr": 0.828
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 93,
+            "total": 3.13,
+            "wr": 0.8602
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 93,
+            "total": 3.13,
+            "wr": 0.8602
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 93,
+            "total": 1.08,
+            "wr": 0.8387
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 93,
+            "total": 4.04,
+            "wr": 0.8817
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 93,
+            "total": 4.04,
+            "wr": 0.8817
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 93,
+            "total": 1.28,
+            "wr": 0.8495
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 93,
+            "total": 5.68,
+            "wr": 0.8925
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 93,
+            "total": 6.01,
+            "wr": 0.8925
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 159,
+            "total": 0.67,
+            "wr": 0.8176
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 159,
+            "total": 6.67,
+            "wr": 0.8491
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 159,
+            "total": 7.14,
+            "wr": 0.8553
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 159,
+            "total": 1.48,
+            "wr": 0.8239
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 159,
+            "total": 7.2,
+            "wr": 0.8742
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 159,
+            "total": 7.67,
+            "wr": 0.8805
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 159,
+            "total": 0.59,
+            "wr": 0.8302
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 159,
+            "total": 6.56,
+            "wr": 0.8805
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 159,
+            "total": 7.07,
+            "wr": 0.8868
+          }
+        ]
+      }
+    },
+    "S3": {
+      "config": {
+        "universe": [
+          "OPUSDT",
+          "NEARUSDT",
+          "SUIUSDT",
+          "ETHUSDT",
+          "UNIUSDT"
+        ],
+        "rsi_long": 30,
+        "rsi_short": 70,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "full_year": {
+        "n": 73,
+        "wr": 0.9452,
+        "pf": 6.057,
+        "total": 31.86,
+        "max_dd": 2.78,
+        "avg_win": 0.553,
+        "avg_loss": -1.575,
+        "max_consec_loss": 1,
+        "annual_pct": 63.7
+      },
+      "mc_ruin": {
+        "ruin_pct": 0.0,
+        "median_final_eq": 81.86,
+        "p5_final_eq": 81.86
+      },
+      "walk_forward": {
+        "pass_count": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "te_n": 19,
+            "te_wr": 0.8947,
+            "te_pf": 3.298,
+            "te_total": 4.62
+          },
+          {
+            "fold": 1,
+            "te_n": 13,
+            "te_wr": 1.0,
+            "te_pf": null,
+            "te_total": 10.34
+          },
+          {
+            "fold": 2,
+            "te_n": 21,
+            "te_wr": 0.9524,
+            "te_pf": 3.749,
+            "te_total": 7.64
+          },
+          {
+            "fold": 3,
+            "te_n": 0,
+            "te_wr": 0,
+            "te_pf": null,
+            "te_total": 0
+          }
+        ]
+      },
+      "slippage_stress": [
+        {
+          "bps": 0,
+          "n": 73,
+          "total": 31.86,
+          "wr": 0.9452,
+          "pf": 6.057
+        },
+        {
+          "bps": 5,
+          "n": 73,
+          "total": 26.38,
+          "wr": 0.9452,
+          "pf": 4.998
+        },
+        {
+          "bps": 10,
+          "n": 73,
+          "total": 20.91,
+          "wr": 0.9452,
+          "pf": 4.03
+        },
+        {
+          "bps": 15,
+          "n": 73,
+          "total": 15.43,
+          "wr": 0.9041,
+          "pf": 3.121
+        },
+        {
+          "bps": 20,
+          "n": 73,
+          "total": 9.96,
+          "wr": 0.8219,
+          "pf": 2.242
+        }
+      ],
+      "per_symbol": {
+        "OPUSDT": {
+          "n": 17,
+          "total": 9.14
+        },
+        "NEARUSDT": {
+          "n": 12,
+          "total": 6.88
+        },
+        "SUIUSDT": {
+          "n": 14,
+          "total": 6.18
+        },
+        "ETHUSDT": {
+          "n": 21,
+          "total": 5.22
+        },
+        "UNIUSDT": {
+          "n": 9,
+          "total": 4.44
+        }
+      },
+      "sym_diversification": "5/5",
+      "param_sensitivity": {
+        "neighbors_positive": "27/27",
+        "best": {
+          "rsi_long": 30,
+          "sl": 3.0,
+          "hold": 36,
+          "n": 73,
+          "total": 32.57,
+          "wr": 0.9589
+        },
+        "worst": {
+          "rsi_long": 35,
+          "sl": 2.5,
+          "hold": 12,
+          "n": 173,
+          "total": 12.55,
+          "wr": 0.8382
+        },
+        "grid": [
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 50,
+            "total": 19.68,
+            "wr": 0.94
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 50,
+            "total": 19.68,
+            "wr": 0.94
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 50,
+            "total": 19.68,
+            "wr": 0.94
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 50,
+            "total": 20.94,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 50,
+            "total": 20.94,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 50,
+            "total": 20.94,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 50,
+            "total": 20.4,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 50,
+            "total": 20.4,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 50,
+            "total": 20.4,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 73,
+            "total": 28.3,
+            "wr": 0.9178
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 73,
+            "total": 31.04,
+            "wr": 0.9315
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 73,
+            "total": 31.76,
+            "wr": 0.9452
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 73,
+            "total": 30.23,
+            "wr": 0.9315
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 73,
+            "total": 31.86,
+            "wr": 0.9452
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 73,
+            "total": 32.57,
+            "wr": 0.9589
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 73,
+            "total": 29.69,
+            "wr": 0.9315
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 73,
+            "total": 30.87,
+            "wr": 0.9452
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 73,
+            "total": 31.59,
+            "wr": 0.9589
+          },
+          {
+            "rsi_long": 35,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 173,
+            "total": 12.55,
+            "wr": 0.8382
+          },
+          {
+            "rsi_long": 35,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 173,
+            "total": 12.71,
+            "wr": 0.8555
+          },
+          {
+            "rsi_long": 35,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 173,
+            "total": 14.34,
+            "wr": 0.8613
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 173,
+            "total": 21.32,
+            "wr": 0.8555
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 173,
+            "total": 21.93,
+            "wr": 0.8728
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 173,
+            "total": 28.49,
+            "wr": 0.8902
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 173,
+            "total": 24.21,
+            "wr": 0.8613
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 173,
+            "total": 21.82,
+            "wr": 0.8786
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 173,
+            "total": 31.62,
+            "wr": 0.9017
+          }
+        ]
+      }
+    },
+    "M5": {
+      "config": {
+        "universe": [
+          "OPUSDT",
+          "NEARUSDT",
+          "SUIUSDT",
+          "ETHUSDT",
+          "UNIUSDT"
+        ],
+        "rsi_long": 30,
+        "rsi_short": 70,
+        "vol_min": 1.0,
+        "tp_atr": 0.5,
+        "sl_atr": 3.0,
+        "hold": 24
+      },
+      "full_year": {
+        "n": 73,
+        "wr": 0.9452,
+        "pf": 4.836,
+        "total": 33.55,
+        "max_dd": 3.8,
+        "avg_win": 0.613,
+        "avg_loss": -2.186,
+        "max_consec_loss": 1,
+        "annual_pct": 67.1
+      },
+      "mc_ruin": {
+        "ruin_pct": 0.0,
+        "median_final_eq": 83.55,
+        "p5_final_eq": 83.55
+      },
+      "walk_forward": {
+        "pass_count": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "te_n": 19,
+            "te_wr": 0.8947,
+            "te_pf": 2.456,
+            "te_total": 5.64
+          },
+          {
+            "fold": 1,
+            "te_n": 13,
+            "te_wr": 1.0,
+            "te_pf": null,
+            "te_total": 6.89
+          },
+          {
+            "fold": 2,
+            "te_n": 21,
+            "te_wr": 0.9524,
+            "te_pf": 6.136,
+            "te_total": 9.52
+          },
+          {
+            "fold": 3,
+            "te_n": 0,
+            "te_wr": 0,
+            "te_pf": null,
+            "te_total": 0
+          }
+        ]
+      },
+      "slippage_stress": [
+        {
+          "bps": 0,
+          "n": 73,
+          "total": 33.55,
+          "wr": 0.9452,
+          "pf": 4.836
+        },
+        {
+          "bps": 5,
+          "n": 73,
+          "total": 27.0,
+          "wr": 0.9452,
+          "pf": 3.952
+        },
+        {
+          "bps": 10,
+          "n": 73,
+          "total": 20.45,
+          "wr": 0.9452,
+          "pf": 3.142
+        },
+        {
+          "bps": 15,
+          "n": 73,
+          "total": 13.9,
+          "wr": 0.9041,
+          "pf": 2.38
+        },
+        {
+          "bps": 20,
+          "n": 73,
+          "total": 7.35,
+          "wr": 0.8219,
+          "pf": 1.665
+        }
+      ],
+      "per_symbol": {
+        "OPUSDT": {
+          "n": 17,
+          "total": 8.13
+        },
+        "NEARUSDT": {
+          "n": 12,
+          "total": 7.33
+        },
+        "SUIUSDT": {
+          "n": 14,
+          "total": 7.07
+        },
+        "ETHUSDT": {
+          "n": 21,
+          "total": 6.73
+        },
+        "UNIUSDT": {
+          "n": 9,
+          "total": 4.29
+        }
+      },
+      "sym_diversification": "5/5",
+      "param_sensitivity": {
+        "neighbors_positive": "27/27",
+        "best": {
+          "rsi_long": 30,
+          "sl": 2.5,
+          "hold": 36,
+          "n": 73,
+          "total": 34.2,
+          "wr": 0.9452
+        },
+        "worst": {
+          "rsi_long": 35,
+          "sl": 2.5,
+          "hold": 12,
+          "n": 173,
+          "total": 20.44,
+          "wr": 0.8382
+        },
+        "grid": [
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 50,
+            "total": 27.25,
+            "wr": 0.94
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 50,
+            "total": 27.25,
+            "wr": 0.94
+          },
+          {
+            "rsi_long": 25,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 50,
+            "total": 27.25,
+            "wr": 0.94
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 50,
+            "total": 27.37,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 50,
+            "total": 27.37,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 50,
+            "total": 27.37,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 50,
+            "total": 26.3,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 50,
+            "total": 26.3,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 25,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 50,
+            "total": 26.3,
+            "wr": 0.96
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 73,
+            "total": 31.89,
+            "wr": 0.9178
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 73,
+            "total": 33.72,
+            "wr": 0.9315
+          },
+          {
+            "rsi_long": 30,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 73,
+            "total": 34.2,
+            "wr": 0.9452
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 73,
+            "total": 32.46,
+            "wr": 0.9315
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 73,
+            "total": 33.55,
+            "wr": 0.9452
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 73,
+            "total": 34.02,
+            "wr": 0.9589
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 73,
+            "total": 31.39,
+            "wr": 0.9315
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 73,
+            "total": 32.17,
+            "wr": 0.9452
+          },
+          {
+            "rsi_long": 30,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 73,
+            "total": 32.65,
+            "wr": 0.9589
+          },
+          {
+            "rsi_long": 35,
+            "sl": 2.5,
+            "hold": 12,
+            "n": 173,
+            "total": 20.44,
+            "wr": 0.8382
+          },
+          {
+            "rsi_long": 35,
+            "sl": 2.5,
+            "hold": 24,
+            "n": 173,
+            "total": 20.54,
+            "wr": 0.8555
+          },
+          {
+            "rsi_long": 35,
+            "sl": 2.5,
+            "hold": 36,
+            "n": 173,
+            "total": 21.63,
+            "wr": 0.8613
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.0,
+            "hold": 12,
+            "n": 173,
+            "total": 25.57,
+            "wr": 0.8555
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.0,
+            "hold": 24,
+            "n": 173,
+            "total": 25.98,
+            "wr": 0.8728
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.0,
+            "hold": 36,
+            "n": 173,
+            "total": 30.35,
+            "wr": 0.8902
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.5,
+            "hold": 12,
+            "n": 173,
+            "total": 26.78,
+            "wr": 0.8613
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.5,
+            "hold": 24,
+            "n": 173,
+            "total": 25.19,
+            "wr": 0.8786
+          },
+          {
+            "rsi_long": 35,
+            "sl": 3.5,
+            "hold": 36,
+            "n": 173,
+            "total": 31.72,
+            "wr": 0.9017
+          }
+        ]
+      }
+    }
+  },
+  "comparison": []
+}

@@ -1,0 +1,431 @@
+{
+  "total_candidates": 3203,
+  "top_pnl": [
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/75|macd0|ema1|vol1.0|tp0.5|sl3.0|h24",
+      "n": 102,
+      "wr": 0.9314,
+      "pnl": 33.45,
+      "pf": null,
+      "test_n": 45,
+      "test_wr": 0.6667,
+      "test_pnl": -32.09
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/75|macd0|ema1|vol1.0|tp0.5|sl3.0|h48",
+      "n": 102,
+      "wr": 0.951,
+      "pnl": 31.45,
+      "pf": null,
+      "test_n": 45,
+      "test_wr": 0.6667,
+      "test_pnl": -34.33
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/75|macd0|ema1|vol1.0|tp0.5|sl3.0|h12",
+      "n": 102,
+      "wr": 0.8627,
+      "pnl": 27.48,
+      "pf": null,
+      "test_n": 45,
+      "test_wr": 0.6667,
+      "test_pnl": -24.7
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.0|tp0.5|sl3.0|h24",
+      "n": 125,
+      "wr": 0.888,
+      "pnl": 21.86,
+      "pf": null,
+      "test_n": 65,
+      "test_wr": 0.7077,
+      "test_pnl": -32.46
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/75|macd0|ema1|vol1.0|tp0.5|sl2.0|h48",
+      "n": 102,
+      "wr": 0.8922,
+      "pnl": 20.38,
+      "pf": null,
+      "test_n": 45,
+      "test_wr": 0.6444,
+      "test_pnl": -21.48
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.0|tp0.5|sl3.0|h48",
+      "n": 125,
+      "wr": 0.904,
+      "pnl": 19.84,
+      "pf": null,
+      "test_n": 65,
+      "test_wr": 0.7231,
+      "test_pnl": -32.62
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/75|macd0|ema1|vol1.0|tp0.5|sl2.0|h24",
+      "n": 102,
+      "wr": 0.8824,
+      "pnl": 19.02,
+      "pf": null,
+      "test_n": 45,
+      "test_wr": 0.6444,
+      "test_pnl": -21.48
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.3|tp0.5|sl3.0|h12",
+      "n": 113,
+      "wr": 0.8319,
+      "pnl": 16.69,
+      "pf": null,
+      "test_n": 56,
+      "test_wr": 0.6786,
+      "test_pnl": -24.86
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.3|tp0.5|sl3.0|h24",
+      "n": 113,
+      "wr": 0.8761,
+      "pnl": 16.66,
+      "pf": null,
+      "test_n": 56,
+      "test_wr": 0.6786,
+      "test_pnl": -33.62
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.0|tp0.5|sl3.0|h12",
+      "n": 125,
+      "wr": 0.824,
+      "pnl": 15.72,
+      "pf": null,
+      "test_n": 65,
+      "test_wr": 0.7077,
+      "test_pnl": -23.7
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/75|macd0|ema1|vol1.0|tp0.5|sl2.0|h12",
+      "n": 102,
+      "wr": 0.8333,
+      "pnl": 15.02,
+      "pf": null,
+      "test_n": 45,
+      "test_wr": 0.6444,
+      "test_pnl": -18.84
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.3|tp0.5|sl3.0|h48",
+      "n": 113,
+      "wr": 0.8938,
+      "pnl": 14.64,
+      "pf": null,
+      "test_n": 56,
+      "test_wr": 0.6964,
+      "test_pnl": -33.78
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.3|tp0.5|sl2.0|h48",
+      "n": 113,
+      "wr": 0.8496,
+      "pnl": 14.05,
+      "pf": null,
+      "test_n": 56,
+      "test_wr": 0.6786,
+      "test_pnl": -20.21
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.0|tp0.5|sl2.0|h48",
+      "n": 125,
+      "wr": 0.848,
+      "pnl": 13.15,
+      "pf": null,
+      "test_n": 65,
+      "test_wr": 0.7077,
+      "test_pnl": -17.93
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.3|tp0.5|sl2.0|h24",
+      "n": 113,
+      "wr": 0.8407,
+      "pnl": 12.69,
+      "pf": null,
+      "test_n": 56,
+      "test_wr": 0.6786,
+      "test_pnl": -20.21
+    },
+    {
+      "source": "pair_trading",
+      "label": "ETH-XRP|w60|z3.0|ex0.0|h96|st5.0",
+      "n": 427,
+      "wr": 0.4379,
+      "pnl": 12.41,
+      "pf": 1.12,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.5|tp0.5|sl3.0|h12",
+      "n": 102,
+      "wr": 0.8137,
+      "pnl": 12.37,
+      "pf": null,
+      "test_n": 55,
+      "test_wr": 0.6727,
+      "test_pnl": -25.66
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.5|tp0.5|sl3.0|h24",
+      "n": 102,
+      "wr": 0.8627,
+      "pnl": 12.34,
+      "pf": null,
+      "test_n": 55,
+      "test_wr": 0.6727,
+      "test_pnl": -34.42
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.0|tp0.5|sl2.0|h24",
+      "n": 125,
+      "wr": 0.84,
+      "pnl": 11.79,
+      "pf": null,
+      "test_n": 65,
+      "test_wr": 0.7077,
+      "test_pnl": -17.93
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.5|tp0.5|sl3.0|h48",
+      "n": 102,
+      "wr": 0.8824,
+      "pnl": 10.32,
+      "pf": null,
+      "test_n": 55,
+      "test_wr": 0.6909,
+      "test_pnl": -34.58
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.5|tp0.5|sl2.0|h48",
+      "n": 102,
+      "wr": 0.8333,
+      "pnl": 9.73,
+      "pf": null,
+      "test_n": 55,
+      "test_wr": 0.6727,
+      "test_pnl": -21.01
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.3|tp0.5|sl2.0|h12",
+      "n": 113,
+      "wr": 0.8053,
+      "pnl": 9.53,
+      "pf": null,
+      "test_n": 56,
+      "test_wr": 0.6786,
+      "test_pnl": -15.93
+    },
+    {
+      "source": "pair_trading",
+      "label": "ETH-XRP|w100|z3.0|ex0.0|h96|st5.0",
+      "n": 300,
+      "wr": 0.4367,
+      "pnl": 8.66,
+      "pf": 1.113,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/70|macd0|ema1|vol1.5|tp0.5|sl2.0|h24",
+      "n": 102,
+      "wr": 0.8235,
+      "pnl": 8.37,
+      "pf": null,
+      "test_n": 55,
+      "test_wr": 0.6727,
+      "test_pnl": -21.01
+    },
+    {
+      "source": "pair_trading",
+      "label": "ETH-XRP|w100|z2.5|ex0.0|h96|st5.0",
+      "n": 426,
+      "wr": 0.4577,
+      "pnl": 8.35,
+      "pf": 1.072,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/65|macd0|ema1|vol1.0|tp0.5|sl3.0|h24",
+      "n": 213,
+      "wr": 0.8732,
+      "pnl": 3.89,
+      "pf": null,
+      "test_n": 89,
+      "test_wr": 0.7416,
+      "test_pnl": -34.16
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/65|macd0|ema1|vol1.0|tp0.5|sl3.0|h12",
+      "n": 213,
+      "wr": 0.8169,
+      "pnl": 0.16,
+      "pf": null,
+      "test_n": 89,
+      "test_wr": 0.7303,
+      "test_pnl": -23.08
+    },
+    {
+      "source": "pair_trading",
+      "label": "DOG-XRP|w200|z3.0|ex0.3|h96|st5.0",
+      "n": 168,
+      "wr": 0.4405,
+      "pnl": 0.05,
+      "pf": 1.001,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "pair_trading",
+      "label": "DOG-XRP|w200|z3.0|ex0.5|h96|st5.0",
+      "n": 168,
+      "wr": 0.4345,
+      "pnl": -0.45,
+      "pf": 0.988,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi35/65|macd0|ema1|vol1.0|tp0.5|sl3.0|h48",
+      "n": 213,
+      "wr": 0.8826,
+      "pnl": -0.59,
+      "pf": null,
+      "test_n": 89,
+      "test_wr": 0.7753,
+      "test_pnl": -30.33
+    }
+  ],
+  "positive_ev_count": 4,
+  "top_pf": [
+    {
+      "source": "pair_trading",
+      "label": "ETH-XRP|w60|z3.0|ex0.0|h96|st5.0",
+      "n": 427,
+      "wr": 0.4379,
+      "pnl": 12.41,
+      "pf": 1.12,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "pair_trading",
+      "label": "ETH-XRP|w100|z3.0|ex0.0|h96|st5.0",
+      "n": 300,
+      "wr": 0.4367,
+      "pnl": 8.66,
+      "pf": 1.113,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "pair_trading",
+      "label": "ETH-XRP|w100|z2.5|ex0.0|h96|st5.0",
+      "n": 426,
+      "wr": 0.4577,
+      "pnl": 8.35,
+      "pf": 1.072,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    },
+    {
+      "source": "pair_trading",
+      "label": "DOG-XRP|w200|z3.0|ex0.3|h96|st5.0",
+      "n": 168,
+      "wr": 0.4405,
+      "pnl": 0.05,
+      "pf": 1.001,
+      "test_n": 0,
+      "test_wr": 0,
+      "test_pnl": 0
+    }
+  ],
+  "oos_positive_count": 4,
+  "top_oos": [
+    {
+      "source": "confluence_qualified",
+      "label": "rsi30/65|macd1|ema0|vol1.0|tp0.5|sl3.0|h12",
+      "n": 114,
+      "wr": 0.8158,
+      "pnl": -13.31,
+      "pf": null,
+      "test_n": 41,
+      "test_wr": 0.8537,
+      "test_pnl": 1.56
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi25/65|macd0|ema1|vol1.0|tp0.5|sl3.0|h48",
+      "n": 123,
+      "wr": 0.8293,
+      "pnl": -29.55,
+      "pf": null,
+      "test_n": 50,
+      "test_wr": 0.88,
+      "test_pnl": 1.17
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi30/65|macd1|ema0|vol1.0|tp0.5|sl3.0|h24",
+      "n": 114,
+      "wr": 0.8509,
+      "pnl": -9.71,
+      "pf": null,
+      "test_n": 41,
+      "test_wr": 0.9024,
+      "test_pnl": 0.59
+    },
+    {
+      "source": "confluence_qualified",
+      "label": "rsi30/65|macd1|ema0|vol1.0|tp0.5|sl3.0|h48",
+      "n": 114,
+      "wr": 0.8509,
+      "pnl": -9.71,
+      "pf": null,
+      "test_n": 41,
+      "test_wr": 0.9024,
+      "test_pnl": 0.59
+    }
+  ],
+  "true_winners_count": 0,
+  "true_winners": []
+}

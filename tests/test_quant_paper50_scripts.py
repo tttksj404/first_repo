@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,6 +23,8 @@ MAJOR_5M_RESEARCH_PATH = ROOT / "scripts" / "quant_major_5m_leverage_research.py
 FORCED_PILOT_PATH = ROOT / "scripts" / "quant_paper50_forced_pilot.py"
 PARALLEL_RESEARCH_PATH = ROOT / "scripts" / "quant_paper50_parallel_research.py"
 SAMPLE_BOOSTER_PATH = ROOT / "scripts" / "quant_paper50_sample_booster.py"
+HIGH_UPSIDE_OVERLAY_PATH = ROOT / "scripts" / "quant_paper50_high_upside_overlay.py"
+JACKPOT_PAPER_BOT_PATH = ROOT / "scripts" / "quant_jackpot_paper_bot_v1.py"
 
 spec = importlib.util.spec_from_file_location("quant_paper50_counterfactual", COUNTERFACTUAL_PATH)
 counterfactual = importlib.util.module_from_spec(spec)
@@ -125,6 +128,23 @@ sample_booster_spec = importlib.util.spec_from_file_location(
 sample_booster = importlib.util.module_from_spec(sample_booster_spec)
 assert sample_booster_spec is not None and sample_booster_spec.loader is not None
 sample_booster_spec.loader.exec_module(sample_booster)
+
+high_upside_overlay_spec = importlib.util.spec_from_file_location(
+    "quant_paper50_high_upside_overlay",
+    HIGH_UPSIDE_OVERLAY_PATH,
+)
+high_upside_overlay = importlib.util.module_from_spec(high_upside_overlay_spec)
+assert high_upside_overlay_spec is not None and high_upside_overlay_spec.loader is not None
+high_upside_overlay_spec.loader.exec_module(high_upside_overlay)
+
+jackpot_paper_bot_spec = importlib.util.spec_from_file_location(
+    "quant_jackpot_paper_bot_v1",
+    JACKPOT_PAPER_BOT_PATH,
+)
+jackpot_paper_bot = importlib.util.module_from_spec(jackpot_paper_bot_spec)
+assert jackpot_paper_bot_spec is not None and jackpot_paper_bot_spec.loader is not None
+sys.modules[jackpot_paper_bot_spec.name] = jackpot_paper_bot
+jackpot_paper_bot_spec.loader.exec_module(jackpot_paper_bot)
 
 
 class QuantPaper50ScriptTests(unittest.TestCase):
@@ -1088,6 +1108,23 @@ class QuantPaper50ScriptTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (decision_root / "artifacts" / "paper50_high_upside_overlay_latest.json").write_text(
+                json.dumps(
+                    {
+                        "top_profiles": [
+                            {
+                                "id": "DOGEUSDT|oi_exhaustion_reversion|short|lev5x|15m_runner",
+                                "action": "lottery_watch_only",
+                                "high_upside_score": 22.0,
+                                "p90_roe_bps": 230.0,
+                                "worst_roe_bps": -60.0,
+                                "blockers": ["sample_lt_min"],
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
             (decision_root / "_monitor_status.json").write_text(
                 json.dumps({"heartbeats": {"live_orders": 0, "tested_orders": 0, "decisions": 5}, "bitget": {"positions": []}}),
                 encoding="utf-8",
@@ -1104,6 +1141,7 @@ class QuantPaper50ScriptTests(unittest.TestCase):
         self.assertTrue(payload["no_order_side_effects"])
         self.assertEqual(payload["overall_action"], "continue_parallel_observation")
         self.assertEqual(payload["top_candidates"][0]["id"], "combo:core")
+        self.assertTrue(any(row["source"] == "high_upside_overlay" for row in payload["top_candidates"]))
 
     def test_sample_booster_promotes_only_after_target_sample_and_quality_gate(self) -> None:
         weak = {
@@ -1318,6 +1356,223 @@ class QuantPaper50ScriptTests(unittest.TestCase):
         )
         self.assertFalse(stress["available"])
         self.assertFalse(stress["cost_unsurvivable"])
+
+    def test_high_upside_overlay_promotes_only_paper_candidates(self) -> None:
+        outcomes = []
+        for idx in range(40):
+            outcomes.append(
+                {
+                    "symbol": "DOGEUSDT",
+                    "strategy": "oi_exhaustion_reversion",
+                    "side": "short",
+                    "ret5_bps": 18.0 + (idx % 5),
+                    "ret10_bps": 34.0 + (idx % 7),
+                    "ret15_bps": 42.0 + (idx % 9),
+                }
+            )
+
+        payload = high_upside_overlay.build_report(
+            {"outcomes": outcomes},
+            focus_keys=["DOGEUSDT|oi_exhaustion_reversion|short"],
+            leverages=[5],
+            cost_bps=4.0,
+            min_sample=40,
+            monitor_status={"safe": True, "live_orders": 0, "tested_orders": 0, "bitget_positions": []},
+        )
+
+        self.assertEqual(payload["overall_action"], "paper_high_upside_candidate")
+        self.assertFalse(payload["live_ready"])
+        self.assertTrue(payload["paper_only"])
+        self.assertTrue(payload["top_profiles"])
+        self.assertEqual(payload["top_profiles"][0]["action"], "paper_high_upside_candidate")
+        self.assertFalse(payload["top_profiles"][0]["live_ready"])
+
+    def test_high_upside_overlay_keeps_thin_sample_watch_only(self) -> None:
+        outcomes = [
+            {
+                "symbol": "DOGEUSDT",
+                "strategy": "oi_exhaustion_reversion",
+                "side": "short",
+                "ret5_bps": 30.0,
+                "ret10_bps": 42.0,
+                "ret15_bps": 50.0,
+            }
+            for _ in range(4)
+        ]
+
+        payload = high_upside_overlay.build_report(
+            {"outcomes": outcomes},
+            focus_keys=["DOGEUSDT|oi_exhaustion_reversion|short"],
+            leverages=[5],
+            cost_bps=4.0,
+            min_sample=40,
+            monitor_status={"safe": True, "live_orders": 0, "tested_orders": 0, "bitget_positions": []},
+        )
+
+        self.assertEqual(payload["overall_action"], "collect_more_samples")
+        self.assertEqual(payload["top_profiles"][0]["action"], "lottery_watch_only")
+        self.assertIn("sample_lt_min", payload["top_profiles"][0]["blockers"])
+
+    def test_high_upside_overlay_adds_near_miss_and_fast_family_samples(self) -> None:
+        outcomes = []
+        for idx in range(50):
+            outcomes.append(
+                {
+                    "symbol": "DOGEUSDT",
+                    "strategy": "oi_momentum_breakout",
+                    "side": "short",
+                    "ret5_bps": 15.0 + (idx % 4),
+                    "ret10_bps": 20.0 + (idx % 5),
+                    "ret15_bps": 18.0 + (idx % 6),
+                }
+            )
+        outcomes.append(
+            {
+                "symbol": "DOGEUSDT",
+                "strategy": "oi_exhaustion_reversion",
+                "side": "short",
+                "ret5_bps": 5.0,
+                "ret10_bps": 8.0,
+                "ret15_bps": 10.0,
+            }
+        )
+
+        payload = high_upside_overlay.build_report(
+            {"outcomes": outcomes},
+            focus_keys=["DOGEUSDT|oi_exhaustion_reversion|short"],
+            leverages=[5],
+            cost_bps=4.0,
+            min_sample=40,
+            monitor_status={"safe": True, "live_orders": 0, "tested_orders": 0, "bitget_positions": []},
+        )
+
+        near = [row for row in payload["leg_summaries"] if row["profile_type"] == "near_miss"][0]
+        fast = [row for row in payload["leg_summaries"] if row["profile_type"] == "fast_label_family"][0]
+        self.assertEqual(near["sample_count"], 50)
+        self.assertEqual(fast["sample_count"], 51)
+        self.assertTrue(any(row["profile_type"] == "near_miss" for row in payload["top_profiles"]))
+        self.assertTrue(any(row["primary_horizon"] == "fast" for row in payload["top_profiles"]))
+
+    def test_high_upside_overlay_halts_on_live_position_safety_violation(self) -> None:
+        payload = high_upside_overlay.build_report(
+            {"outcomes": []},
+            focus_keys=["DOGEUSDT|flow_momentum|long"],
+            leverages=[5],
+            monitor_status={"safe": False, "live_orders": 1, "tested_orders": 0, "bitget_positions": ["DOGEUSDT"]},
+        )
+
+        self.assertEqual(payload["overall_action"], "halt_safety_violation")
+
+    def test_jackpot_paper_bot_builds_long_and_short_5m_signals(self) -> None:
+        np = jackpot_paper_bot.np
+        n = 90
+        base = {
+            "ts": np.arange(n, dtype=float) * 300000.0,
+            "close": np.linspace(100.0, 110.0, n),
+            "high": np.linspace(99.0, 108.0, n),
+            "low": np.linspace(98.0, 107.0, n),
+            "ema20": np.linspace(99.0, 108.0, n),
+            "ema50": np.linspace(98.0, 106.0, n),
+            "ret3": np.full(n, 0.0035),
+            "ret6": np.full(n, 0.0055),
+            "vol_r": np.full(n, 1.6),
+            "bb_width_rank": np.full(n, 0.8),
+            "atr_pct": np.full(n, 0.002),
+            "adx": np.full(n, 24.0),
+        }
+        long_signal = jackpot_paper_bot.build_entry_signal("ETH/USDT:USDT", base, btc_features=base)
+
+        short_features = {
+            **base,
+            "close": np.linspace(110.0, 100.0, n),
+            "high": np.linspace(112.0, 102.0, n),
+            "low": np.linspace(111.0, 101.0, n),
+            "ema20": np.linspace(111.0, 101.0, n),
+            "ema50": np.linspace(112.0, 102.0, n),
+            "ret3": np.full(n, -0.0035),
+            "ret6": np.full(n, -0.0055),
+        }
+        short_signal = jackpot_paper_bot.build_entry_signal("DOGE/USDT:USDT", short_features, btc_features=short_features)
+
+        self.assertEqual(long_signal["side"], "long")
+        self.assertEqual(short_signal["side"], "short")
+        self.assertGreater(long_signal["score"], jackpot_paper_bot.MIN_SCORE)
+        self.assertEqual(long_signal["signal"], "5m_momentum_burst")
+
+    def test_jackpot_paper_bot_exit_and_report_are_paper_only(self) -> None:
+        np = jackpot_paper_bot.np
+        pos = jackpot_paper_bot.PaperPosition(
+            symbol="DOGE/USDT:USDT",
+            side="long",
+            entry_price=100.0,
+            entry_ts_ms=0,
+            entry_iso="2026-01-01T00:00:00+00:00",
+            margin_usd=10.0,
+            leverage=5.0,
+            score=15.0,
+            signal="5m_momentum_burst",
+        )
+        n = 90
+        ind = {
+            "ts": np.arange(n, dtype=float) * 300000.0,
+            "high": np.full(n, 102.5),
+            "low": np.full(n, 99.7),
+            "close": np.full(n, 101.3),
+        }
+
+        exit_info = jackpot_paper_bot.evaluate_exit(pos, ind, now_ms=10 * 60000)
+        self.assertEqual(exit_info["reason"], "RUNNER_TP")
+
+        state = jackpot_paper_bot.JackpotState(open_position=jackpot_paper_bot.asdict(pos))
+        trade = jackpot_paper_bot.close_position(state, pos, exit_info)
+        report = jackpot_paper_bot.summarize_state(state)
+
+        self.assertTrue(trade["paper_only"])
+        self.assertTrue(report["paper_only"])
+        self.assertTrue(report["no_order_side_effects"])
+        self.assertFalse(report["live_ready"])
+        self.assertEqual(report["live_order_count"], 0)
+        self.assertEqual(report["tested_order_count"], 0)
+
+    def test_jackpot_paper_bot_opens_balanced_and_jackpot_profiles(self) -> None:
+        np = jackpot_paper_bot.np
+
+        class FakeExchange:
+            def fetch_ohlcv(self, symbol: str, timeframe: str, limit: int) -> list[list[float]]:
+                del timeframe, limit
+                n = 90
+                close = np.linspace(100.0, 110.0, n)
+                high = np.linspace(99.0, 108.0, n)
+                low = np.linspace(98.0, 107.0, n)
+                if symbol.startswith("DOGE"):
+                    close = np.linspace(10.0, 11.0, n)
+                    high = np.linspace(9.9, 10.8, n)
+                    low = np.linspace(9.8, 10.7, n)
+                volume = np.full(n, 100.0)
+                volume[-2] = 200.0
+                return [
+                    [float(idx * 300000), float(close[idx]), float(high[idx]), float(low[idx]), float(close[idx]), float(volume[idx])]
+                    for idx in range(n)
+                ]
+
+            def fetch_ticker(self, symbol: str) -> dict[str, float]:
+                return {"bid": 109.9, "ask": 110.1, "last": 110.0}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            jackpot_paper_bot.STATE_PATH = Path(tmp) / "state.json"
+            jackpot_paper_bot.REPORT_PATH = Path(tmp) / "report.json"
+            jackpot_paper_bot.LOG_PATH = Path(tmp) / "log.jsonl"
+            state = jackpot_paper_bot.JackpotState()
+
+            report = jackpot_paper_bot.run_cycle(FakeExchange(), state)
+
+        self.assertEqual(report["total_entries"], 1)
+        self.assertEqual(set(report["open_positions"]), {"balanced_3x", "jackpot_5x"})
+        self.assertEqual(report["open_positions"]["balanced_3x"]["leverage"], 3.0)
+        self.assertEqual(report["open_positions"]["jackpot_5x"]["leverage"], 5.0)
+        self.assertLess(report["open_positions"]["jackpot_5x"]["sl_roe_pct"], 0.0)
+        self.assertTrue(report["paper_only"])
+        self.assertEqual(report["live_order_count"], 0)
 
 
 if __name__ == "__main__":

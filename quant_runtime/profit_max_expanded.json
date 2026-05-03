@@ -1,0 +1,758 @@
+{
+  "generated_at": "2026-04-26T01:06:45Z",
+  "configs": {
+    "cfg_1h_20": {
+      "config": "cfg_1h_20",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "XRPUSDT",
+        "DOGEUSDT",
+        "ADAUSDT",
+        "APTUSDT",
+        "ARBUSDT",
+        "AVAXUSDT",
+        "BNBUSDT",
+        "DOTUSDT",
+        "LINKUSDT",
+        "LTCUSDT",
+        "NEARUSDT",
+        "OPUSDT",
+        "PEPEUSDT",
+        "SUIUSDT",
+        "UNIUSDT",
+        "WIFUSDT",
+        "MATICUSDT"
+      ],
+      "tf": "1h",
+      "n_bars": 9000,
+      "n_variants": 588,
+      "qualified_count": 6,
+      "elapsed_sec": 30.5,
+      "top10_total_pnl": [
+        {
+          "label": "rsi35/75|macd1|ema0|vol1.0|tp1.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 75,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 269,
+            "wr": 0.7435,
+            "pnl": 198.76,
+            "pf": 1.702
+          },
+          "test": {
+            "n": 193,
+            "wr": 0.5751,
+            "pnl": -76.13,
+            "pf": 0.727
+          },
+          "total_pnl": 122.64,
+          "total_pf": 1.218
+        },
+        {
+          "label": "rsi35/65|macd1|ema0|vol1.0|tp1.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 65,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 592,
+            "wr": 0.7111,
+            "pnl": 224.72,
+            "pf": 1.336
+          },
+          "test": {
+            "n": 276,
+            "wr": 0.587,
+            "pnl": -102.14,
+            "pf": 0.739
+          },
+          "total_pnl": 122.58,
+          "total_pf": 1.116
+        },
+        {
+          "label": "rsi35/75|macd1|ema0|vol1.0|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 75,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 269,
+            "wr": 0.6803,
+            "pnl": 166.77,
+            "pf": 1.615
+          },
+          "test": {
+            "n": 193,
+            "wr": 0.5596,
+            "pnl": -46.59,
+            "pf": 0.805
+          },
+          "total_pnl": 120.17,
+          "total_pf": 1.236
+        },
+        {
+          "label": "rsi35/65|macd1|ema0|vol1.0|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 65,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 592,
+            "wr": 0.674,
+            "pnl": 179.7,
+            "pf": 1.278
+          },
+          "test": {
+            "n": 276,
+            "wr": 0.5725,
+            "pnl": -67.87,
+            "pf": 0.802
+          },
+          "total_pnl": 111.83,
+          "total_pf": 1.113
+        },
+        {
+          "label": "rsi30/75|macd1|ema0|vol1.0|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 30,
+            "rsi_short": 75,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 72,
+            "wr": 0.7361,
+            "pnl": 87.81,
+            "pf": 2.531
+          },
+          "test": {
+            "n": 62,
+            "wr": 0.5968,
+            "pnl": -5.38,
+            "pf": 0.924
+          },
+          "total_pnl": 82.43,
+          "total_pf": 1.645
+        },
+        {
+          "label": "rsi35/75|macd1|ema0|vol1.3|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 75,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 186,
+            "wr": 0.672,
+            "pnl": 105.99,
+            "pf": 1.556
+          },
+          "test": {
+            "n": 146,
+            "wr": 0.5685,
+            "pnl": -26.54,
+            "pf": 0.846
+          },
+          "total_pnl": 79.45,
+          "total_pf": 1.219
+        },
+        {
+          "label": "rsi35/75|macd1|ema0|vol1.3|tp1.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 75,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 186,
+            "wr": 0.7419,
+            "pnl": 127.28,
+            "pf": 1.635
+          },
+          "test": {
+            "n": 146,
+            "wr": 0.5959,
+            "pnl": -48.92,
+            "pf": 0.761
+          },
+          "total_pnl": 78.37,
+          "total_pf": 1.194
+        },
+        {
+          "label": "rsi30/65|macd1|ema0|vol1.0|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 30,
+            "rsi_short": 65,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 395,
+            "wr": 0.681,
+            "pnl": 100.74,
+            "pf": 1.233
+          },
+          "test": {
+            "n": 145,
+            "wr": 0.6,
+            "pnl": -26.65,
+            "pf": 0.847
+          },
+          "total_pnl": 74.09,
+          "total_pf": 1.122
+        },
+        {
+          "label": "rsi35/70|macd1|ema0|vol1.0|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 353,
+            "wr": 0.6657,
+            "pnl": 125.82,
+            "pf": 1.31
+          },
+          "test": {
+            "n": 213,
+            "wr": 0.5587,
+            "pnl": -52.72,
+            "pf": 0.802
+          },
+          "total_pnl": 73.1,
+          "total_pf": 1.109
+        },
+        {
+          "label": "rsi35/70|macd1|ema0|vol1.0|tp1.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 353,
+            "wr": 0.7167,
+            "pnl": 152.96,
+            "pf": 1.36
+          },
+          "test": {
+            "n": 213,
+            "wr": 0.5728,
+            "pnl": -83.8,
+            "pf": 0.728
+          },
+          "total_pnl": 69.17,
+          "total_pf": 1.094
+        }
+      ],
+      "qualified": [
+        {
+          "label": "rsi30/70|macd1|ema0|vol1.0|tp0.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 30,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 0.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 156,
+            "wr": 0.8782,
+            "pnl": 25.38,
+            "pf": 1.362
+          },
+          "test": {
+            "n": 82,
+            "wr": 0.8902,
+            "pnl": 7.38,
+            "pf": 1.241
+          },
+          "total_pnl": 32.76,
+          "total_pf": 1.325
+        },
+        {
+          "label": "rsi30/70|macd1|ema0|vol1.0|tp0.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 30,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 0.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 156,
+            "wr": 0.8846,
+            "pnl": 24.08,
+            "pf": 1.334
+          },
+          "test": {
+            "n": 82,
+            "wr": 0.8902,
+            "pnl": 7.38,
+            "pf": 1.241
+          },
+          "total_pnl": 31.45,
+          "total_pf": 1.306
+        },
+        {
+          "label": "rsi25/70|macd1|ema0|vol1.0|tp0.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 0.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 109,
+            "wr": 0.8716,
+            "pnl": 3.7,
+            "pf": 1.068
+          },
+          "test": {
+            "n": 35,
+            "wr": 0.9143,
+            "pnl": 6.73,
+            "pf": 1.675
+          },
+          "total_pnl": 10.43,
+          "total_pf": 1.162
+        },
+        {
+          "label": "rsi25/70|macd1|ema0|vol1.0|tp0.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 0.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 109,
+            "wr": 0.8716,
+            "pnl": 3.7,
+            "pf": 1.068
+          },
+          "test": {
+            "n": 35,
+            "wr": 0.9143,
+            "pnl": 6.73,
+            "pf": 1.675
+          },
+          "total_pnl": 10.43,
+          "total_pf": 1.162
+        },
+        {
+          "label": "rsi25/70|macd1|ema0|vol1.3|tp0.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 0.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 70,
+            "wr": 0.8714,
+            "pnl": 5.15,
+            "pf": 1.17
+          },
+          "test": {
+            "n": 23,
+            "wr": 0.913,
+            "pnl": 3.05,
+            "pf": 1.427
+          },
+          "total_pnl": 8.2,
+          "total_pf": 1.219
+        },
+        {
+          "label": "rsi25/70|macd1|ema0|vol1.3|tp0.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 70,
+            "req_macd": true,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 0.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 70,
+            "wr": 0.8714,
+            "pnl": 5.15,
+            "pf": 1.17
+          },
+          "test": {
+            "n": 23,
+            "wr": 0.913,
+            "pnl": 3.05,
+            "pf": 1.427
+          },
+          "total_pnl": 8.2,
+          "total_pf": 1.219
+        }
+      ]
+    },
+    "cfg_4h_4": {
+      "config": "cfg_4h_4",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ],
+      "tf": "4h",
+      "n_bars": 3000,
+      "n_variants": 240,
+      "qualified_count": 0,
+      "elapsed_sec": 1.8,
+      "top10_total_pnl": [
+        {
+          "label": "rsi25/75|macd0|ema0|vol1.3|tp1.0|sl2.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 75,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.0,
+            "sl_atr": 2.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 136,
+            "wr": 0.6765,
+            "pnl": 55.45,
+            "pf": 1.272
+          },
+          "test": {
+            "n": 48,
+            "wr": 0.5417,
+            "pnl": -58.94,
+            "pf": 0.495
+          },
+          "total_pnl": -3.5,
+          "total_pf": 0.989
+        },
+        {
+          "label": "rsi25/75|macd0|ema0|vol1.3|tp1.0|sl2.0|h48",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 75,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.0,
+            "sl_atr": 2.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 136,
+            "wr": 0.6691,
+            "pnl": 41.37,
+            "pf": 1.19
+          },
+          "test": {
+            "n": 48,
+            "wr": 0.5417,
+            "pnl": -58.94,
+            "pf": 0.495
+          },
+          "total_pnl": -17.57,
+          "total_pf": 0.948
+        },
+        {
+          "label": "rsi25/75|macd0|ema0|vol1.3|tp1.5|sl2.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 75,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.5,
+            "sl_atr": 2.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 136,
+            "wr": 0.5588,
+            "pnl": 47.96,
+            "pf": 1.178
+          },
+          "test": {
+            "n": 48,
+            "wr": 0.4375,
+            "pnl": -66.92,
+            "pf": 0.511
+          },
+          "total_pnl": -18.97,
+          "total_pf": 0.953
+        },
+        {
+          "label": "rsi35/65|macd0|ema1|vol1.3|tp1.5|sl3.0|h48",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 65,
+            "req_macd": false,
+            "req_ema": true,
+            "vol_min": 1.3,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 53,
+            "wr": 0.5472,
+            "pnl": -50.39,
+            "pf": 0.663
+          },
+          "test": {
+            "n": 20,
+            "wr": 0.75,
+            "pnl": 22.25,
+            "pf": 1.915
+          },
+          "total_pnl": -28.14,
+          "total_pf": 0.838
+        },
+        {
+          "label": "rsi35/65|macd0|ema1|vol1.3|tp1.0|sl3.0|h48",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 65,
+            "req_macd": false,
+            "req_ema": true,
+            "vol_min": 1.3,
+            "tp_atr": 1.0,
+            "sl_atr": 3.0,
+            "hold": 48
+          },
+          "train": {
+            "n": 53,
+            "wr": 0.6792,
+            "pnl": -39.69,
+            "pf": 0.662
+          },
+          "test": {
+            "n": 20,
+            "wr": 0.75,
+            "pnl": 6.13,
+            "pf": 1.252
+          },
+          "total_pnl": -33.56,
+          "total_pf": 0.763
+        },
+        {
+          "label": "rsi25/75|macd0|ema0|vol1.3|tp1.0|sl3.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 75,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.0,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 136,
+            "wr": 0.7279,
+            "pnl": 29.36,
+            "pf": 1.119
+          },
+          "test": {
+            "n": 48,
+            "wr": 0.6458,
+            "pnl": -64.3,
+            "pf": 0.512
+          },
+          "total_pnl": -34.94,
+          "total_pf": 0.908
+        },
+        {
+          "label": "rsi35/65|macd0|ema1|vol1.3|tp1.5|sl3.0|h24",
+          "v": {
+            "rsi_long": 35,
+            "rsi_short": 65,
+            "req_macd": false,
+            "req_ema": true,
+            "vol_min": 1.3,
+            "tp_atr": 1.5,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 53,
+            "wr": 0.5472,
+            "pnl": -50.13,
+            "pf": 0.649
+          },
+          "test": {
+            "n": 20,
+            "wr": 0.7,
+            "pnl": 14.54,
+            "pf": 1.537
+          },
+          "total_pnl": -35.59,
+          "total_pf": 0.79
+        },
+        {
+          "label": "rsi25/75|macd0|ema0|vol1.0|tp1.0|sl3.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 75,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.0,
+            "tp_atr": 1.0,
+            "sl_atr": 3.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 151,
+            "wr": 0.7285,
+            "pnl": 18.62,
+            "pf": 1.067
+          },
+          "test": {
+            "n": 52,
+            "wr": 0.6538,
+            "pnl": -55.21,
+            "pf": 0.583
+          },
+          "total_pnl": -36.59,
+          "total_pf": 0.911
+        },
+        {
+          "label": "rsi25/70|macd0|ema0|vol1.3|tp1.5|sl2.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 70,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 1.5,
+            "sl_atr": 2.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 192,
+            "wr": 0.5469,
+            "pnl": 12.05,
+            "pf": 1.031
+          },
+          "test": {
+            "n": 71,
+            "wr": 0.493,
+            "pnl": -50.03,
+            "pf": 0.695
+          },
+          "total_pnl": -37.97,
+          "total_pf": 0.931
+        },
+        {
+          "label": "rsi25/75|macd0|ema0|vol1.3|tp0.5|sl2.0|h24",
+          "v": {
+            "rsi_long": 25,
+            "rsi_short": 75,
+            "req_macd": false,
+            "req_ema": false,
+            "vol_min": 1.3,
+            "tp_atr": 0.5,
+            "sl_atr": 2.0,
+            "hold": 24
+          },
+          "train": {
+            "n": 136,
+            "wr": 0.7794,
+            "pnl": -8.07,
+            "pf": 0.945
+          },
+          "test": {
+            "n": 48,
+            "wr": 0.7083,
+            "pnl": -31.1,
+            "pf": 0.55
+          },
+          "total_pnl": -39.16,
+          "total_pf": 0.819
+        }
+      ],
+      "qualified": []
+    }
+  }
+}

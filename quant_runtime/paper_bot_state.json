@@ -1,0 +1,16 @@
+{
+  "working_capital": 50.0,
+  "safe_pocket": 0.0,
+  "total_invested": 50.0,
+  "n_trades": 0,
+  "n_wins": 0,
+  "n_losses": 0,
+  "n_liquidations": 0,
+  "cum_pnl": 0.0,
+  "last_exit_ts": 0,
+  "last_loss_exit_ts": 0,
+  "open_position": null,
+  "started_at": "2026-04-26T04:22:48.277669+00:00",
+  "last_check_at": "2026-04-26T14:23:39.723151+00:00",
+  "last_event": ""
+}
