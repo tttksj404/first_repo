@@ -34,6 +34,13 @@ from quant_binance.policy.execution import (
     is_major_strong_futures_decision,
 )
 from quant_binance.policy_evidence import policy_evidence_bucket
+from quant_binance.cross_coin_scorer import (
+    is_blocked as _cross_coin_is_blocked,
+    load_ev_table as _cross_coin_load_ev_table,
+    load_latest_states as _cross_coin_load_latest_states,
+    rank_candidates as _cross_coin_rank_candidates,
+    score_symbol as _cross_coin_score_symbol,
+)
 from quant_binance.observability.log_store import JsonlLogStore
 from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
 from quant_binance.observability.report import build_auto_tune_policy, build_executive_operating_verdict, build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
@@ -1621,6 +1628,10 @@ class LivePaperSession:
                 decision,
                 notional_usd=decision.order_intent_notional_usd,
             )
+        cross_coin_decision = self._apply_cross_coin_oi_quadrant_gate(decision)
+        if cross_coin_decision.final_mode != "futures" or cross_coin_decision.order_intent_notional_usd <= 0.0:
+            return cross_coin_decision
+        decision = cross_coin_decision
         delayed_entry_gate = self._apply_paper_verification_delayed_entry_gate(decision)
         if delayed_entry_gate.final_mode != "futures" or delayed_entry_gate.order_intent_notional_usd <= 0.0:
             return delayed_entry_gate
@@ -1682,6 +1693,292 @@ class LivePaperSession:
             ),
         )
 
+    # ─── Cross-coin OI quadrant gate (introduced 2026-04-26) ──────────────
+    # Opt-in feature, enabled only when env var QUANT_CROSS_COIN_GATE=1.
+    # Reads from cwd-relative paths:
+    # · quant_runtime_paper50/cross_coin_ev_table.json
+    # · quant_runtime_paper50/bitget_external_alpha_shadow/cycle_*/metrics.json
+    # If env var is unset or files missing, the gate is silently disabled.
+    _CROSS_COIN_EV_TABLE_PATH = Path("quant_runtime_paper50") / "cross_coin_ev_table.json"
+    _CROSS_COIN_SHADOW_DIR = Path("quant_runtime_paper50") / "bitget_external_alpha_shadow"
+    _CROSS_COIN_UNIVERSE = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT")
+    _CROSS_COIN_STATE_TTL_SEC = 60.0  # cache states for 60s to avoid IO on every decision
+    _CROSS_COIN_ENV_FLAG = "QUANT_CROSS_COIN_GATE"
+    # Cross-coin dynamic priority refresh: re-evaluate priority_symbols at most
+    # once per CYCLE_SEC. Cycle data updates every ~5min, so 60s is plenty fresh
+    # while avoiding state mutation on every per-symbol decision call.
+    _CROSS_COIN_PRIORITY_REFRESH_SEC = 60.0
+
+    def _cross_coin_gate_enabled(self) -> bool:
+        return os.environ.get(self._CROSS_COIN_ENV_FLAG, "").strip() in {"1", "true", "TRUE", "yes"}
+
+    def _cross_coin_ev_table_cached(self):
+        cached = getattr(self, "_cross_coin_ev_table_cache", None)
+        if cached is not None:
+            return cached
+        path = self._CROSS_COIN_EV_TABLE_PATH
+        if not path.exists():
+            self._cross_coin_ev_table_cache = False  # sentinel: tried, missing
+            return False
+        try:
+            table = _cross_coin_load_ev_table(path)
+        except (json.JSONDecodeError, OSError):
+            self._cross_coin_ev_table_cache = False
+            return False
+        self._cross_coin_ev_table_cache = table
+        return table
+
+    def _cross_coin_states_cached(self):
+        cached_at = getattr(self, "_cross_coin_states_cached_at", 0.0)
+        if time.time() - cached_at < self._CROSS_COIN_STATE_TTL_SEC:
+            return getattr(self, "_cross_coin_states_cache", {})
+        shadow = self._CROSS_COIN_SHADOW_DIR
+        if not shadow.exists():
+            states: dict = {}
+        else:
+            try:
+                states = _cross_coin_load_latest_states(shadow, list(self._CROSS_COIN_UNIVERSE))
+            except Exception:
+                logger.exception("cross_coin_load_latest_states failed")
+                states = {}
+        self._cross_coin_states_cache = states
+        self._cross_coin_states_cached_at = time.time()
+        return states
+
+    def _refresh_cross_coin_dynamic_priority(self) -> None:
+        """Update Settings.priority_symbols from cross-coin EV top-1 each cycle.
+
+        Behavior (option A=keep + B=pivot, committed 2026-04-26):
+        - On first call, captures the static priority_symbols from config as
+          fallback (so we can restore when no signal is present).
+        - When ranked candidates exist, sets priority_symbols=(top_1.symbol,)
+          on both futures_exposure and spot_support.
+        - When ranked is empty (no scenarios match), restores static fallback.
+        - Throttled to once per _CROSS_COIN_PRIORITY_REFRESH_SEC to avoid
+          mutating Settings on every per-symbol decision.
+        - Soft-disabled (no-op) when env flag unset or data unavailable.
+
+        Reallocation behavior (option B=pivot): Settings mutation only changes
+        size_boost / gate_relax marker, NOT existing positions. Existing trades
+        are evaluated for reallocation by score/edge as before; the new top-1
+        gets priority size on its NEXT entry rather than forcing churn.
+        """
+        if not self._cross_coin_gate_enabled():
+            return
+        last_at = getattr(self, "_cross_coin_priority_refreshed_at", 0.0)
+        if time.time() - last_at < self._CROSS_COIN_PRIORITY_REFRESH_SEC:
+            return
+
+        try:
+            settings = self.runtime.paper_service.settings
+        except AttributeError:
+            return
+        fe = getattr(settings, "futures_exposure", None)
+        ss = getattr(settings, "spot_support", None)
+        if fe is None or ss is None:
+            return
+
+        # Capture static fallback once on first call.
+        if not hasattr(self, "_cross_coin_static_priority_futures"):
+            self._cross_coin_static_priority_futures = tuple(
+                getattr(fe, "priority_symbols", ()) or ()
+            )
+            self._cross_coin_static_priority_spot = tuple(
+                getattr(ss, "priority_symbols", ()) or ()
+            )
+
+        table = self._cross_coin_ev_table_cached()
+        states = self._cross_coin_states_cached()
+        if table is False or not isinstance(table, dict) or not states:
+            self._cross_coin_priority_refreshed_at = time.time()
+            return
+
+        try:
+            ranked = _cross_coin_rank_candidates(
+                table, states, now_ms=int(time.time() * 1000)
+            )
+        except Exception:
+            logger.exception("cross_coin_rank_candidates failed")
+            self._cross_coin_priority_refreshed_at = time.time()
+            return
+
+        if ranked:
+            top_symbol = ranked[0].symbol.upper()
+            new_priority = (top_symbol,)
+            current_futures = tuple(getattr(fe, "priority_symbols", ()) or ())
+            if current_futures != new_priority:
+                try:
+                    object.__setattr__(fe, "priority_symbols", new_priority)
+                    object.__setattr__(ss, "priority_symbols", new_priority)
+                    logger.info(
+                        "cross_coin_dynamic_priority: %s ev=%.2fbps wr=%.0f%% n=%d (was %s)",
+                        top_symbol,
+                        ranked[0].ev_bps,
+                        ranked[0].winrate * 100.0,
+                        ranked[0].n,
+                        ",".join(current_futures) or "<empty>",
+                    )
+                except (AttributeError, TypeError):
+                    logger.exception("cross_coin priority_symbols mutation failed")
+        else:
+            # No signal: restore static fallback.
+            static_f = getattr(self, "_cross_coin_static_priority_futures", ())
+            static_s = getattr(self, "_cross_coin_static_priority_spot", ())
+            current_futures = tuple(getattr(fe, "priority_symbols", ()) or ())
+            if current_futures != static_f:
+                try:
+                    object.__setattr__(fe, "priority_symbols", static_f)
+                    object.__setattr__(ss, "priority_symbols", static_s)
+                    logger.info(
+                        "cross_coin_dynamic_priority: no signal — restored static %s",
+                        ",".join(static_f) or "<empty>",
+                    )
+                except (AttributeError, TypeError):
+                    logger.exception("cross_coin priority_symbols restore failed")
+
+        self._cross_coin_priority_refreshed_at = time.time()
+
+    def _apply_cross_coin_oi_quadrant_gate(self, decision: DecisionIntent) -> DecisionIntent:
+        """Reject futures entries that hit a known-bad cross-coin scenario, and
+        enrich the decision with cross-coin metadata for sufficient observability.
+
+        Soft-disabled when EV table or cycle data is unavailable. When enabled,
+        always enriches the returned decision with cross_coin_* fields whether
+        or not entry is blocked — this is what lets summary.json and forensics
+        track gate effectiveness.
+        """
+        # Refresh priority_symbols from cross-coin EV (cheap, throttled to 60s).
+        self._refresh_cross_coin_dynamic_priority()
+
+        if not self._cross_coin_gate_enabled():
+            return decision
+        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
+            return decision
+        if decision.order_intent_notional_usd <= 0.0:
+            return decision
+        sym = decision.symbol.strip().upper()
+        if sym not in self._CROSS_COIN_UNIVERSE:
+            return decision
+
+        table = self._cross_coin_ev_table_cached()
+        if table is False or not isinstance(table, dict):
+            return decision
+        states = self._cross_coin_states_cached()
+        if not states:
+            return decision
+
+        own = states.get(sym)
+        if own is None:
+            return decision
+        leader_sym = (table.get("leader_per_symbol") or {}).get(sym, "")
+        leader = states.get(leader_sym) if leader_sym else None
+        now_ms = int(time.time() * 1000)
+        try:
+            score = _cross_coin_score_symbol(table, own, leader, now_ms=now_ms)
+        except Exception:
+            logger.exception("cross_coin_score_symbol failed for %s", sym)
+            return decision
+
+        # Detect dynamic-priority top-1 match.
+        is_top = False
+        try:
+            settings = self.runtime.paper_service.settings
+            current_priority = tuple(getattr(settings.futures_exposure, "priority_symbols", ()) or ())
+            is_top = sym in current_priority
+        except Exception:
+            pass
+
+        # Build metadata fields (always populated when env on + universe symbol).
+        own_quadrant = own.own_quadrant
+        own_dir = own.own_dir
+        leader_quadrant = leader.own_quadrant if leader else ""
+        leader_dir = leader.own_dir if leader else ""
+
+        # No score (no scenario, no blocker): just enrich and return.
+        if score is None:
+            return replace(
+                decision,
+                cross_coin_own_quadrant=own_quadrant,
+                cross_coin_own_dir=own_dir,
+                cross_coin_leader_symbol=leader_sym or "",
+                cross_coin_leader_quadrant=leader_quadrant,
+                cross_coin_leader_dir=leader_dir,
+                cross_coin_is_top_priority=is_top,
+            )
+
+        # Blocker present: reject AND enrich.
+        if score.blocker_match is not None:
+            reason = f"CROSS_COIN_OI_QUADRANT_BLOCKED:{score.blocker_match.get('reason', 'unknown')}"
+            return replace(
+                decision,
+                final_mode="cash",
+                side="flat",
+                order_intent_notional_usd=0.0,
+                stop_distance_bps=0.0,
+                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (reason,)))),
+                cross_coin_own_quadrant=own_quadrant,
+                cross_coin_own_dir=own_dir,
+                cross_coin_leader_symbol=leader_sym or "",
+                cross_coin_leader_quadrant=leader_quadrant,
+                cross_coin_leader_dir=leader_dir,
+                cross_coin_ev_bps=float(score.ev_bps),
+                cross_coin_winrate=float(score.winrate),
+                cross_coin_n=int(score.n),
+                cross_coin_rank=int(score.rank),
+                cross_coin_blocker_reason=str(score.blocker_match.get("reason", "")),
+                cross_coin_is_top_priority=is_top,
+            )
+
+        # Positive scenario match: enrich + size-boost based on EV strength.
+        # Conservative size multiplier: only scales UP when ev_bps > threshold
+        # (no downsizing for weak-but-positive scenarios). Capped at 1.5x to keep
+        # risk envelope compatible with existing exposure controls. Off when
+        # decision side mismatches scenario side (gate stays enrichment-only).
+        ev_threshold = float(table.get("ev_threshold_bps", 5.0))
+        ev_bps = float(score.ev_bps)
+        scenario_side = str(score.side or "").lower()
+        side_aligned = scenario_side in {"long", "short"} and scenario_side == decision.side
+        boost_factor = 1.0
+        if (
+            side_aligned
+            and ev_threshold > 0.0
+            and ev_bps > ev_threshold
+            and decision.order_intent_notional_usd > 0.0
+        ):
+            boost_factor = min(1.0 + (ev_bps - ev_threshold) / ev_threshold, 1.5)
+        if boost_factor > 1.000001:
+            return replace(
+                decision,
+                order_intent_notional_usd=round(decision.order_intent_notional_usd * boost_factor, 6),
+                strategy_size_multiplier=round(decision.strategy_size_multiplier * boost_factor, 6),
+                size_boost_reasons=tuple(
+                    sorted(set(decision.size_boost_reasons + (f"CROSS_COIN_EV_BOOST:{ev_bps:.1f}bps",)))
+                ),
+                cross_coin_own_quadrant=own_quadrant,
+                cross_coin_own_dir=own_dir,
+                cross_coin_leader_symbol=leader_sym or "",
+                cross_coin_leader_quadrant=leader_quadrant,
+                cross_coin_leader_dir=leader_dir,
+                cross_coin_ev_bps=ev_bps,
+                cross_coin_winrate=float(score.winrate),
+                cross_coin_n=int(score.n),
+                cross_coin_rank=int(score.rank),
+                cross_coin_is_top_priority=is_top,
+            )
+        return replace(
+            decision,
+            cross_coin_own_quadrant=own_quadrant,
+            cross_coin_own_dir=own_dir,
+            cross_coin_leader_symbol=leader_sym or "",
+            cross_coin_leader_quadrant=leader_quadrant,
+            cross_coin_leader_dir=leader_dir,
+            cross_coin_ev_bps=ev_bps,
+            cross_coin_winrate=float(score.winrate),
+            cross_coin_n=int(score.n),
+            cross_coin_rank=int(score.rank),
+            cross_coin_is_top_priority=is_top,
+        )
+
     def _symbol_filter_profile_for_decision(self, decision: DecisionIntent):
         profiles = self.runtime.paper_service.settings.symbol_filter_profiles or {}
         return profiles.get(decision.symbol.strip().upper())
@@ -1727,7 +2024,15 @@ class LivePaperSession:
             )
         ):
             rejections.append("SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL")
+        recovery_reason = ""
         if rejections:
+            recovery_reason = self._paper_symbol_filter_recovery_reason(
+                decision,
+                profile=profile,
+                rejections=tuple(rejections),
+                edge_to_cost=edge_to_cost,
+            )
+        if rejections and not recovery_reason:
             return replace(
                 decision,
                 final_mode="cash",
@@ -1741,10 +2046,53 @@ class LivePaperSession:
                 decision,
                 order_intent_notional_usd=round(decision.order_intent_notional_usd * profile.size_multiplier, 6),
                 size_boost_reasons=tuple(
-                    sorted(set(decision.size_boost_reasons + (f"SYMBOL_FILTER_PROFILE_SIZE:{decision.symbol}",)))
+                    sorted(
+                        set(
+                            decision.size_boost_reasons
+                            + (f"SYMBOL_FILTER_PROFILE_SIZE:{decision.symbol}",)
+                            + ((recovery_reason,) if recovery_reason else ())
+                        )
+                    )
                 ),
             )
+        if recovery_reason:
+            return replace(
+                decision,
+                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (recovery_reason,)))),
+            )
         return decision
+
+    def _paper_symbol_filter_recovery_reason(
+        self,
+        decision: DecisionIntent,
+        *,
+        profile,
+        rejections: tuple[str, ...],
+        edge_to_cost: float,
+    ) -> str:
+        if self.live_order_executor is not None or not self._paper_verification_mode_enabled():
+            return ""
+        if not bool(getattr(profile, "paper_recovery_enabled", False)):
+            return ""
+        side = str(getattr(profile, "paper_recovery_side", "") or "").strip().lower()
+        if side and decision.side != side:
+            return ""
+        allowed = set(getattr(profile, "paper_recovery_allowed_rejections", ()) or ())
+        if allowed and not set(rejections).issubset(allowed):
+            return ""
+        if decision.predictability_score < float(getattr(profile, "paper_recovery_min_score", 0.0) or 0.0):
+            return ""
+        if decision.volume_confirmation < float(getattr(profile, "paper_recovery_min_volume_confirmation", 0.0) or 0.0):
+            return ""
+        if decision.net_expected_edge_bps < float(getattr(profile, "paper_recovery_min_net_edge_bps", 0.0) or 0.0):
+            return ""
+        if edge_to_cost < float(getattr(profile, "paper_recovery_min_edge_to_cost", 0.0) or 0.0):
+            return ""
+        max_cost = float(getattr(profile, "paper_recovery_max_cost_bps", 0.0) or 0.0)
+        if max_cost > 0.0 and decision.estimated_round_trip_cost_bps > max_cost:
+            return ""
+        reason = str(getattr(profile, "paper_recovery_reason", "") or "PAPER_SYMBOL_FILTER_RECOVERY")
+        return f"{reason}:{decision.symbol}:{decision.side}"
 
     def _apply_paper_verification_front_entry_gate(self, decision: DecisionIntent) -> DecisionIntent:
         if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
@@ -7307,6 +7655,8 @@ class LivePaperSession:
             exit_reason = "SCORE_DROP_EXIT"
         elif decision.liquidity_score <= position.entry_liquidity_score - exit_rules.liquidity_drop_exit_buffer:
             exit_reason = "LIQUIDITY_DROP_EXIT"
+        elif self._cross_coin_held_position_reversal_signal(position):
+            exit_reason = "CROSS_COIN_REVERSAL_EXIT"
 
         if exit_reason:
             required_confirmation_cycles = max(1, exit_rules.confirmation_cycles_for_exit)
@@ -7416,6 +7766,53 @@ class LivePaperSession:
             and self._futures_slot_limit() == 1
         )
 
+    def _cross_coin_reallocation_edge_bonus_bps(self, decision: DecisionIntent) -> float:
+        """Capped EV bonus applied to reallocation comparisons when the gate is active.
+
+        Returns 0.0 when the gate is disabled or `cross_coin_ev_bps` is non-positive,
+        so legacy code paths and disabled-gate runs stay byte-compatible. The cap
+        (10 bps) prevents an exceptionally strong leader signal from overriding the
+        real-edge gate entirely.
+        """
+        if not self._cross_coin_gate_enabled():
+            return 0.0
+        ev = float(getattr(decision, "cross_coin_ev_bps", 0.0) or 0.0)
+        if ev <= 0.0:
+            return 0.0
+        return min(ev, 10.0)
+
+    def _cross_coin_held_position_reversal_signal(self, position: "PaperPosition") -> bool:
+        """Detect if a held futures position now sits in a cross-coin reversal quadrant.
+
+        Conservative signal — only fires for the most direct reversal patterns:
+        held long with own_quadrant=="longUnwind" (longs being closed at a loss),
+        or held short with own_quadrant=="shortCover" (shorts being squeezed out).
+
+        Used by the management cycle to emit a `CROSS_COIN_REVERSAL_EXIT` exit
+        reason; respects the existing confirmation_cycles_for_exit cadence so
+        single-cycle noise does not close positions. Returns False whenever the
+        gate is off or the underlying cycle data is unavailable, keeping legacy
+        runs byte-compatible.
+        """
+        if not self._cross_coin_gate_enabled():
+            return False
+        if position.market != "futures" or position.side not in {"long", "short"}:
+            return False
+        sym = position.symbol.strip().upper()
+        if sym not in self._CROSS_COIN_UNIVERSE:
+            return False
+        states = self._cross_coin_states_cached()
+        if not states:
+            return False
+        own = states.get(sym)
+        if own is None:
+            return False
+        if position.side == "long" and own.own_quadrant == "longUnwind":
+            return True
+        if position.side == "short" and own.own_quadrant == "shortCover":
+            return True
+        return False
+
     def _is_strong_reallocation_candidate(self, decision: DecisionIntent) -> bool:
         settings = self.runtime.paper_service.settings
         focus = settings.portfolio_focus
@@ -7430,6 +7827,9 @@ class LivePaperSession:
         if self._is_major_futures_symbol(decision.symbol):
             score_floor = max(score_floor - exposure.major_reallocation_score_advantage_relaxation, settings.mode_thresholds.futures_score_min)
             edge_floor = max(edge_floor - exposure.major_reallocation_edge_advantage_relaxation_bps, exposure.min_entry_net_edge_bps)
+        cross_coin_bonus = self._cross_coin_reallocation_edge_bonus_bps(decision)
+        if cross_coin_bonus > 0.0:
+            edge_floor = max(edge_floor - cross_coin_bonus, exposure.min_entry_net_edge_bps)
         if decision.predictability_score < score_floor:
             return False
         if decision.net_expected_edge_bps < edge_floor:
@@ -8092,7 +8492,13 @@ class LivePaperSession:
                 candidate.estimated_round_trip_cost_bps,
             ) * 2.0
         score_advantage = candidate.predictability_score - max(replaced_scores)
-        edge_advantage_after_costs = candidate.net_expected_edge_bps - max(replaced_edges) - switching_cost_bps
+        cross_coin_edge_bonus_bps = self._cross_coin_reallocation_edge_bonus_bps(decision)
+        edge_advantage_after_costs = (
+            candidate.net_expected_edge_bps
+            - max(replaced_edges)
+            - switching_cost_bps
+            + cross_coin_edge_bonus_bps
+        )
         incremental_pnl_usd = edge_advantage_after_costs * candidate.order_intent_notional_usd / 10000.0
         focus = self.runtime.paper_service.settings.portfolio_focus
         exposure = self.runtime.paper_service.settings.futures_exposure

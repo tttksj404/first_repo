@@ -1,0 +1,245 @@
+{
+  "X3": {
+    "params": {
+      "rsi_long": 25,
+      "rsi_short": 70,
+      "vol_min": 1.0,
+      "tp_atr": 0.5,
+      "sl_atr": 3.0,
+      "hold": 24
+    },
+    "n_trades": 144,
+    "wr": 0.8819,
+    "pf": 1.162,
+    "total_pnl_usd": 10.43,
+    "avg_win_usd": 0.589,
+    "avg_loss_usd": -3.79,
+    "ev_per_trade_usd": 0.0724,
+    "fee_per_trade_usd": 0.12,
+    "fee_to_avg_loss": 0.032,
+    "mc_ruin_at_leverages": [
+      {
+        "leverage": 1.0,
+        "n_runs": 5000,
+        "n_trades": 144,
+        "ruin_rate": 0.0048,
+        "median_final_eq": 60.42800434203085,
+        "p5_final_eq": 60.428004342030825,
+        "p95_final_eq": 60.42800434203088,
+        "median_min_eq": 43.92449707397068,
+        "p5_min_eq": 32.43975225023095,
+        "mean_total_pnl": 10.428004342030842
+      },
+      {
+        "leverage": 2.0,
+        "n_runs": 5000,
+        "n_trades": 144,
+        "ruin_rate": 0.1666,
+        "median_final_eq": 70.85600868406169,
+        "p5_final_eq": 70.85600868406163,
+        "p95_final_eq": 70.85600868406173,
+        "median_min_eq": 37.84899414794135,
+        "p5_min_eq": 14.879504500461895,
+        "mean_total_pnl": 20.856008684061685
+      },
+      {
+        "leverage": 3.0,
+        "n_runs": 5000,
+        "n_trades": 144,
+        "ruin_rate": 0.3678,
+        "median_final_eq": 81.28401302609252,
+        "p5_final_eq": 81.28401302609247,
+        "p95_final_eq": 81.28401302609257,
+        "median_min_eq": 31.77349122191201,
+        "p5_min_eq": -2.6807432493071817,
+        "mean_total_pnl": 31.284013026092513
+      },
+      {
+        "leverage": 5.0,
+        "n_runs": 5000,
+        "n_trades": 144,
+        "ruin_rate": 0.5698,
+        "median_final_eq": 102.1400217101542,
+        "p5_final_eq": 102.14002171015412,
+        "p95_final_eq": 102.1400217101543,
+        "median_min_eq": 19.622485369853372,
+        "p5_min_eq": -37.801238748845314,
+        "mean_total_pnl": 52.14002171015422
+      },
+      {
+        "leverage": 10.0,
+        "n_runs": 5000,
+        "n_trades": 144,
+        "ruin_rate": 0.7316,
+        "median_final_eq": 154.2800434203084,
+        "p5_final_eq": 154.28004342030826,
+        "p95_final_eq": 154.28004342030852,
+        "median_min_eq": -10.755029260293266,
+        "p5_min_eq": -125.60247749769057,
+        "mean_total_pnl": 104.28004342030844
+      }
+    ]
+  },
+  "X4": {
+    "params": {
+      "rsi_long": 25,
+      "rsi_short": 70,
+      "vol_min": 1.3,
+      "tp_atr": 0.5,
+      "sl_atr": 3.0,
+      "hold": 24
+    },
+    "n_trades": 93,
+    "wr": 0.8817,
+    "pf": 1.219,
+    "total_pnl_usd": 8.2,
+    "avg_win_usd": 0.557,
+    "avg_loss_usd": -3.405,
+    "ev_per_trade_usd": 0.0882,
+    "fee_per_trade_usd": 0.12,
+    "fee_to_avg_loss": 0.035,
+    "mc_ruin_at_leverages": [
+      {
+        "leverage": 1.0,
+        "n_runs": 5000,
+        "n_trades": 93,
+        "ruin_rate": 0.0,
+        "median_final_eq": 58.20225568897331,
+        "p5_final_eq": 58.20225568897328,
+        "p95_final_eq": 58.20225568897332,
+        "median_min_eq": 45.98727487478588,
+        "p5_min_eq": 37.739030935620775,
+        "mean_total_pnl": 8.202255688973283
+      },
+      {
+        "leverage": 2.0,
+        "n_runs": 5000,
+        "n_trades": 93,
+        "ruin_rate": 0.0458,
+        "median_final_eq": 66.40451137794659,
+        "p5_final_eq": 66.40451137794655,
+        "p95_final_eq": 66.40451137794663,
+        "median_min_eq": 41.97454974957175,
+        "p5_min_eq": 25.478061871241508,
+        "mean_total_pnl": 16.404511377946566
+      },
+      {
+        "leverage": 3.0,
+        "n_runs": 5000,
+        "n_trades": 93,
+        "ruin_rate": 0.182,
+        "median_final_eq": 74.60676706691987,
+        "p5_final_eq": 74.60676706691983,
+        "p95_final_eq": 74.60676706691991,
+        "median_min_eq": 37.961824624357625,
+        "p5_min_eq": 13.217092806862277,
+        "mean_total_pnl": 24.606767066919858
+      },
+      {
+        "leverage": 5.0,
+        "n_runs": 5000,
+        "n_trades": 93,
+        "ruin_rate": 0.4074,
+        "median_final_eq": 91.01127844486643,
+        "p5_final_eq": 91.01127844486638,
+        "p95_final_eq": 91.01127844486648,
+        "median_min_eq": 29.936374373929382,
+        "p5_min_eq": -11.304845321896217,
+        "mean_total_pnl": 41.01127844486641
+      },
+      {
+        "leverage": 10.0,
+        "n_runs": 5000,
+        "n_trades": 93,
+        "ruin_rate": 0.6496,
+        "median_final_eq": 132.02255688973287,
+        "p5_final_eq": 132.02255688973278,
+        "p95_final_eq": 132.02255688973293,
+        "median_min_eq": 9.872748747858747,
+        "p5_min_eq": -72.6096906437924,
+        "mean_total_pnl": 82.02255688973283
+      }
+    ]
+  },
+  "X1": {
+    "params": {
+      "rsi_long": 30,
+      "rsi_short": 70,
+      "vol_min": 1.0,
+      "tp_atr": 0.5,
+      "sl_atr": 3.0,
+      "hold": 24
+    },
+    "n_trades": 238,
+    "wr": 0.8824,
+    "pf": 1.325,
+    "total_pnl_usd": 32.76,
+    "avg_win_usd": 0.635,
+    "avg_loss_usd": -3.596,
+    "ev_per_trade_usd": 0.1376,
+    "fee_per_trade_usd": 0.12,
+    "fee_to_avg_loss": 0.033,
+    "mc_ruin_at_leverages": [
+      {
+        "leverage": 1.0,
+        "n_runs": 5000,
+        "n_trades": 238,
+        "ruin_rate": 0.007,
+        "median_final_eq": 82.75570250052331,
+        "p5_final_eq": 82.75570250052324,
+        "p95_final_eq": 82.75570250052338,
+        "median_min_eq": 45.893947169728634,
+        "p5_min_eq": 32.84139034470646,
+        "mean_total_pnl": 32.75570250052334
+      },
+      {
+        "leverage": 2.0,
+        "n_runs": 5000,
+        "n_trades": 238,
+        "ruin_rate": 0.128,
+        "median_final_eq": 115.51140500104671,
+        "p5_final_eq": 115.51140500104663,
+        "p95_final_eq": 115.51140500104677,
+        "median_min_eq": 41.78789433945727,
+        "p5_min_eq": 15.682780689412931,
+        "mean_total_pnl": 65.51140500104668
+      },
+      {
+        "leverage": 3.0,
+        "n_runs": 5000,
+        "n_trades": 238,
+        "ruin_rate": 0.2634,
+        "median_final_eq": 148.26710750157,
+        "p5_final_eq": 148.26710750156988,
+        "p95_final_eq": 148.2671075015701,
+        "median_min_eq": 37.681841509185915,
+        "p5_min_eq": -1.4758289658806045,
+        "mean_total_pnl": 98.26710750157
+      },
+      {
+        "leverage": 5.0,
+        "n_runs": 5000,
+        "n_trades": 238,
+        "ruin_rate": 0.4392,
+        "median_final_eq": 213.7785125026167,
+        "p5_final_eq": 213.77851250261656,
+        "p95_final_eq": 213.77851250261685,
+        "median_min_eq": 29.469735848643168,
+        "p5_min_eq": -35.79304827646769,
+        "mean_total_pnl": 163.77851250261668
+      },
+      {
+        "leverage": 10.0,
+        "n_runs": 5000,
+        "n_trades": 238,
+        "ruin_rate": 0.622,
+        "median_final_eq": 377.5570250052334,
+        "p5_final_eq": 377.55702500523313,
+        "p95_final_eq": 377.5570250052337,
+        "median_min_eq": 8.93947169728635,
+        "p5_min_eq": -121.58609655293535,
+        "mean_total_pnl": 327.55702500523336
+      }
+    ]
+  }
+}

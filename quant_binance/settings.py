@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, fields as _dc_fields
 from pathlib import Path
 from typing import Any
 
@@ -312,6 +312,15 @@ class SymbolFilterProfileConfig:
     reversal_guard_min_expected_profit_multiplier: float = 2.0
     reversal_guard_min_expected_profit_extra_usd: float = 0.75
     rejection_reason: str = "SYMBOL_FILTER_PROFILE"
+    paper_recovery_enabled: bool = False
+    paper_recovery_side: str = ""
+    paper_recovery_min_score: float = 0.0
+    paper_recovery_min_volume_confirmation: float = 0.0
+    paper_recovery_min_net_edge_bps: float = 0.0
+    paper_recovery_min_edge_to_cost: float = 0.0
+    paper_recovery_max_cost_bps: float = 0.0
+    paper_recovery_allowed_rejections: tuple[str, ...] = ()
+    paper_recovery_reason: str = "PAPER_SYMBOL_FILTER_RECOVERY"
 
 
 @dataclass(frozen=True)
@@ -470,14 +479,15 @@ class Settings:
             raw = json.load(handle)
         profile = resolve_strategy_profile() or "conservative"
         raw = _deep_merge(raw, raw.get("strategy_profiles", {}).get(profile, {}))
-        override_symbols = resolve_universe_symbols()
-        if override_symbols:
-            raw["universe"] = list(override_symbols)
         override_path = resolve_strategy_override_path()
         if override_path:
             candidate = Path(override_path)
             if candidate.exists():
                 raw = _deep_merge(raw, json.loads(candidate.read_text(encoding="utf-8")))
+        override_symbols = resolve_universe_symbols()
+        if override_symbols:
+            # Environment-selected universe must win over any file-based override.
+            raw["universe"] = list(override_symbols)
         raw["strategy_profile"] = profile
         return cls.from_dict(raw)
 
@@ -503,8 +513,11 @@ class Settings:
             "cooldown_minutes": 0,
         }
         loss_combo_downgrade_raw.update(raw.get("loss_combo_downgrade", {}))
+        _profile_field_names = {f.name for f in _dc_fields(SymbolFilterProfileConfig)}
         symbol_filter_profiles = {
-            str(symbol).upper(): SymbolFilterProfileConfig(**dict(profile or {}))
+            str(symbol).upper(): SymbolFilterProfileConfig(
+                **{k: v for k, v in dict(profile or {}).items() if k in _profile_field_names}
+            )
             for symbol, profile in dict(raw.get("symbol_filter_profiles", {}) or {}).items()
         }
         return cls(

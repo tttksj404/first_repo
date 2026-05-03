@@ -42,6 +42,7 @@ notion_automation/**/notion_auth.py
 # Runtime outputs (paper50)
 quant_runtime_paper50/_paper50*.log
 quant_runtime_paper50/artifacts/
+quant_runtime_paper50/cache/
 quant_runtime_paper50/forensics/
 quant_runtime_paper50/output/
 quant_runtime_paper50/execution_quality_state.json
@@ -61,10 +62,28 @@ quant_runtime/output/
 quant_runtime_paper50/*.err
 quant_runtime_paper50/*.log
 quant_runtime_paper50/artifacts/
+quant_runtime_paper50/cache/
 quant_runtime_paper50/execution_quality_state.json
 quant_runtime_paper50/forensics/
 quant_runtime_paper50/output/
+quant_runtime_paper50/_launcher.pid
+quant_runtime_paper50/_monitor.pid
+quant_runtime_paper50/_monitor_status.json
+quant_runtime_paper50/_paper50*.log.*
+quant_runtime_paper50/bitget_external_alpha_shadow/
+quant_runtime/artifacts/strategy_override.pending.json
+quant_runtime/artifacts/strategy_override.report.json
+quant_runtime/live_supervisor_health.json
 
-# verify_btc_timing: Binance public klines (8MB), regeneratable via fetch_history.py
+# Top-level scratch artifacts dir
+/artifacts/
+
+# BOJ / algorithm-pack work (separate concern from quant trading)
+/build_finance_boj_pack.py
+/crawl_boj_curriculum.py
+/crawl_finance_pack_problem_texts.py
+/offline_judge/
+
+# verify_btc_timing: Binance public klines (regeneratable)
 verify_btc_timing/data/
 verify_btc_timing/__pycache__/

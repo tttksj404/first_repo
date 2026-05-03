@@ -32,6 +32,41 @@ run_python() {
   sh "$PYTHON_LAUNCHER" "$@"
 }
 
+write_health_state() {
+  health_path="$1"
+  health_status="$2"
+  health_reason="$3"
+  health_summary="${4:-}"
+  if ! run_python - "$health_path" "$health_status" "$health_reason" "$health_summary" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+path = Path(sys.argv[1])
+payload = {
+    "checked_at": datetime.now(tz=timezone.utc).isoformat(),
+    "reason": sys.argv[3],
+    "status": sys.argv[2],
+    "updated_at": datetime.now(tz=timezone.utc).isoformat(),
+}
+summary = sys.argv[4]
+if summary:
+    payload["summary"] = summary
+path.parent.mkdir(parents=True, exist_ok=True)
+path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+PY
+  then
+    return 0
+  fi
+}
+
+mark_stopped_health() {
+  health_reason="${1:-supervisor_stop_requested}"
+  health_summary="${2:-runtime intentionally stopped via supervisor stop sentinel}"
+  write_health_state "$HEALTH_STATE_PATH" "stopped" "$health_reason" "$health_summary"
+}
+
 supervisor_stop_requested() {
   [ -f "$SUPERVISOR_STOP_FILE" ] && grep -qi 'stop' "$SUPERVISOR_STOP_FILE" 2>/dev/null
 }
@@ -40,9 +75,11 @@ OUTPUT_BASE="${1:-quant_runtime}"
 LOG_DIR="$OUTPUT_BASE"
 SUPERVISOR_LOG="$LOG_DIR/live_supervisor.log"
 SUPERVISOR_PID_PATH="$LOG_DIR/live_supervisor.pid"
+HEALTH_STATE_PATH="$LOG_DIR/live_supervisor_health.json"
 
 mkdir -p "$LOG_DIR"
 if supervisor_stop_requested; then
+  mark_stopped_health "supervisor_stop_requested" "runtime intentionally stopped before supervisor startup"
   printf '[SUPERVISOR] stop file present; refusing to start at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
   exit 0
 fi
@@ -74,7 +111,6 @@ REPORT_SEND_FLAG="${QUANT_REPORT_SEND_FLAG:-}"
 if [ "$QUANT_TELEGRAM_NOTIFICATIONS" = "1" ] && [ -z "$REPORT_SEND_FLAG" ]; then
   REPORT_SEND_FLAG="--send-telegram"
 fi
-HEALTH_STATE_PATH="$LOG_DIR/live_supervisor_health.json"
 SUPERVISOR_WATCHDOG_PID_PATH="$LOG_DIR/live_supervisor_watchdog.pid"
 SUPERVISOR_LOCK_DIR="$LOG_DIR/live_supervisor.lock"
 
@@ -141,6 +177,9 @@ REPORT_PID=""
 NEWS_PID=""
 
 cleanup() {
+  if supervisor_stop_requested; then
+    mark_stopped_health "supervisor_stop_requested" "runtime intentionally stopped during supervisor cleanup"
+  fi
   lock_owner_pid="$(slot_pid "$SUPERVISOR_LOCK_DIR/pid")"
   if [ "$lock_owner_pid" = "$$" ]; then
     rm -rf "$SUPERVISOR_LOCK_DIR"
@@ -337,6 +376,7 @@ start_watchdog
 
 while :; do
   if supervisor_stop_requested; then
+    mark_stopped_health "supervisor_stop_requested" "runtime intentionally stopped in supervisor loop"
     printf '[SUPERVISOR] stop file present; exiting supervisor loop at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi
@@ -344,6 +384,7 @@ while :; do
   while kill -0 "$CHILD_PID" 2>/dev/null; do
     sleep "$WATCHDOG_POLL_SECONDS"
     if supervisor_stop_requested; then
+      mark_stopped_health "supervisor_stop_requested" "runtime intentionally stopped while child was running"
       printf '[SUPERVISOR] stop file present; stopping child pid=%s at %s\n' "$CHILD_PID" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
       kill "$CHILD_PID" 2>/dev/null || true
       wait "$CHILD_PID" 2>/dev/null || true
@@ -385,6 +426,7 @@ PY
   CHILD_EXIT_CODE=0
   wait "$CHILD_PID" 2>/dev/null || CHILD_EXIT_CODE=$?
   if supervisor_stop_requested; then
+    mark_stopped_health "supervisor_stop_requested" "runtime intentionally stopped after child exit"
     printf '[SUPERVISOR] stop file present after child exit; not restarting at %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" >>"$SUPERVISOR_LOG"
     exit 0
   fi

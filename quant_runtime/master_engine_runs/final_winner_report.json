@@ -1,0 +1,1921 @@
+{
+  "generated_at": "2026-04-26T02:17:13Z",
+  "n_candidates": 30,
+  "tier_S_safe": [
+    {
+      "rank": 3,
+      "params": {
+        "sig": "x1",
+        "univ": "PEPE_DOGE",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 100,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT",
+          "DOGEUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 26,
+        "wr": 0.4615,
+        "pf": 2.127,
+        "total_pnl": 57.74,
+        "max_dd": 12.45,
+        "avg_win": 9.081,
+        "avg_loss": -3.659,
+        "max_consec_loss": 3,
+        "annual_pct": 115.5
+      },
+      "ruin_10k": {
+        "ruin_pct": 1.61,
+        "median_final": 107.74,
+        "p5_final": 107.74,
+        "p5_min_eq": 30.4,
+        "median_min_eq": 45.67
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 4,
+            "total": 1.51,
+            "wr": 0.5
+          },
+          {
+            "fold": 1,
+            "n": 5,
+            "total": -12.45,
+            "wr": 0.2
+          },
+          {
+            "fold": 2,
+            "n": 8,
+            "total": 65.15,
+            "wr": 0.75
+          },
+          {
+            "fold": 3,
+            "n": 9,
+            "total": 3.52,
+            "wr": 0.3333
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 26,
+          "total": 57.74,
+          "wr": 0.4615
+        },
+        {
+          "bps": 3,
+          "n": 26,
+          "total": 55.79,
+          "wr": 0.4615
+        },
+        {
+          "bps": 5,
+          "n": 26,
+          "total": 54.49,
+          "wr": 0.4615
+        },
+        {
+          "bps": 10,
+          "n": 26,
+          "total": 51.24,
+          "wr": 0.4615
+        },
+        {
+          "bps": 15,
+          "n": 26,
+          "total": 47.99,
+          "wr": 0.4615
+        },
+        {
+          "bps": 20,
+          "n": 26,
+          "total": 44.74,
+          "wr": 0.4615
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 13,
+          "total": 65.72
+        },
+        "DOGEUSDT": {
+          "n": 13,
+          "total": -7.98
+        }
+      },
+      "dd_distribution": {
+        "p50": 3.9,
+        "p75": 6.72,
+        "p95": 10.49,
+        "max": 12.45
+      },
+      "gates": {
+        "n_min30": false,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": true,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": true,
+      "all_aggressive_pass": true
+    },
+    {
+      "rank": 7,
+      "params": {
+        "sig": "x1",
+        "univ": "memes_first",
+        "lev": 5,
+        "mp": 0.35,
+        "tp": 100,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT",
+          "WIFUSDT",
+          "DOGEUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 39,
+        "wr": 0.359,
+        "pf": 1.795,
+        "total_pnl": 53.26,
+        "max_dd": 18.96,
+        "avg_win": 8.59,
+        "avg_loss": -2.68,
+        "max_consec_loss": 5,
+        "annual_pct": 106.5
+      },
+      "ruin_10k": {
+        "ruin_pct": 2.75,
+        "median_final": 103.26,
+        "p5_final": 103.26,
+        "p5_min_eq": 28.1,
+        "median_min_eq": 44.06
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 10,
+            "total": 7.82,
+            "wr": 0.4
+          },
+          {
+            "fold": 1,
+            "n": 6,
+            "total": 1.89,
+            "wr": 0.1667
+          },
+          {
+            "fold": 2,
+            "n": 11,
+            "total": 47.69,
+            "wr": 0.5455
+          },
+          {
+            "fold": 3,
+            "n": 12,
+            "total": -4.15,
+            "wr": 0.25
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 39,
+          "total": 53.26,
+          "wr": 0.359
+        },
+        {
+          "bps": 3,
+          "n": 39,
+          "total": 51.21,
+          "wr": 0.359
+        },
+        {
+          "bps": 5,
+          "n": 39,
+          "total": 49.85,
+          "wr": 0.359
+        },
+        {
+          "bps": 10,
+          "n": 39,
+          "total": 46.43,
+          "wr": 0.359
+        },
+        {
+          "bps": 15,
+          "n": 39,
+          "total": 43.02,
+          "wr": 0.359
+        },
+        {
+          "bps": 20,
+          "n": 39,
+          "total": 39.61,
+          "wr": 0.359
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 11,
+          "total": 27.63
+        },
+        "WIFUSDT": {
+          "n": 16,
+          "total": 38.63
+        },
+        "DOGEUSDT": {
+          "n": 12,
+          "total": -13.01
+        }
+      },
+      "dd_distribution": {
+        "p50": 4.23,
+        "p75": 8.33,
+        "p95": 13.76,
+        "max": 18.96
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": true,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": true,
+      "all_aggressive_pass": true
+    },
+    {
+      "rank": 8,
+      "params": {
+        "sig": "x1",
+        "univ": "DOGE_first",
+        "lev": 5,
+        "mp": 0.35,
+        "tp": 100,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "DOGEUSDT",
+          "PEPEUSDT",
+          "WIFUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 39,
+        "wr": 0.359,
+        "pf": 1.795,
+        "total_pnl": 53.26,
+        "max_dd": 18.96,
+        "avg_win": 8.59,
+        "avg_loss": -2.68,
+        "max_consec_loss": 5,
+        "annual_pct": 106.5
+      },
+      "ruin_10k": {
+        "ruin_pct": 2.75,
+        "median_final": 103.26,
+        "p5_final": 103.26,
+        "p5_min_eq": 28.1,
+        "median_min_eq": 44.06
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 10,
+            "total": 7.82,
+            "wr": 0.4
+          },
+          {
+            "fold": 1,
+            "n": 6,
+            "total": 1.89,
+            "wr": 0.1667
+          },
+          {
+            "fold": 2,
+            "n": 11,
+            "total": 47.69,
+            "wr": 0.5455
+          },
+          {
+            "fold": 3,
+            "n": 12,
+            "total": -4.15,
+            "wr": 0.25
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 39,
+          "total": 53.26,
+          "wr": 0.359
+        },
+        {
+          "bps": 3,
+          "n": 39,
+          "total": 51.21,
+          "wr": 0.359
+        },
+        {
+          "bps": 5,
+          "n": 39,
+          "total": 49.85,
+          "wr": 0.359
+        },
+        {
+          "bps": 10,
+          "n": 39,
+          "total": 46.43,
+          "wr": 0.359
+        },
+        {
+          "bps": 15,
+          "n": 39,
+          "total": 43.02,
+          "wr": 0.359
+        },
+        {
+          "bps": 20,
+          "n": 39,
+          "total": 39.61,
+          "wr": 0.359
+        }
+      ],
+      "per_symbol": {
+        "DOGEUSDT": {
+          "n": 13,
+          "total": -15.75
+        },
+        "PEPEUSDT": {
+          "n": 10,
+          "total": 30.37
+        },
+        "WIFUSDT": {
+          "n": 16,
+          "total": 38.63
+        }
+      },
+      "dd_distribution": {
+        "p50": 4.23,
+        "p75": 8.33,
+        "p95": 13.76,
+        "max": 18.96
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": true,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": true,
+      "all_aggressive_pass": true
+    }
+  ],
+  "tier_A_aggressive": [
+    {
+      "rank": 11,
+      "params": {
+        "sig": "x1",
+        "univ": "memes_alts",
+        "lev": 5,
+        "mp": 0.35,
+        "tp": 100,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT",
+          "DOGEUSDT",
+          "WIFUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 51,
+        "wr": 0.3725,
+        "pf": 1.61,
+        "total_pnl": 54.7,
+        "max_dd": 20.54,
+        "avg_win": 7.6,
+        "avg_loss": -2.803,
+        "max_consec_loss": 7,
+        "annual_pct": 109.4
+      },
+      "ruin_10k": {
+        "ruin_pct": 5.46,
+        "median_final": 104.7,
+        "p5_final": 104.7,
+        "p5_min_eq": 24.48,
+        "median_min_eq": 43.22
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 13,
+            "total": 7.12,
+            "wr": 0.3846
+          },
+          {
+            "fold": 1,
+            "n": 8,
+            "total": 7.37,
+            "wr": 0.375
+          },
+          {
+            "fold": 2,
+            "n": 12,
+            "total": 50.5,
+            "wr": 0.5833
+          },
+          {
+            "fold": 3,
+            "n": 19,
+            "total": -13.02,
+            "wr": 0.2105
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 51,
+          "total": 54.7,
+          "wr": 0.3725
+        },
+        {
+          "bps": 3,
+          "n": 51,
+          "total": 52.02,
+          "wr": 0.3725
+        },
+        {
+          "bps": 5,
+          "n": 51,
+          "total": 50.24,
+          "wr": 0.3725
+        },
+        {
+          "bps": 10,
+          "n": 51,
+          "total": 45.78,
+          "wr": 0.3725
+        },
+        {
+          "bps": 15,
+          "n": 51,
+          "total": 41.31,
+          "wr": 0.3725
+        },
+        {
+          "bps": 20,
+          "n": 51,
+          "total": 36.85,
+          "wr": 0.3725
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 9,
+          "total": 31.19
+        },
+        "DOGEUSDT": {
+          "n": 10,
+          "total": -7.53
+        },
+        "WIFUSDT": {
+          "n": 16,
+          "total": 38.63
+        },
+        "OPUSDT": {
+          "n": 10,
+          "total": -14.85
+        },
+        "SUIUSDT": {
+          "n": 6,
+          "total": 7.27
+        }
+      },
+      "dd_distribution": {
+        "p50": 6.34,
+        "p75": 11.86,
+        "p95": 16.92,
+        "max": 20.54
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": true
+    },
+    {
+      "rank": 23,
+      "params": {
+        "sig": "x1",
+        "univ": "ETH_first",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 50,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "ETHUSDT",
+          "SOLUSDT",
+          "BTCUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 43,
+        "wr": 0.4884,
+        "pf": 1.46,
+        "total_pnl": 37.88,
+        "max_dd": 21.07,
+        "avg_win": 5.722,
+        "avg_loss": -3.74,
+        "max_consec_loss": 5,
+        "annual_pct": 75.8
+      },
+      "ruin_10k": {
+        "ruin_pct": 5.93,
+        "median_final": 87.88,
+        "p5_final": 87.88,
+        "p5_min_eq": 23.95,
+        "median_min_eq": 42.41
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 8,
+            "total": 8.05,
+            "wr": 0.5
+          },
+          {
+            "fold": 1,
+            "n": 11,
+            "total": -2.52,
+            "wr": 0.4545
+          },
+          {
+            "fold": 2,
+            "n": 9,
+            "total": 25.32,
+            "wr": 0.5556
+          },
+          {
+            "fold": 3,
+            "n": 15,
+            "total": 7.03,
+            "wr": 0.4667
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 43,
+          "total": 37.88,
+          "wr": 0.4884
+        },
+        {
+          "bps": 3,
+          "n": 43,
+          "total": 34.66,
+          "wr": 0.4884
+        },
+        {
+          "bps": 5,
+          "n": 43,
+          "total": 32.51,
+          "wr": 0.4651
+        },
+        {
+          "bps": 10,
+          "n": 43,
+          "total": 27.13,
+          "wr": 0.4651
+        },
+        {
+          "bps": 15,
+          "n": 43,
+          "total": 21.76,
+          "wr": 0.4419
+        },
+        {
+          "bps": 20,
+          "n": 43,
+          "total": 16.38,
+          "wr": 0.4419
+        }
+      ],
+      "per_symbol": {
+        "ETHUSDT": {
+          "n": 20,
+          "total": 3.47
+        },
+        "SOLUSDT": {
+          "n": 13,
+          "total": 41.12
+        },
+        "BTCUSDT": {
+          "n": 10,
+          "total": -6.71
+        }
+      },
+      "dd_distribution": {
+        "p50": 5.18,
+        "p75": 10.48,
+        "p95": 18.12,
+        "max": 21.07
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": true
+    },
+    {
+      "rank": 28,
+      "params": {
+        "sig": "x1",
+        "univ": "alt_first",
+        "lev": 10,
+        "mp": 0.35,
+        "tp": 100,
+        "sl": -10,
+        "hold": 24,
+        "long_only": true,
+        "priority": [
+          "OPUSDT",
+          "NEARUSDT",
+          "SUIUSDT",
+          "ETHUSDT",
+          "UNIUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 35,
+        "wr": 0.2571,
+        "pf": 1.364,
+        "total_pnl": 23.57,
+        "max_dd": 16.92,
+        "avg_win": 9.809,
+        "avg_loss": -2.489,
+        "max_consec_loss": 7,
+        "annual_pct": 47.1
+      },
+      "ruin_10k": {
+        "ruin_pct": 7.43,
+        "median_final": 73.57,
+        "p5_final": 73.57,
+        "p5_min_eq": 22.74,
+        "median_min_eq": 40.58
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 4,
+            "total": 16.28,
+            "wr": 0.5
+          },
+          {
+            "fold": 1,
+            "n": 3,
+            "total": -6.93,
+            "wr": 0.0
+          },
+          {
+            "fold": 2,
+            "n": 10,
+            "total": 9.5,
+            "wr": 0.3
+          },
+          {
+            "fold": 3,
+            "n": 18,
+            "total": 4.71,
+            "wr": 0.2222
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 35,
+          "total": 23.57,
+          "wr": 0.2571
+        },
+        {
+          "bps": 3,
+          "n": 35,
+          "total": 19.89,
+          "wr": 0.2571
+        },
+        {
+          "bps": 5,
+          "n": 35,
+          "total": 17.44,
+          "wr": 0.2571
+        },
+        {
+          "bps": 10,
+          "n": 35,
+          "total": 11.32,
+          "wr": 0.2571
+        },
+        {
+          "bps": 15,
+          "n": 35,
+          "total": 5.19,
+          "wr": 0.2571
+        },
+        {
+          "bps": 20,
+          "n": 35,
+          "total": -0.93,
+          "wr": 0.2571
+        }
+      ],
+      "per_symbol": {
+        "OPUSDT": {
+          "n": 16,
+          "total": 6.86
+        },
+        "NEARUSDT": {
+          "n": 3,
+          "total": -8.0
+        },
+        "SUIUSDT": {
+          "n": 4,
+          "total": 10.31
+        },
+        "ETHUSDT": {
+          "n": 5,
+          "total": 19.91
+        },
+        "UNIUSDT": {
+          "n": 7,
+          "total": -5.51
+        }
+      },
+      "dd_distribution": {
+        "p50": 3.96,
+        "p75": 7.99,
+        "p95": 14.51,
+        "max": 16.92
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": true
+    },
+    {
+      "rank": 29,
+      "params": {
+        "sig": "x1",
+        "univ": "alt_first",
+        "lev": 10,
+        "mp": 0.35,
+        "tp": 100,
+        "sl": -8,
+        "hold": 24,
+        "long_only": true,
+        "priority": [
+          "OPUSDT",
+          "NEARUSDT",
+          "SUIUSDT",
+          "ETHUSDT",
+          "UNIUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 36,
+        "wr": 0.2222,
+        "pf": 1.279,
+        "total_pnl": 17.27,
+        "max_dd": 24.76,
+        "avg_win": 9.898,
+        "avg_loss": -2.211,
+        "max_consec_loss": 8,
+        "annual_pct": 34.5
+      },
+      "ruin_10k": {
+        "ruin_pct": 9.07,
+        "median_final": 67.27,
+        "p5_final": 67.27,
+        "p5_min_eq": 21.04,
+        "median_min_eq": 39.67
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 4,
+            "total": 16.98,
+            "wr": 0.5
+          },
+          {
+            "fold": 1,
+            "n": 3,
+            "total": -6.23,
+            "wr": 0.0
+          },
+          {
+            "fold": 2,
+            "n": 10,
+            "total": 0.58,
+            "wr": 0.2
+          },
+          {
+            "fold": 3,
+            "n": 19,
+            "total": 5.93,
+            "wr": 0.2105
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 36,
+          "total": 17.27,
+          "wr": 0.2222
+        },
+        {
+          "bps": 3,
+          "n": 36,
+          "total": 13.49,
+          "wr": 0.2222
+        },
+        {
+          "bps": 5,
+          "n": 36,
+          "total": 10.97,
+          "wr": 0.2222
+        },
+        {
+          "bps": 10,
+          "n": 36,
+          "total": 4.67,
+          "wr": 0.2222
+        },
+        {
+          "bps": 15,
+          "n": 36,
+          "total": -1.63,
+          "wr": 0.2222
+        },
+        {
+          "bps": 20,
+          "n": 36,
+          "total": -7.93,
+          "wr": 0.2222
+        }
+      ],
+      "per_symbol": {
+        "OPUSDT": {
+          "n": 16,
+          "total": -1.03
+        },
+        "NEARUSDT": {
+          "n": 3,
+          "total": -7.65
+        },
+        "SUIUSDT": {
+          "n": 5,
+          "total": 8.02
+        },
+        "ETHUSDT": {
+          "n": 5,
+          "total": 20.61
+        },
+        "UNIUSDT": {
+          "n": 7,
+          "total": -2.68
+        }
+      },
+      "dd_distribution": {
+        "p50": 8.38,
+        "p75": 13.35,
+        "p95": 21.95,
+        "max": 24.76
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": true
+    },
+    {
+      "rank": 30,
+      "params": {
+        "sig": "x1",
+        "univ": "alt_first",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 100,
+        "sl": -15,
+        "hold": 24,
+        "long_only": true,
+        "priority": [
+          "OPUSDT",
+          "NEARUSDT",
+          "SUIUSDT",
+          "ETHUSDT",
+          "UNIUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 25,
+        "wr": 0.44,
+        "pf": 1.249,
+        "total_pnl": 13.09,
+        "max_dd": 13.32,
+        "avg_win": 5.965,
+        "avg_loss": -3.752,
+        "max_consec_loss": 4,
+        "annual_pct": 26.2
+      },
+      "ruin_10k": {
+        "ruin_pct": 5.66,
+        "median_final": 63.09,
+        "p5_final": 63.09,
+        "p5_min_eq": 24.33,
+        "median_min_eq": 40.94
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 3,
+            "total": 7.04,
+            "wr": 0.6667
+          },
+          {
+            "fold": 1,
+            "n": 3,
+            "total": -5.78,
+            "wr": 0.0
+          },
+          {
+            "fold": 2,
+            "n": 7,
+            "total": 10.42,
+            "wr": 0.5714
+          },
+          {
+            "fold": 3,
+            "n": 12,
+            "total": 1.41,
+            "wr": 0.4167
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 25,
+          "total": 13.09,
+          "wr": 0.44
+        },
+        {
+          "bps": 3,
+          "n": 25,
+          "total": 11.21,
+          "wr": 0.44
+        },
+        {
+          "bps": 5,
+          "n": 25,
+          "total": 9.96,
+          "wr": 0.44
+        },
+        {
+          "bps": 10,
+          "n": 25,
+          "total": 6.84,
+          "wr": 0.44
+        },
+        {
+          "bps": 15,
+          "n": 25,
+          "total": 3.71,
+          "wr": 0.44
+        },
+        {
+          "bps": 20,
+          "n": 25,
+          "total": 0.59,
+          "wr": 0.44
+        }
+      ],
+      "per_symbol": {
+        "OPUSDT": {
+          "n": 9,
+          "total": -14.97
+        },
+        "NEARUSDT": {
+          "n": 3,
+          "total": -5.75
+        },
+        "SUIUSDT": {
+          "n": 3,
+          "total": 7.58
+        },
+        "ETHUSDT": {
+          "n": 4,
+          "total": 17.59
+        },
+        "UNIUSDT": {
+          "n": 6,
+          "total": 8.63
+        }
+      },
+      "dd_distribution": {
+        "p50": 3.92,
+        "p75": 6.61,
+        "p95": 10.62,
+        "max": 13.32
+      },
+      "gates": {
+        "n_min30": false,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": true,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": true
+    }
+  ],
+  "tier_B_high_risk": [
+    {
+      "rank": 1,
+      "params": {
+        "sig": "x1",
+        "univ": "memes_first",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 100,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT",
+          "WIFUSDT",
+          "DOGEUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 39,
+        "wr": 0.359,
+        "pf": 1.795,
+        "total_pnl": 76.08,
+        "max_dd": 27.09,
+        "avg_win": 12.271,
+        "avg_loss": -3.829,
+        "max_consec_loss": 5,
+        "annual_pct": 152.2
+      },
+      "ruin_10k": {
+        "ruin_pct": 10.42,
+        "median_final": 126.08,
+        "p5_final": 126.08,
+        "p5_min_eq": 18.71,
+        "median_min_eq": 41.52
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 10,
+            "total": 11.18,
+            "wr": 0.4
+          },
+          {
+            "fold": 1,
+            "n": 6,
+            "total": 2.7,
+            "wr": 0.1667
+          },
+          {
+            "fold": 2,
+            "n": 11,
+            "total": 68.13,
+            "wr": 0.5455
+          },
+          {
+            "fold": 3,
+            "n": 12,
+            "total": -5.93,
+            "wr": 0.25
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 39,
+          "total": 76.08,
+          "wr": 0.359
+        },
+        {
+          "bps": 3,
+          "n": 39,
+          "total": 73.16,
+          "wr": 0.359
+        },
+        {
+          "bps": 5,
+          "n": 39,
+          "total": 71.21,
+          "wr": 0.359
+        },
+        {
+          "bps": 10,
+          "n": 39,
+          "total": 66.33,
+          "wr": 0.359
+        },
+        {
+          "bps": 15,
+          "n": 39,
+          "total": 61.46,
+          "wr": 0.359
+        },
+        {
+          "bps": 20,
+          "n": 39,
+          "total": 56.58,
+          "wr": 0.359
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 11,
+          "total": 39.47
+        },
+        "WIFUSDT": {
+          "n": 16,
+          "total": 55.19
+        },
+        "DOGEUSDT": {
+          "n": 12,
+          "total": -18.58
+        }
+      },
+      "dd_distribution": {
+        "p50": 6.04,
+        "p75": 11.9,
+        "p95": 19.65,
+        "max": 27.09
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": false,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": false
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": false
+    },
+    {
+      "rank": 2,
+      "params": {
+        "sig": "x1",
+        "univ": "DOGE_first",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 100,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "DOGEUSDT",
+          "PEPEUSDT",
+          "WIFUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 39,
+        "wr": 0.359,
+        "pf": 1.795,
+        "total_pnl": 76.08,
+        "max_dd": 27.09,
+        "avg_win": 12.271,
+        "avg_loss": -3.829,
+        "max_consec_loss": 5,
+        "annual_pct": 152.2
+      },
+      "ruin_10k": {
+        "ruin_pct": 10.42,
+        "median_final": 126.08,
+        "p5_final": 126.08,
+        "p5_min_eq": 18.71,
+        "median_min_eq": 41.52
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 10,
+            "total": 11.18,
+            "wr": 0.4
+          },
+          {
+            "fold": 1,
+            "n": 6,
+            "total": 2.7,
+            "wr": 0.1667
+          },
+          {
+            "fold": 2,
+            "n": 11,
+            "total": 68.13,
+            "wr": 0.5455
+          },
+          {
+            "fold": 3,
+            "n": 12,
+            "total": -5.93,
+            "wr": 0.25
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 39,
+          "total": 76.08,
+          "wr": 0.359
+        },
+        {
+          "bps": 3,
+          "n": 39,
+          "total": 73.16,
+          "wr": 0.359
+        },
+        {
+          "bps": 5,
+          "n": 39,
+          "total": 71.21,
+          "wr": 0.359
+        },
+        {
+          "bps": 10,
+          "n": 39,
+          "total": 66.33,
+          "wr": 0.359
+        },
+        {
+          "bps": 15,
+          "n": 39,
+          "total": 61.46,
+          "wr": 0.359
+        },
+        {
+          "bps": 20,
+          "n": 39,
+          "total": 56.58,
+          "wr": 0.359
+        }
+      ],
+      "per_symbol": {
+        "DOGEUSDT": {
+          "n": 13,
+          "total": -22.5
+        },
+        "PEPEUSDT": {
+          "n": 10,
+          "total": 43.39
+        },
+        "WIFUSDT": {
+          "n": 16,
+          "total": 55.19
+        }
+      },
+      "dd_distribution": {
+        "p50": 6.04,
+        "p75": 11.9,
+        "p95": 19.65,
+        "max": 27.09
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": false,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": false
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": false
+    },
+    {
+      "rank": 5,
+      "params": {
+        "sig": "x1",
+        "univ": "PEPE_DOGE",
+        "lev": 5,
+        "mp": 1.0,
+        "tp": 25,
+        "sl": -15,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT",
+          "DOGEUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 27,
+        "wr": 0.5556,
+        "pf": 1.699,
+        "total_pnl": 65.19,
+        "max_dd": 24.89,
+        "avg_win": 10.562,
+        "avg_loss": -7.77,
+        "max_consec_loss": 3,
+        "annual_pct": 130.4
+      },
+      "ruin_10k": {
+        "ruin_pct": 10.58,
+        "median_final": 115.19,
+        "p5_final": 115.19,
+        "p5_min_eq": 18.46,
+        "median_min_eq": 42.2
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 4,
+            "total": 18.89,
+            "wr": 0.75
+          },
+          {
+            "fold": 1,
+            "n": 5,
+            "total": -24.89,
+            "wr": 0.2
+          },
+          {
+            "fold": 2,
+            "n": 8,
+            "total": 66.21,
+            "wr": 0.875
+          },
+          {
+            "fold": 3,
+            "n": 10,
+            "total": 4.98,
+            "wr": 0.4
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 27,
+          "total": 65.19,
+          "wr": 0.5556
+        },
+        {
+          "bps": 3,
+          "n": 27,
+          "total": 61.14,
+          "wr": 0.5556
+        },
+        {
+          "bps": 5,
+          "n": 27,
+          "total": 58.44,
+          "wr": 0.5556
+        },
+        {
+          "bps": 10,
+          "n": 27,
+          "total": 51.69,
+          "wr": 0.5556
+        },
+        {
+          "bps": 15,
+          "n": 27,
+          "total": 44.94,
+          "wr": 0.5556
+        },
+        {
+          "bps": 20,
+          "n": 27,
+          "total": 38.19,
+          "wr": 0.5556
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 13,
+          "total": 80.89
+        },
+        "DOGEUSDT": {
+          "n": 14,
+          "total": -15.7
+        }
+      },
+      "dd_distribution": {
+        "p50": 7.8,
+        "p75": 14.22,
+        "p95": 22.8,
+        "max": 24.89
+      },
+      "gates": {
+        "n_min30": false,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": false,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": true
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": false
+    },
+    {
+      "rank": 12,
+      "params": {
+        "sig": "x1",
+        "univ": "memes_first",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 100,
+        "sl": -10,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT",
+          "WIFUSDT",
+          "DOGEUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 42,
+        "wr": 0.2857,
+        "pf": 1.7,
+        "total_pnl": 62.74,
+        "max_dd": 26.17,
+        "avg_win": 12.701,
+        "avg_loss": -2.989,
+        "max_consec_loss": 7,
+        "annual_pct": 125.5
+      },
+      "ruin_10k": {
+        "ruin_pct": 12.8,
+        "median_final": 112.74,
+        "p5_final": 112.74,
+        "p5_min_eq": 16.73,
+        "median_min_eq": 40.53
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 10,
+            "total": 0.07,
+            "wr": 0.3
+          },
+          {
+            "fold": 1,
+            "n": 6,
+            "total": 10.02,
+            "wr": 0.1667
+          },
+          {
+            "fold": 2,
+            "n": 11,
+            "total": 75.41,
+            "wr": 0.5455
+          },
+          {
+            "fold": 3,
+            "n": 15,
+            "total": -22.76,
+            "wr": 0.1333
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 42,
+          "total": 62.74,
+          "wr": 0.2857
+        },
+        {
+          "bps": 3,
+          "n": 42,
+          "total": 59.59,
+          "wr": 0.2857
+        },
+        {
+          "bps": 5,
+          "n": 42,
+          "total": 57.49,
+          "wr": 0.2857
+        },
+        {
+          "bps": 10,
+          "n": 42,
+          "total": 52.24,
+          "wr": 0.2857
+        },
+        {
+          "bps": 15,
+          "n": 42,
+          "total": 46.99,
+          "wr": 0.2857
+        },
+        {
+          "bps": 20,
+          "n": 42,
+          "total": 41.74,
+          "wr": 0.2857
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 11,
+          "total": 30.91
+        },
+        "WIFUSDT": {
+          "n": 18,
+          "total": 46.22
+        },
+        "DOGEUSDT": {
+          "n": 13,
+          "total": -14.4
+        }
+      },
+      "dd_distribution": {
+        "p50": 8.33,
+        "p75": 15.56,
+        "p95": 23.48,
+        "max": 26.17
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": false,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": false
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": false
+    },
+    {
+      "rank": 13,
+      "params": {
+        "sig": "x1",
+        "univ": "DOGE_first",
+        "lev": 5,
+        "mp": 0.5,
+        "tp": 100,
+        "sl": -10,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "DOGEUSDT",
+          "PEPEUSDT",
+          "WIFUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 42,
+        "wr": 0.2857,
+        "pf": 1.7,
+        "total_pnl": 62.74,
+        "max_dd": 26.17,
+        "avg_win": 12.701,
+        "avg_loss": -2.989,
+        "max_consec_loss": 7,
+        "annual_pct": 125.5
+      },
+      "ruin_10k": {
+        "ruin_pct": 12.8,
+        "median_final": 112.74,
+        "p5_final": 112.74,
+        "p5_min_eq": 16.73,
+        "median_min_eq": 40.53
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 10,
+            "total": 0.07,
+            "wr": 0.3
+          },
+          {
+            "fold": 1,
+            "n": 6,
+            "total": 10.02,
+            "wr": 0.1667
+          },
+          {
+            "fold": 2,
+            "n": 11,
+            "total": 75.41,
+            "wr": 0.5455
+          },
+          {
+            "fold": 3,
+            "n": 15,
+            "total": -22.76,
+            "wr": 0.1333
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 42,
+          "total": 62.74,
+          "wr": 0.2857
+        },
+        {
+          "bps": 3,
+          "n": 42,
+          "total": 59.59,
+          "wr": 0.2857
+        },
+        {
+          "bps": 5,
+          "n": 42,
+          "total": 57.49,
+          "wr": 0.2857
+        },
+        {
+          "bps": 10,
+          "n": 42,
+          "total": 52.24,
+          "wr": 0.2857
+        },
+        {
+          "bps": 15,
+          "n": 42,
+          "total": 46.99,
+          "wr": 0.2857
+        },
+        {
+          "bps": 20,
+          "n": 42,
+          "total": 41.74,
+          "wr": 0.2857
+        }
+      ],
+      "per_symbol": {
+        "DOGEUSDT": {
+          "n": 14,
+          "total": -17.06
+        },
+        "PEPEUSDT": {
+          "n": 10,
+          "total": 33.58
+        },
+        "WIFUSDT": {
+          "n": 18,
+          "total": 46.22
+        }
+      },
+      "dd_distribution": {
+        "p50": 8.33,
+        "p75": 15.56,
+        "p95": 23.48,
+        "max": 26.17
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": false,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": false
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": false
+    },
+    {
+      "rank": 22,
+      "params": {
+        "sig": "atr_breakout",
+        "univ": "PEPE_only",
+        "lev": 5,
+        "mp": 0.35,
+        "tp": 25,
+        "sl": -8,
+        "hold": 48,
+        "long_only": false,
+        "priority": [
+          "PEPEUSDT"
+        ]
+      },
+      "full_year": {
+        "n": 252,
+        "wr": 0.3135,
+        "pf": 1.159,
+        "total_pnl": 45.87,
+        "max_dd": 33.94,
+        "avg_win": 4.223,
+        "avg_loss": -1.663,
+        "max_consec_loss": 10,
+        "annual_pct": 91.7
+      },
+      "ruin_10k": {
+        "ruin_pct": 14.01,
+        "median_final": 95.87,
+        "p5_final": 95.87,
+        "p5_min_eq": 15.88,
+        "median_min_eq": 39.28
+      },
+      "wf": {
+        "pass": 3,
+        "folds": [
+          {
+            "fold": 0,
+            "n": 70,
+            "total": 0.14,
+            "wr": 0.2857
+          },
+          {
+            "fold": 1,
+            "n": 58,
+            "total": 24.91,
+            "wr": 0.3621
+          },
+          {
+            "fold": 2,
+            "n": 66,
+            "total": -2.84,
+            "wr": 0.2727
+          },
+          {
+            "fold": 3,
+            "n": 58,
+            "total": 23.66,
+            "wr": 0.3448
+          }
+        ]
+      },
+      "slippage": [
+        {
+          "bps": 0,
+          "n": 252,
+          "total": 45.87,
+          "wr": 0.3135
+        },
+        {
+          "bps": 3,
+          "n": 252,
+          "total": 32.64,
+          "wr": 0.3135
+        },
+        {
+          "bps": 5,
+          "n": 252,
+          "total": 23.82,
+          "wr": 0.3135
+        },
+        {
+          "bps": 10,
+          "n": 252,
+          "total": 1.77,
+          "wr": 0.3135
+        },
+        {
+          "bps": 15,
+          "n": 252,
+          "total": -20.28,
+          "wr": 0.3135
+        },
+        {
+          "bps": 20,
+          "n": 252,
+          "total": -42.33,
+          "wr": 0.3135
+        }
+      ],
+      "per_symbol": {
+        "PEPEUSDT": {
+          "n": 252,
+          "total": 45.87
+        }
+      },
+      "dd_distribution": {
+        "p50": 7.39,
+        "p75": 13.75,
+        "p95": 24.58,
+        "max": 33.94
+      },
+      "gates": {
+        "n_min30": true,
+        "n_min25": true,
+        "wf_3of4": true,
+        "ruin_5pct": false,
+        "ruin_10pct": false,
+        "slip5_pos": true,
+        "slip10_pos": true,
+        "dd_under_50pct_eq": false
+      },
+      "all_safe_pass": false,
+      "all_aggressive_pass": false
+    }
+  ],
+  "tier_F_fail_count": 16
+}

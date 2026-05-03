@@ -1,0 +1,145 @@
+{
+  "config": {
+    "signal": "x1",
+    "universe": "PEPE_DOGE",
+    "priority": [
+      "PEPEUSDT",
+      "DOGEUSDT"
+    ],
+    "lev": 4,
+    "margin_pct": 0.75,
+    "tp_roe": 100,
+    "sl_roe": -15,
+    "hold_h": 48,
+    "long_only": false,
+    "abort_roe": -20,
+    "btc_filter": "rsi < 70"
+  },
+  "full_year": {
+    "n": 22,
+    "wr": 0.5909,
+    "pf": 2.91,
+    "total_pnl": 83.45,
+    "max_dd": 12.97,
+    "avg_win": 9.78,
+    "avg_loss": -4.854,
+    "max_consec_loss": 3,
+    "annual_pct": 166.9,
+    "ruin": {
+      "ruin_pct": 0.77,
+      "median_final": 133.45,
+      "p5_final": 133.45,
+      "p5_min_eq": 32.54,
+      "median_min_eq": 48.02
+    }
+  },
+  "baseline_no_filter": {
+    "n": 25,
+    "wr": 0.56,
+    "pf": 2.732,
+    "total_pnl": 87.09,
+    "max_dd": 12.97,
+    "avg_win": 9.814,
+    "avg_loss": -4.573,
+    "max_consec_loss": 3,
+    "annual_pct": 174.2,
+    "ruin": {
+      "ruin_pct": 1.05,
+      "median_final": 137.09,
+      "p5_final": 137.09,
+      "p5_min_eq": 31.73,
+      "median_min_eq": 47.13
+    }
+  },
+  "wf": {
+    "pass": 3,
+    "folds": [
+      {
+        "fold": 0,
+        "n": 3,
+        "total": 10.95,
+        "wr": 1.0
+      },
+      {
+        "fold": 1,
+        "n": 4,
+        "total": -2.75,
+        "wr": 0.5
+      },
+      {
+        "fold": 2,
+        "n": 6,
+        "total": 70.95,
+        "wr": 0.8333
+      },
+      {
+        "fold": 3,
+        "n": 9,
+        "total": 4.3,
+        "wr": 0.3333
+      }
+    ]
+  },
+  "slippage": [
+    {
+      "bps": 0,
+      "n": 22,
+      "total": 83.45
+    },
+    {
+      "bps": 3,
+      "n": 22,
+      "total": 81.47
+    },
+    {
+      "bps": 5,
+      "n": 22,
+      "total": 80.15
+    },
+    {
+      "bps": 10,
+      "n": 22,
+      "total": 76.85
+    },
+    {
+      "bps": 15,
+      "n": 22,
+      "total": 73.55
+    },
+    {
+      "bps": 20,
+      "n": 22,
+      "total": 70.25
+    },
+    {
+      "bps": 30,
+      "n": 22,
+      "total": 63.65
+    }
+  ],
+  "per_symbol": {
+    "PEPEUSDT": {
+      "n": 11,
+      "wins": 7,
+      "wr": 0.6363636363636364,
+      "total": 62.98,
+      "avg_win": 11.07,
+      "avg_loss": -3.64
+    },
+    "DOGEUSDT": {
+      "n": 11,
+      "wins": 6,
+      "wr": 0.5454545454545454,
+      "total": 20.47,
+      "avg_win": 8.27,
+      "avg_loss": -5.83
+    }
+  },
+  "dd_distribution": {
+    "p50": 0.87,
+    "p75": 5.83,
+    "p90": 7.07,
+    "p95": 7.37,
+    "max": 12.97
+  }
+}

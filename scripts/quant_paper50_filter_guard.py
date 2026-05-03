@@ -119,6 +119,22 @@ def _append_audit(path: Path, payload: dict[str, Any]) -> None:
         handle.write(json.dumps(payload, sort_keys=True) + "\n")
 
 
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
 def _parse_ts(value: Any) -> datetime | None:
     try:
         return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(UTC)
@@ -144,6 +160,50 @@ def _window_key(rows: list[dict[str, Any]]) -> str:
 def _config_digest(payload: dict[str, Any]) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _symbol_states(state: dict[str, Any], audit_rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    states = {
+        str(symbol).upper(): dict(payload)
+        for symbol, payload in dict(state.get("symbol_states") or {}).items()
+        if isinstance(payload, dict)
+    }
+    for row in audit_rows:
+        if not bool(row.get("apply_requested")):
+            continue
+        generated_at = row.get("generated_at")
+        for symbol, changes in dict(row.get("changes") or {}).items():
+            symbol = str(symbol).upper()
+            evidence = dict(dict(row.get("evidence") or {}).get(symbol) or {})
+            previous = dict(dict(row.get("previous_profiles") or {}).get(symbol) or {})
+            existing = states.setdefault(symbol, {})
+            existing.update(
+                {
+                    "last_applied_at": generated_at,
+                    "window_key": evidence.get("window_key") or existing.get("window_key"),
+                    "changes": changes,
+                    "side": _evidence_side(evidence),
+                }
+            )
+            if previous:
+                existing["rollback_profile"] = previous
+    for symbol, window_key in dict(state.get("window_keys") or {}).items():
+        symbol = str(symbol).upper()
+        existing = states.setdefault(symbol, {})
+        existing.setdefault("window_key", window_key)
+        existing.setdefault("last_applied_at", state.get("last_applied_at"))
+        rollback = dict(state.get("rollback_profiles") or {}).get(symbol)
+        if rollback and "rollback_profile" not in existing:
+            existing["rollback_profile"] = rollback
+    return states
+
+
+def _evidence_side(evidence: dict[str, Any]) -> str:
+    sides = {
+        str(row.get("direction") or row.get("side") or "").lower()
+        for row in list(evidence.get("entries") or [])
+    }
+    return "short" if "short" in sides else "long"
 
 
 def _quality_missed_entries(
@@ -274,14 +334,14 @@ def main() -> int:
     config = _read_json(filters_path)
     counterfactual = _read_json(counterfactual_path)
     state = _read_json(state_path) if state_path.exists() else {}
+    audit_rows = _load_jsonl(audit_path)
+    symbol_states = _symbol_states(state, audit_rows)
 
     config_digest = _config_digest(config)
-    last_applied_at = _parse_ts(state.get("last_applied_at")) or datetime.min.replace(tzinfo=UTC)
     # Git syncs and artifact copies rewrite file mtimes, which can make old
     # runtime evidence look newer than the local config even when the embedded
     # decision timestamps are the true source of time. Gate on guard state
     # instead of filesystem mtime so copied paper artifacts remain usable.
-    evidence_after = last_applied_at
     profiles = dict(config.get("symbol_filter_profiles") or {})
     entries_by_symbol: dict[str, list[dict[str, Any]]] = {}
     for row in list(counterfactual.get("possible_missed_entries") or []):
@@ -291,13 +351,15 @@ def main() -> int:
     changes: dict[str, dict[str, float]] = {}
     evidence: dict[str, dict[str, Any]] = {}
     for symbol, profile in profiles.items():
+        symbol_state = dict(symbol_states.get(str(symbol).upper()) or {})
+        evidence_after = _parse_ts(symbol_state.get("last_applied_at")) or datetime.min.replace(tzinfo=UTC)
         quality_entries = _quality_missed_entries(
             entries_by_symbol.get(symbol, []),
             evidence_after=evidence_after,
         )
         quality_entries = sorted(quality_entries, key=lambda row: str(row.get("timestamp") or ""))
         key = _window_key(quality_entries)
-        if not quality_entries or state.get("window_keys", {}).get(symbol) == key:
+        if not quality_entries or symbol_state.get("window_key") == key:
             continue
         proposed = _propose_symbol_changes(symbol, dict(profile), quality_entries)
         if proposed:
@@ -305,6 +367,7 @@ def main() -> int:
             evidence[symbol] = {
                 "quality_missed_count": len(quality_entries),
                 "window_key": key,
+                "evidence_after": evidence_after.isoformat(),
                 "entries": quality_entries[-5:],
             }
 
@@ -313,22 +376,41 @@ def main() -> int:
         "mode": "paper50_filter_guard",
         "apply_requested": bool(args.apply),
         "restart_requested": bool(args.restart_paper50),
-        "evidence_after": evidence_after.isoformat(),
         "changes": changes,
         "evidence": evidence,
     }
 
     if args.apply and changes:
+        previous_profiles: dict[str, dict[str, Any]] = {}
         for symbol, symbol_changes in changes.items():
+            previous_profiles[symbol] = {
+                field: profiles.get(symbol, {}).get(field)
+                for field in symbol_changes
+            }
             profiles.setdefault(symbol, {}).update(symbol_changes)
         config["symbol_filter_profiles"] = profiles
         _write_json(filters_path, config)
         state.setdefault("window_keys", {})
+        state.setdefault("rollback_profiles", {})
+        state.setdefault("symbol_states", {})
         for symbol, symbol_evidence in evidence.items():
             state["window_keys"][symbol] = symbol_evidence["window_key"]
+        for symbol, previous_profile in previous_profiles.items():
+            state["rollback_profiles"][symbol] = previous_profile
+        for symbol, symbol_changes in changes.items():
+            state["symbol_states"][symbol] = {
+                "last_applied_at": payload["generated_at"],
+                "window_key": evidence[symbol]["window_key"],
+                "changes": symbol_changes,
+                "rollback_profile": previous_profiles.get(symbol, {}),
+                "side": _evidence_side(evidence[symbol]),
+                "previous_config_digest": config_digest,
+                "config_digest": _config_digest(config),
+            }
         state["last_applied_at"] = payload["generated_at"]
         state["previous_config_digest"] = config_digest
         state["config_digest"] = _config_digest(config)
+        payload["previous_profiles"] = previous_profiles
         _write_json(state_path, state)
         _append_audit(audit_path, payload)
         if args.restart_paper50:
