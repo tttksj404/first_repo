@@ -1,0 +1,6 @@
+﻿{
+    "target_seconds":  240,
+    "pid":  20568,
+    "probe":  "quant_runtime/realtime_candidate_probe17_reversal_unlock_smoke_4m",
+    "started_at":  "2026-04-20T17:30:59.0232993+09:00"
+}

@@ -130,3 +130,31 @@ def test_long_failure_short_overlay_config_is_paper_only_and_separate() -> None:
     assert overlay["conflict_policy"] == "do_not_open_short_if_long_is_active_or_accepted"
     assert [leg["symbol"] for leg in overlay["legs"]] == ["ETHUSDT"]
     assert result["bitget_entry_overlay"]["long_failure_short_overlay_enabled"] is True
+
+
+def test_long_failure_short_overlay_shadow_watch_is_report_only() -> None:
+    base = {"symbol_filter_profiles": {"SOLUSDT": _profile()}}
+    report = {
+        "match_window_minutes": 7.5,
+        "leg_stats": [
+            {
+                "symbol": "SOLUSDT",
+                "strategy": "crowded_long_unwind",
+                "side": "short",
+                "matched_count": 9,
+                "avg_ret15_bps": 0.83,
+                "win15_rate": 0.55,
+                "worst_ret15_bps": -12.8,
+                "verdict": "shadow_watch",
+            }
+        ],
+    }
+
+    result = build_candidate_config(base, report)
+
+    overlay = result["long_failure_short_overlay"]
+    assert overlay["enabled"] is False
+    assert overlay["legs"] == []
+    assert overlay["watch_legs"][0]["symbol"] == "SOLUSDT"
+    assert overlay["promotion_rules"]["shadow_watch_is_report_only"] is True
+    assert result["bitget_entry_overlay"]["long_failure_short_overlay_enabled"] is False

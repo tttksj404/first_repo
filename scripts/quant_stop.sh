@@ -2,15 +2,47 @@
 set -eu
 
 OUTPUT_BASE="${1:-quant_runtime}"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+PYTHON_LAUNCHER="$SCRIPT_DIR/quant_python.sh"
+HEALTH_STATE_PATH="$OUTPUT_BASE/live_supervisor_health.json"
 
-mkdir -p "$(dirname "$0")"
-printf 'stop\n' >"$(dirname "$0")/_supervisor_stop"
-printf 'stop\n' >"$(dirname "$0")/_safety_guardian_stop"
+mkdir -p "$SCRIPT_DIR"
+printf 'stop\n' >"$SCRIPT_DIR/_supervisor_stop"
+printf 'stop\n' >"$SCRIPT_DIR/_safety_guardian_stop"
 
 slot_pid() {
   slot_path="$1"
   awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
 }
+
+write_health_state() {
+  if [ ! -f "$PYTHON_LAUNCHER" ]; then
+    return 0
+  fi
+  if ! sh "$PYTHON_LAUNCHER" - "$HEALTH_STATE_PATH" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+now = datetime.now(tz=timezone.utc).isoformat()
+payload = {
+    "checked_at": now,
+    "reason": "stopped_by_quant_stop",
+    "status": "stopped",
+    "summary": "runtime intentionally stopped via quant_stop.sh",
+    "updated_at": now,
+}
+path = Path(sys.argv[1])
+path.parent.mkdir(parents=True, exist_ok=True)
+path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+PY
+  then
+    return 0
+  fi
+}
+
+write_health_state
 
 for pid_path in \
   "$OUTPUT_BASE/live_supervisor.pid" \

@@ -267,8 +267,27 @@ def build_overlay_report(
 def build_candidate_config(base_config: dict[str, Any], report: dict[str, Any]) -> dict[str, Any]:
     config = dict(base_config)
     legs = []
+    watch_legs = []
     for row in report.get("leg_stats") or []:
-        if row.get("verdict") == "reject_or_shadow_only":
+        verdict = str(row.get("verdict") or "")
+        if verdict == "shadow_watch":
+            watch_legs.append(
+                {
+                    "symbol": row["symbol"],
+                    "strategy": row["strategy"],
+                    "side": row["side"],
+                    "trigger": "same_symbol_blocked_long_near_external_alpha",
+                    "match_window_minutes": report["match_window_minutes"],
+                    "paper_only": True,
+                    "matched_count": row["matched_count"],
+                    "avg_ret15_bps": row["avg_ret15_bps"],
+                    "win15_rate": row["win15_rate"],
+                    "worst_ret15_bps": row["worst_ret15_bps"],
+                    "verdict": verdict,
+                }
+            )
+            continue
+        if verdict != "paper_short_overlay_watch":
             continue
         legs.append(
             {
@@ -282,7 +301,7 @@ def build_candidate_config(base_config: dict[str, Any], report: dict[str, Any]) 
                 "avg_ret15_bps": row["avg_ret15_bps"],
                 "win15_rate": row["win15_rate"],
                 "worst_ret15_bps": row["worst_ret15_bps"],
-                "verdict": row["verdict"],
+                "verdict": verdict,
             }
         )
     config["long_failure_short_overlay"] = {
@@ -293,6 +312,12 @@ def build_candidate_config(base_config: dict[str, Any], report: dict[str, Any]) 
         "no_order_side_effects": True,
         "conflict_policy": "do_not_open_short_if_long_is_active_or_accepted",
         "legs": legs,
+        "watch_legs": watch_legs,
+        "promotion_rules": {
+            "enabled_verdict": "paper_short_overlay_watch",
+            "shadow_verdict": "shadow_watch",
+            "shadow_watch_is_report_only": True,
+        },
     }
     overlay = dict(config.get("bitget_entry_overlay") or {})
     overlay.update(

@@ -1,0 +1,58 @@
+{
+  "applied_at": "2026-04-03T22:47:01.112781+00:00",
+  "change_id": "auto-20260403-224701-be3f44",
+  "consecutive_losses": 0,
+  "deltas": [
+    {
+      "confidence": 0.9,
+      "current_value": 2.315,
+      "delta_pct": 5.0,
+      "evidence": "stop_waste=96% (68/71): widen stop",
+      "min_trades": 30,
+      "path": [
+        "sizing",
+        "atr_multiple_for_stop"
+      ],
+      "proposed_value": 2.431,
+      "risk_tier": "medium",
+      "sample_size": 71
+    },
+    {
+      "confidence": 0.8,
+      "current_value": 216.6,
+      "delta_pct": -5.0,
+      "evidence": "longest quartile avg=-2.2bps (n=28): reduce max holding",
+      "min_trades": 30,
+      "path": [
+        "exit_rules",
+        "futures_max_holding_minutes"
+      ],
+      "proposed_value": 205.8,
+      "risk_tier": "medium",
+      "sample_size": 28
+    },
+    {
+      "confidence": 0.85,
+      "current_value": 0.00776,
+      "delta_pct": -3.0,
+      "evidence": "calmar=-0.89 dd=$0.11 pnl=$-0.10: reduce risk",
+      "min_trades": 50,
+      "path": [
+        "risk",
+        "per_trade_equity_risk"
+      ],
+      "proposed_value": 0.00753,
+      "risk_tier": "high",
+      "sample_size": 109
+    }
+  ],
+  "max_drawdown_since": 0.0,
+  "peak_equity_since": 0.0,
+  "pnl_since": 0.0,
+  "pre_change_avg_loss_magnitude": 0.0040666800000000005,
+  "pre_change_avg_pnl": -0.002257566666666667,
+  "pre_change_max_consecutive_loss": 13,
+  "revert_reason": "",
+  "revert_triggered": false,
+  "trades_since": 0
+}

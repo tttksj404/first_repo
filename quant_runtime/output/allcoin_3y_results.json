@@ -1,0 +1,232 @@
+[
+  {
+    "sym": "AAVEUSDT",
+    "best_label": "m720_lv5_adx20_fixed8_atr4.0_fixed5",
+    "trades": 64,
+    "wr": 0.375,
+    "pnl": 53.47,
+    "pf": 1.38,
+    "wf": 3,
+    "bh": -33.77
+  },
+  {
+    "sym": "ADAUSDT",
+    "best_label": "m336_lv5_adx15_atr2.0_atr4.0_fixed5_scale",
+    "trades": 113,
+    "wr": 0.6991,
+    "pnl": 85.92,
+    "pf": 1.73,
+    "wf": 4,
+    "bh": -49.79
+  },
+  {
+    "sym": "APTUSDT",
+    "best_label": "m8_lv5_adx20_fixed8_atr4.0_voltarget",
+    "trades": 275,
+    "wr": 0.3236,
+    "pnl": 76.53,
+    "pf": 1.26,
+    "wf": 3,
+    "bh": -63.48
+  },
+  {
+    "sym": "ARBUSDT",
+    "best_label": "m8_lv5_adx0_atr2.0_atr4.0_voltarget_scale",
+    "trades": 376,
+    "wr": 0.6516,
+    "pnl": 120.25,
+    "pf": 1.29,
+    "wf": 4,
+    "bh": -54.81
+  },
+  {
+    "sym": "AVAXUSDT",
+    "best_label": "m24_lv5_adx20_fixed8_fixed15_voltarget_btcrf_scale",
+    "trades": 584,
+    "wr": 0.6233,
+    "pnl": 133.93,
+    "pf": 1.3,
+    "wf": 4,
+    "bh": -45.22
+  },
+  {
+    "sym": "BNBUSDT",
+    "best_label": "m720_lv3_adx0_atr2.0_fixed15_voltarget",
+    "trades": 174,
+    "wr": 0.4253,
+    "pnl": 146.42,
+    "pf": 1.41,
+    "wf": 4,
+    "bh": -1.02
+  },
+  {
+    "sym": "BTCUSDT",
+    "best_label": "m72_lv5_adx20_atr2.0_atr4.0_voltarget",
+    "trades": 226,
+    "wr": 0.4646,
+    "pnl": 109.51,
+    "pf": 1.3,
+    "wf": 4,
+    "bh": 128.64
+  },
+  {
+    "sym": "DOGEUSDT",
+    "best_label": "m72_lv5_adx0_fixed8_atr4.0_fixed5_btcrf",
+    "trades": 89,
+    "wr": 0.3708,
+    "pnl": 94.88,
+    "pf": 1.51,
+    "wf": 3,
+    "bh": -36.75
+  },
+  {
+    "sym": "DOTUSDT",
+    "best_label": "m8_lv5_adx20_atr2.0_atr4.0_voltarget",
+    "trades": 188,
+    "wr": 0.484,
+    "pnl": 120.25,
+    "pf": 1.39,
+    "wf": 4,
+    "bh": -52.32
+  },
+  {
+    "sym": "ETHUSDT",
+    "best_label": "m168_lv5_adx0_atr2.0_atr4.0_voltarget_btcrf_scale",
+    "trades": 292,
+    "wr": 0.6199,
+    "pnl": 70.5,
+    "pf": 1.3,
+    "wf": 4,
+    "bh": 19.23
+  },
+  {
+    "sym": "LINKUSDT",
+    "best_label": "m8_lv5_adx20_fixed8_fixed15_fixed5_btcrf",
+    "trades": 102,
+    "wr": 0.451,
+    "pnl": 52.44,
+    "pf": 1.34,
+    "wf": 4,
+    "bh": -31.4
+  },
+  {
+    "sym": "LTCUSDT",
+    "best_label": "m168_lv5_adx0_atr2.0_atr4.0_fixed5_btcrf_scale",
+    "trades": 105,
+    "wr": 0.6571,
+    "pnl": 29.67,
+    "pf": 1.31,
+    "wf": 3,
+    "bh": -27.01
+  },
+  {
+    "sym": "MATICUSDT",
+    "best_label": "m168_lv5_adx20_atr2.0_fixed15_voltarget",
+    "trades": 372,
+    "wr": 0.5054,
+    "pnl": 133.06,
+    "pf": 1.23,
+    "wf": 3,
+    "bh": -21.71
+  },
+  {
+    "sym": "NEARUSDT",
+    "best_label": "m8_lv5_adx15_fixed8_atr4.0_voltarget",
+    "trades": 293,
+    "wr": 0.3242,
+    "pnl": 60.91,
+    "pf": 1.18,
+    "wf": 3,
+    "bh": -38.01
+  },
+  {
+    "sym": "OPUSDT",
+    "best_label": "m8_lv5_adx0_fixed8_fixed15_fixed5_scale",
+    "trades": 374,
+    "wr": 0.6658,
+    "pnl": 151.91,
+    "pf": 1.23,
+    "wf": 3,
+    "bh": -64.61
+  },
+  {
+    "sym": "PEPEUSDT",
+    "best_label": "m168_lv5_adx0_atr2.0_atr4.0_voltarget_scale",
+    "trades": 415,
+    "wr": 0.6386,
+    "pnl": 91.97,
+    "pf": 1.24,
+    "wf": 4,
+    "bh": -45.78
+  },
+  {
+    "sym": "SHIBUSDT",
+    "best_label": "m336_lv3_adx20_atr2.0_fixed15_voltarget",
+    "trades": 265,
+    "wr": 0.434,
+    "pnl": 80.77,
+    "pf": 1.22,
+    "wf": 3,
+    "bh": -43.07
+  },
+  {
+    "sym": "SOLUSDT",
+    "best_label": "m168_lv3_adx0_atr2.0_fixed15_voltarget_btcrf_scale",
+    "trades": 1378,
+    "wr": 0.6335,
+    "pnl": 650.38,
+    "pf": 1.17,
+    "wf": 4,
+    "bh": 244.09
+  },
+  {
+    "sym": "SUIUSDT",
+    "best_label": "m336_lv5_adx0_atr2.0_atr4.0_voltarget_scale",
+    "trades": 444,
+    "wr": 0.6554,
+    "pnl": 123.24,
+    "pf": 1.29,
+    "wf": 3,
+    "bh": -55.04
+  },
+  {
+    "sym": "TRXUSDT",
+    "best_label": "m720_lv5_adx15_atr2.0_atr4.0_voltarget_scale",
+    "trades": 420,
+    "wr": 0.6452,
+    "pnl": 99.56,
+    "pf": 1.29,
+    "wf": 4,
+    "bh": 18.77
+  },
+  {
+    "sym": "UNIUSDT",
+    "best_label": "m8_lv5_adx0_fixed8_atr4.0_fixed5",
+    "trades": 24,
+    "wr": 0.4167,
+    "pnl": 62.04,
+    "pf": 2.41,
+    "wf": 3,
+    "bh": -34.8
+  },
+  {
+    "sym": "WIFUSDT",
+    "best_label": "m336_lv5_adx15_atr2.0_atr4.0_fixed5_btcrf",
+    "trades": 9,
+    "wr": 0.7778,
+    "pnl": 90.07,
+    "pf": 3.27,
+    "wf": 4,
+    "bh": -50.32
+  },
+  {
+    "sym": "XRPUSDT",
+    "best_label": "m24_lv5_adx15_atr2.0_fixed15_voltarget_btcrf_scale",
+    "trades": 397,
+    "wr": 0.6826,
+    "pnl": 95.19,
+    "pf": 1.34,
+    "wf": 4,
+    "bh": -30.07
+  }
+]

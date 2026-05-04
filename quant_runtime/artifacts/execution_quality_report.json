@@ -1,0 +1,22 @@
+{
+  "accepted_live_order_count": 1,
+  "base_dir": "/Users/tttksj/first_repo/quant_runtime",
+  "estimated_live_acceptance_rate": 1.0,
+  "generated_at": "2026-03-15T22:14:09.845598+00:00",
+  "live_order_count": 1,
+  "lookback_days": 7,
+  "order_error_count": 0,
+  "run_count": 3,
+  "symbol_order_summary": [
+    {
+      "accepted_live_order_count": 1,
+      "estimated_live_acceptance_rate": 1.0,
+      "live_order_count": 1,
+      "order_error_count": 0,
+      "symbol": "BTCUSDT",
+      "tested_order_count": 1
+    }
+  ],
+  "tested_order_count": 1,
+  "top_error_codes": []
+}

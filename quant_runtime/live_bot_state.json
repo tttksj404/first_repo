@@ -1,0 +1,15 @@
+{
+  "n_trades": 0,
+  "n_wins": 0,
+  "n_losses": 0,
+  "n_liquidations": 0,
+  "cum_pnl": 0.0,
+  "last_exit_ts": 0,
+  "last_loss_exit_ts": 0,
+  "open_position": null,
+  "open_orders": [],
+  "started_at": "2026-04-26T07:00:42.385385+00:00",
+  "last_check_at": "2026-04-26T14:24:04.937748+00:00",
+  "last_event": "",
+  "live_mode": true
+}

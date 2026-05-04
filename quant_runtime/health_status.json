@@ -1,0 +1,31 @@
+{
+  "updated_at": "2026-04-21T23:46:54.953860+00:00",
+  "overall_severity": "OK",
+  "checks": {
+    "adopted_ratio": {
+      "severity": "OK",
+      "message": "no trades yet",
+      "value": 0.0
+    },
+    "tighter_mode": {
+      "severity": "OK",
+      "message": "auto_mode=unknown expansion_blocked=False",
+      "value": {
+        "mode": "",
+        "expansion_blocked": false
+      }
+    },
+    "strategy_entries": {
+      "severity": "OK",
+      "message": "no trades yet",
+      "value": 0
+    },
+    "equity_drop": {
+      "severity": "OK",
+      "message": "equity data unavailable",
+      "value": null
+    }
+  },
+  "auto_actions": [],
+  "disk_usage_mb": 2481.4
+}

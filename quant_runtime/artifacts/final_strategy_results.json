@@ -1,0 +1,5192 @@
+[
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": true,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 27,
+    "wr": 0.6296,
+    "pf": 2.43,
+    "total": 22451.6,
+    "avg": 831.5,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 6.931,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 6,
+        "wr": 0.3333,
+        "pf": 1.17,
+        "total": 1379.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 7,
+        "wr": 1.0,
+        "pf": 1697538.28,
+        "total": 16975.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 10,
+        "wr": 0.5,
+        "pf": 1.12,
+        "total": 710.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 4,
+        "wr": 0.75,
+        "pf": 3.45,
+        "total": 3386.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": true,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 27,
+    "wr": 0.6296,
+    "pf": 2.43,
+    "total": 44903.2,
+    "avg": 1663.1,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 6.931,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 6,
+        "wr": 0.3333,
+        "pf": 1.17,
+        "total": 2759.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 7,
+        "wr": 1.0,
+        "pf": 3395076.56,
+        "total": 33950.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 10,
+        "wr": 0.5,
+        "pf": 1.12,
+        "total": 1420.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 4,
+        "wr": 0.75,
+        "pf": 3.45,
+        "total": 6772.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": true,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 27,
+    "wr": 0.6296,
+    "pf": 2.41,
+    "total": 22021.5,
+    "avg": 815.6,
+    "worst_fold_pf": 1.03,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 6.702,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 6,
+        "wr": 0.3333,
+        "pf": 1.2,
+        "total": 1637.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 7,
+        "wr": 1.0,
+        "pf": 1482611.81,
+        "total": 14826.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 10,
+        "wr": 0.5,
+        "pf": 1.03,
+        "total": 171.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 4,
+        "wr": 0.75,
+        "pf": 4.9,
+        "total": 5385.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": true,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 27,
+    "wr": 0.6296,
+    "pf": 2.41,
+    "total": 44043.0,
+    "avg": 1631.2,
+    "worst_fold_pf": 1.03,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 6.702,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 6,
+        "wr": 0.3333,
+        "pf": 1.2,
+        "total": 3275.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 7,
+        "wr": 1.0,
+        "pf": 2965223.63,
+        "total": 29652.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 10,
+        "wr": 0.5,
+        "pf": 1.03,
+        "total": 343.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 4,
+        "wr": 0.75,
+        "pf": 4.9,
+        "total": 10771.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.6238,
+    "pf": 1.51,
+    "total": 349506.1,
+    "avg": 281.0,
+    "worst_fold_pf": 1.41,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.699,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6316,
+        "pf": 1.41,
+        "total": 99392.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6632,
+        "pf": 1.88,
+        "total": 120582.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5774,
+        "pf": 1.43,
+        "total": 71328.1
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6298,
+        "pf": 1.43,
+        "total": 58203.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.6238,
+    "pf": 1.51,
+    "total": 699012.3,
+    "avg": 561.9,
+    "worst_fold_pf": 1.41,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.699,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6316,
+        "pf": 1.41,
+        "total": 198784.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6632,
+        "pf": 1.88,
+        "total": 241164.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5774,
+        "pf": 1.43,
+        "total": 142656.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6298,
+        "pf": 1.43,
+        "total": 116407.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5378,
+    "pf": 1.53,
+    "total": 403983.6,
+    "avg": 324.7,
+    "worst_fold_pf": 1.34,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.593,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5706,
+        "pf": 1.38,
+        "total": 99242.7
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5684,
+        "pf": 1.89,
+        "total": 142765.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4851,
+        "pf": 1.6,
+        "total": 106679.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5267,
+        "pf": 1.34,
+        "total": 55295.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5378,
+    "pf": 1.53,
+    "total": 807967.2,
+    "avg": 649.5,
+    "worst_fold_pf": 1.34,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.593,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5706,
+        "pf": 1.38,
+        "total": 198485.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5684,
+        "pf": 1.89,
+        "total": 285531.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4851,
+        "pf": 1.6,
+        "total": 213359.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5267,
+        "pf": 1.34,
+        "total": 110591.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5402,
+    "pf": 1.51,
+    "total": 391602.0,
+    "avg": 314.8,
+    "worst_fold_pf": 1.34,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.564,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5706,
+        "pf": 1.4,
+        "total": 106904.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5895,
+        "pf": 1.94,
+        "total": 144454.5
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4762,
+        "pf": 1.47,
+        "total": 85554.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5267,
+        "pf": 1.34,
+        "total": 54688.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5402,
+    "pf": 1.51,
+    "total": 783204.1,
+    "avg": 629.6,
+    "worst_fold_pf": 1.34,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.564,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5706,
+        "pf": 1.4,
+        "total": 213809.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5895,
+        "pf": 1.94,
+        "total": 288909.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4762,
+        "pf": 1.47,
+        "total": 171107.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5267,
+        "pf": 1.34,
+        "total": 109377.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5249,
+    "pf": 1.48,
+    "total": 372964.8,
+    "avg": 299.8,
+    "worst_fold_pf": 1.35,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.509,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.554,
+        "pf": 1.41,
+        "total": 103294.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5509,
+        "pf": 1.68,
+        "total": 121527.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4762,
+        "pf": 1.48,
+        "total": 92198.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5191,
+        "pf": 1.35,
+        "total": 55944.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5249,
+    "pf": 1.48,
+    "total": 745929.6,
+    "avg": 599.6,
+    "worst_fold_pf": 1.35,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.509,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.554,
+        "pf": 1.41,
+        "total": 206588.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5509,
+        "pf": 1.68,
+        "total": 243055.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4762,
+        "pf": 1.48,
+        "total": 184397.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5191,
+        "pf": 1.35,
+        "total": 111888.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4164,
+    "pf": 1.57,
+    "total": 269521.5,
+    "avg": 351.9,
+    "worst_fold_pf": 1.23,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.458,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.3509,
+        "pf": 1.23,
+        "total": 38898.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.4767,
+        "pf": 2.12,
+        "total": 111889.5
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.3901,
+        "pf": 1.5,
+        "total": 65227.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4895,
+        "pf": 1.71,
+        "total": 53505.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4164,
+    "pf": 1.57,
+    "total": 539042.9,
+    "avg": 703.7,
+    "worst_fold_pf": 1.23,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.458,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.3509,
+        "pf": 1.23,
+        "total": 77797.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.4767,
+        "pf": 2.12,
+        "total": 223779.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.3901,
+        "pf": 1.5,
+        "total": 130455.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4895,
+        "pf": 1.71,
+        "total": 107010.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5287,
+    "pf": 1.65,
+    "total": 309761.9,
+    "avg": 404.4,
+    "worst_fold_pf": 1.15,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.451,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5088,
+        "pf": 1.15,
+        "total": 28033.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5988,
+        "pf": 2.49,
+        "total": 134072.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5112,
+        "pf": 2.06,
+        "total": 117269.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5035,
+        "pf": 1.34,
+        "total": 30386.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5287,
+    "pf": 1.65,
+    "total": 619523.8,
+    "avg": 808.8,
+    "worst_fold_pf": 1.15,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.451,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5088,
+        "pf": 1.15,
+        "total": 56067.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5988,
+        "pf": 2.49,
+        "total": 268144.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5112,
+        "pf": 2.06,
+        "total": 234539.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5035,
+        "pf": 1.34,
+        "total": 60773.0
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4935,
+    "pf": 1.62,
+    "total": 325269.0,
+    "avg": 424.6,
+    "worst_fold_pf": 1.17,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.448,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4211,
+        "pf": 1.17,
+        "total": 32153.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5465,
+        "pf": 2.25,
+        "total": 137300.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5022,
+        "pf": 1.8,
+        "total": 104552.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.58,
+        "total": 51262.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4935,
+    "pf": 1.62,
+    "total": 650538.1,
+    "avg": 849.3,
+    "worst_fold_pf": 1.17,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.448,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4211,
+        "pf": 1.17,
+        "total": 64306.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5465,
+        "pf": 2.25,
+        "total": 274600.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5022,
+        "pf": 1.8,
+        "total": 209105.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.58,
+        "total": 102525.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.6238,
+    "pf": 1.46,
+    "total": 315243.4,
+    "avg": 253.4,
+    "worst_fold_pf": 1.32,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.425,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6316,
+        "pf": 1.37,
+        "total": 90501.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6632,
+        "pf": 1.84,
+        "total": 115435.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5774,
+        "pf": 1.32,
+        "total": 54207.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6298,
+        "pf": 1.41,
+        "total": 55098.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.6238,
+    "pf": 1.46,
+    "total": 630486.8,
+    "avg": 506.8,
+    "worst_fold_pf": 1.32,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.425,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6316,
+        "pf": 1.37,
+        "total": 181002.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6632,
+        "pf": 1.84,
+        "total": 230871.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5774,
+        "pf": 1.32,
+        "total": 108415.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6298,
+        "pf": 1.41,
+        "total": 110197.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.549,
+    "pf": 1.46,
+    "total": 347667.8,
+    "avg": 279.5,
+    "worst_fold_pf": 1.32,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.417,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5734,
+        "pf": 1.47,
+        "total": 113668.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 1.71,
+        "total": 119120.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4881,
+        "pf": 1.34,
+        "total": 63779.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5344,
+        "pf": 1.32,
+        "total": 51099.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.549,
+    "pf": 1.46,
+    "total": 695335.6,
+    "avg": 559.0,
+    "worst_fold_pf": 1.32,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.417,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5734,
+        "pf": 1.47,
+        "total": 227336.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 1.71,
+        "total": 238241.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4881,
+        "pf": 1.34,
+        "total": 127559.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5344,
+        "pf": 1.32,
+        "total": 102198.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5248,
+    "pf": 1.59,
+    "total": 286004.3,
+    "avg": 373.4,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.324,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5,
+        "pf": 1.14,
+        "total": 26502.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.6105,
+        "pf": 2.5,
+        "total": 133688.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4978,
+        "pf": 1.86,
+        "total": 97864.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5035,
+        "pf": 1.32,
+        "total": 27949.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5248,
+    "pf": 1.59,
+    "total": 572008.5,
+    "avg": 746.7,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.324,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5,
+        "pf": 1.14,
+        "total": 53004.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.6105,
+        "pf": 2.5,
+        "total": 267376.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4978,
+        "pf": 1.86,
+        "total": 195728.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5035,
+        "pf": 1.32,
+        "total": 55899.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.517,
+    "pf": 1.54,
+    "total": 275773.7,
+    "avg": 360.0,
+    "worst_fold_pf": 1.15,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.255,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4868,
+        "pf": 1.15,
+        "total": 27423.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.593,
+        "pf": 2.18,
+        "total": 121027.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5022,
+        "pf": 1.83,
+        "total": 103532.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4965,
+        "pf": 1.25,
+        "total": 23790.0
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.517,
+    "pf": 1.54,
+    "total": 551547.5,
+    "avg": 720.0,
+    "worst_fold_pf": 1.15,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.255,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4868,
+        "pf": 1.15,
+        "total": 54846.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.593,
+        "pf": 2.18,
+        "total": 242055.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5022,
+        "pf": 1.83,
+        "total": 207065.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4965,
+        "pf": 1.25,
+        "total": 47580.0
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4269,
+    "pf": 1.53,
+    "total": 235106.1,
+    "avg": 306.9,
+    "worst_fold_pf": 1.16,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.246,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.3947,
+        "pf": 1.26,
+        "total": 38271.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5,
+        "pf": 2.16,
+        "total": 106092.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4126,
+        "pf": 1.64,
+        "total": 76882.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4126,
+        "pf": 1.16,
+        "total": 13860.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4269,
+    "pf": 1.53,
+    "total": 470212.2,
+    "avg": 613.9,
+    "worst_fold_pf": 1.16,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.246,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.3947,
+        "pf": 1.26,
+        "total": 76542.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5,
+        "pf": 2.16,
+        "total": 212184.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4126,
+        "pf": 1.64,
+        "total": 153764.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4126,
+        "pf": 1.16,
+        "total": 27721.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.4678,
+    "pf": 1.43,
+    "total": 371945.1,
+    "avg": 299.0,
+    "worst_fold_pf": 1.24,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.215,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.4903,
+        "pf": 1.45,
+        "total": 115481.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.4772,
+        "pf": 1.67,
+        "total": 129415.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4464,
+        "pf": 1.38,
+        "total": 82395.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.4542,
+        "pf": 1.24,
+        "total": 44652.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.4678,
+    "pf": 1.43,
+    "total": 743890.2,
+    "avg": 598.0,
+    "worst_fold_pf": 1.24,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.215,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.4903,
+        "pf": 1.45,
+        "total": 230963.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.4772,
+        "pf": 1.67,
+        "total": 258831.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4464,
+        "pf": 1.38,
+        "total": 164791.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.4542,
+        "pf": 1.24,
+        "total": 89304.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5979,
+    "pf": 1.53,
+    "total": 234940.1,
+    "avg": 306.7,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.206,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5658,
+        "pf": 1.14,
+        "total": 24754.7
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.686,
+        "pf": 2.43,
+        "total": 112791.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.583,
+        "pf": 1.76,
+        "total": 80895.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5664,
+        "pf": 1.2,
+        "total": 16499.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5979,
+    "pf": 1.53,
+    "total": 469880.2,
+    "avg": 613.4,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.206,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5658,
+        "pf": 1.14,
+        "total": 49509.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.686,
+        "pf": 2.43,
+        "total": 225581.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.583,
+        "pf": 1.76,
+        "total": 161790.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5664,
+        "pf": 1.2,
+        "total": 32998.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.3955,
+    "pf": 1.43,
+    "total": 328989.5,
+    "avg": 264.5,
+    "worst_fold_pf": 1.22,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.168,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.4183,
+        "pf": 1.51,
+        "total": 115543.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.4175,
+        "pf": 1.68,
+        "total": 114432.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.3423,
+        "pf": 1.22,
+        "total": 46406.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.4084,
+        "pf": 1.34,
+        "total": 52607.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.3955,
+    "pf": 1.43,
+    "total": 657978.9,
+    "avg": 528.9,
+    "worst_fold_pf": 1.22,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.168,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.4183,
+        "pf": 1.51,
+        "total": 231086.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.4175,
+        "pf": 1.68,
+        "total": 228865.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.3423,
+        "pf": 1.22,
+        "total": 92813.1
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.4084,
+        "pf": 1.34,
+        "total": 105214.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5366,
+    "pf": 1.49,
+    "total": 242875.6,
+    "avg": 317.1,
+    "worst_fold_pf": 1.16,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.167,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5044,
+        "pf": 1.16,
+        "total": 29640.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.6337,
+        "pf": 2.18,
+        "total": 116117.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5022,
+        "pf": 1.61,
+        "total": 75778.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5245,
+        "pf": 1.23,
+        "total": 21338.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5366,
+    "pf": 1.49,
+    "total": 485751.1,
+    "avg": 634.1,
+    "worst_fold_pf": 1.16,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.167,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5044,
+        "pf": 1.16,
+        "total": 59281.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.6337,
+        "pf": 2.18,
+        "total": 232235.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5022,
+        "pf": 1.61,
+        "total": 151556.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5245,
+        "pf": 1.23,
+        "total": 42677.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4817,
+    "pf": 1.56,
+    "total": 266563.4,
+    "avg": 348.0,
+    "worst_fold_pf": 1.08,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.154,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4518,
+        "pf": 1.25,
+        "total": 40677.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5581,
+        "pf": 2.13,
+        "total": 111993.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4843,
+        "pf": 1.92,
+        "total": 106365.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4336,
+        "pf": 1.08,
+        "total": 7527.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.4817,
+    "pf": 1.56,
+    "total": 533126.8,
+    "avg": 696.0,
+    "worst_fold_pf": 1.08,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.154,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4518,
+        "pf": 1.25,
+        "total": 81354.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5581,
+        "pf": 2.13,
+        "total": 223986.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4843,
+        "pf": 1.92,
+        "total": 212731.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.4336,
+        "pf": 1.08,
+        "total": 15055.0
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.4791,
+    "pf": 1.45,
+    "total": 336607.1,
+    "avg": 270.6,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.148,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5152,
+        "pf": 1.51,
+        "total": 114658.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5018,
+        "pf": 1.64,
+        "total": 108493.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4375,
+        "pf": 1.43,
+        "total": 82303.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.458,
+        "pf": 1.19,
+        "total": 31151.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 2.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.4791,
+    "pf": 1.45,
+    "total": 673214.1,
+    "avg": 541.2,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.148,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5152,
+        "pf": 1.51,
+        "total": 229316.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5018,
+        "pf": 1.64,
+        "total": 216986.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4375,
+        "pf": 1.43,
+        "total": 164607.1
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.458,
+        "pf": 1.19,
+        "total": 62303.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5828,
+    "pf": 1.45,
+    "total": 314975.7,
+    "avg": 253.2,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.143,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5762,
+        "pf": 1.38,
+        "total": 88501.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6105,
+        "pf": 1.76,
+        "total": 112374.5
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5417,
+        "pf": 1.19,
+        "total": 35606.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6145,
+        "pf": 1.57,
+        "total": 78493.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5828,
+    "pf": 1.45,
+    "total": 629951.4,
+    "avg": 506.4,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.143,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5762,
+        "pf": 1.38,
+        "total": 177002.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6105,
+        "pf": 1.76,
+        "total": 224749.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5417,
+        "pf": 1.19,
+        "total": 71213.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6145,
+        "pf": 1.57,
+        "total": 156987.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5822,
+    "pf": 1.54,
+    "total": 244179.6,
+    "avg": 318.8,
+    "worst_fold_pf": 1.09,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.13,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5132,
+        "pf": 1.09,
+        "total": 16225.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.657,
+        "pf": 2.34,
+        "total": 115178.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.574,
+        "pf": 1.53,
+        "total": 61221.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.6154,
+        "pf": 1.67,
+        "total": 51554.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5822,
+    "pf": 1.54,
+    "total": 488359.3,
+    "avg": 637.5,
+    "worst_fold_pf": 1.09,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.13,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5132,
+        "pf": 1.09,
+        "total": 32451.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.657,
+        "pf": 2.34,
+        "total": 230356.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.574,
+        "pf": 1.53,
+        "total": 122442.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.6154,
+        "pf": 1.67,
+        "total": 103108.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5707,
+    "pf": 1.51,
+    "total": 488514.9,
+    "avg": 392.7,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.129,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5374,
+        "pf": 1.12,
+        "total": 44018.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.607,
+        "pf": 2.51,
+        "total": 252902.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5714,
+        "pf": 1.68,
+        "total": 136110.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5763,
+        "pf": 1.26,
+        "total": 55483.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5707,
+    "pf": 1.51,
+    "total": 977029.9,
+    "avg": 785.4,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.129,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5374,
+        "pf": 1.12,
+        "total": 88036.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.607,
+        "pf": 2.51,
+        "total": 505805.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5714,
+        "pf": 1.68,
+        "total": 272221.1
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5763,
+        "pf": 1.26,
+        "total": 110966.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.574,
+    "pf": 1.4,
+    "total": 368138.0,
+    "avg": 295.9,
+    "worst_fold_pf": 1.22,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.117,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5568,
+        "pf": 1.22,
+        "total": 70625.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 1.7,
+        "total": 134536.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5446,
+        "pf": 1.42,
+        "total": 87968.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6031,
+        "pf": 1.39,
+        "total": 75007.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.574,
+    "pf": 1.4,
+    "total": 736275.9,
+    "avg": 591.9,
+    "worst_fold_pf": 1.22,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.117,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5568,
+        "pf": 1.22,
+        "total": 141251.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 1.7,
+        "total": 269072.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5446,
+        "pf": 1.42,
+        "total": 175937.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6031,
+        "pf": 1.39,
+        "total": 150015.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5274,
+    "pf": 1.45,
+    "total": 172197.5,
+    "avg": 224.8,
+    "worst_fold_pf": 1.17,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.116,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4737,
+        "pf": 1.18,
+        "total": 26362.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5698,
+        "pf": 2.04,
+        "total": 79080.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5471,
+        "pf": 1.64,
+        "total": 53727.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.17,
+        "total": 13026.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5274,
+    "pf": 1.45,
+    "total": 344394.9,
+    "avg": 449.6,
+    "worst_fold_pf": 1.17,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.116,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4737,
+        "pf": 1.18,
+        "total": 52725.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5698,
+        "pf": 2.04,
+        "total": 158160.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5471,
+        "pf": 1.64,
+        "total": 107454.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.17,
+        "total": 26053.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.4188,
+    "pf": 1.43,
+    "total": 297532.4,
+    "avg": 239.2,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.1,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.446,
+        "pf": 1.52,
+        "total": 105859.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.4491,
+        "pf": 1.71,
+        "total": 108446.5
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.369,
+        "pf": 1.28,
+        "total": 54346.1
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.4122,
+        "pf": 1.19,
+        "total": 28880.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 1.5,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.4188,
+    "pf": 1.43,
+    "total": 595064.8,
+    "avg": 478.3,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.1,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.446,
+        "pf": 1.52,
+        "total": 211718.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.4491,
+        "pf": 1.71,
+        "total": 216892.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.369,
+        "pf": 1.28,
+        "total": 108692.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.4122,
+        "pf": 1.19,
+        "total": 57761.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 3.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.7042,
+    "pf": 1.46,
+    "total": 312140.2,
+    "avg": 250.9,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.065,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.651,
+        "pf": 1.14,
+        "total": 37002.7
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.7368,
+        "pf": 1.82,
+        "total": 110937.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6726,
+        "pf": 1.25,
+        "total": 41267.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.7824,
+        "pf": 2.12,
+        "total": 122932.0
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 3.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.7042,
+    "pf": 1.46,
+    "total": 624280.5,
+    "avg": 501.8,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.065,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.651,
+        "pf": 1.14,
+        "total": 74005.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.7368,
+        "pf": 1.82,
+        "total": 221875.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6726,
+        "pf": 1.25,
+        "total": 82535.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.7824,
+        "pf": 2.12,
+        "total": 245863.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5281,
+    "pf": 1.38,
+    "total": 371181.7,
+    "avg": 298.4,
+    "worst_fold_pf": 1.2,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.034,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5263,
+        "pf": 1.2,
+        "total": 65710.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5544,
+        "pf": 1.77,
+        "total": 157436.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.506,
+        "pf": 1.42,
+        "total": 93520.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.26,
+        "total": 54513.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5281,
+    "pf": 1.38,
+    "total": 742363.4,
+    "avg": 596.8,
+    "worst_fold_pf": 1.2,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.034,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5263,
+        "pf": 1.2,
+        "total": 131421.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5544,
+        "pf": 1.77,
+        "total": 314873.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.506,
+        "pf": 1.42,
+        "total": 187040.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.26,
+        "total": 109027.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.6833,
+    "pf": 1.49,
+    "total": 389089.1,
+    "avg": 312.8,
+    "worst_fold_pf": 1.09,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.028,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.626,
+        "pf": 1.09,
+        "total": 29892.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.7158,
+        "pf": 2.02,
+        "total": 148376.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6756,
+        "pf": 1.68,
+        "total": 111638.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.7366,
+        "pf": 1.65,
+        "total": 99182.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.6833,
+    "pf": 1.49,
+    "total": 778178.1,
+    "avg": 625.5,
+    "worst_fold_pf": 1.09,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.028,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.626,
+        "pf": 1.09,
+        "total": 59784.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.7158,
+        "pf": 2.02,
+        "total": 296751.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6756,
+        "pf": 1.68,
+        "total": 223277.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.7366,
+        "pf": 1.65,
+        "total": 198364.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5979,
+    "pf": 1.46,
+    "total": 204119.9,
+    "avg": 266.5,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.012,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5658,
+        "pf": 1.11,
+        "total": 19374.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.686,
+        "pf": 2.36,
+        "total": 107165.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.583,
+        "pf": 1.63,
+        "total": 66211.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5664,
+        "pf": 1.14,
+        "total": 11368.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5979,
+    "pf": 1.46,
+    "total": 408239.7,
+    "avg": 533.0,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 5.012,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5658,
+        "pf": 1.11,
+        "total": 38748.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.686,
+        "pf": 2.36,
+        "total": 214331.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.583,
+        "pf": 1.63,
+        "total": 132423.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5664,
+        "pf": 1.14,
+        "total": 22736.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.3R,0.7R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.713,
+    "pf": 1.41,
+    "total": 233539.9,
+    "avg": 187.7,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.982,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6981,
+        "pf": 1.25,
+        "total": 53385.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.7333,
+        "pf": 1.78,
+        "total": 92267.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6815,
+        "pf": 1.14,
+        "total": 19309.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.7519,
+        "pf": 1.75,
+        "total": 68577.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.3R,0.7R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.713,
+    "pf": 1.41,
+    "total": 467079.9,
+    "avg": 375.5,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.982,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6981,
+        "pf": 1.25,
+        "total": 106771.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.7333,
+        "pf": 1.78,
+        "total": 184534.5
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6815,
+        "pf": 1.14,
+        "total": 38618.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.7519,
+        "pf": 1.75,
+        "total": 137155.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5402,
+    "pf": 1.37,
+    "total": 285635.8,
+    "avg": 229.6,
+    "worst_fold_pf": 1.18,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.981,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5706,
+        "pf": 1.33,
+        "total": 87135.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5895,
+        "pf": 1.79,
+        "total": 122325.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4762,
+        "pf": 1.18,
+        "total": 32424.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5267,
+        "pf": 1.27,
+        "total": 43750.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5402,
+    "pf": 1.37,
+    "total": 571271.6,
+    "avg": 459.2,
+    "worst_fold_pf": 1.18,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.981,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5706,
+        "pf": 1.33,
+        "total": 174270.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5895,
+        "pf": 1.79,
+        "total": 244651.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.4762,
+        "pf": 1.18,
+        "total": 64848.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5267,
+        "pf": 1.27,
+        "total": 87501.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5366,
+    "pf": 1.43,
+    "total": 165093.6,
+    "avg": 215.5,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.979,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4912,
+        "pf": 1.25,
+        "total": 34433.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5814,
+        "pf": 2.11,
+        "total": 80970.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5516,
+        "pf": 1.43,
+        "total": 40267.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.12,
+        "total": 9421.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5366,
+    "pf": 1.43,
+    "total": 330187.2,
+    "avg": 431.1,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.979,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4912,
+        "pf": 1.25,
+        "total": 68867.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5814,
+        "pf": 2.11,
+        "total": 161941.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5516,
+        "pf": 1.43,
+        "total": 80534.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.12,
+        "total": 18843.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.533,
+    "pf": 1.41,
+    "total": 246724.6,
+    "avg": 198.3,
+    "worst_fold_pf": 1.13,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.956,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5319,
+        "pf": 1.54,
+        "total": 104740.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5579,
+        "pf": 1.65,
+        "total": 86101.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5149,
+        "pf": 1.28,
+        "total": 39742.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.13,
+        "total": 16139.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.533,
+    "pf": 1.41,
+    "total": 493449.2,
+    "avg": 396.7,
+    "worst_fold_pf": 1.13,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.956,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5319,
+        "pf": 1.54,
+        "total": 209481.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5579,
+        "pf": 1.65,
+        "total": 172203.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5149,
+        "pf": 1.28,
+        "total": 79485.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.13,
+        "total": 32278.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.66,
+    "pf": 1.41,
+    "total": 263824.1,
+    "avg": 212.1,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.937,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6537,
+        "pf": 1.41,
+        "total": 88123.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6947,
+        "pf": 1.69,
+        "total": 96040.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6101,
+        "pf": 1.12,
+        "total": 20257.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6947,
+        "pf": 1.51,
+        "total": 59402.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.66,
+    "pf": 1.41,
+    "total": 527648.2,
+    "avg": 424.2,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.937,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6537,
+        "pf": 1.41,
+        "total": 176247.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6947,
+        "pf": 1.69,
+        "total": 192080.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.6101,
+        "pf": 1.12,
+        "total": 40515.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.6947,
+        "pf": 1.51,
+        "total": 118805.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5313,
+    "pf": 1.43,
+    "total": 161218.2,
+    "avg": 210.5,
+    "worst_fold_pf": 1.1,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.933,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4781,
+        "pf": 1.1,
+        "total": 14795.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5756,
+        "pf": 2.03,
+        "total": 77380.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5516,
+        "pf": 1.68,
+        "total": 56815.4
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.16,
+        "total": 12227.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5313,
+    "pf": 1.43,
+    "total": 322436.4,
+    "avg": 420.9,
+    "worst_fold_pf": 1.1,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.933,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4781,
+        "pf": 1.1,
+        "total": 29590.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5756,
+        "pf": 2.03,
+        "total": 154760.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5516,
+        "pf": 1.68,
+        "total": 113630.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.16,
+        "total": 24455.0
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5611,
+    "pf": 1.45,
+    "total": 432607.8,
+    "avg": 347.8,
+    "worst_fold_pf": 1.08,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.93,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5346,
+        "pf": 1.08,
+        "total": 29531.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 2.28,
+        "total": 217867.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5625,
+        "pf": 1.65,
+        "total": 130432.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5496,
+        "pf": 1.25,
+        "total": 54776.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 48,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5611,
+    "pf": 1.45,
+    "total": 865215.6,
+    "avg": 695.5,
+    "worst_fold_pf": 1.08,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.93,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5346,
+        "pf": 1.08,
+        "total": 59063.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 2.28,
+        "total": 435735.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5625,
+        "pf": 1.65,
+        "total": 260864.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5496,
+        "pf": 1.25,
+        "total": 109552.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(3%,50%)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5675,
+    "pf": 1.33,
+    "total": 245927.1,
+    "avg": 197.7,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.923,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5956,
+        "pf": 1.19,
+        "total": 43730.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6175,
+        "pf": 1.57,
+        "total": 93135.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.494,
+        "pf": 1.37,
+        "total": 69396.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5687,
+        "pf": 1.27,
+        "total": 39664.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(3%,50%)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5675,
+    "pf": 1.33,
+    "total": 491854.1,
+    "avg": 395.4,
+    "worst_fold_pf": 1.19,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.923,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5956,
+        "pf": 1.19,
+        "total": 87461.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6175,
+        "pf": 1.57,
+        "total": 186271.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.494,
+        "pf": 1.37,
+        "total": 138793.5
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5687,
+        "pf": 1.27,
+        "total": 79328.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5248,
+    "pf": 1.41,
+    "total": 200478.4,
+    "avg": 261.7,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.921,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5,
+        "pf": 1.11,
+        "total": 22035.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.6105,
+        "pf": 2.29,
+        "total": 114635.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4978,
+        "pf": 1.45,
+        "total": 51318.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5035,
+        "pf": 1.14,
+        "total": 12489.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5248,
+    "pf": 1.41,
+    "total": 400956.9,
+    "avg": 523.4,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.921,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.5,
+        "pf": 1.11,
+        "total": 44071.1
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.6105,
+        "pf": 2.29,
+        "total": 229271.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.4978,
+        "pf": 1.45,
+        "total": 102635.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5035,
+        "pf": 1.14,
+        "total": 24978.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(3%,50%)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5796,
+    "pf": 1.37,
+    "total": 269590.5,
+    "avg": 216.7,
+    "worst_fold_pf": 1.15,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.921,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6122,
+        "pf": 1.15,
+        "total": 37601.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6351,
+        "pf": 1.78,
+        "total": 113330.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.503,
+        "pf": 1.47,
+        "total": 83877.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5725,
+        "pf": 1.23,
+        "total": 34780.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(3%,50%)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5796,
+    "pf": 1.37,
+    "total": 539181.1,
+    "avg": 433.4,
+    "worst_fold_pf": 1.15,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.921,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.6122,
+        "pf": 1.15,
+        "total": 75203.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6351,
+        "pf": 1.78,
+        "total": 226661.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.503,
+        "pf": 1.47,
+        "total": 167755.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5725,
+        "pf": 1.23,
+        "total": 69560.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 697,
+    "wr": 0.5194,
+    "pf": 1.5,
+    "total": 148038.6,
+    "avg": 212.4,
+    "worst_fold_pf": 1.02,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.913,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 187,
+        "wr": 0.4652,
+        "pf": 1.02,
+        "total": 2157.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 159,
+        "wr": 0.6038,
+        "pf": 3.01,
+        "total": 106007.0
+      },
+      {
+        "name": "Q2_test",
+        "n": 215,
+        "wr": 0.5163,
+        "pf": 1.35,
+        "total": 27984.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 136,
+        "wr": 0.5,
+        "pf": 1.19,
+        "total": 11889.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 697,
+    "wr": 0.5194,
+    "pf": 1.5,
+    "total": 296077.2,
+    "avg": 424.8,
+    "worst_fold_pf": 1.02,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.913,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 187,
+        "wr": 0.4652,
+        "pf": 1.02,
+        "total": 4314.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 159,
+        "wr": 0.6038,
+        "pf": 3.01,
+        "total": 212013.9
+      },
+      {
+        "name": "Q2_test",
+        "n": 215,
+        "wr": 0.5163,
+        "pf": 1.35,
+        "total": 55969.2
+      },
+      {
+        "name": "Q3_test",
+        "n": 136,
+        "wr": 0.5,
+        "pf": 1.19,
+        "total": 23779.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.6397,
+    "pf": 1.39,
+    "total": 165722.4,
+    "avg": 216.3,
+    "worst_fold_pf": 1.13,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.907,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.6009,
+        "pf": 1.13,
+        "total": 19840.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.7209,
+        "pf": 2.23,
+        "total": 96043.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.6278,
+        "pf": 1.35,
+        "total": 39512.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.6224,
+        "pf": 1.13,
+        "total": 10325.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 3.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.6397,
+    "pf": 1.39,
+    "total": 331444.7,
+    "avg": 432.7,
+    "worst_fold_pf": 1.13,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.907,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.6009,
+        "pf": 1.13,
+        "total": 39680.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.7209,
+        "pf": 2.23,
+        "total": 192087.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.6278,
+        "pf": 1.35,
+        "total": 79024.6
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.6224,
+        "pf": 1.13,
+        "total": 20651.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5274,
+    "pf": 1.39,
+    "total": 147282.7,
+    "avg": 192.3,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.89,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4737,
+        "pf": 1.25,
+        "total": 35398.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5698,
+        "pf": 1.92,
+        "total": 69638.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5471,
+        "pf": 1.39,
+        "total": 33127.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.12,
+        "total": 9118.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "FIXED(1R)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.5274,
+    "pf": 1.39,
+    "total": 294565.5,
+    "avg": 384.6,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.89,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.4737,
+        "pf": 1.25,
+        "total": 70796.7
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.5698,
+        "pf": 1.92,
+        "total": 139276.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.5471,
+        "pf": 1.39,
+        "total": 66254.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.5315,
+        "pf": 1.12,
+        "total": 18237.9
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5394,
+    "pf": 1.4,
+    "total": 236130.2,
+    "avg": 189.8,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.889,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5457,
+        "pf": 1.62,
+        "total": 114071.6
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5684,
+        "pf": 1.7,
+        "total": 88512.4
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5149,
+        "pf": 1.12,
+        "total": 19416.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.11,
+        "total": 14129.3
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 3.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5394,
+    "pf": 1.4,
+    "total": 472260.4,
+    "avg": 379.6,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.889,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5457,
+        "pf": 1.62,
+        "total": 228143.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5684,
+        "pf": 1.7,
+        "total": 177024.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5149,
+        "pf": 1.12,
+        "total": 38833.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.11,
+        "total": 28258.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": "ALL",
+    "trades": 1494,
+    "wr": 0.5857,
+    "pf": 1.38,
+    "total": 296171.0,
+    "avg": 198.2,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.883,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 459,
+        "wr": 0.5861,
+        "pf": 1.12,
+        "total": 39846.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 310,
+        "wr": 0.6194,
+        "pf": 2.14,
+        "total": 138517.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 414,
+        "wr": 0.5338,
+        "pf": 1.25,
+        "total": 47517.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 311,
+        "wr": 0.6206,
+        "pf": 1.52,
+        "total": 70289.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": "ALL",
+    "trades": 1494,
+    "wr": 0.5857,
+    "pf": 1.38,
+    "total": 592341.9,
+    "avg": 396.5,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.883,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 459,
+        "wr": 0.5861,
+        "pf": 1.12,
+        "total": 79692.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 310,
+        "wr": 0.6194,
+        "pf": 2.14,
+        "total": 277034.7
+      },
+      {
+        "name": "Q2_test",
+        "n": 414,
+        "wr": 0.5338,
+        "pf": 1.25,
+        "total": 95035.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 311,
+        "wr": 0.6206,
+        "pf": 1.52,
+        "total": 140579.5
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5338,
+    "pf": 1.39,
+    "total": 234616.8,
+    "avg": 188.6,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.882,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5319,
+        "pf": 1.49,
+        "total": 93977.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5579,
+        "pf": 1.63,
+        "total": 83763.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5179,
+        "pf": 1.3,
+        "total": 42887.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.11,
+        "total": 13988.1
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 4.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5338,
+    "pf": 1.39,
+    "total": 469233.6,
+    "avg": 377.2,
+    "worst_fold_pf": 1.11,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.882,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5319,
+        "pf": 1.49,
+        "total": 187954.0
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5579,
+        "pf": 1.63,
+        "total": 167527.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5179,
+        "pf": 1.3,
+        "total": 85775.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.11,
+        "total": 27976.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 2.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5603,
+    "pf": 1.36,
+    "total": 244964.1,
+    "avg": 196.9,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.88,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5789,
+        "pf": 1.5,
+        "total": 101098.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 1.69,
+        "total": 98268.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5149,
+        "pf": 1.14,
+        "total": 24902.0
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5458,
+        "pf": 1.14,
+        "total": 20695.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(1R,2R)",
+    "sl": 2.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5603,
+    "pf": 1.36,
+    "total": 489928.2,
+    "avg": 393.8,
+    "worst_fold_pf": 1.14,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.88,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5789,
+        "pf": 1.5,
+        "total": 202196.9
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.6035,
+        "pf": 1.69,
+        "total": 196536.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5149,
+        "pf": 1.14,
+        "total": 49803.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5458,
+        "pf": 1.14,
+        "total": 41390.8
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5314,
+    "pf": 1.38,
+    "total": 226624.3,
+    "avg": 182.2,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.869,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5291,
+        "pf": 1.51,
+        "total": 96479.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5579,
+        "pf": 1.68,
+        "total": 87305.3
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5119,
+        "pf": 1.17,
+        "total": 27100.7
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.12,
+        "total": 15739.2
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "TRAIL(5%,50%)",
+    "sl": 3.0,
+    "hold": 12,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 1244,
+    "wr": 0.5314,
+    "pf": 1.38,
+    "total": 453248.6,
+    "avg": 364.3,
+    "worst_fold_pf": 1.12,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.869,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 361,
+        "wr": 0.5291,
+        "pf": 1.51,
+        "total": 192958.3
+      },
+      {
+        "name": "Q1_test",
+        "n": 285,
+        "wr": 0.5579,
+        "pf": 1.68,
+        "total": 174610.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 336,
+        "wr": 0.5119,
+        "pf": 1.17,
+        "total": 54201.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 262,
+        "wr": 0.5305,
+        "pf": 1.12,
+        "total": 31478.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 697,
+    "wr": 0.5882,
+    "pf": 1.48,
+    "total": 176970.2,
+    "avg": 253.9,
+    "worst_fold_pf": 1.01,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.864,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 187,
+        "wr": 0.5936,
+        "pf": 1.01,
+        "total": 1366.2
+      },
+      {
+        "name": "Q1_test",
+        "n": 159,
+        "wr": 0.6289,
+        "pf": 2.65,
+        "total": 108976.1
+      },
+      {
+        "name": "Q2_test",
+        "n": 215,
+        "wr": 0.5628,
+        "pf": 1.5,
+        "total": 50895.1
+      },
+      {
+        "name": "Q3_test",
+        "n": 136,
+        "wr": 0.5735,
+        "pf": 1.21,
+        "total": 15732.7
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1R)",
+    "sl": 4.0,
+    "hold": 24,
+    "adx": 40,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "trades": 697,
+    "wr": 0.5882,
+    "pf": 1.48,
+    "total": 353940.4,
+    "avg": 507.8,
+    "worst_fold_pf": 1.01,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.864,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 187,
+        "wr": 0.5936,
+        "pf": 1.01,
+        "total": 2732.4
+      },
+      {
+        "name": "Q1_test",
+        "n": 159,
+        "wr": 0.6289,
+        "pf": 2.65,
+        "total": 217952.2
+      },
+      {
+        "name": "Q2_test",
+        "n": 215,
+        "wr": 0.5628,
+        "pf": 1.5,
+        "total": 101790.3
+      },
+      {
+        "name": "Q3_test",
+        "n": 136,
+        "wr": 0.5735,
+        "pf": 1.21,
+        "total": 31465.4
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 5,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.6958,
+    "pf": 1.43,
+    "total": 143199.1,
+    "avg": 186.9,
+    "worst_fold_pf": 1.06,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.848,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.6535,
+        "pf": 1.06,
+        "total": 7822.8
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.7442,
+        "pf": 2.06,
+        "total": 70344.8
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.6816,
+        "pf": 1.2,
+        "total": 17850.9
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.7273,
+        "pf": 1.86,
+        "total": 47180.6
+      }
+    ]
+  },
+  {
+    "side": "LONG",
+    "tp": "LAD(0.5R,1.5R)",
+    "sl": 2.0,
+    "hold": 48,
+    "adx": 45,
+    "ema_req": false,
+    "lev": 10,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "trades": 766,
+    "wr": 0.6958,
+    "pf": 1.43,
+    "total": 286398.1,
+    "avg": 373.9,
+    "worst_fold_pf": 1.06,
+    "all_folds_profit": true,
+    "q4_profit": true,
+    "composite": 4.848,
+    "folds": [
+      {
+        "name": "Q4_test",
+        "n": 228,
+        "wr": 0.6535,
+        "pf": 1.06,
+        "total": 15645.5
+      },
+      {
+        "name": "Q1_test",
+        "n": 172,
+        "wr": 0.7442,
+        "pf": 2.06,
+        "total": 140689.6
+      },
+      {
+        "name": "Q2_test",
+        "n": 223,
+        "wr": 0.6816,
+        "pf": 1.2,
+        "total": 35701.8
+      },
+      {
+        "name": "Q3_test",
+        "n": 143,
+        "wr": 0.7273,
+        "pf": 1.86,
+        "total": 94361.2
+      }
+    ]
+  }
+]

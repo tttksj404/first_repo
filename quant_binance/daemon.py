@@ -478,6 +478,12 @@ def run_live_paper_daemon(
             policy_state=previous_policy_state,
             major_symbols=tuple(settings.futures_exposure.major_symbols),
         )
+        schedulable_symbols = set(eligible_symbols)
+        schedulable_symbols.update(
+            str(symbol)
+            for symbol in observe_only_symbols
+            if str(symbol)
+        )
         dispatcher = EventDispatcher(store)
         runtime = LivePaperRuntime(
             dispatcher=dispatcher,
@@ -486,7 +492,7 @@ def run_live_paper_daemon(
             history_provider=lambda symbol, decision_time: extractor.build_history_context(store.get(symbol)),  # type: ignore[arg-type]
             decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
             decision_interval_seconds=settings.decision_engine.decision_interval_seconds,
-            eligible_symbols=eligible_symbols,
+            eligible_symbols=schedulable_symbols,
         )
         log_store = JsonlLogStore(
             run_paths.root / "logs",
@@ -620,7 +626,7 @@ def run_live_paper_daemon(
             ),
         )
         for symbol in bootstrap_symbols:
-            if symbol not in eligible_symbols:
+            if symbol not in schedulable_symbols:
                 continue
             state = store.get(symbol)
             if state is None:

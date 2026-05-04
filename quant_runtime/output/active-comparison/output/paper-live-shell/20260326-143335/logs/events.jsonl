@@ -1,0 +1,150 @@
+{"payload": {"data": {"E": 1774535618775, "m": false, "p": "69678.53", "q": "0.0126", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.008611+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69678.53", "q": "0.0007", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040153+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69678.53", "q": "0.0007", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040257+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69675.69", "q": "0.012953", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040314+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69675.69", "q": "0.0007", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040361+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69675.69", "q": "0.0007", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040405+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69672.27", "q": "0.003683", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040445+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69672.25", "q": "0.008617", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040485+00:00"}
+{"payload": {"data": {"E": 1774535618201, "m": false, "p": "69672.25", "q": "0.000028", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040523+00:00"}
+{"payload": {"data": {"E": 1774535617620, "m": false, "p": "69672.25", "q": "0.000228", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040562+00:00"}
+{"payload": {"data": {"E": 1774535616885, "m": false, "p": "69672.25", "q": "0.000244", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040600+00:00"}
+{"payload": {"data": {"E": 1774535616885, "m": false, "p": "69672.25", "q": "0.000143", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040638+00:00"}
+{"payload": {"data": {"E": 1774535614217, "m": false, "p": "69667.14", "q": "0.000028", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040677+00:00"}
+{"payload": {"data": {"E": 1774535614120, "m": true, "p": "69676.06", "q": "0.000145", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040714+00:00"}
+{"payload": {"data": {"E": 1774535614120, "m": true, "p": "69676.06", "q": "0.000472", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040752+00:00"}
+{"payload": {"data": {"E": 1774535614119, "m": true, "p": "69676.06", "q": "0.000201", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040788+00:00"}
+{"payload": {"data": {"E": 1774535614119, "m": true, "p": "69676.06", "q": "0.000476", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.040825+00:00"}
+{"payload": {"data": {"E": 1774535614117, "m": true, "p": "69676.06", "q": "0.000141", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041059+00:00"}
+{"payload": {"data": {"E": 1774535611549, "m": false, "p": "69676.07", "q": "0.000029", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041181+00:00"}
+{"payload": {"data": {"E": 1774535608830, "m": true, "p": "69684.07", "q": "0.000228", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041222+00:00"}
+{"payload": {"data": {"E": 1774535605653, "m": false, "p": "69684.08", "q": "0.000227", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041261+00:00"}
+{"payload": {"data": {"E": 1774535605653, "m": false, "p": "69684.08", "q": "0.000001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041297+00:00"}
+{"payload": {"data": {"E": 1774535605433, "m": true, "p": "69686.31", "q": "0.000143", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041333+00:00"}
+{"payload": {"data": {"E": 1774535605428, "m": true, "p": "69691.08", "q": "0.001434", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041395+00:00"}
+{"payload": {"data": {"E": 1774535605428, "m": true, "p": "69691.08", "q": "0.003964", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041434+00:00"}
+{"payload": {"data": {"E": 1774535605148, "m": true, "p": "69691.08", "q": "0.000644", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041482+00:00"}
+{"payload": {"data": {"E": 1774535605148, "m": true, "p": "69691.08", "q": "0.000285", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041520+00:00"}
+{"payload": {"data": {"E": 1774535605148, "m": true, "p": "69691.08", "q": "0.000675", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041559+00:00"}
+{"payload": {"data": {"E": 1774535605148, "m": true, "p": "69691.08", "q": "0.001408", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041597+00:00"}
+{"payload": {"data": {"E": 1774535605140, "m": true, "p": "69691.08", "q": "0.000643", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041634+00:00"}
+{"payload": {"data": {"E": 1774535605140, "m": true, "p": "69691.08", "q": "0.002381", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041672+00:00"}
+{"payload": {"data": {"E": 1774535605016, "m": true, "p": "69694.1", "q": "0.000779", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041710+00:00"}
+{"payload": {"data": {"E": 1774535605016, "m": true, "p": "69694.1", "q": "0.000655", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041747+00:00"}
+{"payload": {"data": {"E": 1774535603696, "m": false, "p": "69696.68", "q": "0.000244", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041784+00:00"}
+{"payload": {"data": {"E": 1774535603696, "m": false, "p": "69696.68", "q": "0.000143", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041822+00:00"}
+{"payload": {"data": {"E": 1774535601752, "m": true, "p": "69691.08", "q": "0.000228", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041859+00:00"}
+{"payload": {"data": {"E": 1774535600681, "m": false, "p": "69691.09", "q": "0.000313", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041896+00:00"}
+{"payload": {"data": {"E": 1774535599665, "m": true, "p": "69700", "q": "0.001434", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041934+00:00"}
+{"payload": {"data": {"E": 1774535599665, "m": true, "p": "69700", "q": "0.011748", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.041971+00:00"}
+{"payload": {"data": {"E": 1774535599491, "m": true, "p": "69700", "q": "0.002381", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042009+00:00"}
+{"payload": {"data": {"E": 1774535599489, "m": true, "p": "69700", "q": "0.000663", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042047+00:00"}
+{"payload": {"data": {"E": 1774535598588, "m": true, "p": "69708.58", "q": "0.000229", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042085+00:00"}
+{"payload": {"data": {"E": 1774535598583, "m": true, "p": "69714.35", "q": "0.001434", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042125+00:00"}
+{"payload": {"data": {"E": 1774535598583, "m": true, "p": "69714.35", "q": "0.007642", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042161+00:00"}
+{"payload": {"data": {"E": 1774535598049, "m": true, "p": "69714.35", "q": "0.002358", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042197+00:00"}
+{"payload": {"data": {"E": 1774535595785, "m": false, "p": "69714.36", "q": "0.000206", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042233+00:00"}
+{"payload": {"data": {"E": 1774535594790, "m": true, "p": "69714.35", "q": "0.001254", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042287+00:00"}
+{"payload": {"data": {"E": 1774535593630, "m": true, "p": "69722.82", "q": "0.00025", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042324+00:00"}
+{"payload": {"data": {"E": 1774535593201, "m": true, "p": "69729.68", "q": "0.001985", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042361+00:00"}
+{"payload": {"data": {"E": 1774535593201, "m": true, "p": "69729.68", "q": "0.001597", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042397+00:00"}
+{"payload": {"data": {"E": 1774535619284, "m": false, "p": "2078.61", "q": "0.1684", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042696+00:00"}
+{"payload": {"data": {"E": 1774535619284, "m": false, "p": "2078.61", "q": "0.1684", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042749+00:00"}
+{"payload": {"data": {"E": 1774535616690, "m": true, "p": "2078.7", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042791+00:00"}
+{"payload": {"data": {"E": 1774535614120, "m": true, "p": "2078.8", "q": "0.0075", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042831+00:00"}
+{"payload": {"data": {"E": 1774535610964, "m": true, "p": "2078.8", "q": "0.001", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042870+00:00"}
+{"payload": {"data": {"E": 1774535610880, "m": false, "p": "2078.81", "q": "0.0009", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042908+00:00"}
+{"payload": {"data": {"E": 1774535610880, "m": false, "p": "2078.81", "q": "0.0001", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042944+00:00"}
+{"payload": {"data": {"E": 1774535609947, "m": true, "p": "2078.9", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.042980+00:00"}
+{"payload": {"data": {"E": 1774535609051, "m": true, "p": "2079", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043017+00:00"}
+{"payload": {"data": {"E": 1774535609051, "m": true, "p": "2079.1", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043053+00:00"}
+{"payload": {"data": {"E": 1774535607424, "m": true, "p": "2079.2", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043089+00:00"}
+{"payload": {"data": {"E": 1774535605147, "m": true, "p": "2079.3", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043125+00:00"}
+{"payload": {"data": {"E": 1774535603681, "m": false, "p": "2079.55", "q": "0.049", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043161+00:00"}
+{"payload": {"data": {"E": 1774535603515, "m": false, "p": "2079.31", "q": "0.3006", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043197+00:00"}
+{"payload": {"data": {"E": 1774535602833, "m": true, "p": "2079.4", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043233+00:00"}
+{"payload": {"data": {"E": 1774535600855, "m": false, "p": "2079.71", "q": "0.1541", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043270+00:00"}
+{"payload": {"data": {"E": 1774535600855, "m": false, "p": "2079.71", "q": "0.0699", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043306+00:00"}
+{"payload": {"data": {"E": 1774535600359, "m": false, "p": "2079.51", "q": "0.6283", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043341+00:00"}
+{"payload": {"data": {"E": 1774535600359, "m": false, "p": "2079.51", "q": "0.244", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043379+00:00"}
+{"payload": {"data": {"E": 1774535600349, "m": true, "p": "2079.5", "q": "0.0623", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043432+00:00"}
+{"payload": {"data": {"E": 1774535600349, "m": true, "p": "2079.5", "q": "0.3297", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043469+00:00"}
+{"payload": {"data": {"E": 1774535600349, "m": true, "p": "2079.5", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043506+00:00"}
+{"payload": {"data": {"E": 1774535600335, "m": true, "p": "2079.6", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043545+00:00"}
+{"payload": {"data": {"E": 1774535600335, "m": true, "p": "2079.7", "q": "0.023", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043585+00:00"}
+{"payload": {"data": {"E": 1774535600335, "m": true, "p": "2079.7", "q": "0.023", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043625+00:00"}
+{"payload": {"data": {"E": 1774535600335, "m": true, "p": "2079.7", "q": "0.219", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043668+00:00"}
+{"payload": {"data": {"E": 1774535600334, "m": true, "p": "2079.7", "q": "0.0231", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043705+00:00"}
+{"payload": {"data": {"E": 1774535600334, "m": true, "p": "2079.7", "q": "0.0146", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043741+00:00"}
+{"payload": {"data": {"E": 1774535600334, "m": true, "p": "2079.7", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043779+00:00"}
+{"payload": {"data": {"E": 1774535600138, "m": false, "p": "2079.71", "q": "0.3037", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043815+00:00"}
+{"payload": {"data": {"E": 1774535599530, "m": true, "p": "2079.8", "q": "0.0085", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043852+00:00"}
+{"payload": {"data": {"E": 1774535599489, "m": true, "p": "2079.86", "q": "0.0592", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043888+00:00"}
+{"payload": {"data": {"E": 1774535599489, "m": true, "p": "2079.86", "q": "0.0205", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043924+00:00"}
+{"payload": {"data": {"E": 1774535595767, "m": false, "p": "2080.01", "q": "0.6283", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043961+00:00"}
+{"payload": {"data": {"E": 1774535595767, "m": false, "p": "2080.01", "q": "0.3034", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.043997+00:00"}
+{"payload": {"data": {"E": 1774535595767, "m": false, "p": "2080.01", "q": "0.3006", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044033+00:00"}
+{"payload": {"data": {"E": 1774535593202, "m": true, "p": "2080.54", "q": "0.0328", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044069+00:00"}
+{"payload": {"data": {"E": 1774535593202, "m": true, "p": "2080.54", "q": "0.1452", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044105+00:00"}
+{"payload": {"data": {"E": 1774535593202, "m": true, "p": "2080.54", "q": "0.0184", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044142+00:00"}
+{"payload": {"data": {"E": 1774535591989, "m": true, "p": "2080.6", "q": "0.0327", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044180+00:00"}
+{"payload": {"data": {"E": 1774535591988, "m": true, "p": "2080.6", "q": "0.0327", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044216+00:00"}
+{"payload": {"data": {"E": 1774535591912, "m": true, "p": "2080.4", "q": "0.0095", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044252+00:00"}
+{"payload": {"data": {"E": 1774535591088, "m": true, "p": "2080.24", "q": "0.0095", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044301+00:00"}
+{"payload": {"data": {"E": 1774535591087, "m": true, "p": "2080.24", "q": "0.0095", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044337+00:00"}
+{"payload": {"data": {"E": 1774535591085, "m": true, "p": "2080.24", "q": "0.0095", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044372+00:00"}
+{"payload": {"data": {"E": 1774535590661, "m": false, "p": "2079.96", "q": "0.028", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044407+00:00"}
+{"payload": {"data": {"E": 1774535590247, "m": false, "p": "2079.96", "q": "0.023", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044443+00:00"}
+{"payload": {"data": {"E": 1774535588024, "m": true, "p": "2079.86", "q": "0.0011", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044478+00:00"}
+{"payload": {"data": {"E": 1774535588024, "m": true, "p": "2079.86", "q": "0.0089", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044514+00:00"}
+{"payload": {"data": {"E": 1774535586933, "m": true, "p": "2079.86", "q": "0.0558", "s": "ETHUSDT"}, "stream": "ethusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044549+00:00"}
+{"payload": {"data": {"E": 1774535618445, "m": false, "p": "87.73", "q": "0.1224", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044661+00:00"}
+{"payload": {"data": {"E": 1774535614121, "m": true, "p": "87.72", "q": "0.1607", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044701+00:00"}
+{"payload": {"data": {"E": 1774535614121, "m": true, "p": "87.72", "q": "0.058", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044737+00:00"}
+{"payload": {"data": {"E": 1774535614121, "m": true, "p": "87.72", "q": "0.0532", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044772+00:00"}
+{"payload": {"data": {"E": 1774535614121, "m": true, "p": "87.72", "q": "0.0581", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044807+00:00"}
+{"payload": {"data": {"E": 1774535614120, "m": true, "p": "87.72", "q": "0.3919", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044843+00:00"}
+{"payload": {"data": {"E": 1774535614120, "m": true, "p": "87.72", "q": "0.032", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044879+00:00"}
+{"payload": {"data": {"E": 1774535609060, "m": true, "p": "87.73", "q": "0.058", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044914+00:00"}
+{"payload": {"data": {"E": 1774535609060, "m": true, "p": "87.73", "q": "0.0532", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044949+00:00"}
+{"payload": {"data": {"E": 1774535609060, "m": true, "p": "87.73", "q": "0.032", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.044985+00:00"}
+{"payload": {"data": {"E": 1774535609060, "m": true, "p": "87.73", "q": "0.45", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045020+00:00"}
+{"payload": {"data": {"E": 1774535606601, "m": true, "p": "87.74", "q": "0.058", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045055+00:00"}
+{"payload": {"data": {"E": 1774535606601, "m": true, "p": "87.74", "q": "0.0532", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045090+00:00"}
+{"payload": {"data": {"E": 1774535606601, "m": true, "p": "87.74", "q": "0.45", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045125+00:00"}
+{"payload": {"data": {"E": 1774535606601, "m": true, "p": "87.74", "q": "0.032", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045160+00:00"}
+{"payload": {"data": {"E": 1774535604735, "m": true, "p": "87.75", "q": "0.0532", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045208+00:00"}
+{"payload": {"data": {"E": 1774535604735, "m": true, "p": "87.75", "q": "0.032", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045306+00:00"}
+{"payload": {"data": {"E": 1774535604735, "m": true, "p": "87.75", "q": "0.1139", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045349+00:00"}
+{"payload": {"data": {"E": 1774535604735, "m": true, "p": "87.75", "q": "0.45", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045388+00:00"}
+{"payload": {"data": {"E": 1774535602113, "m": true, "p": "87.76", "q": "0.3794", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045426+00:00"}
+{"payload": {"data": {"E": 1774535602113, "m": true, "p": "87.76", "q": "3.3507", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045465+00:00"}
+{"payload": {"data": {"E": 1774535602113, "m": true, "p": "87.76", "q": "0.1595", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045502+00:00"}
+{"payload": {"data": {"E": 1774535602113, "m": true, "p": "87.76", "q": "1.0102", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045540+00:00"}
+{"payload": {"data": {"E": 1774535599489, "m": true, "p": "87.77", "q": "0.7588", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045576+00:00"}
+{"payload": {"data": {"E": 1774535598645, "m": true, "p": "87.78", "q": "1.5176", "s": "SOLUSDT"}, "stream": "solusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045613+00:00"}
+{"payload": {"data": {"E": 1774535618819, "m": true, "p": "69647.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045935+00:00"}
+{"payload": {"data": {"E": 1774535618819, "m": true, "p": "69647.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.045992+00:00"}
+{"payload": {"data": {"E": 1774535618819, "m": true, "p": "69647.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046037+00:00"}
+{"payload": {"data": {"E": 1774535618810, "m": true, "p": "69647.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046080+00:00"}
+{"payload": {"data": {"E": 1774535618810, "m": true, "p": "69647.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046120+00:00"}
+{"payload": {"data": {"E": 1774535618789, "m": false, "p": "69648", "ps": "BTCUSDT", "q": "0.0014", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046158+00:00"}
+{"payload": {"data": {"E": 1774535618788, "m": false, "p": "69648", "ps": "BTCUSDT", "q": "0.0014", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046196+00:00"}
+{"payload": {"data": {"E": 1774535618788, "m": false, "p": "69648", "ps": "BTCUSDT", "q": "0.0014", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046234+00:00"}
+{"payload": {"data": {"E": 1774535618782, "m": false, "p": "69648", "ps": "BTCUSDT", "q": "0.0008", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046271+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69646.4", "ps": "BTCUSDT", "q": "0.0021", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046309+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69647", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046346+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69646.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046384+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69646.5", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046435+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69646.4", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046473+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69646.2", "ps": "BTCUSDT", "q": "0.0003", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046511+00:00"}
+{"payload": {"data": {"E": 1774535618774, "m": false, "p": "69645.9", "ps": "BTCUSDT", "q": "0.0037", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046550+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.9", "ps": "BTCUSDT", "q": "0.0007", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046588+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.9", "ps": "BTCUSDT", "q": "0.0006", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046625+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.9", "ps": "BTCUSDT", "q": "0.0001", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046663+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.8", "ps": "BTCUSDT", "q": "0.0009", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046700+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.8", "ps": "BTCUSDT", "q": "0.0009", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046738+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.8", "ps": "BTCUSDT", "q": "0.0009", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046776+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.8", "ps": "BTCUSDT", "q": "0.0009", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046814+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.8", "ps": "BTCUSDT", "q": "0.0009", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046851+00:00"}
+{"payload": {"data": {"E": 1774535618773, "m": false, "p": "69645.8", "ps": "BTCUSDT", "q": "0.0009", "s": "BTCUSDT"}, "stream": "btcusdt@trade"}, "timestamp": "2026-03-26T14:33:40.046888+00:00"}

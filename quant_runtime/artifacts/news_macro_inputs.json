@@ -1,0 +1,22 @@
+{
+  "btc_safe_haven_score": 0.35,
+  "directional_bearish_score": 0.985938,
+  "dxy_change_30d_pct": 0.6,
+  "event_risk_score": 0.65,
+  "execution_risk_score": 0.460938,
+  "fed_balance_sheet_30d_pct": -0.05,
+  "fed_liquidity_score": 0.35,
+  "labor_stress_score": 0.72,
+  "mmf_30d_pct": 0.05,
+  "news_bearish_score": 1.0,
+  "news_bullish_score": 0.2875,
+  "news_majors_only_bias": 1.0,
+  "news_uncertainty_score": 0.46875,
+  "official_high_impact_window": 0.0,
+  "oil_momentum_pct": 13.0,
+  "policy_easing_score": 0.2,
+  "tga_drain_score": 0.45,
+  "truflation_yoy": 2.9,
+  "us10y_change_30d_bps": 8.0,
+  "us10y_yield": 4.8
+}

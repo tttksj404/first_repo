@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-04-20T01:29:53.263118+00:00",
+  "query_count": 1,
+  "queries": [
+    "﻿bitcoin"
+  ],
+  "args": {
+    "output_root": "quant_runtime\\artifacts\\threads_coin_intel",
+    "queries_file": ".tmp_threads_queries.txt",
+    "search_scrolls": 0,
+    "profile_scrolls": 0,
+    "wait_ms": 900,
+    "max_posts_per_query": 2,
+    "max_profile_users": 1,
+    "max_posts_per_profile": 2,
+    "http_timeout_s": 25,
+    "locale": "ko-KR",
+    "crawl_external_links": true,
+    "external_max_links_per_post": 3,
+    "external_max_depth": 1,
+    "external_max_pages_per_root": 3,
+    "external_max_total_pages": 12,
+    "external_max_children_per_page": 5
+  },
+  "raw_hits": 0,
+  "unique_posts": 0,
+  "enriched_posts": 0,
+  "usable_posts": 0,
+  "external_seed_links": 0,
+  "external_pages_crawled": 0,
+  "external_usable_pages": 0,
+  "combined_usable_records": 0
+}

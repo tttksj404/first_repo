@@ -1,0 +1,6 @@
+﻿{
+    "target_seconds":  2700,
+    "pid":  8472,
+    "probe":  "quant_runtime/realtime_candidate_probe13_rotation_holdtp_45m",
+    "started_at":  "2026-04-20T16:20:29.6218108+09:00"
+}

@@ -4,6 +4,8 @@ set -eu
 BASE_DIR="${1:-quant_runtime}"
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+SUPERVISOR_STOP_FILE="$REPO_ROOT/scripts/_supervisor_stop"
+SUPERVISOR_HEALTH_FILE="$BASE_DIR/live_supervisor_health.json"
 run_python() { sh "$SCRIPT_DIR/quant_python.sh" "$@"; }
 
 OVERVIEW_FILE="$(run_python - <<'PY' "$BASE_DIR"
@@ -51,16 +53,99 @@ PY
 if [ -n "$OVERVIEW_FILE" ]; then
   echo "OVERVIEW_FILE=$OVERVIEW_FILE"
   echo
-  run_python - <<'PY' "$OVERVIEW_FILE"
+  run_python - <<'PY' "$OVERVIEW_FILE" "$SUPERVISOR_HEALTH_FILE" "$SUPERVISOR_STOP_FILE" "$BASE_DIR"
+from datetime import datetime, timezone
 import json, sys
 from pathlib import Path
+
 overview_path = Path(sys.argv[1])
+health_path = Path(sys.argv[2])
+stop_path = Path(sys.argv[3])
+base_dir = Path(sys.argv[4])
 data = json.loads(overview_path.read_text(encoding='utf-8'))
 summary_path = overview_path.with_name("summary.json")
 summary = json.loads(summary_path.read_text(encoding='utf-8')) if summary_path.exists() else {}
+
+
+def parse_dt(raw):
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+
+
+def stop_requested(path: Path) -> bool:
+    if not path.exists():
+        return False
+    try:
+        return "stop" in path.read_text(encoding="utf-8", errors="ignore").lower()
+    except OSError:
+        return False
+
+
+def load_health(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def snapshot_timestamp(primary_path: Path, payload: dict) -> datetime | None:
+    updated_at = parse_dt(payload.get("updated_at"))
+    if updated_at is not None:
+        return updated_at
+    try:
+        return datetime.fromtimestamp(primary_path.stat().st_mtime, tz=timezone.utc)
+    except OSError:
+        return None
+
+
+def live_stop_state_applies(runtime_path: Path) -> bool:
+    return "paper50" not in runtime_path.name.lower()
+
+
+health = load_health(health_path)
+stop_active = live_stop_state_applies(base_dir) and stop_requested(stop_path)
+health_status = str(health.get("status") or "")
+health_reason = str(health.get("reason") or "")
+raw_status = data.get("status")
+snapshot_dt = snapshot_timestamp(overview_path, data)
+snapshot_age_minutes = None
+if snapshot_dt is not None:
+    snapshot_age_minutes = (datetime.now(tz=timezone.utc) - snapshot_dt.astimezone(timezone.utc)).total_seconds() / 60.0
+snapshot_stale = snapshot_age_minutes is not None and snapshot_age_minutes > 30.0
+
+effective_status = raw_status or health_status or "unknown"
+effective_reason = ""
+if stop_active or health_status == "stopped":
+    effective_status = "stopped"
+    effective_reason = health_reason or "supervisor_stop_requested"
+elif health_status and health_status not in {"healthy", "unknown"}:
+    effective_status = health_status
+    effective_reason = health_reason
+elif snapshot_stale:
+    effective_status = "stale"
+    effective_reason = "runtime_snapshot_stale"
+
+print("updated_at:", data.get("updated_at"))
+print("status:", effective_status)
+if raw_status not in (None, "", effective_status):
+    print("summary_status:", raw_status)
+if effective_reason:
+    print("status_reason:", effective_reason)
+print("stop_requested:", stop_active)
+print("supervisor_status:", health_status or "unavailable")
+if health_reason:
+    print("supervisor_reason:", health_reason)
+if snapshot_age_minutes is not None:
+    print("snapshot_age_minutes:", round(snapshot_age_minutes, 1))
+print("snapshot_stale:", snapshot_stale)
 for key in [
-    'updated_at',
-    'status',
     'decision_count',
     'heartbeat_count',
     'last_event_timestamp',
@@ -167,16 +252,98 @@ fi
 echo "STATE_FILE=$STATE_FILE"
 [ -n "$SUMMARY_FILE" ] && echo "SUMMARY_FILE=$SUMMARY_FILE"
 echo
-run_python - <<'PY' "$STATE_FILE" "$SUMMARY_FILE"
+run_python - <<'PY' "$STATE_FILE" "$SUMMARY_FILE" "$SUPERVISOR_HEALTH_FILE" "$SUPERVISOR_STOP_FILE" "$BASE_DIR"
+from datetime import datetime, timezone
 import json, sys
 from pathlib import Path
 
 state_path = Path(sys.argv[1])
 summary_path = Path(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] else None
+health_path = Path(sys.argv[3])
+stop_path = Path(sys.argv[4])
+base_dir = Path(sys.argv[5])
 state = json.loads(state_path.read_text(encoding='utf-8'))
 summary = json.loads(summary_path.read_text(encoding='utf-8')) if summary_path and summary_path.exists() else {}
 
+
+def parse_dt(raw):
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+
+
+def stop_requested(path: Path) -> bool:
+    if not path.exists():
+        return False
+    try:
+        return "stop" in path.read_text(encoding="utf-8", errors="ignore").lower()
+    except OSError:
+        return False
+
+
+def load_health(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def snapshot_timestamp(primary_path: Path, payload: dict) -> datetime | None:
+    updated_at = parse_dt(payload.get("updated_at"))
+    if updated_at is not None:
+        return updated_at
+    try:
+        return datetime.fromtimestamp(primary_path.stat().st_mtime, tz=timezone.utc)
+    except OSError:
+        return None
+
+
+def live_stop_state_applies(runtime_path: Path) -> bool:
+    return "paper50" not in runtime_path.name.lower()
+
+
+health = load_health(health_path)
+stop_active = live_stop_state_applies(base_dir) and stop_requested(stop_path)
+health_status = str(health.get("status") or "")
+health_reason = str(health.get("reason") or "")
+raw_status = summary.get("status") or state.get("status")
+snapshot_dt = snapshot_timestamp(state_path, state)
+snapshot_age_minutes = None
+if snapshot_dt is not None:
+    snapshot_age_minutes = (datetime.now(tz=timezone.utc) - snapshot_dt.astimezone(timezone.utc)).total_seconds() / 60.0
+snapshot_stale = snapshot_age_minutes is not None and snapshot_age_minutes > 30.0
+
+effective_status = raw_status or health_status or "unknown"
+effective_reason = ""
+if stop_active or health_status == "stopped":
+    effective_status = "stopped"
+    effective_reason = health_reason or "supervisor_stop_requested"
+elif health_status and health_status not in {"healthy", "unknown"}:
+    effective_status = health_status
+    effective_reason = health_reason
+elif snapshot_stale:
+    effective_status = "stale"
+    effective_reason = "runtime_snapshot_stale"
+
 print("updated_at:", state.get("updated_at"))
+print("status:", effective_status)
+if raw_status not in (None, "", effective_status):
+    print("summary_status:", raw_status)
+if effective_reason:
+    print("status_reason:", effective_reason)
+print("stop_requested:", stop_active)
+print("supervisor_status:", health_status or "unavailable")
+if health_reason:
+    print("supervisor_reason:", health_reason)
+if snapshot_age_minutes is not None:
+    print("snapshot_age_minutes:", round(snapshot_age_minutes, 1))
+print("snapshot_stale:", snapshot_stale)
 print("heartbeat_count:", state.get("heartbeat_count"))
 print("decision_count:", state.get("decision_count"))
 print("tested_order_count:", state.get("tested_order_count"))

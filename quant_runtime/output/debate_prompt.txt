@@ -1,0 +1,50 @@
+전수 조합 앙상블 백테스트 결과 (992개 설정, 20코인, 375일 1h 데이터)
+
+5 팩터: A(Vol-Momentum), B(Cross-Sectional Rank), C(Short-Term Reversal), D(Regime Gate), E(BTC-Residual)
+31개 팩터 조합 × 4 가중치(equal/mom_heavy/rev_heavy/alpha_mix) × 4 레버리지(5/10/15/20x) × 2 마진(50/75%)
+총 992개 설정 전수 탐색, 960개 수익 가능
+
+비용: RT 0.12% (수수료+슬리피지), 펀딩비 0.01%/8h, SL -15% ROE, 7일 홀드, 쿨다운 48h
+MC 시뮬 2000회, Walk-Forward 4-fold
+
+개별 팩터 베스트 (20x 기준):
+  A(Vol-Momentum): EV=$14.79 PF=2.88 WR=24.6% ruin=17.8% WF=3/4 PnL=$+962
+  B(Cross-Sectional): EV=$11.15 PF=2.32 WR=19.2% ruin=34.1% WF=2/4 PnL=$+814
+  C(Reversal): EV=$17.68 PF=3.33 WR=28.2% ruin=14.8% WF=4/4 PnL=$+689
+  D(Regime): 단독 viable 없음
+  E(BTC-Residual): EV=$12.96 PF=2.57 WR=19.7% ruin=32.5% WF=3/4 PnL=$+920
+
+앙상블 Top 10 (EV 기준):
+  1. CE equal 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.2% WF=4/4 PnL=$+1900
+  2. CE mom_heavy 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.4% WF=4/4 PnL=$+1900
+  3. CE rev_heavy 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.5% WF=4/4 PnL=$+1900
+  4. CE alpha_mix 20x 75%: EV=$27.53 PF=4.42 WR=23.2% ruin=18.3% WF=4/4 PnL=$+1900
+  5. CDE equal 20x 75%: EV=$26.51 PF=4.24 WR=21.7% ruin=19.8% WF=4/4 PnL=$+1829
+  6. BC equal 20x 75%: EV=$25.47 PF=4.08 WR=21.1% ruin=19.7% WF=4/4 PnL=$+1808
+  7. BC rev_heavy 20x 75%: EV=$25.47 PF=4.08 WR=21.1% ruin=18.6% WF=4/4 PnL=$+1808
+  8. BCE rev_heavy 20x 75%: EV=$25.47 PF=4.08 WR=21.1% ruin=19.2% WF=4/4 PnL=$+1808
+  9. BCD equal 20x 75%: EV=$24.48 PF=3.92 WR=19.7% ruin=23.2% WF=4/4 PnL=$+1738
+ 10. CE equal 20x 50%: EV=$18.35 PF=4.42 WR=23.2% ruin=9.5% WF=4/4 PnL=$+1266
+
+안전 설정 (ruin<10%):
+  CE equal 20x 50%: EV=$18.35 PF=4.42 ruin=9.5% WF=4/4
+  CE mom_heavy 20x 50%: EV=$18.35 PF=4.42 ruin=7.6% WF=4/4
+
+주요 코인 분포: MATIC(11), WIF(7), UNI(6), OP(5), ARB(5)
+$75 시작 자본 기준
+
+---
+
+위 전수 조합 앙상블 백테스트 결과를 독립적으로 평가해주세요.
+
+반드시 답해야 할 질문:
+1. 최적 팩터 조합은? (CE, CDE, BCE, ABCDE 등) 구체적 이유
+2. 최적 레버리지/마진 설정은? 안전성 vs 수익성 트레이드오프 분석
+3. ruin 9.5%(CE 20x 50%) vs ruin 18.2%(CE 20x 75%) — 프로덕션에 적합한 쪽은?
+4. 개별 C만 쓰는 것 대비 CE 앙상블의 실질적 이점이 있는가? 정량적 비교
+5. WR 23%로 낮은데 PF 4.42인 이유와 이것이 실전에서 지속 가능한지
+6. 이 전략의 가장 큰 리스크 3가지 (오버피팅, 유동성, 레짐 변화 등)
+7. 375일(1년) 데이터로 충분한가? 백테스트 기간 관련 우려
+8. 최종 추천 설정 1개와 그 이유
+
+한국어로 상세하게 답변해주세요.

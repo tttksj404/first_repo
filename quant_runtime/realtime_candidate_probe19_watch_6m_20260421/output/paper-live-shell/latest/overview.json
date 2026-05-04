@@ -1,0 +1,138 @@
+{
+  "decision_count": 75,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 50.0,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 50.0,
+  "futures_manual_handling_balance_usd": 1.11722,
+  "futures_total_reusable_balance_usd": 50.0,
+  "futures_transferable_execution_balance_usd": 0.007689,
+  "heartbeat_count": 46177,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-04-20T23:21:30.378074+00:00",
+  "last_decision_timestamp": "2026-04-20T23:21:00+00:00",
+  "last_event_timestamp": "2026-04-20T23:21:42.113650+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.151923,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -22.871923,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 66.43,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.152585,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -22.872585,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 66.43,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.153248,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -22.873248,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 66.43,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.152916,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -22.872916,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 66.43,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.152585,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -22.872585,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "LIQUIDITY_TOO_WEAK"
+      ],
+      "score": 66.43,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.007689,
+  "status": "healthy",
+  "tested_order_count": 0,
+  "top_rejection_reasons": {
+    "BUYING_INTO_RESISTANCE": 32,
+    "DIRECTION_CONFLICT": 70,
+    "EDGE_BELOW_COST": 71,
+    "EDGE_TOO_THIN": 5,
+    "LIQUIDITY_TOO_WEAK": 71,
+    "SCORE_TOO_LOW": 71,
+    "SENTIMENT_TOO_WEAK": 15,
+    "SUPPORT_NOT_CONFIRMED": 44
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-04-20T23:21:42.440149+00:00"
+}

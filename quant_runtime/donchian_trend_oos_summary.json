@@ -1,0 +1,241 @@
+{
+  "generated_at": "2026-04-26T01:10:36Z",
+  "n_symbols": 20,
+  "n_bars": 9000,
+  "n_variants": 216,
+  "qualified_count": 0,
+  "elapsed_sec": 132.0,
+  "top10": [
+    {
+      "label": "d100|reg0|tp5.0|sl1.5|h24",
+      "v": {
+        "donch_period": 100,
+        "require_regime": false,
+        "tp_atr": 5.0,
+        "sl_atr": 1.5,
+        "hold": 24
+      },
+      "train": {
+        "n": 2932,
+        "wr": 0.354,
+        "pnl": 276.49,
+        "pf": 1.066
+      },
+      "test": {
+        "n": 1088,
+        "wr": 0.3033,
+        "pnl": 69.47,
+        "pf": 1.044
+      },
+      "total_pnl": 345.96
+    },
+    {
+      "label": "d50|reg1|tp5.0|sl1.5|h24",
+      "v": {
+        "donch_period": 50,
+        "require_regime": true,
+        "tp_atr": 5.0,
+        "sl_atr": 1.5,
+        "hold": 24
+      },
+      "train": {
+        "n": 2826,
+        "wr": 0.3471,
+        "pnl": 154.42,
+        "pf": 1.039
+      },
+      "test": {
+        "n": 1103,
+        "wr": 0.3182,
+        "pnl": 182.67,
+        "pf": 1.116
+      },
+      "total_pnl": 337.1
+    },
+    {
+      "label": "d50|reg0|tp5.0|sl1.0|h24",
+      "v": {
+        "donch_period": 50,
+        "require_regime": false,
+        "tp_atr": 5.0,
+        "sl_atr": 1.0,
+        "hold": 24
+      },
+      "train": {
+        "n": 4490,
+        "wr": 0.2546,
+        "pnl": -100.91,
+        "pf": 0.98
+      },
+      "test": {
+        "n": 1632,
+        "wr": 0.2751,
+        "pnl": 430.62,
+        "pf": 1.253
+      },
+      "total_pnl": 329.71
+    },
+    {
+      "label": "d50|reg0|tp5.0|sl1.5|h24",
+      "v": {
+        "donch_period": 50,
+        "require_regime": false,
+        "tp_atr": 5.0,
+        "sl_atr": 1.5,
+        "hold": 24
+      },
+      "train": {
+        "n": 4490,
+        "wr": 0.3428,
+        "pnl": 9.49,
+        "pf": 1.002
+      },
+      "test": {
+        "n": 1632,
+        "wr": 0.3419,
+        "pnl": 317.42,
+        "pf": 1.147
+      },
+      "total_pnl": 326.91
+    },
+    {
+      "label": "d100|reg0|tp5.0|sl1.0|h24",
+      "v": {
+        "donch_period": 100,
+        "require_regime": false,
+        "tp_atr": 5.0,
+        "sl_atr": 1.0,
+        "hold": 24
+      },
+      "train": {
+        "n": 2932,
+        "wr": 0.2619,
+        "pnl": 106.37,
+        "pf": 1.031
+      },
+      "test": {
+        "n": 1088,
+        "wr": 0.2436,
+        "pnl": 198.47,
+        "pf": 1.16
+      },
+      "total_pnl": 304.84
+    },
+    {
+      "label": "d50|reg0|tp5.0|sl2.0|h24",
+      "v": {
+        "donch_period": 50,
+        "require_regime": false,
+        "tp_atr": 5.0,
+        "sl_atr": 2.0,
+        "hold": 24
+      },
+      "train": {
+        "n": 4490,
+        "wr": 0.3993,
+        "pnl": -28.73,
+        "pf": 0.996
+      },
+      "test": {
+        "n": 1632,
+        "wr": 0.4007,
+        "pnl": 252.37,
+        "pf": 1.104
+      },
+      "total_pnl": 223.65
+    },
+    {
+      "label": "d100|reg0|tp2.0|sl1.5|h48",
+      "v": {
+        "donch_period": 100,
+        "require_regime": false,
+        "tp_atr": 2.0,
+        "sl_atr": 1.5,
+        "hold": 48
+      },
+      "train": {
+        "n": 2932,
+        "wr": 0.458,
+        "pnl": 98.07,
+        "pf": 1.027
+      },
+      "test": {
+        "n": 1083,
+        "wr": 0.4543,
+        "pnl": 121.28,
+        "pf": 1.094
+      },
+      "total_pnl": 219.34
+    },
+    {
+      "label": "d100|reg1|tp5.0|sl1.5|h24",
+      "v": {
+        "donch_period": 100,
+        "require_regime": true,
+        "tp_atr": 5.0,
+        "sl_atr": 1.5,
+        "hold": 24
+      },
+      "train": {
+        "n": 2362,
+        "wr": 0.3497,
+        "pnl": 165.89,
+        "pf": 1.049
+      },
+      "test": {
+        "n": 894,
+        "wr": 0.2942,
+        "pnl": 46.57,
+        "pf": 1.034
+      },
+      "total_pnl": 212.47
+    },
+    {
+      "label": "d50|reg1|tp5.0|sl2.0|h24",
+      "v": {
+        "donch_period": 50,
+        "require_regime": true,
+        "tp_atr": 5.0,
+        "sl_atr": 2.0,
+        "hold": 24
+      },
+      "train": {
+        "n": 2826,
+        "wr": 0.4006,
+        "pnl": 89.3,
+        "pf": 1.02
+      },
+      "test": {
+        "n": 1103,
+        "wr": 0.3817,
+        "pnl": 120.04,
+        "pf": 1.068
+      },
+      "total_pnl": 209.35
+    },
+    {
+      "label": "d100|reg0|tp4.0|sl1.5|h24",
+      "v": {
+        "donch_period": 100,
+        "require_regime": false,
+        "tp_atr": 4.0,
+        "sl_atr": 1.5,
+        "hold": 24
+      },
+      "train": {
+        "n": 2932,
+        "wr": 0.3636,
+        "pnl": 208.9,
+        "pf": 1.051
+      },
+      "test": {
+        "n": 1088,
+        "wr": 0.3171,
+        "pnl": -1.54,
+        "pf": 0.999
+      },
+      "total_pnl": 207.36
+    }
+  ],
+  "qualified": []
+}

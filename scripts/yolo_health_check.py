@@ -37,6 +37,16 @@ issues_found = 0
 manual_needed = 0
 
 
+def live_stop_requested() -> bool:
+    for stop_file in (REPO / "scripts" / "_supervisor_stop", REPO / "scripts" / "_safety_guardian_stop"):
+        try:
+            if stop_file.exists() and "stop" in stop_file.read_text(encoding="utf-8", errors="ignore").lower():
+                return True
+        except OSError:
+            continue
+    return False
+
+
 def log(msg: str) -> None:
     print(f"[YOLO_HEALTH] {msg}")
 
@@ -60,6 +70,10 @@ def manual(msg: str) -> None:
 
 
 def check_and_fix():
+    if live_stop_requested():
+        log("live stop sentinel present — skip automated health fixes")
+        return
+
     creds = load_exchange_credentials_from_env()
     client = BitgetRestClient(credentials=creds)
 

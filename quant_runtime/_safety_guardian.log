@@ -1,0 +1,16 @@
+[2026-04-15T05:45:05+00:00] guardian starting; interval=20s
+[2026-04-15T06:04:10+00:00] GAP PEPEUSDT:long qty=192921000.0 entry=3.57114678e-06 mark=3.5714e-06 stop_fraction=0.005000 -> registering SL=0.0000035533 (oid=guardian-PEPEUSDT-long-7ca551c7)
+[2026-04-15T06:04:10+00:00] SL placed for PEPEUSDT:long: {'status': 'SUCCESS', 'exchange': 'bitget', 'market': 'futures', 'raw': {'code': '00000', 'msg': 'success', 'requestTime': 1776233049117, 'data': [{'orderId': '1428190410959740928', 'stopSurplusClient
+[2026-04-15T06:05:10+00:00] GAP PEPEUSDT:long qty=192921000.0 entry=3.57114678e-06 mark=3.5704e-06 stop_fraction=0.005000 -> registering SL=0.0000035533 (oid=guardian-PEPEUSDT-long-8b67c7e3)
+[2026-04-15T06:05:10+00:00] SL placed for PEPEUSDT:long: {'status': 'SUCCESS', 'exchange': 'bitget', 'market': 'futures', 'raw': {'code': '00000', 'msg': 'success', 'requestTime': 1776233109464, 'data': [{'orderId': '1428190664063442947', 'stopSurplusClient
+[2026-04-15T06:06:10+00:00] GAP PEPEUSDT:long qty=192921000.0 entry=3.57114678e-06 mark=3.5718e-06 stop_fraction=0.005000 -> registering SL=0.0000035533 (oid=guardian-PEPEUSDT-long-be6b216b)
+[2026-04-15T06:06:10+00:00] SL placed for PEPEUSDT:long: {'status': 'SUCCESS', 'exchange': 'bitget', 'market': 'futures', 'raw': {'code': '00000', 'msg': 'success', 'requestTime': 1776233169821, 'data': [{'orderId': '1428190917233205248', 'stopSurplusClient
+[2026-04-15T06:08:51+00:00] GAP PEPEUSDT:long qty=192921000.0 entry=3.57114678e-06 mark=3.5713e-06 stop_fraction=0.005000 -> registering SL=0.0000035533 (oid=guardian-PEPEUSDT-long-f663aa55)
+[2026-04-15T06:08:51+00:00] SL placed for PEPEUSDT:long: {'status': 'SUCCESS', 'exchange': 'bitget', 'market': 'futures', 'raw': {'code': '00000', 'msg': 'success', 'requestTime': 1776233330644, 'data': [{'orderId': '1428191591769563136', 'stopSurplusClient
+[2026-04-15T06:09:51+00:00] GAP PEPEUSDT:long qty=192921000.0 entry=3.57114678e-06 mark=3.5764e-06 stop_fraction=0.005000 -> registering SL=0.0000035533 (oid=guardian-PEPEUSDT-long-bb046c37)
+[2026-04-15T06:09:52+00:00] SL placed for PEPEUSDT:long: {'status': 'SUCCESS', 'exchange': 'bitget', 'market': 'futures', 'raw': {'code': '00000', 'msg': 'success', 'requestTime': 1776233390997, 'data': [{'orderId': '1428191844906819587', 'stopSurplusClient
+[2026-04-15T06:23:55+00:00] stop file present; exiting
+[2026-04-15T06:47:45+00:00] guardian starting; interval=20s
+[2026-04-15T06:48:05+00:00] stop file present; exiting
+[2026-04-15T06:50:21+00:00] guardian starting; interval=20s
+[2026-04-15T06:50:41+00:00] stop file present; exiting
