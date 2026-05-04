@@ -1,0 +1,303 @@
+{
+  "best_candidate": {
+    "cash_count": 2,
+    "futures_count": 0,
+    "name": "active-baseline",
+    "objective_score": 9.062277,
+    "overrides": {},
+    "spot_count": 1,
+    "symbols": [
+      {
+        "final_mode": "cash",
+        "gross_expected_edge_bps": 32.819577,
+        "net_expected_edge_bps": 12.815277,
+        "predictability_score": 58.46143,
+        "rejection_reasons": [
+          "EDGE_BELOW_COST",
+          "EDGE_TOO_THIN",
+          "SCORE_TOO_LOW",
+          "SENTIMENT_CAUTION",
+          "VOL_TOO_HIGH"
+        ],
+        "symbol": "BTCUSDT"
+      },
+      {
+        "final_mode": "spot",
+        "gross_expected_edge_bps": 28.39885,
+        "net_expected_edge_bps": 8.251361,
+        "predictability_score": 55.062385,
+        "rejection_reasons": [
+          "EDGE_BELOW_COST",
+          "EDGE_TOO_THIN",
+          "SCORE_TOO_LOW",
+          "SENTIMENT_CAUTION",
+          "VOL_TOO_HIGH"
+        ],
+        "symbol": "ETHUSDT"
+      },
+      {
+        "final_mode": "cash",
+        "gross_expected_edge_bps": 28.69225,
+        "net_expected_edge_bps": 5.182471,
+        "predictability_score": 55.257735,
+        "rejection_reasons": [
+          "EDGE_BELOW_COST",
+          "EDGE_TOO_THIN",
+          "SCORE_TOO_LOW",
+          "SENTIMENT_CAUTION",
+          "VOL_TOO_HIGH"
+        ],
+        "symbol": "SOLUSDT"
+      }
+    ],
+    "total_negative_net_edge_bps": 0.0,
+    "total_positive_net_edge_bps": 26.249109
+  },
+  "candidates": [
+    {
+      "cash_count": 2,
+      "futures_count": 0,
+      "name": "active-baseline",
+      "objective_score": 9.062277,
+      "overrides": {},
+      "spot_count": 1,
+      "symbols": [
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 32.819577,
+          "net_expected_edge_bps": 12.815277,
+          "predictability_score": 58.46143,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "BTCUSDT"
+        },
+        {
+          "final_mode": "spot",
+          "gross_expected_edge_bps": 28.39885,
+          "net_expected_edge_bps": 8.251361,
+          "predictability_score": 55.062385,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "ETHUSDT"
+        },
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 28.69225,
+          "net_expected_edge_bps": 5.182471,
+          "predictability_score": 55.257735,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "SOLUSDT"
+        }
+      ],
+      "total_negative_net_edge_bps": 0.0,
+      "total_positive_net_edge_bps": 26.249109
+    },
+    {
+      "cash_count": 2,
+      "futures_count": 0,
+      "name": "active-futures-lean",
+      "objective_score": 9.062277,
+      "overrides": {
+        "futures_exposure": {
+          "macro_edge_to_cost_multiple_min": 0.75,
+          "macro_min_entry_net_edge_bps": 0.0,
+          "macro_score_relaxation": 6.0,
+          "priority_allow_caution": true,
+          "priority_edge_to_cost_multiple_min": 0.65,
+          "priority_min_entry_net_edge_bps": 0.0,
+          "priority_score_relaxation": 6.5,
+          "priority_volatility_relaxation": 0.15
+        }
+      },
+      "spot_count": 1,
+      "symbols": [
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 32.819577,
+          "net_expected_edge_bps": 12.815277,
+          "predictability_score": 58.46143,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "BTCUSDT"
+        },
+        {
+          "final_mode": "spot",
+          "gross_expected_edge_bps": 28.39885,
+          "net_expected_edge_bps": 8.251361,
+          "predictability_score": 55.062385,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "ETHUSDT"
+        },
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 28.69225,
+          "net_expected_edge_bps": 5.182471,
+          "predictability_score": 55.257735,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "SOLUSDT"
+        }
+      ],
+      "total_negative_net_edge_bps": 0.0,
+      "total_positive_net_edge_bps": 26.249109
+    },
+    {
+      "cash_count": 2,
+      "futures_count": 0,
+      "name": "active-alt-spot-lean",
+      "objective_score": 9.062277,
+      "overrides": {
+        "spot_support": {
+          "priority_edge_relaxation_bps": 4.0,
+          "priority_liquidity_relaxation": 0.2
+        }
+      },
+      "spot_count": 1,
+      "symbols": [
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 32.819577,
+          "net_expected_edge_bps": 12.815277,
+          "predictability_score": 58.46143,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "BTCUSDT"
+        },
+        {
+          "final_mode": "spot",
+          "gross_expected_edge_bps": 28.39885,
+          "net_expected_edge_bps": 8.251361,
+          "predictability_score": 55.062385,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "ETHUSDT"
+        },
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 28.69225,
+          "net_expected_edge_bps": 5.182471,
+          "predictability_score": 55.257735,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "SOLUSDT"
+        }
+      ],
+      "total_negative_net_edge_bps": 0.0,
+      "total_positive_net_edge_bps": 26.249109
+    },
+    {
+      "cash_count": 2,
+      "futures_count": 0,
+      "name": "active-rotation-lean",
+      "objective_score": 9.062277,
+      "overrides": {
+        "futures_exposure": {
+          "priority_min_entry_net_edge_bps": 0.25,
+          "priority_score_relaxation": 5.5
+        },
+        "portfolio_focus": {
+          "futures_top_n": 1,
+          "min_incremental_pnl_usd": 0.5,
+          "min_net_edge_advantage_bps": 1.0,
+          "min_score_advantage_to_replace": 2.0,
+          "spot_top_n": 1
+        }
+      },
+      "spot_count": 1,
+      "symbols": [
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 32.819577,
+          "net_expected_edge_bps": 12.815277,
+          "predictability_score": 58.46143,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "BTCUSDT"
+        },
+        {
+          "final_mode": "spot",
+          "gross_expected_edge_bps": 28.39885,
+          "net_expected_edge_bps": 8.251361,
+          "predictability_score": 55.062385,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "ETHUSDT"
+        },
+        {
+          "final_mode": "cash",
+          "gross_expected_edge_bps": 28.69225,
+          "net_expected_edge_bps": 5.182471,
+          "predictability_score": 55.257735,
+          "rejection_reasons": [
+            "EDGE_BELOW_COST",
+            "EDGE_TOO_THIN",
+            "SCORE_TOO_LOW",
+            "SENTIMENT_CAUTION",
+            "VOL_TOO_HIGH"
+          ],
+          "symbol": "SOLUSDT"
+        }
+      ],
+      "total_negative_net_edge_bps": 0.0,
+      "total_positive_net_edge_bps": 26.249109
+    }
+  ],
+  "generated_at": "2026-03-10T21:39:25.270597+00:00"
+}

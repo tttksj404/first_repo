@@ -30,6 +30,37 @@ rotate_if_large() {
 rotate_if_large "$OUTPUT_BASE/_paper50.out.log"
 rotate_if_large "$OUTPUT_BASE/_paper50.err.log"
 
+slot_pid() {
+  slot_path="$1"
+  awk 'NR == 1 { print $1; exit }' "$slot_path" 2>/dev/null || true
+}
+
+pid_is_visible() {
+  pid="$1"
+  case "$pid" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+  if kill -0 "$pid" 2>/dev/null; then
+    return 0
+  fi
+  if command -v lsof >/dev/null 2>&1 && lsof -a -p "$pid" -d cwd >/dev/null 2>&1; then
+    return 0
+  fi
+  if ps -p "$pid" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+MONITOR_PID_PATH="$OUTPUT_BASE/_monitor.pid"
+EXISTING_MONITOR_PID="$(slot_pid "$MONITOR_PID_PATH")"
+if ! pid_is_visible "$EXISTING_MONITOR_PID"; then
+  nohup sh -c "
+    printf '%s\n' \"\$\$\" > '$MONITOR_PID_PATH'
+    exec sh '$SCRIPT_DIR/quant_python.sh' scripts/monitor_daemon_health.py '$OUTPUT_BASE'
+  " >/dev/null 2>>"$OUTPUT_BASE/_paper50.err.log" &
+fi
+
 export QUANT_READ_ONLY_PAPER_MODE=1
 export QUANT_PAPER_VERIFY_EQUITY_USD=50
 export QUANT_PAPER_VERIFY_USE_CAPPED_ENTRY=1
@@ -40,6 +71,7 @@ export STRATEGY_OVERRIDE_PATH="$OUTPUT_BASE/paper50_multi_symbol_filters.json"
 export STRATEGY_PROFILE=live-ultra-aggressive
 export UNIVERSE_SYMBOLS=PEPEUSDT,DOGEUSDT,XRPUSDT,SOLUSDT,ETHUSDT,BTCUSDT
 export QUANT_TELEGRAM_NOTIFICATIONS=0
+export QUANT_CROSS_COIN_GATE=1
 export SELF_HEAL_MAX_STALL_RESTARTS=999
 export NO_PROXY=*
 export no_proxy=*

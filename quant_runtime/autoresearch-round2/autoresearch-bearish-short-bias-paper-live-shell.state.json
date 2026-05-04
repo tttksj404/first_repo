@@ -1,0 +1,26 @@
+{
+  "capital_report": {},
+  "decision_count": 1,
+  "heartbeat_count": 1,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_timestamp": "2026-03-11T14:13:50.115989+00:00",
+  "last_event_timestamp": "2026-03-11T14:13:50.115989+00:00",
+  "live_decision_loop": {
+    "closed_decision_kline_count": 1,
+    "dropped_closed_decision_kline_reasons": {},
+    "emitted_decision_count": 1,
+    "last_closed_decision_kline_symbol": "BTCUSDT",
+    "last_closed_decision_time": "2026-03-08T12:05:00+00:00",
+    "last_drop_decision_time": null,
+    "last_drop_reason": null,
+    "last_drop_symbol": null,
+    "last_emitted_decision_time": "2026-03-08T12:05:00+00:00",
+    "last_emitted_symbol": "BTCUSDT"
+  },
+  "live_order_count": 0,
+  "tested_order_count": 0,
+  "updated_at": "2026-03-11T14:13:50.116868+00:00"
+}

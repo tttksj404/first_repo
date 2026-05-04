@@ -1,0 +1,138 @@
+{
+  "decision_count": 6,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 77.220955,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 94.759405,
+  "futures_manual_handling_balance_usd": 2.033354,
+  "futures_total_reusable_balance_usd": 79.475765,
+  "futures_transferable_execution_balance_usd": 0.221456,
+  "heartbeat_count": 43140,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-03-27T03:30:00.110183+00:00",
+  "last_decision_timestamp": "2026-03-27T03:30:00+00:00",
+  "last_event_timestamp": "2026-03-27T03:31:14.535625+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "spot",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.145603,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -20.145603,
+      "reasons": [
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN",
+        "FUTURES_OVERHEAT"
+      ],
+      "score": 64.48,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "spot",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.472383,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -23.472383,
+      "reasons": [
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN",
+        "FUTURES_OVERHEAT"
+      ],
+      "score": 70.63,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "spot",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.043582,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 22.743733,
+      "reasons": [
+        "FUTURES_OVERHEAT",
+        "SCORE_TOO_LOW",
+        "SENTIMENT_CAUTION",
+        "VOL_TOO_HIGH"
+      ],
+      "score": 71.63,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "BTCUSDT"
+    },
+    {
+      "candidate_mode": "cash",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.145372,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -20.145372,
+      "reasons": [
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN",
+        "FUTURES_OVERHEAT"
+      ],
+      "score": 54.4,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "spot",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.346781,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -20.346781,
+      "reasons": [
+        "ALT_FUTURES_NOT_READY",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN"
+      ],
+      "score": 56.63,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.221456,
+  "status": "healthy",
+  "tested_order_count": 0,
+  "top_rejection_reasons": {
+    "DIRECTION_CONFLICT": 5,
+    "EDGE_BELOW_COST": 5,
+    "EDGE_TOO_THIN": 5,
+    "FUTURES_OVERHEAT": 6,
+    "SCORE_TOO_LOW": 6,
+    "SENTIMENT_CAUTION": 5,
+    "SUPPORT_NOT_CONFIRMED": 3,
+    "VOL_TOO_HIGH": 6
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-03-27T03:31:14.609982+00:00"
+}

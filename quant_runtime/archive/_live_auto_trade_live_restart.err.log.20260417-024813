@@ -1,0 +1,5 @@
+
+=== supervisor spawn @ 2026-04-17T02:09:27+00:00 ===
+[POLICY_VALIDATION_CONTAMINATION] 1 inherited manual-close trade(s) excluded from policy validation - these positions were entered in a prior session and closed via MANUAL_CLOSE_SYNCED, not by the current strategy. Symbols: ['PEPEUSDT']. Excluding to prevent false rollback verdict.
+[POLICY_VALIDATION_CONTAMINATION] 1 inherited manual-close trade(s) excluded from policy validation - these positions were entered in a prior session and closed via MANUAL_CLOSE_SYNCED, not by the current strategy. Symbols: ['PEPEUSDT']. Excluding to prevent false rollback verdict.
+[POLICY_VALIDATION_CONTAMINATION] 1 inherited manual-close trade(s) excluded from policy validation - these positions were entered in a prior session and closed via MANUAL_CLOSE_SYNCED, not by the current strategy. Symbols: ['PEPEUSDT']. Excluding to prevent false rollback verdict.

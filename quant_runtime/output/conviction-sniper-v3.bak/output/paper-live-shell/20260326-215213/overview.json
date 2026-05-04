@@ -1,0 +1,86 @@
+{
+  "decision_count": 3,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 77.220955,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 77.220955,
+  "futures_manual_handling_balance_usd": 0,
+  "futures_total_reusable_balance_usd": 77.442411,
+  "futures_transferable_execution_balance_usd": 0.221456,
+  "heartbeat_count": 32580,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-03-26T21:52:16.888078+00:00",
+  "last_decision_timestamp": "2026-03-26T21:55:00+00:00",
+  "last_event_timestamp": "2026-03-26T21:57:04.349989+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION"
+      ],
+      "estimated_round_trip_cost_bps": 8.004354,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 12.617587,
+      "reasons": [],
+      "score": 70.97,
+      "side": "short",
+      "size_boost_reasons": [
+        "CONVICTION_COMPOSITE_OVERRIDE"
+      ],
+      "strategy_size_multiplier": 0.7,
+      "symbol": "BTCUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION"
+      ],
+      "estimated_round_trip_cost_bps": 8.145068,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 15.210069,
+      "reasons": [],
+      "score": 74.01,
+      "side": "short",
+      "size_boost_reasons": [
+        "CONVICTION_COMPOSITE_OVERRIDE"
+      ],
+      "strategy_size_multiplier": 0.7,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION"
+      ],
+      "estimated_round_trip_cost_bps": 11.45658,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 19.617907,
+      "reasons": [],
+      "score": 78.93,
+      "side": "short",
+      "size_boost_reasons": [
+        "CONVICTION_COMPOSITE_OVERRIDE"
+      ],
+      "strategy_size_multiplier": 0.7,
+      "symbol": "SOLUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.221456,
+  "status": "healthy",
+  "tested_order_count": 0,
+  "top_rejection_reasons": {},
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-03-26T21:57:04.400737+00:00"
+}

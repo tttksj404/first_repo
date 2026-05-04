@@ -1,0 +1,177 @@
+{
+  "decision_count": 500,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 50.0,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 50.0,
+  "futures_manual_handling_balance_usd": 1.120021,
+  "futures_total_reusable_balance_usd": 50.0,
+  "futures_transferable_execution_balance_usd": 0.011739,
+  "heartbeat_count": 9271908,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-04-26T14:20:00.132506+00:00",
+  "last_decision_timestamp": "2026-04-26T14:20:00+00:00",
+  "last_event_timestamp": "2026-04-26T14:24:35.224913+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": -0.529434,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 23.041363,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 8.663462,
+      "reasons": [
+        "ALT_FUTURES_NOT_READY",
+        "FUTURES_OVERHEAT",
+        "LIQUIDITY_TOO_WEAK",
+        "SENTIMENT_CAUTION"
+      ],
+      "score": 59.88,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 22.103344,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 21.682365,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "FUTURES_OVERHEAT",
+        "SENTIMENT_CAUTION",
+        "SENTIMENT_TOO_WEAK"
+      ],
+      "score": 70.22,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "XRPUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.34787,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 25.215307,
+      "reasons": [],
+      "score": 70.34,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "spot",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.128214,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": 4.349515,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "EDGE_BELOW_COST",
+        "EDGE_TOO_THIN",
+        "SCORE_TOO_LOW"
+      ],
+      "score": 55.97,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [],
+      "estimated_round_trip_cost_bps": 20.038474,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "cash",
+      "net_expected_edge_bps": -20.038474,
+      "reasons": [
+        "BUYING_INTO_RESISTANCE",
+        "DIRECTION_CONFLICT",
+        "EDGE_BELOW_COST",
+        "FUTURES_OVERHEAT"
+      ],
+      "score": 73.62,
+      "side": "flat",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "BTCUSDT"
+    }
+  ],
+  "reference_price_guard": {
+    "counts_by_symbol": {
+      "DOGEUSDT": 6,
+      "ETHUSDT": 9,
+      "PEPEUSDT": 9,
+      "SOLUSDT": 6,
+      "XRPUSDT": 7
+    },
+    "last_by_symbol": {
+      "DOGEUSDT": {
+        "deviation_bps": 74.237149,
+        "last_trade_price": 0.09766,
+        "observed_at": "2026-04-26T13:30:00+00:00",
+        "top_mid": 0.098385
+      },
+      "ETHUSDT": {
+        "deviation_bps": 88.752919,
+        "last_trade_price": 2312.6,
+        "observed_at": "2026-04-26T14:05:00+00:00",
+        "top_mid": 2333.125
+      },
+      "PEPEUSDT": {
+        "deviation_bps": 129.644063,
+        "last_trade_price": 3.849e-06,
+        "observed_at": "2026-04-26T13:00:00+00:00",
+        "top_mid": 3.8989e-06
+      },
+      "SOLUSDT": {
+        "deviation_bps": 60.370426,
+        "last_trade_price": 86.549,
+        "observed_at": "2026-04-26T12:55:00+00:00",
+        "top_mid": 86.0265
+      },
+      "XRPUSDT": {
+        "deviation_bps": 92.663289,
+        "last_trade_price": 1.4407,
+        "observed_at": "2026-04-26T10:30:00+00:00",
+        "top_mid": 1.4273500000000001
+      }
+    },
+    "total_count": 37
+  },
+  "spot_available_balance_usd": 0.011739,
+  "status": "healthy",
+  "tested_order_count": 14,
+  "top_rejection_reasons": {
+    "BUYING_INTO_RESISTANCE": 332,
+    "DIRECTION_CONFLICT": 205,
+    "EDGE_BELOW_COST": 258,
+    "EDGE_TOO_THIN": 133,
+    "FUTURES_OVERHEAT": 199,
+    "LIQUIDITY_TOO_WEAK": 236,
+    "SCORE_TOO_LOW": 183,
+    "SENTIMENT_CAUTION": 119
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-04-26T14:24:35.264926+00:00"
+}

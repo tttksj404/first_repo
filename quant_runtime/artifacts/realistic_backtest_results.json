@@ -1,0 +1,5416 @@
+[
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.16,
+    "pnl": -40.5,
+    "final_eq": 25.5,
+    "mdd": 43.05,
+    "fees": 54.84,
+    "slip": 10.28,
+    "fund": 0.13,
+    "avg_pnl": -0.16,
+    "best": 5.69,
+    "worst": -2.04
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.15,
+    "pnl": -40.71,
+    "final_eq": 25.29,
+    "mdd": 43.26,
+    "fees": 54.68,
+    "slip": 10.25,
+    "fund": 0.09,
+    "avg_pnl": -0.16,
+    "best": 5.69,
+    "worst": -2.02
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0644,
+    "pf": 0.06,
+    "pnl": -40.94,
+    "final_eq": 25.06,
+    "mdd": 40.99,
+    "fees": 52.94,
+    "slip": 9.93,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.57,
+    "worst": -1.51
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.06,
+    "pnl": -41.06,
+    "final_eq": 24.94,
+    "mdd": 41.14,
+    "fees": 52.78,
+    "slip": 9.9,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.61,
+    "worst": -1.51
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.12,
+    "pnl": -41.07,
+    "final_eq": 24.93,
+    "mdd": 42.16,
+    "fees": 53.68,
+    "slip": 10.07,
+    "fund": 0.13,
+    "avg_pnl": -0.16,
+    "best": 4.23,
+    "worst": -1.99
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.13,
+    "final_eq": 24.87,
+    "mdd": 41.15,
+    "fees": 52.73,
+    "slip": 9.89,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.63,
+    "worst": -1.51
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.13,
+    "final_eq": 24.87,
+    "mdd": 41.15,
+    "fees": 52.73,
+    "slip": 9.89,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.63,
+    "worst": -1.51
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.15,
+    "final_eq": 24.85,
+    "mdd": 41.17,
+    "fees": 52.67,
+    "slip": 9.87,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.6,
+    "worst": -1.51
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.2,
+    "final_eq": 24.8,
+    "mdd": 41.22,
+    "fees": 52.66,
+    "slip": 9.87,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.54,
+    "worst": -1.51
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.25,
+    "final_eq": 24.75,
+    "mdd": 41.27,
+    "fees": 52.62,
+    "slip": 9.86,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.48,
+    "worst": -1.51
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.28,
+    "final_eq": 24.72,
+    "mdd": 41.3,
+    "fees": 52.58,
+    "slip": 9.86,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.42,
+    "worst": -1.5
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.12,
+    "pnl": -41.28,
+    "final_eq": 24.72,
+    "mdd": 42.37,
+    "fees": 53.53,
+    "slip": 10.04,
+    "fund": 0.09,
+    "avg_pnl": -0.17,
+    "best": 4.23,
+    "worst": -1.97
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.28,
+    "final_eq": 24.72,
+    "mdd": 41.3,
+    "fees": 52.58,
+    "slip": 9.86,
+    "fund": 0.01,
+    "avg_pnl": -0.16,
+    "best": 0.42,
+    "worst": -1.5
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.11,
+    "pnl": -41.38,
+    "final_eq": 24.62,
+    "mdd": 41.6,
+    "fees": 53.11,
+    "slip": 9.96,
+    "fund": 0.13,
+    "avg_pnl": -0.17,
+    "best": 3.36,
+    "worst": -1.97
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0644,
+    "pf": 0.06,
+    "pnl": -41.57,
+    "final_eq": 24.43,
+    "mdd": 41.62,
+    "fees": 52.1,
+    "slip": 9.77,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.57,
+    "worst": -2.77
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0644,
+    "pf": 0.06,
+    "pnl": -41.57,
+    "final_eq": 24.43,
+    "mdd": 41.62,
+    "fees": 52.1,
+    "slip": 9.77,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.57,
+    "worst": -2.77
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.11,
+    "pnl": -41.59,
+    "final_eq": 24.41,
+    "mdd": 41.8,
+    "fees": 52.96,
+    "slip": 9.93,
+    "fund": 0.09,
+    "avg_pnl": -0.17,
+    "best": 3.36,
+    "worst": -1.95
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.6,
+    "final_eq": 24.4,
+    "mdd": 41.68,
+    "fees": 52.06,
+    "slip": 9.76,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.61,
+    "worst": -2.6
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.67,
+    "final_eq": 24.33,
+    "mdd": 41.69,
+    "fees": 52.02,
+    "slip": 9.75,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.63,
+    "worst": -2.6
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.74,
+    "final_eq": 24.26,
+    "mdd": 41.76,
+    "fees": 51.95,
+    "slip": 9.74,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.54,
+    "worst": -2.59
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.75,
+    "final_eq": 24.25,
+    "mdd": 41.77,
+    "fees": 51.91,
+    "slip": 9.73,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.63,
+    "worst": -2.77
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.75,
+    "final_eq": 24.25,
+    "mdd": 41.77,
+    "fees": 51.91,
+    "slip": 9.73,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.63,
+    "worst": -2.77
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.77,
+    "final_eq": 24.23,
+    "mdd": 41.8,
+    "fees": 51.84,
+    "slip": 9.72,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.58,
+    "worst": -2.76
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.77,
+    "final_eq": 24.23,
+    "mdd": 41.8,
+    "fees": 51.84,
+    "slip": 9.72,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.58,
+    "worst": -2.76
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.79,
+    "final_eq": 24.21,
+    "mdd": 41.81,
+    "fees": 51.91,
+    "slip": 9.73,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.48,
+    "worst": -2.59
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.82,
+    "final_eq": 24.18,
+    "mdd": 41.84,
+    "fees": 51.86,
+    "slip": 9.72,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.42,
+    "worst": -2.59
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -41.82,
+    "final_eq": 24.18,
+    "mdd": 41.84,
+    "fees": 51.86,
+    "slip": 9.72,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.42,
+    "worst": -2.59
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -42.1,
+    "final_eq": 23.9,
+    "mdd": 42.18,
+    "fees": 51.41,
+    "slip": 9.64,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.61,
+    "worst": -3.6
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -42.23,
+    "final_eq": 23.77,
+    "mdd": 42.26,
+    "fees": 51.29,
+    "slip": 9.62,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.54,
+    "worst": -3.59
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -42.31,
+    "final_eq": 23.69,
+    "mdd": 42.33,
+    "fees": 51.21,
+    "slip": 9.6,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.42,
+    "worst": -3.59
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -42.57,
+    "final_eq": 23.43,
+    "mdd": 42.59,
+    "fees": 50.82,
+    "slip": 9.53,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.63,
+    "worst": -4.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -42.69,
+    "final_eq": 23.31,
+    "mdd": 42.71,
+    "fees": 50.71,
+    "slip": 9.51,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.48,
+    "worst": -4.41
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0556,
+    "pf": 0.15,
+    "pnl": -42.71,
+    "final_eq": 23.29,
+    "mdd": 45.26,
+    "fees": 54.05,
+    "slip": 10.13,
+    "fund": 0.05,
+    "avg_pnl": -0.17,
+    "best": 5.69,
+    "worst": -1.91
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.04,
+    "pnl": -42.72,
+    "final_eq": 23.28,
+    "mdd": 42.74,
+    "fees": 50.67,
+    "slip": 9.5,
+    "fund": 0.02,
+    "avg_pnl": -0.16,
+    "best": 0.42,
+    "worst": -4.4
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0556,
+    "pf": 0.12,
+    "pnl": -43.23,
+    "final_eq": 22.77,
+    "mdd": 44.32,
+    "fees": 52.91,
+    "slip": 9.92,
+    "fund": 0.05,
+    "avg_pnl": -0.17,
+    "best": 4.23,
+    "worst": -1.86
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0556,
+    "pf": 0.1,
+    "pnl": -43.52,
+    "final_eq": 22.48,
+    "mdd": 43.73,
+    "fees": 52.35,
+    "slip": 9.82,
+    "fund": 0.05,
+    "avg_pnl": -0.17,
+    "best": 3.36,
+    "worst": -1.85
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.13,
+    "pnl": -43.74,
+    "final_eq": 22.26,
+    "mdd": 45.42,
+    "fees": 53.56,
+    "slip": 10.04,
+    "fund": 0.1,
+    "avg_pnl": -0.17,
+    "best": 4.82,
+    "worst": -1.86
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.13,
+    "pnl": -43.91,
+    "final_eq": 22.09,
+    "mdd": 45.59,
+    "fees": 53.34,
+    "slip": 10.0,
+    "fund": 0.14,
+    "avg_pnl": -0.17,
+    "best": 4.82,
+    "worst": -2.87
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.1,
+    "pnl": -44.17,
+    "final_eq": 21.83,
+    "mdd": 44.68,
+    "fees": 52.65,
+    "slip": 9.87,
+    "fund": 0.09,
+    "avg_pnl": -0.18,
+    "best": 3.65,
+    "worst": -1.82
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0635,
+    "pf": 0.09,
+    "pnl": -44.31,
+    "final_eq": 21.69,
+    "mdd": 44.31,
+    "fees": 52.22,
+    "slip": 9.79,
+    "fund": 0.09,
+    "avg_pnl": -0.18,
+    "best": 2.95,
+    "worst": -1.8
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.1,
+    "pnl": -44.34,
+    "final_eq": 21.66,
+    "mdd": 44.84,
+    "fees": 52.43,
+    "slip": 9.83,
+    "fund": 0.14,
+    "avg_pnl": -0.18,
+    "best": 3.65,
+    "worst": -2.81
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0635,
+    "pf": 0.09,
+    "pnl": -44.47,
+    "final_eq": 21.53,
+    "mdd": 44.47,
+    "fees": 52.01,
+    "slip": 9.75,
+    "fund": 0.14,
+    "avg_pnl": -0.18,
+    "best": 2.95,
+    "worst": -2.79
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 254,
+    "wr": 0.0551,
+    "pf": 0.12,
+    "pnl": -44.9,
+    "final_eq": 21.1,
+    "mdd": 46.58,
+    "fees": 53.13,
+    "slip": 9.96,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 4.82,
+    "worst": -1.81
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 254,
+    "wr": 0.0551,
+    "pf": 0.1,
+    "pnl": -45.31,
+    "final_eq": 20.69,
+    "mdd": 45.81,
+    "fees": 52.22,
+    "slip": 9.79,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 3.65,
+    "worst": -1.77
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 254,
+    "wr": 0.0591,
+    "pf": 0.09,
+    "pnl": -45.44,
+    "final_eq": 20.56,
+    "mdd": 45.44,
+    "fees": 51.8,
+    "slip": 9.71,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 2.95,
+    "worst": -1.76
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0538,
+    "pf": 0.1,
+    "pnl": -47.33,
+    "final_eq": 18.67,
+    "mdd": 48.13,
+    "fees": 51.97,
+    "slip": 9.74,
+    "fund": 0.04,
+    "avg_pnl": -0.18,
+    "best": 3.94,
+    "worst": -2.64
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0734,
+    "pf": 0.08,
+    "pnl": -47.47,
+    "final_eq": 18.53,
+    "mdd": 47.51,
+    "fees": 64.12,
+    "slip": 12.02,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.57,
+    "worst": -1.42
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.56,
+    "final_eq": 18.44,
+    "mdd": 47.57,
+    "fees": 63.84,
+    "slip": 11.97,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.65,
+    "worst": -1.41
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.56,
+    "final_eq": 18.44,
+    "mdd": 47.57,
+    "fees": 63.84,
+    "slip": 11.97,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.65,
+    "worst": -1.41
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0577,
+    "pf": 0.08,
+    "pnl": -47.61,
+    "final_eq": 18.39,
+    "mdd": 47.61,
+    "fees": 51.16,
+    "slip": 9.59,
+    "fund": 0.03,
+    "avg_pnl": -0.18,
+    "best": 2.54,
+    "worst": -2.59
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0577,
+    "pf": 0.1,
+    "pnl": -47.61,
+    "final_eq": 18.39,
+    "mdd": 48.41,
+    "fees": 51.94,
+    "slip": 9.74,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 3.94,
+    "worst": -2.61
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0577,
+    "pf": 0.1,
+    "pnl": -47.61,
+    "final_eq": 18.39,
+    "mdd": 48.41,
+    "fees": 51.94,
+    "slip": 9.74,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 3.94,
+    "worst": -2.61
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0538,
+    "pf": 0.09,
+    "pnl": -47.62,
+    "final_eq": 18.38,
+    "mdd": 47.62,
+    "fees": 51.36,
+    "slip": 9.63,
+    "fund": 0.03,
+    "avg_pnl": -0.18,
+    "best": 3.07,
+    "worst": -2.61
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.64,
+    "final_eq": 18.36,
+    "mdd": 47.66,
+    "fees": 63.91,
+    "slip": 11.98,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.52,
+    "worst": -1.41
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.64,
+    "final_eq": 18.36,
+    "mdd": 47.7,
+    "fees": 63.99,
+    "slip": 12.0,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.61,
+    "worst": -1.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.7,
+    "final_eq": 18.3,
+    "mdd": 47.72,
+    "fees": 63.86,
+    "slip": 11.97,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.54,
+    "worst": -1.41
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.71,
+    "final_eq": 18.29,
+    "mdd": 47.72,
+    "fees": 63.73,
+    "slip": 11.95,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.58,
+    "worst": -1.41
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -47.84,
+    "final_eq": 18.16,
+    "mdd": 47.86,
+    "fees": 63.6,
+    "slip": 11.93,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.53,
+    "worst": -1.41
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -47.84,
+    "final_eq": 18.16,
+    "mdd": 47.86,
+    "fees": 63.6,
+    "slip": 11.93,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.53,
+    "worst": -1.41
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0615,
+    "pf": 0.08,
+    "pnl": -47.89,
+    "final_eq": 18.11,
+    "mdd": 47.89,
+    "fees": 51.13,
+    "slip": 9.59,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 2.54,
+    "worst": -2.57
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0615,
+    "pf": 0.08,
+    "pnl": -47.89,
+    "final_eq": 18.11,
+    "mdd": 47.89,
+    "fees": 51.13,
+    "slip": 9.59,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 2.54,
+    "worst": -2.57
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0577,
+    "pf": 0.08,
+    "pnl": -47.89,
+    "final_eq": 18.11,
+    "mdd": 47.89,
+    "fees": 51.33,
+    "slip": 9.62,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 3.07,
+    "worst": -2.58
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 260,
+    "wr": 0.0577,
+    "pf": 0.08,
+    "pnl": -47.89,
+    "final_eq": 18.11,
+    "mdd": 47.89,
+    "fees": 51.33,
+    "slip": 9.62,
+    "fund": 0.05,
+    "avg_pnl": -0.18,
+    "best": 3.07,
+    "worst": -2.58
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0734,
+    "pf": 0.08,
+    "pnl": -47.94,
+    "final_eq": 18.06,
+    "mdd": 47.97,
+    "fees": 63.13,
+    "slip": 11.84,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.56,
+    "worst": -2.6
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0734,
+    "pf": 0.08,
+    "pnl": -47.94,
+    "final_eq": 18.06,
+    "mdd": 47.97,
+    "fees": 63.13,
+    "slip": 11.84,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.56,
+    "worst": -2.6
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -47.96,
+    "final_eq": 18.04,
+    "mdd": 47.97,
+    "fees": 62.99,
+    "slip": 11.81,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.63,
+    "worst": -2.43
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.02,
+    "final_eq": 17.98,
+    "mdd": 48.04,
+    "fees": 62.86,
+    "slip": 11.79,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.63,
+    "worst": -2.59
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.02,
+    "final_eq": 17.98,
+    "mdd": 48.04,
+    "fees": 62.86,
+    "slip": 11.79,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.63,
+    "worst": -2.59
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.04,
+    "final_eq": 17.96,
+    "mdd": 48.1,
+    "fees": 63.13,
+    "slip": 11.84,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.61,
+    "worst": -2.44
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.1,
+    "final_eq": 17.9,
+    "mdd": 48.12,
+    "fees": 62.92,
+    "slip": 11.8,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.51,
+    "worst": -2.59
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.1,
+    "final_eq": 17.9,
+    "mdd": 48.12,
+    "fees": 62.92,
+    "slip": 11.8,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.51,
+    "worst": -2.59
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.1,
+    "final_eq": 17.9,
+    "mdd": 48.12,
+    "fees": 62.88,
+    "slip": 11.79,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.57,
+    "worst": -2.43
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.1,
+    "final_eq": 17.9,
+    "mdd": 48.11,
+    "fees": 63.0,
+    "slip": 11.81,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.53,
+    "worst": -2.43
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.24,
+    "final_eq": 17.76,
+    "mdd": 48.25,
+    "fees": 62.75,
+    "slip": 11.77,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.52,
+    "worst": -2.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.24,
+    "final_eq": 17.76,
+    "mdd": 48.25,
+    "fees": 62.75,
+    "slip": 11.77,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.52,
+    "worst": -2.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 302,
+    "wr": 0.0596,
+    "pf": 0.12,
+    "pnl": -48.36,
+    "final_eq": 17.64,
+    "mdd": 49.6,
+    "fees": 56.94,
+    "slip": 10.68,
+    "fund": 0.12,
+    "avg_pnl": -0.16,
+    "best": 5.58,
+    "worst": -3.4
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.41,
+    "final_eq": 17.59,
+    "mdd": 48.47,
+    "fees": 62.35,
+    "slip": 11.69,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.61,
+    "worst": -3.37
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.47,
+    "final_eq": 17.53,
+    "mdd": 48.49,
+    "fees": 62.1,
+    "slip": 11.64,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.56,
+    "worst": -3.36
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.6,
+    "final_eq": 17.4,
+    "mdd": 48.62,
+    "fees": 61.97,
+    "slip": 11.62,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.51,
+    "worst": -3.36
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.08,
+    "pnl": -48.63,
+    "final_eq": 17.37,
+    "mdd": 48.64,
+    "fees": 61.56,
+    "slip": 11.54,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.61,
+    "worst": -4.14
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 302,
+    "wr": 0.0596,
+    "pf": 0.1,
+    "pnl": -48.69,
+    "final_eq": 17.31,
+    "mdd": 48.69,
+    "fees": 55.88,
+    "slip": 10.48,
+    "fund": 0.12,
+    "avg_pnl": -0.16,
+    "best": 4.15,
+    "worst": -3.33
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.76,
+    "final_eq": 17.24,
+    "mdd": 48.78,
+    "fees": 61.57,
+    "slip": 11.54,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.51,
+    "worst": -4.14
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 302,
+    "wr": 0.0596,
+    "pf": 0.09,
+    "pnl": -48.85,
+    "final_eq": 17.15,
+    "mdd": 48.85,
+    "fees": 55.41,
+    "slip": 10.39,
+    "fund": 0.12,
+    "avg_pnl": -0.16,
+    "best": 3.29,
+    "worst": -3.3
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 302,
+    "wr": 0.0596,
+    "pf": 0.12,
+    "pnl": -48.85,
+    "final_eq": 17.15,
+    "mdd": 50.09,
+    "fees": 58.96,
+    "slip": 11.05,
+    "fund": 0.18,
+    "avg_pnl": -0.16,
+    "best": 5.58,
+    "worst": -3.54
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 368,
+    "wr": 0.0679,
+    "pf": 0.07,
+    "pnl": -48.9,
+    "final_eq": 17.1,
+    "mdd": 48.92,
+    "fees": 61.33,
+    "slip": 11.5,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.5,
+    "worst": -4.12
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 302,
+    "wr": 0.0596,
+    "pf": 0.1,
+    "pnl": -49.16,
+    "final_eq": 16.84,
+    "mdd": 49.16,
+    "fees": 57.86,
+    "slip": 10.85,
+    "fund": 0.18,
+    "avg_pnl": -0.16,
+    "best": 4.15,
+    "worst": -3.47
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 302,
+    "wr": 0.0596,
+    "pf": 0.09,
+    "pnl": -49.33,
+    "final_eq": 16.67,
+    "mdd": 49.33,
+    "fees": 57.37,
+    "slip": 10.76,
+    "fund": 0.18,
+    "avg_pnl": -0.16,
+    "best": 3.29,
+    "worst": -3.43
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.48,
+    "final_eq": 16.52,
+    "mdd": 49.58,
+    "fees": 65.74,
+    "slip": 12.33,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.95,
+    "worst": -2.29
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.11,
+    "pnl": -49.5,
+    "final_eq": 16.5,
+    "mdd": 49.76,
+    "fees": 66.1,
+    "slip": 12.39,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.75,
+    "worst": -2.31
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.58,
+    "final_eq": 16.42,
+    "mdd": 49.68,
+    "fees": 65.78,
+    "slip": 12.33,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.89,
+    "worst": -2.3
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.62,
+    "final_eq": 16.38,
+    "mdd": 49.72,
+    "fees": 65.74,
+    "slip": 12.33,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.79,
+    "worst": -2.29
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.63,
+    "final_eq": 16.37,
+    "mdd": 49.73,
+    "fees": 65.62,
+    "slip": 12.3,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.87,
+    "worst": -2.29
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.75,
+    "final_eq": 16.25,
+    "mdd": 49.85,
+    "fees": 65.61,
+    "slip": 12.3,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.74,
+    "worst": -2.29
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.88,
+    "final_eq": 16.12,
+    "mdd": 49.98,
+    "fees": 65.41,
+    "slip": 12.26,
+    "fund": 0.07,
+    "avg_pnl": -0.13,
+    "best": 0.93,
+    "worst": -3.91
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0559,
+    "pf": 0.12,
+    "pnl": -49.88,
+    "final_eq": 16.12,
+    "mdd": 51.12,
+    "fees": 55.92,
+    "slip": 10.48,
+    "fund": 0.07,
+    "avg_pnl": -0.16,
+    "best": 5.58,
+    "worst": -2.98
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -49.96,
+    "final_eq": 16.04,
+    "mdd": 50.06,
+    "fees": 65.47,
+    "slip": 12.28,
+    "fund": 0.07,
+    "avg_pnl": -0.13,
+    "best": 0.87,
+    "worst": -3.93
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.02,
+    "final_eq": 15.98,
+    "mdd": 50.12,
+    "fees": 65.4,
+    "slip": 12.26,
+    "fund": 0.07,
+    "avg_pnl": -0.13,
+    "best": 0.77,
+    "worst": -3.92
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0559,
+    "pf": 0.1,
+    "pnl": -50.17,
+    "final_eq": 15.83,
+    "mdd": 50.17,
+    "fees": 54.88,
+    "slip": 10.29,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 4.15,
+    "worst": -2.92
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0592,
+    "pf": 0.11,
+    "pnl": -50.23,
+    "final_eq": 15.77,
+    "mdd": 50.6,
+    "fees": 56.33,
+    "slip": 10.56,
+    "fund": 0.12,
+    "avg_pnl": -0.17,
+    "best": 4.72,
+    "worst": -2.73
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.17,
+    "pnl": -50.27,
+    "final_eq": 15.73,
+    "mdd": 53.94,
+    "fees": 70.43,
+    "slip": 13.21,
+    "fund": 0.16,
+    "avg_pnl": -0.2,
+    "best": 8.33,
+    "worst": -2.56
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0559,
+    "pf": 0.09,
+    "pnl": -50.33,
+    "final_eq": 15.67,
+    "mdd": 50.33,
+    "fees": 54.42,
+    "slip": 10.2,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 3.29,
+    "worst": -2.89
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.4,
+    "final_eq": 15.6,
+    "mdd": 50.5,
+    "fees": 63.29,
+    "slip": 11.87,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.9,
+    "worst": -3.98
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.45,
+    "final_eq": 15.55,
+    "mdd": 50.55,
+    "fees": 64.69,
+    "slip": 12.13,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.77,
+    "worst": -3.38
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.46,
+    "final_eq": 15.54,
+    "mdd": 50.56,
+    "fees": 64.8,
+    "slip": 12.15,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.77,
+    "worst": -3.39
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.17,
+    "pnl": -50.46,
+    "final_eq": 15.54,
+    "mdd": 54.13,
+    "fees": 70.19,
+    "slip": 13.16,
+    "fund": 0.11,
+    "avg_pnl": -0.2,
+    "best": 8.33,
+    "worst": -2.13
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0592,
+    "pf": 0.09,
+    "pnl": -50.47,
+    "final_eq": 15.53,
+    "mdd": 50.47,
+    "fees": 55.47,
+    "slip": 10.4,
+    "fund": 0.11,
+    "avg_pnl": -0.17,
+    "best": 3.58,
+    "worst": -2.68
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.47,
+    "final_eq": 15.53,
+    "mdd": 50.57,
+    "fees": 63.35,
+    "slip": 11.88,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.84,
+    "worst": -4.0
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0779,
+    "pf": 0.1,
+    "pnl": -50.53,
+    "final_eq": 15.47,
+    "mdd": 50.71,
+    "fees": 64.93,
+    "slip": 12.18,
+    "fund": 0.01,
+    "avg_pnl": -0.13,
+    "best": 0.64,
+    "worst": -3.39
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.53,
+    "final_eq": 15.47,
+    "mdd": 50.78,
+    "fees": 63.25,
+    "slip": 11.86,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.7,
+    "worst": -4.46
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0625,
+    "pf": 0.08,
+    "pnl": -50.54,
+    "final_eq": 15.46,
+    "mdd": 50.54,
+    "fees": 55.11,
+    "slip": 10.33,
+    "fund": 0.11,
+    "avg_pnl": -0.17,
+    "best": 2.89,
+    "worst": -2.66
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.09,
+    "pnl": -50.54,
+    "final_eq": 15.46,
+    "mdd": 50.64,
+    "fees": 63.29,
+    "slip": 11.87,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.75,
+    "worst": -3.98
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0592,
+    "pf": 0.11,
+    "pnl": -50.55,
+    "final_eq": 15.45,
+    "mdd": 50.93,
+    "fees": 57.95,
+    "slip": 10.87,
+    "fund": 0.17,
+    "avg_pnl": -0.17,
+    "best": 4.72,
+    "worst": -2.84
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0644,
+    "pf": 0.06,
+    "pnl": -50.59,
+    "final_eq": 15.41,
+    "mdd": 50.63,
+    "fees": 65.06,
+    "slip": 12.2,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.77,
+    "worst": -2.01
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.09,
+    "pnl": -50.68,
+    "final_eq": 15.32,
+    "mdd": 50.78,
+    "fees": 62.77,
+    "slip": 11.77,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.82,
+    "worst": -4.42
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.7,
+    "final_eq": 15.3,
+    "mdd": 50.78,
+    "fees": 64.81,
+    "slip": 12.15,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.88,
+    "worst": -2.0
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.76,
+    "final_eq": 15.24,
+    "mdd": 50.78,
+    "fees": 64.72,
+    "slip": 12.13,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.84,
+    "worst": -2.0
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.09,
+    "pnl": -50.76,
+    "final_eq": 15.24,
+    "mdd": 50.86,
+    "fees": 62.78,
+    "slip": 11.77,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.7,
+    "worst": -4.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.76,
+    "final_eq": 15.24,
+    "mdd": 50.78,
+    "fees": 64.72,
+    "slip": 12.13,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.84,
+    "worst": -2.0
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.78,
+    "final_eq": 15.22,
+    "mdd": 50.8,
+    "fees": 64.6,
+    "slip": 12.11,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.65,
+    "worst": -1.99
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.14,
+    "pnl": -50.78,
+    "final_eq": 15.22,
+    "mdd": 52.31,
+    "fees": 68.34,
+    "slip": 12.81,
+    "fund": 0.15,
+    "avg_pnl": -0.2,
+    "best": 6.2,
+    "worst": -2.47
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0592,
+    "pf": 0.09,
+    "pnl": -50.79,
+    "final_eq": 15.21,
+    "mdd": 50.79,
+    "fees": 57.07,
+    "slip": 10.7,
+    "fund": 0.17,
+    "avg_pnl": -0.17,
+    "best": 3.58,
+    "worst": -2.79
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.83,
+    "final_eq": 15.17,
+    "mdd": 50.85,
+    "fees": 64.6,
+    "slip": 12.11,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.72,
+    "worst": -2.0
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.85,
+    "final_eq": 15.15,
+    "mdd": 51.1,
+    "fees": 62.53,
+    "slip": 11.72,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.69,
+    "worst": -4.46
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 304,
+    "wr": 0.0625,
+    "pf": 0.08,
+    "pnl": -50.86,
+    "final_eq": 15.14,
+    "mdd": 50.86,
+    "fees": 56.7,
+    "slip": 10.63,
+    "fund": 0.17,
+    "avg_pnl": -0.17,
+    "best": 2.89,
+    "worst": -2.77
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.87,
+    "final_eq": 15.13,
+    "mdd": 50.97,
+    "fees": 63.74,
+    "slip": 11.95,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.76,
+    "worst": -3.38
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.87,
+    "final_eq": 15.13,
+    "mdd": 50.97,
+    "fees": 63.74,
+    "slip": 11.95,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.76,
+    "worst": -3.38
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.87,
+    "final_eq": 15.13,
+    "mdd": 50.89,
+    "fees": 64.53,
+    "slip": 12.1,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.65,
+    "worst": -1.99
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.88,
+    "final_eq": 15.12,
+    "mdd": 50.98,
+    "fees": 63.84,
+    "slip": 11.97,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.75,
+    "worst": -3.39
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.1,
+    "pnl": -50.88,
+    "final_eq": 15.12,
+    "mdd": 50.98,
+    "fees": 63.84,
+    "slip": 11.97,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.75,
+    "worst": -3.39
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.9,
+    "final_eq": 15.1,
+    "mdd": 50.92,
+    "fees": 64.46,
+    "slip": 12.09,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.58,
+    "worst": -1.99
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -50.9,
+    "final_eq": 15.1,
+    "mdd": 50.92,
+    "fees": 64.46,
+    "slip": 12.09,
+    "fund": 0.01,
+    "avg_pnl": -0.19,
+    "best": 0.58,
+    "worst": -1.99
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0779,
+    "pf": 0.1,
+    "pnl": -50.94,
+    "final_eq": 15.06,
+    "mdd": 51.12,
+    "fees": 63.97,
+    "slip": 12.0,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.62,
+    "worst": -3.39
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0779,
+    "pf": 0.1,
+    "pnl": -50.94,
+    "final_eq": 15.06,
+    "mdd": 51.12,
+    "fees": 63.97,
+    "slip": 12.0,
+    "fund": 0.02,
+    "avg_pnl": -0.13,
+    "best": 0.62,
+    "worst": -3.39
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.14,
+    "pnl": -50.97,
+    "final_eq": 15.03,
+    "mdd": 52.5,
+    "fees": 68.1,
+    "slip": 12.77,
+    "fund": 0.1,
+    "avg_pnl": -0.2,
+    "best": 6.2,
+    "worst": -2.05
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.09,
+    "pnl": -50.99,
+    "final_eq": 15.01,
+    "mdd": 51.09,
+    "fees": 62.05,
+    "slip": 11.63,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.8,
+    "worst": -4.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.12,
+    "pnl": -51.06,
+    "final_eq": 14.94,
+    "mdd": 51.31,
+    "fees": 67.29,
+    "slip": 12.62,
+    "fund": 0.15,
+    "avg_pnl": -0.2,
+    "best": 4.91,
+    "worst": -2.43
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 398,
+    "wr": 0.0704,
+    "pf": 0.09,
+    "pnl": -51.07,
+    "final_eq": 14.93,
+    "mdd": 51.17,
+    "fees": 62.07,
+    "slip": 11.64,
+    "fund": 0.04,
+    "avg_pnl": -0.13,
+    "best": 0.68,
+    "worst": -4.42
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0644,
+    "pf": 0.06,
+    "pnl": -51.18,
+    "final_eq": 14.82,
+    "mdd": 51.22,
+    "fees": 63.65,
+    "slip": 11.93,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.77,
+    "worst": -3.68
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0644,
+    "pf": 0.06,
+    "pnl": -51.18,
+    "final_eq": 14.82,
+    "mdd": 51.22,
+    "fees": 63.65,
+    "slip": 11.93,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.77,
+    "worst": -3.68
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.21,
+    "final_eq": 14.79,
+    "mdd": 51.28,
+    "fees": 63.59,
+    "slip": 11.92,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.88,
+    "worst": -3.44
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 250,
+    "wr": 0.06,
+    "pf": 0.12,
+    "pnl": -51.24,
+    "final_eq": 14.76,
+    "mdd": 51.49,
+    "fees": 67.06,
+    "slip": 12.57,
+    "fund": 0.1,
+    "avg_pnl": -0.2,
+    "best": 4.91,
+    "worst": -2.03
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.27,
+    "final_eq": 14.73,
+    "mdd": 51.29,
+    "fees": 63.5,
+    "slip": 11.91,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.84,
+    "worst": -3.44
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.33,
+    "final_eq": 14.67,
+    "mdd": 51.35,
+    "fees": 63.39,
+    "slip": 11.89,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.72,
+    "worst": -3.43
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.35,
+    "final_eq": 14.65,
+    "mdd": 51.37,
+    "fees": 63.32,
+    "slip": 11.87,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.84,
+    "worst": -3.67
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.35,
+    "final_eq": 14.65,
+    "mdd": 51.37,
+    "fees": 63.32,
+    "slip": 11.87,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.84,
+    "worst": -3.67
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 306,
+    "wr": 0.0556,
+    "pf": 0.1,
+    "pnl": -51.36,
+    "final_eq": 14.64,
+    "mdd": 51.74,
+    "fees": 55.09,
+    "slip": 10.33,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 4.72,
+    "worst": -2.94
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.37,
+    "final_eq": 14.63,
+    "mdd": 51.39,
+    "fees": 63.2,
+    "slip": 11.85,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.63,
+    "worst": -3.65
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.37,
+    "final_eq": 14.63,
+    "mdd": 51.39,
+    "fees": 63.2,
+    "slip": 11.85,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.63,
+    "worst": -3.65
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.37,
+    "final_eq": 14.63,
+    "mdd": 51.39,
+    "fees": 63.32,
+    "slip": 11.87,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.65,
+    "worst": -3.43
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.04,
+    "pnl": -51.4,
+    "final_eq": 14.6,
+    "mdd": 51.42,
+    "fees": 63.25,
+    "slip": 11.86,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.58,
+    "worst": -3.42
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.04,
+    "pnl": -51.4,
+    "final_eq": 14.6,
+    "mdd": 51.42,
+    "fees": 63.25,
+    "slip": 11.86,
+    "fund": 0.02,
+    "avg_pnl": -0.19,
+    "best": 0.58,
+    "worst": -3.42
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 306,
+    "wr": 0.0556,
+    "pf": 0.08,
+    "pnl": -51.59,
+    "final_eq": 14.41,
+    "mdd": 51.59,
+    "fees": 54.26,
+    "slip": 10.17,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 3.58,
+    "worst": -2.89
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 306,
+    "wr": 0.0588,
+    "pf": 0.08,
+    "pnl": -51.65,
+    "final_eq": 14.35,
+    "mdd": 51.65,
+    "fees": 53.91,
+    "slip": 10.11,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 2.89,
+    "worst": -2.87
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.67,
+    "final_eq": 14.33,
+    "mdd": 51.75,
+    "fees": 62.48,
+    "slip": 11.71,
+    "fund": 0.03,
+    "avg_pnl": -0.2,
+    "best": 0.88,
+    "worst": -4.76
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -51.79,
+    "final_eq": 14.21,
+    "mdd": 51.81,
+    "fees": 62.28,
+    "slip": 11.68,
+    "fund": 0.03,
+    "avg_pnl": -0.2,
+    "best": 0.72,
+    "worst": -4.76
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.04,
+    "pnl": -51.86,
+    "final_eq": 14.14,
+    "mdd": 51.88,
+    "fees": 62.14,
+    "slip": 11.65,
+    "fund": 0.03,
+    "avg_pnl": -0.2,
+    "best": 0.58,
+    "worst": -4.74
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.05,
+    "pnl": -52.11,
+    "final_eq": 13.89,
+    "mdd": 52.13,
+    "fees": 61.47,
+    "slip": 11.53,
+    "fund": 0.03,
+    "avg_pnl": -0.2,
+    "best": 0.84,
+    "worst": -5.86
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.04,
+    "pnl": -52.21,
+    "final_eq": 13.79,
+    "mdd": 52.23,
+    "fees": 61.3,
+    "slip": 11.49,
+    "fund": 0.03,
+    "avg_pnl": -0.2,
+    "best": 0.65,
+    "worst": -5.83
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "short",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 264,
+    "wr": 0.0568,
+    "pf": 0.04,
+    "pnl": -52.24,
+    "final_eq": 13.76,
+    "mdd": 52.26,
+    "fees": 61.23,
+    "slip": 11.48,
+    "fund": 0.03,
+    "avg_pnl": -0.2,
+    "best": 0.58,
+    "worst": -5.82
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0556,
+    "pf": 0.17,
+    "pnl": -52.28,
+    "final_eq": 13.72,
+    "mdd": 55.95,
+    "fees": 69.09,
+    "slip": 12.95,
+    "fund": 0.06,
+    "avg_pnl": -0.21,
+    "best": 8.33,
+    "worst": -2.31
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0556,
+    "pf": 0.13,
+    "pnl": -52.72,
+    "final_eq": 13.28,
+    "mdd": 54.26,
+    "fees": 67.04,
+    "slip": 12.57,
+    "fund": 0.06,
+    "avg_pnl": -0.21,
+    "best": 6.2,
+    "worst": -2.22
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0556,
+    "pf": 0.11,
+    "pnl": -52.96,
+    "final_eq": 13.04,
+    "mdd": 53.21,
+    "fees": 66.01,
+    "slip": 12.38,
+    "fund": 0.06,
+    "avg_pnl": -0.21,
+    "best": 4.91,
+    "worst": -2.19
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.14,
+    "pnl": -53.2,
+    "final_eq": 12.8,
+    "mdd": 55.58,
+    "fees": 68.23,
+    "slip": 12.79,
+    "fund": 0.11,
+    "avg_pnl": -0.21,
+    "best": 7.05,
+    "worst": -2.09
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0545,
+    "pf": 0.09,
+    "pnl": -53.23,
+    "final_eq": 12.77,
+    "mdd": 53.23,
+    "fees": 53.48,
+    "slip": 10.03,
+    "fund": 0.05,
+    "avg_pnl": -0.17,
+    "best": 3.87,
+    "worst": -2.9
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0577,
+    "pf": 0.09,
+    "pnl": -53.28,
+    "final_eq": 12.72,
+    "mdd": 53.28,
+    "fees": 55.38,
+    "slip": 10.38,
+    "fund": 0.09,
+    "avg_pnl": -0.17,
+    "best": 3.87,
+    "worst": -2.67
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0577,
+    "pf": 0.07,
+    "pnl": -53.33,
+    "final_eq": 12.67,
+    "mdd": 53.33,
+    "fees": 52.79,
+    "slip": 9.9,
+    "fund": 0.05,
+    "avg_pnl": -0.17,
+    "best": 2.5,
+    "worst": -2.85
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.14,
+    "pnl": -53.35,
+    "final_eq": 12.65,
+    "mdd": 55.74,
+    "fees": 67.85,
+    "slip": 12.72,
+    "fund": 0.16,
+    "avg_pnl": -0.21,
+    "best": 7.05,
+    "worst": -3.58
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0641,
+    "pf": 0.07,
+    "pnl": -53.37,
+    "final_eq": 12.63,
+    "mdd": 53.37,
+    "fees": 54.67,
+    "slip": 10.25,
+    "fund": 0.08,
+    "avg_pnl": -0.17,
+    "best": 2.5,
+    "worst": -2.63
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0545,
+    "pf": 0.08,
+    "pnl": -53.37,
+    "final_eq": 12.63,
+    "mdd": 53.37,
+    "fees": 52.99,
+    "slip": 9.93,
+    "fund": 0.05,
+    "avg_pnl": -0.17,
+    "best": 3.01,
+    "worst": -2.87
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0577,
+    "pf": 0.09,
+    "pnl": -53.4,
+    "final_eq": 12.6,
+    "mdd": 53.4,
+    "fees": 53.67,
+    "slip": 10.06,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 3.87,
+    "worst": -2.62
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0577,
+    "pf": 0.08,
+    "pnl": -53.43,
+    "final_eq": 12.57,
+    "mdd": 53.43,
+    "fees": 54.87,
+    "slip": 10.29,
+    "fund": 0.08,
+    "avg_pnl": -0.17,
+    "best": 3.01,
+    "worst": -2.65
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 453,
+    "wr": 0.0706,
+    "pf": 0.08,
+    "pnl": -53.48,
+    "final_eq": 12.52,
+    "mdd": 53.48,
+    "fees": 63.89,
+    "slip": 11.98,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.99,
+    "worst": -4.7
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0609,
+    "pf": 0.07,
+    "pnl": -53.5,
+    "final_eq": 12.5,
+    "mdd": 53.5,
+    "fees": 52.98,
+    "slip": 9.93,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 2.5,
+    "worst": -2.57
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": false,
+    "trades": 312,
+    "wr": 0.0577,
+    "pf": 0.08,
+    "pnl": -53.55,
+    "final_eq": 12.45,
+    "mdd": 53.55,
+    "fees": 53.18,
+    "slip": 9.97,
+    "fund": 0.07,
+    "avg_pnl": -0.17,
+    "best": 3.01,
+    "worst": -2.59
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.11,
+    "pnl": -53.55,
+    "final_eq": 12.45,
+    "mdd": 54.23,
+    "fees": 66.57,
+    "slip": 12.48,
+    "fund": 0.11,
+    "avg_pnl": -0.21,
+    "best": 5.34,
+    "worst": -2.02
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 447,
+    "wr": 0.0716,
+    "pf": 0.08,
+    "pnl": -53.55,
+    "final_eq": 12.45,
+    "mdd": 53.55,
+    "fees": 62.31,
+    "slip": 11.68,
+    "fund": 0.04,
+    "avg_pnl": -0.12,
+    "best": 0.96,
+    "worst": -4.69
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 453,
+    "wr": 0.0706,
+    "pf": 0.08,
+    "pnl": -53.58,
+    "final_eq": 12.42,
+    "mdd": 53.58,
+    "fees": 63.88,
+    "slip": 11.98,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 1.05,
+    "worst": -4.71
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 453,
+    "wr": 0.0706,
+    "pf": 0.08,
+    "pnl": -53.63,
+    "final_eq": 12.37,
+    "mdd": 53.63,
+    "fees": 63.87,
+    "slip": 11.98,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 1.21,
+    "worst": -4.7
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 447,
+    "wr": 0.0716,
+    "pf": 0.08,
+    "pnl": -53.65,
+    "final_eq": 12.35,
+    "mdd": 53.65,
+    "fees": 62.3,
+    "slip": 11.68,
+    "fund": 0.04,
+    "avg_pnl": -0.12,
+    "best": 1.02,
+    "worst": -4.7
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0635,
+    "pf": 0.1,
+    "pnl": -53.67,
+    "final_eq": 12.33,
+    "mdd": 53.67,
+    "fees": 65.8,
+    "slip": 12.34,
+    "fund": 0.11,
+    "avg_pnl": -0.21,
+    "best": 4.32,
+    "worst": -2.0
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0595,
+    "pf": 0.11,
+    "pnl": -53.7,
+    "final_eq": 12.3,
+    "mdd": 54.38,
+    "fees": 66.2,
+    "slip": 12.41,
+    "fund": 0.16,
+    "avg_pnl": -0.21,
+    "best": 5.34,
+    "worst": -3.48
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 447,
+    "wr": 0.0716,
+    "pf": 0.08,
+    "pnl": -53.7,
+    "final_eq": 12.3,
+    "mdd": 53.7,
+    "fees": 62.29,
+    "slip": 11.68,
+    "fund": 0.04,
+    "avg_pnl": -0.12,
+    "best": 1.18,
+    "worst": -4.69
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 252,
+    "wr": 0.0635,
+    "pf": 0.1,
+    "pnl": -53.82,
+    "final_eq": 12.18,
+    "mdd": 53.82,
+    "fees": 65.43,
+    "slip": 12.27,
+    "fund": 0.16,
+    "avg_pnl": -0.21,
+    "best": 4.32,
+    "worst": -3.44
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 402,
+    "wr": 0.0647,
+    "pf": 0.15,
+    "pnl": -53.87,
+    "final_eq": 12.13,
+    "mdd": 55.18,
+    "fees": 64.92,
+    "slip": 12.17,
+    "fund": 0.11,
+    "avg_pnl": -0.13,
+    "best": 5.59,
+    "worst": -4.17
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 402,
+    "wr": 0.0647,
+    "pf": 0.15,
+    "pnl": -53.98,
+    "final_eq": 12.02,
+    "mdd": 55.3,
+    "fees": 63.56,
+    "slip": 11.92,
+    "fund": 0.16,
+    "avg_pnl": -0.13,
+    "best": 5.59,
+    "worst": -7.28
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 452,
+    "wr": 0.0642,
+    "pf": 0.13,
+    "pnl": -53.98,
+    "final_eq": 12.02,
+    "mdd": 54.82,
+    "fees": 73.11,
+    "slip": 13.71,
+    "fund": 0.07,
+    "avg_pnl": -0.12,
+    "best": 5.55,
+    "worst": -2.1
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 453,
+    "wr": 0.0706,
+    "pf": 0.09,
+    "pnl": -54.06,
+    "final_eq": 11.94,
+    "mdd": 54.06,
+    "fees": 64.93,
+    "slip": 12.18,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 1.18,
+    "worst": -3.82
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 445,
+    "wr": 0.0719,
+    "pf": 0.08,
+    "pnl": -54.06,
+    "final_eq": 11.94,
+    "mdd": 54.06,
+    "fees": 63.15,
+    "slip": 11.84,
+    "fund": 0.07,
+    "avg_pnl": -0.12,
+    "best": 0.98,
+    "worst": -4.97
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 445,
+    "wr": 0.0719,
+    "pf": 0.08,
+    "pnl": -54.16,
+    "final_eq": 11.84,
+    "mdd": 54.16,
+    "fees": 63.14,
+    "slip": 11.84,
+    "fund": 0.07,
+    "avg_pnl": -0.12,
+    "best": 1.04,
+    "worst": -4.98
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 15,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 254,
+    "wr": 0.0551,
+    "pf": 0.14,
+    "pnl": -54.18,
+    "final_eq": 11.82,
+    "mdd": 56.57,
+    "fees": 67.44,
+    "slip": 12.64,
+    "fund": 0.06,
+    "avg_pnl": -0.21,
+    "best": 7.05,
+    "worst": -2.26
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 445,
+    "wr": 0.0719,
+    "pf": 0.08,
+    "pnl": -54.2,
+    "final_eq": 11.8,
+    "mdd": 54.2,
+    "fees": 63.12,
+    "slip": 11.84,
+    "fund": 0.07,
+    "avg_pnl": -0.12,
+    "best": 1.2,
+    "worst": -4.97
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 452,
+    "wr": 0.0642,
+    "pf": 0.11,
+    "pnl": -54.21,
+    "final_eq": 11.79,
+    "mdd": 54.21,
+    "fees": 71.73,
+    "slip": 13.45,
+    "fund": 0.07,
+    "avg_pnl": -0.12,
+    "best": 4.13,
+    "worst": -2.07
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 453,
+    "wr": 0.0728,
+    "pf": 0.08,
+    "pnl": -54.23,
+    "final_eq": 11.77,
+    "mdd": 54.23,
+    "fees": 64.83,
+    "slip": 12.16,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 0.91,
+    "worst": -3.83
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 456,
+    "wr": 0.0702,
+    "pf": 0.09,
+    "pnl": -54.24,
+    "final_eq": 11.76,
+    "mdd": 54.24,
+    "fees": 64.68,
+    "slip": 12.13,
+    "fund": 0.01,
+    "avg_pnl": -0.12,
+    "best": 1.29,
+    "worst": -3.76
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 24,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 402,
+    "wr": 0.0647,
+    "pf": 0.13,
+    "pnl": -54.29,
+    "final_eq": 11.71,
+    "mdd": 54.29,
+    "fees": 63.66,
+    "slip": 11.94,
+    "fund": 0.11,
+    "avg_pnl": -0.14,
+    "best": 4.16,
+    "worst": -4.08
+  },
+  {
+    "sl": 4.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 453,
+    "wr": 0.0706,
+    "pf": 0.08,
+    "pnl": -54.32,
+    "final_eq": 11.68,
+    "mdd": 54.32,
+    "fees": 64.62,
+    "slip": 12.12,
+    "fund": 0.02,
+    "avg_pnl": -0.12,
+    "best": 1.12,
+    "worst": -3.81
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.5,
+      1.0
+    ],
+    "adx": 45,
+    "hold": 48,
+    "lev": 10,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 452,
+    "wr": 0.0642,
+    "pf": 0.13,
+    "pnl": -54.33,
+    "final_eq": 11.67,
+    "mdd": 55.17,
+    "fees": 72.04,
+    "slip": 13.51,
+    "fund": 0.1,
+    "avg_pnl": -0.12,
+    "best": 5.55,
+    "worst": -3.58
+  },
+  {
+    "sl": 3.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 12,
+    "lev": 10,
+    "side": "short",
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "intra": true,
+    "trades": 456,
+    "wr": 0.0768,
+    "pf": 0.08,
+    "pnl": -54.39,
+    "final_eq": 11.61,
+    "mdd": 54.39,
+    "fees": 64.63,
+    "slip": 12.12,
+    "fund": 0.01,
+    "avg_pnl": -0.12,
+    "best": 0.82,
+    "worst": -3.76
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.2,
+      0.5
+    ],
+    "adx": 45,
+    "hold": 24,
+    "lev": 10,
+    "side": "both",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 452,
+    "wr": 0.0642,
+    "pf": 0.1,
+    "pnl": -54.39,
+    "final_eq": 11.61,
+    "mdd": 54.39,
+    "fees": 70.87,
+    "slip": 13.29,
+    "fund": 0.07,
+    "avg_pnl": -0.12,
+    "best": 3.27,
+    "worst": -2.03
+  },
+  {
+    "sl": 5.0,
+    "ladder": [
+      0.3,
+      0.7
+    ],
+    "adx": 40,
+    "hold": 48,
+    "lev": 10,
+    "side": "long",
+    "coins": [
+      "ETHUSDT"
+    ],
+    "intra": true,
+    "trades": 402,
+    "wr": 0.0647,
+    "pf": 0.13,
+    "pnl": -54.39,
+    "final_eq": 11.61,
+    "mdd": 54.39,
+    "fees": 62.33,
+    "slip": 11.69,
+    "fund": 0.16,
+    "avg_pnl": -0.14,
+    "best": 4.16,
+    "worst": -7.12
+  }
+]

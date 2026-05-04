@@ -81,9 +81,12 @@ def build_forward_outcomes(
     gate_summary_path: Path,
     horizon_minutes: tuple[int, ...] = (5, 10, 15),
     min_age_minutes: int = 15,
+    max_decisions: int | None = None,
     allow_insecure_ssl: bool = False,
 ) -> list[dict[str, Any]]:
     rows = _load_jsonl(decisions_path)
+    if max_decisions is not None and max_decisions > 0:
+        rows = sorted(rows, key=lambda row: str(row.get("timestamp") or ""))[-max_decisions:]
     gate_by_key = _gate_lookup(gate_summary_path)
     client = build_exchange_rest_client(
         exchange="bitget",
@@ -267,12 +270,14 @@ def main() -> int:
     parser.add_argument("--gate-summary", required=True)
     parser.add_argument("--base-config", required=True)
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--max-decisions", type=int)
     parser.add_argument("--insecure-ssl", action="store_true")
     args = parser.parse_args()
 
     outcomes = build_forward_outcomes(
         decisions_path=Path(args.decisions),
         gate_summary_path=Path(args.gate_summary),
+        max_decisions=args.max_decisions,
         allow_insecure_ssl=args.insecure_ssl,
     )
     stats = _bucket_stats(outcomes)
@@ -282,6 +287,7 @@ def main() -> int:
     report = {
         "generated_at": datetime.now(UTC).isoformat(),
         "paper_only": True,
+        "max_decisions": args.max_decisions,
         "decision_count_with_mature_outcomes": len(outcomes),
         "bucket_stats": stats,
         "actions": actions,

@@ -1,0 +1,4 @@
+{"key": "trade:2026-04-21 05:11:19.331184+00:00:ETHUSDT:PROACTIVE_PARTIAL_TAKE_PROFIT:0.15391827", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[PROACTIVE_PARTIAL_TAKE_PROFIT] ETHUSDT\nrealized_pnl_usd_estimate=0.68\nrealized_return_bps_estimate=19.23"}
+{"key": "trade:2026-04-21 05:13:53.812576+00:00:ETHUSDT:BREAKEVEN_STOP:0.46175482", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[BREAKEVEN_STOP] ETHUSDT\nrealized_pnl_usd_estimate=-0.76\nrealized_return_bps_estimate=-7.09"}
+{"key": "risk:DAILY_REALIZED_LOSS_LIMIT:2026-04-21", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[DAILY_REALIZED_LOSS_LIMIT] ratio=0.0377 limit=0.0200"}
+{"key": "risk:INTRADAY_DRAWDOWN_LIMIT:2026-04-21", "result": {"reason": "missing_token_or_allowlist", "sent": false}, "text": "[INTRADAY_DRAWDOWN_LIMIT] ratio=0.0466 limit=0.0250"}

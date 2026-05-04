@@ -1,0 +1,52 @@
+Traceback (most recent call last):
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1058, in send
+    with urlopen(request, timeout=15, context=context) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\SSAFY\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 400: Bad Request
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\runtime.py", line 368, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\runtime.py", line 305, in main
+    result = run_live_paper_daemon(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\daemon.py", line 457, in run_live_paper_daemon
+    session.sync_account()
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\session.py", line 565, in sync_account
+    self._refresh_account_state(evaluate_live_positions=True)
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\session.py", line 548, in _refresh_account_state
+    self._build_capital_report_snapshot()
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\session.py", line 502, in _build_capital_report_snapshot
+    report = self.rest_client.build_capital_report()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\daemon.py", line 321, in _build_capital_report
+    futures_account = rest_client.get_account(market="futures")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 798, in get_account
+    payload = self.send(self.build_account_request(market=market))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Downloads\first_repo-main\quant_binance\execution\bitget_rest.py", line 1074, in send
+    raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
+RuntimeError: Bitget HTTP 400: {"code":"40008","msg":"Request timestamp expired","requestTime":1776668007932,"data":null}

@@ -1,0 +1,566 @@
+{
+  "accepted_live_order_count": 0,
+  "account_snapshot": {},
+  "adopted_futures_position_count": 0,
+  "adopted_futures_positions": [],
+  "avg_edge_retention_ratio": 0.0,
+  "avg_expected_edge_bps": 0.0,
+  "avg_fill_ratio": 0.0,
+  "avg_realized_edge_bps": 0.0,
+  "avg_slippage_bps": 0.0,
+  "candidate_policy": {
+    "adjustments": [],
+    "decomposition_summary": {
+      "candidate_adjustment_rows": [],
+      "dominant_regime_mode": "",
+      "elite_regime_modes": [],
+      "runtime_pruning_recommendation_count": 0,
+      "runtime_symbol_recommendation_count": 0,
+      "runtime_symbol_scorecard_count": 0,
+      "score_delta_total": 0,
+      "supportive_regime_modes": []
+    },
+    "signal_sources": [],
+    "status": "insufficient_data"
+  },
+  "capital_report": {},
+  "closed_trade_count": 0,
+  "closed_trades": [],
+  "decision_count": 0,
+  "error": "ConnectionClosedError(None, None, None)",
+  "exchange": "bitget",
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "execute_live_orders": false,
+  "execution_audit_by_symbol": [],
+  "execution_outcome_counts": {},
+  "executive_operating_verdict": {
+    "confidence": "high",
+    "reasons": [
+      "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+    ],
+    "replay_provenance": {
+      "active_policy": {
+        "classification": "not_available",
+        "decision_surface": "active_policy",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+        "runtime_summary_anchor_source": "not_available",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "baseline_control": {
+        "classification": "not_available",
+        "decision_surface": "baseline_control",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+        "runtime_summary_anchor_source": "not_available",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "checkpoint_auto_judge": {
+        "classification": "not_available",
+        "decision_surface": "checkpoint_auto_judge",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+        "runtime_summary_anchor_source": "not_available",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "primary": {
+        "classification": "not_available",
+        "decision_surface": "not_available",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+        "runtime_summary_anchor_source": "not_available",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      },
+      "staged_candidate": {
+        "classification": "not_available",
+        "decision_surface": "staged_candidate",
+        "has_bucket_reference": false,
+        "has_runtime_summary_anchor": false,
+        "policy_bucket": "not_available",
+        "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+        "runtime_summary_anchor_source": "not_available",
+        "source": "not_available",
+        "summary": "not_available:not_available",
+        "uses_direct_bucket_replay": false,
+        "uses_mixed_root_summary_fallback": false,
+        "uses_projected_evidence": false
+      }
+    },
+    "signals": {
+      "active_policy_bucket_available": false,
+      "active_policy_replay_provenance": "not_available:not_available",
+      "auto_mode": "normal",
+      "baseline_control_bucket_available": false,
+      "baseline_control_replay_provenance": "not_available:not_available",
+      "blocked_symbols": [],
+      "cautious_symbols": [],
+      "checkpoint_evidence_policy_bucket": "not_available",
+      "checkpoint_evidence_source": "not_available",
+      "checkpoint_replay_provenance": "not_available:not_available",
+      "checkpoint_verdict": "not_available",
+      "micro_live_status": "not_available",
+      "operational_status": "hold",
+      "policy_lineage_status": "unknown",
+      "policy_validation_status": "fail",
+      "primary_replay_provenance": "not_available:not_available",
+      "promotion_status": "keep",
+      "requested_status": "keep",
+      "review_symbols": [],
+      "sample_quality_watchdog_status": "not_available",
+      "simple_baseline_gate_status": "not_available",
+      "staged_candidate_bucket_available": false,
+      "staged_candidate_replay_provenance": "not_available:not_available"
+    },
+    "source_reason_codes": {
+      "auto_mode": [],
+      "checkpoint_auto_judge": [],
+      "operational": [
+        "INSUFFICIENT_LIVE_ORDERS"
+      ],
+      "policy_validation": [
+        "NO_CANDIDATE_ADJUSTMENTS",
+        "NO_PROMOTION_ACTION",
+        "REPLAY_DRAWDOWN_TOO_HIGH",
+        "SHADOW_ALIGNMENT_TOO_LOW"
+      ],
+      "promotion": [
+        "INSUFFICIENT_ATTRIBUTION_DATA"
+      ]
+    },
+    "verdict": "rollback"
+  },
+  "exit_reason_counts": {},
+  "futures_position_mismatch": false,
+  "futures_position_mismatch_details": {
+    "missing_in_paper": [],
+    "missing_on_exchange": []
+  },
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "live_order_count": 0,
+  "live_orders": [],
+  "live_positions": [],
+  "major_entry_relaxation_count": 0,
+  "major_size_boost_count": 0,
+  "modes": [],
+  "observe_only_symbols": [],
+  "open_futures_positions": [],
+  "open_orders_snapshot": {},
+  "open_spot_positions": [],
+  "operational_verdict": {
+    "metrics": {
+      "avg_edge_retention_ratio": 0.0,
+      "avg_fill_ratio": 0.0,
+      "avg_realized_edge_bps": 0.0,
+      "live_order_count": 0,
+      "protection_degraded_rate": 0.0,
+      "realized_vs_expected_edge_gap_bps": 0.0,
+      "reject_rate": 0.0
+    },
+    "reasons": [
+      "INSUFFICIENT_LIVE_ORDERS"
+    ],
+    "status": "hold"
+  },
+  "paper_open_futures_position_count": 0,
+  "paper_open_futures_positions": [],
+  "pending_external_futures_position_count": 0,
+  "pending_external_futures_positions": [],
+  "performance_attribution": [],
+  "policy_state": {
+    "active_policy": {
+      "adjustments": [],
+      "auto_mode": {},
+      "executive_operating_verdict": {
+        "confidence": "high",
+        "reasons": [
+          "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+        ],
+        "replay_provenance": {
+          "active_policy": {
+            "classification": "not_available",
+            "decision_surface": "active_policy",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+            "runtime_summary_anchor_source": "not_available",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "baseline_control": {
+            "classification": "not_available",
+            "decision_surface": "baseline_control",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+            "runtime_summary_anchor_source": "not_available",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "checkpoint_auto_judge": {
+            "classification": "not_available",
+            "decision_surface": "checkpoint_auto_judge",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+            "runtime_summary_anchor_source": "not_available",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "primary": {
+            "classification": "not_available",
+            "decision_surface": "not_available",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+            "runtime_summary_anchor_source": "not_available",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          },
+          "staged_candidate": {
+            "classification": "not_available",
+            "decision_surface": "staged_candidate",
+            "has_bucket_reference": false,
+            "has_runtime_summary_anchor": false,
+            "policy_bucket": "not_available",
+            "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+            "runtime_summary_anchor_source": "not_available",
+            "source": "not_available",
+            "summary": "not_available:not_available",
+            "uses_direct_bucket_replay": false,
+            "uses_mixed_root_summary_fallback": false,
+            "uses_projected_evidence": false
+          }
+        },
+        "signals": {
+          "active_policy_bucket_available": false,
+          "active_policy_replay_provenance": "not_available:not_available",
+          "auto_mode": "normal",
+          "baseline_control_bucket_available": false,
+          "baseline_control_replay_provenance": "not_available:not_available",
+          "blocked_symbols": [],
+          "cautious_symbols": [],
+          "checkpoint_evidence_policy_bucket": "not_available",
+          "checkpoint_evidence_source": "not_available",
+          "checkpoint_replay_provenance": "not_available:not_available",
+          "checkpoint_verdict": "not_available",
+          "micro_live_status": "not_available",
+          "operational_status": "hold",
+          "policy_lineage_status": "unknown",
+          "policy_validation_status": "fail",
+          "primary_replay_provenance": "not_available:not_available",
+          "promotion_status": "keep",
+          "requested_status": "keep",
+          "review_symbols": [],
+          "sample_quality_watchdog_status": "not_available",
+          "simple_baseline_gate_status": "not_available",
+          "staged_candidate_bucket_available": false,
+          "staged_candidate_replay_provenance": "not_available:not_available"
+        },
+        "source_reason_codes": {
+          "auto_mode": [],
+          "checkpoint_auto_judge": [],
+          "operational": [
+            "INSUFFICIENT_LIVE_ORDERS"
+          ],
+          "policy_validation": [
+            "NO_CANDIDATE_ADJUSTMENTS",
+            "NO_PROMOTION_ACTION",
+            "REPLAY_DRAWDOWN_TOO_HIGH",
+            "SHADOW_ALIGNMENT_TOO_LOW"
+          ],
+          "promotion": [
+            "INSUFFICIENT_ATTRIBUTION_DATA"
+          ]
+        },
+        "verdict": "rollback"
+      },
+      "lifecycle_stage": "baseline",
+      "micro_live_gate": {},
+      "micro_live_readiness": "not_available",
+      "policy_lineage": {
+        "adjustment_count": 0,
+        "adjustment_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "available": true,
+        "basis": "adjustments",
+        "policy_status": "keep",
+        "rollout_phase": "baseline",
+        "source": "ephemeral_policy_state",
+        "structural_key": "1fc1b037426836cda7df24ab7772579c7c0226516ee08658567d2962a5ae5551",
+        "symbols": [],
+        "updated_at": "",
+        "version": 0,
+        "versioned_key": "6eed748c0014dac7652612ebd7cb869e28d6e0f060755071b6892b70a7605b28"
+      },
+      "status": "keep"
+    },
+    "auto_mode": {},
+    "candidate_policy": {
+      "adjustments": [],
+      "decomposition_summary": {
+        "candidate_adjustment_rows": [],
+        "dominant_regime_mode": "",
+        "elite_regime_modes": [],
+        "runtime_pruning_recommendation_count": 0,
+        "runtime_symbol_recommendation_count": 0,
+        "runtime_symbol_scorecard_count": 0,
+        "score_delta_total": 0,
+        "supportive_regime_modes": []
+      },
+      "signal_sources": [],
+      "status": "insufficient_data"
+    },
+    "executive_operating_verdict": {
+      "confidence": "high",
+      "reasons": [
+        "EXECUTIVE_ROLLBACK_BY_VALIDATION_FAILURE"
+      ],
+      "replay_provenance": {
+        "active_policy": {
+          "classification": "not_available",
+          "decision_surface": "active_policy",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+          "runtime_summary_anchor_source": "not_available",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "baseline_control": {
+          "classification": "not_available",
+          "decision_surface": "baseline_control",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+          "runtime_summary_anchor_source": "not_available",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "checkpoint_auto_judge": {
+          "classification": "not_available",
+          "decision_surface": "checkpoint_auto_judge",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+          "runtime_summary_anchor_source": "not_available",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "primary": {
+          "classification": "not_available",
+          "decision_surface": "not_available",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+          "runtime_summary_anchor_source": "not_available",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        },
+        "staged_candidate": {
+          "classification": "not_available",
+          "decision_surface": "staged_candidate",
+          "has_bucket_reference": false,
+          "has_runtime_summary_anchor": false,
+          "policy_bucket": "not_available",
+          "reason_code": "REPLAY_PROVENANCE_NOT_AVAILABLE",
+          "runtime_summary_anchor_source": "not_available",
+          "source": "not_available",
+          "summary": "not_available:not_available",
+          "uses_direct_bucket_replay": false,
+          "uses_mixed_root_summary_fallback": false,
+          "uses_projected_evidence": false
+        }
+      },
+      "signals": {
+        "active_policy_bucket_available": false,
+        "active_policy_replay_provenance": "not_available:not_available",
+        "auto_mode": "normal",
+        "baseline_control_bucket_available": false,
+        "baseline_control_replay_provenance": "not_available:not_available",
+        "blocked_symbols": [],
+        "cautious_symbols": [],
+        "checkpoint_evidence_policy_bucket": "not_available",
+        "checkpoint_evidence_source": "not_available",
+        "checkpoint_replay_provenance": "not_available:not_available",
+        "checkpoint_verdict": "not_available",
+        "micro_live_status": "not_available",
+        "operational_status": "hold",
+        "policy_lineage_status": "unknown",
+        "policy_validation_status": "fail",
+        "primary_replay_provenance": "not_available:not_available",
+        "promotion_status": "keep",
+        "requested_status": "keep",
+        "review_symbols": [],
+        "sample_quality_watchdog_status": "not_available",
+        "simple_baseline_gate_status": "not_available",
+        "staged_candidate_bucket_available": false,
+        "staged_candidate_replay_provenance": "not_available:not_available"
+      },
+      "source_reason_codes": {
+        "auto_mode": [],
+        "checkpoint_auto_judge": [],
+        "operational": [
+          "INSUFFICIENT_LIVE_ORDERS"
+        ],
+        "policy_validation": [
+          "NO_CANDIDATE_ADJUSTMENTS",
+          "NO_PROMOTION_ACTION",
+          "REPLAY_DRAWDOWN_TOO_HIGH",
+          "SHADOW_ALIGNMENT_TOO_LOW"
+        ],
+        "promotion": [
+          "INSUFFICIENT_ATTRIBUTION_DATA"
+        ]
+      },
+      "verdict": "rollback"
+    },
+    "policy_lineage": {
+      "adjustment_count": 0,
+      "adjustment_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "available": true,
+      "basis": "adjustments",
+      "policy_status": "keep",
+      "rollout_phase": "baseline",
+      "source": "ephemeral_policy_state",
+      "structural_key": "1fc1b037426836cda7df24ab7772579c7c0226516ee08658567d2962a5ae5551",
+      "symbols": [],
+      "updated_at": "",
+      "version": 0,
+      "versioned_key": "6eed748c0014dac7652612ebd7cb869e28d6e0f060755071b6892b70a7605b28"
+    },
+    "promotion_verdict": {
+      "blocked_reasons": [],
+      "effective_status": "keep",
+      "micro_live_gate": {},
+      "micro_live_readiness": "not_available",
+      "reasons": [
+        "INSUFFICIENT_ATTRIBUTION_DATA"
+      ],
+      "requested_status": "keep",
+      "rollout_stage": "baseline",
+      "status": "keep"
+    },
+    "status": "keep"
+  },
+  "policy_validation": {
+    "evidence": {
+      "avg_realized_edge_bps": 0.0,
+      "avg_retention": 0.0,
+      "max_protection_degraded_rate": 1.0,
+      "max_reject_rate": 1.0,
+      "replay_like_drawdown_ratio": 1.0,
+      "sample_count": 0,
+      "shadow_alignment_score": 0.0
+    },
+    "reasons": [
+      "NO_CANDIDATE_ADJUSTMENTS",
+      "NO_PROMOTION_ACTION",
+      "REPLAY_DRAWDOWN_TOO_HIGH",
+      "SHADOW_ALIGNMENT_TOO_LOW"
+    ],
+    "status": "fail"
+  },
+  "promotion_verdict": {
+    "blocked_reasons": [],
+    "effective_status": "keep",
+    "micro_live_gate": {},
+    "micro_live_readiness": "not_available",
+    "reasons": [
+      "INSUFFICIENT_ATTRIBUTION_DATA"
+    ],
+    "requested_status": "keep",
+    "rollout_stage": "baseline",
+    "status": "keep"
+  },
+  "protection_degraded_count": 0,
+  "protection_degraded_rate": 0.0,
+  "realized_pnl_usd_estimate": 0.0,
+  "realized_vs_expected_edge_gap_bps": 0.0,
+  "recent_decisions": [],
+  "rejected_live_order_count": 0,
+  "self_healing": {
+    "active_guards": {},
+    "issue_counts": {
+      "startup_failure": 1
+    },
+    "recent_events": [
+      {
+        "action": "report_only",
+        "category": "startup_failure",
+        "status": "active",
+        "summary": "no close frame received or sent"
+      }
+    ],
+    "recovery_counts": {},
+    "status": "startup_failed"
+  },
+  "status": "startup_failed",
+  "symbol_performance": [],
+  "symbols": [],
+  "telegram_alerts": [],
+  "tested_order_count": 0,
+  "tested_orders": [],
+  "top_rejection_reasons": {},
+  "unrealized_futures_pnl_usd_estimate": 0,
+  "unrealized_pnl_usd_estimate": 0,
+  "unrealized_spot_pnl_usd_estimate": 0
+}

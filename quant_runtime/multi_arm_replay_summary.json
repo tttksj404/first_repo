@@ -1,0 +1,95 @@
+{
+  "summaries": [
+    {
+      "arm": "A_live",
+      "universe": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "DOGEUSDT",
+        "PEPEUSDT",
+        "XRPUSDT"
+      ],
+      "gate_enabled": true,
+      "n_decisions": 1050,
+      "n_entries": 876,
+      "n_blocked": 174,
+      "n_boosted": 42,
+      "n_passed": 834,
+      "n_skipped_unknown_side": 0,
+      "wins": 347,
+      "losses": 529,
+      "win_rate": 0.3961,
+      "gross_pnl_usd": -0.8652,
+      "fees_usd": 14.1478,
+      "net_pnl_usd": -15.013
+    },
+    {
+      "arm": "B_gate_off",
+      "universe": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "DOGEUSDT",
+        "PEPEUSDT",
+        "XRPUSDT"
+      ],
+      "gate_enabled": false,
+      "n_decisions": 1050,
+      "n_entries": 1050,
+      "n_blocked": 0,
+      "n_boosted": 0,
+      "n_passed": 1050,
+      "n_skipped_unknown_side": 0,
+      "wins": 410,
+      "losses": 640,
+      "win_rate": 0.3905,
+      "gross_pnl_usd": -4.8673,
+      "fees_usd": 16.8,
+      "net_pnl_usd": -21.6673
+    },
+    {
+      "arm": "C_majors",
+      "universe": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT"
+      ],
+      "gate_enabled": true,
+      "n_decisions": 525,
+      "n_entries": 459,
+      "n_blocked": 66,
+      "n_boosted": 11,
+      "n_passed": 448,
+      "n_skipped_unknown_side": 0,
+      "wins": 164,
+      "losses": 295,
+      "win_rate": 0.3573,
+      "gross_pnl_usd": -2.0389,
+      "fees_usd": 7.3605,
+      "net_pnl_usd": -9.3995
+    },
+    {
+      "arm": "D_alts",
+      "universe": [
+        "PEPEUSDT",
+        "DOGEUSDT",
+        "XRPUSDT",
+        "SOLUSDT"
+      ],
+      "gate_enabled": true,
+      "n_decisions": 700,
+      "n_entries": 656,
+      "n_blocked": 44,
+      "n_boosted": 0,
+      "n_passed": 656,
+      "n_skipped_unknown_side": 0,
+      "wins": 283,
+      "losses": 373,
+      "win_rate": 0.4314,
+      "gross_pnl_usd": 0.3076,
+      "fees_usd": 10.496,
+      "net_pnl_usd": -10.1884
+    }
+  ]
+}

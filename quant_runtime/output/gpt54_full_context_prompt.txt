@@ -1,0 +1,126 @@
+You are GPT-5.4, acting as a quantitative crypto strategy advisor for a live Bitget futures bot.
+Read this entire context carefully before responding. Respond in Korean.
+
+═══════════════════════════════════════════════════════════════
+PROJECT STATE: Bitget Futures Quant Bot ($75 capital)
+═══════════════════════════════════════════════════════════════
+
+## 1. 시스템 개요
+- Exchange: Bitget USD-M Futures
+- Capital: $75 starting equity (소자본 제약)
+- Repo: tttksj404/first_repo
+- 배포 환경: quant_binance daemon (auto live trading)
+- 목표: $75 → 지속 가능한 복리 성장 (ruin 최소화하면서 수익 극대화)
+
+## 2. 현재 배포 전략 (strategy_override.approved.json)
+**DOGE+XRP+SOL rotation pullback 10x** (2026-04-11 적용)
+- 354 trades / 3Y, WR 58%, PF 1.61, PnL $625, ruin 4.9%, WF 4/4
+- 진입: Donchian 55 돌파 후 3바 풀백
+- 방향: 롱 only (7d 모멘텀 > +3%)
+- SL: 풀백 저점 - 0.25×ATR, TP: 50% at 1R, runner at 2.5R
+- 포지션: 1개 한정, 3코인 중 하나 rotation
+- 이전 DOGE 단독(월 3건)보다 3배 빈도
+
+## 3. 데이터
+- 20개 코인 (ADA, APT, ARB, AVAX, BNB, BTC, DOGE, DOT, ETH, LINK, LTC, MATIC, NEAR, OP, PEPE, SOL, SUI, UNI, WIF, XRP)
+- 1h 봉 9,000 bars (375일)
+- 주의: 이전 세션 로그에는 "3년 데이터"로 표현되지만 실제 저장된 건 375일
+- 5m/4h/funding rate 데이터도 일부 존재
+- 비용 모델: RT 0.12% (fee+slippage), funding 0.01%/8h
+
+## 4. 테스트 완료된 5가지 팩터
+A: Vol-managed momentum (168h lookback, vol-adjusted)
+B: Cross-sectional rank (코인 간 모멘텀 랭킹)
+C: Short-term reversal (3일 -10%+ 급락 후 반등 매수)
+D: Regime detection (BTC 기반: crash/range/trend)
+E: BTC-residual strength (BTC 대비 초과수익률)
+
+## 5. 개별 팩터 베스트 (20x 기준, 375d 데이터)
+- A: EV $14.79 PF 2.88 WR 24.6% ruin 17.8% WF 3/4
+- B: EV $11.15 PF 2.32 WR 19.2% ruin 34.1% WF 2/4
+- C: EV $17.68 PF 3.33 WR 28.2% ruin 14.8% WF 4/4 ← 개별 최강
+- D: 단독 viable 없음 (게이트 용도)
+- E: EV $12.96 PF 2.57 WR 19.7% ruin 32.5% WF 3/4
+
+## 6. 최근 전수 조합 결과 (3,784 configs)
+**Phase 1**: 31 factor × 4 lev × 4 margin × 4 SL = 1,984
+**Phase 2**: Top 50 × 3 hold × 4 weights × 3 cooldown = 1,800
+**변수 범위**:
+- Leverage: 5, 10, 15, 20
+- Margin: 25%, 50%, 75%, 100%
+- SL ROE: 10%, 15%, 20%, 30%
+- Hold: 72h(3d), 168h(7d), 336h(14d)
+- Weight profiles: equal, mom_heavy, rev_heavy, alpha_mix
+- Cooldown: 24h, 48h, 72h
+
+**Production-safe 상위 5 (ruin<10%, WF≥3/4)**:
+1. BC 20x 100% SL10% 72h mom_heavy cd72h: EV=$33.03 PF=6.09 WR=32.5% ruin=5.6% 83t PnL=$2,741
+2. BCD 20x 100% SL10% 72h mom_heavy cd72h: EV=$32.79 PF=6.08 WR=32.9% ruin=6.1% 82t PnL=$2,689
+3. BCE 20x 100% SL10% 72h mom_heavy cd72h: EV=$32.48 PF=5.91 WR=31.3% ruin=6.7% 83t PnL=$2,696
+4. CDE 20x 100% SL10% 72h rev_heavy cd48h: EV=$26.69 PF=4.94 WR=30.0% ruin=7.8% 90t PnL=$2,402
+5. CE 20x 100% SL10% 72h rev_heavy cd72h: EV=$26.17 PF=4.99 WR=31.3% ruin=5.9% 83t PnL=$2,172
+
+**핵심 패턴**: SL 10% ROE + 72h 홀드 + mom_heavy 가중치가 최적
+**Top 거래 코인**: MATIC, WIF, UNI, OP, ARB
+
+## 7. 이전 세션의 중요 발견
+### A) 374일 프로필 전략들 3년 데이터 재검증 → 10/11 파산
+- BTC/ETH/SOL WR 82-89% PF 4-7 전략들이 전부 파산
+- MATIC 15x margin50%만 통과 (EV $0.38, 거의 의미 없음)
+- **교훈**: 백테스트 WR 높다고 실전 수익 보장 안 됨
+
+### B) Swing Hold 발견 (수동 트레이딩 재현)
+- SOL 10x 75% SL15% 1주일 홀드: EV $14.82 PF 3.12 ruin 9.7% PnL $1,734
+- 한탕 $88 (equity의 117%)
+- 월 3.2건 (느리지만 큰 한탕)
+
+### C) 하이브리드 전략 비교
+- 풀백 단독 (DOGE 10x): EV $8.83 WR 47% ruin 3.9%
+- 하이브리드 (풀백+모멘텀+BTC필터): EV $3.16 WR 60% ruin 1.8%
+- 결론: 필터 추가하면 WR↑ 하지만 EV↓ — 트레이드오프
+
+### D) 하루 2건 목표는 수학적으로 불가능 (3모델 합의)
+- $75 + fee-safe + ruin<5% 동시 만족 = 0개 config
+- 풀백은 구조적으로 저빈도
+- 현실적 최대: 월 10건 (DOGE+XRP+SOL rotation)
+
+## 8. 최근 4라운드 MAD 토론 결과 (GPT+Gemini+Claude)
+**Round 1 (독립 주장)**:
+- GPT-5.4 → BC 20x 100% (EV 최대)
+- Gemini → CE 20x 100% (ruin 최저)
+- Claude → CE 20x 100% rev_heavy
+
+**Round 4 (최종 투표)**:
+- GPT-5.4: CE 20x 100% SL10% 72h rev_heavy cd72h, 신뢰도 65/100
+- Gemini: **BC 10x 50% SL10% 168h rev_heavy cd168h, 신뢰도 75/100**
+- Claude: CE 20x 75% SL10% 72h rev_heavy cd72h, 신뢰도 60/100
+
+**합의점**: SL 10% ROE + 72h+ 홀드 + rev_heavy 가중치
+**분쟁점**: 레버리지 10x vs 20x, 마진 50% vs 75% vs 100%
+
+## 9. 해결해야 할 질문
+1. 현재 배포된 DOGE+XRP+SOL rotation을 새 앙상블로 교체할 것인가?
+2. 교체한다면 BC vs CE 어느 쪽? 100% 마진 감수 가능한가?
+3. 375일 데이터의 신뢰도: 오버피팅 리스크 어떻게 완화?
+4. 실전 비용(슬리피지, 갭) 반영 시 EV가 여전히 양수일까?
+5. MC ruin 5.6%는 실전에서 정확할까? (과거 10/11 파산 사례 고려)
+
+## 10. 진행 중인 미해결 과제
+- 375일 → 3년 데이터 확장 필요 (현재 데이터 부족 인정)
+- 50거래 paper trading 검증 필요
+- 비용 stress test (0.2% RT 재검증)
+- 코인별 집중도 하드캡 (MATIC 16% 등)
+
+═══════════════════════════════════════════════════════════════
+REQUEST
+═══════════════════════════════════════════════════════════════
+
+위 전체 컨텍스트를 바탕으로 다음에 답해주세요:
+
+1. **현재 배포 전략(DOGE+XRP+SOL rotation)을 유지 vs 새 앙상블로 교체** — 어느 쪽이 더 합리적인가?
+2. **BC vs CE 조합** — 본인의 최종 선택과 이유 (레버리지/마진/SL/홀드/쿨다운 완전 명시)
+3. **백테스트 숫자를 믿을 수 있는 한계** — 375일 데이터의 진짜 신뢰도
+4. **실전 배포 전 반드시 해야 할 검증 3가지**
+5. **신뢰도 점수 (0-100)** 자신의 추천에 대해
+
+정량적 근거 필수. 막연한 조언 금지. 한국어로.

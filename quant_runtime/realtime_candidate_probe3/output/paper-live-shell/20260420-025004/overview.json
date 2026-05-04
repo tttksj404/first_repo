@@ -1,0 +1,126 @@
+{
+  "decision_count": 30,
+  "exchange_live_futures_position_count": 0,
+  "exchange_live_futures_positions": [],
+  "futures_available_balance_usd": 4.326179,
+  "futures_collateral_candidate_balance_usd": 0,
+  "futures_execution_balance_usd": 4.326179,
+  "futures_manual_handling_balance_usd": 1.096867,
+  "futures_total_reusable_balance_usd": 5.430735,
+  "futures_transferable_execution_balance_usd": 0.007689,
+  "heartbeat_count": 37970,
+  "kill_switch": {
+    "armed": false,
+    "reasons": []
+  },
+  "last_decision_emitted_at": "2026-04-20T02:53:41.661390+00:00",
+  "last_decision_timestamp": "2026-04-20T02:53:00+00:00",
+  "last_event_timestamp": "2026-04-20T02:53:58.892386+00:00",
+  "live_order_count": 0,
+  "realized_pnl_usd_estimate": 0.0,
+  "recent_decisions": [
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.356083,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 13.467561,
+      "reasons": [],
+      "score": 62.81,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "SOLUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.131541,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 21.47303,
+      "reasons": [],
+      "score": 70.86,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.131554,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 21.472561,
+      "reasons": [],
+      "score": 70.86,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 8.13158,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 21.471623,
+      "reasons": [],
+      "score": 70.86,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "ETHUSDT"
+    },
+    {
+      "candidate_mode": "futures",
+      "entry_relaxations": [
+        "SENTIMENT_CAUTION_OVERRIDE",
+        "ENSEMBLE_OPTIONAL"
+      ],
+      "estimated_round_trip_cost_bps": 11.189454,
+      "execution_quality_trade_restraint": "none",
+      "macro_trade_restraint": "none",
+      "mode": "futures",
+      "net_expected_edge_bps": 18.640508,
+      "reasons": [],
+      "score": 63.42,
+      "side": "long",
+      "size_boost_reasons": [],
+      "strategy_size_multiplier": 1.0,
+      "symbol": "DOGEUSDT"
+    }
+  ],
+  "spot_available_balance_usd": 0.007689,
+  "status": "healthy",
+  "tested_order_count": 0,
+  "top_rejection_reasons": {
+    "EDGE_BELOW_COST": 6,
+    "EDGE_TOO_THIN": 6,
+    "LIQUIDITY_TOO_WEAK": 6,
+    "SCORE_TOO_LOW": 6,
+    "SENTIMENT_CAUTION": 6,
+    "SUPPORT_NOT_CONFIRMED": 6
+  },
+  "unrealized_pnl_usd_estimate": 0,
+  "updated_at": "2026-04-20T02:53:59.014818+00:00"
+}

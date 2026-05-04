@@ -1,0 +1,328 @@
+{
+  "arms": {
+    "A_live": {
+      "actionable_issue": "latest decision cycle symbols do not match the configured arm universe",
+      "base": "/Users/tttksj/first_repo/quant_runtime_paper50",
+      "closed_trades": 0,
+      "cross_coin_blocked": 0,
+      "cross_coin_size_boosted": 0,
+      "cross_coin_top_priority_decisions": 0,
+      "decisions_total": 3679,
+      "final_modes": {
+        "cash": 3678,
+        "futures": 1
+      },
+      "health": {
+        "alive": true,
+        "log_age_sec": 18.5,
+        "reason": "universe_mismatch"
+      },
+      "latest_cycle": {
+        "symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT"
+        ],
+        "timestamp": "2026-04-26T06:05:00+00:00"
+      },
+      "log_path": "/Users/tttksj/first_repo/quant_runtime_paper50/_paper50.out.log",
+      "name": "A_live",
+      "realized_pnl_usd": 0.0,
+      "sides": {
+        "flat": 3678,
+        "long": 1
+      },
+      "top_rejection_reasons": {
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN": 1440,
+        "SYMBOL_PROFILE_EDGE_TOO_THIN": 1633,
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL": 2474,
+        "SYMBOL_PROFILE_SCORE_TOO_LOW": 1695,
+        "SYMBOL_PROFILE_VOLUME_TOO_WEAK": 1229
+      },
+      "total_intent_notional_usd": 200.0,
+      "universe_mismatch": {
+        "detected": true,
+        "expected_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "latest_timestamp": "2026-04-26T06:05:00+00:00",
+        "missing_symbols": [
+          "XRPUSDT"
+        ],
+        "observed_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT"
+        ],
+        "unexpected_symbols": []
+      }
+    },
+    "E_aggressive": {
+      "base": "/Users/tttksj/first_repo/quant_runtime_armE",
+      "closed_trades": 0,
+      "cross_coin_blocked": 0,
+      "cross_coin_size_boosted": 0,
+      "cross_coin_top_priority_decisions": 0,
+      "decisions_total": 480,
+      "final_modes": {
+        "cash": 470,
+        "futures": 10
+      },
+      "health": {
+        "alive": true,
+        "log_age_sec": 0.1
+      },
+      "latest_cycle": {
+        "symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "timestamp": "2026-04-26T06:05:00+00:00"
+      },
+      "log_path": "/Users/tttksj/first_repo/quant_runtime_armE/_armE.out.log",
+      "name": "E_aggressive",
+      "realized_pnl_usd": 0.0,
+      "sides": {
+        "flat": 470,
+        "long": 6,
+        "short": 4
+      },
+      "top_rejection_reasons": {
+        "BUYING_INTO_RESISTANCE": 229,
+        "DIRECTION_CONFLICT": 293,
+        "EDGE_BELOW_COST": 296,
+        "SCORE_TOO_LOW": 234,
+        "SYMBOL_PROFILE_EDGE_TOO_THIN": 158
+      },
+      "total_intent_notional_usd": 1350.0,
+      "universe_mismatch": {
+        "detected": false,
+        "expected_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "latest_timestamp": "2026-04-26T06:05:00+00:00",
+        "missing_symbols": [],
+        "observed_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "unexpected_symbols": []
+      }
+    },
+    "F_lev_strong": {
+      "base": "/Users/tttksj/first_repo/quant_runtime_armF",
+      "closed_trades": 0,
+      "cross_coin_blocked": 0,
+      "cross_coin_size_boosted": 0,
+      "cross_coin_top_priority_decisions": 0,
+      "decisions_total": 480,
+      "final_modes": {
+        "cash": 468,
+        "futures": 12
+      },
+      "health": {
+        "alive": true,
+        "log_age_sec": 0.0
+      },
+      "latest_cycle": {
+        "symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "timestamp": "2026-04-26T06:05:00+00:00"
+      },
+      "log_path": "/Users/tttksj/first_repo/quant_runtime_armF/_armF.out.log",
+      "name": "F_lev_strong",
+      "realized_pnl_usd": 0.0,
+      "sides": {
+        "flat": 468,
+        "long": 5,
+        "short": 7
+      },
+      "top_rejection_reasons": {
+        "BUYING_INTO_RESISTANCE": 280,
+        "EDGE_BELOW_COST": 288,
+        "EDGE_TOO_THIN": 233,
+        "LIQUIDITY_TOO_WEAK": 236,
+        "SCORE_TOO_LOW": 258
+      },
+      "total_intent_notional_usd": 2850.0,
+      "universe_mismatch": {
+        "detected": false,
+        "expected_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "latest_timestamp": "2026-04-26T06:05:00+00:00",
+        "missing_symbols": [],
+        "observed_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "unexpected_symbols": []
+      }
+    },
+    "G_fut_active": {
+      "base": "/Users/tttksj/first_repo/quant_runtime_armG",
+      "closed_trades": 0,
+      "cross_coin_blocked": 0,
+      "cross_coin_size_boosted": 0,
+      "cross_coin_top_priority_decisions": 0,
+      "decisions_total": 480,
+      "final_modes": {
+        "cash": 461,
+        "futures": 19
+      },
+      "health": {
+        "alive": true,
+        "log_age_sec": 0.0
+      },
+      "latest_cycle": {
+        "symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "timestamp": "2026-04-26T06:05:00+00:00"
+      },
+      "log_path": "/Users/tttksj/first_repo/quant_runtime_armG/_armG.out.log",
+      "name": "G_fut_active",
+      "realized_pnl_usd": 0.0,
+      "sides": {
+        "flat": 461,
+        "long": 11,
+        "short": 8
+      },
+      "top_rejection_reasons": {
+        "BUYING_INTO_RESISTANCE": 268,
+        "DIRECTION_CONFLICT": 244,
+        "EDGE_BELOW_COST": 277,
+        "LIQUIDITY_TOO_WEAK": 224,
+        "SCORE_TOO_LOW": 213
+      },
+      "total_intent_notional_usd": 1950.0,
+      "universe_mismatch": {
+        "detected": false,
+        "expected_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "latest_timestamp": "2026-04-26T06:05:00+00:00",
+        "missing_symbols": [],
+        "observed_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "unexpected_symbols": []
+      }
+    },
+    "H_guard_on": {
+      "base": "/Users/tttksj/first_repo/quant_runtime_armH",
+      "closed_trades": 0,
+      "cross_coin_blocked": 0,
+      "cross_coin_size_boosted": 0,
+      "cross_coin_top_priority_decisions": 0,
+      "decisions_total": 480,
+      "final_modes": {
+        "cash": 480
+      },
+      "health": {
+        "alive": true,
+        "log_age_sec": 13.1
+      },
+      "latest_cycle": {
+        "symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "timestamp": "2026-04-26T06:05:00+00:00"
+      },
+      "log_path": "/Users/tttksj/first_repo/quant_runtime_armH/_armH.out.log",
+      "name": "H_guard_on",
+      "realized_pnl_usd": 0.0,
+      "sides": {
+        "flat": 480
+      },
+      "top_rejection_reasons": {
+        "EDGE_BELOW_COST": 164,
+        "SYMBOL_PROFILE_EDGE_COST_TOO_THIN": 189,
+        "SYMBOL_PROFILE_EDGE_TOO_THIN": 205,
+        "SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL": 287,
+        "SYMBOL_PROFILE_SCORE_TOO_LOW": 187
+      },
+      "total_intent_notional_usd": 0.0,
+      "universe_mismatch": {
+        "detected": false,
+        "expected_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "latest_timestamp": "2026-04-26T06:05:00+00:00",
+        "missing_symbols": [],
+        "observed_symbols": [
+          "BTCUSDT",
+          "DOGEUSDT",
+          "ETHUSDT",
+          "PEPEUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "unexpected_symbols": []
+      }
+    }
+  },
+  "timestamp": "2026-04-26T06:06:35.385991+00:00"
+}
