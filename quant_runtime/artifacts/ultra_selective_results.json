@@ -1,0 +1,3364 @@
+[
+  {
+    "wr": 1.0,
+    "pf": 2959889.59,
+    "trades": 12,
+    "total_bps": 29598.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      1.0,
+      2.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 29598.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2959889.59,
+    "trades": 12,
+    "total_bps": 29598.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      1.0,
+      2.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 29598.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2388138.13,
+    "trades": 15,
+    "total_bps": 23881.4,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 23881.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2388138.13,
+    "trades": 15,
+    "total_bps": 23881.4,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 23881.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2271729.77,
+    "trades": 15,
+    "total_bps": 22717.3,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 22717.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2271729.77,
+    "trades": 15,
+    "total_bps": 22717.3,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 22717.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2202587.7,
+    "trades": 12,
+    "total_bps": 22025.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 22025.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2202587.7,
+    "trades": 12,
+    "total_bps": 22025.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 22025.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2202160.9,
+    "trades": 12,
+    "total_bps": 22021.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 22021.6
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2202160.9,
+    "trades": 12,
+    "total_bps": 22021.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 22021.6
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2029454.43,
+    "trades": 12,
+    "total_bps": 20294.5,
+    "tp_type": "fixed",
+    "tp_r": 1.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 20294.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 2029454.43,
+    "trades": 12,
+    "total_bps": 20294.5,
+    "tp_type": "fixed",
+    "tp_r": 1.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 20294.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1479944.79,
+    "trades": 12,
+    "total_bps": 14799.4,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      1.0,
+      2.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 14799.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1479944.79,
+    "trades": 12,
+    "total_bps": 14799.4,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      1.0,
+      2.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 14799.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1194069.07,
+    "trades": 15,
+    "total_bps": 11940.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11940.7
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1194069.07,
+    "trades": 15,
+    "total_bps": 11940.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11940.7
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1181454.43,
+    "trades": 15,
+    "total_bps": 11814.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11814.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1181454.43,
+    "trades": 15,
+    "total_bps": 11814.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11814.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1150714.01,
+    "trades": 15,
+    "total_bps": 11507.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11507.1
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1150714.01,
+    "trades": 15,
+    "total_bps": 11507.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11507.1
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1135864.89,
+    "trades": 15,
+    "total_bps": 11358.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11358.6
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1135864.89,
+    "trades": 15,
+    "total_bps": 11358.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11358.6
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1101293.85,
+    "trades": 12,
+    "total_bps": 11012.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 11012.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1101293.85,
+    "trades": 12,
+    "total_bps": 11012.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 11012.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1101080.45,
+    "trades": 12,
+    "total_bps": 11010.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 11010.8
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1101080.45,
+    "trades": 12,
+    "total_bps": 11010.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 11010.8
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1014727.22,
+    "trades": 12,
+    "total_bps": 10147.3,
+    "tp_type": "fixed",
+    "tp_r": 1.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 10147.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1014727.22,
+    "trades": 12,
+    "total_bps": 10147.3,
+    "tp_type": "fixed",
+    "tp_r": 1.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 10147.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1000977.8,
+    "trades": 12,
+    "total_bps": 10009.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 10009.8
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 1000977.8,
+    "trades": 12,
+    "total_bps": 10009.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 10009.8
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 929454.43,
+    "trades": 12,
+    "total_bps": 9294.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 9294.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 929454.43,
+    "trades": 12,
+    "total_bps": 9294.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 9294.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 890954.79,
+    "trades": 18,
+    "total_bps": 8909.5,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 1.0,
+        "total": 1989.6
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 6787.0
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 58.7
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 74.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 890954.79,
+    "trades": 18,
+    "total_bps": 8909.5,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 1.0,
+        "total": 1989.6
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 6787.0
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 58.7
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 74.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 887966.88,
+    "trades": 12,
+    "total_bps": 8879.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      1.0,
+      2.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 8879.7
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 887966.88,
+    "trades": 12,
+    "total_bps": 8879.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      1.0,
+      2.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 8879.7
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 716441.44,
+    "trades": 15,
+    "total_bps": 7164.4,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 7164.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 716441.44,
+    "trades": 15,
+    "total_bps": 7164.4,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 7164.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 681518.93,
+    "trades": 15,
+    "total_bps": 6815.2,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 6815.2
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 681518.93,
+    "trades": 15,
+    "total_bps": 6815.2,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 6815.2
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 660776.31,
+    "trades": 12,
+    "total_bps": 6607.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 6607.8
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 660776.31,
+    "trades": 12,
+    "total_bps": 6607.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 6607.8
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 660648.27,
+    "trades": 12,
+    "total_bps": 6606.5,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 6606.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 660648.27,
+    "trades": 12,
+    "total_bps": 6606.5,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 6606.5
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 608836.33,
+    "trades": 12,
+    "total_bps": 6088.4,
+    "tp_type": "fixed",
+    "tp_r": 1.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 6088.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 608836.33,
+    "trades": 12,
+    "total_bps": 6088.4,
+    "tp_type": "fixed",
+    "tp_r": 1.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 6088.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 590727.22,
+    "trades": 15,
+    "total_bps": 5907.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5907.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 590727.22,
+    "trades": 15,
+    "total_bps": 5907.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5907.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 575357.01,
+    "trades": 15,
+    "total_bps": 5753.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5753.6
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 575357.01,
+    "trades": 15,
+    "total_bps": 5753.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5753.6
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 500488.9,
+    "trades": 12,
+    "total_bps": 5004.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 5004.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 500488.9,
+    "trades": 12,
+    "total_bps": 5004.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 5004.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 464727.22,
+    "trades": 12,
+    "total_bps": 4647.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 4647.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 464727.22,
+    "trades": 12,
+    "total_bps": 4647.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 4647.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 445477.4,
+    "trades": 18,
+    "total_bps": 4454.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 1.0,
+        "total": 994.8
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 3393.5
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 29.3
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 37.1
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 445477.4,
+    "trades": 18,
+    "total_bps": 4454.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 1.0,
+        "total": 994.8
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 3393.5
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 29.3
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 37.1
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 354436.33,
+    "trades": 15,
+    "total_bps": 3544.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3544.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 354436.33,
+    "trades": 15,
+    "total_bps": 3544.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3544.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 345214.2,
+    "trades": 15,
+    "total_bps": 3452.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3452.1
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 345214.2,
+    "trades": 15,
+    "total_bps": 3452.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3452.1
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 300293.34,
+    "trades": 12,
+    "total_bps": 3002.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 3002.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 300293.34,
+    "trades": 12,
+    "total_bps": 3002.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 3002.9
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 278836.33,
+    "trades": 12,
+    "total_bps": 2788.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 2788.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 278836.33,
+    "trades": 12,
+    "total_bps": 2788.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 40,
+    "score": 85,
+    "coins": [
+      "ETHUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 12,
+        "wr": 1.0,
+        "total": 2788.4
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 267286.44,
+    "trades": 18,
+    "total_bps": 2672.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 1.0,
+        "total": 596.9
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 2036.1
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 17.6
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 22.3
+      }
+    }
+  },
+  {
+    "wr": 1.0,
+    "pf": 267286.44,
+    "trades": 18,
+    "total_bps": 2672.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 1.0,
+        "total": 596.9
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 2036.1
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 17.6
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 22.3
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 17.18,
+    "trades": 21,
+    "total_bps": 34942.2,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 22717.3
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 12224.9
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 17.18,
+    "trades": 21,
+    "total_bps": 34942.2,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 22717.3
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 12224.9
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 17.18,
+    "trades": 21,
+    "total_bps": 17471.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11358.6
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 6112.5
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 17.18,
+    "trades": 21,
+    "total_bps": 17471.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11358.6
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 6112.5
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 17.18,
+    "trades": 21,
+    "total_bps": 10482.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 6815.2
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 3667.5
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 17.18,
+    "trades": 21,
+    "total_bps": 10482.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.5
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 6815.2
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 3667.5
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 14.87,
+    "trades": 21,
+    "total_bps": 29957.0,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 23881.4
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 6075.6
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 14.87,
+    "trades": 21,
+    "total_bps": 29957.0,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 23881.4
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 6075.6
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 14.87,
+    "trades": 21,
+    "total_bps": 14978.5,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11940.7
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 3037.8
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 14.87,
+    "trades": 21,
+    "total_bps": 14978.5,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11940.7
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 3037.8
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 14.87,
+    "trades": 21,
+    "total_bps": 8987.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 7164.4
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 1822.7
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 14.87,
+    "trades": 21,
+    "total_bps": 8987.1,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 7164.4
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 1822.7
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.41,
+    "trades": 21,
+    "total_bps": 13854.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11814.5
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 2040.0
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.41,
+    "trades": 21,
+    "total_bps": 13854.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11814.5
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 2040.0
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.41,
+    "trades": 21,
+    "total_bps": 6927.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5907.3
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 1020.0
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.41,
+    "trades": 21,
+    "total_bps": 6927.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5907.3
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 1020.0
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.41,
+    "trades": 21,
+    "total_bps": 4156.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3544.4
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 612.0
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.41,
+    "trades": 21,
+    "total_bps": 4156.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3544.4
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 612.0
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.4,
+    "trades": 21,
+    "total_bps": 13825.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11507.1
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 2318.6
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.4,
+    "trades": 21,
+    "total_bps": 13825.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 11507.1
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 2318.6
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.4,
+    "trades": 21,
+    "total_bps": 6912.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5753.6
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 1159.3
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.4,
+    "trades": 21,
+    "total_bps": 6912.9,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 5753.6
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 1159.3
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.4,
+    "trades": 21,
+    "total_bps": 4147.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3452.1
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 695.6
+      }
+    }
+  },
+  {
+    "wr": 0.9524,
+    "pf": 7.4,
+    "trades": 21,
+    "total_bps": 4147.7,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.3,
+      0.7
+    ],
+    "hold": 48,
+    "adx": 35,
+    "score": 85,
+    "coins": [
+      "ETHUSDT",
+      "XRPUSDT"
+    ],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "ETHUSDT": {
+        "trades": 15,
+        "wr": 1.0,
+        "total": 3452.1
+      },
+      "XRPUSDT": {
+        "trades": 6,
+        "wr": 0.8333,
+        "total": 695.6
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 6.02,
+    "trades": 18,
+    "total_bps": 10844.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 4910.0
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 4254.5
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 840.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 840.0
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 6.02,
+    "trades": 18,
+    "total_bps": 10844.5,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 4910.0
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 4254.5
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 840.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 840.0
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 6.02,
+    "trades": 18,
+    "total_bps": 5422.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 2455.0
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 2127.3
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 420.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 420.0
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 6.02,
+    "trades": 18,
+    "total_bps": 5422.3,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 2455.0
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 2127.3
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 420.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 420.0
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 6.02,
+    "trades": 18,
+    "total_bps": 3253.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 1473.0
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 1276.4
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 252.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 252.0
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 6.02,
+    "trades": 18,
+    "total_bps": 3253.4,
+    "tp_type": "fixed",
+    "tp_r": 0.5,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 3,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 1473.0
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 1276.4
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 252.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 252.0
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 4.99,
+    "trades": 18,
+    "total_bps": 8625.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 2047.6
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 6105.6
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 244.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 228.4
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 4.99,
+    "trades": 18,
+    "total_bps": 8625.6,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 10,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 2047.6
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 6105.6
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 244.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 228.4
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 4.99,
+    "trades": 18,
+    "total_bps": 4312.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": false,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 1023.8
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 3052.8
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 122.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 114.2
+      }
+    }
+  },
+  {
+    "wr": 0.9444,
+    "pf": 4.99,
+    "trades": 18,
+    "total_bps": 4312.8,
+    "tp_type": "partial_ladder",
+    "tp_r": 0.0,
+    "sl": 4.0,
+    "trail": 0.0,
+    "partial": [
+      0.5,
+      1.0
+    ],
+    "hold": 48,
+    "adx": 55,
+    "score": 85,
+    "coins": [],
+    "bull": true,
+    "ema": false,
+    "trend_min": 0.0,
+    "lev": 5,
+    "sym": {
+      "BTCUSDT": {
+        "trades": 10,
+        "wr": 0.9,
+        "total": 1023.8
+      },
+      "ETHUSDT": {
+        "trades": 6,
+        "wr": 1.0,
+        "total": 3052.8
+      },
+      "SOLUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 122.0
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wr": 1.0,
+        "total": 114.2
+      }
+    }
+  }
+]
