@@ -1,0 +1,67 @@
+{
+  "real_mirror": {
+    "label": "REAL_MIRROR",
+    "n": 142,
+    "avg_net_bps": -10.89,
+    "wr": 0.211,
+    "pnl_usd": -12.75,
+    "avg_double_cost": -19.89,
+    "liq_rate": 0.0,
+    "quarter_avgs": [
+      1.84,
+      -17.53,
+      -15.92,
+      -11.88
+    ],
+    "gates": {
+      "1_quarter_avg_pos": false,
+      "2_portfolio_pnl_pos": false,
+      "3_avg_ge_50bps": false,
+      "4_wr_ge_65pct": false,
+      "5_axis_fit": true,
+      "6_cost_sensitivity_ok": false,
+      "7_liq_lt_10pct": true,
+      "8_n_ge_50": true,
+      "9_no_warmup": true
+    },
+    "passed": "4/9"
+  },
+  "structural_null": {
+    "label": "STRUCTURAL_NULL",
+    "n": 200,
+    "avg_net_bps": -18.01,
+    "wr": 0.465,
+    "pnl_usd": -29.72,
+    "avg_double_cost": -27.01,
+    "liq_rate": 0.0,
+    "quarter_avgs": [
+      -9.71,
+      -15.25,
+      -15.72,
+      -31.36
+    ],
+    "gates": {
+      "1_quarter_avg_pos": false,
+      "2_portfolio_pnl_pos": false,
+      "3_avg_ge_50bps": false,
+      "4_wr_ge_65pct": false,
+      "5_axis_fit": true,
+      "6_cost_sensitivity_ok": false,
+      "7_liq_lt_10pct": true,
+      "8_n_ge_50": true,
+      "9_no_warmup": true
+    },
+    "passed": "4/9"
+  },
+  "alpha_vs_null_bps": 7.12,
+  "config": {
+    "capital_usd": 55.0,
+    "position_pct": 0.3,
+    "leverage": 5.0,
+    "fee_roundtrip_bps": 4.0,
+    "slippage_bps": 5.0,
+    "latency_sec": 5.0,
+    "hold_hours": 4,
+    "rng_seed": 42
+  }
+}
