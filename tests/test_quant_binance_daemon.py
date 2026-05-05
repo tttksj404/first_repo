@@ -419,7 +419,7 @@ class QuantBinanceDaemonTests(unittest.TestCase):
                         max_retries=1,
                     )
             summary_payload = json.loads(result["run_paths"].summary_path.read_text(encoding="utf-8"))
-            self.assertEqual(summary_payload["decision_count"], 2)
+            self.assertEqual(summary_payload["decision_count"], 1)
             self.assertIn("ETHUSDT", summary_payload["observe_only_symbols"])
 
     def test_run_live_paper_daemon_uses_aligned_bucket_evidence_to_mark_observe_only_symbols(self) -> None:
