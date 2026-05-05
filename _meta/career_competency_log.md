@@ -23,6 +23,30 @@ This file stores only the conversations and work that materially connect to the 
 
 ## Entries
 
+### 2026-05-05 - Bybit OI leader-lag paper scanner
+- Summary: Built a paper-only Bybit OI quadrant scanner for a strategy path distinct from candle breakout/donchian/jackpot retuning.
+- What was done: Read the existing paper50 external-alpha and cross-coin EV code, checked current Bybit V5 public market endpoints, implemented ticker-sampled OI/price quadrant state, encoded ETH/1000PEPE/DOGE leader-lag candidate rules, added 30x TP/SL/time-stop/leader-reversal paper outcome simulation, and verified Bybit symbol reality where PEPE maps to `1000PEPEUSDT`.
+- Competency mapping: Data extraction and processing, real-time experiment design, quant feature engineering, paper/live safety separation, evidence-backed technical communication
+- Skill sharpened next: Run the scanner for 20-30 mature paper signals and compare outcome distributions before changing any live-facing runtime.
+
+### 2026-05-05 - Bybit OI paper-position lifecycle
+- Summary: Upgraded the strict PEPE OI scanner from signal logging into a paper-position lifecycle monitor.
+- What was done: Added active paper position state, one-position-at-a-time entry handling, per-cycle no-entry/hold/exit decision logs, live-paper TP/SL/time-stop/leader-reversal management, cooldown filtering, and regression tests for no-entry explanations and active exits.
+- Competency mapping: Trading-system state management, real-time decision logging, risk-response design, paper/live safety separation, verification-focused engineering
+- Skill sharpened next: Collect enough lifecycle events to compare whether leader-reversal exits improve net outcomes versus fixed 60-minute time stops.
+
+### 2026-05-05 - Bybit reflexive squeeze theory test
+- Summary: Tested the strongest theoretical PEPE OI squeeze/fade framework instead of only logging live paper signals.
+- What was done: Built a Bybit public-data replay script that fetches 5m klines and open interest for BTC/ETH/1000PEPE, compares follow, fade, trap-short, and capitulation-bounce variants under conservative round-trip cost, fixed kline pagination to cover the full requested window, and rejected the family after 14-day and 30-day tests both produced negative net results across folds.
+- Competency mapping: Hypothesis-driven quant research, public API data extraction, backtest pagination correctness, experiment falsification, risk-aware technical communication
+- Skill sharpened next: Shift from directional OI squeeze/fade to either market-neutral funding/basis capture or no-trade capital preservation unless a new positive-edge theory survives out-of-sample replay.
+
+### 2026-05-05 - Bybit surge-scanner grid search
+- Summary: Investigated sudden-surge and small-account jackpot strategies against Bybit futures data.
+- What was done: Corrected the exchange basis from Binance to the local Bybit/linear-historical workflow, added a reusable surge-strategy grid search, compared momentum breakout, pullback continuation, volume breakout, and failed-surge short variants under one cost model, rejected the current coarse surge family after negative walk-forward evidence, then added live Bybit public-data scanning and recent split optimization for the stronger 1h jackpot candidates.
+- Competency mapping: Data analysis and optimization, broader data support through market insight generation, data extraction and processing, technical communication
+- Skill sharpened next: Narrow the search to OI-confirmed Bybit surge candidates or add regime filters before any paper/live runtime change.
+
 ### 2026-04-25 - PEPE runtime stale stop-state audit fix
 - Summary: Corrected PEPE runtime health reporting so a persisted `stopped` health file is no longer misreported as a live stop-sentinel condition.
 - What was done: Audited supervisor health, monitor state, latest paper-live summaries, sync evidence, and startup error logs; confirmed no active manual-close or futures-position mismatch; traced misleading stopped-state output to `scripts/quant_health_audit.sh`; patched the stop-source reporting path; and verified it with focused runtime-script tests plus a live audit run.
