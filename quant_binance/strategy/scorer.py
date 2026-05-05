@@ -32,6 +32,15 @@ def compute_predictability_score(features: FeatureVector, settings: Settings) ->
         )
         if aligned:
             score += settings.b3_msb.score_bonus * features.b3_msb_strength
+    # --- Advanced signal integration ---
+    # OI Divergence: asymmetric +4/-6 (penalize fake breakouts harder)
+    if features.oi_divergence_score > 0:
+        score += min(features.oi_divergence_score * 5.7, 4.0)
+    elif features.oi_divergence_score < -0.3:
+        score += max(features.oi_divergence_score * 8.6, -6.0)
+
+    # SMC composite: up to +7 points for strong structure confirmation
+    score += features.smc_composite_score * 7.0
     return round(score, 6)
 
 
@@ -152,6 +161,19 @@ def estimate_live_fallback_edge_bps(
         )
         if aligned:
             raw += settings.b3_msb.edge_bonus_bps * features.b3_msb_strength
+    # --- Advanced signal edge contributions ---
+    # OI confirmation: +4bps for healthy breakout, -6bps penalty for fake breakout
+    if features.oi_divergence_score > 0.3:
+        raw += min(features.oi_divergence_score * 5.7, 4.0)
+    elif features.oi_divergence_score < -0.3:
+        raw += max(features.oi_divergence_score * 8.6, -6.0)
+
+    # SMC structure: up to +8bps for confirmed structure retest
+    raw += features.smc_composite_score * 8.0
+
+    # VWAP deviation: penalize entries far from VWAP in ranging markets
+    if adx < 18 and abs(features.vwap_deviation_z) > 2.0:
+        raw -= min(abs(features.vwap_deviation_z) - 1.5, 2.0) * 2.0
 
     return round(max(raw, 0.0), 6)
 
