@@ -1,0 +1,7 @@
+[daemon Tue Apr 28 11:50:01     2026] next cycle in 599s
+[daemon Tue Apr 28 12:00:00     2026] running cycle...
+[2026-04-28 03:00:02] === cycle 4 @ 2026-04-28T03:00:02.214796+00:00 ===
+[2026-04-28 03:00:02]   gate: ACTIVE (warmup)
+[2026-04-28 03:00:06]   STATUS equity=$55.00 open=0 closed=0 wins=0 totalPnL=$+0.000
+[daemon Tue Apr 28 12:00:07     2026] cycle done
+[daemon Tue Apr 28 12:00:07     2026] next cycle in 3593s
