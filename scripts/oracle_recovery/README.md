@@ -29,11 +29,20 @@ g185ctl discover
 ```bash
 g185ctl status   # OCI Instance Agent로 상태 확인, SSH 불필요
 g185ctl prune    # g1165/g129183/g922_meme stop+disable+mask
+g185ctl rescue-prune  # Agent가 ACCEPTED에 멈추면 SOFTRESET/RESET 후 prune까지 자동 진행
 g185ctl recover  # sshd 재시작
 g185ctl ssh      # SSH가 살아 있을 때만 접속
 ```
 
 `g185ctl discover`는 현재 Cloud Shell 권한으로 보이는 RUNNING 인스턴스 중 `g185` 계열을 찾아 `~/.g185ctl.env`에 저장하고, `~/.ssh/config`의 `Host g185`도 현재 public IP/443 기준으로 갱신한다. 비밀번호나 API 키는 저장하지 않는다.
+
+`g185ctl status`나 `g185ctl prune`이 `ACCEPTED`에 계속 머무르면 인스턴스 안의 OCI Agent가 명령을 실행하지 못하는 상태다. 이때는 반복 설정하지 말고:
+
+```bash
+g185ctl rescue-prune
+```
+
+이 명령 하나가 prune 시도 → SOFTRESET → prune 재시도 → 필요시 RESET → prune 재시도를 순서대로 처리한다.
 
 ## 전략 과적재 정리 — 한 번만 실행
 

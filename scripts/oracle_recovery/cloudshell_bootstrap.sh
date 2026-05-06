@@ -183,7 +183,7 @@ agent_run_text() {
   local name="$1"
   local text="$2"
   local timeout="${3:-180}"
-  local body cmd_id state
+  local body cmd_id state terminal_state=""
   body="$(mktemp)"
   python3 - "$body" "$COMP_ID" "$INST_ID" "$name" "$timeout" "$text" <<'PY'
 import json, sys
@@ -228,7 +228,10 @@ PY
       --raw-output 2>/dev/null || true)"
     echo "[agent] state=${state:-pending}"
     case "$state" in
-      SUCCEEDED|FAILED|TIMED_OUT|CANCELED) break ;;
+      SUCCEEDED|FAILED|TIMED_OUT|CANCELED)
+        terminal_state="$state"
+        break
+        ;;
     esac
     sleep 5
   done
@@ -241,6 +244,78 @@ PY
     --command-id "$cmd_id" \
     --query 'data."content"."output"."text"' \
     --raw-output 2>/dev/null || true
+
+  case "$terminal_state" in
+    SUCCEEDED) return 0 ;;
+    FAILED|TIMED_OUT|CANCELED) return 1 ;;
+    *)
+      echo
+      echo "FATAL: Instance Agent command stayed in ${state:-unknown}; agent is likely stuck." >&2
+      return 124
+      ;;
+  esac
+}
+
+refresh_ip() {
+  need_oci
+  require_target
+  local ip
+  ip="$(oci compute instance list-vnics \
+    --region "$REGION" \
+    --instance-id "$INST_ID" \
+    --query 'data[0]."public-ip"' \
+    --raw-output 2>/dev/null || true)"
+  [ "$ip" = "null" ] && ip=""
+  if [ -n "$ip" ]; then
+    SSH_IP="$ip"
+    save_env
+    write_ssh_config || true
+  fi
+}
+
+instance_action_wait() {
+  need_oci
+  require_target
+  local action="$1"
+  echo "[compute] ${action} ${DISPLAY_NAME:-$INST_ID}"
+  oci compute instance action \
+    --region "$REGION" \
+    --instance-id "$INST_ID" \
+    --action "$action" \
+    --wait-for-state RUNNING \
+    --max-wait-seconds 300 >/dev/null
+  echo "[compute] ${action} returned RUNNING; waiting for guest services"
+  sleep 90
+  refresh_ip || true
+}
+
+rescue_prune() {
+  need_oci
+  require_target
+  echo "=== rescue-prune ==="
+  echo "Target: ${DISPLAY_NAME:-unknown} ${INST_ID}"
+  echo
+
+  echo "[try] prune through Instance Agent"
+  set +e
+  agent_run_text "g185-prune-low-value-emulators" "$(prune_cmd)" 180
+  local rc=$?
+  set -e
+  [ "$rc" -eq 0 ] && return 0
+
+  echo
+  echo "[rescue] Instance Agent did not complete prune. Trying SOFTRESET, then prune again."
+  instance_action_wait SOFTRESET
+  set +e
+  agent_run_text "g185-prune-after-softreset" "$(prune_cmd)" 180
+  rc=$?
+  set -e
+  [ "$rc" -eq 0 ] && return 0
+
+  echo
+  echo "[rescue] SOFTRESET did not restore agent execution. Trying hard RESET once, then prune again."
+  instance_action_wait RESET
+  agent_run_text "g185-prune-after-reset" "$(prune_cmd)" 180
 }
 
 status_cmd() {
@@ -331,6 +406,7 @@ Commands:
   g185ctl env                 Show saved target.
   g185ctl status              Run status through OCI Instance Agent.
   g185ctl prune               Stop+disable+mask low-value emulators through OCI Instance Agent.
+  g185ctl rescue-prune        If Agent is stuck, reboot once and prune automatically.
   g185ctl recover             Restart sshd through OCI Instance Agent.
   g185ctl ssh [cmd...]        SSH to saved public IP on port 443.
   g185ctl ssh-config          Rewrite ~/.ssh/config Host g185 from saved env.
@@ -345,6 +421,7 @@ case "$cmd" in
   env) show_env ;;
   status) agent_run_text "g185-status" "$(status_cmd)" 180 ;;
   prune) agent_run_text "g185-prune-low-value-emulators" "$(prune_cmd)" 180 ;;
+  rescue-prune) rescue_prune ;;
   recover) agent_run_text "g185-restart-sshd" "$(recover_cmd)" 120 ;;
   ssh) ssh_cmd "$@" ;;
   ssh-config) write_ssh_config ;;
@@ -374,3 +451,4 @@ echo "Next:"
 echo "  g185ctl discover"
 echo "  g185ctl status"
 echo "  g185ctl prune"
+echo "  g185ctl rescue-prune  # if status/prune stays ACCEPTED"
