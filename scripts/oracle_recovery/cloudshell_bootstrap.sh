@@ -223,7 +223,7 @@ PY
     state="$(oci instance-agent command-execution get \
       --region "$REGION" \
       --instance-id "$INST_ID" \
-      --instance-agent-command-id "$cmd_id" \
+      --command-id "$cmd_id" \
       --query 'data."lifecycle-state"' \
       --raw-output 2>/dev/null || true)"
     echo "[agent] state=${state:-pending}"
@@ -238,7 +238,7 @@ PY
   oci instance-agent command-execution get \
     --region "$REGION" \
     --instance-id "$INST_ID" \
-    --instance-agent-command-id "$cmd_id" \
+    --command-id "$cmd_id" \
     --query 'data."content"."output"."text"' \
     --raw-output 2>/dev/null || true
 }
