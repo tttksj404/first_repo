@@ -284,7 +284,7 @@ cancel_accepted() {
     --compartment-id "$COMP_ID" \
     --instance-id "$INST_ID" \
     --lifecycle-state ACCEPTED \
-    --all \
+    --limit 50 \
     --output json > "$tmp"
 
   ids="$(python3 - "$tmp" <<'PY'
