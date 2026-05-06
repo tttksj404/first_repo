@@ -76,7 +76,6 @@ DOT Studio Bridge (`run_sequence.py`)를 통해 자동 실행. 결과: `quant_ru
 - 3모델 토론 요청 시 스코어링 함수로 대체 금지
 - Claude가 GPT/Gemini를 흉내내는 것 금지 — 반드시 실제 모델 호출
 - API key 방식 시도 금지 — CLI 도구 사용
-
 ## 전략 발굴/테스트 헌법 (토큰 절감 고정)
 
 - 전략 신규 발굴/탐색/검증 작업은 기본적으로 토큰 절감 모드(`ecomode`/compact 출력)를 사용한다.
