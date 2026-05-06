@@ -1,8 +1,6 @@
 # Environments & Secrets
 .env
 .env.*
-/env
-/env.*
 *.key
 *.token
 notion_key.txt
@@ -82,3 +80,16 @@ quant_runtime/
 quant_runtime_paper50/
 quant_runtime_g185_paper/
 quant_binance/strategies/strategies/
+
+# Top-level scratch artifacts dir
+/artifacts/
+
+# BOJ / algorithm-pack work (separate concern from quant trading)
+/build_finance_boj_pack.py
+/crawl_boj_curriculum.py
+/crawl_finance_pack_problem_texts.py
+/offline_judge/
+
+# verify_btc_timing: Binance public klines (regeneratable)
+verify_btc_timing/data/
+verify_btc_timing/__pycache__/
