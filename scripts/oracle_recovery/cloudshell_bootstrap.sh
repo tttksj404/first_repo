@@ -273,6 +273,50 @@ refresh_ip() {
   fi
 }
 
+cancel_accepted() {
+  need_oci
+  require_target
+  local tmp ids
+  tmp="$(mktemp)"
+  echo "[cancel] listing ACCEPTED command executions"
+  oci instance-agent command-execution list \
+    --region "$REGION" \
+    --compartment-id "$COMP_ID" \
+    --instance-id "$INST_ID" \
+    --lifecycle-state ACCEPTED \
+    --all \
+    --output json > "$tmp"
+
+  ids="$(python3 - "$tmp" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1]))
+items = data.get("data", [])
+seen = set()
+for item in items:
+    cid = item.get("instance-agent-command-id") or item.get("instanceAgentCommandId")
+    if cid and cid not in seen:
+        seen.add(cid)
+        print(cid)
+PY
+)"
+  rm -f "$tmp"
+
+  if [ -z "$ids" ]; then
+    echo "[cancel] no ACCEPTED commands found"
+    return 0
+  fi
+
+  printf '%s\n' "$ids" | while IFS= read -r cid; do
+    [ -n "$cid" ] || continue
+    echo "[cancel] $cid"
+    oci instance-agent command cancel \
+      --region "$REGION" \
+      --command-id "$cid" \
+      --force >/dev/null 2>&1 || true
+  done
+  echo "[cancel] requested"
+}
+
 instance_action_wait() {
   need_oci
   require_target
@@ -315,6 +359,7 @@ rescue_prune() {
   echo
 
   echo "[rescue] Instance Agent is presumed stuck. Trying SOFTRESET first, then prune."
+  cancel_accepted || true
   instance_action_wait SOFTRESET
 
   echo
@@ -325,12 +370,14 @@ rescue_prune() {
 
   echo
   echo "[try] SSH prune failed; trying Instance Agent after SOFTRESET"
+  cancel_accepted || true
   if agent_run_text "g185-prune-after-softreset" "$(prune_cmd)" 180; then
     return 0
   fi
 
   echo
   echo "[rescue] SOFTRESET did not restore agent execution. Trying hard RESET once, then prune again."
+  cancel_accepted || true
   instance_action_wait RESET
 
   echo
@@ -341,6 +388,7 @@ rescue_prune() {
 
   echo
   echo "[try] SSH prune failed; trying Instance Agent after RESET"
+  cancel_accepted || true
   agent_run_text "g185-prune-after-reset" "$(prune_cmd)" 180
 }
 
@@ -436,6 +484,7 @@ Commands:
   g185ctl env                 Show saved target.
   g185ctl status              Run status through OCI Instance Agent.
   g185ctl prune               Stop+disable+mask low-value emulators through OCI Instance Agent.
+  g185ctl cancel-accepted     Cancel stuck ACCEPTED Instance Agent commands.
   g185ctl rescue-prune        If Agent is stuck, reboot once and prune automatically.
   g185ctl recover             Restart sshd through OCI Instance Agent.
   g185ctl ssh [cmd...]        SSH to saved public IP on port 443.
@@ -451,6 +500,7 @@ case "$cmd" in
   env) show_env ;;
   status) agent_run_text "g185-status" "$(status_cmd)" 180 ;;
   prune) agent_run_text "g185-prune-low-value-emulators" "$(prune_cmd)" 180 ;;
+  cancel-accepted) cancel_accepted ;;
   rescue-prune) rescue_prune ;;
   recover) agent_run_text "g185-restart-sshd" "$(recover_cmd)" 120 ;;
   ssh) ssh_cmd "$@" ;;
@@ -481,4 +531,5 @@ echo "Next:"
 echo "  g185ctl discover"
 echo "  g185ctl status"
 echo "  g185ctl prune"
+echo "  g185ctl cancel-accepted"
 echo "  g185ctl rescue-prune  # if status/prune stays ACCEPTED"
