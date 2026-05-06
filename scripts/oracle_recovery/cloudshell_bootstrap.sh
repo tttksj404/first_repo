@@ -296,21 +296,11 @@ rescue_prune() {
   echo "Target: ${DISPLAY_NAME:-unknown} ${INST_ID}"
   echo
 
-  echo "[try] prune through Instance Agent"
-  set +e
-  agent_run_text "g185-prune-low-value-emulators" "$(prune_cmd)" 180
-  local rc=$?
-  set -e
-  [ "$rc" -eq 0 ] && return 0
-
-  echo
-  echo "[rescue] Instance Agent did not complete prune. Trying SOFTRESET, then prune again."
+  echo "[rescue] Instance Agent is presumed stuck. Trying SOFTRESET first, then prune."
   instance_action_wait SOFTRESET
-  set +e
-  agent_run_text "g185-prune-after-softreset" "$(prune_cmd)" 180
-  rc=$?
-  set -e
-  [ "$rc" -eq 0 ] && return 0
+  if agent_run_text "g185-prune-after-softreset" "$(prune_cmd)" 180; then
+    return 0
+  fi
 
   echo
   echo "[rescue] SOFTRESET did not restore agent execution. Trying hard RESET once, then prune again."
