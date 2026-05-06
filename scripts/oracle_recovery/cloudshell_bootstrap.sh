@@ -289,6 +289,23 @@ instance_action_wait() {
   refresh_ip || true
 }
 
+ssh_run_text() {
+  require_target
+  load_env
+  [ -n "${SSH_IP:-}" ] || return 1
+  local text="$1"
+  echo "[ssh] trying ${SSH_USER:-opc}@${SSH_IP}:${SSH_PORT:-443}"
+  ssh \
+    -p "${SSH_PORT:-443}" \
+    -o BatchMode=yes \
+    -o ConnectTimeout=20 \
+    -o ConnectionAttempts=1 \
+    -o ServerAliveInterval=10 \
+    -o ServerAliveCountMax=2 \
+    "${SSH_USER:-opc}@${SSH_IP}" \
+    "bash -s" <<<"$text"
+}
+
 rescue_prune() {
   need_oci
   require_target
@@ -298,6 +315,15 @@ rescue_prune() {
 
   echo "[rescue] Instance Agent is presumed stuck. Trying SOFTRESET first, then prune."
   instance_action_wait SOFTRESET
+
+  echo
+  echo "[try] prune through SSH after SOFTRESET"
+  if ssh_run_text "$(prune_cmd)"; then
+    return 0
+  fi
+
+  echo
+  echo "[try] SSH prune failed; trying Instance Agent after SOFTRESET"
   if agent_run_text "g185-prune-after-softreset" "$(prune_cmd)" 180; then
     return 0
   fi
@@ -305,6 +331,15 @@ rescue_prune() {
   echo
   echo "[rescue] SOFTRESET did not restore agent execution. Trying hard RESET once, then prune again."
   instance_action_wait RESET
+
+  echo
+  echo "[try] prune through SSH after RESET"
+  if ssh_run_text "$(prune_cmd)"; then
+    return 0
+  fi
+
+  echo
+  echo "[try] SSH prune failed; trying Instance Agent after RESET"
   agent_run_text "g185-prune-after-reset" "$(prune_cmd)" 180
 }
 
