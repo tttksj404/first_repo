@@ -298,6 +298,7 @@ ssh_run_text() {
   ssh \
     -p "${SSH_PORT:-443}" \
     -o BatchMode=yes \
+    -o StrictHostKeyChecking=accept-new \
     -o ConnectTimeout=20 \
     -o ConnectionAttempts=1 \
     -o ServerAliveInterval=10 \
@@ -419,7 +420,11 @@ SH
 ssh_cmd() {
   load_env
   [ -n "${SSH_IP:-}" ] || die "No SSH_IP saved. Run: g185ctl discover"
-  exec ssh -p "${SSH_PORT:-443}" "${SSH_USER:-opc}@${SSH_IP}" "$@"
+  exec ssh \
+    -p "${SSH_PORT:-443}" \
+    -o StrictHostKeyChecking=accept-new \
+    "${SSH_USER:-opc}@${SSH_IP}" \
+    "$@"
 }
 
 usage() {
