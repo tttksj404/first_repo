@@ -970,3 +970,15 @@ This file stores only the conversations and work that materially connect to the 
 - What was done: Checked trading runtime state, process list, supervisor logs, and latest paper-live summaries to separate copied file mtimes from embedded runtime timestamps; confirmed no 2026-04-22/23 overnight run artifacts and summarized the last valid 2026-04-15 live result.
 - Mapped competencies: Data analysis and optimization, runtime/system integration diagnostics, evidence-first verification, technical communication.
 - Next skill to sharpen: Add a freshness report that compares filesystem mtimes, embedded runtime timestamps, and active process state before reviewing trading outcomes.
+
+## 2026-05-06 - Oracle paper-strategy runtime health check
+- Conversation/topic: Pulled the latest repo state and checked whether the Oracle `g185` paper strategy services were currently running correctly.
+- What was done: Verified git sync, diagnosed the Mac SSH setup script result, confirmed direct SSH access, inspected user systemd services, process state, runtime state files, logs, freshness, open positions, PnL, and error fields across the active paper emulators.
+- Mapped competencies: Trading-system operations, remote runtime diagnostics, observability evidence synthesis, data-pipeline health verification.
+- Next skill to sharpen: Add a one-command Oracle health summary that normalizes service status, heartbeat age, open positions, and recent error signals.
+
+## 2026-05-06 - Oracle emulator pruning automation
+- Conversation/topic: Reduced operational risk from too many paper strategy emulators on the Oracle `g185` VM.
+- What was done: Selected three low-priority emulators for removal, diagnosed the broken `sudo` path issue, and added an idempotent no-sudo pruning script that stops, disables, masks, and verifies the selected user systemd services.
+- Mapped competencies: Runtime capacity control, remote operations hardening, systemd service management, operational automation design.
+- Next skill to sharpen: Package remote maintenance actions as OCI Run Command payloads so recovery and pruning do not depend on SSH availability.
