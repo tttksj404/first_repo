@@ -23,6 +23,7 @@ from repo config and prints a one-line Cloud Shell registration command.
 from __future__ import annotations
 
 import argparse
+import configparser
 import json
 import os
 import pathlib
@@ -110,7 +111,7 @@ def write_env(cfg: OracleConfig, path: pathlib.Path = CONFIG_PATH) -> None:
 def oci_json(args: list[str], *, timeout: int = 90) -> tuple[dict[str, Any] | None, str | None]:
     if not command_exists("oci"):
         return None, "oci CLI not found"
-    proc = run(["oci", *args, "--output", "json"], timeout=timeout)
+    proc = run(["oci", *args, *oci_auth_args(), "--output", "json"], timeout=timeout)
     if proc.returncode != 0:
         return None, (proc.stderr.strip() or proc.stdout.strip() or f"oci rc={proc.returncode}")
     if not proc.stdout.strip():
@@ -119,6 +120,15 @@ def oci_json(args: list[str], *, timeout: int = 90) -> tuple[dict[str, Any] | No
         return json.loads(proc.stdout), None
     except json.JSONDecodeError as exc:
         return None, f"oci returned non-JSON stdout: {exc}: {proc.stdout[:300]}"
+
+
+def oci_auth_args(profile: str = "DEFAULT") -> list[str]:
+    config_path = pathlib.Path.home() / ".oci" / "config"
+    parser = configparser.ConfigParser()
+    parser.read(config_path, encoding="utf-8")
+    if parser.has_option(profile, "security_token_file"):
+        return ["--auth", "security_token"]
+    return []
 
 
 def command_exists(name: str) -> bool:
