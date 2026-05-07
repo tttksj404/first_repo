@@ -47,19 +47,3 @@ class ConditionalEdgeLookup:
         if len(pooled_values) >= self.min_observations:
             return float(median(pooled_values))
         return None
-
-    def diagnostics(self) -> dict[str, object]:
-        """Return observation counts for monitoring learning health."""
-        total_symbol = sum(len(v) for v in self._symbol_buckets.values())
-        total_pooled = sum(len(v) for v in self._pooled_buckets.values())
-        qualified_symbol = sum(1 for v in self._symbol_buckets.values() if len(v) >= self.min_observations)
-        qualified_pooled = sum(1 for v in self._pooled_buckets.values() if len(v) >= self.min_observations)
-        return {
-            "total_observations": total_symbol,
-            "symbol_buckets": len(self._symbol_buckets),
-            "symbol_buckets_qualified": qualified_symbol,
-            "pooled_buckets": len(self._pooled_buckets),
-            "pooled_buckets_qualified": qualified_pooled,
-            "min_observations_threshold": self.min_observations,
-            "learning_active": qualified_symbol > 0 or qualified_pooled > 0,
-        }

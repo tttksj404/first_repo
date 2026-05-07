@@ -1,19 +1,8 @@
 from __future__ import annotations
 
 import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-
-_RUNTIME_OPTION_ENV_KEYS = (
-    "UNIVERSE_SYMBOLS",
-    "STRATEGY_PROFILE",
-    "STRATEGY_OVERRIDE_PATH",
-)
-_INITIAL_RUNTIME_OPTION_ENV = {
-    key: os.environ.get(key, "")
-    for key in _RUNTIME_OPTION_ENV_KEYS
-}
 
 
 @dataclass(frozen=True)
@@ -48,12 +37,10 @@ def _load_env_file(path: Path) -> dict[str, str]:
     return values
 
 
-def _resolve_env_value(name: str, *, allow_file_fallback: bool = True) -> str:
+def _resolve_env_value(name: str) -> str:
     direct = os.environ.get(name, "").strip()
     if direct:
         return direct
-    if not allow_file_fallback:
-        return ""
     repo_root = Path(__file__).resolve().parents[1]
     for candidate in (repo_root / ".env", repo_root / ".env.local"):
         file_values = _load_env_file(candidate)
@@ -63,38 +50,11 @@ def _resolve_env_value(name: str, *, allow_file_fallback: bool = True) -> str:
     return ""
 
 
-def _allow_file_runtime_overrides() -> bool:
-    explicit = os.environ.get("QUANT_BINANCE_ALLOW_FILE_RUNTIME_OVERRIDES", "").strip().lower()
-    if explicit:
-        return explicit not in {"0", "false", "no", "off"}
-    # Unit tests should be deterministic and must not inherit local runtime tuning
-    # from repository .env files unless explicitly opted in.
-    if "PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules:
-        return False
-    return True
-
-
-def _resolve_runtime_option_env_value(name: str) -> str:
-    direct = os.environ.get(name, "").strip()
-    if not direct:
-        return ""
-    if "PYTEST_CURRENT_TEST" not in os.environ and "pytest" not in sys.modules:
-        return direct
-    # Ignore ambient process-level runtime tuning during tests unless a test
-    # explicitly changed the value after module import.
-    initial = (_INITIAL_RUNTIME_OPTION_ENV.get(name) or "").strip()
-    if direct == initial:
-        return ""
-    return direct
-
-
 def resolve_universe_symbols(
     *,
     env_var: str = "UNIVERSE_SYMBOLS",
 ) -> tuple[str, ...]:
-    raw = _resolve_runtime_option_env_value(env_var)
-    if not raw and _allow_file_runtime_overrides():
-        raw = _resolve_env_value(env_var, allow_file_fallback=True)
+    raw = _resolve_env_value(env_var)
     if not raw:
         return ()
     symbols = []
@@ -111,24 +71,25 @@ def resolve_universe_symbols(
     return tuple(deduped)
 
 
+def resolve_universe_symbols_append(
+    *,
+    env_var: str = "UNIVERSE_SYMBOLS_APPEND",
+) -> tuple[str, ...]:
+    return resolve_universe_symbols(env_var=env_var)
+
+
+def resolve_bitget_us_stock_symbols(
+    *,
+    env_var: str = "BITGET_US_STOCK_SYMBOLS",
+) -> tuple[str, ...]:
+    return resolve_universe_symbols(env_var=env_var)
+
+
 def resolve_strategy_profile(
     *,
     env_var: str = "STRATEGY_PROFILE",
 ) -> str:
-    raw = _resolve_runtime_option_env_value(env_var)
-    if not raw and _allow_file_runtime_overrides():
-        raw = _resolve_env_value(env_var, allow_file_fallback=True)
-    return raw.strip().lower()
-
-
-def resolve_strategy_override_path(
-    *,
-    env_var: str = "STRATEGY_OVERRIDE_PATH",
-) -> str:
-    raw = _resolve_runtime_option_env_value(env_var)
-    if not raw and _allow_file_runtime_overrides():
-        raw = _resolve_env_value(env_var, allow_file_fallback=True)
-    return raw.strip()
+    return _resolve_env_value(env_var).strip().lower()
 
 
 def load_binance_credentials_from_env(
@@ -136,8 +97,8 @@ def load_binance_credentials_from_env(
     api_key_var: str = "BINANCE_API_KEY",
     api_secret_var: str = "BINANCE_API_SECRET",
 ) -> LoadedBinanceCredentials:
-    api_key = _resolve_env_value(api_key_var, allow_file_fallback=True)
-    api_secret = _resolve_env_value(api_secret_var, allow_file_fallback=True)
+    api_key = _resolve_env_value(api_key_var)
+    api_secret = _resolve_env_value(api_secret_var)
     if not api_key or not api_secret:
         missing = [
             name
@@ -154,6 +115,6 @@ def runtime_readiness(
     api_secret_var: str = "BINANCE_API_SECRET",
 ) -> RuntimeReadiness:
     return RuntimeReadiness(
-        has_api_key=bool(_resolve_env_value(api_key_var, allow_file_fallback=True)),
-        has_api_secret=bool(_resolve_env_value(api_secret_var, allow_file_fallback=True)),
+        has_api_key=bool(_resolve_env_value(api_key_var)),
+        has_api_secret=bool(_resolve_env_value(api_secret_var)),
     )

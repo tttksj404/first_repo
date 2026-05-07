@@ -1,90 +1,36 @@
 from __future__ import annotations
 
 import asyncio
-import json
-import logging
 import os
-from dataclasses import replace
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from quant_binance.bootstrap import initialize_workspace
+from quant_binance.data.bitget_polling_ws import BitgetPollingWebSocketClient
 from quant_binance.data.combined_ws import CombinedWebSocketClient
 from quant_binance.data.futures_stream import build_futures_streams
 from quant_binance.data.rest_seed import seed_market_store_from_rest
 from quant_binance.data.spot_stream import build_spot_streams
-from quant_binance.data.bitget_ws import BitgetWebSocketClient
-from quant_binance.data.bitget_ws import BITGET_MAX_CHANNELS_PER_CONNECTION
-from quant_binance.cost_calibration import load_cost_calibration, refresh_bitget_cost_calibration
-from quant_binance.exchange import resolve_exchange_id
 from quant_binance.data.binance_ws import BinanceWebSocketClient
 from quant_binance.execution.client_factory import build_exchange_rest_client
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.execution.router import ExecutionRouter
 from quant_binance.features.extractor import MarketFeatureExtractor
+from quant_binance.features.primitive import build_feature_vector_from_primitives
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import EventDispatcher, LivePaperRuntime
 from quant_binance.observability.log_store import JsonlLogStore
-from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
-from quant_binance.observability.runtime_snapshot import latest_runtime_artifact_path, load_latest_runtime_payloads
-from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.paths import prepare_run_paths
 from quant_binance.session import BackoffPolicy, LivePaperSession, LivePaperShell
 from quant_binance.service import PaperTradingService
-from quant_binance.self_healing import RuntimeSelfHealing
 from quant_binance.settings import Settings
-from quant_binance.risk.capital import build_capital_adequacy_report, extract_account_capital_inputs
+from quant_binance.risk.capital import build_capital_adequacy_report
 from quant_binance.strategy.regime import observe_only_reasons
 from quant_binance.strategy.scorer import apply_score_and_costs
+from quant_binance.strategy_profile_switch import AutoProfileSwitchPolicy, AutoProfileSwitcher
+from quant_binance.exchange import resolve_exchange_id
 from quant_binance.overlays import apply_altcoin_overlay, apply_macro_overlay, apply_sentiment_overlay, load_altcoin_inputs, load_macro_inputs
-from quant_binance.features.primitive import build_feature_vector_from_primitives
-from quant_binance.runtime_universe import build_runtime_universe_hydration
-
-_log = logging.getLogger(__name__)
-
-
-class ReadOnlyExchangeClient:
-    """Proxy that allows market/account reads while hiding exchange write APIs."""
-
-    _BLOCKED_METHODS = {
-        "cancel_futures_plan_orders",
-        "cancel_order",
-        "place_futures_position_tpsl",
-        "place_order",
-        "place_spot_plan_order",
-        "test_order",
-        "transfer_asset",
-        "transfer_spot_to_futures",
-    }
-
-    def __init__(self, client: Any) -> None:
-        self._client = client
-
-    def __getattr__(self, name: str) -> Any:
-        if name in self._BLOCKED_METHODS:
-            raise AttributeError(f"{name} is disabled in read-only paper mode")
-        return getattr(self._client, name)
-
-
-class SimulatedOrderTestClient:
-    """Local-only test-order client for read-only paper runs."""
-
-    def __init__(self, exchange_id: str) -> None:
-        self.exchange_id = exchange_id
-
-    def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "status": "SIMULATED_READ_ONLY",
-            "market": market,
-            "order_params": dict(order_params),
-            "read_only": True,
-        }
-
-
-def _truthy_env(name: str, default: str = "0") -> bool:
-    return str(os.environ.get(name, default) or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _next_decision_boundary(timestamp, interval_minutes: int):
@@ -100,15 +46,7 @@ def _next_decision_boundary(timestamp, interval_minutes: int):
     return floored
 
 
-def _decision_boundary_at_or_before(timestamp: datetime, interval_minutes: int) -> datetime:
-    return timestamp.replace(
-        minute=(timestamp.minute // interval_minutes) * interval_minutes,
-        second=0,
-        microsecond=0,
-    )
-
-
-def _decision_interval_label(interval_minutes: int) -> str:
+def _interval_label(interval_minutes: int) -> str:
     if interval_minutes % (24 * 60) == 0:
         return f"{interval_minutes // (24 * 60)}d"
     if interval_minutes % 60 == 0:
@@ -116,245 +54,124 @@ def _decision_interval_label(interval_minutes: int) -> str:
     return f"{interval_minutes}m"
 
 
-def _normalized_closed_decision_time(timestamp: datetime) -> datetime:
-    if timestamp.second == 0 and timestamp.microsecond == 0:
-        return timestamp
-    return timestamp + timedelta(milliseconds=1)
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name, "").strip().lower()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "y", "on"}
 
 
-def _bootstrap_decision_time(*, store, interval_minutes: int, now: datetime | None = None):
-    latest_allowed = (
-        _decision_boundary_at_or_before(now.astimezone(timezone.utc), interval_minutes)
-        if now is not None
-        else None
-    )
-    interval_label = _decision_interval_label(interval_minutes)
-    latest_closed = None
-    for state in getattr(store, "_states", {}).values():
-        klines = state.klines.get(interval_label, ())
-        if not klines:
-            continue
-        close_time = _normalized_closed_decision_time(klines[-1].close_time)
-        if latest_closed is None or close_time > latest_closed:
-            latest_closed = close_time
-    if latest_closed is not None:
-        aligned = latest_closed.replace(second=0, microsecond=0)
-        if (
-            latest_closed.second == 0
-            and latest_closed.microsecond == 0
-            and latest_closed.minute % interval_minutes == 0
-        ):
-            candidate = latest_closed
-        else:
-            candidate = _next_decision_boundary(aligned, interval_minutes)
-        if latest_allowed is not None and candidate > latest_allowed:
-            return latest_allowed
-        return candidate
-    candidate = _next_decision_boundary(
-        next(iter(store._states.values())).last_update_time,
-        interval_minutes,
-    )
-    if latest_allowed is not None and candidate > latest_allowed:
-        return latest_allowed
-    return candidate
-
-
-def _runtime_snapshot_futures_position_keys(
-    *,
-    state_payload: dict[str, Any],
-    summary_payload: dict[str, Any] | None,
-) -> set[tuple[str, str]]:
-    summary = summary_payload or {}
-    candidate_positions = (
-        state_payload.get("paper_open_futures_positions")
-        or summary.get("paper_open_futures_positions")
-        or summary.get("open_futures_positions")
-        or []
-    )
-    keys: set[tuple[str, str]] = set()
-    for item in candidate_positions:
-        if not isinstance(item, dict):
-            continue
-        symbol = str(item.get("symbol", "") or "").strip()
-        side = str(item.get("side", "") or item.get("holdSide", "") or "").strip().lower()
-        if not symbol:
-            continue
-        keys.add((symbol, side))
-    for item in list(summary.get("live_orders") or []):
-        if not isinstance(item, dict) or not bool(item.get("accepted", False)):
-            continue
-        if str(item.get("market", "") or "") != "futures":
-            continue
-        symbol = str(item.get("symbol", "") or "").strip()
-        order_side = str(item.get("side", "") or "").strip().lower()
-        side = "long" if order_side == "buy" else "short" if order_side == "sell" else ""
-        if not symbol or not side:
-            continue
-        keys.add((symbol, side))
-    return keys
-
-
-def _enforce_strict_startup_position_block(
-    *,
-    session: LivePaperSession,
-    enabled: bool,
-    state_payload: dict[str, Any],
-    summary_payload: dict[str, Any] | None,
-) -> None:
-    if not enabled:
-        return
-    live_positions = session._active_live_futures_positions_by_symbol()
-    if not live_positions:
-        return
-    # Only block live positions that cannot be tied back to the previous runtime
-    # snapshot. Snapshot-matched positions remain eligible for strategy recovery.
-    snapshot_keys = _runtime_snapshot_futures_position_keys(
-        state_payload=state_payload,
-        summary_payload=summary_payload,
-    )
-    unexpected: list[str] = []
-    for symbol, position in sorted(live_positions.items()):
-        side = session._normalize_live_position_side(position)
-        key = (symbol, side)
-        wildcard_key = (symbol, "")
-        if key in snapshot_keys or wildcard_key in snapshot_keys:
-            continue
-        unexpected.append(f"{symbol}:{side}" if side else symbol)
-    if unexpected:
-        joined = ", ".join(unexpected)
-        raise RuntimeError(
-            "STRICT_STARTUP_POSITION_BLOCK: found live startup position(s) that are not present in the "
-            "previous runtime snapshot while disable_position_adoption=true. Refusing startup for "
-            f"unknown/external positions. Symbols: {joined}"
-        )
-
-
-def _build_live_ws_client(
-    *,
-    exchange_id: str,
-    symbols: tuple[str, ...],
-    allow_insecure_ssl: bool,
-    decision_interval_minutes: int = 5,
-) -> CombinedWebSocketClient:
-    decision_interval = f"{max(int(decision_interval_minutes), 1)}m"
-    spot_intervals = tuple(dict.fromkeys(("1m", "5m", "1h", "4h", decision_interval)))
-    futures_intervals = tuple(dict.fromkeys(("5m", decision_interval)))
-    if exchange_id == "bitget":
-        def _chunk_symbols(symbols_in: tuple[str, ...], *, streams_per_symbol: int) -> list[tuple[str, ...]]:
-            max_symbols = max(1, BITGET_MAX_CHANNELS_PER_CONNECTION // max(streams_per_symbol, 1))
-            return [
-                tuple(symbols_in[index : index + max_symbols])
-                for index in range(0, len(symbols_in), max_symbols)
-            ]
-
-        clients: list[BitgetWebSocketClient] = []
-        spot_streams_per_symbol = 2 + len(spot_intervals)
-        futures_streams_per_symbol = 2 + len(futures_intervals)
-        for chunk in _chunk_symbols(symbols, streams_per_symbol=spot_streams_per_symbol):
-            clients.append(
-                BitgetWebSocketClient(
-                    market="spot",
-                    symbols=chunk,
-                    intervals=spot_intervals,
-                    allow_insecure_ssl=allow_insecure_ssl,
-                    label=f"spot-{chunk[0].lower()}",
-                )
-            )
-        for chunk in _chunk_symbols(symbols, streams_per_symbol=futures_streams_per_symbol):
-            clients.append(
-                BitgetWebSocketClient(
-                    market="futures",
-                    symbols=chunk,
-                    intervals=futures_intervals,
-                    allow_insecure_ssl=allow_insecure_ssl,
-                    label=f"futures-{chunk[0].lower()}",
-                )
-            )
-        return CombinedWebSocketClient(
-            clients
-        )
-    spot_streams = []
-    futures_streams = []
-    for symbol in symbols:
-        spot_streams.extend(build_spot_streams(symbol, spot_intervals))
-        futures_streams.extend(build_futures_streams(symbol, futures_intervals))
-        futures_streams.append(f"{symbol.lower()}@openInterest")
-    return CombinedWebSocketClient(
-        [
-            BinanceWebSocketClient(
-                market="spot",
-                streams=spot_streams,
-                allow_insecure_ssl=allow_insecure_ssl,
-                label="spot",
-            ),
-            BinanceWebSocketClient(
-                market="futures",
-                streams=futures_streams,
-                allow_insecure_ssl=allow_insecure_ssl,
-                label="futures",
-            ),
-        ]
-    )
-
-
-def _stateful_runtime_symbols(
-    *,
-    configured_symbols: tuple[str, ...],
-    store,
-) -> tuple[str, ...]:
-    return tuple(symbol for symbol in configured_symbols if store.get(symbol) is not None)
-
-
-def _read_json_payload(path: Path | None) -> dict[str, object]:
-    if path is None or not path.exists():
-        return {}
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        _log.warning("failed to read runtime policy payload %s", path, exc_info=True)
-        return {}
-    return payload if isinstance(payload, dict) else {}
+        return float(raw)
+    except ValueError:
+        return default
 
 
-def _apply_persisted_runtime_policy_guards(
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def _resolve_bitget_symbol_market_by_symbol(
     *,
-    eligible_symbols: set[str],
-    observe_only_symbols: list[str],
-    policy_state: dict[str, object],
-    major_symbols: tuple[str, ...],
-) -> tuple[set[str], list[str], dict[str, object]]:
-    adjusted_eligible = set(eligible_symbols)
-    if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
-        hydration = build_runtime_universe_hydration(
-            policy_state={},
-            configured_symbols=sorted(adjusted_eligible | set(str(symbol) for symbol in observe_only_symbols if str(symbol))),
-            major_symbols=major_symbols,
-        )
-        return adjusted_eligible, list(observe_only_symbols), hydration
-    adjusted_observe_only = set(str(symbol) for symbol in observe_only_symbols if str(symbol))
-    hydration = build_runtime_universe_hydration(
-        policy_state=policy_state,
-        configured_symbols=sorted(adjusted_eligible | adjusted_observe_only),
-        major_symbols=major_symbols,
-    )
-    for symbol, row in dict(hydration.get("rows_by_symbol", {}) or {}).items():
-        payload = dict(row or {})
-        if bool(payload.get("observe_only")):
-            adjusted_observe_only.add(symbol)
-            adjusted_eligible.discard(symbol)
+    rest_client: Any,
+    symbols: tuple[str, ...],
+) -> dict[str, str]:
+    get_exchange_info = getattr(rest_client, "get_exchange_info", None)
+    if not callable(get_exchange_info):
+        return {symbol: "futures" for symbol in symbols}
+    try:
+        spot_info = get_exchange_info(market="spot")
+    except Exception:
+        spot_info = {}
+    try:
+        futures_info = get_exchange_info(market="futures")
+    except Exception:
+        futures_info = {}
+    spot_symbols = {
+        str(item.get("symbol", "")).upper()
+        for item in (spot_info.get("symbols", []) if isinstance(spot_info, dict) else [])
+        if isinstance(item, dict)
+    }
+    futures_symbols = {
+        str(item.get("symbol", "")).upper()
+        for item in (futures_info.get("symbols", []) if isinstance(futures_info, dict) else [])
+        if isinstance(item, dict)
+    }
+    resolved: dict[str, str] = {}
+    for symbol in symbols:
+        upper = symbol.upper()
+        if upper in futures_symbols:
+            resolved[symbol] = "futures"
+        elif upper in spot_symbols:
+            resolved[symbol] = "spot"
+    return resolved
+
+
+def _resolve_symbol_eligibility(
+    *,
+    settings: Settings,
+    extractor: MarketFeatureExtractor,
+    store: Any,
+    macro_inputs: Any,
+    altcoin_inputs: Any,
+) -> tuple[list[str], set[str]]:
+    observe_only_symbols: list[str] = []
+    eligible_symbols: set[str] = set()
+    for symbol in settings.universe:
+        state = store.get(symbol)
+        if state is None:
             continue
-        if not bool(payload.get("allow_bootstrap", True)):
-            adjusted_eligible.discard(symbol)
-    auto_mode = dict(policy_state.get("auto_mode", {}) or {})
-    policy_guidance = dict(auto_mode.get("policy_guidance", {}) or {})
-    if (
-        str(auto_mode.get("mode", "normal") or "normal") == "tighter"
-        and bool(policy_guidance.get("block_non_major_positive"))
-        ):
-        non_major_symbols = {symbol for symbol in adjusted_eligible if symbol not in set(major_symbols)}
-        adjusted_eligible.difference_update(non_major_symbols)
-        adjusted_observe_only.update(non_major_symbols)
-    return adjusted_eligible, sorted(adjusted_observe_only), hydration
+        history = extractor.build_history_context(state)
+        primitives = extractor.build_primitive_inputs(state)
+        features = build_feature_vector_from_primitives(
+            inputs=primitives,
+            history=history,
+            settings=settings,
+        )
+        features = extractor.enrich_feature_vector(state=state, features=features)
+        features = apply_macro_overlay(features, macro_inputs)
+        features = apply_altcoin_overlay(features, symbol=symbol, altcoin_inputs=altcoin_inputs)
+        features = apply_sentiment_overlay(features)
+        spot_features = apply_score_and_costs(features, settings, "spot")
+        if observe_only_reasons(spot_features, settings, symbol):
+            observe_only_symbols.append(symbol)
+        else:
+            eligible_symbols.add(symbol)
+    return observe_only_symbols, eligible_symbols
+
+
+def _build_auto_profile_switcher(
+    *,
+    config_path: str | Path,
+    settings: Settings,
+) -> AutoProfileSwitcher | None:
+    if not _env_bool("AUTO_STRATEGY_SWITCH", default=False):
+        return None
+    policy = AutoProfileSwitchPolicy(
+        calm_profile=os.environ.get("AUTO_STRATEGY_CALM_PROFILE", "aggressive_alt").strip().lower(),
+        fast_profile=os.environ.get("AUTO_STRATEGY_FAST_PROFILE", "scalp_ultra").strip().lower(),
+        min_hold_cycles=max(_env_int("AUTO_STRATEGY_MIN_HOLD_CYCLES", 3), 0),
+        fast_on_volatility_penalty=_env_float("AUTO_STRATEGY_FAST_ON_VOLATILITY_PENALTY", 0.62),
+        fast_off_volatility_penalty=_env_float("AUTO_STRATEGY_FAST_OFF_VOLATILITY_PENALTY", 0.48),
+        fast_on_abs_ret_1h=_env_float("AUTO_STRATEGY_FAST_ON_ABS_RET_1H", 0.018),
+        fast_off_abs_ret_1h=_env_float("AUTO_STRATEGY_FAST_OFF_ABS_RET_1H", 0.010),
+    )
+    return AutoProfileSwitcher(
+        config_path=config_path,
+        policy=policy,
+        runtime_decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
+        initial_profile=settings.strategy_profile,
+    )
 
 
 def run_live_paper_daemon(
@@ -365,382 +182,269 @@ def run_live_paper_daemon(
     max_retries: int = 3,
     execute_live_orders: bool = False,
     exchange: str | None = None,
-    sync_interval_seconds: int = 60,
 ) -> dict[str, object]:
     exchange_id = resolve_exchange_id(exchange)
     settings = Settings.load(config_path)
+    auto_profile_switcher = _build_auto_profile_switcher(config_path=config_path, settings=settings)
+    if auto_profile_switcher is not None:
+        settings = auto_profile_switcher.active_settings
+        print(
+            f"[PROFILE_SWITCHER] enabled calm={auto_profile_switcher.policy.calm_profile} fast={auto_profile_switcher.policy.fast_profile} active={settings.strategy_profile}",
+            flush=True,
+        )
+    runtime_decision_interval_minutes = settings.decision_engine.decision_interval_minutes
     initialize_workspace(output_base_dir)
-    cost_calibration_path = Path(output_base_dir) / "artifacts" / "cost_calibration.json"
+    if settings.housekeeping.enabled:
+        from quant_binance.housekeeping import prune_old_run_directories
+
+        prune_old_run_directories(
+            mode_root=Path(output_base_dir) / "output" / "paper-live-shell",
+            keep_recent_runs=settings.housekeeping.keep_recent_runs,
+        )
     run_paths = prepare_run_paths(base_dir=Path(output_base_dir) / "output", mode="paper-live-shell")
-    previous_policy_state_path = latest_runtime_artifact_path(
-        output_base_dir,
-        filename="policy_state.json",
+    rest_client = build_exchange_rest_client(
+        exchange=exchange_id,
+        allow_insecure_ssl=allow_insecure_ssl,
     )
-    previous_policy_state = _read_json_payload(previous_policy_state_path)
-    try:
-        rest_client = build_exchange_rest_client(
-            exchange=exchange_id,
-            allow_insecure_ssl=allow_insecure_ssl,
-            allow_missing_credentials=exchange_id == "bitget" and not execute_live_orders,
-        )
-        supports_private_reads = bool(getattr(rest_client, "supports_private_reads", True))
-        if execute_live_orders and not supports_private_reads:
-            raise RuntimeError(
-                "Bitget live order daemon requires BITGET_API_KEY, BITGET_API_SECRET, and BITGET_API_PASSPHRASE"
+    settings_ref: dict[str, Settings] = {"current": settings}
+    rest_client.build_capital_report = lambda: build_capital_adequacy_report(  # type: ignore[attr-defined]
+        spot_available_balance_usd=float(
+            next(
+                (
+                    item.get("free", 0.0)
+                    for item in rest_client.get_account(market="spot").get("balances", [])
+                    if item.get("asset") == "USDT"
+                ),
+                0.0,
             )
-        read_only_paper_mode = (not execute_live_orders) and _truthy_env("QUANT_READ_ONLY_PAPER_MODE")
-        if read_only_paper_mode:
-            print("[daemon] read-only paper mode enabled: exchange write APIs and test orders disabled", flush=True)
-            rest_client = ReadOnlyExchangeClient(rest_client)
+        ),
+        futures_available_balance_usd=float(
+            rest_client.get_account(market="futures").get("availableBalance", 0.0)
+        ),
+        settings=settings_ref["current"],
+        rest_client=rest_client,
+    )
+    store = seed_market_store_from_rest(
+        client=rest_client,
+        symbols=settings.universe,
+        intervals=("5m", "1h", "4h"),
+    )
+    active_universe = tuple(symbol for symbol in settings.universe if store.get(symbol) is not None)
+    learner = OnlineEdgeLearner(
+        min_observations=max(20, settings.feature_thresholds.min_expected_edge_observations)
+    )
+    paper_service = PaperTradingService(
+        settings,
+        router=ExecutionRouter(),
+        edge_lookup=learner.lookup,
+    )
+    macro_inputs = load_macro_inputs()
+    altcoin_inputs = load_altcoin_inputs()
+    observe_only_symbols, eligible_symbols = _resolve_symbol_eligibility(
+        settings=paper_service.settings,
+        extractor=paper_service.feature_extractor,
+        store=store,
+        macro_inputs=macro_inputs,
+        altcoin_inputs=altcoin_inputs,
+    )
+    decision_context_cache: dict[tuple[str, str], tuple[Any, Any]] = {}
+    switch_cycle_seen: dict[str, None] = {}
+    runtime_ref: list[LivePaperRuntime | None] = [None]
+    session_ref: list[LivePaperSession | None] = [None]
 
-        if supports_private_reads:
-            def _build_capital_report():
-                spot_account = rest_client.get_account(market="spot")
-                futures_account = rest_client.get_account(market="futures")
-                capital_inputs = extract_account_capital_inputs(
-                    spot_account=spot_account,
-                    futures_account=futures_account,
-                    rest_client=rest_client,
-                )
-                return build_capital_adequacy_report(
-                    spot_available_balance_usd=capital_inputs.spot_available_balance_usd,
-                    spot_recognized_balance_usd=capital_inputs.spot_recognized_balance_usd,
-                    spot_funding_assets=capital_inputs.spot_funding_assets,
-                    futures_available_balance_usd=capital_inputs.futures_available_balance_usd,
-                    futures_execution_balance_usd=capital_inputs.futures_execution_balance_usd,
-                    futures_recognized_balance_usd=capital_inputs.futures_recognized_balance_usd,
-                    futures_funding_assets=capital_inputs.futures_funding_assets,
-                    settings=settings,
-                    rest_client=rest_client,
-                )
-
-            rest_client.build_capital_report = _build_capital_report  # type: ignore[attr-defined]
-            try:
-                refresh_bitget_cost_calibration(
-                    rest_client=rest_client,
-                    base_dir=output_base_dir,
-                    output_path=cost_calibration_path,
-                )
-            except Exception as _cost_cal_exc:
-                print(f"[daemon] cost calibration refresh failed (non-fatal, using cached/defaults): {_cost_cal_exc}")
-        store = seed_market_store_from_rest(
-            client=rest_client,
-            symbols=settings.universe,
-            intervals=("1m", "5m", "1h", "4h"),
-        )
-        runtime_symbols = _stateful_runtime_symbols(
-            configured_symbols=settings.universe,
+    def _apply_profile_switch(*, switch_reason: str, switch_volatility_penalty: float, switch_abs_ret_1h: float) -> None:
+        previous_profile = paper_service.settings.strategy_profile
+        paper_service.apply_settings(auto_profile_switcher.active_settings)  # type: ignore[union-attr]
+        settings_ref["current"] = paper_service.settings
+        if session_ref[0] is not None and session_ref[0].live_order_executor is not None:
+            session_ref[0].live_order_executor.settings = paper_service.settings
+        refreshed_observe_only, refreshed_eligible = _resolve_symbol_eligibility(
+            settings=paper_service.settings,
+            extractor=paper_service.feature_extractor,
             store=store,
+            macro_inputs=macro_inputs,
+            altcoin_inputs=altcoin_inputs,
         )
-        if not runtime_symbols:
-            raise RuntimeError("no seeded market states available for the configured live runtime universe")
-        learner = OnlineEdgeLearner(
-            min_observations=max(20, settings.feature_thresholds.min_expected_edge_observations)
+        if runtime_ref[0] is not None:
+            runtime_ref[0].eligible_symbols = refreshed_eligible
+        if session_ref[0] is not None:
+            session_ref[0].observe_only_symbols = sorted(refreshed_observe_only)
+        print(
+            "[PROFILE_SWITCH] "
+            f"from={previous_profile} to={paper_service.settings.strategy_profile} "
+            f"reason={switch_reason} vol_penalty={switch_volatility_penalty:.4f} "
+            f"abs_ret_1h={switch_abs_ret_1h:.4f}",
+            flush=True,
         )
-        # Restore learning state from previous session's edge_table.json
-        previous_edge_table = latest_runtime_artifact_path(output_base_dir, filename="edge_table.json")
-        if previous_edge_table is not None:
-            restored = learner.load_from_export(previous_edge_table)
-            if restored > 0:
-                print(f"[daemon] restored {restored} learning observations from {previous_edge_table}")
-        extractor = MarketFeatureExtractor(
-            settings,
-            edge_lookup=learner.lookup,
-            cost_calibration=load_cost_calibration(cost_calibration_path),
-        )
-        macro_inputs = load_macro_inputs()
-        altcoin_inputs = load_altcoin_inputs()
-        observe_only_symbols: list[str] = []
-        eligible_symbols: set[str] = set()
-        for symbol in runtime_symbols:
-            state = store.get(symbol)
-            if state is None:
-                continue
-            history = extractor.build_history_context(state)
-            primitives = extractor.build_primitive_inputs(state)
-            features = build_feature_vector_from_primitives(
-                inputs=primitives,
-                history=history,
-                settings=settings,
-            )
-            features = extractor.enrich_feature_vector(state=state, features=features)
-            features = apply_macro_overlay(features, macro_inputs)
-            features = apply_altcoin_overlay(features, symbol=symbol, altcoin_inputs=altcoin_inputs)
-            features = apply_sentiment_overlay(features, macro_inputs)
-            spot_features = apply_score_and_costs(features, settings, "spot")
-            if observe_only_reasons(spot_features, settings, symbol):
-                observe_only_symbols.append(symbol)
-            else:
-                eligible_symbols.add(symbol)
-        eligible_symbols, observe_only_symbols, runtime_universe_hydration = _apply_persisted_runtime_policy_guards(
-            eligible_symbols=eligible_symbols,
-            observe_only_symbols=observe_only_symbols,
-            policy_state=previous_policy_state,
-            major_symbols=tuple(settings.futures_exposure.major_symbols),
-        )
-        schedulable_symbols = set(eligible_symbols)
-        schedulable_symbols.update(
-            str(symbol)
-            for symbol in observe_only_symbols
-            if str(symbol)
-        )
-        dispatcher = EventDispatcher(store)
-        runtime = LivePaperRuntime(
-            dispatcher=dispatcher,
-            paper_service=PaperTradingService(settings, router=ExecutionRouter(), feature_extractor=extractor),
-            primitive_builder=lambda symbol, decision_time: extractor.build_primitive_inputs(store.get(symbol)),  # type: ignore[arg-type]
-            history_provider=lambda symbol, decision_time: extractor.build_history_context(store.get(symbol)),  # type: ignore[arg-type]
-            decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
-            decision_interval_seconds=settings.decision_engine.decision_interval_seconds,
-            eligible_symbols=schedulable_symbols,
-        )
-        log_store = JsonlLogStore(
-            run_paths.root / "logs",
-            max_bytes_per_stream=settings.housekeeping.max_log_bytes_per_stream if settings.housekeeping.enabled else None,
-            mirror_roots=[Path(output_base_dir) / "forensics"],
-        )
-        session = LivePaperSession(
-            runtime=runtime,
-            equity_usd=10000.0,  # overridden after sync_account() below
-            remaining_portfolio_capacity_usd=5000.0,
-            sync_interval_seconds=sync_interval_seconds,
-            flush_interval_seconds=min(sync_interval_seconds, 15),
-            rest_client=rest_client if supports_private_reads else None,
-            order_tester=DecisionOrderTestAdapter(
-                SimulatedOrderTestClient(exchange_id) if read_only_paper_mode else rest_client
-            ),
-            live_order_executor=DecisionLiveOrderAdapter(rest_client, settings) if execute_live_orders else None,
-            learner=learner,
-            learner_output_path=run_paths.root / "edge_table.json",
-            log_store=log_store,
-            verbose=True,
-            observe_only_symbols=sorted(observe_only_symbols),
-        )
-        session.summary_path = run_paths.summary_path
-        if previous_policy_state_path is not None and previous_policy_state_path.exists():
-            current_policy_state_path = run_paths.summary_path.with_name("policy_state.json")
-            if previous_policy_state_path.resolve() != current_policy_state_path.resolve():
-                current_policy_state_path.write_text(
-                    previous_policy_state_path.read_text(encoding="utf-8"),
-                    encoding="utf-8",
-                )
-        session.self_healing.log_store = log_store
-        session.self_healing.stall_timeout_seconds = RuntimeSelfHealing.recommended_stall_timeout_seconds(
-            sync_interval_seconds=sync_interval_seconds,
-            decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
-            stale_data_alarm_sla_seconds=settings.operational_limits.stale_data_alarm_sla_seconds,
-        )
-        # Override stall-restart budget to avoid STALL_RECOVERY_LIMIT_EXCEEDED killing the
-        # daemon under benign decision-progress stalls. Self-heal still restarts the
-        # websocket; we just refuse to give up on the process. The external supervisor
-        # (scripts/daemon_supervisor.py) is the last resort if the process truly dies.
-        # Configurable via SELF_HEAL_MAX_STALL_RESTARTS env var (default 999).
-        try:
-            _max_stall_restarts = int(os.environ.get("SELF_HEAL_MAX_STALL_RESTARTS", "999"))
-        except (TypeError, ValueError):
-            _max_stall_restarts = 999
-        session.self_healing.max_stall_restarts_per_window = max(_max_stall_restarts, 1)
-        if supports_private_reads:
-            session.sync_account()
-            # Auto-detect actual account equity so position sizing reflects real capital.
-            # session_start_equity_usdt is populated by sync_account() from exchange accounts.
-            # Fallback to futures_available_balance if total equity is unavailable.
-            _detected_equity = session.session_start_equity_usdt
-            if _detected_equity is None or _detected_equity <= 0.0:
-                _detected_equity = float(session.capital_report.get("futures_available_balance_usd", 0.0) or 0.0)
-            if _detected_equity > 0.0:
-                _leverage_cap = max(session.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
-                _capacity = round(_detected_equity * _leverage_cap, 6)
-                print(
-                    f"[daemon] equity auto-detected: ${_detected_equity:.2f} USDT "
-                    f"→ capacity: ${_capacity:.2f} (was $10,000 / $5,000 defaults)"
-                )
-                session.equity_usd = _detected_equity
-                session.remaining_portfolio_capacity_usd = _capacity
-                session.max_portfolio_capacity_usd = _capacity
-            else:
-                _allow_fallback = str(os.environ.get("ALLOW_DAEMON_EQUITY_FALLBACK", "0")).strip().lower() in {"1", "true", "yes", "on"}
-                if execute_live_orders and not _allow_fallback:
-                    raise RuntimeError(
-                        "LIVE_EQUITY_DETECTION_FAILED: refusing to keep $10,000 sizing defaults in live mode. "
-                        "Check API credentials/account scope, or set ALLOW_DAEMON_EQUITY_FALLBACK=1 to override."
-                    )
-                print("[daemon] WARNING: could not detect account equity — keeping $10,000 default. Check API credentials.")
-            if not execute_live_orders:
-                paper_equity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_EQUITY_USD", "") or "").strip()
-                if paper_equity_raw:
-                    try:
-                        paper_equity = float(paper_equity_raw)
-                    except (TypeError, ValueError):
-                        paper_equity = 0.0
-                    if paper_equity > 0.0:
-                        _leverage_cap = max(session.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
-                        paper_capacity = round(paper_equity * _leverage_cap, 6)
-                        capacity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_CAPACITY_USD", "") or "").strip()
-                        if capacity_raw:
-                            try:
-                                paper_capacity = max(float(capacity_raw), 0.0)
-                            except (TypeError, ValueError):
-                                pass
-                        session.equity_usd = paper_equity
-                        session.remaining_portfolio_capacity_usd = paper_capacity
-                        session.max_portfolio_capacity_usd = paper_capacity
-                        session.capital_report["futures_available_balance_usd"] = paper_equity
-                        session.capital_report["futures_execution_balance_usd"] = paper_equity
-                        session.capital_report["futures_recognized_balance_usd"] = paper_equity
-                        session.capital_report["futures_total_reusable_balance_usd"] = paper_equity
-                        print(
-                            f"[daemon] paper verification equity override: ${paper_equity:.2f} USDT "
-                            f"-> capacity: ${paper_capacity:.2f}",
-                            flush=True,
-                        )
-            previous_state, previous_summary = load_latest_runtime_payloads(output_base_dir)
-            _enforce_strict_startup_position_block(
-                session=session,
-                enabled=settings.disable_position_adoption,
-                state_payload=previous_state,
-                summary_payload=previous_summary,
-            )
-            session.restore_futures_state_from_runtime(
-                state_payload=previous_state,
-                summary_payload=previous_summary,
-            )
-        bootstrap_time = _bootstrap_decision_time(
-            store=store,
-            interval_minutes=settings.decision_engine.decision_interval_minutes,
-            now=datetime.now(tz=timezone.utc),
-        )
-        bootstrap_records: list[tuple[Any, Any]] = []
-        hydration_rows_by_symbol = dict(runtime_universe_hydration.get("rows_by_symbol", {}) or {})
-        universe_rank = {symbol: index for index, symbol in enumerate(settings.universe)}
-        bootstrap_symbols = sorted(
-            runtime_symbols,
-            key=lambda symbol: (
-                universe_rank.get(symbol, len(universe_rank)),
-                tuple(
-                    dict(hydration_rows_by_symbol.get(symbol, {}) or {}).get(
-                        "sort_key",
-                        (0, 1 if symbol not in set(settings.futures_exposure.major_symbols) else 0, 1, 0, symbol),
-                    )
-                )
-            ),
-        )
-        for symbol in bootstrap_symbols:
-            if symbol not in schedulable_symbols:
-                continue
-            state = store.get(symbol)
-            if state is None:
-                continue
-            bootstrap_state = state
-            if state.last_update_time > bootstrap_time:
-                bootstrap_state = replace(
-                    state,
-                    last_update_time=bootstrap_time,
-                    top_of_book=replace(state.top_of_book, updated_at=bootstrap_time),
-                )
-            primitive_inputs = extractor.build_primitive_inputs(state)
-            history = extractor.build_history_context(state)
-            bootstrap_decision = session.run_bootstrap_cycle(
-                state=bootstrap_state,
-                primitive_inputs=primitive_inputs,
-                history=history,
-                decision_time=bootstrap_time,
-            )
-            bootstrap_records.append((bootstrap_decision, bootstrap_state))
-        for bootstrap_decision, bootstrap_state in bootstrap_records:
-            session._execute_recorded_decision(
-                managed_decision=bootstrap_decision,
-                state=bootstrap_state,
-                timestamp=bootstrap_time,
-            )
-        session.minimum_live_decision_timestamp = bootstrap_time
-        session.flush(
-            summary_path=run_paths.summary_path,
-            state_path=run_paths.state_path,
-        )
-        if settings.housekeeping.enabled:
-            from quant_binance.housekeeping import prune_old_run_directories
 
-            prune_old_run_directories(
-                mode_root=Path(output_base_dir) / "output" / "paper-live-shell",
-                keep_recent_runs=settings.housekeeping.keep_recent_runs,
+    def _evaluate_switch_for_cycle(cycle_key: str) -> None:
+        if auto_profile_switcher is None:
+            return
+        if cycle_key in switch_cycle_seen:
+            return
+        max_abs_ret_1h = 0.0
+        max_volatility_penalty = 0.0
+        for universe_symbol in paper_service.settings.universe:
+            universe_state = store.get(universe_symbol)
+            if universe_state is None:
+                continue
+            universe_primitive = paper_service.feature_extractor.build_primitive_inputs(universe_state)
+            universe_history = paper_service.feature_extractor.build_history_context(universe_state)
+            universe_features = build_feature_vector_from_primitives(
+                inputs=universe_primitive,
+                history=universe_history,
+                settings=paper_service.settings,
             )
-        shell = LivePaperShell(
-            ws_client_factory=lambda: _build_live_ws_client(
-                exchange_id=exchange_id,
-                symbols=runtime_symbols,
-                allow_insecure_ssl=allow_insecure_ssl,
-                decision_interval_minutes=settings.decision_engine.decision_interval_minutes,
-            ),
-            session=session,
-            backoff_policy=BackoffPolicy(max_attempts=max_retries),
-            summary_path=run_paths.summary_path,
-            state_path=run_paths.state_path,
+            max_abs_ret_1h = max(max_abs_ret_1h, abs(float(universe_primitive.ret_1h)))
+            max_volatility_penalty = max(max_volatility_penalty, float(universe_features.volatility_penalty))
+        switch_decision = auto_profile_switcher.evaluate_metrics(
+            volatility_penalty=max_volatility_penalty,
+            abs_ret_1h=max_abs_ret_1h,
+            cycle_key=cycle_key,
         )
-        summary = asyncio.run(shell.run()) or {}
-        if "self_healing" not in summary:
-            mismatch_active, mismatch_details = session._self_healing_mismatch_snapshot()  # type: ignore[attr-defined]
-            summary["self_healing"] = session.self_healing.snapshot(
-                now=datetime.now(tz=timezone.utc),
-                order_error_cooldowns=session.order_error_cooldowns,
-                manual_symbol_cooldowns=session.manual_symbol_cooldowns,
-                mismatch_active=mismatch_active,
-                mismatch_details=mismatch_details,
+        switch_cycle_seen[cycle_key] = None
+        if len(switch_cycle_seen) > 256:
+            oldest_key = next(iter(switch_cycle_seen))
+            switch_cycle_seen.pop(oldest_key, None)
+        if switch_decision.changed:
+            _apply_profile_switch(
+                switch_reason=switch_decision.reason,
+                switch_volatility_penalty=switch_decision.volatility_penalty,
+                switch_abs_ret_1h=switch_decision.abs_ret_1h,
             )
-        return {"run_paths": run_paths, "summary": summary}
-    except Exception as exc:
-        failure_event = {
-            "category": "startup_failure",
-            "action": "report_only",
-            "status": "active",
-            "summary": str(exc),
-        }
-        failure_self_healing = {
-            "status": "startup_failed",
-            "active_guards": {},
-            "issue_counts": {"startup_failure": 1},
-            "recent_events": [failure_event],
-            "recovery_counts": {},
-        }
-        failure_summary = build_runtime_summary(
-            decisions=[],
-            self_healing=failure_self_healing,
+
+    def _build_context_for_decision(symbol: str, decision_time: Any) -> tuple[Any, Any]:
+        cycle_key = decision_time.isoformat()
+        cache_key = (symbol, cycle_key)
+        cached = decision_context_cache.get(cache_key)
+        if cached is not None:
+            return cached
+        _evaluate_switch_for_cycle(cycle_key)
+        state = store.get(symbol)
+        if state is None:
+            raise ValueError(f"missing market state for symbol: {symbol}")
+        primitive_inputs = paper_service.feature_extractor.build_primitive_inputs(state)
+        history = paper_service.feature_extractor.build_history_context(state)
+        decision_context_cache[cache_key] = (primitive_inputs, history)
+        return primitive_inputs, history
+
+    def _primitive_builder(symbol: str, decision_time: Any) -> Any:
+        return _build_context_for_decision(symbol, decision_time)[0]
+
+    def _history_provider(symbol: str, decision_time: Any) -> Any:
+        cache_key = (symbol, decision_time.isoformat())
+        cached = decision_context_cache.pop(cache_key, None)
+        if cached is None:
+            cached = _build_context_for_decision(symbol, decision_time)
+        return cached[1]
+
+    dispatcher = EventDispatcher(store)
+    runtime = LivePaperRuntime(
+        dispatcher=dispatcher,
+        paper_service=paper_service,
+        primitive_builder=_primitive_builder,
+        history_provider=_history_provider,
+        decision_interval_minutes=runtime_decision_interval_minutes,
+        eligible_symbols=eligible_symbols,
+    )
+    runtime_ref[0] = runtime
+    log_store = JsonlLogStore(run_paths.root / "logs")
+    session = LivePaperSession(
+        runtime=runtime,
+        equity_usd=10000.0,
+        remaining_portfolio_capacity_usd=5000.0,
+        rest_client=rest_client,
+        order_tester=DecisionOrderTestAdapter(rest_client),
+        live_order_executor=DecisionLiveOrderAdapter(rest_client, paper_service.settings) if execute_live_orders else None,
+        learner=learner,
+        learner_output_path=run_paths.root / "edge_table.json",
+        log_store=log_store,
+        verbose=True,
+        observe_only_symbols=sorted(observe_only_symbols),
+    )
+    session_ref[0] = session
+    session.sync_account()
+    bootstrap_time = _next_decision_boundary(
+        next(iter(store._states.values())).last_update_time,
+        runtime_decision_interval_minutes,
+    )
+    for symbol in paper_service.settings.universe:
+        if symbol not in eligible_symbols:
+            continue
+        state = store.get(symbol)
+        if state is None:
+            continue
+        primitive_inputs = paper_service.feature_extractor.build_primitive_inputs(state)
+        history = paper_service.feature_extractor.build_history_context(state)
+        session.run_bootstrap_cycle(
+            state=state,
+            primitive_inputs=primitive_inputs,
+            history=history,
+            decision_time=bootstrap_time,
         )
-        failure_summary.update(
-            {
-                "status": "startup_failed",
-                "error": repr(exc),
-                "exchange": exchange_id,
-                "execute_live_orders": execute_live_orders,
-            }
+    decision_interval_stream = _interval_label(runtime_decision_interval_minutes)
+    spot_intervals = tuple(dict.fromkeys((decision_interval_stream, "5m", "1h", "4h")))
+    futures_intervals = tuple(dict.fromkeys((decision_interval_stream, "5m")))
+    spot_streams = []
+    futures_streams = []
+    for symbol in paper_service.settings.universe:
+        spot_streams.extend(build_spot_streams(symbol, spot_intervals))
+        futures_streams.extend(build_futures_streams(symbol, futures_intervals))
+        futures_streams.append(f"{symbol.lower()}@openInterest")
+    if exchange_id == "bitget":
+        bitget_symbol_market_by_symbol = _resolve_bitget_symbol_market_by_symbol(
+            rest_client=rest_client,
+            symbols=active_universe,
         )
-        write_runtime_summary(run_paths.summary_path, failure_summary)
-        write_runtime_state(
-            run_paths.state_path,
-            {
-                "status": "startup_failed",
-                "error": repr(exc),
-                "decision_count": 0,
-                "tested_order_count": 0,
-                "live_order_count": 0,
-                "heartbeat_count": 0,
-                "last_event_timestamp": None,
-                "last_decision_timestamp": None,
-                "live_decision_loop": {},
-                "capital_report": {},
-                "open_spot_position_count": 0,
-                "open_futures_position_count": 0,
-                "paper_open_futures_position_count": 0,
-                "paper_open_futures_positions": [],
-                "exchange_live_futures_position_count": 0,
-                "exchange_live_futures_positions": [],
-                "futures_position_mismatch": False,
-                "futures_position_mismatch_details": {"missing_in_paper": [], "missing_on_exchange": []},
-                "futures_missing_in_paper_counts": {},
-                "futures_missing_on_exchange_counts": {},
-                "self_healing": failure_self_healing,
-                "closed_trade_count": 0,
-                "kill_switch": {"armed": False, "reasons": []},
-            },
+        polling_symbols = tuple(
+            symbol for symbol in active_universe if symbol in bitget_symbol_market_by_symbol
         )
-        raise
+        poll_interval_seconds = max(_env_float("BITGET_POLL_LOOP_INTERVAL_SECONDS", 2.0), 0.5)
+        symbol_poll_interval_seconds = max(
+            _env_float("BITGET_POLL_SYMBOL_INTERVAL_SECONDS", 20.0),
+            poll_interval_seconds,
+        )
+        rate_limit_backoff_initial_seconds = max(
+            _env_float("BITGET_RATE_LIMIT_BACKOFF_INITIAL_SECONDS", 5.0),
+            1.0,
+        )
+        rate_limit_backoff_max_seconds = max(
+            _env_float("BITGET_RATE_LIMIT_BACKOFF_MAX_SECONDS", 60.0),
+            rate_limit_backoff_initial_seconds,
+        )
+        ws_client_factory = lambda: BitgetPollingWebSocketClient(
+            rest_client=rest_client,
+            symbols=polling_symbols,
+            symbol_market_by_symbol=bitget_symbol_market_by_symbol,
+            decision_interval_minutes=runtime_decision_interval_minutes,
+            poll_interval_seconds=poll_interval_seconds,
+            symbol_poll_interval_seconds=symbol_poll_interval_seconds,
+            rate_limit_backoff_initial_seconds=rate_limit_backoff_initial_seconds,
+            rate_limit_backoff_max_seconds=rate_limit_backoff_max_seconds,
+        )
+    else:
+        ws_client_factory = lambda: CombinedWebSocketClient(
+            [
+                BinanceWebSocketClient(
+                    market="spot",
+                    streams=spot_streams,
+                    allow_insecure_ssl=allow_insecure_ssl,
+                    label="spot",
+                ),
+                BinanceWebSocketClient(
+                    market="futures",
+                    streams=futures_streams,
+                    allow_insecure_ssl=allow_insecure_ssl,
+                    label="futures",
+                ),
+            ]
+        )
+    shell = LivePaperShell(
+        ws_client_factory=ws_client_factory,
+        session=session,
+        backoff_policy=BackoffPolicy(max_attempts=max_retries),
+        summary_path=run_paths.summary_path,
+        state_path=run_paths.state_path,
+    )
+    summary = asyncio.run(shell.run()) or {}
+    return {"run_paths": run_paths, "summary": summary}

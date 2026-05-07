@@ -31,14 +31,6 @@ class QuantBinanceMacroInputsTests(unittest.TestCase):
         assert macro is not None
         self.assertAlmostEqual(macro.truflation_yoy, 1.8)
         self.assertAlmostEqual(macro.tga_drain_score, 0.7)
-        self.assertAlmostEqual(macro.dxy_change_30d_pct, -1.8)
-        self.assertAlmostEqual(macro.fed_liquidity_score, 0.66)
-
-    def test_load_macro_inputs_reuses_cached_value_for_same_source(self) -> None:
-        os.environ["MACRO_INPUTS_PATH"] = str(SAMPLE_PATH)
-        first = load_macro_inputs()
-        second = load_macro_inputs()
-        self.assertIs(first, second)
 
 
 if __name__ == "__main__":

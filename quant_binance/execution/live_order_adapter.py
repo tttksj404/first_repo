@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-import logging
-import re
-from decimal import Decimal, ROUND_HALF_UP
+import math
 from dataclasses import dataclass
-from inspect import signature
+from datetime import datetime, timedelta, timezone
 from typing import Any, Protocol
 
-_log = logging.getLogger(__name__)
-
-from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.models import DecisionIntent
 from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
 from quant_binance.settings import Settings
@@ -21,23 +16,7 @@ class SupportsLiveOrder(Protocol):
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         ...
 
-    def set_futures_leverage(self, *, symbol: str, leverage: int, hold_side: str | None = None) -> dict[str, Any]:
-        ...
-
-    def place_futures_position_tpsl(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
-        ...
-
-    def place_spot_plan_order(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
-        ...
-
-    def get_max_openable_quantity(
-        self,
-        *,
-        symbol: str,
-        pos_side: str,
-        order_type: str = "market",
-        open_amount: float | None = None,
-    ) -> float | None:
+    def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
         ...
 
 
@@ -47,53 +26,30 @@ class LiveOrderResult:
     market: str
     side: str
     quantity: float
-    filled_quantity: float
-    fill_ratio: float
-    fill_status: str
     accepted: bool
     response: dict[str, Any]
-    avg_fill_price: float = 0.0
-    slippage_bps: float = 0.0
-    realized_edge_bps: float = 0.0
-    protection_orders: tuple[dict[str, Any], ...] = ()
-    protection_error: str = ""
 
 
 class DecisionLiveOrderAdapter:
+    _BITGET_MARGIN_SAFETY_BUFFER = 0.9
+    _BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING = 6.0
+    _BITGET_MIN_NOTIONAL_BUFFER = 1.02
+    _BITGET_ZERO_CROSS_FALLBACK_FACTOR = 0.08
+
     def __init__(self, client: SupportsLiveOrder, settings: Settings | None = None) -> None:
         self.client = client
         self.settings = settings
-        self._exchange_info_cache: dict[str, dict[str, dict[str, Any]]] = {}
-        self._last_preflight_rejection: dict[str, Any] | None = None
-        self._bitget_margin_mode_by_symbol: dict[str, str] = {}
+        self._last_set_leverage_by_symbol: dict[str, int] = {}
+        self._last_set_leverage_at_by_symbol: dict[str, datetime] = {}
+        self._leverage_refresh_interval = timedelta(seconds=300)
 
     def _exchange_id(self) -> str:
         return getattr(self.client, "exchange_id", "binance")
 
-    def _execution_symbol(self, decision: DecisionIntent) -> str:
-        return decision.execution_symbol or decision.symbol
-
-    def _uses_spot_quote_notional(self, decision: DecisionIntent) -> bool:
-        return (
-            decision.final_mode == "spot"
-            and decision.side == "long"
-            and (decision.spot_quote_asset or "USDT") == "USDT"
-            and self._execution_symbol(decision).endswith("USDT")
-        )
-
-    def pop_last_preflight_rejection(self) -> dict[str, Any] | None:
-        payload = self._last_preflight_rejection
-        self._last_preflight_rejection = None
-        return payload
-
     def _target_futures_leverage(self, decision: DecisionIntent) -> int:
-        # Use pre-computed leverage from regime evaluation (includes ADX/coin profiles)
-        if decision.planned_leverage > 0:
-            return decision.planned_leverage
         if self.settings is None:
             return 1
         return select_futures_leverage(
-            symbol=decision.symbol,
             predictability_score=decision.predictability_score,
             trend_strength=decision.trend_strength,
             volume_confirmation=decision.volume_confirmation,
@@ -105,744 +61,274 @@ class DecisionLiveOrderAdapter:
             settings=self.settings,
         )
 
-    def _set_futures_leverage_call(
+    @staticmethod
+    def _safe_float(value: Any) -> float:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _extract_effective_futures_leverage(self, response: dict[str, Any] | None, fallback: int) -> int:
+        if not isinstance(response, dict):
+            return max(int(fallback), 1)
+        for key in ("leverage", "longLeverage", "shortLeverage", "crossMarginLeverage"):
+            parsed = self._safe_float(response.get(key))
+            if parsed > 0:
+                return max(int(round(parsed)), 1)
+        return max(int(fallback), 1)
+
+    def _bitget_required_min_notional_usd(self, *, symbol: str) -> float:
+        if self._exchange_id() != "bitget":
+            return 0.0
+        min_trade_reader = getattr(self.client, "_futures_min_trade_usdt", None)
+        if not callable(min_trade_reader):
+            return 0.0
+        try:
+            min_trade_usdt = self._safe_float(min_trade_reader(symbol=symbol))
+        except Exception:
+            return 0.0
+        if min_trade_usdt <= 0:
+            return 0.0
+        return min_trade_usdt * self._BITGET_MIN_NOTIONAL_BUFFER
+
+    def _fetch_futures_available_balance_usd(self) -> float | None:
+        getter = getattr(self.client, "get_account", None)
+        if getter is None or not callable(getter):
+            return None
+        try:
+            payload = getter(market="futures")
+        except Exception:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        if self._exchange_id() == "bitget":
+            effective = self._safe_float(payload.get("effectiveAvailableBalance"))
+            if effective > 0:
+                return effective
+            crossed = self._safe_float(payload.get("crossedMaxAvailable"))
+            if crossed > 0:
+                return crossed
+            # Some Bitget account snapshots report crossed/effective as zero even when
+            # raw available balance is positive. Use a conservative fraction fallback
+            # to keep live execution responsive while containing 40762 risk.
+            raw_available = self._safe_float(payload.get("availableBalance"))
+            raw_available = max(raw_available, self._safe_float(payload.get("rawAvailableBalance")))
+            union_available = self._safe_float(payload.get("unionAvailable"))
+            fallback_base = min(raw_available, union_available) if union_available > 0 else raw_available
+            if fallback_base > 0:
+                return fallback_base * self._BITGET_ZERO_CROSS_FALLBACK_FACTOR
+        effective = self._safe_float(payload.get("effectiveAvailableBalance"))
+        if effective > 0:
+            return effective
+        crossed = self._safe_float(payload.get("crossedMaxAvailable"))
+        if crossed > 0:
+            return crossed
+        union_available = self._safe_float(payload.get("unionAvailable"))
+        available = self._safe_float(payload.get("availableBalance"))
+        if union_available > 0 and available > 0:
+            return min(union_available, available)
+        available = self._safe_float(payload.get("availableBalance"))
+        if available > 0:
+            return available
+        available = self._safe_float(payload.get("rawAvailableBalance"))
+        if available > 0:
+            return available
+        available = self._safe_float(payload.get("crossedMaxAvailable"))
+        if available > 0:
+            return available
+        return None
+
+    def _cap_futures_notional_by_balance(
         self,
         *,
         symbol: str,
-        leverage: int,
-        hold_side: str,
-    ) -> dict[str, Any]:
-        setter = self.client.set_futures_leverage
-        try:
-            params = signature(setter).parameters
-        except (TypeError, ValueError):
-            params = {}
-        if "hold_side" in params:
-            return setter(symbol=symbol, leverage=leverage, hold_side=hold_side)
-        return setter(symbol=symbol, leverage=leverage)
-
-    def _response_raw_code(self, response: dict[str, Any]) -> str:
-        raw = response.get("raw")
-        if isinstance(raw, dict):
-            return str(raw.get("code", "") or "")
-        return str(response.get("code", "") or "")
-
-    def _response_status_ok(self, response: dict[str, Any]) -> bool:
-        raw_code = self._response_raw_code(response)
-        if raw_code and raw_code != "00000":
-            return False
-        status = str(response.get("status", "") or "").strip().upper()
-        return status in {"", "SUCCESS", "FILLED", "PARTIALLY_FILLED"}
-
-    def _response_leverage(self, response: dict[str, Any], *, hold_side: str) -> float | None:
-        keys = (
-            "longLeverage" if hold_side == "long" else "shortLeverage",
-            "crossMarginLeverage",
-            "crossedMarginLeverage",
-            "isolatedMarginLeverage",
-            "leverage",
-        )
-        for key in keys:
-            value = response.get(key)
-            if value in (None, ""):
-                raw = response.get("raw")
-                data = raw.get("data") if isinstance(raw, dict) else None
-                if isinstance(data, dict):
-                    value = data.get(key)
-            if value in (None, ""):
-                continue
-            try:
-                return float(value)
-            except (TypeError, ValueError):
-                continue
-        return None
-
-    def _set_futures_leverage_if_supported(self, *, decision: DecisionIntent) -> None:
-        if decision.side not in {"long", "short"}:
-            return
-        leverage = self._target_futures_leverage(decision)
-        if leverage <= 0:
-            return
-        hold_side = "long" if decision.side == "long" else "short"
-        try:
-            response = self._set_futures_leverage_call(
-                symbol=decision.symbol,
-                leverage=leverage,
-                hold_side=hold_side,
-            )
-        except Exception as exc:
-            raise RuntimeError(
-                f"FUTURES_LEVERAGE_SET_FAILED:{decision.symbol}:{hold_side}:{leverage}:{exc!r}"
-            ) from exc
-        if self._exchange_id() == "bitget" and not self._response_status_ok(response or {}):
-            raise RuntimeError(
-                f"FUTURES_LEVERAGE_SET_REJECTED:{decision.symbol}:{hold_side}:{leverage}:{response}"
-            )
-        actual_leverage = self._response_leverage(response or {}, hold_side=hold_side)
-        if actual_leverage is not None and int(actual_leverage) != int(leverage):
-            raise RuntimeError(
-                f"FUTURES_LEVERAGE_MISMATCH:{decision.symbol}:{hold_side}:requested={leverage}:actual={actual_leverage}"
-            )
+        requested_notional_usd: float,
+        effective_leverage: int,
+    ) -> float:
+        if self.settings is None:
+            return requested_notional_usd
+        available_balance = self._fetch_futures_available_balance_usd()
+        if available_balance is None:
+            return requested_notional_usd
+        if available_balance <= 0:
+            if self._exchange_id() == "bitget":
+                return 0.0
+            return requested_notional_usd
+        reserve_fraction = max(self.settings.cash_reserve.when_futures_enabled, 0.0)
         if self._exchange_id() == "bitget":
-            margin_mode = str((response or {}).get("marginMode", "") or "").strip().lower()
-            if margin_mode in {"crossed", "isolated"}:
-                self._bitget_margin_mode_by_symbol[decision.symbol] = margin_mode
-
-    def _bitget_margin_mode_for_symbol(self, symbol: str) -> str:
-        cached = str(self._bitget_margin_mode_by_symbol.get(symbol, "") or "").strip().lower()
-        if cached in {"crossed", "isolated"}:
-            return cached
-        return resolve_bitget_margin_mode()
-
-    def _is_bitget_unilateral_error(self, message: str) -> bool:
-        code = self._bitget_error_code(message)
-        normalized = message.lower()
-        has_unilateral_marker = (
-            "unilateral position type" in normalized
-            or "one-way position" in normalized
-            or "one way position" in normalized
-        )
-        return code == "40774" or has_unilateral_marker
-
-    def _bitget_error_code(self, message: str) -> str:
-        match = re.search(r'"code":"?([0-9A-Za-z_-]+)"?', message)
-        if match is None:
-            return ""
-        return match.group(1)
-
-    def _is_bitget_balance_error(self, message: str) -> bool:
-        code = self._bitget_error_code(message)
-        normalized = message.lower()
-        return code == "40762" and "exceeds the balance" in normalized
-
-    def _bitget_retryable_protection_error(self, message: str) -> bool:
-        code = self._bitget_error_code(message)
-        normalized = message.lower()
-        return code == "43059" or "request failed, please try again" in normalized
-
-    def _bitget_ignorable_protection_error(self, message: str) -> bool:
-        code = self._bitget_error_code(message)
-        return code == "40774" or self._is_bitget_unilateral_error(message)
-
-    def _bitget_reduce_only_value(self, order_params: dict[str, Any]) -> str:
-        existing = str(order_params.get("reduceOnly", "")).strip().upper()
-        if existing in {"YES", "NO"}:
-            return existing
-        trade_side = str(order_params.get("tradeSide", "")).strip().lower()
-        return "YES" if trade_side == "close" else "NO"
-
-    def _bitget_alternate_futures_params(self, order_params: dict[str, Any]) -> tuple[dict[str, Any], ...]:
-        reduce_only_value = self._bitget_reduce_only_value(order_params)
-        trade_side = str(order_params.get("tradeSide", "")).strip().lower() or "open"
-        alternates: list[dict[str, Any]] = []
-
-        def add(candidate: dict[str, Any]) -> None:
-            if candidate == order_params:
-                return
-            if candidate in alternates:
-                return
-            alternates.append(candidate)
-
-        without_trade_side = dict(order_params)
-        without_trade_side.pop("tradeSide", None)
-        add(without_trade_side)
-
-        with_reduce_only = dict(without_trade_side)
-        with_reduce_only["reduceOnly"] = reduce_only_value
-        add(with_reduce_only)
-
-        without_reduce_only = dict(order_params)
-        without_reduce_only.pop("reduceOnly", None)
-        add(without_reduce_only)
-
-        with_trade_side = dict(without_reduce_only)
-        with_trade_side["tradeSide"] = trade_side
-        add(with_trade_side)
-
-        return tuple(alternates)
-
-    def _bitget_symbol_metadata(self, *, market: str, symbol: str) -> dict[str, Any]:
-        cache = self._exchange_info_cache.setdefault(market, {})
-        if symbol in cache:
-            return cache[symbol]
-        getter = getattr(self.client, "get_exchange_info", None)
-        if not callable(getter):
-            cache[symbol] = {}
-            return cache[symbol]
+            # Session-level execution capping already applies reserve; avoid compounding conservative reserve twice.
+            reserve_fraction = 0.0
+        leverage_for_sizing = max(float(effective_leverage), 1.0)
         if self._exchange_id() == "bitget":
-            credentials = getattr(self.client, "credentials", object())
-            getter_qualname = str(getattr(getter, "__qualname__", ""))
-            if credentials is None and getter_qualname.startswith("BitgetRestClient."):
-                cache[symbol] = {}
-                return cache[symbol]
+            # Keep Bitget live sizing bounded by available margin to avoid repeated 40762 balance rejections.
+            leverage_for_sizing = min(leverage_for_sizing, self._BITGET_MAX_BALANCE_LEVERAGE_FOR_SIZING)
+        capped_notional = (
+            available_balance
+            * leverage_for_sizing
+            * max(1.0 - reserve_fraction, 0.0)
+            * self._BITGET_MARGIN_SAFETY_BUFFER
+        )
+        if self._exchange_id() == "bitget":
+            # If conservative sizing falls below exchange minimum notional, allow using the
+            # currently active leverage (already validated by exchange) to keep orders executable.
+            required_min_notional = self._bitget_required_min_notional_usd(symbol=symbol)
+            if required_min_notional > 0 and capped_notional + 1e-9 < required_min_notional:
+                expanded_cap = (
+                    available_balance
+                    * max(float(effective_leverage), 1.0)
+                    * max(1.0 - reserve_fraction, 0.0)
+                    * self._BITGET_MARGIN_SAFETY_BUFFER
+                )
+                if expanded_cap + 1e-9 >= required_min_notional:
+                    capped_notional = min(requested_notional_usd, expanded_cap)
+        if capped_notional <= 0:
+            return requested_notional_usd
+        return min(requested_notional_usd, round(capped_notional, 6))
+
+    def _ensure_bitget_min_order_leverage(
+        self,
+        *,
+        symbol: str,
+        effective_leverage: int,
+        now: datetime,
+    ) -> int:
+        if self._exchange_id() != "bitget" or self.settings is None:
+            return effective_leverage
+        available_balance = self._fetch_futures_available_balance_usd()
+        if available_balance is None or available_balance <= 0:
+            return effective_leverage
+        required_min_notional = self._bitget_required_min_notional_usd(symbol=symbol)
+        if required_min_notional <= 0:
+            return effective_leverage
+        current_capacity = (
+            available_balance
+            * max(float(effective_leverage), 1.0)
+            * self._BITGET_MARGIN_SAFETY_BUFFER
+        )
+        if current_capacity + 1e-9 >= required_min_notional:
+            return effective_leverage
+        max_allowed_leverage = max(int(math.ceil(self.settings.risk.max_futures_leverage)), 1)
+        needed_leverage = int(
+            math.ceil(
+                required_min_notional
+                / max(available_balance * self._BITGET_MARGIN_SAFETY_BUFFER, 1e-9)
+            )
+        )
+        target_leverage = min(
+            max(max(needed_leverage, int(effective_leverage) + 1), 1),
+            max_allowed_leverage,
+        )
+        if target_leverage <= int(effective_leverage):
+            return effective_leverage
         try:
-            info = getter(market=market)
+            leverage_response = self.client.set_futures_leverage(symbol=symbol, leverage=target_leverage)
         except Exception:
-            _log.warning("exchange info fetch failed for market=%s symbol=%s — skipping cache", market, symbol, exc_info=True)
-            # Do NOT cache on failure — allow retry on next call
-            return {}
-        for row in info.get("symbols", []):
-            row_symbol = str(row.get("symbol", ""))
-            if not row_symbol:
-                continue
-            cache[row_symbol] = dict(row.get("raw") or {})
-        cache.setdefault(symbol, {})
-        return cache[symbol]
-
-    def _bitget_price_decimals(self, *, market: str, symbol: str) -> int | None:
-        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
-        for key in ("pricePlace", "priceScale"):
-            value = metadata.get(key)
-            if value not in (None, ""):
-                try:
-                    return max(int(value), 0)
-                except (TypeError, ValueError):
-                    continue
-        tick_size = metadata.get("tickSize")
-        if tick_size in (None, ""):
-            return None
-        text = str(tick_size).strip()
-        if not text or "." not in text:
-            return 0 if text else None
-        return max(len(text.rstrip("0").split(".", 1)[1]), 0)
-
-    def _bitget_min_quantity(self, *, market: str, symbol: str) -> float:
-        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
-        for key in ("minTradeNum", "minQty"):
-            value = metadata.get(key)
-            if value not in (None, ""):
-                try:
-                    return max(float(value), 0.0)
-                except (TypeError, ValueError):
-                    continue
-        return 0.0
-
-    def _bitget_quantity_step(self, *, market: str, symbol: str) -> float:
-        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
-        for key in ("sizeMultiplier", "stepSize"):
-            value = metadata.get(key)
-            if value not in (None, ""):
-                try:
-                    return max(float(value), 0.0)
-                except (TypeError, ValueError):
-                    continue
-        return 0.0
-
-    def normalize_quantity(self, *, market: str, symbol: str, quantity: float) -> float:
-        safe_quantity = max(float(quantity), 0.0)
-        if self._exchange_id() != "bitget":
-            return round(safe_quantity, 8)
-        step = self._bitget_quantity_step(market=market, symbol=symbol)
-        if step <= 0.0:
-            return round(safe_quantity, 8)
-        step_dec = Decimal(str(step))
-        qty_dec = Decimal(str(safe_quantity))
-        normalized = (qty_dec // step_dec) * step_dec
-        return float(normalized)
-
-    def format_quantity(self, *, market: str, symbol: str, quantity: float) -> str:
-        normalized = self.normalize_quantity(market=market, symbol=symbol, quantity=quantity)
-        if self._exchange_id() != "bitget":
-            return f"{normalized:.8f}"
-        metadata = self._bitget_symbol_metadata(market=market, symbol=symbol)
-        decimals = metadata.get("volumePlace")
-        try:
-            precision = max(int(decimals), 0)
-        except (TypeError, ValueError):
-            step = self._bitget_quantity_step(market=market, symbol=symbol)
-            if step <= 0.0:
-                precision = 8
-            else:
-                step_text = str(step).rstrip("0")
-                precision = len(step_text.split(".", 1)[1]) if "." in step_text else 0
-        return format(Decimal(str(normalized)), f".{precision}f")
-
-    def format_trigger_price(self, *, value: float, market: str, symbol: str) -> str:
-        safe_value = max(value, 0.0)
-        if self._exchange_id() != "bitget":
-            return f"{safe_value:.8f}"
-        decimals = self._bitget_price_decimals(market=market, symbol=symbol)
-        if decimals is None:
-            return f"{safe_value:.8f}"
-        quantum = Decimal("1").scaleb(-decimals)
-        rounded = Decimal(str(safe_value)).quantize(quantum, rounding=ROUND_HALF_UP)
-        return format(rounded, f".{decimals}f")
-
-    def _formatted_positive_trigger_price(self, *, value: float, market: str, symbol: str) -> str | None:
-        if value <= 0.0:
-            return None
-        formatted = self.format_trigger_price(value=value, market=market, symbol=symbol)
-        try:
-            if float(formatted) <= 0.0:
-                return None
-        except (TypeError, ValueError):
-            return None
-        return formatted
-
-    def _safe_float(self, value: Any, default: float = 0.0) -> float:
-        try:
-            if value in (None, ""):
-                return default
-            return float(value)
-        except (TypeError, ValueError):
-            return default
-
-    def _requested_fill_measure(self, *, market: str, order_params: dict[str, Any]) -> float:
-        if market == "spot" and "quoteOrderQty" in order_params:
-            return self._safe_float(order_params.get("quoteOrderQty"))
-        if market == "spot" and self._exchange_id() == "bitget" and "size" in order_params and str(order_params.get("side", "")).upper() == "BUY":
-            return self._safe_float(order_params.get("size"))
-        return self._safe_float(order_params.get("quantity", order_params.get("size")))
-
-    def _filled_measure(self, *, market: str, order_params: dict[str, Any], response: dict[str, Any]) -> float:
-        if market == "spot" and "quoteOrderQty" in order_params:
-            return self._safe_float(response.get("cummulativeQuoteQty"))
-        if market == "spot" and self._exchange_id() == "bitget" and "size" in order_params and str(order_params.get("side", "")).upper() == "BUY":
-            return self._safe_float(
-                response.get("filledAmount", response.get("dealMoney", response.get("filledQuoteQty")))
-            )
-        return self._safe_float(
-            response.get(
-                "executedQty",
-                response.get(
-                    "filledQty",
-                    response.get("baseVolume", response.get("dealSize", response.get("size"))),
-                ),
-            )
+            return effective_leverage
+        boosted = self._extract_effective_futures_leverage(
+            leverage_response,
+            fallback=target_leverage,
         )
+        self._last_set_leverage_by_symbol[symbol] = boosted
+        self._last_set_leverage_at_by_symbol[symbol] = now
+        return boosted
 
-    def _fill_ratio(
-        self,
-        *,
-        market: str,
-        order_params: dict[str, Any],
-        response: dict[str, Any],
-        accepted: bool,
-    ) -> float:
-        if not accepted:
-            return 0.0
-        requested = self._requested_fill_measure(market=market, order_params=order_params)
-        filled = self._filled_measure(market=market, order_params=order_params, response=response)
-        if requested > 0.0 and filled > 0.0:
-            return max(0.0, min(filled / requested, 1.0))
-        if requested <= 0.0:
-            return 0.0
-        return 1.0
+    def _should_refresh_leverage(self, *, symbol: str, target_leverage: int, now: datetime) -> bool:
+        previous = self._last_set_leverage_by_symbol.get(symbol)
+        if previous is None:
+            return True
+        if previous != target_leverage:
+            return True
+        last_set_at = self._last_set_leverage_at_by_symbol.get(symbol)
+        if last_set_at is None:
+            return True
+        return now - last_set_at >= self._leverage_refresh_interval
 
-    def _avg_fill_price(
-        self,
-        *,
-        response: dict[str, Any],
-    ) -> float:
-        price = self._safe_float(
-            response.get(
-                "avgPrice",
-                response.get(
-                    "priceAvg",
-                    response.get("fillPrice", response.get("dealAvgPrice")),
-                ),
-            )
-        )
-        if price > 0.0:
-            return price
-        executed_qty = self._safe_float(response.get("executedQty"))
-        quote_qty = self._safe_float(response.get("cummulativeQuoteQty"))
-        if executed_qty > 0.0 and quote_qty > 0.0:
-            return quote_qty / executed_qty
-        return self._safe_float(response.get("price"))
-
-    def _slippage_bps(
-        self,
-        *,
-        decision: DecisionIntent,
-        fill_price: float,
-        reference_price: float,
-    ) -> float:
-        if fill_price <= 0.0 or reference_price <= 0.0:
-            return 0.0
-        if decision.side == "short":
-            adverse_move = max(reference_price - fill_price, 0.0)
-        else:
-            adverse_move = max(fill_price - reference_price, 0.0)
-        return adverse_move / reference_price * 10000.0
-
-    def _fill_status(
-        self,
-        *,
-        response: dict[str, Any],
-        accepted: bool,
-        fill_ratio: float,
-    ) -> str:
-        if not accepted:
-            return "rejected"
-        status = str(response.get("status", "")).upper()
-        if "PARTIAL" in status or fill_ratio < 0.999:
-            return "partial_fill"
-        return "filled"
-
-    def _protection_prices(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-    ) -> tuple[float, float]:
-        from quant_binance.strategy.coin_profiles import get_profile
-        stop_fraction = max(decision.stop_distance_bps, 0.0) / 10000.0
-        # Use coin profile RR instead of global partial_take_profit_r
-        cp = get_profile(decision.symbol)
-        if decision.side == "short" and cp.short_rr > 0:
-            r_mult = cp.short_rr
-        elif cp.rr > 0:
-            r_mult = cp.rr
-        elif self.settings is not None:
-            r_mult = self.settings.exit_rules.partial_take_profit_r
-        else:
-            r_mult = 1.0
-        reward_fraction = stop_fraction * r_mult
-        if decision.side == "short":
-            take_profit = reference_price * max(0.0, 1.0 - reward_fraction)
-            stop_loss = reference_price * (1.0 + stop_fraction)
-        else:
-            take_profit = reference_price * (1.0 + reward_fraction)
-            stop_loss = reference_price * max(0.0, 1.0 - stop_fraction)
-        return take_profit, stop_loss
-
-    def _skip_long_stop_loss_protection(self, decision: DecisionIntent) -> bool:
-        if self.settings is None or decision.side != "long":
+    def _bitget_futures_order_is_executable(self, *, symbol: str, order_params: dict[str, Any]) -> bool:
+        if self._exchange_id() != "bitget":
+            return True
+        raw_size = self._safe_float(order_params.get("size"))
+        if raw_size <= 0:
             return False
-        cfg = self.settings.live_position_risk
-        return bool(cfg.long_only_turnaround_mode and cfg.long_disable_standard_stop_loss)
-
-    def _build_bitget_protection_payloads(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-        quantity: float,
-    ) -> tuple[tuple[str, dict[str, Any]], ...]:
-        take_profit, stop_loss = self._protection_prices(
-            decision=decision,
-            reference_price=reference_price,
-        )
-        if decision.final_mode == "futures":
-            hold_side = "long" if decision.side == "long" else "short"
-            skip_stop_loss = self._skip_long_stop_loss_protection(decision)
-            take_profit_trigger = self._formatted_positive_trigger_price(
-                value=take_profit,
-                market="futures",
-                symbol=decision.symbol,
-            )
-            stop_loss_trigger = self._formatted_positive_trigger_price(
-                value=stop_loss,
-                market="futures",
-                symbol=decision.symbol,
-            )
-            payload: dict[str, Any] = {
-                "marginCoin": "USDT",
-                "productType": "USDT-FUTURES",
-                "symbol": decision.symbol,
-                "holdSide": hold_side,
-            }
-            if take_profit_trigger is not None:
-                payload["stopSurplusTriggerPrice"] = take_profit_trigger
-                payload["stopSurplusTriggerType"] = "mark_price"
-                payload["stopSurplusClientOid"] = f"{decision.decision_id}-tp"
-            if not skip_stop_loss and stop_loss_trigger is not None:
-                payload["stopLossTriggerPrice"] = stop_loss_trigger
-                payload["stopLossTriggerType"] = "mark_price"
-                payload["stopLossClientOid"] = f"{decision.decision_id}-sl"
-            if "stopSurplusTriggerPrice" not in payload and "stopLossTriggerPrice" not in payload:
-                return ()
-            return (
-                (
-                    "futures",
-                    payload,
-                ),
-            )
-        if decision.final_mode == "spot" and decision.side == "long":
-            if not self._uses_spot_quote_notional(decision):
-                return ()
-            size = f"{quantity:.8f}"
-            spot_symbol = self._execution_symbol(decision)
-            return (
-                (
-                    "spot",
-                    {
-                        "symbol": spot_symbol,
-                        "side": "sell",
-                        "triggerPrice": self.format_trigger_price(
-                            value=take_profit,
-                            market="spot",
-                            symbol=spot_symbol,
-                        ),
-                        "triggerType": "market_price",
-                        "orderType": "market",
-                        "planType": "amount",
-                        "size": size,
-                        "clientOid": f"{decision.decision_id}-tp",
-                    },
-                ),
-                (
-                    "spot",
-                    {
-                        "symbol": spot_symbol,
-                        "side": "sell",
-                        "triggerPrice": self.format_trigger_price(
-                            value=stop_loss,
-                            market="spot",
-                            symbol=spot_symbol,
-                        ),
-                        "triggerType": "market_price",
-                        "orderType": "market",
-                        "planType": "amount",
-                        "size": size,
-                        "clientOid": f"{decision.decision_id}-sl",
-                    },
-                ),
-            )
-        return ()
-
-    def _submit_protection_orders(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-        quantity: float,
-    ) -> tuple[dict[str, Any], ...]:
-        if self._exchange_id() != "bitget":
-            return ()
-        payloads = self._build_bitget_protection_payloads(
-            decision=decision,
-            reference_price=reference_price,
-            quantity=quantity,
-        )
-        results: list[dict[str, Any]] = []
-        for market, order_params in payloads:
-            submit = self.client.place_futures_position_tpsl if market == "futures" else self.client.place_spot_plan_order
+        normalizer = getattr(self.client, "_normalize_futures_size", None)
+        normalized_size = raw_size
+        if callable(normalizer):
             try:
-                result = submit(order_params=order_params)
-            except Exception as exc:
-                message = str(exc)
-                if self._bitget_ignorable_protection_error(message):
-                    continue
-                if self._bitget_retryable_protection_error(message):
-                    result = submit(order_params=order_params)
-                else:
-                    raise
-            if not self._response_status_ok(result or {}):
-                raise RuntimeError(f"PROTECTION_ORDER_REJECTED:{market}:{result}")
-            results.append(
-                {
-                    "market": market,
-                    "request": order_params,
-                    "response": result,
-                }
-            )
-        return tuple(results)
-
-    def _emergency_close_futures_position(
-        self,
-        *,
-        decision: DecisionIntent,
-        quantity: float,
-    ) -> dict[str, Any]:
-        """Best-effort emergency close when entry protection cannot be armed.
-
-        This is fail-closed behavior: if we cannot attach SL/TP after an accepted
-        futures entry, we immediately attempt a reduce-only market close.
-        """
-        execution_symbol = self._execution_symbol(decision)
-        close_side = "sell" if decision.side == "long" else "buy"
-        close_qty = self.normalize_quantity(market="futures", symbol=execution_symbol, quantity=quantity)
-        if close_qty <= 0.0:
-            raise RuntimeError(f"EMERGENCY_CLOSE_INVALID_QUANTITY:{execution_symbol}:{quantity}")
-        order_params = {
-            "symbol": execution_symbol,
-            "side": close_side,
-            "orderType": "market",
-            "clientOid": f"{decision.decision_id}-panic-close",
-            "productType": "USDT-FUTURES",
-            "marginCoin": "USDT",
-            "marginMode": resolve_bitget_margin_mode(),
-            "tradeSide": "close",
-            "reduceOnly": "YES",
-            "size": f"{close_qty:.8f}",
-        }
+                normalized_size = self._safe_float(normalizer(symbol=symbol, size=raw_size))
+            except Exception:
+                normalized_size = raw_size
+            if normalized_size <= 0:
+                return False
+            order_params["size"] = f"{normalized_size:.8f}"
+        min_trade_reader = getattr(self.client, "_futures_min_trade_usdt", None)
+        if not callable(min_trade_reader):
+            return True
+        min_trade_usdt = 0.0
         try:
-            return self.client.place_order(market="futures", order_params=order_params)
-        except Exception as exc:
-            if not self._is_bitget_unilateral_error(str(exc)):
-                raise
-            retry_error = exc
-            for alternate_params in self._bitget_alternate_futures_params(order_params):
-                try:
-                    return self.client.place_order(market="futures", order_params=alternate_params)
-                except Exception as retry_exc:
-                    retry_error = retry_exc
-                    if not self._is_bitget_unilateral_error(str(retry_exc)):
-                        raise
-                    continue
-            raise retry_error
-
-    def _apply_fail_closed_on_missing_protection(
-        self,
-        *,
-        decision: DecisionIntent,
-        market: str,
-        accepted: bool,
-        quantity: float,
-        fill_ratio: float,
-        fill_status: str,
-        realized_edge_bps: float,
-        protection_error: str,
-    ) -> tuple[bool, float, str, float, str]:
-        if not accepted or market != "futures" or decision.side not in {"long", "short"}:
-            return accepted, fill_ratio, fill_status, realized_edge_bps, protection_error
+            min_trade_usdt = self._safe_float(min_trade_reader(symbol=symbol))
+        except Exception:
+            min_trade_usdt = 0.0
+        if min_trade_usdt <= 0:
+            return True
+        ticker_reader = getattr(self.client, "get_book_ticker", None)
+        if not callable(ticker_reader):
+            return True
         try:
-            emergency_close_response = self._emergency_close_futures_position(
-                decision=decision,
-                quantity=quantity,
-            )
-            merged_error = f"{protection_error} | EMERGENCY_CLOSE_OK:{emergency_close_response}"
-            return False, 0.0, "protection_failed_closed", -10000.0, merged_error
-        except Exception as close_exc:
-            merged_error = f"{protection_error} | EMERGENCY_CLOSE_FAILED:{repr(close_exc)}"
-            raise RuntimeError(merged_error) from close_exc
-
-    def _spot_quantity_reference_price(self, decision: DecisionIntent, reference_price: float) -> float:
-        if (decision.spot_quote_asset or "USDT") == "USDT":
-            return reference_price
-        quote_asset_usd_price = float(decision.spot_quote_asset_usd_price or 0.0)
-        if quote_asset_usd_price <= 0.0:
-            return reference_price
-        return reference_price * quote_asset_usd_price
+            ticker = ticker_reader(market="futures", symbol=symbol)
+        except Exception:
+            return True
+        bid_price = self._safe_float(ticker.get("bidPrice")) if isinstance(ticker, dict) else 0.0
+        if bid_price <= 0:
+            return True
+        required_min_notional = min_trade_usdt * self._BITGET_MIN_NOTIONAL_BUFFER
+        return (normalized_size * bid_price + 1e-9) >= required_min_notional
 
     def build_order_params(
         self,
         *,
         decision: DecisionIntent,
         reference_price: float,
-        futures_max_open_override: float | None = None,
+        notional_override_usd: float | None = None,
     ) -> tuple[str, dict[str, Any]] | None:
-        self._last_preflight_rejection = None
         if decision.final_mode not in {"spot", "futures"}:
             return None
-        quantity = quantity_from_notional(decision.order_intent_notional_usd, self._spot_quantity_reference_price(decision, reference_price) if decision.final_mode == "spot" else reference_price)
+        target_notional_usd = (
+            decision.order_intent_notional_usd
+            if notional_override_usd is None
+            else max(float(notional_override_usd), 0.0)
+        )
+        quantity = quantity_from_notional(target_notional_usd, reference_price)
         market = "futures" if decision.final_mode == "futures" else "spot"
         side = "BUY" if decision.side == "long" else "SELL"
-        execution_symbol = self._execution_symbol(decision)
-        if market == "futures" and self._exchange_id() == "bitget" and hasattr(self.client, "get_max_openable_quantity"):
-            max_open = futures_max_open_override
-            if max_open is None:
-                max_open = self.client.get_max_openable_quantity(
-                    symbol=decision.symbol,
-                    pos_side="long" if decision.side == "long" else "short",
-                    order_type="market",
-                )
-            if max_open is not None:
-                if max_open <= 0.0:
-                    self._last_preflight_rejection = {
-                        "symbol": decision.symbol,
-                        "market": "futures",
-                        "reason": "BITGET_MAX_OPEN_ZERO",
-                        "message": "Bitget preflight rejected order because max openable quantity is 0.",
-                    }
-                    return None
-                quantity = min(quantity, max_open)
         if self._exchange_id() == "bitget":
-            quantity = self.normalize_quantity(market=market, symbol=execution_symbol, quantity=quantity)
-            min_quantity = self._bitget_min_quantity(market=market, symbol=execution_symbol)
-            if quantity <= 0.0 or (min_quantity > 0.0 and quantity < min_quantity):
-                reason = "BITGET_MAX_OPEN_BELOW_MIN_QTY" if market == "futures" else "BITGET_MIN_QTY"
-                self._last_preflight_rejection = {
-                    "symbol": decision.symbol,
-                    "market": market,
-                    "reason": reason,
-                    "message": f"Bitget preflight rejected order because normalized quantity {quantity:.8f} is below minimum {min_quantity:.8f} for {execution_symbol}.",
-                }
-                return None
             params = {
-                "symbol": execution_symbol,
+                "symbol": decision.symbol,
                 "side": side.lower(),
                 "orderType": "market",
                 "clientOid": decision.decision_id,
             }
-            if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
-                params["size"] = f"{decision.order_intent_notional_usd:.2f}"
+            if market == "spot" and side == "BUY":
+                params["size"] = f"{target_notional_usd:.2f}"
             else:
-                params["size"] = self.format_quantity(market=market, symbol=execution_symbol, quantity=quantity)
+                params["size"] = f"{quantity:.8f}"
             if market == "futures":
                 params["productType"] = "USDT-FUTURES"
                 params["marginCoin"] = "USDT"
-                params["marginMode"] = self._bitget_margin_mode_for_symbol(decision.symbol)
-                params["tradeSide"] = "close" if decision.side == "flat" else "open"
-                if decision.side in {"long", "short"}:
-                    skip_stop_loss = self._skip_long_stop_loss_protection(decision)
-                    take_profit, stop_loss = self._protection_prices(
-                        decision=decision,
-                        reference_price=reference_price,
-                    )
-                    take_profit_trigger = self._formatted_positive_trigger_price(
-                        value=take_profit,
-                        market="futures",
-                        symbol=decision.symbol,
-                    )
-                    if take_profit_trigger is not None:
-                        params["presetStopSurplusPrice"] = take_profit_trigger
-                    if not skip_stop_loss:
-                        stop_loss_trigger = self._formatted_positive_trigger_price(
-                            value=stop_loss,
-                            market="futures",
-                            symbol=decision.symbol,
-                        )
-                        if stop_loss_trigger is not None:
-                            params["presetStopLossPrice"] = stop_loss_trigger
+                params["marginMode"] = "crossed"
+                params["reduceOnly"] = "NO"
             return market, params
         params = {
-            "symbol": self._execution_symbol(decision),
+            "symbol": decision.symbol,
             "side": side,
             "type": "MARKET",
             "newOrderRespType": "RESULT",
         }
-        if market == "spot" and side == "BUY" and self._uses_spot_quote_notional(decision):
-            params["quoteOrderQty"] = f"{decision.order_intent_notional_usd:.2f}"
+        if market == "spot" and side == "BUY":
+            params["quoteOrderQty"] = f"{target_notional_usd:.2f}"
         else:
             params["quantity"] = f"{quantity:.8f}"
         if market == "futures":
             params["reduceOnly"] = "false"
         return market, params
-
-    def _bitget_balance_retry_order_params(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-        original_order_params: dict[str, Any],
-    ) -> tuple[str, dict[str, Any]] | None:
-        if decision.final_mode != "futures" or self._exchange_id() != "bitget":
-            return None
-        if not hasattr(self.client, "get_max_openable_quantity"):
-            return None
-        max_open = self.client.get_max_openable_quantity(
-            symbol=decision.symbol,
-            pos_side="long" if decision.side == "long" else "short",
-            order_type="market",
-        )
-        if max_open is None or max_open <= 0.0:
-            return None
-        # Keep a small safety buffer against exchange-side balance/margin rounding.
-        retry_max_open = max_open * 0.98
-        rebuilt = self.build_order_params(
-            decision=decision,
-            reference_price=reference_price,
-            futures_max_open_override=retry_max_open,
-        )
-        if rebuilt is None:
-            return None
-        market, retry_order_params = rebuilt
-        if retry_order_params == original_order_params:
-            return None
-        return market, retry_order_params
 
     def execute_decision(
         self,
@@ -850,108 +336,71 @@ class DecisionLiveOrderAdapter:
         decision: DecisionIntent,
         reference_price: float,
     ) -> LiveOrderResult | None:
-        if decision.final_mode == "futures":
-            self._set_futures_leverage_if_supported(decision=decision)
         built = self.build_order_params(decision=decision, reference_price=reference_price)
         if built is None:
             return None
         market, order_params = built
-        try:
-            response = self.client.place_order(market=market, order_params=order_params)
-        except Exception as exc:
-            if self._exchange_id() != "bitget" or market != "futures":
-                raise
-            message = str(exc)
-            if self._is_bitget_balance_error(message):
-                rebuilt = self._bitget_balance_retry_order_params(
-                    decision=decision,
-                    reference_price=reference_price,
-                    original_order_params=order_params,
-                )
-                if rebuilt is None:
-                    raise
-                market, retry_order_params = rebuilt
-                response = self.client.place_order(market=market, order_params=retry_order_params)
-                order_params = retry_order_params
-            elif self._is_bitget_unilateral_error(message):
-                retry_error = exc
-                for alternate_params in self._bitget_alternate_futures_params(order_params):
-                    try:
-                        response = self.client.place_order(market=market, order_params=alternate_params)
-                    except Exception as retry_exc:
-                        retry_error = retry_exc
-                        if not self._is_bitget_unilateral_error(str(retry_exc)):
-                            raise
-                        continue
-                    order_params = alternate_params
-                    break
-                else:
-                    raise retry_error
-            else:
-                raise
-        quantity = self._requested_fill_measure(market=market, order_params=order_params)
-        accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
-        fill_ratio = self._fill_ratio(
-            market=market,
-            order_params=order_params,
-            response=response,
-            accepted=accepted,
-        )
-        fill_status = self._fill_status(response=response, accepted=accepted, fill_ratio=fill_ratio)
-        avg_fill_price = self._avg_fill_price(response=response)
-        slippage_bps = self._slippage_bps(
-            decision=decision,
-            fill_price=avg_fill_price,
-            reference_price=reference_price,
-        )
-        realized_edge_bps = max((decision.net_expected_edge_bps * fill_ratio) - slippage_bps, -10000.0)
-        protection_orders = ()
-        protection_error = ""
-        if accepted and decision.side in {"long", "short"}:
-            try:
-                protection_orders = self._submit_protection_orders(
-                    decision=decision,
-                    reference_price=reference_price,
-                    quantity=quantity,
-                )
-            except Exception as exc:
-                protection_error = repr(exc)
-                accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
-                    decision=decision,
-                    market=market,
-                    accepted=accepted,
-                    quantity=quantity,
-                    fill_ratio=fill_ratio,
-                    fill_status=fill_status,
-                    realized_edge_bps=realized_edge_bps,
-                    protection_error=protection_error,
-                )
-            else:
-                if market == "futures" and self._exchange_id() == "bitget" and not protection_orders:
-                    protection_error = "NO_PROTECTION_ORDERS_RETURNED"
-                    accepted, fill_ratio, fill_status, realized_edge_bps, protection_error = self._apply_fail_closed_on_missing_protection(
-                        decision=decision,
-                        market=market,
-                        accepted=accepted,
-                        quantity=quantity,
-                        fill_ratio=fill_ratio,
-                        fill_status=fill_status,
-                        realized_edge_bps=realized_edge_bps,
-                        protection_error=protection_error,
+        if market == "futures" and self.settings is not None:
+            now = datetime.now(tz=timezone.utc)
+            leverage = self._target_futures_leverage(decision)
+            effective_leverage = leverage
+            if self._should_refresh_leverage(symbol=decision.symbol, target_leverage=leverage, now=now):
+                try:
+                    leverage_response = self.client.set_futures_leverage(symbol=decision.symbol, leverage=leverage)
+                    fallback_leverage = self._last_set_leverage_by_symbol.get(
+                        decision.symbol,
+                        1 if self._exchange_id() == "bitget" else leverage,
                     )
+                    effective_leverage = self._extract_effective_futures_leverage(
+                        leverage_response,
+                        fallback=fallback_leverage,
+                    )
+                    self._last_set_leverage_by_symbol[decision.symbol] = effective_leverage
+                    self._last_set_leverage_at_by_symbol[decision.symbol] = now
+                except Exception as exc:
+                    if self._exchange_id() == "bitget" and "code=40893" in str(exc):
+                        # Bitget can reject leverage updates when changing leverage is temporarily blocked.
+                        # Fall back to the most recent known leverage (or target leverage if unknown).
+                        effective_leverage = max(self._last_set_leverage_by_symbol.get(decision.symbol, leverage), 1)
+                        self._last_set_leverage_by_symbol[decision.symbol] = effective_leverage
+                        self._last_set_leverage_at_by_symbol[decision.symbol] = now
+                    else:
+                        raise
+            else:
+                effective_leverage = self._last_set_leverage_by_symbol.get(
+                    decision.symbol,
+                    1 if self._exchange_id() == "bitget" else leverage,
+                )
+            effective_leverage = self._ensure_bitget_min_order_leverage(
+                symbol=decision.symbol,
+                effective_leverage=effective_leverage,
+                now=now,
+            )
+            capped_notional = self._cap_futures_notional_by_balance(
+                symbol=decision.symbol,
+                requested_notional_usd=decision.order_intent_notional_usd,
+                effective_leverage=effective_leverage,
+            )
+            if capped_notional <= 0:
+                return None
+            if capped_notional < decision.order_intent_notional_usd:
+                rebuilt = self.build_order_params(
+                    decision=decision,
+                    reference_price=reference_price,
+                    notional_override_usd=capped_notional,
+                )
+                if rebuilt is not None:
+                    market, order_params = rebuilt
+        if market == "futures" and not self._bitget_futures_order_is_executable(symbol=decision.symbol, order_params=order_params):
+            return None
+        response = self.client.place_order(market=market, order_params=order_params)
+        quantity = float(order_params.get("quantity", order_params.get("size", 0.0)))
+        accepted = response.get("status", "").upper() not in {"REJECTED", "EXPIRED"} if response else False
         return LiveOrderResult(
             symbol=decision.symbol,
             market=market,
             side=order_params["side"],
             quantity=quantity,
-            filled_quantity=round(quantity * fill_ratio, 8),
-            fill_ratio=round(fill_ratio, 6),
-            fill_status=fill_status,
             accepted=accepted,
-            avg_fill_price=round(avg_fill_price, 8),
-            slippage_bps=round(slippage_bps, 6),
-            realized_edge_bps=round(realized_edge_bps, 6),
             response=response,
-            protection_orders=protection_orders,
-            protection_error=protection_error,
         )

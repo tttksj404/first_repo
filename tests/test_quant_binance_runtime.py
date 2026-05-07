@@ -3,13 +3,11 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
 from urllib.parse import parse_qs, urlparse
-from unittest.mock import patch
 
 from quant_binance.backtest.fixtures import load_snapshot_fixture
 from quant_binance.execution.binance_rest import BinanceCredentials, BinanceRestClient, sign_query_string
-from quant_binance.runtime import build_arg_parser, main as runtime_main, run_paper_live_shell_mode, run_replay_mode
+from quant_binance.runtime import build_arg_parser, run_paper_live_shell_mode, run_replay_mode
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -203,70 +201,6 @@ class QuantBinanceRuntimeTests(unittest.TestCase):
         parser = build_arg_parser()
         args = parser.parse_args(["--mode", "replay", "--fixture", "x.json"])
         self.assertEqual(args.mode, "replay")
-
-    @patch("quant_binance.runtime.run_live_paper_daemon")
-    def test_live_paper_daemon_passes_sync_interval(self, mock_run) -> None:
-        mock_run.return_value = {"summary": {}, "run_paths": SimpleNamespace(root=Path("run"))}
-
-        result = runtime_main(
-            [
-                "--mode",
-                "live-paper-daemon",
-                "--sync-interval-seconds",
-                "7",
-            ]
-        )
-
-        self.assertEqual(result, 0)
-        self.assertEqual(mock_run.call_args.kwargs["sync_interval_seconds"], 7)
-        self.assertFalse(mock_run.call_args.kwargs["execute_live_orders"])
-
-    @patch("quant_binance.runtime.run_live_paper_daemon")
-    def test_live_auto_daemon_passes_sync_interval(self, mock_run) -> None:
-        mock_run.return_value = {"summary": {}, "run_paths": SimpleNamespace(root=Path("run"))}
-        stop_file = ROOT / "scripts" / "_supervisor_stop"
-        previous = stop_file.read_text(encoding="utf-8") if stop_file.exists() else None
-        stop_file.write_text("", encoding="utf-8")
-        try:
-            result = runtime_main(
-                [
-                    "--mode",
-                    "live-auto-trade-daemon",
-                    "--ack-live-risk",
-                    "I_UNDERSTAND_LIVE_TRADING",
-                    "--sync-interval-seconds",
-                    "11",
-                ]
-            )
-        finally:
-            if previous is None:
-                stop_file.unlink(missing_ok=True)
-            else:
-                stop_file.write_text(previous, encoding="utf-8")
-
-        self.assertEqual(result, 0)
-        self.assertEqual(mock_run.call_args.kwargs["sync_interval_seconds"], 11)
-        self.assertTrue(mock_run.call_args.kwargs["execute_live_orders"])
-
-    def test_live_auto_refuses_to_start_when_supervisor_stop_file_present(self) -> None:
-        stop_file = ROOT / "scripts" / "_supervisor_stop"
-        previous = stop_file.read_text(encoding="utf-8") if stop_file.exists() else None
-        stop_file.write_text("stop\n", encoding="utf-8")
-        try:
-            with self.assertRaisesRegex(RuntimeError, "LIVE_AUTO_STOP_FILE_PRESENT"):
-                runtime_main(
-                    [
-                        "--mode",
-                        "live-auto-trade-daemon",
-                        "--ack-live-risk",
-                        "I_UNDERSTAND_LIVE_TRADING",
-                    ]
-                )
-        finally:
-            if previous is None:
-                stop_file.unlink(missing_ok=True)
-            else:
-                stop_file.write_text(previous, encoding="utf-8")
 
 
 if __name__ == "__main__":

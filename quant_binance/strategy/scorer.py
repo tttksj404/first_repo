@@ -22,19 +22,6 @@ def compute_predictability_score(features: FeatureVector, settings: Settings) ->
         + weights.inverse_volatility_penalty * (1.0 - features.volatility_penalty)
         + weights.inverse_overheat_penalty * (1.0 - features.overheat_penalty)
     )
-    if features.intraday_trend_direction != 0 and features.intraday_trend_direction == features.trend_direction:
-        score += 8.0 * features.intraday_trend_strength
-
-    # --- Advanced signal integration ---
-    # OI Divergence: asymmetric +4/-6 (penalize fake breakouts harder)
-    if features.oi_divergence_score > 0:
-        score += min(features.oi_divergence_score * 5.7, 4.0)
-    elif features.oi_divergence_score < -0.3:
-        score += max(features.oi_divergence_score * 8.6, -6.0)
-
-    # SMC composite: up to +7 points for strong structure confirmation
-    score += features.smc_composite_score * 7.0
-
     return round(score, 6)
 
 
@@ -44,16 +31,15 @@ def estimate_round_trip_cost_bps(
     expected_entry_slippage_bps: float,
     expected_exit_slippage_bps: float,
     expected_funding_drag_bps: float = 0.0,
-    empirical_fee_bps: float = 0.0,
 ) -> float:
     fees = settings.fees
     if mode == "futures":
-        entry_fee_bps = max(fees.futures_taker_fee_bps, empirical_fee_bps)
-        exit_fee_bps = max(fees.futures_taker_fee_bps, empirical_fee_bps)
+        entry_fee_bps = fees.futures_taker_fee_bps
+        exit_fee_bps = fees.futures_taker_fee_bps
         funding_drag_bps = expected_funding_drag_bps
     elif mode == "spot":
-        entry_fee_bps = max(fees.spot_taker_fee_bps, empirical_fee_bps)
-        exit_fee_bps = max(fees.spot_taker_fee_bps, empirical_fee_bps)
+        entry_fee_bps = fees.spot_taker_fee_bps
+        exit_fee_bps = fees.spot_taker_fee_bps
         funding_drag_bps = 0.0
     else:
         return 0.0
@@ -115,7 +101,6 @@ def estimate_live_fallback_edge_bps(
             quality_base
             + 2.0 * features.breakout_norm
             + 10.0 * directional_flow_alignment
-            + 6.0 * features.intraday_trend_strength
             + 8.0 * max(features.macro_liquidity_support_score - 0.5, 0.0)
             - risk_penalty
         )
@@ -136,31 +121,6 @@ def estimate_live_fallback_edge_bps(
         raw = 0.0
     if mode == "spot" and features.trend_direction < 0:
         raw = 0.0
-
-    # ADX + EMA cross bonus: backtested PF 2-32 when ADX >= 28 + aligned cross
-    # Conservative bonus here; regime.py gates apply additional symbol-level logic
-    adx = features.adx_1h
-    cross_aligned = (features.ema_cross_signal != 0 and features.ema_cross_signal == features.trend_direction)
-    if adx >= 25 and cross_aligned:
-        adx_bonus = min((adx - 25) / 15.0, 1.0) * 6.0  # up to +6 bps edge
-        raw += adx_bonus
-    elif adx >= 22:
-        raw += min((adx - 22) / 18.0, 1.0) * 2.0  # modest +2 bps for decent ADX
-
-    # --- Advanced signal edge contributions ---
-    # OI confirmation: +4bps for healthy breakout, -6bps penalty for fake breakout
-    if features.oi_divergence_score > 0.3:
-        raw += min(features.oi_divergence_score * 5.7, 4.0)
-    elif features.oi_divergence_score < -0.3:
-        raw += max(features.oi_divergence_score * 8.6, -6.0)
-
-    # SMC structure: up to +8bps for confirmed structure retest
-    raw += features.smc_composite_score * 8.0
-
-    # VWAP deviation: penalize entries far from VWAP in ranging markets
-    if adx < 18 and abs(features.vwap_deviation_z) > 2.0:
-        raw -= min(abs(features.vwap_deviation_z) - 1.5, 2.0) * 2.0
-
     return round(max(raw, 0.0), 6)
 
 
@@ -197,13 +157,11 @@ def apply_score_and_costs(
         if expected_entry_slippage_bps is not None
         else features.probe_slippage_bps_norm * settings.feature_thresholds.slippage_bps_ceiling
     )
-    entry_slippage = max(entry_slippage, features.empirical_entry_slippage_bps)
     exit_slippage = (
         expected_exit_slippage_bps
         if expected_exit_slippage_bps is not None
         else entry_slippage
     )
-    exit_slippage = max(exit_slippage, features.empirical_exit_slippage_bps)
     score = compute_predictability_score(features, settings)
     round_trip_cost = estimate_round_trip_cost_bps(
         mode=mode,
@@ -211,7 +169,6 @@ def apply_score_and_costs(
         expected_entry_slippage_bps=entry_slippage,
         expected_exit_slippage_bps=exit_slippage,
         expected_funding_drag_bps=expected_funding_drag_bps,
-        empirical_fee_bps=features.empirical_fee_bps,
     )
     return replace(
         features,
@@ -223,8 +180,6 @@ def apply_score_and_costs(
 
 
 def passes_cost_gate(features: FeatureVector, settings: Settings) -> bool:
-    if features.estimated_round_trip_cost_bps <= 0:
-        return False
     return (
         features.gross_expected_edge_bps
         >= settings.cost_gate.edge_to_cost_multiple_min

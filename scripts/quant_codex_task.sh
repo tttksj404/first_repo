@@ -7,12 +7,11 @@ if [ "$#" -lt 1 ]; then
 fi
 
 TASK="$1"
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-ROOT="$SCRIPT_DIR/.."
+ROOT="$(dirname "$0")/.."
 
 cd "$ROOT"
 
-sh "$SCRIPT_DIR/quant_python.sh" - <<'PY' "$TASK" "$ROOT"
+python3 - <<'PY' "$TASK" "$ROOT"
 from __future__ import annotations
 
 import subprocess
