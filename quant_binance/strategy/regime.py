@@ -1063,68 +1063,51 @@ def evaluate_snapshot(
         settings,
         snapshot.symbol,
     )
-    futures_relaxed_reasons = list(futures_relaxed_reasons)
+    if futures_ok:
+        # DOGE PULLBACK 10x: 3Y verified, EV $8.83, ruin 3.9%, WR 47%, PF 2.61
+        # Donchian 55 breakout → 3-bar pullback entry, long only in uptrend
+        # 68t/3yr, fee-safe, WF 4/4. Claude+GPT-5.4 합작 설계.
+        _futures_side = prediction.futures.side
+        _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
+        if is_profiled(snapshot.symbol):
+            if len(_bars_1h) < 168:
+                futures_ok = False
+                futures_reasons.append("INSUFFICIENT_BARS")
+            elif _futures_side != "long":
+                # Pullback strategy is long-only; reject shorts instead of forcing the side.
+                futures_ok = False
+                futures_reasons.append("PULLBACK_LONG_ONLY")
+            else:
+                _price_now = _bars_1h[-1].close_price
+                _price_7d = _bars_1h[-168].close_price
+                _mom_7d = (_price_now - _price_7d) / _price_7d if _price_7d > 0 else 0
 
-    # ENSEMBLE TOP 3: evaluate FIRST, bypass base filters if signal fires
-    # Backtest: 200 tr/375d, WR 36%, PF 6.75, Ruin 0.0%, WF 4/4
-    import statistics as _stat
-    _ens_sig_fired = False
-    _ens_sig_name = ""
-    _bars_1h = snapshot.state.klines.get("1h", []) if hasattr(snapshot, 'state') else []
+                # 1. 7d momentum > +3%
+                if _mom_7d < 0.03:
+                    futures_ok = False
+                    futures_reasons.append("MOMENTUM_TOO_WEAK")
+                else:
+                    # 2. Donchian 55 breakout in the prior 3 bars with current-bar pullback.
+                    # Exclude bars -2..-4 from the Donchian window — including them makes
+                    # `close > dc_high` trivially false (close ≤ high ≤ max(high)).
+                    _dc_high = max(b.high_price for b in _bars_1h[-60:-4])
+                    _at = sum(max(_bars_1h[-j].high_price - _bars_1h[-j].low_price,
+                                  abs(_bars_1h[-j].high_price - _bars_1h[-j-1].close_price),
+                                  abs(_bars_1h[-j].low_price - _bars_1h[-j-1].close_price))
+                              for j in range(1, 15)) / 14
 
-    if is_profiled(snapshot.symbol) and len(_bars_1h) >= 168:
-        def _mom1h(bars, p):
-            if len(bars) < p + 1: return 0
-            _p0 = bars[-1 - p].close_price
-            return (bars[-1].close_price / _p0 - 1) if _p0 > 0 else 0
+                    _recent_breakout = any(
+                        _bars_1h[-k].close_price > _dc_high + 0.25 * _at
+                        for k in range(2, 5)
+                    )
+                    _pullback = (
+                        _bars_1h[-1].low_price <= _dc_high + 0.5 * _at
+                        and _price_now > _dc_high
+                    )
 
-        def _rsi_1h(bars, p=14):
-            if len(bars) < p + 1: return 50
-            _gains, _losses = [], []
-            for _j in range(p):
-                _d = bars[-1 - _j].close_price - bars[-2 - _j].close_price
-                _gains.append(max(_d, 0)); _losses.append(max(-_d, 0))
-            _ag = sum(_gains) / p; _al = sum(_losses) / p
-            return 100 - 100 / (1 + _ag / _al) if _al > 0 else 100
-
-        def _bb_width(bars, p=48):
-            if len(bars) < p: return 1.0
-            _closes = [b.close_price for b in bars[-p:]]
-            _m = sum(_closes) / p
-            _s = _stat.stdev(_closes) if len(_closes) > 1 else 0
-            return (2 * _s) / _m if _m > 0 else 1.0
-
-        _m1d = _mom1h(_bars_1h, 24)
-        _m3d = _mom1h(_bars_1h, 72)
-        _rsi14 = _rsi_1h(_bars_1h, 14)
-        _bw48 = _bb_width(_bars_1h, 48)
-
-        _sig_a = _bw48 < 0.04 and _m1d > 0.01
-        _sig_b = _m3d > 0.03
-        _sig_c = _m3d < -0.05 and _rsi14 < 25
-
-        if _sig_a or _sig_b or _sig_c:
-            _ens_sig_fired = True
-            _ens_sig_name = "A" if _sig_a else ("B" if _sig_b else "C")
-
-    # If ensemble fired, FORCE futures_ok = True (bypass base filters)
-    if _ens_sig_fired:
-        if not futures_ok:
-            futures_reasons = list(futures_reasons) + [f"ENSEMBLE_OVERRIDE_{_ens_sig_name}"]
-        futures_ok = True
-        from dataclasses import replace as _dc_replace
-        prediction = _dc_replace(prediction,
-            futures=_dc_replace(prediction.futures, side="long")
-        )
-    else:
-        # No ensemble signal: block only when explicitly required
-        ensemble_signal_required = bool(getattr(settings, "ensemble_signal_required", True))
-        if futures_ok and ensemble_signal_required:
-            futures_reasons = list(futures_reasons) + ["NO_ENSEMBLE_SIGNAL"]
-        if ensemble_signal_required:
-            futures_ok = False
-        elif futures_ok:
-            futures_relaxed_reasons.append("ENSEMBLE_OPTIONAL")
+                    if not (_recent_breakout and _pullback):
+                        futures_ok = False
+                        futures_reasons.append("NO_PULLBACK_SIGNAL")
 
     if futures_ok:
         if futures_direction not in {-1, 1}:
