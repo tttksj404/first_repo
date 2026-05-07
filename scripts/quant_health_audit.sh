@@ -5,11 +5,7 @@
 set -uo pipefail
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
-RUNTIME_INPUT="${1:-${QUANT_HEALTH_AUDIT_RUNTIME:-quant_runtime}}"
-case "$RUNTIME_INPUT" in
-    /*) RUNTIME="$RUNTIME_INPUT" ;;
-    *) RUNTIME="$REPO/$RUNTIME_INPUT" ;;
-esac
+RUNTIME="${QUANT_HEALTH_AUDIT_RUNTIME:-$REPO/quant_runtime}"
 PYTHON="$SCRIPT_DIR/quant_python.sh"
 CLAUDE="${CLAUDE_BIN:-$(command -v claude 2>/dev/null || true)}"
 chmod +x "$PYTHON" 2>/dev/null || true

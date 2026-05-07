@@ -32,41 +32,6 @@ run_python() {
   sh "$PYTHON_LAUNCHER" "$@"
 }
 
-write_health_state() {
-  health_path="$1"
-  health_status="$2"
-  health_reason="$3"
-  health_summary="${4:-}"
-  if ! run_python - "$health_path" "$health_status" "$health_reason" "$health_summary" <<'PY'
-import json
-import sys
-from datetime import datetime, timezone
-from pathlib import Path
-
-path = Path(sys.argv[1])
-payload = {
-    "checked_at": datetime.now(tz=timezone.utc).isoformat(),
-    "reason": sys.argv[3],
-    "status": sys.argv[2],
-    "updated_at": datetime.now(tz=timezone.utc).isoformat(),
-}
-summary = sys.argv[4]
-if summary:
-    payload["summary"] = summary
-path.parent.mkdir(parents=True, exist_ok=True)
-path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
-PY
-  then
-    return 0
-  fi
-}
-
-mark_stopped_health() {
-  health_reason="${1:-supervisor_stop_requested}"
-  health_summary="${2:-runtime intentionally stopped via supervisor stop sentinel}"
-  write_health_state "$HEALTH_STATE_PATH" "stopped" "$health_reason" "$health_summary"
-}
-
 supervisor_stop_requested() {
   [ -f "$SUPERVISOR_STOP_FILE" ] && grep -qi 'stop' "$SUPERVISOR_STOP_FILE" 2>/dev/null
 }

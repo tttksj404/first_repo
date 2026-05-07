@@ -1628,10 +1628,6 @@ class LivePaperSession:
                 decision,
                 notional_usd=decision.order_intent_notional_usd,
             )
-        cross_coin_decision = self._apply_cross_coin_oi_quadrant_gate(decision)
-        if cross_coin_decision.final_mode != "futures" or cross_coin_decision.order_intent_notional_usd <= 0.0:
-            return cross_coin_decision
-        decision = cross_coin_decision
         delayed_entry_gate = self._apply_paper_verification_delayed_entry_gate(decision)
         if delayed_entry_gate.final_mode != "futures" or delayed_entry_gate.order_intent_notional_usd <= 0.0:
             return delayed_entry_gate

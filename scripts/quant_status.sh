@@ -4,8 +4,6 @@ set -eu
 BASE_DIR="${1:-quant_runtime}"
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
-SUPERVISOR_STOP_FILE="$REPO_ROOT/scripts/_supervisor_stop"
-SUPERVISOR_HEALTH_FILE="$BASE_DIR/live_supervisor_health.json"
 run_python() { sh "$SCRIPT_DIR/quant_python.sh" "$@"; }
 
 OVERVIEW_FILE="$(run_python - <<'PY' "$BASE_DIR"
@@ -53,8 +51,7 @@ PY
 if [ -n "$OVERVIEW_FILE" ]; then
   echo "OVERVIEW_FILE=$OVERVIEW_FILE"
   echo
-  run_python - <<'PY' "$OVERVIEW_FILE" "$SUPERVISOR_HEALTH_FILE" "$SUPERVISOR_STOP_FILE" "$BASE_DIR"
-from datetime import datetime, timezone
+  run_python - <<'PY' "$OVERVIEW_FILE"
 import json, sys
 from pathlib import Path
 
@@ -252,8 +249,7 @@ fi
 echo "STATE_FILE=$STATE_FILE"
 [ -n "$SUMMARY_FILE" ] && echo "SUMMARY_FILE=$SUMMARY_FILE"
 echo
-run_python - <<'PY' "$STATE_FILE" "$SUMMARY_FILE" "$SUPERVISOR_HEALTH_FILE" "$SUPERVISOR_STOP_FILE" "$BASE_DIR"
-from datetime import datetime, timezone
+run_python - <<'PY' "$STATE_FILE" "$SUMMARY_FILE"
 import json, sys
 from pathlib import Path
 
