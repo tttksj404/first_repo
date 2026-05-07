@@ -332,8 +332,6 @@ class LivePositionRiskConfig:
     disable_standard_stop_loss_exits: bool = False
     long_only_turnaround_mode: bool = False
     long_disable_standard_stop_loss: bool = False
-    short_only_turnaround_mode: bool = False
-    short_disable_standard_stop_loss: bool = False
     portfolio_full_exit_only: bool = False
     portfolio_full_exit_profit_ratio: float = 0.0
     turnaround_grace_enabled: bool = True
@@ -471,7 +469,6 @@ class Settings:
     data_collection_mode: bool = False
     data_collection_min_trades: int = 50
     b3_msb: B3MsbConfig = B3MsbConfig()
-    symbol_filter_profiles: dict[str, SymbolFilterProfileConfig] | None = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Settings":
@@ -556,5 +553,4 @@ class Settings:
             data_collection_mode=bool(raw.get("data_collection_mode", False)),
             data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
             b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
-            symbol_filter_profiles=symbol_filter_profiles,
         )
