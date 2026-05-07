@@ -75,6 +75,12 @@ quant_runtime/artifacts/strategy_override.pending.json
 quant_runtime/artifacts/strategy_override.report.json
 quant_runtime/live_supervisor_health.json
 
+# Local runtime and emulator-generated artifacts
+quant_runtime/
+quant_runtime_paper50/
+quant_runtime_g185_paper/
+quant_binance/strategies/strategies/
+
 # Top-level scratch artifacts dir
 /artifacts/
 
