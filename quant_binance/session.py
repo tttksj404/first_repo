@@ -5517,10 +5517,7 @@ class LivePaperSession:
             return False
         if cfg.long_only_turnaround_mode and self._normalize_live_position_side(position) != "long":
             return False
-        effective_abort_floor = (
-            cfg.turnaround_abort_roe_percent if abort_roe_floor is None else float(abort_roe_floor)
-        )
-        if roe_percent > cfg.soft_stop_roe_percent or roe_percent <= effective_abort_floor:
+        if roe_percent > cfg.soft_stop_roe_percent or roe_percent <= cfg.turnaround_abort_roe_percent:
             return False
         paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
         if paper_position is None:
@@ -6639,8 +6636,6 @@ class LivePaperSession:
         for position in self.live_positions_snapshot:
             symbol = str(position.get("symbol", ""))
             _, management_mode = self._live_position_management_context(position=position, now=now)
-            if management_mode in {"adopted", "adopted_grace"}:
-                continue
             is_major_symbol = self._is_major_futures_symbol(symbol)
             in_core_universe = (
                 symbol in set(self.runtime.paper_service.settings.universe)
@@ -6648,7 +6643,6 @@ class LivePaperSession:
             )
             hold_side = self._normalize_live_position_side(position)
             is_long_position = hold_side == "long"
-            is_short_position = hold_side == "short"
             self._reconcile_live_position_plan_orders(position=position, hold_side=hold_side)
             roe = self._position_roe_percent(position)
             unrealized_pnl = self._position_unrealized_pnl_usd(position)
@@ -6671,13 +6665,7 @@ class LivePaperSession:
             )
             long_turnaround_mode = cfg.long_only_turnaround_mode and is_long_position
             long_disable_standard_stop = long_turnaround_mode and cfg.long_disable_standard_stop_loss
-            long_turnaround_abort_roe = cfg.turnaround_abort_roe_percent
-            if long_turnaround_mode:
-                long_turnaround_abort_roe = self._effective_long_turnaround_abort_roe_percent(
-                    symbol=symbol,
-                    base_abort_roe_percent=cfg.turnaround_abort_roe_percent,
-                )
-            if long_turnaround_mode and roe <= long_turnaround_abort_roe:
+            if long_turnaround_mode and roe <= cfg.turnaround_abort_roe_percent:
                 self._close_live_position(position=position, reason="LIVE_POSITION_LONG_TURNAROUND_ABORT")
                 continue
             if (
@@ -6731,7 +6719,6 @@ class LivePaperSession:
                     identity=identity,
                     roe_percent=roe,
                     now=now,
-                    abort_roe_floor=long_turnaround_abort_roe,
                 )
             major_drawdown_grace = self._major_drawdown_grace_applies(
                 position=position,
@@ -6809,10 +6796,7 @@ class LivePaperSession:
             )
             if (
                 cfg.turnaround_grace_enabled
-                and (
-                    (is_long_position and (not cfg.long_only_turnaround_mode or is_long_position))
-                    or (is_short_position and turnaround_take_profit_fraction > 0.0)
-                )
+                and (not cfg.long_only_turnaround_mode or is_long_position)
                 and worst_roe <= cfg.soft_stop_roe_percent
                 and turnaround_take_profit_roe > 0.0
                 and roe >= turnaround_take_profit_roe
@@ -8722,7 +8706,6 @@ class LivePaperSession:
                 rejection_reasons=restored_reasons,
             )
         managed_decision = self._enforce_configured_universe_guard(managed_decision)
-        managed_decision = self._apply_paper_verification_front_entry_gate(managed_decision)
         emitted_at = datetime.now(tz=timezone.utc)
         self.decisions.append(managed_decision)
         self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp

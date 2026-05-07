@@ -393,13 +393,12 @@ class QuantBinanceSelfHealingTests(unittest.TestCase):
             config_path.write_text(json.dumps(config_payload), encoding="utf-8")
             with patch("quant_binance.daemon.build_exchange_rest_client", return_value=FakeRestClient()):
                 with patch("quant_binance.daemon.LivePaperShell", FakeShellWithoutSelfHealing):
-                    with patch.dict("os.environ", {"QUANT_BINANCE_ALLOW_FILE_RUNTIME_OVERRIDES": "0", "UNIVERSE_SYMBOLS": ""}, clear=False):
-                        result = run_live_paper_daemon(
-                            config_path=config_path,
-                            output_base_dir=output_dir,
-                            exchange="binance",
-                            max_retries=1,
-                        )
+                    result = run_live_paper_daemon(
+                        config_path=config_path,
+                        output_base_dir=output_dir,
+                        exchange="binance",
+                        max_retries=1,
+                    )
 
         self.assertIn("self_healing", result["summary"])
         self.assertEqual(result["summary"]["self_healing"]["status"], "healthy")
