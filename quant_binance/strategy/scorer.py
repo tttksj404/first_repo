@@ -24,14 +24,7 @@ def compute_predictability_score(features: FeatureVector, settings: Settings) ->
     )
     if features.intraday_trend_direction != 0 and features.intraday_trend_direction == features.trend_direction:
         score += 8.0 * features.intraday_trend_strength
-    # B3 MSB 시그널 보너스: 돌파 방향이 트렌드와 일치하면 점수 가산
-    if features.b3_msb_signal != 0 and settings.b3_msb.enabled:
-        aligned = (
-            (features.b3_msb_signal == 1 and features.trend_direction >= 0)
-            or (features.b3_msb_signal == -1 and features.trend_direction <= 0)
-        )
-        if aligned:
-            score += settings.b3_msb.score_bonus * features.b3_msb_strength
+
     # --- Advanced signal integration ---
     # OI Divergence: asymmetric +4/-6 (penalize fake breakouts harder)
     if features.oi_divergence_score > 0:
@@ -41,6 +34,7 @@ def compute_predictability_score(features: FeatureVector, settings: Settings) ->
 
     # SMC composite: up to +7 points for strong structure confirmation
     score += features.smc_composite_score * 7.0
+
     return round(score, 6)
 
 
@@ -153,14 +147,6 @@ def estimate_live_fallback_edge_bps(
     elif adx >= 22:
         raw += min((adx - 22) / 18.0, 1.0) * 2.0  # modest +2 bps for decent ADX
 
-    # B3 MSB edge 보너스
-    if features.b3_msb_signal != 0 and settings.b3_msb.enabled:
-        aligned = (
-            (features.b3_msb_signal == 1 and features.trend_direction >= 0)
-            or (features.b3_msb_signal == -1 and features.trend_direction <= 0)
-        )
-        if aligned:
-            raw += settings.b3_msb.edge_bonus_bps * features.b3_msb_strength
     # --- Advanced signal edge contributions ---
     # OI confirmation: +4bps for healthy breakout, -6bps penalty for fake breakout
     if features.oi_divergence_score > 0.3:
