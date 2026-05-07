@@ -105,48 +105,6 @@ def _is_blocked_entry(row: dict[str, Any]) -> bool:
     return False
 
 
-def _kline_cache_path(cache_dir: Path, symbol: str, start_ms: int, end_ms: int) -> Path:
-    return cache_dir / f"{symbol}_{start_ms}_{end_ms}.json"
-
-
-def fetch_klines_cached(
-    fetcher: Callable[..., list[dict[str, Any]]],
-    *,
-    symbol: str,
-    start_ms: int,
-    end_ms: int,
-    forward_minutes: int,
-    cache_dir: Path,
-    max_retries: int = 3,
-    sleep_fn: Callable[[float], None] = time.sleep,
-) -> list[dict[str, Any]]:
-    cache_path = _kline_cache_path(cache_dir, symbol, start_ms, end_ms)
-    if cache_path.exists():
-        return json.loads(cache_path.read_text(encoding="utf-8"))
-
-    last_exc: Exception | None = None
-    for attempt in range(max_retries):
-        try:
-            bars = list(
-                fetcher(
-                    market="futures",
-                    symbol=symbol,
-                    interval="1m",
-                    limit=max(20, forward_minutes + 5),
-                    start_time=start_ms,
-                    end_time=end_ms,
-                )
-            )
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            cache_path.write_text(json.dumps(bars), encoding="utf-8")
-            return bars
-        except Exception as exc:
-            last_exc = exc
-            if attempt + 1 < max_retries:
-                sleep_fn(2.0 ** attempt)
-    raise RuntimeError(f"klines fetch failed after {max_retries} attempts: {last_exc}")
-
-
 def _close_at_or_before(bars: list[dict[str, Any]], target_ms: int) -> float | None:
     candidates = [bar for bar in bars if int(bar.get("open_time") or 0) <= target_ms]
     if not candidates:

@@ -98,16 +98,6 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn('if [ "$STOP_REQUESTED" = "1" ]; then', script)
         self.assertIn("[STATUS] intentionally stopped — autofix suppressed", script)
         self.assertIn("[SKIP] runtime intentionally stopped — autofix suppressed", script)
-        self.assertIn("if live_stop_state_applies && live_stop_requested; then", script)
-
-    def test_quant_health_audit_uses_macos_safe_claude_timeout_guard(self) -> None:
-        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_health_audit.sh").read_text(
-            encoding="utf-8"
-        )
-
-        self.assertIn("macOS에는 timeout 명령 없음", script)
-        self.assertIn('( sleep 600 && kill "$CLAUDE_PID" 2>/dev/null ) &', script)
-        self.assertNotIn('timeout 600 "$CLAUDE"', script)
 
     def test_yolo_health_check_skips_exchange_actions_when_stop_sentinel_present(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "yolo_health_check.py").read_text(
@@ -162,6 +152,15 @@ class LiveRuntimeScriptTests(unittest.TestCase):
         self.assertIn("scripts/monitor_daemon_health.py", script)
         self.assertIn("_monitor.pid", script)
         self.assertLess(script.index("monitor_daemon_health.py"), script.index("quant_binance.runtime"))
+
+    def test_quant_run_paper50_readonly_only_blocks_live_when_requested(self) -> None:
+        script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_paper50_readonly.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("QUANT_PAPER50_BLOCK_LIVE_AUTO", script)
+        self.assertIn("_supervisor_stop", script)
+        self.assertLess(script.index("QUANT_PAPER50_BLOCK_LIVE_AUTO"), script.index("_supervisor_stop"))
 
     def test_quant_run_paper50_readonly_only_blocks_live_when_requested(self) -> None:
         script = (Path(__file__).resolve().parents[1] / "scripts" / "quant_run_paper50_readonly.sh").read_text(

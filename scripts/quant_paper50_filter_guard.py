@@ -162,50 +162,6 @@ def _config_digest(payload: dict[str, Any]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def _symbol_states(state: dict[str, Any], audit_rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    states = {
-        str(symbol).upper(): dict(payload)
-        for symbol, payload in dict(state.get("symbol_states") or {}).items()
-        if isinstance(payload, dict)
-    }
-    for row in audit_rows:
-        if not bool(row.get("apply_requested")):
-            continue
-        generated_at = row.get("generated_at")
-        for symbol, changes in dict(row.get("changes") or {}).items():
-            symbol = str(symbol).upper()
-            evidence = dict(dict(row.get("evidence") or {}).get(symbol) or {})
-            previous = dict(dict(row.get("previous_profiles") or {}).get(symbol) or {})
-            existing = states.setdefault(symbol, {})
-            existing.update(
-                {
-                    "last_applied_at": generated_at,
-                    "window_key": evidence.get("window_key") or existing.get("window_key"),
-                    "changes": changes,
-                    "side": _evidence_side(evidence),
-                }
-            )
-            if previous:
-                existing["rollback_profile"] = previous
-    for symbol, window_key in dict(state.get("window_keys") or {}).items():
-        symbol = str(symbol).upper()
-        existing = states.setdefault(symbol, {})
-        existing.setdefault("window_key", window_key)
-        existing.setdefault("last_applied_at", state.get("last_applied_at"))
-        rollback = dict(state.get("rollback_profiles") or {}).get(symbol)
-        if rollback and "rollback_profile" not in existing:
-            existing["rollback_profile"] = rollback
-    return states
-
-
-def _evidence_side(evidence: dict[str, Any]) -> str:
-    sides = {
-        str(row.get("direction") or row.get("side") or "").lower()
-        for row in list(evidence.get("entries") or [])
-    }
-    return "short" if "short" in sides else "long"
-
-
 def _quality_missed_entries(
     entries: list[dict[str, Any]],
     *,
@@ -338,10 +294,12 @@ def main() -> int:
     symbol_states = _symbol_states(state, audit_rows)
 
     config_digest = _config_digest(config)
+    last_applied_at = _parse_ts(state.get("last_applied_at")) or datetime.min.replace(tzinfo=UTC)
     # Git syncs and artifact copies rewrite file mtimes, which can make old
     # runtime evidence look newer than the local config even when the embedded
     # decision timestamps are the true source of time. Gate on guard state
     # instead of filesystem mtime so copied paper artifacts remain usable.
+    evidence_after = last_applied_at
     profiles = dict(config.get("symbol_filter_profiles") or {})
     entries_by_symbol: dict[str, list[dict[str, Any]]] = {}
     for row in list(counterfactual.get("possible_missed_entries") or []):
@@ -410,7 +368,6 @@ def main() -> int:
         state["last_applied_at"] = payload["generated_at"]
         state["previous_config_digest"] = config_digest
         state["config_digest"] = _config_digest(config)
-        payload["previous_profiles"] = previous_profiles
         _write_json(state_path, state)
         _append_audit(audit_path, payload)
         if args.restart_paper50:
