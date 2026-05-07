@@ -5,16 +5,9 @@ from datetime import datetime
 from quant_binance.data.state import KlineBar, SpotTrade, SymbolMarketState, TopOfBook
 
 
-class MissingMarketStateError(KeyError):
-    def __init__(self, *, symbol: str) -> None:
-        self.symbol = symbol
-        super().__init__(f"missing market state for symbol={symbol}")
-
-
 class MarketStateStore:
     def __init__(self) -> None:
         self._states: dict[str, SymbolMarketState] = {}
-        self._event_counter: int = 0
 
     def get(self, symbol: str) -> SymbolMarketState | None:
         return self._states.get(symbol)
@@ -45,12 +38,6 @@ class MarketStateStore:
         bucket = state.klines.setdefault(bar.interval, [])
         bucket.append(bar)
         state.last_update_time = bar.close_time
-        if bar.close_price > 0:
-            state.last_trade_price = bar.close_price
-        # Periodic memory pruning (every 500 kline events)
-        self._event_counter += 1
-        if self._event_counter % 500 == 0:
-            state.prune_samples()
         return state
 
     def apply_mark_price(
@@ -86,5 +73,5 @@ class MarketStateStore:
 
     def _require_state(self, symbol: str) -> SymbolMarketState:
         if symbol not in self._states:
-            raise MissingMarketStateError(symbol=symbol)
+            raise KeyError(f"missing market state for symbol={symbol}")
         return self._states[symbol]

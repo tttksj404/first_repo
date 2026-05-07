@@ -2,213 +2,12 @@
 set -eu
 
 BASE_DIR="${1:-quant_runtime}"
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
-run_python() { sh "$SCRIPT_DIR/quant_python.sh" "$@"; }
 
-OVERVIEW_FILE="$(run_python - <<'PY' "$BASE_DIR"
-from datetime import datetime
-import json
+STATE_FILE="$(python3 - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
-latest = base / 'output' / 'paper-live-shell' / 'latest' / 'overview.json'
-state = latest.with_name('summary.state.json')
-if not latest.exists():
-    print('')
-    raise SystemExit
-
-def parse_updated_at(path):
-    try:
-        raw = json.loads(path.read_text(encoding='utf-8')).get('updated_at')
-    except Exception:
-        return None
-    if not isinstance(raw, str) or not raw:
-        return None
-    try:
-        return datetime.fromisoformat(raw)
-    except ValueError:
-        return None
-
-overview_updated_at = parse_updated_at(latest)
-state_updated_at = parse_updated_at(state) if state.exists() else None
-overview_mtime = latest.stat().st_mtime
-state_mtime = state.stat().st_mtime if state.exists() else 0
-
-if state.exists() and (
-    state_mtime > overview_mtime
-    or (
-        overview_updated_at is not None
-        and state_updated_at is not None
-        and state_updated_at > overview_updated_at
-    )
-):
-    print('')
-else:
-    print(latest)
-PY
-)"
-if [ -n "$OVERVIEW_FILE" ]; then
-  echo "OVERVIEW_FILE=$OVERVIEW_FILE"
-  echo
-  run_python - <<'PY' "$OVERVIEW_FILE"
-import json, sys
-from pathlib import Path
-
-overview_path = Path(sys.argv[1])
-health_path = Path(sys.argv[2])
-stop_path = Path(sys.argv[3])
-base_dir = Path(sys.argv[4])
-data = json.loads(overview_path.read_text(encoding='utf-8'))
-summary_path = overview_path.with_name("summary.json")
-summary = json.loads(summary_path.read_text(encoding='utf-8')) if summary_path.exists() else {}
-
-
-def parse_dt(raw):
-    if not isinstance(raw, str) or not raw:
-        return None
-    try:
-        return datetime.fromisoformat(raw)
-    except ValueError:
-        return None
-
-
-def stop_requested(path: Path) -> bool:
-    if not path.exists():
-        return False
-    try:
-        return "stop" in path.read_text(encoding="utf-8", errors="ignore").lower()
-    except OSError:
-        return False
-
-
-def load_health(path: Path) -> dict:
-    if not path.exists():
-        return {}
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-    return payload if isinstance(payload, dict) else {}
-
-
-def snapshot_timestamp(primary_path: Path, payload: dict) -> datetime | None:
-    updated_at = parse_dt(payload.get("updated_at"))
-    if updated_at is not None:
-        return updated_at
-    try:
-        return datetime.fromtimestamp(primary_path.stat().st_mtime, tz=timezone.utc)
-    except OSError:
-        return None
-
-
-def live_stop_state_applies(runtime_path: Path) -> bool:
-    return "paper50" not in runtime_path.name.lower()
-
-
-health = load_health(health_path)
-stop_active = live_stop_state_applies(base_dir) and stop_requested(stop_path)
-health_status = str(health.get("status") or "")
-health_reason = str(health.get("reason") or "")
-raw_status = data.get("status")
-snapshot_dt = snapshot_timestamp(overview_path, data)
-snapshot_age_minutes = None
-if snapshot_dt is not None:
-    snapshot_age_minutes = (datetime.now(tz=timezone.utc) - snapshot_dt.astimezone(timezone.utc)).total_seconds() / 60.0
-snapshot_stale = snapshot_age_minutes is not None and snapshot_age_minutes > 30.0
-
-effective_status = raw_status or health_status or "unknown"
-effective_reason = ""
-if stop_active or health_status == "stopped":
-    effective_status = "stopped"
-    effective_reason = health_reason or "supervisor_stop_requested"
-elif health_status and health_status not in {"healthy", "unknown"}:
-    effective_status = health_status
-    effective_reason = health_reason
-elif snapshot_stale:
-    effective_status = "stale"
-    effective_reason = "runtime_snapshot_stale"
-
-print("updated_at:", data.get("updated_at"))
-print("status:", effective_status)
-if raw_status not in (None, "", effective_status):
-    print("summary_status:", raw_status)
-if effective_reason:
-    print("status_reason:", effective_reason)
-print("stop_requested:", stop_active)
-print("supervisor_status:", health_status or "unavailable")
-if health_reason:
-    print("supervisor_reason:", health_reason)
-if snapshot_age_minutes is not None:
-    print("snapshot_age_minutes:", round(snapshot_age_minutes, 1))
-print("snapshot_stale:", snapshot_stale)
-for key in [
-    'decision_count',
-    'heartbeat_count',
-    'last_event_timestamp',
-    'last_decision_timestamp',
-    'last_decision_emitted_at',
-    'live_order_count',
-    'tested_order_count',
-    'realized_pnl_usd_estimate',
-    'unrealized_pnl_usd_estimate',
-]:
-    print(f"{key}: {data.get(key)}")
-print("kill_switch:", data.get("kill_switch"))
-print("top_rejection_reasons:", data.get("top_rejection_reasons"))
-print("recent_decisions:", data.get("recent_decisions"))
-print("exchange_live_futures_positions:", data.get("exchange_live_futures_positions"))
-open_orders_payload = summary.get("open_orders_snapshot") or {}
-orders = open_orders_payload.get("orders") if isinstance(open_orders_payload, dict) else {}
-entrusted = []
-if isinstance(orders, dict):
-    entrusted = orders.get("entrustedList") or orders.get("list") or []
-elif isinstance(orders, list):
-    entrusted = orders
-print("open_order_count:", len(entrusted))
-if entrusted:
-    for item in entrusted[:5]:
-        print(
-            "open_order:",
-            item.get("symbol"),
-            item.get("side") or item.get("tradeSide"),
-            "qty=",
-            item.get("size") or item.get("quantity"),
-            "orderId=",
-            item.get("orderId") or item.get("clientOid"),
-        )
-recent_live_orders = summary.get("live_orders") or []
-print("recent_live_order_count:", len(recent_live_orders))
-for item in recent_live_orders[-5:]:
-    print(
-        "recent_live_order:",
-        item.get("timestamp"),
-        item.get("symbol"),
-        item.get("side"),
-        "accepted=",
-        item.get("accepted"),
-        "qty=",
-        item.get("quantity"),
-        "orderId=",
-        item.get("order_id"),
-    )
-PY
-  exit 0
-fi
-STATE_FILE="$(run_python - <<'PY' "$BASE_DIR"
-from pathlib import Path
-import sys
-base = Path(sys.argv[1])
-latest = base / 'output' / 'paper-live-shell' / 'latest' / 'summary.state.json'
-if latest.exists():
-    print(latest)
-    raise SystemExit
-mode_root = base / 'output' / 'paper-live-shell'
-paths = sorted(
-    [p for p in mode_root.rglob('summary.state.json') if p.exists()],
-    key=lambda p: p.stat().st_mtime,
-    reverse=True,
-)
+paths = sorted(base.rglob('summary.state.json'), key=lambda p: p.stat().st_mtime, reverse=True)
 print(paths[0] if paths else '')
 PY
 )"
@@ -222,20 +21,11 @@ if [ -n "$STATE_FILE" ]; then
 fi
 
 if [ -z "$SUMMARY_FILE" ]; then
-  SUMMARY_FILE="$(run_python - <<'PY' "$BASE_DIR"
+  SUMMARY_FILE="$(python3 - <<'PY' "$BASE_DIR"
 from pathlib import Path
 import sys
 base = Path(sys.argv[1])
-latest = base / 'output' / 'paper-live-shell' / 'latest' / 'summary.json'
-if latest.exists():
-    print(latest)
-    raise SystemExit
-mode_root = base / 'output' / 'paper-live-shell'
-paths = sorted(
-    [p for p in mode_root.rglob('summary.json') if p.exists()],
-    key=lambda p: p.stat().st_mtime,
-    reverse=True,
-)
+paths = sorted(base.rglob('summary.json'), key=lambda p: p.stat().st_mtime, reverse=True)
 print(paths[0] if paths else '')
 PY
 )"
@@ -249,175 +39,19 @@ fi
 echo "STATE_FILE=$STATE_FILE"
 [ -n "$SUMMARY_FILE" ] && echo "SUMMARY_FILE=$SUMMARY_FILE"
 echo
-run_python - <<'PY' "$STATE_FILE" "$SUMMARY_FILE"
+python3 - <<'PY' "$STATE_FILE"
 import json, sys
 from pathlib import Path
 
-state_path = Path(sys.argv[1])
-summary_path = Path(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] else None
-health_path = Path(sys.argv[3])
-stop_path = Path(sys.argv[4])
-base_dir = Path(sys.argv[5])
-state = json.loads(state_path.read_text(encoding='utf-8'))
-summary = json.loads(summary_path.read_text(encoding='utf-8')) if summary_path and summary_path.exists() else {}
+path = Path(sys.argv[1])
+data = json.loads(path.read_text(encoding='utf-8'))
 
-
-def parse_dt(raw):
-    if not isinstance(raw, str) or not raw:
-        return None
-    try:
-        return datetime.fromisoformat(raw)
-    except ValueError:
-        return None
-
-
-def stop_requested(path: Path) -> bool:
-    if not path.exists():
-        return False
-    try:
-        return "stop" in path.read_text(encoding="utf-8", errors="ignore").lower()
-    except OSError:
-        return False
-
-
-def load_health(path: Path) -> dict:
-    if not path.exists():
-        return {}
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-    return payload if isinstance(payload, dict) else {}
-
-
-def snapshot_timestamp(primary_path: Path, payload: dict) -> datetime | None:
-    updated_at = parse_dt(payload.get("updated_at"))
-    if updated_at is not None:
-        return updated_at
-    try:
-        return datetime.fromtimestamp(primary_path.stat().st_mtime, tz=timezone.utc)
-    except OSError:
-        return None
-
-
-def live_stop_state_applies(runtime_path: Path) -> bool:
-    return "paper50" not in runtime_path.name.lower()
-
-
-health = load_health(health_path)
-stop_active = live_stop_state_applies(base_dir) and stop_requested(stop_path)
-health_status = str(health.get("status") or "")
-health_reason = str(health.get("reason") or "")
-raw_status = summary.get("status") or state.get("status")
-snapshot_dt = snapshot_timestamp(state_path, state)
-snapshot_age_minutes = None
-if snapshot_dt is not None:
-    snapshot_age_minutes = (datetime.now(tz=timezone.utc) - snapshot_dt.astimezone(timezone.utc)).total_seconds() / 60.0
-snapshot_stale = snapshot_age_minutes is not None and snapshot_age_minutes > 30.0
-
-effective_status = raw_status or health_status or "unknown"
-effective_reason = ""
-if stop_active or health_status == "stopped":
-    effective_status = "stopped"
-    effective_reason = health_reason or "supervisor_stop_requested"
-elif health_status and health_status not in {"healthy", "unknown"}:
-    effective_status = health_status
-    effective_reason = health_reason
-elif snapshot_stale:
-    effective_status = "stale"
-    effective_reason = "runtime_snapshot_stale"
-
-print("updated_at:", state.get("updated_at"))
-print("status:", effective_status)
-if raw_status not in (None, "", effective_status):
-    print("summary_status:", raw_status)
-if effective_reason:
-    print("status_reason:", effective_reason)
-print("stop_requested:", stop_active)
-print("supervisor_status:", health_status or "unavailable")
-if health_reason:
-    print("supervisor_reason:", health_reason)
-if snapshot_age_minutes is not None:
-    print("snapshot_age_minutes:", round(snapshot_age_minutes, 1))
-print("snapshot_stale:", snapshot_stale)
-print("heartbeat_count:", state.get("heartbeat_count"))
-print("decision_count:", state.get("decision_count"))
-print("tested_order_count:", state.get("tested_order_count"))
-print("live_order_count:", state.get("live_order_count"))
-print("last_event_timestamp:", state.get("last_event_timestamp"))
-print("last_decision_timestamp:", state.get("last_decision_timestamp"))
-print("kill_switch:", state.get("kill_switch"))
-self_healing = state.get("self_healing") or summary.get("self_healing") or {}
-print("self_healing_status:", self_healing.get("status") or "unavailable")
-print("self_healing_active_guards:", self_healing.get("active_guards"))
-print("self_healing_recent_events:", self_healing.get("recent_events"))
-paper_futures_positions = state.get("paper_open_futures_positions")
-if paper_futures_positions is None:
-    paper_futures_positions = summary.get("paper_open_futures_positions") or summary.get("open_futures_positions") or []
-exchange_futures_positions = state.get("exchange_live_futures_positions")
-if exchange_futures_positions is None:
-    exchange_futures_positions = summary.get("exchange_live_futures_positions") or []
-mismatch_details = state.get("futures_position_mismatch_details") or summary.get("futures_position_mismatch_details") or {}
-print("paper_open_futures_position_count:", state.get("paper_open_futures_position_count", len(paper_futures_positions)))
-print("paper_open_futures_symbols:", [item.get("symbol") for item in paper_futures_positions])
-print("exchange_live_futures_position_count:", state.get("exchange_live_futures_position_count", len(exchange_futures_positions)))
-print("exchange_live_futures_symbols:", [item.get("symbol") for item in exchange_futures_positions])
-print("futures_position_mismatch:", state.get("futures_position_mismatch"))
-print(
-    "futures_position_warning:",
-    {
-        "missing_in_paper": mismatch_details.get("missing_in_paper") or [],
-        "missing_on_exchange": mismatch_details.get("missing_on_exchange") or [],
-    },
-)
-for item in exchange_futures_positions[:5]:
-    print(
-        "live_position:",
-        item.get("symbol"),
-        item.get("holdSide"),
-        "roe=",
-        round((float(item.get("unrealizedPL") or 0.0) / max(float(item.get("marginSize") or 1e-9), 1e-9)) * 100.0, 2),
-        "marginRatio=",
-        item.get("marginRatio"),
-    )
-recent_decisions = summary.get("recent_decisions") or []
-if recent_decisions:
-    print("recent_decisions:", recent_decisions)
-top_rejections = summary.get("top_rejection_reasons") or {}
-if top_rejections:
-    print("top_rejection_reasons:", top_rejections)
-open_orders_payload = summary.get("open_orders_snapshot") or {}
-orders = open_orders_payload.get("orders") if isinstance(open_orders_payload, dict) else {}
-entrusted = []
-if isinstance(orders, dict):
-    entrusted = orders.get("entrustedList") or orders.get("list") or []
-elif isinstance(orders, list):
-    entrusted = orders
-print("open_order_count:", len(entrusted))
-if entrusted:
-    for item in entrusted[:5]:
-        print(
-            "open_order:",
-            item.get("symbol"),
-            item.get("side") or item.get("tradeSide"),
-            "qty=",
-            item.get("size") or item.get("quantity"),
-            "orderId=",
-            item.get("orderId") or item.get("clientOid"),
-        )
-recent_live_orders = summary.get("live_orders") or []
-print("recent_live_order_count:", len(recent_live_orders))
-for item in recent_live_orders[-5:]:
-    print(
-        "recent_live_order:",
-        item.get("timestamp"),
-        item.get("symbol"),
-        item.get("side"),
-        "accepted=",
-        item.get("accepted"),
-        "qty=",
-        item.get("quantity"),
-        "orderId=",
-        item.get("order_id"),
-    )
+print("updated_at:", data.get("updated_at"))
+print("heartbeat_count:", data.get("heartbeat_count"))
+print("decision_count:", data.get("decision_count"))
+print("tested_order_count:", data.get("tested_order_count"))
+print("live_order_count:", data.get("live_order_count"))
+print("last_event_timestamp:", data.get("last_event_timestamp"))
+print("last_decision_timestamp:", data.get("last_decision_timestamp"))
+print("kill_switch:", data.get("kill_switch"))
 PY

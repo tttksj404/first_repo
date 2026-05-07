@@ -5,18 +5,14 @@ import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from types import SimpleNamespace
-from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from quant_binance.exchange import ExchangeCredentials, resolve_exchange_id, runtime_readiness
-from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.execution.bitget_rest import BitgetRestClient, sign_bitget_request
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter
 from quant_binance.models import DecisionIntent
 from quant_binance.runtime import run_paper_live_test_order_mode
-from quant_binance.session import LivePaperSession
 from quant_binance.settings import Settings
 
 
@@ -30,7 +26,6 @@ class FakeBitgetLiveClient:
     def __init__(self) -> None:
         self.leverage_calls: list[tuple[str, int]] = []
         self.orders: list[tuple[str, dict[str, object]]] = []
-        self.protection_orders: list[tuple[str, dict[str, object]]] = []
 
     def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
         self.leverage_calls.append((symbol, leverage))
@@ -40,16 +35,153 @@ class FakeBitgetLiveClient:
         self.orders.append((market, order_params))
         return {"status": "SUCCESS", "orderId": "bitget-1"}
 
-    def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
-        self.protection_orders.append(("futures", order_params))
-        return {"status": "SUCCESS", "orderId": "bitget-tpsl-1"}
 
-    def place_spot_plan_order(self, *, order_params):  # type: ignore[no-untyped-def]
-        self.protection_orders.append(("spot", order_params))
-        return {"status": "SUCCESS", "orderId": "bitget-plan-1"}
+class BackoffBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.order_sizes: list[float] = []
 
-    def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
-        return None
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/account" in url:
+            return {"code": "00000", "data": {"posMode": "one_way_mode"}}
+        if "/api/v2/mix/order/place-order" in url:
+            raw = (request.data or b"{}").decode("utf-8")
+            payload = json.loads(raw)
+            size = float(payload.get("size", 0.0))
+            self.order_sizes.append(size)
+            if len(self.order_sizes) < 3:
+                raise RuntimeError(
+                    "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+                    "code=40762 msg=The order amount exceeds the balance"
+                )
+            return {"code": "00000", "msg": "success", "data": {"orderId": "bitget-retry-ok"}}
+        return {"code": "00000", "data": {}}
+
+
+class AlwaysFailBalanceBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.place_order_calls = 0
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/account" in url:
+            return {"code": "00000", "data": {"posMode": "one_way_mode"}}
+        if "/api/v2/mix/order/place-order" in url:
+            self.place_order_calls += 1
+            raise RuntimeError(
+                "Bitget HTTP 400 Bad Request for POST https://api.bitget.com/api/v2/mix/order/place-order: "
+                "code=40762 msg=The order amount exceeds the balance"
+            )
+        return {"code": "00000", "data": {}}
+
+
+class AccountSnapshotBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/accounts" in url:
+            return {
+                "code": "00000",
+                "data": [
+                    {
+                        "marginCoin": "USDT",
+                        "available": "37.88836272",
+                        "crossedMaxAvailable": "0",
+                        "unionAvailable": "17.82432174",
+                    }
+                ],
+            }
+        return {"code": "00000", "data": {}}
+
+
+class TransferCaptureBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.last_url = ""
+        self.last_body = ""
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        self.last_url = request.full_url
+        self.last_body = (request.data or b"").decode("utf-8")
+        return {"code": "00000", "msg": "success", "data": {"transferId": "x-1"}}
+
+
+class HedgeCloseBitgetRestClient(BitgetRestClient):
+    def __init__(self) -> None:
+        super().__init__(
+            credentials=ExchangeCredentials(
+                exchange_id="bitget",
+                api_key="key",
+                api_secret="secret",
+                api_passphrase="passphrase",
+            )
+        )
+        self.place_payloads: list[dict[str, object]] = []
+
+    def send(self, request):  # type: ignore[no-untyped-def]
+        url = request.full_url
+        if "/api/v2/mix/account/account" in url:
+            return {"code": "00000", "data": {"posMode": "hedge_mode"}}
+        if "/api/v2/mix/position/all-position" in url:
+            return {
+                "code": "00000",
+                "data": [
+                    {"symbol": "ETHUSDT", "holdSide": "long", "available": "0.47", "total": "0.47"},
+                    {"symbol": "WLDUSDT", "holdSide": "short", "available": "225", "total": "225"},
+                ],
+            }
+        if "/api/v2/mix/market/contracts" in url:
+            return {
+                "code": "00000",
+                "data": [
+                    {"symbol": "ETHUSDT", "minTradeNum": "0.01", "sizeMultiplier": "0.01", "minTradeUSDT": "5"},
+                    {"symbol": "WLDUSDT", "minTradeNum": "1", "sizeMultiplier": "1", "minTradeUSDT": "5"},
+                ],
+            }
+        if "/api/v2/mix/market/ticker" in url:
+            if "symbol=ETHUSDT" in url:
+                return {"code": "00000", "data": [{"bidPr": "2000"}]}
+            if "symbol=WLDUSDT" in url:
+                return {"code": "00000", "data": [{"bidPr": "1.0"}]}
+            return {"code": "00000", "data": [{"bidPr": "1.0"}]}
+        if "/api/v2/mix/order/place-order" in url:
+            raw = (request.data or b"{}").decode("utf-8")
+            payload = json.loads(raw)
+            self.place_payloads.append(payload)
+            return {"code": "00000", "msg": "success", "data": {"orderId": "hedge-close-ok"}}
+        return {"code": "00000", "data": {}}
 
 
 class QuantBitgetMigrationTests(unittest.TestCase):
@@ -179,40 +311,13 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(resolve_exchange_id(), "bitget")
 
     def test_runtime_readiness_tracks_bitget_passphrase_requirement(self) -> None:
-        with patch("quant_binance.exchange._resolve_env_value") as mock_resolve:
-            values = {
-                "BITGET_API_KEY": "key",
-                "BITGET_API_SECRET": "secret",
-                "BITGET_API_PASSPHRASE": "",
-            }
-            mock_resolve.side_effect = lambda name: values.get(name, "")
-            readiness = runtime_readiness("bitget")
-            self.assertFalse(readiness.is_ready)
-            values["BITGET_API_PASSPHRASE"] = "passphrase"
-            readiness = runtime_readiness("bitget")
-            self.assertTrue(readiness.is_ready)
-
-    def test_bitget_set_leverage_request_can_include_hold_side(self) -> None:
-        client = BitgetRestClient(
-            credentials=ExchangeCredentials(
-                exchange_id="bitget",
-                api_key="key",
-                api_secret="secret",
-                api_passphrase="passphrase",
-            )
-        )
-        captured: list[dict[str, object]] = []
-
-        def fake_send(request):  # type: ignore[no-untyped-def]
-            captured.append(json.loads((request.data or b"{}").decode("utf-8")))
-            return {"code": "00000", "data": {"longLeverage": "20"}}
-
-        with patch.object(client, "send", side_effect=fake_send):
-            response = client.set_futures_leverage(symbol="DOGEUSDT", leverage=20, hold_side="long")
-
-        self.assertEqual(captured[0]["holdSide"], "long")
-        self.assertEqual(captured[0]["leverage"], "20")
-        self.assertEqual(response["longLeverage"], "20")
+        os.environ["BITGET_API_KEY"] = "key"
+        os.environ["BITGET_API_SECRET"] = "secret"
+        readiness = runtime_readiness("bitget")
+        self.assertFalse(readiness.is_ready)
+        os.environ["BITGET_API_PASSPHRASE"] = "passphrase"
+        readiness = runtime_readiness("bitget")
+        self.assertTrue(readiness.is_ready)
 
     def test_sign_and_request_builders_follow_bitget_headers_and_paths(self) -> None:
         signature = sign_bitget_request(
@@ -262,666 +367,6 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(futures_result.market, "futures")
         self.assertEqual(live_client.leverage_calls, [("BTCUSDT", 2)])
         self.assertEqual(live_client.orders[0][1]["productType"], "USDT-FUTURES")
-        self.assertEqual(live_client.orders[0][1]["side"], "buy")
-        self.assertEqual(live_client.orders[0][1]["tradeSide"], "open")
-        self.assertIn("presetStopSurplusPrice", live_client.orders[0][1])
-        self.assertIn("presetStopLossPrice", live_client.orders[0][1])
-        self.assertNotIn("holdSide", live_client.orders[0][1])
-        self.assertGreaterEqual(len(live_client.protection_orders), 1)
-
-    def test_bitget_order_adapters_use_base_quantity_for_routed_spot_buy(self) -> None:
-        decision = DecisionIntent(
-            **{
-                **self._decision(final_mode="spot").as_dict(),
-                "timestamp": self._decision(final_mode="spot").timestamp,
-                "symbol": "ETHUSDT",
-                "order_intent_notional_usd": 125.0,
-                "execution_symbol": "ETHBTC",
-                "spot_base_asset": "ETH",
-                "spot_quote_asset": "BTC",
-                "spot_funding_asset": "BTC",
-            }
-        )
-        preview_client = BitgetRestClient(credentials=None)
-        test_adapter = DecisionOrderTestAdapter(preview_client)
-        built_preview = test_adapter.build_order_params(decision=decision, reference_price=2500.0)
-        self.assertIsNotNone(built_preview)
-        assert built_preview is not None
-        market, params = built_preview
-        self.assertEqual(market, "spot")
-        self.assertEqual(params["symbol"], "ETHBTC")
-        self.assertEqual(params["side"], "buy")
-        self.assertEqual(params["size"], "0.05000000")
-
-        live_client = FakeBitgetLiveClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-        result = live_adapter.execute_decision(
-            decision=decision,
-            reference_price=2500.0,
-        )
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertEqual(result.market, "spot")
-        self.assertEqual(live_client.orders[0][1]["symbol"], "ETHBTC")
-        self.assertEqual(live_client.orders[0][1]["size"], "0.05000000")
-        self.assertEqual(live_client.protection_orders, [])
-
-    def test_bitget_live_order_aborts_when_margin_leverage_update_fails(self) -> None:
-        class FlakyLeverageClient(FakeBitgetLiveClient):
-            def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
-                raise RuntimeError(
-                    'Bitget HTTP 400: {"code":"40893","msg":"Unable to update the leverage factor of this position, there is not enough margin!"}'
-                )
-
-        live_client = FlakyLeverageClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        with self.assertRaisesRegex(RuntimeError, "FUTURES_LEVERAGE_SET_FAILED"):
-            live_adapter.execute_decision(
-                decision=self._decision(final_mode="futures"),
-                reference_price=50000.0,
-            )
-
-        self.assertEqual(live_client.orders, [])
-
-    def test_bitget_live_order_sets_planned_leverage_with_hold_side_before_entry(self) -> None:
-        class HoldSideLeverageClient(FakeBitgetLiveClient):
-            def __init__(self) -> None:
-                super().__init__()
-                self.hold_side_calls: list[tuple[str, int, str | None]] = []
-
-            def set_futures_leverage(self, *, symbol, leverage, hold_side=None):  # type: ignore[no-untyped-def]
-                self.hold_side_calls.append((symbol, leverage, hold_side))
-                return {"symbol": symbol, "leverage": leverage, "holdSide": hold_side, "status": "SUCCESS"}
-
-        decision = DecisionIntent(
-            **{
-                **self._decision(final_mode="futures").as_dict(),
-                "timestamp": self._decision(final_mode="futures").timestamp,
-                "symbol": "DOGEUSDT",
-                "planned_leverage": 20,
-            }
-        )
-        live_client = HoldSideLeverageClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(decision=decision, reference_price=0.094)
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(live_client.hold_side_calls, [("DOGEUSDT", 20, "long")])
-
-    def test_bitget_live_order_aborts_when_exchange_reports_different_leverage(self) -> None:
-        class WrongLeverageClient(FakeBitgetLiveClient):
-            def set_futures_leverage(self, *, symbol, leverage, hold_side=None):  # type: ignore[no-untyped-def]
-                return {
-                    "symbol": symbol,
-                    "leverage": leverage,
-                    "longLeverage": "10",
-                    "holdSide": hold_side,
-                    "status": "SUCCESS",
-                }
-
-        decision = DecisionIntent(
-            **{
-                **self._decision(final_mode="futures").as_dict(),
-                "timestamp": self._decision(final_mode="futures").timestamp,
-                "symbol": "DOGEUSDT",
-                "planned_leverage": 20,
-            }
-        )
-        live_client = WrongLeverageClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        with self.assertRaisesRegex(RuntimeError, "FUTURES_LEVERAGE_MISMATCH"):
-            live_adapter.execute_decision(decision=decision, reference_price=0.094)
-
-        self.assertEqual(live_client.orders, [])
-
-    def test_bitget_live_order_fail_closes_when_protection_cannot_be_armed(self) -> None:
-        class FlakyProtectionClient(FakeBitgetLiveClient):
-            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
-                raise RuntimeError('Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}')
-
-        live_client = FlakyProtectionClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=50000.0,
-        )
-
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertFalse(result.accepted)
-        self.assertEqual(result.market, "futures")
-        self.assertEqual(len(live_client.orders), 2)  # entry + emergency close
-        self.assertIn("NO_PROTECTION_ORDERS_RETURNED", result.protection_error)
-        self.assertIn("EMERGENCY_CLOSE_OK", result.protection_error)
-
-    def test_bitget_live_order_retries_transient_protection_order_failure(self) -> None:
-        class RetryProtectionClient(FakeBitgetLiveClient):
-            def __init__(self) -> None:
-                super().__init__()
-                self.protection_calls = 0
-
-            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
-                self.protection_calls += 1
-                if self.protection_calls == 1:
-                    raise RuntimeError('Bitget HTTP 400: {"code":"43059","msg":"Request failed, please try again","requestTime":1773732903078,"data":null}')
-                return {"status": "SUCCESS", "planId": f"retry-{self.protection_calls}"}
-
-        live_client = RetryProtectionClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=50000.0,
-        )
-
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(result.protection_error, "")
-        self.assertGreaterEqual(live_client.protection_calls, 2)
-        self.assertGreaterEqual(len(result.protection_orders), 1)
-
-    def test_bitget_live_order_fail_closes_when_protection_response_is_rejected(self) -> None:
-        class RejectedProtectionClient(FakeBitgetLiveClient):
-            def place_futures_position_tpsl(self, *, order_params):  # type: ignore[no-untyped-def]
-                self.protection_orders.append(("futures", order_params))
-                return {
-                    "status": "REQUEST FAILED",
-                    "raw": {"code": "43059", "msg": "Request failed, please try again"},
-                }
-
-        live_client = RejectedProtectionClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=50000.0,
-        )
-
-        assert result is not None
-        self.assertFalse(result.accepted)
-        self.assertEqual(len(live_client.orders), 2)
-        self.assertIn("PROTECTION_ORDER_REJECTED", result.protection_error)
-        self.assertIn("EMERGENCY_CLOSE_OK", result.protection_error)
-
-    def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40762(self) -> None:
-        class RetryClient(FakeBitgetLiveClient):
-            def __init__(self) -> None:
-                super().__init__()
-                self.calls = 0
-
-            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
-                self.calls += 1
-                self.orders.append((market, dict(order_params)))
-                if self.calls == 1:
-                    raise RuntimeError('Bitget HTTP 400: {"code":"40762","msg":"The order type for one-way position must match the one-way position mode."}')
-                return {"status": "SUCCESS", "orderId": "retried-40762"}
-
-        adapter = DecisionLiveOrderAdapter(RetryClient(), self.settings)  # type: ignore[arg-type]
-        decision = DecisionIntent(
-            decision_id="bitget-40762",
-            decision_hash="hash-40762",
-            snapshot_id="snap-40762",
-            config_version="2026-03-13.v1",
-            timestamp=datetime(2026, 3, 10, 0, 30, tzinfo=timezone.utc),
-            symbol="BTCUSDT",
-            candidate_mode="futures",
-            final_mode="futures",
-            side="long",
-            trend_direction=1,
-            trend_strength=0.8,
-            volume_confirmation=0.7,
-            liquidity_score=0.8,
-            volatility_penalty=0.2,
-            overheat_penalty=0.1,
-            predictability_score=66.0,
-            gross_expected_edge_bps=30.0,
-            net_expected_edge_bps=18.0,
-            estimated_round_trip_cost_bps=12.0,
-            order_intent_notional_usd=1200.0,
-            stop_distance_bps=80.0,
-        )
-        result = adapter.execute_decision(decision=decision, reference_price=50000.0)
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(result.response.get("orderId"), "retried-40762")
-        self.assertEqual(len(adapter.client.orders), 2)  # type: ignore[attr-defined]
-
-    def test_bitget_live_order_retries_with_alternate_position_mode_payload_on_40774(self) -> None:
-        class RetryClient(FakeBitgetLiveClient):
-            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
-                self.orders.append((market, dict(order_params)))
-                if len(self.orders) < 3:
-                    raise RuntimeError('Bitget HTTP 400: {"code":"40774","msg":"The order type for unilateral position must also be the unilateral position type."}')
-                return {"status": "SUCCESS", "orderId": "bitget-2"}
-
-        live_client = RetryClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=50000.0,
-        )
-
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(len(live_client.orders), 3)
-        self.assertIn("tradeSide", live_client.orders[0][1])
-        self.assertNotIn("tradeSide", live_client.orders[1][1])
-        self.assertNotIn("reduceOnly", live_client.orders[1][1])
-        self.assertEqual(live_client.orders[2][1].get("reduceOnly"), "NO")
-
-    def test_bitget_live_order_does_not_retry_balance_40762_as_position_mode_error(self) -> None:
-        class InsufficientBalanceClient(FakeBitgetLiveClient):
-            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
-                self.orders.append((market, dict(order_params)))
-                raise RuntimeError('Bitget HTTP 400: {"code":"40762","msg":"The order amount exceeds the balance"}')
-
-        live_client = InsufficientBalanceClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        with self.assertRaisesRegex(RuntimeError, "40762"):
-            live_adapter.execute_decision(
-                decision=self._decision(final_mode="futures"),
-                reference_price=50000.0,
-            )
-
-        self.assertEqual(len(live_client.orders), 1)
-
-    def test_bitget_live_order_sets_leverage_before_max_open_preflight(self) -> None:
-        events: list[str] = []
-
-        class OrderedClient(FakeBitgetLiveClient):
-            def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
-                events.append(f"set_leverage:{symbol}:{leverage}")
-                return super().set_futures_leverage(symbol=symbol, leverage=leverage)
-
-            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
-                events.append(f"max_open:{symbol}:{pos_side}")
-                return 25.0
-
-        live_client = OrderedClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=0.25,
-        )
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertGreaterEqual(len(events), 2)
-        self.assertTrue(events[0].startswith("set_leverage:"))
-        self.assertTrue(events[1].startswith("max_open:"))
-
-    def test_bitget_live_order_retries_balance_error_with_smaller_rebuilt_size(self) -> None:
-        class RetryBalanceClient(FakeBitgetLiveClient):
-            def __init__(self) -> None:
-                super().__init__()
-                self.max_open_calls = 0
-
-            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
-                self.max_open_calls += 1
-                return 100.0 if self.max_open_calls == 1 else 80.0
-
-            def place_order(self, *, market, order_params):  # type: ignore[no-untyped-def]
-                self.orders.append((market, dict(order_params)))
-                if len(self.orders) == 1:
-                    raise RuntimeError('Bitget HTTP 400: {"code":"40762","msg":"The order amount exceeds the balance"}')
-                return {"status": "SUCCESS", "orderId": "retried-balance-40762"}
-
-        live_client = RetryBalanceClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=1.0,
-        )
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(result.response.get("orderId"), "retried-balance-40762")
-        self.assertEqual(len(live_client.orders), 2)
-        first_size = float(live_client.orders[0][1]["size"])
-        second_size = float(live_client.orders[1][1]["size"])
-        self.assertLess(second_size, first_size)
-
-    def test_bitget_live_order_uses_margin_mode_returned_by_leverage_response(self) -> None:
-        class IsolatedClient(FakeBitgetLiveClient):
-            def set_futures_leverage(self, *, symbol, leverage):  # type: ignore[no-untyped-def]
-                self.leverage_calls.append((symbol, leverage))
-                return {
-                    "symbol": symbol,
-                    "leverage": leverage,
-                    "marginMode": "isolated",
-                }
-
-        live_client = IsolatedClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=50000.0,
-        )
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(live_client.orders[0][1]["marginMode"], "isolated")
-
-    def test_bitget_live_order_formats_quantity_using_exchange_precision(self) -> None:
-        class PrecisionClient(FakeBitgetLiveClient):
-            def get_exchange_info(self, *, market):  # type: ignore[no-untyped-def]
-                return {
-                    "symbols": [
-                        {
-                            "symbol": "PEPEUSDT",
-                            "raw": {
-                                "minTradeNum": "1000",
-                                "sizeMultiplier": "1000",
-                                "volumePlace": "0",
-                                "pricePlace": "10",
-                            },
-                        }
-                    ]
-                }
-
-        live_client = PrecisionClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-        decision = DecisionIntent(
-            decision_id="pepe-qty",
-            decision_hash="hash-pepe-qty",
-            snapshot_id="snap-pepe-qty",
-            config_version="2026-03-13.v1",
-            timestamp=datetime(2026, 3, 10, 0, 30, tzinfo=timezone.utc),
-            symbol="PEPEUSDT",
-            candidate_mode="futures",
-            final_mode="futures",
-            side="long",
-            trend_direction=1,
-            trend_strength=0.8,
-            volume_confirmation=0.7,
-            liquidity_score=0.8,
-            volatility_penalty=0.2,
-            overheat_penalty=0.1,
-            predictability_score=66.0,
-            gross_expected_edge_bps=30.0,
-            net_expected_edge_bps=18.0,
-            estimated_round_trip_cost_bps=12.0,
-            order_intent_notional_usd=517.314631,
-            stop_distance_bps=80.0,
-            planned_leverage=30,
-        )
-
-        result = live_adapter.execute_decision(decision=decision, reference_price=3.8856e-06)
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(live_client.orders[0][1]["size"], "133136000")
-
-    def test_bitget_live_order_caps_quantity_with_exchange_max_open_hint(self) -> None:
-        class MaxOpenClient(FakeBitgetLiveClient):
-            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
-                return 25.0
-
-        live_client = MaxOpenClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=0.25,
-        )
-
-        assert result is not None
-        self.assertTrue(result.accepted)
-        self.assertEqual(result.quantity, 25.0)
-        self.assertEqual(live_client.orders[0][1]["size"], "25.00000000")
-
-    def test_bitget_live_order_skips_when_exchange_reports_zero_max_open(self) -> None:
-        class ZeroOpenClient(FakeBitgetLiveClient):
-            def get_max_openable_quantity(self, *, symbol, pos_side, order_type="market", open_amount=None):  # type: ignore[no-untyped-def]
-                return 0.0
-
-        live_client = ZeroOpenClient()
-        live_adapter = DecisionLiveOrderAdapter(live_client, self.settings)  # type: ignore[arg-type]
-
-        result = live_adapter.execute_decision(
-            decision=self._decision(final_mode="futures"),
-            reference_price=0.25,
-        )
-
-        self.assertIsNone(result)
-        self.assertEqual(live_client.orders, [])
-        rejection = live_adapter.pop_last_preflight_rejection()
-        self.assertIsNotNone(rejection)
-        assert rejection is not None
-        self.assertEqual(rejection["reason"], "BITGET_MAX_OPEN_ZERO")
-
-    def test_bitget_exchange_info_exposes_min_quantity(self) -> None:
-        client = BitgetRestClient(credentials=None)
-        with patch.object(
-            client,
-            "send",
-            return_value={
-                "data": [
-                    {
-                        "symbol": "ETHUSDT",
-                        "minTradeUSDT": "5",
-                        "minTradeNum": "0.01",
-                        "sizeMultiplier": "0.01",
-                    }
-                ]
-            },
-        ):
-            info = client.get_exchange_info(market="futures")
-        row = info["symbols"][0]
-        lot = next(item for item in row["filters"] if item["filterType"] == "LOT_SIZE")
-        self.assertEqual(lot["minQty"], "0.01")
-
-    def test_bitget_positions_request_builder(self) -> None:
-        client = BitgetRestClient(
-            credentials=ExchangeCredentials(
-                exchange_id="bitget",
-                api_key="key",
-                api_secret="secret",
-                api_passphrase="passphrase",
-            )
-        )
-        request = client.build_positions_request()
-        self.assertIn("/api/v2/mix/position/all-position", request.full_url)
-
-    def test_bitget_history_request_builders_follow_expected_paths(self) -> None:
-        client = BitgetRestClient(
-            credentials=ExchangeCredentials(
-                exchange_id="bitget",
-                api_key="key",
-                api_secret="secret",
-                api_passphrase="passphrase",
-            )
-        )
-        order_request = client.build_futures_order_history_request(symbol="BTCUSDT", limit=50)
-        fill_request = client.build_futures_fill_history_request(symbol="BTCUSDT", limit=50)
-        position_request = client.build_futures_position_history_request(symbol="BTCUSDT", limit=50)
-        pending_plan_request = client.build_futures_pending_plan_orders_request(symbol="BTCUSDT", plan_type="profit_loss")
-        cancel_plan_request = client.build_cancel_futures_plan_order_request(
-            symbol="BTCUSDT",
-            order_id_list=[{"orderId": "1", "clientOid": "cid-1"}],
-        )
-        self.assertIn("/api/v2/mix/order/orders-history", order_request.full_url)
-        self.assertIn("/api/v2/mix/order/fill-history", fill_request.full_url)
-        self.assertIn("/api/v2/mix/position/history-position", position_request.full_url)
-        self.assertIn("/api/v2/mix/order/orders-plan-pending", pending_plan_request.full_url)
-        self.assertIn("/api/v2/mix/order/cancel-plan-order", cancel_plan_request.full_url)
-
-    def test_bitget_futures_order_params_follow_one_way_mode_contract(self) -> None:
-        client = BitgetRestClient(credentials=None)
-
-        open_params = client.build_order_params(
-            market="futures",
-            symbol="BTCUSDT",
-            side="BUY",
-            order_type="MARKET",
-            quantity=0.04,
-            reduce_only=False,
-            client_oid="open-1",
-        )
-        self.assertEqual(open_params["side"], "buy")
-        self.assertEqual(open_params["tradeSide"], "open")
-        self.assertNotIn("holdSide", open_params)
-
-        close_params = client.build_order_params(
-            market="futures",
-            symbol="BTCUSDT",
-            side="SELL",
-            order_type="MARKET",
-            quantity=0.04,
-            reduce_only=True,
-            client_oid="close-1",
-        )
-        self.assertEqual(close_params["side"], "sell")
-        self.assertEqual(close_params["tradeSide"], "close")
-        self.assertNotIn("holdSide", close_params)
-
-    def test_bitget_futures_account_prefers_crossed_executable_balance_when_available(self) -> None:
-        client = BitgetRestClient(
-            credentials=ExchangeCredentials(
-                exchange_id="bitget",
-                api_key="key",
-                api_secret="secret",
-                api_passphrase="passphrase",
-            )
-        )
-        payload = {
-            "code": "00000",
-            "msg": "success",
-            "data": [
-                {
-                    "marginCoin": "USDT",
-                    "available": "37.96533289",
-                    "crossedMaxAvailable": "4.93305789",
-                    "crossedMargin": "37.489375",
-                    "usdtEquity": "42.422432895899",
-                }
-            ],
-        }
-
-        with patch.object(client, "send", return_value=payload):
-            account = client.get_account(market="futures")
-
-        self.assertEqual(float(account["accounts"][0]["crossedMaxAvailable"]), 4.93305789)
-        self.assertEqual(float(account["availableBalance"]), 37.96533289)
-        self.assertEqual(float(account["executionAvailableBalance"]), 4.93305789)
-        self.assertEqual(float(account["crossedMaxAvailable"]), 4.93305789)
-
-
-    def test_bitget_futures_account_prefers_union_available_when_crossed_executable_balance_is_zero(self) -> None:
-        client = BitgetRestClient(
-            credentials=ExchangeCredentials(
-                exchange_id="bitget",
-                api_key="key",
-                api_secret="secret",
-                api_passphrase="passphrase",
-            )
-        )
-        payload = {
-            "code": "00000",
-            "msg": "success",
-            "data": [
-                {
-                    "marginCoin": "USDT",
-                    "available": "147.50760642",
-                    "crossedMaxAvailable": "0",
-                    "unionAvailable": "18.17050274",
-                    "crossedMargin": "150.45935428",
-                    "usdtEquity": "149.237136425496",
-                }
-            ],
-        }
-
-        with patch.object(client, "send", return_value=payload):
-            account = client.get_account(market="futures")
-
-        self.assertEqual(float(account["availableBalance"]), 147.50760642)
-        self.assertEqual(float(account["executionAvailableBalance"]), 18.17050274)
-        self.assertEqual(float(account["unionAvailable"]), 18.17050274)
-
-    def test_crossed_executable_balance_assumption_reduces_bitget_futures_payload_size(self) -> None:
-        decision = self._decision(final_mode="futures")
-        live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
-
-        uncapped_market, uncapped_params = live_adapter.build_order_params(
-            decision=decision,
-            reference_price=50000.0,
-        ) or (None, None)
-        self.assertEqual(uncapped_market, "futures")
-        self.assertIsNotNone(uncapped_params)
-        assert uncapped_params is not None
-        self.assertEqual(uncapped_params["size"], "0.04000000")
-
-        session = LivePaperSession(
-            runtime=SimpleNamespace(paper_service=SimpleNamespace(settings=self.settings)),
-            equity_usd=10000.0,
-            remaining_portfolio_capacity_usd=5000.0,
-        )
-        session.capital_report = {
-            "can_trade_futures_any": True,
-            "futures_available_balance_usd": 37.96533289,
-            "futures_execution_balance_usd": 4.93305789,
-            "futures_requirements": [{"symbol": "BTCUSDT", "min_notional_usd": 5.0}],
-        }
-
-        capped_decision = session._cap_live_order_decision(decision)
-        capped_market, capped_params = live_adapter.build_order_params(
-            decision=capped_decision,
-            reference_price=50000.0,
-        ) or (None, None)
-
-        self.assertEqual(capped_market, "futures")
-        self.assertIsNotNone(capped_params)
-        assert capped_params is not None
-        self.assertEqual(capped_decision.order_intent_notional_usd, 8.386198)
-        self.assertEqual(capped_params["marginMode"], resolve_bitget_margin_mode())
-        self.assertEqual(capped_params["size"], "0.00016772")
-        self.assertLess(float(capped_params["size"]), float(uncapped_params["size"]))
-
-    def test_bitget_margin_mode_env_override_uses_isolated_for_futures_orders(self) -> None:
-        decision = self._decision(final_mode="futures")
-        live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
-        rest_client = BitgetRestClient(credentials=None)
-
-        with patch.dict(os.environ, {"BITGET_MARGIN_MODE": "isolated"}, clear=False):
-            built = live_adapter.build_order_params(decision=decision, reference_price=50000.0)
-            self.assertIsNotNone(built)
-            assert built is not None
-            _, params = built
-            self.assertEqual(params["marginMode"], "isolated")
-
-            rest_params = rest_client.build_order_params(
-                market="futures",
-                symbol="BTCUSDT",
-                side="BUY",
-                order_type="market",
-                quantity=0.01,
-                reduce_only=False,
-            )
-            self.assertEqual(rest_params["marginMode"], "isolated")
-
-    def test_bitget_margin_mode_env_override_falls_back_to_crossed_on_invalid_value(self) -> None:
-        decision = self._decision(final_mode="futures")
-        live_adapter = DecisionLiveOrderAdapter(FakeBitgetLiveClient(), self.settings)  # type: ignore[arg-type]
-
-        with patch.dict(os.environ, {"BITGET_MARGIN_MODE": "invalid"}, clear=False):
-            built = live_adapter.build_order_params(decision=decision, reference_price=50000.0)
-            self.assertIsNotNone(built)
-            assert built is not None
-            _, params = built
-            self.assertEqual(params["marginMode"], "crossed")
 
     def test_bitget_paper_live_test_order_mode_runs_without_live_credentials(self) -> None:
         summary = run_paper_live_test_order_mode(
@@ -937,10 +382,134 @@ class QuantBitgetMigrationTests(unittest.TestCase):
         self.assertEqual(summary["tested_order_count"], 1)
         self.assertEqual(summary["account_snapshot"], {})
 
+    def test_bitget_place_order_retries_with_smaller_size_on_balance_error(self) -> None:
+        client = BackoffBitgetRestClient()
+        response = client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "XRPUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "buy",
+                "orderType": "market",
+                "size": "120.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "test-retry",
+            },
+        )
 
-    def test_bitget_cancel_order_builder(self) -> None:
-        request = BitgetRestClient(credentials=ExchangeCredentials(exchange_id="bitget", api_key="key", api_secret="secret", api_passphrase="pass")).build_cancel_order_request(market="futures", symbol="BTCUSDT", order_id="123")
-        self.assertIn("/api/v2/mix/order/cancel-order", request.full_url)
+        self.assertEqual(response["status"], "SUCCESS")
+        self.assertGreaterEqual(len(client.order_sizes), 3)
+        self.assertLess(client.order_sizes[-1], client.order_sizes[0])
+        self.assertAlmostEqual(client.order_sizes[1], round(client.order_sizes[0] * 0.4, 8))
+
+    def test_bitget_place_order_limits_balance_retry_burst(self) -> None:
+        client = AlwaysFailBalanceBitgetRestClient()
+        with self.assertRaises(RuntimeError):
+            client.place_order(
+                market="futures",
+                order_params={
+                    "symbol": "ETHUSDT",
+                    "productType": "USDT-FUTURES",
+                    "marginCoin": "USDT",
+                    "marginMode": "crossed",
+                    "side": "buy",
+                    "orderType": "market",
+                    "size": "0.08000000",
+                    "reduceOnly": "NO",
+                    "clientOid": "retry-burst-guard",
+                },
+            )
+        self.assertEqual(client.place_order_calls, 5)
+
+    def test_bitget_get_account_includes_effective_available_balance(self) -> None:
+        client = AccountSnapshotBitgetRestClient()
+        account = client.get_account(market="futures")
+
+        self.assertAlmostEqual(account["availableBalance"], 37.88836272)
+        self.assertAlmostEqual(account["unionAvailable"], 17.82432174)
+        self.assertAlmostEqual(account["effectiveAvailableBalance"], 0.0)
+        self.assertTrue(account["hasCrossedMaxAvailable"])
+
+    def test_bitget_transfer_spot_to_futures_builds_expected_request(self) -> None:
+        client = TransferCaptureBitgetRestClient()
+        payload = client.transfer_spot_to_futures_usdt(amount_usdt=12.34, client_oid="x-oid")
+
+        self.assertIn("/api/v2/spot/wallet/transfer", client.last_url)
+        self.assertIn("\"fromType\":\"spot\"", client.last_body)
+        self.assertIn("\"toType\":\"usdt_futures\"", client.last_body)
+        self.assertIn("\"coin\":\"USDT\"", client.last_body)
+        self.assertIn("\"amount\":\"12.34\"", client.last_body)
+        self.assertIn("\"clientOid\":\"x-oid\"", client.last_body)
+        self.assertEqual(payload["coin"], "USDT")
+
+    def test_bitget_hedge_mode_uses_close_when_opposite_position_exists(self) -> None:
+        client = HedgeCloseBitgetRestClient()
+        client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "ETHUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "sell",
+                "orderType": "market",
+                "size": "1.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "hedge-close-test",
+            },
+        )
+        self.assertEqual(len(client.place_payloads), 1)
+        payload = client.place_payloads[0]
+        self.assertEqual(payload.get("side"), "buy")
+        self.assertEqual(payload.get("tradeSide"), "close")
+        self.assertAlmostEqual(float(payload.get("size", 0.0)), 0.47, places=8)
+        self.assertNotIn("reduceOnly", payload)
+
+    def test_bitget_hedge_mode_uses_close_side_for_short_position(self) -> None:
+        client = HedgeCloseBitgetRestClient()
+        client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "WLDUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "buy",
+                "orderType": "market",
+                "size": "10.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "hedge-close-short-test",
+            },
+        )
+        self.assertEqual(len(client.place_payloads), 1)
+        payload = client.place_payloads[0]
+        self.assertEqual(payload.get("side"), "sell")
+        self.assertEqual(payload.get("tradeSide"), "close")
+        self.assertAlmostEqual(float(payload.get("size", 0.0)), 10.0, places=8)
+
+    def test_bitget_hedge_mode_keeps_open_when_no_opposite_position(self) -> None:
+        client = HedgeCloseBitgetRestClient()
+        client.place_order(
+            market="futures",
+            order_params={
+                "symbol": "WLDUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+                "marginMode": "crossed",
+                "side": "sell",
+                "orderType": "market",
+                "size": "10.00000000",
+                "reduceOnly": "NO",
+                "clientOid": "hedge-open-test",
+            },
+        )
+        self.assertEqual(len(client.place_payloads), 1)
+        payload = client.place_payloads[0]
+        self.assertEqual(payload.get("side"), "sell")
+        self.assertEqual(payload.get("tradeSide"), "open")
+        self.assertAlmostEqual(float(payload.get("size", 0.0)), 10.0, places=8)
 
 
 if __name__ == "__main__":

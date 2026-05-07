@@ -14,15 +14,9 @@ class ExecutionRouter:
         self.spot_broker = spot_broker or PaperBroker()
         self.futures_broker = futures_broker or PaperBroker()
 
-    def route(self, decision: DecisionIntent, *, reference_price: float | None = None) -> PaperOrder | None:
+    def route(self, decision: DecisionIntent) -> PaperOrder | None:
         if decision.final_mode == "spot":
-            order = self.spot_broker.submit(decision)
-            if reference_price is not None:
-                self.spot_broker.ensure_position(decision, reference_price=reference_price)
-            return order
+            return self.spot_broker.submit(decision)
         if decision.final_mode == "futures":
-            order = self.futures_broker.submit(decision)
-            if reference_price is not None:
-                self.futures_broker.ensure_position(decision, reference_price=reference_price)
-            return order
+            return self.futures_broker.submit(decision)
         return None

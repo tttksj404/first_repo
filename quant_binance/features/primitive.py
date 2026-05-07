@@ -46,10 +46,6 @@ class PrimitiveInputs:
     open_interest_ema: float
     basis_bps: float
     gross_expected_edge_bps: float
-    intraday_trend_direction: int = 0
-    intraday_trend_strength: float = 0.0
-    adx_1h: float = 0.0
-    ema_cross_signal: int = 0
 
 
 def _safe_mean(values: tuple[float, ...]) -> float:
@@ -91,49 +87,33 @@ def build_feature_vector_from_primitives(
         * 0.5
         + 0.5
     )
-    spread_bps_norm = clamp(inputs.spread_bps / max(thresholds.spread_bps_ceiling, 1e-6))
-    probe_slippage_bps_norm = clamp(inputs.probe_slippage_bps / max(thresholds.slippage_bps_ceiling, 1e-6))
-    depth_10bps_norm = clamp(inputs.depth_usd_within_10bps / max(thresholds.depth_usd_target, 1e-6))
+    spread_bps_norm = clamp(inputs.spread_bps / thresholds.spread_bps_ceiling)
+    probe_slippage_bps_norm = clamp(inputs.probe_slippage_bps / thresholds.slippage_bps_ceiling)
+    depth_10bps_norm = clamp(inputs.depth_usd_within_10bps / thresholds.depth_usd_target)
     book_stability_norm = 1.0 - clamp(
-        inputs.order_book_imbalance_std / max(thresholds.order_book_imbalance_std_ceiling, 1e-6)
+        inputs.order_book_imbalance_std / thresholds.order_book_imbalance_std_ceiling
     )
     realized_vol_1h_norm = midpoint_percentile_rank(inputs.realized_vol_1h, history.realized_vol_1h)
     realized_vol_4h_norm = midpoint_percentile_rank(inputs.realized_vol_4h, history.realized_vol_4h)
     vol_shock_norm = clamp(
         max(inputs.realized_vol_1h / max(inputs.median_realized_vol_1h_30d, 1e-9) - 1.0, 0.0)
-        / max(thresholds.vol_shock_ceiling, 1e-6)
+        / thresholds.vol_shock_ceiling
     )
     funding_abs_percentile = midpoint_percentile_rank(abs(inputs.funding_rate), history.funding_abs)
     oi_surge_value = max(inputs.open_interest / max(inputs.open_interest_ema, 1e-9) - 1.0, 0.0)
     oi_surge_percentile = midpoint_percentile_rank(oi_surge_value, history.oi_surge)
     basis_stretch_percentile = midpoint_percentile_rank(abs(inputs.basis_bps), history.basis_abs)
-    intraday_alignment = (
-        1.0
-        if inputs.trend_direction != 0 and inputs.intraday_trend_direction == inputs.trend_direction
-        else 0.0
-        if inputs.intraday_trend_direction != 0 and inputs.intraday_trend_direction != inputs.trend_direction
-        else 0.5
-    )
-    regime_alignment = clamp(
-        (
-            1.0 if inputs.trend_direction != 0 and inputs.ema_stack_score == 1.0 else 0.5 if inputs.trend_direction != 0 else 0.0
-        ) * 0.75
-        + intraday_alignment * max(inputs.intraday_trend_strength, 0.0) * 0.25
-    )
+    regime_alignment = 1.0 if inputs.trend_direction != 0 and inputs.ema_stack_score == 1.0 else 0.5 if inputs.trend_direction != 0 else 0.0
 
     trend_strength = round(
-        0.30 * ret_rank_1h
-        + 0.25 * ret_rank_4h
+        0.35 * ret_rank_1h
+        + 0.35 * ret_rank_4h
         + 0.15 * breakout_norm
-        + 0.15 * inputs.ema_stack_score
-        + 0.15 * inputs.intraday_trend_strength,
+        + 0.15 * inputs.ema_stack_score,
         6,
     )
     volume_confirmation = round(
-        0.36 * vol_z_5m_norm
-        + 0.31 * vol_z_1h_norm
-        + 0.23 * taker_imbalance_norm
-        + 0.10 * max(inputs.intraday_trend_strength, 0.0),
+        0.40 * vol_z_5m_norm + 0.35 * vol_z_1h_norm + 0.25 * taker_imbalance_norm,
         6,
     )
     liquidity_score = round(
@@ -181,15 +161,5 @@ def build_feature_vector_from_primitives(
         liquidity_score=liquidity_score,
         volatility_penalty=volatility_penalty,
         overheat_penalty=overheat_penalty,
-        intraday_trend_direction=inputs.intraday_trend_direction,
-        intraday_trend_strength=inputs.intraday_trend_strength,
-        adx_1h=inputs.adx_1h,
-        ema_cross_signal=inputs.ema_cross_signal,
-        atr_14_1h_bps=round(
-            (inputs.atr_14_1h_price / inputs.last_trade_price * 10000.0)
-            if inputs.last_trade_price > 0 and inputs.atr_14_1h_price > 0
-            else 0.0,
-            6,
-        ),
         gross_expected_edge_bps=inputs.gross_expected_edge_bps,
     )

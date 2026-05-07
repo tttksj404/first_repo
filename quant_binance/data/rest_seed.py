@@ -7,31 +7,29 @@ from quant_binance.data.market_store import MarketStateStore
 from quant_binance.data.state import KlineBar, SymbolMarketState, TopOfBook
 
 
-def _parse_kline(symbol: str, interval: str, row: object) -> KlineBar:
+def _parse_kline(symbol: str, interval: str, row: Any) -> KlineBar:
     if isinstance(row, dict):
-        open_time = int(row["open_time"])
-        quote_volume = float(row.get("quote_volume", row.get("base_volume", 0.0)))
-        close_time = open_time
+        open_time_ms = int(row["open_time"])
+        close_time_ms = open_time_ms
         if interval.endswith("m"):
-            close_time += int(interval[:-1]) * 60 * 1000
+            close_time_ms = open_time_ms + (int(interval[:-1]) * 60 * 1000) - 1
         elif interval.endswith("h"):
-            close_time += int(interval[:-1]) * 60 * 60 * 1000
-        elif interval.endswith("d"):
-            close_time += int(interval[:-1]) * 24 * 60 * 60 * 1000
+            close_time_ms = open_time_ms + (int(interval[:-1]) * 60 * 60 * 1000) - 1
         return KlineBar(
             symbol=symbol,
             interval=interval,
-            start_time=datetime.fromtimestamp(open_time / 1000, tz=timezone.utc),
-            close_time=datetime.fromtimestamp(close_time / 1000, tz=timezone.utc),
+            start_time=datetime.fromtimestamp(open_time_ms / 1000, tz=timezone.utc),
+            close_time=datetime.fromtimestamp(close_time_ms / 1000, tz=timezone.utc),
             open_price=float(row["open_price"]),
             high_price=float(row["high_price"]),
             low_price=float(row["low_price"]),
             close_price=float(row["close_price"]),
             volume=float(row["base_volume"]),
-            quote_volume=quote_volume,
+            quote_volume=float(row["quote_volume"]),
             is_closed=True,
         )
-    assert isinstance(row, list)
+    if not isinstance(row, list):
+        raise RuntimeError(f"unsupported kline payload type: {type(row).__name__}")
     return KlineBar(
         symbol=symbol,
         interval=interval,

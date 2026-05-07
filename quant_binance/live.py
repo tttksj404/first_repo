@@ -145,7 +145,6 @@ class LivePaperRuntime:
         primitive_builder: PrimitiveBuilder,
         history_provider: HistoryProvider,
         decision_interval_minutes: int,
-        decision_interval_seconds: int = 0,
         kill_switch: KillSwitch | None = None,
         eligible_symbols: set[str] | None = None,
     ) -> None:
@@ -154,10 +153,6 @@ class LivePaperRuntime:
         self.primitive_builder = primitive_builder
         self.history_provider = history_provider
         self.decision_interval_minutes = decision_interval_minutes
-        self.decision_interval_seconds = max(
-            int(decision_interval_seconds or int(decision_interval_minutes) * 60),
-            1,
-        )
         self.decision_interval_stream = _binance_interval_label(decision_interval_minutes)
         self.kill_switch = kill_switch or KillSwitch()
         self.eligible_symbols = eligible_symbols

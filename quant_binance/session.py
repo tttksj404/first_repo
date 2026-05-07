@@ -1,69 +1,24 @@
 from __future__ import annotations
 
-import json
-import logging
-import math
-import os
-import re
-import time
 import asyncio
-
-logger = logging.getLogger(__name__)
-from contextlib import suppress
-from collections import deque
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
+from uuid import uuid4
 
-from quant_binance.data.market_store import MissingMarketStateError
-from quant_binance.auto_mode import apply_auto_mode_runtime_overrides
-from quant_binance.execution_quality import MIN_EXECUTION_QUALITY_SAMPLE_SIZE, ExecutionQualityState
-from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.execution.live_order_adapter import DecisionLiveOrderAdapter
 from quant_binance.execution.order_test_adapter import DecisionOrderTestAdapter, OrderTestResult
 from quant_binance.learning import OnlineEdgeLearner
 from quant_binance.live import LivePaperRuntime
 from quant_binance.models import DecisionIntent
-from quant_binance.policy.execution import (
-    build_execution_intent,
-    decision_from_execution_intent,
-    is_major_futures_symbol,
-    is_major_medium_futures_decision,
-    is_major_strong_futures_decision,
-)
-from quant_binance.policy_evidence import policy_evidence_bucket
-from quant_binance.cross_coin_scorer import (
-    is_blocked as _cross_coin_is_blocked,
-    load_ev_table as _cross_coin_load_ev_table,
-    load_latest_states as _cross_coin_load_latest_states,
-    rank_candidates as _cross_coin_rank_candidates,
-    score_symbol as _cross_coin_score_symbol,
-)
 from quant_binance.observability.log_store import JsonlLogStore
-from quant_binance.observability.overview import build_runtime_overview, write_runtime_overview
-from quant_binance.observability.report import build_auto_tune_policy, build_executive_operating_verdict, build_operational_verdict, build_persisted_policy_state, build_policy_history_entry, build_policy_state, build_promotion_verdict, build_runtime_summary, build_policy_validation, load_validation_runner_evidence, write_runtime_summary
-from quant_binance.validation_report import write_policy_comparison_validation_artifact, write_policy_validation_runner_artifact
+from quant_binance.observability.report import build_runtime_summary, write_runtime_summary
 from quant_binance.observability.runtime_state import write_runtime_state
 from quant_binance.risk.capital import CapitalAdequacyReport
-from quant_binance.risk.sizing import quantity_from_notional, select_futures_leverage
-from quant_binance.runtime_universe import build_runtime_universe_hydration
-from quant_binance.self_healing import RuntimeSelfHealing, parse_error_code
-from quant_binance.telegram_notify import send_telegram_message, telegram_report_only_enabled
-
-
-def _reference_price_guard_max_bps() -> float:
-    raw = os.getenv("QUANT_REFERENCE_PRICE_GUARD_MAX_BPS", "50")
-    try:
-        return max(float(raw), 0.0)
-    except (TypeError, ValueError):
-        return 50.0
-
-
-def _payload_price(value: float) -> float:
-    """Preserve micro-price symbols in JSON payloads without noisy float tails."""
-    return round(float(value), 12)
+from quant_binance.risk.sizing import select_futures_leverage
 
 
 class SupportsAccountSync(Protocol):
@@ -76,235 +31,21 @@ class SupportsAccountSync(Protocol):
     def build_capital_report(self) -> CapitalAdequacyReport:
         ...
 
-    def get_positions(self) -> dict[str, Any]:
-        ...
-
-    def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, Any]:
-        ...
-
-    def transfer_asset(
-        self,
-        *,
-        source_market: str,
-        target_market: str,
-        asset: str,
-        amount: float,
-        client_oid: str | None = None,
-    ) -> dict[str, Any]:
-        ...
-
-    def transfer_wallet_balance(
-        self,
-        *,
-        asset: str,
-        amount: float,
-        source_market: str,
-        target_market: str,
-    ) -> dict[str, Any]:
-        ...
-
-    def get_book_ticker(self, *, market: str, symbol: str) -> dict[str, Any]:
-        ...
-
-
-def _resume_staged_candidate_policy(
-    previous_policy_state: dict[str, Any] | None,
-    candidate_policy: dict[str, object],
-    runner_evidence: dict[str, object] | None,
-) -> dict[str, object]:
-    previous_state = dict(previous_policy_state or {})
-    if str(previous_state.get("status", "") or "") != "staged_rollout":
-        return candidate_policy
-    if str(previous_state.get("rollout_status", "") or "") != "micro_live_pending":
-        return candidate_policy
-    if list(dict(candidate_policy or {}).get("adjustments", []) or []):
-        return candidate_policy
-    staged_candidate = dict(previous_state.get("candidate_policy", {}) or {})
-    staged_adjustments = list(staged_candidate.get("adjustments", []) or [])
-    if not staged_adjustments:
-        return candidate_policy
-    if not any(str(item.get("action", "") or "") in {"promote", "aggressive_promote"} for item in staged_adjustments):
-        return candidate_policy
-    resumed_adjustments: list[dict[str, object]] = []
-    for item in staged_adjustments:
-        adjustment = dict(item)
-        adjustment["signal_sources"] = sorted(
-            {
-                str(source)
-                for source in list(adjustment.get("signal_sources", []) or []) + ["staged_rollout_resume"]
-                if str(source)
-            }
-        )
-        resumed_adjustments.append(adjustment)
-    resumed = dict(staged_candidate)
-    decomposition_summary = dict(resumed.get("decomposition_summary", {}) or {})
-    micro_live_gate = dict(dict(runner_evidence or {}).get("micro_live_gate", {}) or {})
-    decomposition_summary["resumed_from_staged_rollout"] = True
-    decomposition_summary["staged_rollout_micro_live_status"] = str(micro_live_gate.get("status", "not_available") or "not_available")
-    resumed["status"] = "candidate_ready"
-    resumed["adjustments"] = resumed_adjustments
-    resumed["signal_sources"] = sorted(
-        {
-            str(source)
-            for source in list(resumed.get("signal_sources", []) or []) + ["staged_rollout_resume"]
-            if str(source)
-        }
-    )
-    resumed["decomposition_summary"] = decomposition_summary
-    return resumed
-
-
-_EXECUTIVE_VERDICT_PRIORITY = {
-    "rollback": 0,
-    "tighten": 1,
-    "rebuild_evidence": 2,
-    "hold": 3,
-    "expand": 4,
-}
-
-
-@dataclass
-class PaperPosition:
-    symbol: str
-    market: str
-    side: str
-    entry_time: datetime
-    entry_price: float
-    current_price: float
-    quantity_opened: float
-    quantity_remaining: float
-    stop_distance_bps: float
-    active_stop_price: float
-    best_price: float
-    worst_price: float
-    entry_predictability_score: float
-    entry_liquidity_score: float
-    entry_net_expected_edge_bps: float = 0.0
-    entry_estimated_round_trip_cost_bps: float = 0.0
-    entry_planned_leverage: int = 1
-    latest_predictability_score: float = 0.0
-    latest_liquidity_score: float = 0.0
-    latest_net_expected_edge_bps: float = 0.0
-    latest_volume_confirmation: float | None = None
-    latest_trend_strength: float | None = None
-    latest_estimated_round_trip_cost_bps: float = 0.0
-    latest_decision_time: datetime | None = None
-    partial_take_profit_taken: bool = False
-    r_multiple_partial_take_profit_taken: bool = False
-    profit_protection_retrace_taken: bool = False
-    proactive_take_profit_thresholds_hit: tuple[float, ...] = ()
-    exit_confirmation_count: int = 0
-    last_exit_signal_reason: str = ""
-    peak_roe_percent: float = 0.0
-    exchange_synced: bool = False
-    confirmation_pending: bool = False
-    confirmation_pending_since: datetime | None = None
-    origin: str = "strategy"
-    adoption_source: str = ""
-    adopted_at: datetime | None = None
-    adoption_grace_until: datetime | None = None
-    entry_policy_context_source: str = ""
-    entry_policy_bucket: str = ""
-    entry_policy_bucket_available: bool = False
-    entry_policy_bucket_source: str = ""
-    entry_policy_bucket_alignment_status: str = ""
-    entry_policy_execution_phase: str = "baseline"
-    entry_policy_lineage: dict[str, object] = field(default_factory=dict)
-
-    def is_adopted(self) -> bool:
-        origin = self.origin.strip().lower()
-        return origin == "adopted" or self.adopted_at is not None or bool(self.adoption_source)
-
-    def adoption_grace_active(self, *, now: datetime | None = None) -> bool:
-        if not self.is_adopted() or self.adoption_grace_until is None:
-            return False
-        current = now or datetime.now(tz=timezone.utc)
-        return current < self.adoption_grace_until
-
-    def unrealized_pnl_usd_estimate(self) -> float:
-        if self.side == "short":
-            return round((self.entry_price - self.current_price) * self.quantity_remaining, 6)
-        return round((self.current_price - self.entry_price) * self.quantity_remaining, 6)
-
-    def current_notional_usd_estimate(self) -> float:
-        return round(self.current_price * self.quantity_remaining, 6)
-
-    def as_dict(self) -> dict[str, object]:
-        return {
-            "symbol": self.symbol,
-            "market": self.market,
-            "side": self.side,
-            "entry_time": self.entry_time,
-            "entry_price": _payload_price(self.entry_price),
-            "current_price": _payload_price(self.current_price),
-            "quantity_opened": round(self.quantity_opened, 8),
-            "quantity_remaining": round(self.quantity_remaining, 8),
-            "current_notional_usd_estimate": self.current_notional_usd_estimate(),
-            "unrealized_pnl_usd_estimate": self.unrealized_pnl_usd_estimate(),
-            "stop_distance_bps": round(self.stop_distance_bps, 6),
-            "active_stop_price": _payload_price(self.active_stop_price),
-            "best_price": _payload_price(self.best_price),
-            "worst_price": _payload_price(self.worst_price),
-            "partial_take_profit_taken": self.partial_take_profit_taken,
-            "r_multiple_partial_take_profit_taken": self.r_multiple_partial_take_profit_taken,
-            "profit_protection_retrace_taken": self.profit_protection_retrace_taken,
-            "proactive_take_profit_thresholds_hit": list(self.proactive_take_profit_thresholds_hit),
-            "entry_predictability_score": round(self.entry_predictability_score, 6),
-            "entry_liquidity_score": round(self.entry_liquidity_score, 6),
-            "entry_net_expected_edge_bps": round(self.entry_net_expected_edge_bps, 6),
-            "entry_estimated_round_trip_cost_bps": round(self.entry_estimated_round_trip_cost_bps, 6),
-            "entry_planned_leverage": int(max(self.entry_planned_leverage, 1)),
-            "latest_predictability_score": round(self.latest_predictability_score or self.entry_predictability_score, 6),
-            "latest_liquidity_score": round(self.latest_liquidity_score or self.entry_liquidity_score, 6),
-            "latest_net_expected_edge_bps": round(self.latest_net_expected_edge_bps or self.entry_net_expected_edge_bps, 6),
-            "latest_volume_confirmation": (
-                round(self.latest_volume_confirmation, 6) if self.latest_volume_confirmation is not None else None
-            ),
-            "latest_trend_strength": (
-                round(self.latest_trend_strength, 6) if self.latest_trend_strength is not None else None
-            ),
-            "latest_estimated_round_trip_cost_bps": round(
-                self.latest_estimated_round_trip_cost_bps or self.entry_estimated_round_trip_cost_bps,
-                6,
-            ),
-            "latest_decision_time": self.latest_decision_time,
-            "exit_confirmation_count": self.exit_confirmation_count,
-            "last_exit_signal_reason": self.last_exit_signal_reason,
-            "peak_roe_percent": round(self.peak_roe_percent, 6),
-            "exchange_synced": self.exchange_synced,
-            "confirmation_pending": self.confirmation_pending,
-            "confirmation_pending_since": self.confirmation_pending_since,
-            "origin": self.origin,
-            "adoption_source": self.adoption_source,
-            "adopted_at": self.adopted_at,
-            "adoption_grace_until": self.adoption_grace_until,
-            "adoption_grace_active": self.adoption_grace_active(),
-            "entry_policy_context_source": self.entry_policy_context_source,
-            "entry_policy_bucket": self.entry_policy_bucket,
-            "entry_policy_bucket_available": self.entry_policy_bucket_available,
-            "entry_policy_bucket_source": self.entry_policy_bucket_source,
-            "entry_policy_bucket_alignment_status": self.entry_policy_bucket_alignment_status,
-            "entry_policy_execution_phase": self.entry_policy_execution_phase,
-            "entry_policy_lineage": dict(self.entry_policy_lineage),
-        }
-
 
 @dataclass
 class LivePaperSession:
     runtime: LivePaperRuntime
     equity_usd: float
     remaining_portfolio_capacity_usd: float
-    max_portfolio_capacity_usd: float | None = None
     rest_client: SupportsAccountSync | None = None
     order_tester: DecisionOrderTestAdapter | None = None
     live_order_executor: DecisionLiveOrderAdapter | None = None
     learner: OnlineEdgeLearner | None = None
     learner_output_path: str | Path | None = None
     log_store: JsonlLogStore | None = None
-    execution_quality_state_path: str | Path | None = None
     verbose: bool = False
     sync_interval_seconds: int = 60
-    flush_interval_seconds: int = 15
+    flush_interval_seconds: int = 60
     decisions: list[DecisionIntent] = field(default_factory=list)
     tested_orders: list[dict[str, object]] = field(default_factory=list)
     account_snapshot: dict[str, object] = field(default_factory=dict)
@@ -313,196 +54,49 @@ class LivePaperSession:
     live_orders: list[dict[str, object]] = field(default_factory=list)
     observe_only_symbols: list[str] = field(default_factory=list)
     last_executed_fingerprint_by_symbol: dict[str, str] = field(default_factory=dict)
-    paper_positions: dict[str, PaperPosition] = field(default_factory=dict)
-    closed_trades: deque[dict[str, object]] = field(default_factory=lambda: deque(maxlen=2000))
-    telegram_alerts: list[dict[str, object]] = field(default_factory=list)
-    sent_alert_keys: set[str] = field(default_factory=set)
-    live_positions_snapshot: list[dict[str, object]] = field(default_factory=list)
-    live_proactive_take_profit_keys: set[str] = field(default_factory=set)
-    live_profit_protection_keys: set[str] = field(default_factory=set)
-    live_peak_roe_by_identity: dict[str, float] = field(default_factory=dict)
-    live_worst_roe_by_identity: dict[str, float] = field(default_factory=dict)
-    live_turnaround_take_profit_keys: set[str] = field(default_factory=set)
-    live_peak_unrealized_pnl_by_identity: dict[str, float] = field(default_factory=dict)
-    live_unrealized_take_profit_keys: set[str] = field(default_factory=set)
-    live_partial_exit_last_at_by_identity: dict[str, datetime] = field(default_factory=dict)
-    live_partial_exit_mode_by_identity: dict[str, str] = field(default_factory=dict)
-    live_major_drawdown_grace_started_at_by_identity: dict[str, datetime] = field(default_factory=dict)
-    live_entry_starvation_attempts_by_symbol: dict[str, int] = field(default_factory=dict)
-    live_entry_starvation_last_at_by_symbol: dict[str, datetime] = field(default_factory=dict)
-    recent_weak_preflight_by_symbol: dict[str, tuple[datetime, tuple[str, ...]]] = field(default_factory=dict)
-    live_trailing_stop_prices: dict[str, float] = field(default_factory=dict)  # identity → current trailing SL price
-    live_portfolio_peak_unrealized_ratio: float = 0.0
-    live_portfolio_profit_lock_taken: bool = False
-    live_portfolio_full_exit_taken: bool = False
-    futures_pyramid_add_counts: dict[str, int] = field(default_factory=dict)
-    order_error_cooldowns: dict[str, datetime] = field(default_factory=dict)
-    manual_symbol_cooldowns: dict[str, datetime] = field(default_factory=dict)
-    loss_combo_cooldowns: dict[str, datetime] = field(default_factory=dict)
-    futures_missing_in_paper_counts: dict[str, int] = field(default_factory=dict)
-    futures_missing_on_exchange_counts: dict[str, int] = field(default_factory=dict)
-    futures_reallocation_cooldown_until: datetime | None = None
-    wallet_transfer_cooldowns: dict[str, datetime] = field(default_factory=dict)
-    coin_convert_spot_sell_cooldowns: dict[str, datetime] = field(default_factory=dict)
-    self_healing: RuntimeSelfHealing = field(default_factory=RuntimeSelfHealing)
+    live_error_cooldown_until_by_symbol: dict[str, datetime] = field(default_factory=dict)
+    live_error_code_by_symbol: dict[str, str] = field(default_factory=dict)
+    live_error_global_cooldown_until: datetime | None = None
+    live_error_global_code: str | None = None
+    futures_notional_scale_by_symbol: dict[str, float] = field(default_factory=dict)
+    spot_min_trade_usdt_by_symbol: dict[str, float] = field(default_factory=dict)
+    supported_spot_symbols: set[str] = field(default_factory=set)
+    supported_futures_symbols: set[str] = field(default_factory=set)
+    _symbol_market_support_loaded: bool = False
+    _symbol_market_support_enabled: bool = False
+    _margin_transfer_permission_denied: bool = False
+    _last_margin_release_at: datetime | None = None
     heartbeat_count: int = 0
     last_event_timestamp: datetime | None = None
     last_decision_timestamp: datetime | None = None
-    last_decision_emitted_at: datetime | None = None
-    next_scheduled_decision_at: datetime | None = None
-    last_recorded_decision_time_by_symbol: dict[str, datetime] = field(default_factory=dict)
-    reference_price_guard_counts: dict[str, int] = field(default_factory=dict)
-    reference_price_guard_last_by_symbol: dict[str, dict[str, object]] = field(default_factory=dict)
-    minimum_live_decision_timestamp: datetime | None = None
-    recent_paper_management_close_reasons: dict[str, str] = field(default_factory=dict)
     _last_sync_at: datetime | None = None
     _last_flush_at: datetime | None = None
-    _execution_quality_state: ExecutionQualityState = field(init=False, repr=False)
-    session_start_equity_usdt: float | None = field(default=None, init=False)
-    _coin_convert_in_progress: bool = field(default=False, init=False)
-    _live_client_oid_counter: int = field(default=0, init=False, repr=False)
-
-    def __post_init__(self) -> None:
-        if self.max_portfolio_capacity_usd is None:
-            self.max_portfolio_capacity_usd = self.remaining_portfolio_capacity_usd
-        self._execution_quality_state = ExecutionQualityState(self._default_execution_quality_state_path())
-
-    def _default_execution_quality_state_path(self) -> str | Path | None:
-        if self.execution_quality_state_path is not None:
-            return self.execution_quality_state_path
-        if self.learner_output_path is None:
-            return None
-        learner_path = Path(self.learner_output_path)
-        if len(learner_path.parents) >= 4 and learner_path.parents[2].name == "output":
-            return learner_path.parents[3] / "execution_quality_state.json"
-        return None
-
-    def _paper_verification_equity_override(self) -> tuple[float, float] | None:
-        if self.live_order_executor is not None:
-            return None
-        equity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_EQUITY_USD", "") or "").strip()
-        if not equity_raw:
-            return None
-        try:
-            equity = float(equity_raw)
-        except (TypeError, ValueError):
-            return None
-        if equity <= 0.0:
-            return None
-        leverage_cap = max(self.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
-        capacity = round(equity * leverage_cap, 6)
-        capacity_raw = str(os.environ.get("QUANT_PAPER_VERIFY_CAPACITY_USD", "") or "").strip()
-        if capacity_raw:
-            try:
-                capacity = max(float(capacity_raw), 0.0)
-            except (TypeError, ValueError):
-                pass
-        return equity, capacity
-
-    def _paper_verification_mode_enabled(self) -> bool:
-        return self._paper_verification_equity_override() is not None
-
-    def _paper_verification_continue_decisions_after_kill_switch(self) -> bool:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        stop_raw = str(os.environ.get("QUANT_PAPER_VERIFY_STOP_ON_KILL_SWITCH", "") or "").strip().lower()
-        return stop_raw not in {"1", "true", "yes", "on"}
-
-    def _paper_verification_skip_risk_kill_switch(self, *, exit_reason: str) -> bool:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        if not exit_reason.startswith("PAPER_VERIFY_"):
-            return False
-        arm_raw = str(os.environ.get("QUANT_PAPER_VERIFY_ARM_RISK_KILL_SWITCH", "") or "").strip().lower()
-        return arm_raw not in {"1", "true", "yes", "on"}
-
-    def _apply_paper_verification_account_override(self) -> None:
-        override = self._paper_verification_equity_override()
-        if override is None:
-            return
-        equity, capacity = override
-        open_notional = sum(
-            position.current_notional_usd_estimate()
-            for position in self.paper_positions.values()
-            if position.quantity_remaining > 0.0
-        )
-        self.equity_usd = equity
-        self.max_portfolio_capacity_usd = capacity
-        self.remaining_portfolio_capacity_usd = max(capacity - open_notional, 0.0)
-        self.capital_report["futures_available_balance_usd"] = equity
-        self.capital_report["futures_execution_balance_usd"] = equity
-        self.capital_report["futures_recognized_balance_usd"] = equity
-        self.capital_report["futures_total_reusable_balance_usd"] = equity
 
     def process_payload(self, payload: dict[str, Any], *, now: datetime | None = None) -> DecisionIntent | None:
         timestamp = now or datetime.now(tz=timezone.utc)
         self.heartbeat_count += 1
         self.last_event_timestamp = timestamp
-        self.self_healing.note_progress(timestamp=timestamp, heartbeat_count=self.heartbeat_count)
         if self._should_sync(timestamp):
-            try:
-                self.sync_account()
-                self._last_sync_at = timestamp
-                # Check for stranded COIN-Futures capital after every sync
-                try:
-                    self._auto_convert_coin_futures_to_usdt()
-                except Exception as conv_exc:
-                    print(
-                        f"[COIN_CONVERT_ERROR] {timestamp.isoformat()} auto-conversion failed: {conv_exc}",
-                        flush=True,
-                    )
-                if self.verbose:
-                    print(f"[SYNC] {timestamp.isoformat()} account/open-order snapshot refreshed", flush=True)
-                if self.log_store is not None:
-                    self.log_store.append(
-                        "account_sync",
-                        {
-                            "timestamp": timestamp,
-                            "account_snapshot": self.account_snapshot,
-                            "open_orders_snapshot": self.open_orders_snapshot,
-                        },
-                    )
-            except Exception as sync_exc:
-                # REST sync failure must not crash the decision cycle.
-                # Keep the previous account_snapshot so equity / balance remain
-                # available from the last successful sync.
-                print(
-                    f"[SYNC_ERROR] {timestamp.isoformat()} account sync failed, keeping prior snapshot: {sync_exc}",
-                    flush=True,
-                )
-                if self.log_store is not None:
-                    self.log_store.append(
-                        "account_sync",
-                        {
-                            "timestamp": timestamp,
-                            "status": "failed",
-                            "error": repr(sync_exc),
-                        },
-                    )
-        event_payload: dict[str, Any] = {"timestamp": timestamp, "payload": payload}
-        try:
-            decision = self.runtime.on_payload(
-                payload,
-                equity_usd=self.equity_usd,
-                remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
-            )
-        except MissingMarketStateError as exc:
-            issue = self.self_healing.record_runtime_error(
-                now=timestamp,
-                symbol=exc.symbol,
-                error_message=str(exc),
-                exchange_id=getattr(self.rest_client, "exchange_id", "binance"),
-                stage="market_data",
-            )
-            event_payload["self_healing"] = issue
-            event_payload["status"] = "skipped_known_runtime_issue"
+            self.sync_account()
+            self._last_sync_at = timestamp
             if self.verbose:
-                print(f"[SELF_HEAL] skipped payload due to missing market state for {exc.symbol}", flush=True)
+                print(f"[SYNC] {timestamp.isoformat()} account/open-order snapshot refreshed", flush=True)
             if self.log_store is not None:
-                self.log_store.append("events", event_payload)
-            return None
+                self.log_store.append(
+                    "account_sync",
+                    {
+                        "timestamp": timestamp,
+                        "account_snapshot": self.account_snapshot,
+                        "open_orders_snapshot": self.open_orders_snapshot,
+                    },
+                )
+        decision = self.runtime.on_payload(
+            payload,
+            equity_usd=self.equity_usd,
+            remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
+        )
         if self.log_store is not None:
-            self.log_store.append("events", event_payload)
+            self.log_store.append("events", {"timestamp": timestamp, "payload": payload})
         if self.verbose and self.heartbeat_count % 25 == 0:
             print(
                 f"[HEARTBEAT] events={self.heartbeat_count} decisions={len(self.decisions)} live_orders={len(self.live_orders)} tested_orders={len(self.tested_orders)}",
@@ -510,38 +104,7 @@ class LivePaperSession:
             )
         if decision is not None:
             state = self.runtime.dispatcher.store.get(decision.symbol)
-            if self._single_slot_priority_fallback_mode_enabled():
-                decision_timestamp = decision.timestamp
-                comparable_decision_timestamp = decision_timestamp
-                if comparable_decision_timestamp.tzinfo is None:
-                    comparable_decision_timestamp = comparable_decision_timestamp.replace(tzinfo=timezone.utc)
-                comparable_event_timestamp = timestamp
-                if comparable_event_timestamp.tzinfo is None:
-                    comparable_event_timestamp = comparable_event_timestamp.replace(tzinfo=timezone.utc)
-                if comparable_decision_timestamp > comparable_event_timestamp:
-                    if self.verbose and self.heartbeat_count % 250 == 0:
-                        print(
-                            f"[PRIORITY_FALLBACK] deferred future direct {decision.symbol} websocket decision "
-                            f"timestamp={decision_timestamp.isoformat()} event={timestamp.isoformat()}",
-                            flush=True,
-                        )
-                elif self._priority_fallback_boundary_has_pending_symbols(decision_timestamp):
-                    if self.verbose:
-                        print(
-                            f"[PRIORITY_FALLBACK] running universe-order cycle for {decision_timestamp.isoformat()} "
-                            f"after direct {decision.symbol} websocket decision",
-                            flush=True,
-                        )
-                    self._run_priority_fallback_decision_boundary(decision_timestamp)
-                elif self.verbose and self.heartbeat_count % 250 == 0:
-                    print(
-                        f"[PRIORITY_FALLBACK] deferred direct {decision.symbol} websocket decision "
-                        "to scheduled universe-order cycle",
-                        flush=True,
-                    )
-            else:
-                self._record_decision(decision=decision, state=state, timestamp=timestamp)
-        self._maybe_run_scheduled_decision_cycle(timestamp)
+            self._record_decision(decision=decision, state=state, timestamp=timestamp)
         return decision
 
     def run_bootstrap_cycle(
@@ -561,581 +124,52 @@ class LivePaperSession:
             remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
             cash_reserve_fraction=self._cash_reserve_fraction(),
         )
-        recorded = self._record_decision(decision=decision, state=state, timestamp=decision_time, bootstrap=True)
-        return recorded or decision
-
-    def _build_capital_report_snapshot(self) -> None:
-        if self.rest_client is None or not hasattr(self.rest_client, "build_capital_report"):
-            return
-        report = self.rest_client.build_capital_report()
-        self.capital_report = {
-            "spot_available_balance_usd": report.spot_available_balance_usd,
-            "spot_recognized_balance_usd": report.spot_recognized_balance_usd,
-            "spot_funding_assets": [item.__dict__ for item in report.spot_funding_assets],
-            "futures_funding_assets": [item.__dict__ for item in report.futures_funding_assets],
-            "spot_execution_routes": [item.__dict__ for item in report.spot_execution_routes],
-            "capital_transfer_routes": [item.__dict__ for item in report.capital_transfer_routes],
-            "futures_available_balance_usd": report.futures_available_balance_usd,
-            "futures_execution_balance_usd": report.futures_execution_balance_usd,
-            "futures_recognized_balance_usd": report.futures_recognized_balance_usd,
-            "futures_transferable_execution_balance_usd": report.futures_transferable_execution_balance_usd,
-            "futures_collateral_candidate_balance_usd": report.futures_collateral_candidate_balance_usd,
-            "futures_manual_handling_balance_usd": report.futures_manual_handling_balance_usd,
-            "futures_total_reusable_balance_usd": report.futures_total_reusable_balance_usd,
-            "minimum_operational_balance_usd": report.minimum_operational_balance_usd,
-            "minimum_full_universe_balance_usd": report.minimum_full_universe_balance_usd,
-            "recommended_balance_usd": report.recommended_balance_usd,
-            "can_trade_any": report.can_trade_any,
-            "can_trade_spot_any": report.can_trade_spot_any,
-            "can_trade_futures_any": report.can_trade_futures_any,
-            "max_spot_to_futures_transfer_usd": report.max_spot_to_futures_transfer_usd,
-            "max_futures_to_spot_transfer_usd": report.max_futures_to_spot_transfer_usd,
-            "spot_requirements": [r.__dict__ for r in report.spot_requirements],
-            "futures_requirements": [r.__dict__ for r in report.futures_requirements],
-            "pending_symbols": list(report.pending_symbols),
-            "note": report.note,
-        }
-        if not report.can_trade_any:
-            self.runtime.kill_switch.arm("INSUFFICIENT_CAPITAL")
-
-    def _refresh_account_state(self, *, evaluate_live_positions: bool) -> None:
-        if self.rest_client is None:
-            return
-        previous_account_snapshot = dict(self.account_snapshot)
-        previous_live_positions = list(self.live_positions_snapshot)
-        self.account_snapshot = self.rest_client.get_account(market="futures")
-        self.open_orders_snapshot = self.rest_client.get_open_orders(market="futures")
-        if hasattr(self.rest_client, "get_positions"):
-            positions_payload = self.rest_client.get_positions()
-            self.live_positions_snapshot = positions_payload.get("positions", [])
-        self._reconcile_manual_live_closes(
-            previous_live_positions=previous_live_positions,
-            previous_account_snapshot=previous_account_snapshot,
-        )
-        self._reconcile_persistent_futures_position_mismatch()
-        self._build_capital_report_snapshot()
-        if evaluate_live_positions:
-            self._evaluate_live_positions()
-        self._last_sync_at = datetime.now(tz=timezone.utc)
-
-    def _extract_total_usdt_equity(self) -> float | None:
-        accounts = self.account_snapshot.get("accounts", [])
-        if not accounts:
-            return None
-        total = sum(
-            float(row.get("usdtEquity") or row.get("accountEquity") or 0.0)
-            for row in accounts
-            if isinstance(row, dict)
-        )
-        return total if total > 0.0 else None
+        self._record_decision(decision=decision, state=state, timestamp=decision_time)
+        return decision
 
     def sync_account(self) -> None:
-        self._refresh_account_state(evaluate_live_positions=True)
-        equity = self._extract_total_usdt_equity()
-        if self.session_start_equity_usdt is None:
-            if equity is not None and equity > 0.0:
-                self.session_start_equity_usdt = equity
-        # Live equity refresh: update sizing basis every sync cycle
-        if equity is not None and equity > 0.0:
-            self.equity_usd = equity
-            try:
-                leverage_cap = max(self.runtime.paper_service.settings.risk.max_futures_leverage, 2.5)
-            except Exception:
-                leverage_cap = 2.5
-            new_capacity = round(equity * leverage_cap, 6)
-            if self.max_portfolio_capacity_usd is None or new_capacity > self.remaining_portfolio_capacity_usd:
-                self.remaining_portfolio_capacity_usd = new_capacity
-                self.max_portfolio_capacity_usd = new_capacity
-        self._apply_paper_verification_account_override()
-
-    # ------------------------------------------------------------------
-    # COIN-Futures → USDT auto-conversion
-    # ------------------------------------------------------------------
-    _COIN_CONVERT_THRESHOLD_USD = 15.0
-    _COIN_CONVERT_MIN_SPOT_NOTIONAL_USD = 1.0
-    _COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS = 6 * 60 * 60
-    _COIN_CONVERT_ASSETS = ("ETH", "BTC")
-    _COIN_SPOT_SIZE_DECIMALS = {"ETH": 4, "BTC": 6}
-
-    def _estimate_spot_asset_notional_usd(
-        self,
-        *,
-        asset: str,
-        quantity: float,
-        balance_row: dict[str, Any] | None = None,
-    ) -> float | None:
-        if quantity <= 0.0:
-            return 0.0
-        capital_report = dict(self.capital_report or {})
-        raw_routes = capital_report.get("capital_transfer_routes", [])
-        if isinstance(raw_routes, list):
-            for item in raw_routes:
-                if not isinstance(item, dict):
-                    continue
-                if str(item.get("source_market", "") or "").lower() != "spot":
-                    continue
-                if str(item.get("asset", "") or "").upper() != asset:
-                    continue
-                transferable_usd = float(item.get("transferable_usd") or 0.0)
-                if transferable_usd <= 0.0:
-                    continue
-                source_free_amount = float(item.get("source_free_amount") or 0.0)
-                if source_free_amount > 0.0 and quantity < source_free_amount:
-                    return transferable_usd * (quantity / source_free_amount)
-                return transferable_usd
-        if asset == "USDT":
-            return quantity
-        if self.rest_client is None:
-            return None
-        get_ticker = getattr(self.rest_client, "get_book_ticker", None)
-        if not callable(get_ticker):
-            return None
-        try:
-            ticker = get_ticker(market="spot", symbol=f"{asset}USDT")
-        except Exception:
-            return None
-        for key in ("bidPrice", "askPrice", "lastPrice", "price"):
-            try:
-                price = float(ticker.get(key) or 0.0)
-            except (TypeError, ValueError):
-                continue
-            if price > 0.0:
-                return quantity * price
-        # Spot balance rows can expose account-level USD values even when the
-        # per-asset ticker payload is empty. Treat that metadata as untrusted
-        # for non-USDT conversion decisions so dust cannot bypass the minimum
-        # notional guard and trigger repeated 45110 failures.
-        return None
-
-    def _auto_convert_coin_futures_to_usdt(self) -> None:
-        """Convert stranded COIN-Futures ETH/BTC into USDT-Futures capital.
-
-        Triggered when USDT-Futures available < $15 and any ETH/BTC balance
-        exists in the COIN-Futures account.  Pipeline:
-          1. COIN-Futures → spot  (wallet transfer)
-          2. spot sell ETH/BTC → USDT  (market order)
-          3. spot USDT → USDT-Futures   (wallet transfer)
-        """
-        if self._coin_convert_in_progress:
-            return
         if self.rest_client is None:
             return
-        # --- guard: only run when USDT-Futures capital is low ---------------
-        futures_available = float(
-            self.account_snapshot.get("availableBalance") or 0.0
-        )
-        if futures_available >= self._COIN_CONVERT_THRESHOLD_USD:
-            return
-        # --- find COIN-Futures rows with convertible balance ----------------
-        accounts = self.account_snapshot.get("accounts", [])
-        coin_rows: list[tuple[str, float]] = []
-        for row in accounts:
-            if not isinstance(row, dict):
-                continue
-            coin = str(row.get("marginCoin", "")).upper()
-            if coin not in self._COIN_CONVERT_ASSETS:
-                continue
-            equity = float(row.get("usdtEquity") or row.get("accountEquity") or 0.0)
-            available = float(row.get("available") or 0.0)
-            if available <= 0.0 or equity < 1.0:
-                continue
-            coin_rows.append((coin, available))
-        # --- also detect stranded ETH/BTC on spot (e.g. partial prior run) --
-        spot_only_rows: list[tuple[str, float]] = []
+        futures_account_snapshot = self.rest_client.get_account(market="futures")
+        spot_account_snapshot: dict[str, Any] = {}
         try:
-            spot_account = self.rest_client.get_account(market="spot")
-            for bal in spot_account.get("balances", []):
-                asset = str(bal.get("asset", "")).upper()
-                if asset not in self._COIN_CONVERT_ASSETS:
-                    continue
-                free = float(bal.get("free") or 0.0)
-                if free <= 0.0:
-                    continue
-                # skip if already covered by coin_rows (will be transferred first)
-                if any(c == asset for c, _ in coin_rows):
-                    continue
-                decimals = self._COIN_SPOT_SIZE_DECIMALS.get(asset, 4)
-                sell_qty = math.floor(free * 10**decimals) / 10**decimals
-                if sell_qty <= 0.0:
-                    continue
-                estimated_notional_usd = self._estimate_spot_asset_notional_usd(
-                    asset=asset,
-                    quantity=sell_qty,
-                    balance_row=bal,
-                )
-                cooldown_until = self.coin_convert_spot_sell_cooldowns.get(asset)
-                if estimated_notional_usd is not None and estimated_notional_usd >= self._COIN_CONVERT_MIN_SPOT_NOTIONAL_USD:
-                    self.coin_convert_spot_sell_cooldowns.pop(asset, None)
-                    cooldown_until = None
-                elif cooldown_until is not None and cooldown_until <= datetime.now(tz=timezone.utc):
-                    self.coin_convert_spot_sell_cooldowns.pop(asset, None)
-                    cooldown_until = None
-                if cooldown_until is not None:
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": datetime.now(tz=timezone.utc),
-                            "coin": asset,
-                            "phase": "B",
-                            "step": "skip_cooldown",
-                            "status": "skipped",
-                            "sell_qty": sell_qty,
-                            "estimated_notional_usd": round(estimated_notional_usd, 8) if estimated_notional_usd is not None else None,
-                            "cooldown_until": cooldown_until,
-                        })
-                    continue
-                if estimated_notional_usd is None:
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": datetime.now(tz=timezone.utc),
-                            "coin": asset,
-                            "phase": "B",
-                            "step": "skip_unpriced",
-                            "status": "skipped",
-                            "sell_qty": sell_qty,
-                        })
-                    continue
-                if (
-                    estimated_notional_usd < self._COIN_CONVERT_MIN_SPOT_NOTIONAL_USD
-                ):
-                    cooldown_until = datetime.now(tz=timezone.utc) + timedelta(
-                        seconds=self._COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS
-                    )
-                    self.coin_convert_spot_sell_cooldowns[asset] = cooldown_until
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": datetime.now(tz=timezone.utc),
-                            "coin": asset,
-                            "phase": "B",
-                            "step": "skip_dust",
-                            "status": "skipped",
-                            "sell_qty": sell_qty,
-                            "estimated_notional_usd": round(estimated_notional_usd, 8),
-                            "cooldown_until": cooldown_until,
-                        })
-                    continue
-                spot_only_rows.append((asset, sell_qty))
+            spot_account_snapshot = self.rest_client.get_account(market="spot")
         except Exception:
-            pass  # spot query failure is non-critical
-        if not coin_rows and not spot_only_rows:
-            return
-        # --- begin conversion -----------------------------------------------
-        self._coin_convert_in_progress = True
-        now = datetime.now(tz=timezone.utc)
-        transfer_method = getattr(self.rest_client, "transfer_asset", None)
-        if not callable(transfer_method):
-            self._coin_convert_in_progress = False
-            return
-        total_usdt_recovered = 0.0
+            spot_account_snapshot = {}
+        self.account_snapshot = {
+            "futures": futures_account_snapshot,
+            "spot": spot_account_snapshot,
+        }
+        futures_open_orders = self.rest_client.get_open_orders(market="futures")
+        spot_open_orders: dict[str, Any] = {}
         try:
-            # Phase A — process COIN-Futures assets (3-step pipeline)
-            for coin, amount in coin_rows:
-                tag = f"coin_convert:{coin}"
-                # Step 1 — COIN-Futures → spot
-                print(
-                    f"[COIN_CONVERT] {now.isoformat()} transferring {amount:.8f} {coin} "
-                    f"from coin_futures → spot",
-                    flush=True,
-                )
-                try:
-                    resp1 = transfer_method(
-                        source_market="coin_futures",
-                        target_market="spot",
-                        asset=coin,
-                        amount=amount,
-                        client_oid=f"{tag}:step1:{int(now.timestamp())}",
-                    )
-                except Exception as exc:
-                    print(f"[COIN_CONVERT] step1 transfer failed for {coin}: {exc}", flush=True)
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": now, "coin": coin, "step": 1,
-                            "status": "failed", "error": repr(exc),
-                        })
-                    continue
-                step1_ok = str(resp1.get("status", "")).upper() == "SUCCESS"
-                if not step1_ok:
-                    print(f"[COIN_CONVERT] step1 non-success for {coin}: {resp1}", flush=True)
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": now, "coin": coin, "step": 1,
-                            "status": "non_success", "response": resp1,
-                        })
-                    continue
-                # Step 2 — spot market-sell coin → USDT
-                spot_symbol = f"{coin}USDT"
-                decimals = self._COIN_SPOT_SIZE_DECIMALS.get(coin, 4)
-                sell_qty = math.floor(amount * 10**decimals) / 10**decimals
-                if sell_qty <= 0.0:
-                    print(f"[COIN_CONVERT] sell_qty rounded to 0 for {coin}, skip", flush=True)
-                    continue
-                order_params = self.rest_client.build_order_params(
-                    market="spot",
-                    symbol=spot_symbol,
-                    side="sell",
-                    order_type="market",
-                    quantity=sell_qty,
-                )
-                print(
-                    f"[COIN_CONVERT] {now.isoformat()} placing spot market sell "
-                    f"{sell_qty} {spot_symbol} (raw={amount:.8f}, decimals={decimals})",
-                    flush=True,
-                )
-                try:
-                    resp2 = self.rest_client.place_order(
-                        market="spot", order_params=order_params,
-                    )
-                except Exception as exc:
-                    print(f"[COIN_CONVERT] step2 spot sell failed for {coin}: {exc}", flush=True)
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": now, "coin": coin, "step": 2,
-                            "status": "failed", "error": repr(exc),
-                        })
-                    continue
-                step2_ok = str(resp2.get("status", "")).upper() == "SUCCESS"
-                if not step2_ok:
-                    print(f"[COIN_CONVERT] step2 non-success for {coin}: {resp2}", flush=True)
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": now, "coin": coin, "step": 2,
-                            "status": "non_success", "response": resp2,
-                        })
-                    continue
-                # Wait briefly for fill to settle
-                time.sleep(1.0)
-                # Fetch spot USDT balance to know how much to transfer
-                try:
-                    spot_account = self.rest_client.get_account(market="spot")
-                    spot_usdt_free = 0.0
-                    for bal in spot_account.get("balances", []):
-                        if str(bal.get("asset", "")).upper() == "USDT":
-                            spot_usdt_free = float(bal.get("free") or 0.0)
-                            break
-                except Exception:
-                    spot_usdt_free = 0.0
-                if spot_usdt_free < 1.0:
-                    print(
-                        f"[COIN_CONVERT] spot USDT balance too low after sell "
-                        f"({spot_usdt_free:.2f}), skipping step3 for {coin}",
-                        flush=True,
-                    )
-                    continue
-                # Step 3 — spot USDT → USDT-Futures
-                print(
-                    f"[COIN_CONVERT] {now.isoformat()} transferring {spot_usdt_free:.4f} USDT "
-                    f"from spot → futures",
-                    flush=True,
-                )
-                try:
-                    resp3 = transfer_method(
-                        source_market="spot",
-                        target_market="futures",
-                        asset="USDT",
-                        amount=spot_usdt_free,
-                        client_oid=f"{tag}:step3:{int(now.timestamp())}",
-                    )
-                except Exception as exc:
-                    print(f"[COIN_CONVERT] step3 transfer failed: {exc}", flush=True)
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": now, "coin": coin, "step": 3,
-                            "status": "failed", "error": repr(exc),
-                        })
-                    continue
-                step3_ok = str(resp3.get("status", "")).upper() == "SUCCESS"
-                if self.log_store is not None:
-                    self.log_store.append("coin_convert", {
-                        "timestamp": now, "coin": coin,
-                        "status": "completed" if step3_ok else "step3_non_success",
-                        "amount_coin": amount,
-                        "usdt_recovered": spot_usdt_free if step3_ok else 0.0,
-                        "step1_response": resp1,
-                        "step2_response": resp2,
-                        "step3_response": resp3,
-                    })
-                if step3_ok:
-                    total_usdt_recovered += spot_usdt_free
-                    print(
-                        f"[COIN_CONVERT] SUCCESS {coin}: recovered ~${spot_usdt_free:.2f} USDT "
-                        f"to futures",
-                        flush=True,
-                    )
-                else:
-                    print(
-                        f"[COIN_CONVERT] step3 non-success for {coin}: {resp3}",
-                        flush=True,
-                    )
-            # Phase B — sell stranded spot ETH/BTC and move USDT to futures
-            for asset, sell_qty in spot_only_rows:
-                tag = f"coin_convert:spot_{asset}"
-                spot_symbol = f"{asset}USDT"
-                print(
-                    f"[COIN_CONVERT] {now.isoformat()} selling stranded spot "
-                    f"{sell_qty} {spot_symbol}",
-                    flush=True,
-                )
-                order_params = self.rest_client.build_order_params(
-                    market="spot",
-                    symbol=spot_symbol,
-                    side="sell",
-                    order_type="market",
-                    quantity=sell_qty,
-                )
-                try:
-                    resp_sell = self.rest_client.place_order(
-                        market="spot", order_params=order_params,
-                    )
-                except Exception as exc:
-                    error_message = str(exc)
-                    code = parse_error_code(error_message)
-                    if code in {"45110", "45111"} or "less than the minimum amount" in error_message.lower():
-                        self.coin_convert_spot_sell_cooldowns[asset] = now + timedelta(
-                            seconds=self._COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS
-                        )
-                    print(f"[COIN_CONVERT] spot sell failed for {asset}: {exc}", flush=True)
-                    if self.log_store is not None:
-                        self.log_store.append("coin_convert", {
-                            "timestamp": now, "coin": asset, "phase": "B",
-                            "step": "sell", "status": "failed", "error": repr(exc),
-                            "error_code": code,
-                            "cooldown_until": self.coin_convert_spot_sell_cooldowns.get(asset),
-                        })
-                    continue
-                sell_ok = str(resp_sell.get("status", "")).upper() == "SUCCESS"
-                if not sell_ok:
-                    response_message = json.dumps(resp_sell, ensure_ascii=False, default=str)
-                    code = parse_error_code(response_message)
-                    if code in {"45110", "45111"} or "less than the minimum amount" in response_message.lower():
-                        self.coin_convert_spot_sell_cooldowns[asset] = now + timedelta(
-                            seconds=self._COIN_CONVERT_MIN_AMOUNT_ERROR_COOLDOWN_SECONDS
-                        )
-                    print(f"[COIN_CONVERT] spot sell non-success for {asset}: {resp_sell}", flush=True)
-                    continue
-                time.sleep(1.0)
-                try:
-                    spot_acct = self.rest_client.get_account(market="spot")
-                    usdt_free = 0.0
-                    for bal in spot_acct.get("balances", []):
-                        if str(bal.get("asset", "")).upper() == "USDT":
-                            usdt_free = float(bal.get("free") or 0.0)
-                            break
-                except Exception:
-                    usdt_free = 0.0
-                if usdt_free < 1.0:
-                    continue
-                print(
-                    f"[COIN_CONVERT] {now.isoformat()} transferring {usdt_free:.4f} USDT "
-                    f"from spot → futures (phase B, {asset})",
-                    flush=True,
-                )
-                try:
-                    resp_xfer = transfer_method(
-                        source_market="spot",
-                        target_market="futures",
-                        asset="USDT",
-                        amount=usdt_free,
-                        client_oid=f"{tag}:xfer:{int(now.timestamp())}",
-                    )
-                except Exception as exc:
-                    print(f"[COIN_CONVERT] spot→futures transfer failed: {exc}", flush=True)
-                    continue
-                xfer_ok = str(resp_xfer.get("status", "")).upper() == "SUCCESS"
-                if self.log_store is not None:
-                    self.log_store.append("coin_convert", {
-                        "timestamp": now, "coin": asset, "phase": "B",
-                        "status": "completed" if xfer_ok else "transfer_non_success",
-                        "sell_qty": sell_qty,
-                        "usdt_recovered": usdt_free if xfer_ok else 0.0,
-                        "sell_response": resp_sell,
-                        "transfer_response": resp_xfer,
-                    })
-                if xfer_ok:
-                    total_usdt_recovered += usdt_free
-                    print(
-                        f"[COIN_CONVERT] SUCCESS spot {asset}: recovered "
-                        f"~${usdt_free:.2f} USDT to futures",
-                        flush=True,
-                    )
-            if total_usdt_recovered > 0.0:
-                print(
-                    f"[COIN_CONVERT] total recovered: ${total_usdt_recovered:.2f} USDT → futures",
-                    flush=True,
-                )
-                self._refresh_account_state(evaluate_live_positions=False)
-        finally:
-            self._coin_convert_in_progress = False
-
-    def _check_data_collection_graduation(self) -> None:
-        """Auto-graduate from data_collection_mode when min_trades reached.
-
-        Updates strategy_override.approved.json:
-        - data_collection_mode → false
-        - removes _lock field
-        Restores autotuner cron so the system can self-optimize.
-        """
-        settings = self.runtime.paper_service.settings
-        if not settings.data_collection_mode:
-            return
-        if len(self.closed_trades) < settings.data_collection_min_trades:
-            return
-        override_path_str = os.environ.get("STRATEGY_OVERRIDE_PATH", "")
-        if not override_path_str:
-            return
-        override_path = Path(override_path_str)
-        if not override_path.exists():
-            return
-        try:
-            raw = json.loads(override_path.read_text(encoding="utf-8"))
-            if not raw.get("data_collection_mode", False):
-                return
-            raw["data_collection_mode"] = False
-            raw.pop("_lock", None)
-            override_path.write_text(
-                json.dumps(raw, indent=2, sort_keys=True, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            logger.warning(
-                "[DATA_COLLECTION_GRADUATED] closed_trades=%d >= min=%d — "
-                "data_collection_mode disabled, _lock removed. "
-                "Normal protection gates will apply from next session restart.",
-                len(self.closed_trades),
-                settings.data_collection_min_trades,
-            )
-            # Restore autotuner cron
-            import subprocess
-            cron_line = "47 1,7,13,19 * * * /Users/tttksj/first_repo/scripts/quant_autotuner_cycle.sh >> /Users/tttksj/first_repo/quant_runtime/autotuner.log 2>&1"
-            result = subprocess.run(
-                ["bash", "-c", f'(crontab -l 2>/dev/null; echo "{cron_line}") | sort -u | crontab -'],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode == 0:
-                logger.warning("[DATA_COLLECTION_GRADUATED] autotuner cron restored")
-        except Exception as exc:
-            logger.warning("[DATA_COLLECTION_GRADUATION_FAILED] %s", exc)
+            spot_open_orders = self.rest_client.get_open_orders(market="spot")
+        except Exception:
+            spot_open_orders = {}
+        self.open_orders_snapshot = {
+            "futures": futures_open_orders,
+            "spot": spot_open_orders,
+        }
+        if hasattr(self.rest_client, "build_capital_report"):
+            report = self.rest_client.build_capital_report()
+            self.capital_report = {
+                "spot_available_balance_usd": report.spot_available_balance_usd,
+                "futures_available_balance_usd": report.futures_available_balance_usd,
+                "minimum_operational_balance_usd": report.minimum_operational_balance_usd,
+                "minimum_full_universe_balance_usd": report.minimum_full_universe_balance_usd,
+                "recommended_balance_usd": report.recommended_balance_usd,
+                "can_trade_any": report.can_trade_any,
+                "can_trade_spot_any": report.can_trade_spot_any,
+                "can_trade_futures_any": report.can_trade_futures_any,
+                "spot_requirements": [r.__dict__ for r in report.spot_requirements],
+                "futures_requirements": [r.__dict__ for r in report.futures_requirements],
+                "pending_symbols": list(report.pending_symbols),
+                "note": report.note,
+            }
+            if not report.can_trade_any:
+                self.runtime.kill_switch.arm("INSUFFICIENT_CAPITAL")
 
     def flush(self, *, summary_path: str | Path, state_path: str | Path) -> dict[str, object]:
-        self._check_data_collection_graduation()
-        self.summary_path = summary_path
-        self.state_path = state_path
-        open_spot_positions = self._open_positions_for_market("spot")
-        open_futures_positions = self._open_positions_for_market("futures")
-        mismatch_active, mismatch_details = self._self_healing_mismatch_snapshot()
-        self_healing_status = self.self_healing.snapshot(
-            now=datetime.now(tz=timezone.utc),
-            order_error_cooldowns=self.order_error_cooldowns,
-            manual_symbol_cooldowns=self.manual_symbol_cooldowns,
-            mismatch_active=mismatch_active,
-            mismatch_details=mismatch_details,
-        )
-        recent_decisions = self.decisions[-20:]
-        macro_runtime = {
-            "regime": recent_decisions[-1].macro_regime if recent_decisions else "neutral",
-            "trade_restraint": recent_decisions[-1].macro_trade_restraint if recent_decisions else "none",
-            "symbol_bias": recent_decisions[-1].macro_symbol_bias if recent_decisions else "neutral",
-            "active_symbols": sorted({decision.symbol for decision in recent_decisions if decision.final_mode != "cash"}),
-            "cash_rejections": sum(1 for decision in recent_decisions if "MACRO_EVENT_WINDOW" in decision.rejection_reasons or "MACRO_MAJORS_ONLY" in decision.rejection_reasons),
-        }
         summary = build_runtime_summary(
             decisions=self.decisions,
             tested_orders=self.tested_orders,
@@ -1145,114 +179,8 @@ class LivePaperSession:
             capital_report=self.capital_report,
             kill_switch_status=self.runtime.kill_switch.status(),
             observe_only_symbols=self.observe_only_symbols,
-            open_spot_positions=open_spot_positions,
-            open_futures_positions=open_futures_positions,
-            closed_trades=self.closed_trades,
-            telegram_alerts=self.telegram_alerts,
-            live_positions=self.live_positions_snapshot,
-            self_healing=self_healing_status,
         )
-        if self._paper_verification_mode_enabled():
-            mismatch_details_payload = dict(summary.get("futures_position_mismatch_details") or {})
-            mismatch_details_payload["missing_on_exchange"] = []
-            summary["futures_position_mismatch_details"] = mismatch_details_payload
-            summary["futures_position_mismatch"] = bool(mismatch_details_payload.get("missing_in_paper"))
-            summary["paper_verification_mode"] = True
-        reference_price_guard = {
-            "total_count": sum(self.reference_price_guard_counts.values()),
-            "counts_by_symbol": dict(sorted(self.reference_price_guard_counts.items())),
-            "last_by_symbol": {
-                symbol: dict(payload)
-                for symbol, payload in sorted(self.reference_price_guard_last_by_symbol.items())
-            },
-        }
-        summary["reference_price_guard"] = reference_price_guard
-        summary["macro_runtime"] = macro_runtime
-        summary["execution_quality"] = self._execution_quality_snapshot()
-        current_equity = self._extract_total_usdt_equity()
-        summary["session_start_equity_usdt"] = self.session_start_equity_usdt
-        summary["session_current_equity_usdt"] = current_equity
-        summary["session_equity_delta_usdt"] = (
-            round(current_equity - self.session_start_equity_usdt, 6)
-            if self.session_start_equity_usdt is not None and current_equity is not None
-            else None
-        )
-        run_dir = Path(summary_path).parent
-        base_dir = run_dir.parents[2] if len(run_dir.parents) >= 3 else run_dir
         write_runtime_summary(summary_path, summary)
-        validation_report_path = run_dir / "validation_report.json"
-        write_policy_validation_runner_artifact(base_dir=base_dir, output_path=validation_report_path)
-        previous_policy_state = self._read_persisted_policy_state()
-        validation_runner_context = dict(load_validation_runner_evidence(validation_report_path))
-        if self.runtime.paper_service.settings.portfolio_focus.enabled:
-            validation_runner_context.setdefault(
-                "promotion_top_k",
-                max(int(self.runtime.paper_service.settings.portfolio_focus.futures_top_n), 0),
-            )
-        summary["candidate_policy"] = _resume_staged_candidate_policy(
-            previous_policy_state,
-            build_auto_tune_policy(summary.get("performance_attribution", []), validation_runner_context),
-            validation_runner_context,
-        )
-        comparison_report_path = run_dir / "policy_comparison.json"
-        comparison_evidence: dict[str, Any] = {}
-        try:
-            write_policy_comparison_validation_artifact(
-                current_policy_state=previous_policy_state,
-                candidate_policy=summary.get("candidate_policy", {}),
-                base_dir=base_dir,
-                output_path=comparison_report_path,
-                current_runtime_summary=summary,
-            )
-            comparison_evidence = load_validation_runner_evidence(comparison_report_path)
-        except Exception as exc:
-            summary["policy_comparison_error"] = {
-                "type": type(exc).__name__,
-                "message": str(exc),
-                "output_path": str(comparison_report_path),
-            }
-        checkpoint_auto_judge = dict(comparison_evidence.get("checkpoint_auto_judge", {}) or {})
-        if checkpoint_auto_judge:
-            try:
-                (run_dir / "checkpoint_auto_judge.json").write_text(
-                    json.dumps(checkpoint_auto_judge, indent=2, sort_keys=True),
-                    encoding="utf-8",
-                )
-            except Exception as exc:
-                print(f"[CHECKPOINT_WRITE_ERROR] {exc}", flush=True)
-        summary["checkpoint_auto_judge"] = checkpoint_auto_judge
-        summary["promotion_verdict"] = build_promotion_verdict(summary.get("candidate_policy", {}), comparison_evidence)
-        summary["policy_validation"] = build_policy_validation(
-            summary.get("candidate_policy", {}),
-            summary.get("promotion_verdict", {}),
-            summary.get("operational_verdict", {}),
-            summary.get("performance_attribution", []),
-            comparison_evidence,
-        )
-        summary["executive_operating_verdict"] = build_executive_operating_verdict(
-            summary.get("promotion_verdict", {}),
-            summary.get("operational_verdict", {}),
-            summary.get("policy_validation", {}),
-            comparison_evidence,
-        )
-        persisted_policy_state = build_persisted_policy_state(
-            previous_policy_state,
-            summary.get("candidate_policy", {}),
-            summary.get("promotion_verdict", {}),
-            summary.get("operational_verdict", {}),
-            summary.get("policy_validation", {}),
-        )
-        summary["policy_state"] = persisted_policy_state
-        summary["executive_operating_verdict"] = dict(
-            persisted_policy_state.get("executive_operating_verdict", summary.get("executive_operating_verdict", {})) or {}
-        )
-        summary["live_evidence_rejudge"] = dict(persisted_policy_state.get("live_evidence_rejudge", {}) or {})
-        summary["retention_monitor"] = dict(persisted_policy_state.get("retention_monitor", {}) or {})
-        summary["rollout_progression"] = dict(persisted_policy_state.get("rollout_progression", {}) or {})
-        summary["policy_lineage"] = dict(persisted_policy_state.get("policy_lineage", {}) or {})
-        summary["policy_evidence_buckets"] = dict(persisted_policy_state.get("policy_evidence_buckets", {}) or {})
-        write_runtime_summary(summary_path, summary)
-        self._write_persisted_policy_state(persisted_policy_state)
         write_runtime_state(
             state_path,
             {
@@ -1262,101 +190,14 @@ class LivePaperSession:
                 "heartbeat_count": self.heartbeat_count,
                 "last_event_timestamp": self.last_event_timestamp,
                 "last_decision_timestamp": self.last_decision_timestamp,
-                "last_decision_emitted_at": self.last_decision_emitted_at,
                 "live_decision_loop": self.runtime.loop_stats.as_dict(),
                 "capital_report": self.capital_report,
-                "open_spot_position_count": len(open_spot_positions),
-                "open_futures_position_count": len(open_futures_positions),
-                "paper_open_futures_position_count": summary["paper_open_futures_position_count"],
-                "paper_open_futures_positions": summary["paper_open_futures_positions"],
-                "adopted_futures_position_count": summary["adopted_futures_position_count"],
-                "adopted_futures_positions": summary["adopted_futures_positions"],
-                "exchange_live_futures_position_count": summary["exchange_live_futures_position_count"],
-                "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
-                "pending_external_futures_position_count": summary["pending_external_futures_position_count"],
-                "pending_external_futures_positions": summary["pending_external_futures_positions"],
-                "futures_position_mismatch": summary["futures_position_mismatch"],
-                "futures_position_mismatch_details": summary["futures_position_mismatch_details"],
-                "futures_missing_in_paper_counts": dict(sorted(self.futures_missing_in_paper_counts.items())),
-                "futures_missing_on_exchange_counts": dict(sorted(self.futures_missing_on_exchange_counts.items())),
-                "reference_price_guard": reference_price_guard,
-                "self_healing": self_healing_status,
-                "macro_runtime": macro_runtime,
-                "execution_quality": summary["execution_quality"],
-                "closed_trade_count": summary["closed_trade_count"],
-                "session_start_equity_usdt": self.session_start_equity_usdt,
-                "session_current_equity_usdt": current_equity,
-                "session_equity_delta_usdt": summary.get("session_equity_delta_usdt"),
-                "kill_switch": self.runtime.kill_switch.status(),
-                "policy_state": persisted_policy_state,
-                "executive_operating_verdict": dict(persisted_policy_state.get("executive_operating_verdict", {}) or {}),
-                "live_evidence_rejudge": dict(persisted_policy_state.get("live_evidence_rejudge", {}) or {}),
-                "retention_monitor": dict(persisted_policy_state.get("retention_monitor", {}) or {}),
-                "rollout_progression": dict(persisted_policy_state.get("rollout_progression", {}) or {}),
-                "policy_lineage": dict(persisted_policy_state.get("policy_lineage", {}) or {}),
-                "policy_evidence_buckets": dict(persisted_policy_state.get("policy_evidence_buckets", {}) or {}),
-            },
-        )
-        overview_path = Path(summary_path).with_name("overview.json")
-        overview = build_runtime_overview(
-            summary=summary,
-            state={
-                "updated_at": datetime.now(tz=timezone.utc).isoformat(),
-                "decision_count": len(self.decisions),
-                "heartbeat_count": self.heartbeat_count,
-                "last_event_timestamp": self.last_event_timestamp,
-                "last_decision_timestamp": self.last_decision_timestamp,
-                "last_decision_emitted_at": self.last_decision_emitted_at,
-                "live_order_count": len(self.live_orders),
-                "tested_order_count": len(self.tested_orders),
-                "exchange_live_futures_position_count": summary["exchange_live_futures_position_count"],
-                "exchange_live_futures_positions": summary["exchange_live_futures_positions"],
-                "adopted_futures_position_count": summary["adopted_futures_position_count"],
-                "adopted_futures_positions": summary["adopted_futures_positions"],
-                "pending_external_futures_position_count": summary["pending_external_futures_position_count"],
-                "pending_external_futures_positions": summary["pending_external_futures_positions"],
-                "capital_report": self.capital_report,
-                "reference_price_guard": reference_price_guard,
-                "self_healing": self_healing_status,
-                "macro_runtime": macro_runtime,
-                "execution_quality": summary["execution_quality"],
                 "kill_switch": self.runtime.kill_switch.status(),
             },
         )
-        write_runtime_overview(overview_path, overview)
         if self.learner is not None and self.learner_output_path is not None:
             self.learner.export(self.learner_output_path)
-        # Window in-memory lists to prevent unbounded growth in long-running sessions.
-        # Full history is already persisted to JSONL log files.
-        _MAX_DECISIONS = 500
-        _MAX_ORDERS = 200
-        _MAX_ALERTS = 100
-        if len(self.decisions) > _MAX_DECISIONS:
-            self.decisions = self.decisions[-_MAX_DECISIONS:]
-        if len(self.tested_orders) > _MAX_ORDERS:
-            self.tested_orders = self.tested_orders[-_MAX_ORDERS:]
-        if len(self.live_orders) > _MAX_ORDERS:
-            self.live_orders = self.live_orders[-_MAX_ORDERS:]
-        if len(self.telegram_alerts) > _MAX_ALERTS:
-            self.telegram_alerts = self.telegram_alerts[-_MAX_ALERTS:]
         return summary
-
-    def _self_healing_mismatch_snapshot(self) -> tuple[bool, dict[str, list[str]]]:
-        if self.rest_client is None and not self.live_positions_snapshot:
-            return False, {"missing_in_paper": [], "missing_on_exchange": []}
-        details = {
-            "missing_in_paper": sorted(
-                symbol
-                for symbol, count in self.futures_missing_in_paper_counts.items()
-                if count >= self._missing_in_paper_threshold()
-            ),
-            "missing_on_exchange": sorted(
-                symbol
-                for symbol, count in self.futures_missing_on_exchange_counts.items()
-                if count >= self._missing_on_exchange_threshold()
-            ),
-        }
-        return bool(details["missing_in_paper"] or details["missing_on_exchange"]), details
 
     def maybe_flush(
         self,
@@ -1395,6472 +236,143 @@ class LivePaperSession:
             ]
         )
 
-    def _execution_quality_snapshot(self) -> dict[str, object]:
-        snapshot = self._execution_quality_state.snapshot()
-        return self._sanitize_execution_quality_snapshot(snapshot)
-
-    def _is_timeout_error(self, message: str) -> bool:
-        normalized = message.lower()
-        return "timed out" in normalized or "timeout" in normalized
-
-    def _record_execution_quality_outcome(
-        self,
-        *,
-        symbol: str,
-        outcome: str,
-        fill_ratio: float,
-        slippage_bps: float | None,
-        realized_edge_bps: float | None,
-        expected_edge_bps: float | None = None,
-        protection_degraded: bool = False,
-        timestamp: datetime,
-        market: str | None = None,
-        exchange_id: str | None = None,
-        policy_bucket: str | None = None,
-    ) -> None:
-        self._execution_quality_state.record(
-            symbol=symbol,
-            outcome=outcome,
-            fill_ratio=fill_ratio,
-            slippage_bps=slippage_bps,
-            realized_edge_bps=realized_edge_bps,
-            expected_edge_bps=expected_edge_bps,
-            protection_degraded=protection_degraded,
-            timestamp=timestamp,
-            market=market,
-            exchange_id=exchange_id,
-            policy_bucket=policy_bucket,
-        )
-
-    def _execution_quality_exchange_id(self) -> str | None:
-        if self.live_order_executor is not None:
-            return self.live_order_executor._exchange_id()
-        if self.order_tester is not None:
-            return str(getattr(self.order_tester.client, "exchange_id", "") or "")
-        return str(getattr(self.rest_client, "exchange_id", "") or "")
-
-    def _safe_execution_quality_snapshot(self, symbol: str) -> dict[str, float]:
-        """Safe extraction of execution quality metrics for closed trade logging."""
-        try:
-            snap = self._execution_quality_state.snapshot()
-            return {
-                "avg_edge_retention_ratio": round(float(snap.get("avg_edge_retention_ratio", 0.0) or 0.0), 4),
-                "avg_slippage_bps": round(float(snap.get("avg_slippage_bps", 0.0) or 0.0), 4),
-                "avg_fill_ratio": round(float(snap.get("avg_fill_ratio", 0.0) or 0.0), 4),
-                "reject_rate": round(float(snap.get("reject_rate", 0.0) or 0.0), 4),
-                "sample_size": int(snap.get("sample_size", 0) or 0),
-            }
-        except Exception:
-            return {}
-
-    def _market_capital_allowed(self, decision: DecisionIntent) -> bool:
-        if not self.capital_report:
-            return True
-        if decision.final_mode == "spot":
-            return bool(self.capital_report.get("can_trade_spot_any", False))
-        if decision.final_mode == "futures":
-            return bool(self.capital_report.get("can_trade_futures_any", False))
-        return True
-
-    def _cash_reserve_fraction(self) -> float:
-        reserve_overrides = dict(self._conservative_auto_mode_runtime_overrides().get("cash_reserve", {}) or {})
-        if self.capital_report.get("can_trade_futures_any", False):
-            base_reserve = self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
-            return max(base_reserve, float(reserve_overrides.get("when_futures_enabled", base_reserve) or base_reserve))
-        return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
-
-    def _fee_bps_for_market(self, market: str) -> float:
-        fees = self.runtime.paper_service.settings.fees
-        if market == "futures":
-            return max(float(fees.futures_taker_fee_bps), 0.0)
-        if market == "spot":
-            return max(float(fees.spot_taker_fee_bps), 0.0)
-        return 0.0
-
-    def _estimated_round_trip_fee_usd(self, *, market: str, notional_usd: float) -> float:
-        return max(float(notional_usd), 0.0) * self._fee_bps_for_market(market) * 2.0 / 10000.0
-
-    def _estimated_one_way_fee_usd(self, *, market: str, notional_usd: float) -> float:
-        return max(float(notional_usd), 0.0) * self._fee_bps_for_market(market) / 10000.0
-
-    def _fee_sensitive_execution_enabled(self) -> bool:
-        return self.live_order_executor is not None or self._paper_verification_mode_enabled()
-
-    def _expected_net_profit_usd(self, decision: DecisionIntent, *, notional_usd: float | None = None) -> float:
-        effective_notional = decision.order_intent_notional_usd if notional_usd is None else notional_usd
-        return max(float(effective_notional), 0.0) * max(float(decision.net_expected_edge_bps), 0.0) / 10000.0
-
-    def _min_expected_profit_usd_threshold(
-        self,
-        decision: DecisionIntent,
-        *,
-        notional_usd: float | None = None,
-    ) -> float:
-        base_threshold = float(self.runtime.paper_service.settings.risk.min_expected_profit_usd_per_trade)
-        base_threshold = max(0.0, base_threshold + self._policy_expected_profit_floor_adjustment_usd(decision))
-        base_threshold = max(0.0, base_threshold + self._execution_quality_expected_profit_floor_adjustment_usd(decision))
-        if (
-            self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
-            and decision.final_mode == "futures"
-            and self._is_major_futures_symbol(decision.symbol)
-            and base_threshold > 0.0
-        ):
-            base_threshold = min(base_threshold, 0.09)
-        if self._fee_sensitive_execution_enabled() and decision.final_mode in {"spot", "futures"}:
-            effective_notional = decision.order_intent_notional_usd if notional_usd is None else notional_usd
-            fee_drag_multiplier = 4.0 if self.equity_usd <= 10.0 else 2.0
-            fee_drag_floor = self._estimated_round_trip_fee_usd(
-                market=decision.final_mode,
-                notional_usd=effective_notional,
-            ) * fee_drag_multiplier
-            base_threshold = max(base_threshold, fee_drag_floor)
-        return base_threshold
-
-    def _policy_alignment_fast_path_passes(self, decision: DecisionIntent, *, elite: bool = False) -> bool:
-        if decision.final_mode != "futures" or decision.side != "long":
-            return False
-        notional = max(float(decision.order_intent_notional_usd), 0.0)
-        threshold = self._min_expected_profit_usd_threshold(decision, notional_usd=notional)
-        expected_profit = self._expected_net_profit_usd(decision, notional_usd=notional)
-        edge_to_cost = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.gross_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        if elite:
-            return (
-                expected_profit >= max(threshold * 2.5, threshold + 1.0)
-                and edge_to_cost >= 3.0
-                and decision.predictability_score >= 75.0
-                and decision.liquidity_score >= 0.60
-                and decision.volume_confirmation >= 0.60
-            )
-        return (
-            expected_profit >= max(threshold * 1.75, threshold + 0.5)
-            and edge_to_cost >= 2.0
-            and decision.predictability_score >= 70.0
-            and decision.liquidity_score >= 0.55
-            and decision.volume_confirmation >= 0.55
-        )
-
-    def _apply_policy_alignment_entry_gate(
-        self,
-        decision: DecisionIntent,
-        *,
-        policy_entry_context: dict[str, object] | None = None,
-    ) -> DecisionIntent:
-        if not self._fee_sensitive_execution_enabled():
-            return decision
-        if decision.final_mode != "futures" or decision.side != "long" or decision.order_intent_notional_usd <= 0.0:
-            return decision
-        context = dict(policy_entry_context or self._policy_entry_context_snapshot())
-        source = str(context.get("entry_policy_context_source", "") or "").strip().lower()
-        if source not in {"active_policy", "candidate_policy"}:
-            return decision
-        available = bool(context.get("entry_policy_bucket_available", False))
-        alignment = str(context.get("entry_policy_bucket_alignment_status", "") or "").strip().lower()
-        policy_lineage = dict(context.get("entry_policy_lineage", {}) or {})
-        policy_status = str(policy_lineage.get("policy_status", "") or "").strip().lower()
-        if policy_status in {"demote", "disable", "disabled", "rollback", "hold"}:
-            policy_symbols = tuple(
-                str(symbol).strip().upper()
-                for symbol in list(policy_lineage.get("symbols", []) or [])
-                if str(symbol).strip()
-            )
-            decision_symbol = decision.symbol.strip().upper()
-            if not policy_symbols or decision_symbol in policy_symbols:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(
-                        sorted(set(decision.rejection_reasons + ("POLICY_ALIGNMENT_DEMOTED_BUCKET",)))
-                    ),
-                )
-            return decision
-        if available and alignment == "aligned":
-            return decision
-        if self._policy_alignment_fast_path_passes(decision, elite=not available):
-            return decision
-        return replace(
-            decision,
-            final_mode="cash",
-            side="flat",
-            order_intent_notional_usd=0.0,
-            stop_distance_bps=0.0,
-            rejection_reasons=tuple(
-                sorted(set(decision.rejection_reasons + ("POLICY_ALIGNMENT_CONFIRMATION_REQUIRED",)))
-            ),
-        )
-
-    def _apply_fee_sensitive_entry_quality_buffer(self, decision: DecisionIntent) -> DecisionIntent:
-        if not self._fee_sensitive_execution_enabled():
-            return decision
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return decision
-        if decision.order_intent_notional_usd <= 0.0:
-            return decision
-        threshold = self._min_expected_profit_usd_threshold(
-            decision,
-            notional_usd=decision.order_intent_notional_usd,
-        )
-        expected_profit = self._expected_net_profit_usd(
-            decision,
-            notional_usd=decision.order_intent_notional_usd,
-        )
-        symbol_profile = self._symbol_filter_profile_for_decision(decision)
-        symbol_profile_decision = self._apply_symbol_filter_profile_entry_gate(
-            decision,
-            expected_profit_usd=expected_profit,
-            threshold_usd=threshold,
-        )
-        if symbol_profile_decision.final_mode != "futures" or symbol_profile_decision.order_intent_notional_usd <= 0.0:
-            return symbol_profile_decision
-        if symbol_profile_decision is not decision:
-            decision = symbol_profile_decision
-            threshold = self._min_expected_profit_usd_threshold(
-                decision,
-                notional_usd=decision.order_intent_notional_usd,
-            )
-            expected_profit = self._expected_net_profit_usd(
-                decision,
-                notional_usd=decision.order_intent_notional_usd,
-            )
-        delayed_entry_gate = self._apply_paper_verification_delayed_entry_gate(decision)
-        if delayed_entry_gate.final_mode != "futures" or delayed_entry_gate.order_intent_notional_usd <= 0.0:
-            return delayed_entry_gate
-        microstructure_strong = (
-            decision.predictability_score >= 70.0
-            and decision.liquidity_score >= 0.55
-            and decision.volume_confirmation >= 0.55
-        )
-        if self._paper_verification_marginal_liquidity_continuation_entry(
-            decision,
-            expected_profit_usd=expected_profit,
-            threshold_usd=threshold,
-        ):
-            return decision
-        if self._paper_verification_fragile_fee_drag_entry(
-            decision,
-            expected_profit_usd=expected_profit,
-            threshold_usd=threshold,
-        ):
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(
-                    sorted(set(decision.rejection_reasons + ("PAPER_VERIFY_FRAGILE_FEE_DRAG_ENTRY",)))
-                ),
-            )
-        if self._paper_verification_reversal_prone_entry(
-            decision,
-            expected_profit_usd=expected_profit,
-            threshold_usd=threshold,
-        ):
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(
-                    sorted(set(decision.rejection_reasons + ("PAPER_VERIFY_REVERSAL_PRONE_ENTRY",)))
-                ),
-            )
-        if symbol_profile is not None and symbol_profile.bypass_fee_edge_buffer:
-            return decision
-        if microstructure_strong:
-            return decision
-        if expected_profit >= max(threshold * 1.75, threshold + 0.5):
-            return decision
-        return replace(
-            decision,
-            final_mode="cash",
-            side="flat",
-            order_intent_notional_usd=0.0,
-            stop_distance_bps=0.0,
-            rejection_reasons=tuple(
-                sorted(set(decision.rejection_reasons + ("FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED",)))
-            ),
-        )
-
-    # ─── Cross-coin OI quadrant gate (introduced 2026-04-26) ──────────────
-    # Opt-in feature, enabled only when env var QUANT_CROSS_COIN_GATE=1.
-    # Reads from cwd-relative paths:
-    # · quant_runtime_paper50/cross_coin_ev_table.json
-    # · quant_runtime_paper50/bitget_external_alpha_shadow/cycle_*/metrics.json
-    # If env var is unset or files missing, the gate is silently disabled.
-    _CROSS_COIN_EV_TABLE_PATH = Path("quant_runtime_paper50") / "cross_coin_ev_table.json"
-    _CROSS_COIN_SHADOW_DIR = Path("quant_runtime_paper50") / "bitget_external_alpha_shadow"
-    _CROSS_COIN_UNIVERSE = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "PEPEUSDT")
-    _CROSS_COIN_STATE_TTL_SEC = 60.0  # cache states for 60s to avoid IO on every decision
-    _CROSS_COIN_ENV_FLAG = "QUANT_CROSS_COIN_GATE"
-    # Cross-coin dynamic priority refresh: re-evaluate priority_symbols at most
-    # once per CYCLE_SEC. Cycle data updates every ~5min, so 60s is plenty fresh
-    # while avoiding state mutation on every per-symbol decision call.
-    _CROSS_COIN_PRIORITY_REFRESH_SEC = 60.0
-
-    def _cross_coin_gate_enabled(self) -> bool:
-        return os.environ.get(self._CROSS_COIN_ENV_FLAG, "").strip() in {"1", "true", "TRUE", "yes"}
-
-    def _cross_coin_ev_table_cached(self):
-        cached = getattr(self, "_cross_coin_ev_table_cache", None)
-        if cached is not None:
-            return cached
-        path = self._CROSS_COIN_EV_TABLE_PATH
-        if not path.exists():
-            self._cross_coin_ev_table_cache = False  # sentinel: tried, missing
-            return False
-        try:
-            table = _cross_coin_load_ev_table(path)
-        except (json.JSONDecodeError, OSError):
-            self._cross_coin_ev_table_cache = False
-            return False
-        self._cross_coin_ev_table_cache = table
-        return table
-
-    def _cross_coin_states_cached(self):
-        cached_at = getattr(self, "_cross_coin_states_cached_at", 0.0)
-        if time.time() - cached_at < self._CROSS_COIN_STATE_TTL_SEC:
-            return getattr(self, "_cross_coin_states_cache", {})
-        shadow = self._CROSS_COIN_SHADOW_DIR
-        if not shadow.exists():
-            states: dict = {}
-        else:
-            try:
-                states = _cross_coin_load_latest_states(shadow, list(self._CROSS_COIN_UNIVERSE))
-            except Exception:
-                logger.exception("cross_coin_load_latest_states failed")
-                states = {}
-        self._cross_coin_states_cache = states
-        self._cross_coin_states_cached_at = time.time()
-        return states
-
-    def _refresh_cross_coin_dynamic_priority(self) -> None:
-        """Update Settings.priority_symbols from cross-coin EV top-1 each cycle.
-
-        Behavior (option A=keep + B=pivot, committed 2026-04-26):
-        - On first call, captures the static priority_symbols from config as
-          fallback (so we can restore when no signal is present).
-        - When ranked candidates exist, sets priority_symbols=(top_1.symbol,)
-          on both futures_exposure and spot_support.
-        - When ranked is empty (no scenarios match), restores static fallback.
-        - Throttled to once per _CROSS_COIN_PRIORITY_REFRESH_SEC to avoid
-          mutating Settings on every per-symbol decision.
-        - Soft-disabled (no-op) when env flag unset or data unavailable.
-
-        Reallocation behavior (option B=pivot): Settings mutation only changes
-        size_boost / gate_relax marker, NOT existing positions. Existing trades
-        are evaluated for reallocation by score/edge as before; the new top-1
-        gets priority size on its NEXT entry rather than forcing churn.
-        """
-        if not self._cross_coin_gate_enabled():
-            return
-        last_at = getattr(self, "_cross_coin_priority_refreshed_at", 0.0)
-        if time.time() - last_at < self._CROSS_COIN_PRIORITY_REFRESH_SEC:
-            return
-
-        try:
-            settings = self.runtime.paper_service.settings
-        except AttributeError:
-            return
-        fe = getattr(settings, "futures_exposure", None)
-        ss = getattr(settings, "spot_support", None)
-        if fe is None or ss is None:
-            return
-
-        # Capture static fallback once on first call.
-        if not hasattr(self, "_cross_coin_static_priority_futures"):
-            self._cross_coin_static_priority_futures = tuple(
-                getattr(fe, "priority_symbols", ()) or ()
-            )
-            self._cross_coin_static_priority_spot = tuple(
-                getattr(ss, "priority_symbols", ()) or ()
-            )
-
-        table = self._cross_coin_ev_table_cached()
-        states = self._cross_coin_states_cached()
-        if table is False or not isinstance(table, dict) or not states:
-            self._cross_coin_priority_refreshed_at = time.time()
-            return
-
-        try:
-            ranked = _cross_coin_rank_candidates(
-                table, states, now_ms=int(time.time() * 1000)
-            )
-        except Exception:
-            logger.exception("cross_coin_rank_candidates failed")
-            self._cross_coin_priority_refreshed_at = time.time()
-            return
-
-        if ranked:
-            top_symbol = ranked[0].symbol.upper()
-            new_priority = (top_symbol,)
-            current_futures = tuple(getattr(fe, "priority_symbols", ()) or ())
-            if current_futures != new_priority:
-                try:
-                    object.__setattr__(fe, "priority_symbols", new_priority)
-                    object.__setattr__(ss, "priority_symbols", new_priority)
-                    logger.info(
-                        "cross_coin_dynamic_priority: %s ev=%.2fbps wr=%.0f%% n=%d (was %s)",
-                        top_symbol,
-                        ranked[0].ev_bps,
-                        ranked[0].winrate * 100.0,
-                        ranked[0].n,
-                        ",".join(current_futures) or "<empty>",
-                    )
-                except (AttributeError, TypeError):
-                    logger.exception("cross_coin priority_symbols mutation failed")
-        else:
-            # No signal: restore static fallback.
-            static_f = getattr(self, "_cross_coin_static_priority_futures", ())
-            static_s = getattr(self, "_cross_coin_static_priority_spot", ())
-            current_futures = tuple(getattr(fe, "priority_symbols", ()) or ())
-            if current_futures != static_f:
-                try:
-                    object.__setattr__(fe, "priority_symbols", static_f)
-                    object.__setattr__(ss, "priority_symbols", static_s)
-                    logger.info(
-                        "cross_coin_dynamic_priority: no signal — restored static %s",
-                        ",".join(static_f) or "<empty>",
-                    )
-                except (AttributeError, TypeError):
-                    logger.exception("cross_coin priority_symbols restore failed")
-
-        self._cross_coin_priority_refreshed_at = time.time()
-
-    def _apply_cross_coin_oi_quadrant_gate(self, decision: DecisionIntent) -> DecisionIntent:
-        """Reject futures entries that hit a known-bad cross-coin scenario, and
-        enrich the decision with cross-coin metadata for sufficient observability.
-
-        Soft-disabled when EV table or cycle data is unavailable. When enabled,
-        always enriches the returned decision with cross_coin_* fields whether
-        or not entry is blocked — this is what lets summary.json and forensics
-        track gate effectiveness.
-        """
-        # Refresh priority_symbols from cross-coin EV (cheap, throttled to 60s).
-        self._refresh_cross_coin_dynamic_priority()
-
-        if not self._cross_coin_gate_enabled():
-            return decision
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return decision
-        if decision.order_intent_notional_usd <= 0.0:
-            return decision
-        sym = decision.symbol.strip().upper()
-        if sym not in self._CROSS_COIN_UNIVERSE:
-            return decision
-
-        table = self._cross_coin_ev_table_cached()
-        if table is False or not isinstance(table, dict):
-            return decision
-        states = self._cross_coin_states_cached()
-        if not states:
-            return decision
-
-        own = states.get(sym)
-        if own is None:
-            return decision
-        leader_sym = (table.get("leader_per_symbol") or {}).get(sym, "")
-        leader = states.get(leader_sym) if leader_sym else None
-        now_ms = int(time.time() * 1000)
-        try:
-            score = _cross_coin_score_symbol(table, own, leader, now_ms=now_ms)
-        except Exception:
-            logger.exception("cross_coin_score_symbol failed for %s", sym)
-            return decision
-
-        # Detect dynamic-priority top-1 match.
-        is_top = False
-        try:
-            settings = self.runtime.paper_service.settings
-            current_priority = tuple(getattr(settings.futures_exposure, "priority_symbols", ()) or ())
-            is_top = sym in current_priority
-        except Exception:
-            pass
-
-        # Build metadata fields (always populated when env on + universe symbol).
-        own_quadrant = own.own_quadrant
-        own_dir = own.own_dir
-        leader_quadrant = leader.own_quadrant if leader else ""
-        leader_dir = leader.own_dir if leader else ""
-
-        # No score (no scenario, no blocker): just enrich and return.
-        if score is None:
-            return replace(
-                decision,
-                cross_coin_own_quadrant=own_quadrant,
-                cross_coin_own_dir=own_dir,
-                cross_coin_leader_symbol=leader_sym or "",
-                cross_coin_leader_quadrant=leader_quadrant,
-                cross_coin_leader_dir=leader_dir,
-                cross_coin_is_top_priority=is_top,
-            )
-
-        # Blocker present: reject AND enrich.
-        if score.blocker_match is not None:
-            reason = f"CROSS_COIN_OI_QUADRANT_BLOCKED:{score.blocker_match.get('reason', 'unknown')}"
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (reason,)))),
-                cross_coin_own_quadrant=own_quadrant,
-                cross_coin_own_dir=own_dir,
-                cross_coin_leader_symbol=leader_sym or "",
-                cross_coin_leader_quadrant=leader_quadrant,
-                cross_coin_leader_dir=leader_dir,
-                cross_coin_ev_bps=float(score.ev_bps),
-                cross_coin_winrate=float(score.winrate),
-                cross_coin_n=int(score.n),
-                cross_coin_rank=int(score.rank),
-                cross_coin_blocker_reason=str(score.blocker_match.get("reason", "")),
-                cross_coin_is_top_priority=is_top,
-            )
-
-        # Positive scenario match: enrich + size-boost based on EV strength.
-        # Conservative size multiplier: only scales UP when ev_bps > threshold
-        # (no downsizing for weak-but-positive scenarios). Capped at 1.5x to keep
-        # risk envelope compatible with existing exposure controls. Off when
-        # decision side mismatches scenario side (gate stays enrichment-only).
-        ev_threshold = float(table.get("ev_threshold_bps", 5.0))
-        ev_bps = float(score.ev_bps)
-        scenario_side = str(score.side or "").lower()
-        side_aligned = scenario_side in {"long", "short"} and scenario_side == decision.side
-        boost_factor = 1.0
-        if (
-            side_aligned
-            and ev_threshold > 0.0
-            and ev_bps > ev_threshold
-            and decision.order_intent_notional_usd > 0.0
-        ):
-            boost_factor = min(1.0 + (ev_bps - ev_threshold) / ev_threshold, 1.5)
-        if boost_factor > 1.000001:
-            return replace(
-                decision,
-                order_intent_notional_usd=round(decision.order_intent_notional_usd * boost_factor, 6),
-                strategy_size_multiplier=round(decision.strategy_size_multiplier * boost_factor, 6),
-                size_boost_reasons=tuple(
-                    sorted(set(decision.size_boost_reasons + (f"CROSS_COIN_EV_BOOST:{ev_bps:.1f}bps",)))
-                ),
-                cross_coin_own_quadrant=own_quadrant,
-                cross_coin_own_dir=own_dir,
-                cross_coin_leader_symbol=leader_sym or "",
-                cross_coin_leader_quadrant=leader_quadrant,
-                cross_coin_leader_dir=leader_dir,
-                cross_coin_ev_bps=ev_bps,
-                cross_coin_winrate=float(score.winrate),
-                cross_coin_n=int(score.n),
-                cross_coin_rank=int(score.rank),
-                cross_coin_is_top_priority=is_top,
-            )
-        return replace(
-            decision,
-            cross_coin_own_quadrant=own_quadrant,
-            cross_coin_own_dir=own_dir,
-            cross_coin_leader_symbol=leader_sym or "",
-            cross_coin_leader_quadrant=leader_quadrant,
-            cross_coin_leader_dir=leader_dir,
-            cross_coin_ev_bps=ev_bps,
-            cross_coin_winrate=float(score.winrate),
-            cross_coin_n=int(score.n),
-            cross_coin_rank=int(score.rank),
-            cross_coin_is_top_priority=is_top,
-        )
-
-    def _symbol_filter_profile_for_decision(self, decision: DecisionIntent):
-        profiles = self.runtime.paper_service.settings.symbol_filter_profiles or {}
-        return profiles.get(decision.symbol.strip().upper())
-
-    def _apply_symbol_filter_profile_entry_gate(
-        self,
-        decision: DecisionIntent,
-        *,
-        expected_profit_usd: float,
-        threshold_usd: float,
-    ) -> DecisionIntent:
-        profile = self._symbol_filter_profile_for_decision(decision)
-        if profile is None:
-            return decision
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return decision
-        if decision.order_intent_notional_usd <= 0.0:
-            return decision
-        edge_to_cost = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        rejections: list[str] = []
-        if profile.min_predictability_score > 0.0 and decision.predictability_score < profile.min_predictability_score:
-            rejections.append("SYMBOL_PROFILE_SCORE_TOO_LOW")
-        if profile.min_liquidity_score > 0.0 and decision.liquidity_score < profile.min_liquidity_score:
-            rejections.append("SYMBOL_PROFILE_LIQUIDITY_TOO_WEAK")
-        if profile.min_volume_confirmation > 0.0 and decision.volume_confirmation < profile.min_volume_confirmation:
-            rejections.append("SYMBOL_PROFILE_VOLUME_TOO_WEAK")
-        if profile.min_net_edge_bps > 0.0 and decision.net_expected_edge_bps < profile.min_net_edge_bps:
-            rejections.append("SYMBOL_PROFILE_EDGE_TOO_THIN")
-        if profile.min_edge_to_cost > 0.0 and edge_to_cost < profile.min_edge_to_cost:
-            rejections.append("SYMBOL_PROFILE_EDGE_COST_TOO_THIN")
-        if profile.max_stop_distance_bps > 0.0 and decision.stop_distance_bps > profile.max_stop_distance_bps:
-            rejections.append("SYMBOL_PROFILE_STOP_TOO_WIDE")
-        if (
-            profile.min_expected_profit_multiplier > 0.0
-            and expected_profit_usd
-            < max(
-                threshold_usd * profile.min_expected_profit_multiplier,
-                threshold_usd + profile.min_expected_profit_extra_usd,
-            )
-        ):
-            rejections.append("SYMBOL_PROFILE_EXPECTED_PROFIT_TOO_SMALL")
-        recovery_reason = ""
-        if rejections:
-            recovery_reason = self._paper_symbol_filter_recovery_reason(
-                decision,
-                profile=profile,
-                rejections=tuple(rejections),
-                edge_to_cost=edge_to_cost,
-            )
-        if rejections and not recovery_reason:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + tuple(rejections)))),
-            )
-        if profile.size_multiplier > 0.0 and profile.size_multiplier < 0.999999:
-            return replace(
-                decision,
-                order_intent_notional_usd=round(decision.order_intent_notional_usd * profile.size_multiplier, 6),
-                size_boost_reasons=tuple(
-                    sorted(
-                        set(
-                            decision.size_boost_reasons
-                            + (f"SYMBOL_FILTER_PROFILE_SIZE:{decision.symbol}",)
-                            + ((recovery_reason,) if recovery_reason else ())
-                        )
-                    )
-                ),
-            )
-        if recovery_reason:
-            return replace(
-                decision,
-                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (recovery_reason,)))),
-            )
-        return decision
-
-    def _paper_symbol_filter_recovery_reason(
-        self,
-        decision: DecisionIntent,
-        *,
-        profile,
-        rejections: tuple[str, ...],
-        edge_to_cost: float,
-    ) -> str:
-        if self.live_order_executor is not None or not self._paper_verification_mode_enabled():
-            return ""
-        if not bool(getattr(profile, "paper_recovery_enabled", False)):
-            return ""
-        side = str(getattr(profile, "paper_recovery_side", "") or "").strip().lower()
-        if side and decision.side != side:
-            return ""
-        allowed = set(getattr(profile, "paper_recovery_allowed_rejections", ()) or ())
-        if allowed and not set(rejections).issubset(allowed):
-            return ""
-        if decision.predictability_score < float(getattr(profile, "paper_recovery_min_score", 0.0) or 0.0):
-            return ""
-        if decision.volume_confirmation < float(getattr(profile, "paper_recovery_min_volume_confirmation", 0.0) or 0.0):
-            return ""
-        if decision.net_expected_edge_bps < float(getattr(profile, "paper_recovery_min_net_edge_bps", 0.0) or 0.0):
-            return ""
-        if edge_to_cost < float(getattr(profile, "paper_recovery_min_edge_to_cost", 0.0) or 0.0):
-            return ""
-        max_cost = float(getattr(profile, "paper_recovery_max_cost_bps", 0.0) or 0.0)
-        if max_cost > 0.0 and decision.estimated_round_trip_cost_bps > max_cost:
-            return ""
-        reason = str(getattr(profile, "paper_recovery_reason", "") or "PAPER_SYMBOL_FILTER_RECOVERY")
-        return f"{reason}:{decision.symbol}:{decision.side}"
-
-    def _apply_paper_verification_front_entry_gate(self, decision: DecisionIntent) -> DecisionIntent:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return decision
-        if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
-            return decision
-        if decision.order_intent_notional_usd <= 0.0:
-            return decision
-        threshold = self._min_expected_profit_usd_threshold(
-            decision,
-            notional_usd=decision.order_intent_notional_usd,
-        )
-        expected_profit = self._expected_net_profit_usd(
-            decision,
-            notional_usd=decision.order_intent_notional_usd,
-        )
-        if decision.final_mode == "futures":
-            profiled = self._apply_symbol_filter_profile_entry_gate(
-                decision,
-                expected_profit_usd=expected_profit,
-                threshold_usd=threshold,
-            )
-            if profiled.final_mode != "futures" or profiled.order_intent_notional_usd <= 0.0:
-                return profiled
-            decision = profiled
-        if expected_profit < threshold:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("EXPECTED_PROFIT_TOO_SMALL",)))),
-            )
-        if decision.final_mode == "futures":
-            delayed_entry_gate = self._apply_paper_verification_delayed_entry_gate(decision)
-            if delayed_entry_gate.final_mode != "futures" or delayed_entry_gate.order_intent_notional_usd <= 0.0:
-                return delayed_entry_gate
-        return decision
-
-    def _paper_verification_delayed_entry_gate_enabled(self) -> bool:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        raw = str(os.getenv("QUANT_PAPER_VERIFY_DELAYED_ENTRY_GATE", "") or "").strip().lower()
-        if raw in {"0", "false", "off", "no"}:
-            return False
-        if raw in {"1", "true", "on", "yes"}:
-            return True
-        return self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
-
-    def _paper_verification_delayed_entry_fast_path_passes(self, decision: DecisionIntent) -> bool:
-        edge_to_cost = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        return (
-            decision.predictability_score >= 88.0
-            and decision.net_expected_edge_bps >= 50.0
-            and edge_to_cost >= 6.0
-            and decision.volume_confirmation >= 0.70
-            and decision.trend_strength >= 0.85
-        )
-
-    def _paper_verification_delayed_entry_candidate_side(self, decision: DecisionIntent) -> str:
-        if decision.side in {"long", "short"}:
-            return decision.side
-        if decision.trend_direction > 0:
-            return "long"
-        if decision.trend_direction < 0:
-            return "short"
-        return ""
-
-    def _paper_verification_recent_delayed_entry_confirmation(
-        self,
-        decision: DecisionIntent,
-        *,
-        window_minutes: float,
-    ) -> bool:
-        confirmation_window_minutes = max(float(window_minutes), 0.0)
-        decision_time = decision.timestamp
-        if decision_time.tzinfo is None:
-            decision_time = decision_time.replace(tzinfo=timezone.utc)
-        for previous in reversed(self.decisions):
-            if previous.symbol != decision.symbol:
-                continue
-            previous_time = previous.timestamp
-            if previous_time.tzinfo is None:
-                previous_time = previous_time.replace(tzinfo=timezone.utc)
-            age_minutes = (decision_time - previous_time).total_seconds() / 60.0
-            if age_minutes < 0:
-                continue
-            if age_minutes > confirmation_window_minutes:
-                return False
-            previous_side = self._paper_verification_delayed_entry_candidate_side(previous)
-            if previous_side in {"long", "short"} and previous_side != decision.side:
-                return False
-            if (
-                previous.candidate_mode == "futures"
-                and previous_side == decision.side
-                and "PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED" in set(previous.rejection_reasons)
-            ):
-                return True
-        return False
-
-    def _paper_verification_delayed_entry_confirmation_required(self, decision: DecisionIntent) -> bool:
-        if not self._paper_verification_delayed_entry_gate_enabled():
-            return False
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return False
-        if decision.order_intent_notional_usd <= 0.0:
-            return False
-        if self.paper_positions.get(decision.symbol) is not None:
-            return False
-        if self._paper_verification_delayed_entry_fast_path_passes(decision):
-            return False
-        return not self._paper_verification_recent_delayed_entry_confirmation(
-            decision,
-            window_minutes=6.0,
-        )
-
-    def _apply_paper_verification_delayed_entry_gate(self, decision: DecisionIntent) -> DecisionIntent:
-        if not self._paper_verification_delayed_entry_confirmation_required(decision):
-            return decision
-        return replace(
-            decision,
-            final_mode="cash",
-            side="flat",
-            order_intent_notional_usd=0.0,
-            stop_distance_bps=0.0,
-            rejection_reasons=tuple(
-                sorted(set(decision.rejection_reasons + ("PAPER_VERIFY_DELAYED_ENTRY_CONFIRMATION_REQUIRED",)))
-            ),
-        )
-
-    def _paper_verification_marginal_liquidity_continuation_entry(
-        self,
-        decision: DecisionIntent,
-        *,
-        expected_profit_usd: float,
-        threshold_usd: float,
-    ) -> bool:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return False
-        if decision.stop_distance_bps <= 0.0 or decision.order_intent_notional_usd <= 0.0:
-            return False
-        if not (0.535 <= decision.liquidity_score < 0.55):
-            return False
-        if decision.stop_distance_bps > 250.0:
-            return False
-        edge_to_cost = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        return (
-            decision.predictability_score >= 70.0
-            and decision.volume_confirmation >= 0.70
-            and decision.trend_strength >= 0.75
-            and decision.net_expected_edge_bps >= 28.0
-            and edge_to_cost >= 3.0
-            and expected_profit_usd >= max(threshold_usd * 1.6, threshold_usd + 1.0)
-        )
-
-    def _paper_verification_fragile_fee_drag_entry(
-        self,
-        decision: DecisionIntent,
-        *,
-        expected_profit_usd: float,
-        threshold_usd: float,
-    ) -> bool:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
-            return False
-        if decision.stop_distance_bps <= 0.0:
-            return False
-        if expected_profit_usd < max(threshold_usd * 1.75, threshold_usd + 0.5):
-            return False
-        paper_equity = self.equity_usd
-        paper_override = self._paper_verification_equity_override()
-        if paper_override is not None:
-            paper_equity = paper_override[0]
-        elif self.capital_report:
-            paper_equity = float(
-                self.capital_report.get(
-                    "futures_execution_balance_usd",
-                    self.capital_report.get("futures_available_balance_usd", paper_equity),
-                )
-                or paper_equity
-            )
-        if paper_equity <= 0.0:
-            return False
-        notional_to_equity = decision.order_intent_notional_usd / paper_equity
-        if notional_to_equity < 20.0:
-            return False
-        edge_to_stop = max(decision.net_expected_edge_bps, 0.0) / decision.stop_distance_bps
-        fragile_microstructure = (
-            decision.liquidity_score < 0.55
-            or decision.volume_confirmation < 0.58
-        )
-        fee_drag_prone_edge = decision.net_expected_edge_bps < max(
-            decision.estimated_round_trip_cost_bps * 4.5,
-            32.0,
-        )
-        return fragile_microstructure and edge_to_stop < 0.15 and fee_drag_prone_edge
-
-    def _paper_verification_reversal_prone_entry(
-        self,
-        decision: DecisionIntent,
-        *,
-        expected_profit_usd: float,
-        threshold_usd: float,
-    ) -> bool:
-        profile = self._symbol_filter_profile_for_decision(decision)
-        if profile is None or not profile.reversal_prone_guard_enabled:
-            return False
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return False
-        if decision.order_intent_notional_usd <= 0.0 or decision.stop_distance_bps <= 0.0:
-            return False
-        if self.paper_positions.get(decision.symbol) is not None:
-            return False
-        if self._paper_verification_recent_same_side_confirmation(
-            decision,
-            window_minutes=profile.reversal_guard_confirmation_window_minutes,
-        ):
-            return False
-
-        paper_equity = self.equity_usd
-        paper_override = self._paper_verification_equity_override()
-        if paper_override is not None:
-            paper_equity = paper_override[0]
-        elif self.capital_report:
-            paper_equity = float(
-                self.capital_report.get(
-                    "futures_execution_balance_usd",
-                    self.capital_report.get("futures_available_balance_usd", paper_equity),
-                )
-                or paper_equity
-            )
-        if paper_equity <= 0.0:
-            return False
-        edge_to_cost = (
-            float("inf")
-            if decision.estimated_round_trip_cost_bps <= 0.0
-            else decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
-        )
-        notional_to_equity = decision.order_intent_notional_usd / paper_equity
-        if (
-            profile.reversal_guard_min_notional_to_equity > 0.0
-            and notional_to_equity < profile.reversal_guard_min_notional_to_equity
-        ):
-            return False
-        marginal_signal = (
-            (
-                profile.reversal_guard_marginal_score > 0.0
-                and decision.predictability_score < profile.reversal_guard_marginal_score
-            )
-            or (
-                profile.reversal_guard_marginal_trend_strength > 0.0
-                and decision.trend_strength < profile.reversal_guard_marginal_trend_strength
-            )
-            or (
-                profile.reversal_guard_marginal_volume_confirmation > 0.0
-                and decision.volume_confirmation < profile.reversal_guard_marginal_volume_confirmation
-            )
-        )
-        fee_thin_edge = (
-            (
-                profile.reversal_guard_min_net_edge_bps > 0.0
-                and decision.net_expected_edge_bps < profile.reversal_guard_min_net_edge_bps
-            )
-            or (
-                profile.reversal_guard_min_edge_to_cost > 0.0
-                and edge_to_cost < profile.reversal_guard_min_edge_to_cost
-            )
-            or (
-                profile.reversal_guard_min_expected_profit_multiplier > 0.0
-                and expected_profit_usd
-                < max(
-                    threshold_usd * profile.reversal_guard_min_expected_profit_multiplier,
-                    threshold_usd + profile.reversal_guard_min_expected_profit_extra_usd,
-                )
-            )
-        )
-        return marginal_signal and fee_thin_edge
-
-    def _paper_verification_recent_same_side_confirmation(
-        self,
-        decision: DecisionIntent,
-        *,
-        window_minutes: float,
-    ) -> bool:
-        confirmation_window_minutes = max(float(window_minutes), 0.0)
-        decision_time = decision.timestamp
-        if decision_time.tzinfo is None:
-            decision_time = decision_time.replace(tzinfo=timezone.utc)
-        for previous in reversed(self.decisions):
-            if previous.symbol != decision.symbol:
-                continue
-            previous_time = previous.timestamp
-            if previous_time.tzinfo is None:
-                previous_time = previous_time.replace(tzinfo=timezone.utc)
-            age_minutes = (decision_time - previous_time).total_seconds() / 60.0
-            if age_minutes < 0:
-                continue
-            if age_minutes > confirmation_window_minutes:
-                return False
-            if (
-                previous.final_mode == "futures"
-                and previous.side == decision.side
-                and previous.order_intent_notional_usd > 0.0
-            ):
-                return True
-            if previous.side in {"long", "short"} and previous.side != decision.side:
-                return False
-        return False
-
-    def _major_futures_entry_floor(self, *, symbol: str, configured_floor: float, decision: DecisionIntent | None = None) -> float:
-        floor = max(float(configured_floor), 0.0)
-        floor = max(floor + self._policy_entry_floor_adjustment_for_symbol(symbol), 0.0)
-        if decision is not None:
-            floor = max(floor + self._execution_quality_entry_floor_adjustment_bps(decision), 0.0)
-        if (
-            self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
-            and self._is_major_futures_symbol(symbol)
-        ):
-            return min(floor, 60.0) if floor > 0.0 else 60.0
-        return floor
-
-    def _execution_quality_runtime_scale(self, decision: DecisionIntent) -> float:
-        if decision.final_mode == "futures" and self._is_major_futures_symbol(decision.symbol):
-            return 0.5
-        return 1.0
-
-    def _execution_quality_leverage_multiplier_for_decision(self, decision: DecisionIntent) -> float:
-        if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
-            return 1.0
-        raw_multiplier = float(decision.execution_quality_leverage_multiplier or 1.0)
-        scaled_reduction = (1.0 - raw_multiplier) * self._execution_quality_runtime_scale(decision)
-        return max(0.0, min(1.0, 1.0 - scaled_reduction))
-
-    def _execution_quality_entry_floor_adjustment_bps(self, decision: DecisionIntent) -> float:
-        if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
-            return 0.0
-        # Data collection mode: execution quality based on <50 trades is noise, skip floor inflation.
-        _dcm_s = self.runtime.paper_service.settings
-        if _dcm_s.data_collection_mode and len(self.closed_trades) < _dcm_s.data_collection_min_trades:
-            return 0.0
-        raw_adjustment = float(decision.execution_quality_entry_threshold_bps or 0.0)
-        return max(0.0, raw_adjustment * self._execution_quality_runtime_scale(decision))
-
-    def _execution_quality_expected_profit_floor_adjustment_usd(self, decision: DecisionIntent) -> float:
-        if decision.execution_quality_sample_size < MIN_EXECUTION_QUALITY_SAMPLE_SIZE:
-            return 0.0
-        threshold_bps = max(
-            0.0,
-            float(decision.execution_quality_expected_profit_floor_bps or 0.0) * self._execution_quality_runtime_scale(decision),
-        )
-        return decision.order_intent_notional_usd * threshold_bps / 10000.0
-
-    def _preserve_execution_quality_size_throttle(self, decision: DecisionIntent) -> bool:
-        return (
-            decision.execution_quality_sample_size >= MIN_EXECUTION_QUALITY_SAMPLE_SIZE
-            and decision.execution_quality_trade_restraint == "none"
-            and float(decision.execution_quality_size_multiplier or 1.0) < 0.999999
-        )
-
-    def _market_min_quantity(self, *, market: str, symbol: str) -> float:
-        if not self.capital_report:
-            return 0.0
-        requirements_key = "spot_requirements" if market == "spot" else "futures_requirements"
-        for item in self.capital_report.get(requirements_key, []):
-            if item.get("symbol") == symbol:
-                return float(item.get("min_quantity", 0.0) or 0.0)
-        return 0.0
-
-    def _select_spot_execution_route(self, decision: DecisionIntent, *, reserve_fraction: float) -> dict[str, Any] | None:
-        if decision.final_mode != "spot" or decision.side != "long":
+    @staticmethod
+    def _extract_exchange_error_code(error: Exception) -> str | None:
+        matched = re.search(r"code=(\d+)", str(error))
+        if matched is None:
             return None
-        raw_routes = self.capital_report.get("spot_execution_routes", [])
-        if not isinstance(raw_routes, list):
-            return None
-        candidate_routes = [
-            item
-            for item in raw_routes
-            if isinstance(item, dict)
-            and str(item.get("target_symbol", "")) == decision.symbol
-            and float(item.get("free_balance_usd", 0.0)) > 0.0
-        ]
-        if not candidate_routes:
-            return None
-        return max(
-            candidate_routes,
-            key=lambda item: (
-                float(item.get("free_balance_usd", 0.0)) * (1.0 - reserve_fraction) >= decision.order_intent_notional_usd,
-                not bool(item.get("requires_wallet_transfer", False)),
-                float(item.get("free_balance_usd", 0.0)) * (1.0 - reserve_fraction),
-                item.get("route_type") == "direct",
-            ),
-        )
-
-    def _spot_route_available_balance_usd(
-        self,
-        *,
-        route: dict[str, Any],
-        extra_spot_available_balance_usd: float,
-        extra_spot_transfer_asset: str,
-    ) -> float:
-        funding_asset = str(route.get("funding_asset", "")).upper()
-        source_market = str(route.get("funding_source_market", "spot"))
-        requires_wallet_transfer = bool(route.get("requires_wallet_transfer", False))
-        if not requires_wallet_transfer and source_market == "spot":
-            available = float(route.get("free_balance_usd", 0.0) or 0.0)
-            if funding_asset == "USDT":
-                available += max(extra_spot_available_balance_usd, 0.0)
-            return available
-        if extra_spot_transfer_asset == funding_asset:
-            return max(extra_spot_available_balance_usd, 0.0)
-        return 0.0
-
-
-    def _policy_state_path(self) -> Path | None:
-        summary_path = getattr(self, "summary_path", None)
-        if summary_path is None:
-            return None
-        return Path(summary_path).with_name("policy_state.json")
-
-    def _policy_history_path(self) -> Path | None:
-        summary_path = getattr(self, "summary_path", None)
-        if summary_path is None:
-            return None
-        return Path(summary_path).with_name("policy_history.jsonl")
-
-    def _read_persisted_policy_state(self) -> dict[str, object]:
-        path = self._policy_state_path()
-        if path is None or not path.exists():
-            return {}
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
-            logger.warning("failed to read persisted policy state %s", path, exc_info=True)
-            return {}
-        allowed_symbols = self._allowed_runtime_symbols()
-        if not allowed_symbols:
-            return payload if isinstance(payload, dict) else {}
-        sanitized = self._sanitize_runtime_payload(payload, allowed_symbols=allowed_symbols)
-        return sanitized if isinstance(sanitized, dict) else {}
-
-    def _write_persisted_policy_state(self, policy_state: dict[str, object]) -> None:
-        path = self._policy_state_path()
-        history_path = self._policy_history_path()
-        if path is None or history_path is None:
-            return
-        try:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps(policy_state, indent=2, sort_keys=True), encoding="utf-8")
-            with history_path.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(build_policy_history_entry(policy_state), sort_keys=True) + "\n")
-        except Exception as exc:
-            print(f"[POLICY_STATE_WRITE_ERROR] {exc}", flush=True)
-
-    def _current_operational_verdict(self) -> dict[str, object]:
-        return build_operational_verdict(build_runtime_summary(decisions=[], live_orders=self.live_orders))
-
-    def _current_policy_state(self) -> dict[str, object]:
-        persisted = self._read_persisted_policy_state()
-        if persisted:
-            return persisted
-        summary = build_runtime_summary(decisions=[], live_orders=self.live_orders)
-        return build_policy_state(
-            summary.get("candidate_policy", {}),
-            summary.get("promotion_verdict", {}),
-            summary.get("executive_operating_verdict", {}),
-        )
-
-    def _policy_rollout_progression(self, policy_state: dict[str, object]) -> dict[str, object]:
-        active_policy = dict(policy_state.get("active_policy", {}) or {})
-        return dict(
-            policy_state.get("rollout_progression", active_policy.get("rollout_progression", {})) or {}
-        )
-
-    def _apply_force_auto_mode(self, auto_mode: dict[str, object]) -> dict[str, object]:
-        # First check settings (loaded at startup), then re-read override file live so
-        # watchdog-written changes take effect without a daemon restart.
-        forced = str(self.runtime.paper_service.settings.force_auto_mode or "").strip().lower()
-        if not forced:
-            override_path_str = os.environ.get("STRATEGY_OVERRIDE_PATH", "")
-            if override_path_str:
-                try:
-                    raw = json.loads(Path(override_path_str).read_text(encoding="utf-8"))
-                    forced = str(raw.get("force_auto_mode", "") or "").strip().lower()
-                except Exception:
-                    pass
-        if forced not in {"normal", "tighter", "cautiously_expanded"}:
-            return auto_mode
-        result = dict(auto_mode)
-        result["mode"] = forced
-        if forced == "normal":
-            result["expansion_blocked"] = False
-        return result
-
-    def _allowed_runtime_symbols(self) -> set[str]:
-        allowed_symbols = {
-            str(symbol)
-            for symbol in list(self.runtime.paper_service.settings.universe or ())
-            if str(symbol)
-        }
-        if self.runtime.eligible_symbols is not None:
-            allowed_symbols.update(
-                str(symbol)
-                for symbol in list(self.runtime.eligible_symbols or set())
-                if str(symbol)
-            )
-        allowed_symbols.update(
-            str(symbol)
-            for symbol in list(self.observe_only_symbols or [])
-            if str(symbol)
-        )
-        store = getattr(getattr(self.runtime, "dispatcher", None), "store", None)
-        state_map = getattr(store, "_states", None)
-        if isinstance(state_map, dict):
-            allowed_symbols.update(str(symbol) for symbol in state_map.keys() if str(symbol))
-        return allowed_symbols
+        return matched.group(1)
 
     @staticmethod
-    def _symbol_from_context_key(key: object) -> str:
-        text = str(key or "").strip()
-        if not text:
-            return ""
-        if "|" in text:
-            return text.split("|", 1)[0].strip()
-        return text if text.endswith("USDT") else ""
-
-    def _sanitize_runtime_payload(self, payload: object, *, allowed_symbols: set[str]) -> object:
-        if isinstance(payload, dict):
-            symbol = str(payload.get("symbol", "") or "").strip()
-            if symbol and symbol not in allowed_symbols:
-                return None
-            sanitized: dict[str, object] = {}
-            for key, value in payload.items():
-                if key == "symbol" and symbol:
-                    sanitized[key] = symbol
-                    continue
-                if key in {
-                    "symbols",
-                    "actionable_symbols",
-                    "candidate_only_symbols",
-                    "current_only_symbols",
-                    "promoted_symbols",
-                    "demoted_symbols",
-                } and isinstance(value, list):
-                    sanitized[key] = [
-                        item
-                        for item in value
-                        if not isinstance(item, str) or item in allowed_symbols
-                    ]
-                    continue
-                context_symbol = self._symbol_from_context_key(key)
-                if context_symbol and context_symbol not in allowed_symbols:
-                    continue
-                sanitized_value = self._sanitize_runtime_payload(value, allowed_symbols=allowed_symbols)
-                if sanitized_value is None:
-                    continue
-                sanitized[key] = sanitized_value
-            return sanitized
-        if isinstance(payload, list):
-            sanitized_list = []
-            for item in payload:
-                sanitized_item = self._sanitize_runtime_payload(item, allowed_symbols=allowed_symbols)
-                if sanitized_item is None:
-                    continue
-                sanitized_list.append(sanitized_item)
-            return sanitized_list
-        return payload
-
-    def _sanitize_execution_quality_snapshot(self, snapshot: dict[str, object]) -> dict[str, object]:
-        allowed_symbols = self._allowed_runtime_symbols()
-        if not allowed_symbols:
-            return snapshot
-        sanitized = dict(snapshot)
-        sanitized["symbols"] = {
-            symbol: metrics
-            for symbol, metrics in dict(snapshot.get("symbols", {}) or {}).items()
-            if str(symbol) in allowed_symbols
-        }
-        sanitized["contexts"] = {
-            key: value
-            for key, value in dict(snapshot.get("contexts", {}) or {}).items()
-            if self._symbol_from_context_key(key) in allowed_symbols
-        }
-        sanitized["active_overlays"] = {
-            key: value
-            for key, value in dict(snapshot.get("active_overlays", {}) or {}).items()
-            if self._symbol_from_context_key(key) in allowed_symbols
-        }
-        sanitized["degraded_keys"] = [
-            key
-            for key in list(snapshot.get("degraded_keys", []) or [])
-            if self._symbol_from_context_key(key) in allowed_symbols
-        ]
-        sanitized["degraded_overlays"] = {
-            key: value
-            for key, value in dict(snapshot.get("degraded_overlays", {}) or {}).items()
-            if self._symbol_from_context_key(key) in allowed_symbols
-        }
-        policy_bucket_contexts: dict[str, object] = {}
-        for bucket, payload in dict(snapshot.get("policy_bucket_contexts", {}) or {}).items():
-            bucket_payload = dict(payload or {})
-            bucket_payload["contexts"] = {
-                key: value
-                for key, value in dict(bucket_payload.get("contexts", {}) or {}).items()
-                if self._symbol_from_context_key(key) in allowed_symbols
-            }
-            bucket_payload["active_overlays"] = {
-                key: value
-                for key, value in dict(bucket_payload.get("active_overlays", {}) or {}).items()
-                if self._symbol_from_context_key(key) in allowed_symbols
-            }
-            bucket_payload["degraded_keys"] = [
-                key
-                for key in list(bucket_payload.get("degraded_keys", []) or [])
-                if self._symbol_from_context_key(key) in allowed_symbols
-            ]
-            bucket_payload["degraded_overlays"] = {
-                key: value
-                for key, value in dict(bucket_payload.get("degraded_overlays", {}) or {}).items()
-                if self._symbol_from_context_key(key) in allowed_symbols
-            }
-            policy_bucket_contexts[str(bucket)] = bucket_payload
-        sanitized["policy_bucket_contexts"] = policy_bucket_contexts
-        return sanitized
-
-    def _policy_runtime_context(self) -> dict[str, object]:
-        policy_state = self._read_persisted_policy_state()
-        if not policy_state:
-            return {
-                "policy_state": {},
-                "active_policy": {},
-                "adjustments": [],
-                "source": "none",
-                "execution_phase": "baseline",
-                "auto_mode": {},
-                "live_evidence_rejudge": {},
-                "executive_operating_verdict": {},
-                "symbol_lifecycle": [],
-                "runtime_universe_hydration": {},
-            }
-        active_policy = dict(policy_state.get("active_policy", {}) or {})
-        rollout_progression = self._policy_rollout_progression(policy_state)
-        adjustments = list(active_policy.get("adjustments", []) or [])
-        source = "active_policy"
-        if (
-            not adjustments
-            and str(policy_state.get("status", "") or "") == "staged_rollout"
-            and str(policy_state.get("rollout_status", "baseline") or "baseline") == "micro_live_pending"
-        ):
-            adjustments = list(dict(policy_state.get("candidate_policy", {}) or {}).get("adjustments", []) or [])
-            source = "candidate_policy"
-        configured_symbols = sorted(
-            {
-                str(symbol)
-                for symbol in list(self.runtime.eligible_symbols or set())
-                if str(symbol)
-            }
-            | {
-                str(symbol)
-                for symbol in list(self.observe_only_symbols or [])
-                if str(symbol)
-            }
-        )
-        return {
-            "policy_state": policy_state,
-            "active_policy": active_policy,
-            "adjustments": adjustments,
-            "source": source,
-            "execution_phase": str(rollout_progression.get("execution_phase", "baseline") or "baseline"),
-            "auto_mode": self._apply_force_auto_mode(
-                dict(policy_state.get("auto_mode", active_policy.get("auto_mode", {})) or {})
-            ),
-            "live_evidence_rejudge": dict(
-                policy_state.get("live_evidence_rejudge", active_policy.get("live_evidence_rejudge", {})) or {}
-            ),
-            "executive_operating_verdict": dict(
-                policy_state.get(
-                    "executive_operating_verdict",
-                    active_policy.get("executive_operating_verdict", {}),
-                )
-                or {}
-            ),
-            "symbol_lifecycle": list(policy_state.get("symbol_lifecycle", []) or []),
-            "runtime_universe_hydration": build_runtime_universe_hydration(
-                policy_state=policy_state,
-                configured_symbols=configured_symbols,
-                major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-            ),
-        }
-
-    def _policy_entry_context_snapshot(self) -> dict[str, object]:
-        context = self._policy_runtime_context()
-        policy_state = dict(context.get("policy_state", {}) or {})
-        bucket_name = "staged_candidate" if str(context.get("source", "active_policy") or "active_policy") == "candidate_policy" else "active_policy"
-        bucket = policy_evidence_bucket(policy_state, bucket_name)
-        alignment = dict(bucket.get("alignment", {}) or {})
-        return {
-            "entry_policy_context_source": str(context.get("source", "") or ""),
-            "entry_policy_bucket": bucket_name,
-            "entry_policy_bucket_available": bool(bucket.get("available")),
-            "entry_policy_bucket_source": str(bucket.get("source", "") or ""),
-            "entry_policy_bucket_alignment_status": str(alignment.get("status", "unknown") or "unknown"),
-            "entry_policy_execution_phase": str(context.get("execution_phase", "baseline") or "baseline"),
-            "entry_policy_lineage": dict(policy_state.get("policy_lineage", {}) or {}),
-        }
-
-    def _policy_entry_bucket_name(self, policy_entry_context: dict[str, object] | None) -> str | None:
-        payload = dict(policy_entry_context or {})
-        context_source = str(payload.get("entry_policy_context_source", "") or "").strip().lower()
-        if context_source not in {"active_policy", "candidate_policy"}:
-            return None
-        bucket_name = str(payload.get("entry_policy_bucket", "") or "").strip().lower()
-        return bucket_name or None
-
-    def _conservative_auto_mode_runtime_overrides(self) -> dict[str, object]:
-        settings = self.runtime.paper_service.settings
-        auto_mode = dict(self._policy_runtime_context().get("auto_mode", {}) or {})
-        runtime_overrides = apply_auto_mode_runtime_overrides(
-            base_config={
-                "mode_thresholds": {
-                    "futures_score_min": settings.mode_thresholds.futures_score_min,
-                    "spot_score_min": settings.mode_thresholds.spot_score_min,
-                },
-                "risk": {"per_trade_equity_risk": settings.risk.per_trade_equity_risk},
-                "cash_reserve": {"when_futures_enabled": settings.cash_reserve.when_futures_enabled},
-            },
-            auto_mode=auto_mode,
-        )
-        threshold_overrides = dict(runtime_overrides.get("mode_thresholds", {}) or {})
-        risk_overrides = dict(runtime_overrides.get("risk", {}) or {})
-        reserve_overrides = dict(runtime_overrides.get("cash_reserve", {}) or {})
-        base_futures_threshold = float(settings.mode_thresholds.futures_score_min)
-        base_spot_threshold = float(settings.mode_thresholds.spot_score_min)
-        base_risk = float(settings.risk.per_trade_equity_risk)
-        base_reserve = float(settings.cash_reserve.when_futures_enabled)
-        return {
-            "mode_thresholds": {
-                "futures_score_min": max(
-                    base_futures_threshold,
-                    float(threshold_overrides.get("futures_score_min", base_futures_threshold) or base_futures_threshold),
-                ),
-                "spot_score_min": max(
-                    base_spot_threshold,
-                    float(threshold_overrides.get("spot_score_min", base_spot_threshold) or base_spot_threshold),
-                ),
-            },
-            "risk": {
-                "per_trade_equity_risk": min(
-                    base_risk,
-                    float(risk_overrides.get("per_trade_equity_risk", base_risk) or base_risk),
-                )
-            },
-            "cash_reserve": {
-                "when_futures_enabled": max(
-                    base_reserve,
-                    float(reserve_overrides.get("when_futures_enabled", base_reserve) or base_reserve),
-                )
-            },
-        }
-
-    def _effective_mode_thresholds(self) -> dict[str, float]:
-        settings = self.runtime.paper_service.settings
-        overrides = dict(self._conservative_auto_mode_runtime_overrides().get("mode_thresholds", {}) or {})
-        return {
-            "futures_score_min": float(
-                overrides.get("futures_score_min", settings.mode_thresholds.futures_score_min)
-                or settings.mode_thresholds.futures_score_min
-            ),
-            "spot_score_min": float(
-                overrides.get("spot_score_min", settings.mode_thresholds.spot_score_min)
-                or settings.mode_thresholds.spot_score_min
-            ),
-        }
-
-    def _effective_per_trade_equity_risk(self) -> float:
-        settings = self.runtime.paper_service.settings
-        overrides = dict(self._conservative_auto_mode_runtime_overrides().get("risk", {}) or {})
-        base_risk = float(settings.risk.per_trade_equity_risk)
-        return min(base_risk, float(overrides.get("per_trade_equity_risk", base_risk) or base_risk))
-
-    def _symbol_lifecycle_row_for_symbol(self, symbol: str) -> dict[str, object]:
-        for row in list(self._policy_runtime_context().get("symbol_lifecycle", []) or []):
-            payload = dict(row)
-            if str(payload.get("symbol", "") or "") == symbol:
-                return payload
-        return {}
-
-    def _runtime_universe_row_for_symbol(self, symbol: str) -> dict[str, object]:
-        hydration = dict(self._policy_runtime_context().get("runtime_universe_hydration", {}) or {})
-        rows_by_symbol = dict(hydration.get("rows_by_symbol", {}) or {})
-        return dict(rows_by_symbol.get(symbol, {}) or {})
-
-    def _effective_executive_runtime_verdict(
-        self,
-        *,
-        executive_operating_verdict: dict[str, object],
-        live_evidence_rejudge: dict[str, object],
-    ) -> tuple[str, str]:
-        current_verdict = str(dict(executive_operating_verdict or {}).get("verdict", "hold") or "hold")
-        rejudge_effective = str(dict(live_evidence_rejudge or {}).get("effective_verdict", current_verdict) or current_verdict)
-        current_rank = _EXECUTIVE_VERDICT_PRIORITY.get(current_verdict, _EXECUTIVE_VERDICT_PRIORITY["hold"])
-        rejudge_rank = _EXECUTIVE_VERDICT_PRIORITY.get(rejudge_effective, current_rank)
-        if rejudge_rank < current_rank:
-            return rejudge_effective, str(dict(live_evidence_rejudge or {}).get("status", "unknown") or "unknown")
-        return current_verdict, str(dict(live_evidence_rejudge or {}).get("status", "unknown") or "unknown")
-
-    def _direct_policy_evidence_guardrails(self, decision: DecisionIntent) -> DecisionIntent:
-        if (
-            decision.final_mode not in {"spot", "futures"}
-            or decision.side not in {"long", "short"}
-            or decision.order_intent_notional_usd <= 0.0
-        ):
-            return decision
-        if os.getenv("QUANT_BYPASS_POLICY_GUARDRAILS", "0") == "1":
-            return decision
-        _settings = self.runtime.paper_service.settings
-        if (
-            _settings.live_position_risk.long_only_turnaround_mode
-            and decision.final_mode == "futures"
-            and decision.side != "long"
-        ):
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(
-                    sorted(set(decision.rejection_reasons + ("LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",)))
-                ),
-            )
-        if self.live_order_executor is None and os.getenv("QUANT_PAPER_VERIFY_RELAX_POLICY_GATES", "0") == "1":
-            return decision
-        if _settings.data_collection_mode and len(self.closed_trades) < _settings.data_collection_min_trades:
-            logger.info(
-                "[DATA_COLLECTION_MODE] symbol=%s closed_trades=%d/%d — bypassing policy guardrails to accumulate live evidence",
-                decision.symbol,
-                len(self.closed_trades),
-                _settings.data_collection_min_trades,
-            )
-            return decision
-        context = self._policy_runtime_context()
-        auto_mode = dict(context.get("auto_mode", {}) or {})
-        executive_operating_verdict = dict(context.get("executive_operating_verdict", {}) or {})
-        live_evidence_rejudge = dict(context.get("live_evidence_rejudge", {}) or {})
-        lifecycle_row = self._symbol_lifecycle_row_for_symbol(decision.symbol)
-        runtime_universe_row = self._runtime_universe_row_for_symbol(decision.symbol)
-        lifecycle_action = str(lifecycle_row.get("recommended_action", "keep") or "keep")
-        effective_verdict, rejudge_status = self._effective_executive_runtime_verdict(
-            executive_operating_verdict=executive_operating_verdict,
-            live_evidence_rejudge=live_evidence_rejudge,
-        )
-        is_major_symbol = is_major_futures_symbol(
-            decision.symbol,
-            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-        )
-        # ------------------------------------------------------------------
-        # Deadlock detection: rollback verdict + waiting rejudge + zero real
-        # evidence.  This can happen when a prior session's positions are
-        # inherited and immediately manually-closed, leaving the policy
-        # validator with contaminated data (non-zero PnL loss from inherited
-        # manual-close trades) but zero actual live orders.  The system then
-        # issues a rollback verdict before the current session can generate any
-        # evidence, and the rejudge gate prevents new evidence from ever being
-        # accumulated — a chicken-and-egg deadlock.
-        #
-        # When this condition is detected we allow major symbols through with a
-        # reduced size cap so that the session can build enough real evidence to
-        # trigger a proper re-verdict.  Non-major symbols remain blocked because
-        # the rollback verdict still warrants caution outside the core universe.
-        # ------------------------------------------------------------------
-        deadlock_bootstrap_enabled = os.getenv("QUANT_ENABLE_POLICY_DEADLOCK_BOOTSTRAP", "0") == "1"
-        _is_evidence_deadlocked = False
-        if deadlock_bootstrap_enabled:
-            live_snapshot = dict(live_evidence_rejudge.get("current_snapshot", {}) or {})
-            snap_closed_trades = int(live_snapshot.get("closed_trade_count", 0) or 0)
-            snap_live_orders = int(live_snapshot.get("live_order_count", 0) or 0)
-            # Bootstrap-friendly: allow all symbols (not just majors) to break
-            # deadlock, and raise the closed-trade threshold from 0 to <10 so that
-            # symbols with a handful of trades can still accumulate evidence.
-            _BOOTSTRAP_TRADE_THRESHOLD = 10
-            _is_evidence_deadlocked = (
-                effective_verdict == "rollback"
-                and rejudge_status in {"waiting", "blocked"}
-                and snap_closed_trades < _BOOTSTRAP_TRADE_THRESHOLD
-                and snap_live_orders == 0
-            )
-            if _is_evidence_deadlocked:
-                logger.warning(
-                    "[POLICY_DEADLOCK_DETECTED] symbol=%s verdict=%s rejudge_status=%s "
-                    "snap_closed_trades=%d snap_live_orders=%d — "
-                    "rollback verdict with thin live evidence (<%d trades). "
-                    "Allowing bootstrap entry to break the deadlock (size will be capped). "
-                    "If this was caused by contaminated inherited positions, check "
-                    "closed_trades.jsonl for exit_reason=MANUAL_CLOSE_SYNCED entries "
-                    "with entry_policy_bucket_available=false.",
-                    decision.symbol,
-                    effective_verdict,
-                    rejudge_status,
-                    snap_closed_trades,
-                    snap_live_orders,
-                    _BOOTSTRAP_TRADE_THRESHOLD,
-                )
-
-        rejection_reasons: list[str] = []
-        if lifecycle_action in {"rollback", "hold", "re_review"}:
-            rejection_reasons.append(f"SYMBOL_LIFECYCLE_{lifecycle_action.upper()}")
-        if bool(runtime_universe_row.get("observe_only")):
-            rejection_reasons.append("POLICY_BUCKET_OBSERVE_ONLY")
-        elif not bool(runtime_universe_row.get("allow_bootstrap", True)):
-            rejection_reasons.append("POLICY_BUCKET_BOOTSTRAP_EXCLUDED")
-        if effective_verdict == "rollback" and not _is_evidence_deadlocked:
-            rejection_reasons.append("EXECUTIVE_OPERATING_VERDICT_ROLLBACK")
-        elif effective_verdict in {"tighten", "rebuild_evidence"} and not is_major_symbol:
-            rejection_reasons.append("EXECUTIVE_MAJORS_ONLY_CONSERVATIVE_GATE")
-        if effective_verdict in {"rollback", "tighten", "rebuild_evidence"} and rejudge_status in {"waiting", "blocked"} and not _is_evidence_deadlocked:
-            rejection_reasons.append(f"LIVE_EVIDENCE_REJUDGE_{rejudge_status.upper()}")
-        if (
-            str(auto_mode.get("mode", "normal") or "normal") == "tighter"
-            and bool(dict(auto_mode.get("policy_guidance", {}) or {}).get("block_non_major_positive"))
-            and not is_major_symbol
-        ):
-            rejection_reasons.append("AUTO_MODE_BLOCK_NON_MAJOR_POSITIVE")
-        thresholds = self._effective_mode_thresholds()
-        base_score_floor = (
-            float(self.runtime.paper_service.settings.mode_thresholds.futures_score_min)
-            if decision.final_mode == "futures"
-            else float(self.runtime.paper_service.settings.mode_thresholds.spot_score_min)
-        )
-        score_floor = thresholds["futures_score_min"] if decision.final_mode == "futures" else thresholds["spot_score_min"]
-        if score_floor > base_score_floor and decision.predictability_score < score_floor:
-            rejection_reasons.append("AUTO_MODE_RUNTIME_SCORE_GATE")
-        if rejection_reasons:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + tuple(rejection_reasons)))),
-            )
-        # Deadlock bootstrap: pass the decision through but cap size at 50% so
-        # the session can accumulate real evidence without overexposing.
-        if _is_evidence_deadlocked:
-            base_risk = float(self.runtime.paper_service.settings.risk.per_trade_equity_risk)
-            effective_risk = self._effective_per_trade_equity_risk()
-            risk_scale = min(max(effective_risk / base_risk, 0.0), 0.5) if base_risk > 0.0 else 0.5
-            scaled_notional = round(decision.order_intent_notional_usd * risk_scale, 6)
-            if scaled_notional <= 0.0:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(
-                        decision.rejection_reasons + ("DEADLOCK_BOOTSTRAP_ZERO_SCALED_SIZE",)
-                    ))),
-                )
-            return replace(
-                decision,
-                order_intent_notional_usd=scaled_notional,
-                rejection_reasons=tuple(sorted(set(
-                    decision.rejection_reasons + ("DEADLOCK_BOOTSTRAP_SIZE_CAPPED",)
-                ))),
-            )
-        if effective_verdict not in {"tighten", "rebuild_evidence"}:
-            return decision
-        base_risk = float(self.runtime.paper_service.settings.risk.per_trade_equity_risk)
-        effective_risk = self._effective_per_trade_equity_risk()
-        risk_scale = 1.0
-        if base_risk > 0.0:
-            risk_scale = min(max(effective_risk / base_risk, 0.0), 1.0)
-        risk_scale = min(risk_scale, 0.5)
-        if risk_scale >= 0.999999:
-            return decision
-        scaled_notional = round(decision.order_intent_notional_usd * risk_scale, 6)
-        if scaled_notional <= 0.0:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(
-                    sorted(set(decision.rejection_reasons + ("EXECUTIVE_CONSERVATIVE_SCALE_ZERO",)))
-                ),
-            )
-        return replace(
-            decision,
-            order_intent_notional_usd=scaled_notional,
-            strategy_size_multiplier=round(decision.strategy_size_multiplier * risk_scale, 6),
-            size_boost_reasons=tuple(
-                sorted(set(decision.size_boost_reasons + ("EXECUTIVE_CONSERVATIVE_SCALE",)))
-            ),
-        )
-
-    def _policy_rollout_phase_scale(self, execution_phase: str) -> float:
-        return {
-            "partial": 0.35,
-            "broad": 0.7,
-            "full": 1.0,
-            "watch": 0.5,
-            "rollback": 0.0,
-        }.get(execution_phase, 1.0)
-
-    def _effective_policy_adjustment(
-        self,
-        adjustment: dict[str, object],
-        *,
-        symbol: str,
-        source: str,
-        execution_phase: str,
-    ) -> dict[str, object]:
-        payload = dict(adjustment or {})
-        if not payload:
-            return {}
-        action = str(payload.get("action", "") or "")
-        phase_scaled = source == "candidate_policy" or action in {"promote", "aggressive_promote"}
-        if not phase_scaled:
-            payload["rollout_adjustment_source"] = source
-            payload["rollout_execution_phase"] = execution_phase
-            payload["rollout_phase_scale"] = 1.0
-            return payload
-        scale = self._policy_rollout_phase_scale(execution_phase)
-        if execution_phase == "partial" and not is_major_futures_symbol(
-            symbol,
-            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-        ):
-            return {}
-        if scale <= 0.0:
-            return {}
-        payload["size_multiplier"] = round(1.0 + ((float(payload.get("size_multiplier", 1.0) or 1.0) - 1.0) * scale), 6)
-        payload["leverage_multiplier"] = round(
-            1.0 + ((float(payload.get("leverage_multiplier", 1.0) or 1.0) - 1.0) * scale),
-            6,
-        )
-        payload["entry_threshold_bps"] = round(float(payload.get("entry_threshold_bps", 0.0) or 0.0) * scale, 6)
-        payload["expected_profit_floor_bps"] = round(
-            float(payload.get("expected_profit_floor_bps", 0.0) or 0.0) * scale,
-            6,
-        )
-        if "score_delta" in payload:
-            payload["score_delta"] = round(float(payload.get("score_delta", 0.0) or 0.0) * scale, 6)
-        payload["rollout_adjustment_source"] = source
-        payload["rollout_execution_phase"] = execution_phase
-        payload["rollout_phase_scale"] = round(scale, 6)
-        payload["rollout_scope"] = "major_only" if execution_phase == "partial" else "full_universe"
-        return payload
-
-    def _policy_adjustment_for_decision(self, decision: DecisionIntent) -> dict[str, object]:
-        context = self._policy_runtime_context()
-        for adjustment in list(context.get("adjustments", []) or []):
-            if str(adjustment.get("symbol", "")) == decision.symbol:
-                return self._effective_policy_adjustment(
-                    dict(adjustment),
-                    symbol=decision.symbol,
-                    source=str(context.get("source", "active_policy") or "active_policy"),
-                    execution_phase=str(context.get("execution_phase", "baseline") or "baseline"),
-                )
-        return {}
-
-    def _policy_leverage_multiplier_for_decision(self, decision: DecisionIntent) -> float:
-        adjustment = self._policy_adjustment_for_decision(decision)
-        return float(adjustment.get("leverage_multiplier", 1.0) or 1.0)
-
-
-    def _policy_entry_floor_adjustment_for_symbol(self, symbol: str) -> float:
-        context = self._policy_runtime_context()
-        for adjustment in list(context.get("adjustments", []) or []):
-            if str(adjustment.get("symbol", "")) == symbol:
-                effective = self._effective_policy_adjustment(
-                    dict(adjustment),
-                    symbol=symbol,
-                    source=str(context.get("source", "active_policy") or "active_policy"),
-                    execution_phase=str(context.get("execution_phase", "baseline") or "baseline"),
-                )
-                return float(effective.get("entry_threshold_bps", 0.0) or 0.0)
-        return 0.0
-
-    def _policy_entry_floor_adjustment_bps(self, decision: DecisionIntent) -> float:
-        adjustment = self._policy_adjustment_for_decision(decision)
-        return float(adjustment.get("entry_threshold_bps", 0.0) or 0.0)
-
-    def _policy_expected_profit_floor_adjustment_usd(self, decision: DecisionIntent) -> float:
-        adjustment = self._policy_adjustment_for_decision(decision)
-        threshold_bps = float(adjustment.get("expected_profit_floor_bps", 0.0) or 0.0)
-        return decision.order_intent_notional_usd * threshold_bps / 10000.0
-
-
-    def _policy_symbol_bias_for_decision(self, decision: DecisionIntent) -> str:
-        adjustment = self._policy_adjustment_for_decision(decision)
-        return str(adjustment.get("symbol_bias", "neutral") or "neutral")
-
-    def _policy_multiplier_for_decision(self, decision: DecisionIntent) -> float:
-        adjustment = self._policy_adjustment_for_decision(decision)
-        action = str(adjustment.get("action", ""))
-        if action in {"promote", "aggressive_promote", "demote", "disabled"}:
-            return float(adjustment.get("size_multiplier", 1.0) or 1.0)
-        return 1.0
-
-    def _high_conviction_recent_long_confirmation_passes(
-        self,
-        decision: DecisionIntent,
-        *,
-        is_major_strong_futures_decision: bool,
-        submission_time: datetime | None = None,
-    ) -> bool:
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        required_confirmations = max(int(exposure.high_conviction_recent_long_confirmations), 0)
-        if required_confirmations <= 1:
-            return True
-        max_age_minutes = max(int(exposure.high_conviction_recent_max_age_minutes), 0)
-        min_trend_strength = max(float(exposure.high_conviction_recent_min_trend_strength), 0.0)
-        min_volume_confirmation = max(float(exposure.high_conviction_recent_min_volume_confirmation), 0.0)
-        min_liquidity = max(float(exposure.high_conviction_recent_min_liquidity), 0.0)
-        max_volatility_penalty = max(float(exposure.high_conviction_recent_max_volatility_penalty), 0.0)
-        max_overheat_penalty = max(float(exposure.high_conviction_recent_max_overheat_penalty), 0.0)
-        min_edge_to_cost_multiple = max(float(exposure.high_conviction_recent_min_edge_to_cost_multiple), 0.0)
-        if min_trend_strength <= 0.0:
-            min_trend_strength = (
-                float(exposure.strong_trend_strength_min)
-                if is_major_strong_futures_decision
-                else float(exposure.pyramid_min_trend_strength)
-            )
-        if min_volume_confirmation <= 0.0:
-            min_volume_confirmation = (
-                float(exposure.strong_volume_confirmation_min)
-                if is_major_strong_futures_decision
-                else float(exposure.pyramid_min_volume_confirmation)
-            )
-        if min_liquidity <= 0.0:
-            min_liquidity = (
-                float(exposure.strong_liquidity_min)
-                if is_major_strong_futures_decision
-                else float(exposure.soft_liquidity_floor)
-            )
-        if max_volatility_penalty <= 0.0:
-            max_volatility_penalty = (
-                float(exposure.strong_volatility_penalty_max)
-                if is_major_strong_futures_decision
-                else float(exposure.soft_volatility_penalty_max)
-            )
-        if max_overheat_penalty <= 0.0:
-            max_overheat_penalty = (
-                float(exposure.strong_overheat_penalty_max)
-                if is_major_strong_futures_decision
-                else float(exposure.soft_overheat_penalty_max)
-            )
-        if min_edge_to_cost_multiple <= 0.0:
-            min_edge_to_cost_multiple = (
-                float(exposure.strong_edge_to_cost_multiple_min)
-                if is_major_strong_futures_decision
-                else max(float(exposure.priority_edge_to_cost_multiple_min), 1.0)
-            )
-
-        def qualifies(candidate: DecisionIntent) -> bool:
-            if candidate.symbol != decision.symbol:
-                return False
-            if candidate.final_mode != "futures" or candidate.side != "long":
-                return False
-            if candidate.trend_direction <= 0:
-                return False
-            if candidate.trend_strength < min_trend_strength:
-                return False
-            if candidate.volume_confirmation < min_volume_confirmation:
-                return False
-            if candidate.liquidity_score < min_liquidity:
-                return False
-            if candidate.volatility_penalty > max_volatility_penalty:
-                return False
-            if candidate.overheat_penalty > max_overheat_penalty:
-                return False
-            edge_to_cost_multiple = (
-                float("inf")
-                if candidate.estimated_round_trip_cost_bps <= 0.0
-                else candidate.gross_expected_edge_bps / candidate.estimated_round_trip_cost_bps
-            )
-            return candidate.net_expected_edge_bps > 0.0 and edge_to_cost_multiple >= min_edge_to_cost_multiple
-
-        if not qualifies(decision):
-            return False
-        seen_decision_ids = {decision.decision_id}
-
-        if bool(getattr(exposure, "high_conviction_recent_weak_block_enabled", False)) and submission_time is not None:
-            decision_time = decision.timestamp
-            if decision_time.tzinfo is None:
-                decision_time = decision_time.replace(tzinfo=timezone.utc)
-            comparable_submission_time = submission_time
-            if comparable_submission_time.tzinfo is None:
-                comparable_submission_time = comparable_submission_time.replace(tzinfo=timezone.utc)
-            weak_max_age_seconds = max(
-                int(getattr(exposure, "high_conviction_recent_weak_max_age_seconds", 0) or 0),
-                0,
-            )
-            if weak_max_age_seconds <= 0:
-                weak_max_age_seconds = max(int(getattr(exposure, "high_conviction_max_decision_age_seconds", 0) or 0), 0)
-            if weak_max_age_seconds <= 0 and max_age_minutes > 0:
-                weak_max_age_seconds = max_age_minutes * 60
-            for previous in reversed(self.decisions):
-                if previous.decision_id in seen_decision_ids:
-                    continue
-                if previous.symbol != decision.symbol:
-                    continue
-                previous_time = previous.timestamp
-                if previous_time.tzinfo is None:
-                    previous_time = previous_time.replace(tzinfo=timezone.utc)
-                if previous_time <= decision_time:
-                    continue
-                age_to_submission_seconds = (comparable_submission_time - previous_time).total_seconds()
-                if age_to_submission_seconds < 0.0:
-                    continue
-                if weak_max_age_seconds > 0 and age_to_submission_seconds > weak_max_age_seconds:
-                    continue
-                if not qualifies(previous):
-                    return False
-
-        def clean_reversal_unlock_passes(*, opposite_max_age_minutes: int) -> bool:
-            if not bool(getattr(exposure, "high_conviction_recent_reversal_unlock_enabled", False)):
-                return False
-            unlock_confirmations = max(
-                int(getattr(exposure, "high_conviction_recent_reversal_unlock_confirmations", 0)),
-                0,
-            )
-            if unlock_confirmations <= 0:
-                unlock_confirmations = max(required_confirmations + 1, 3)
-            confirmations = 1
-            for previous in reversed(self.decisions):
-                if previous.decision_id in seen_decision_ids:
-                    continue
-                if previous.symbol != decision.symbol:
-                    continue
-                age_seconds = (decision.timestamp - previous.timestamp).total_seconds()
-                if age_seconds < 0:
-                    continue
-                if opposite_max_age_minutes > 0 and age_seconds > opposite_max_age_minutes * 60:
-                    return False
-                if (
-                    previous.final_mode == "futures"
-                    and previous.side == "short"
-                    and previous.order_intent_notional_usd > 0.0
-                ):
-                    return confirmations >= unlock_confirmations
-                if not qualifies(previous):
-                    return False
-                confirmations += 1
-                if confirmations >= unlock_confirmations:
-                    return True
-            return False
-
-        if bool(getattr(exposure, "high_conviction_recent_opposite_block_enabled", False)):
-            opposite_max_age_minutes = max(
-                int(getattr(exposure, "high_conviction_recent_opposite_max_age_minutes", 0)),
-                0,
-            )
-            if opposite_max_age_minutes <= 0:
-                opposite_max_age_minutes = max_age_minutes
-            if opposite_max_age_minutes > 0:
-                for previous in reversed(self.decisions):
-                    if previous.decision_id in seen_decision_ids:
-                        continue
-                    if previous.symbol != decision.symbol:
-                        continue
-                    age_seconds = (decision.timestamp - previous.timestamp).total_seconds()
-                    if age_seconds < 0 or age_seconds > opposite_max_age_minutes * 60:
-                        continue
-                    if (
-                        previous.final_mode == "futures"
-                        and previous.side == "short"
-                        and previous.order_intent_notional_usd > 0.0
-                    ):
-                        if clean_reversal_unlock_passes(opposite_max_age_minutes=opposite_max_age_minutes):
-                            break
-                        return False
-        confirmations = 1
-        for previous in reversed(self.decisions):
-            if previous.decision_id in seen_decision_ids:
-                continue
-            if previous.symbol != decision.symbol:
-                continue
-            if max_age_minutes > 0:
-                age_seconds = abs((decision.timestamp - previous.timestamp).total_seconds())
-                if age_seconds > max_age_minutes * 60:
-                    return False
-            if not qualifies(previous):
-                return False
-            confirmations += 1
-            if confirmations >= required_confirmations:
-                return True
-        return False
-
-    def _high_conviction_recent_weak_signal_seen(
-        self,
-        decision: DecisionIntent,
-        *,
-        submission_time: datetime | None,
-    ) -> bool:
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        if not bool(getattr(exposure, "high_conviction_recent_weak_block_enabled", False)):
-            return False
-        if submission_time is None:
-            return False
-        if decision.final_mode != "futures" or decision.side != "long":
-            return False
-        decision_time = decision.timestamp
-        if decision_time.tzinfo is None:
-            decision_time = decision_time.replace(tzinfo=timezone.utc)
-        comparable_submission_time = submission_time
-        if comparable_submission_time.tzinfo is None:
-            comparable_submission_time = comparable_submission_time.replace(tzinfo=timezone.utc)
-        weak_max_age_seconds = max(
-            int(getattr(exposure, "high_conviction_recent_weak_max_age_seconds", 0) or 0),
-            0,
-        )
-        if weak_max_age_seconds <= 0:
-            weak_max_age_seconds = max(int(getattr(exposure, "high_conviction_max_decision_age_seconds", 0) or 0), 0)
-        blocking_flat_reasons = {
-            "DIRECTION_CONFLICT",
-            "EDGE_BELOW_COST",
-            "EDGE_TOO_THIN",
-            "HIGH_CONVICTION_A_PLUS_REQUIRED",
-            "HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",
-            "LIQUIDITY_TOO_WEAK",
-            "LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",
-            "SCORE_TOO_LOW",
-        }
-        for previous in reversed(self.decisions):
-            if previous.decision_id == decision.decision_id:
-                continue
-            if previous.symbol != decision.symbol:
-                continue
-            previous_time = previous.timestamp
-            if previous_time.tzinfo is None:
-                previous_time = previous_time.replace(tzinfo=timezone.utc)
-            age_to_submission_seconds = (comparable_submission_time - previous_time).total_seconds()
-            if age_to_submission_seconds < 0.0:
-                continue
-            if weak_max_age_seconds > 0 and age_to_submission_seconds > weak_max_age_seconds:
-                continue
-            if previous.final_mode != "futures" or previous.side != "long" or previous.order_intent_notional_usd <= 0.0:
-                if not previous.rejection_reasons or blocking_flat_reasons.intersection(previous.rejection_reasons):
-                    return True
-            if previous.trend_direction <= 0 or previous.net_expected_edge_bps <= 0.0:
-                return True
-        weak_preflight = self.recent_weak_preflight_by_symbol.get(decision.symbol)
-        if weak_preflight is not None:
-            weak_at, _weak_reasons = weak_preflight
-            if weak_at.tzinfo is None:
-                weak_at = weak_at.replace(tzinfo=timezone.utc)
-            age_to_submission_seconds = (comparable_submission_time - weak_at).total_seconds()
-            if age_to_submission_seconds >= 0.0 and (
-                weak_max_age_seconds <= 0 or age_to_submission_seconds <= weak_max_age_seconds
-            ):
-                return True
-        return False
-
-    def _apply_high_conviction_futures_sizing(
-        self,
-        decision: DecisionIntent,
-        *,
-        execution_headroom: float,
-        leverage: float,
-        max_notional: float,
-        is_major_strong_futures_decision: bool,
-        is_major_medium_futures_decision: bool,
-        submission_time: datetime | None = None,
-    ) -> DecisionIntent:
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        if not exposure.high_conviction_sizing_enabled:
-            return decision
-        if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
-            return decision
-        if not self._is_major_futures_symbol(decision.symbol):
-            return decision
-        if decision.side != "long":
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_LONG_ONLY",)))),
-            )
-        if execution_headroom <= 0.0 or leverage <= 0.0 or max_notional <= 0.0:
-            return decision
-        max_decision_age_seconds = max(
-            int(getattr(exposure, "high_conviction_max_decision_age_seconds", 0) or 0),
-            0,
-        )
-        if max_decision_age_seconds > 0 and submission_time is not None:
-            decision_time = decision.timestamp
-            if decision_time.tzinfo is None:
-                decision_time = decision_time.replace(tzinfo=timezone.utc)
-            comparable_submission_time = submission_time
-            if comparable_submission_time.tzinfo is None:
-                comparable_submission_time = comparable_submission_time.replace(tzinfo=timezone.utc)
-            decision_age_seconds = (comparable_submission_time - decision_time).total_seconds()
-            if decision_age_seconds < 0.0 or decision_age_seconds > max_decision_age_seconds:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(
-                        sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_STALE_DECISION",)))
-                    ),
-                )
-        if self._high_conviction_recent_weak_signal_seen(decision, submission_time=submission_time):
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(
-                    sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_RECENT_WEAK_SIGNAL",)))
-                ),
-            )
-        if not self._high_conviction_recent_long_confirmation_passes(
-            decision,
-            is_major_strong_futures_decision=is_major_strong_futures_decision,
-            submission_time=submission_time,
-        ):
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(
-                    sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",)))
-                ),
-            )
-        target_margin_fraction = 0.0
-        boost_reason = ""
-        if is_major_strong_futures_decision:
-            target_margin_fraction = max(float(exposure.high_conviction_target_margin_fraction), 0.0)
-            boost_reason = "HIGH_CONVICTION_A_PLUS_SIZE"
-        elif is_major_medium_futures_decision:
-            target_margin_fraction = max(float(exposure.high_conviction_medium_margin_fraction), 0.0)
-            boost_reason = "HIGH_CONVICTION_MEDIUM_SIZE"
-        elif exposure.high_conviction_block_non_strong:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_A_PLUS_REQUIRED",)))),
-            )
-        if target_margin_fraction <= 0.0:
-            if exposure.high_conviction_block_non_strong:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_A_PLUS_REQUIRED",)))),
-                )
-            return decision
-        target_notional = execution_headroom * min(target_margin_fraction, 1.0) * max(leverage, 1.0)
-        target_notional = min(target_notional, max_notional)
-        min_notional = max(float(exposure.high_conviction_min_notional_usd), 0.0)
-        if min_notional > 0.0 and target_notional < min_notional:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("HIGH_CONVICTION_NOTIONAL_TOO_SMALL",)))),
-            )
-        target_notional = round(max(target_notional, 0.0), 6)
-        if target_notional <= 0.0:
-            return decision
-        if target_notional <= decision.order_intent_notional_usd:
-            scale = target_notional / max(decision.order_intent_notional_usd, 1e-9)
-            return replace(
-                decision,
-                order_intent_notional_usd=target_notional,
-                strategy_size_multiplier=round(decision.strategy_size_multiplier * scale, 6),
-                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (boost_reason,)))),
-            )
-        scale = target_notional / max(decision.order_intent_notional_usd, 1e-9)
-        return replace(
-            decision,
-            order_intent_notional_usd=target_notional,
-            strategy_size_multiplier=round(decision.strategy_size_multiplier * scale, 6),
-            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + (boost_reason,)))),
-        )
-
-    def _apply_operational_self_correction(self, decision: DecisionIntent) -> DecisionIntent:
-        decision = self._direct_policy_evidence_guardrails(decision)
-        if decision.final_mode == "cash" or decision.order_intent_notional_usd <= 0.0:
-            return decision
-        # Data collection mode: skip operational self-correction entirely to preserve
-        # full position sizing during evidence accumulation phase.
-        _dcm = self.runtime.paper_service.settings
-        if _dcm.data_collection_mode and len(self.closed_trades) < _dcm.data_collection_min_trades:
-            return decision
-        policy_adjustment = self._policy_adjustment_for_decision(decision)
-        verdict = self._current_operational_verdict()
-        verdict_status = str(verdict.get("status", "hold"))
-        if len(self.live_orders) < 5 and not policy_adjustment and verdict_status != "stop":
-            return decision
-        status = "stop" if len(self.live_orders) < 5 and verdict_status == "stop" else ("pass" if len(self.live_orders) < 5 else verdict_status)
-        policy_multiplier = float(policy_adjustment.get("size_multiplier", 1.0) or 1.0)
-        policy_symbol_bias = str(policy_adjustment.get("symbol_bias", "neutral") or "neutral")
-        rollout_phase = str(policy_adjustment.get("rollout_execution_phase", "baseline") or "baseline")
-        is_major_symbol = is_major_futures_symbol(
-            decision.symbol,
-            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-        )
-        phase_reason = (
-            (f"ACTIVE_POLICY_PHASE_{rollout_phase.upper()}",)
-            if rollout_phase in {"partial", "broad", "full", "watch", "rollback"}
-            else ()
-        )
-        if policy_symbol_bias == "majors_only" and decision.symbol not in {"BTCUSDT", "ETHUSDT"}:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("ACTIVE_POLICY_MAJORS_ONLY",) + phase_reason))),
-            )
-        if status == "stop":
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_STOP",)))),
-            )
-        if status == "aggressive_pass":
-            if not is_major_symbol:
-                scaled_notional = round(decision.order_intent_notional_usd * 0.5 * policy_multiplier, 6)
-                return replace(
-                    decision,
-                    order_intent_notional_usd=scaled_notional,
-                    strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5 * policy_multiplier, 6),
-                    size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("NON_MAJOR_CONSERVATIVE_OVERRIDE", "OPERATIONAL_HOLD_SCALE")))),
-                )
-            boosted_notional = round(decision.order_intent_notional_usd * 1.3 * policy_multiplier, 6)
-            return replace(
-                decision,
-                order_intent_notional_usd=boosted_notional,
-                strategy_size_multiplier=round(decision.strategy_size_multiplier * 1.3 * policy_multiplier, 6),
-                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_AGGRESSIVE_PASS_SCALE",)))),
-            )
-        if status == "strong_pass":
-            if not is_major_symbol:
-                return replace(
-                    decision,
-                    size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("NON_MAJOR_CONSERVATIVE_OVERRIDE",)))),
-                )
-            boosted_notional = round(decision.order_intent_notional_usd * 1.15 * policy_multiplier, 6)
-            return replace(
-                decision,
-                order_intent_notional_usd=boosted_notional,
-                strategy_size_multiplier=round(decision.strategy_size_multiplier * 1.15 * policy_multiplier, 6),
-                size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_STRONG_PASS_SCALE",)))),
-            )
-        if status == "pass" and policy_multiplier != 1.0:
-            adjusted_notional = round(decision.order_intent_notional_usd * policy_multiplier, 6)
-            if policy_multiplier <= 0.0:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("ACTIVE_POLICY_DISABLED",)))),
-                )
-            return replace(
-                decision,
-                order_intent_notional_usd=adjusted_notional,
-                strategy_size_multiplier=round(decision.strategy_size_multiplier * policy_multiplier, 6),
-                size_boost_reasons=tuple(
-                    sorted(
-                        set(
-                            decision.size_boost_reasons
-                            + (("ACTIVE_POLICY_PROMOTE",) if policy_multiplier > 1.0 else ("ACTIVE_POLICY_DEMOTE",))
-                            + phase_reason
-                        )
-                    )
-                ),
-            )
-        if status != "hold":
-            return decision
-        scaled_notional = round(decision.order_intent_notional_usd * 0.5 * policy_multiplier, 6)
-        if scaled_notional <= 0.0:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("OPERATIONAL_HOLD",)))),
-            )
-        return replace(
-            decision,
-            order_intent_notional_usd=scaled_notional,
-            strategy_size_multiplier=round(decision.strategy_size_multiplier * 0.5 * policy_multiplier, 6),
-            size_boost_reasons=tuple(sorted(set(decision.size_boost_reasons + ("OPERATIONAL_HOLD_SCALE",) + phase_reason))),
-        )
-
-    def _cap_live_order_decision(
-        self,
-        decision: DecisionIntent,
-        *,
-        reference_price: float | None = None,
-        extra_spot_available_balance_usd: float = 0.0,
-        extra_spot_transfer_asset: str = "",
-        extra_futures_execution_balance_usd: float = 0.0,
-        allow_transfer_hints: bool = True,
-        policy_entry_context: dict[str, object] | None = None,
-        submission_time: datetime | None = None,
-    ) -> DecisionIntent:
-        decision = self._apply_operational_self_correction(decision)
-        if not self.capital_report:
-            return decision
-        is_major_strong_futures_decision = self._is_major_strong_futures_decision(decision)
-        is_major_medium_futures_decision = self._is_major_medium_futures_decision(decision)
-        if decision.final_mode == "futures":
-            # Data collection mode: skip cross-symbol side conflict check.
-            # At small account scale, BTC/ETH directional correlation risk is negligible.
-            _dcm_skip_cross = (
-                self.runtime.paper_service.settings.data_collection_mode
-                and len(self.closed_trades) < self.runtime.paper_service.settings.data_collection_min_trades
-            )
-            major_cross_conflict_symbol = None if _dcm_skip_cross else self._major_cross_symbol_side_conflict(decision)
-            if major_cross_conflict_symbol is not None:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (f"MAJOR_SIDE_CONFLICT:{major_cross_conflict_symbol}", "MAJOR_CROSS_SYMBOL_SIDE_CONFLICT")))),
-                )
-            live_position = self._find_live_futures_position(decision.symbol)
-            if live_position is not None:
-                live_side = self._normalize_live_position_side(live_position)
-                if live_side != decision.side:
-                    return replace(
-                        decision,
-                        final_mode="cash",
-                        side="flat",
-                        order_intent_notional_usd=0.0,
-                        stop_distance_bps=0.0,
-                        rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("LIVE_POSITION_CONFLICT",)))),
-                    )
-        reserve_fraction = self._cash_reserve_fraction()
-        requirements_key = "spot_requirements" if decision.final_mode == "spot" else "futures_requirements"
-        min_notional = 0.0
-        min_quantity = 0.0
-        for item in self.capital_report.get(requirements_key, []):
-            if item.get("symbol") == decision.symbol:
-                min_notional = float(item.get("min_notional_usd", 0.0))
-                min_quantity = float(item.get("min_quantity", 0.0))
-                break
-        if decision.final_mode == "spot":
-            selected_route = self._select_spot_execution_route(decision, reserve_fraction=reserve_fraction)
-            if selected_route is not None:
-                available = self._spot_route_available_balance_usd(
-                    route=selected_route,
-                    extra_spot_available_balance_usd=extra_spot_available_balance_usd,
-                    extra_spot_transfer_asset=extra_spot_transfer_asset,
-                )
-                min_notional = float(selected_route.get("min_notional_usd", min_notional))
-                min_quantity = float(selected_route.get("min_quantity", min_quantity))
-                decision = replace(
-                    decision,
-                    execution_symbol=str(selected_route.get("execution_symbol", decision.symbol)),
-                    spot_base_asset=str(selected_route.get("base_asset", "")),
-                    spot_quote_asset=str(selected_route.get("quote_asset", "")),
-                    spot_funding_asset=str(selected_route.get("funding_asset", "")),
-                    spot_quote_asset_usd_price=float(selected_route.get("quote_asset_usd_price", 0.0) or 0.0),
-                )
-            else:
-                available = float(self.capital_report.get("spot_available_balance_usd", 0.0)) + max(
-                    extra_spot_available_balance_usd,
-                    0.0,
-                )
-                decision = replace(
-                    decision,
-                    execution_symbol=decision.symbol,
-                    spot_quote_asset="USDT" if decision.symbol.endswith("USDT") else "",
-                    spot_funding_asset="USDT" if decision.symbol.endswith("USDT") else "",
-                    spot_quote_asset_usd_price=1.0 if decision.symbol.endswith("USDT") else 0.0,
-                )
-            max_notional = max(0.0, available * (1.0 - reserve_fraction))
-        elif decision.final_mode == "futures":
-            execution_available = float(
-                self.capital_report.get(
-                    "futures_execution_balance_usd",
-                    self.capital_report.get("futures_available_balance_usd", 0.0),
-                )
-            )
-            total_reusable_available = float(
-                self.capital_report.get(
-                    "futures_total_reusable_balance_usd",
-                    self.capital_report.get("futures_recognized_balance_usd", execution_available),
-                )
-            )
-            available = max(execution_available, total_reusable_available)
-            available += max(extra_futures_execution_balance_usd, 0.0)
-            leverage = select_futures_leverage(
-                symbol=decision.symbol,
-                predictability_score=decision.predictability_score,
-                trend_strength=decision.trend_strength,
-                volume_confirmation=decision.volume_confirmation,
-                liquidity_score=decision.liquidity_score,
-                volatility_penalty=decision.volatility_penalty,
-                overheat_penalty=decision.overheat_penalty,
-                net_expected_edge_bps=decision.net_expected_edge_bps,
-                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
-                settings=self.runtime.paper_service.settings,
-            )
-            leverage = max(1.0, leverage * self._policy_leverage_multiplier_for_decision(decision))
-            leverage = max(1.0, leverage * self._execution_quality_leverage_multiplier_for_decision(decision))
-            execution_headroom = max(0.0, available * (1.0 - reserve_fraction))
-            max_notional = max(0.0, execution_headroom * leverage)
-            current_futures_notional = sum(
-                position.current_notional_usd_estimate()
-                for position in self.paper_positions.values()
-                if position is not None
-                and position.market == "futures"
-                and position.quantity_remaining > 0
-                and position.exchange_synced
-            )
-            if current_futures_notional > 0.0:
-                total_notional_fraction = self.runtime.paper_service.settings.risk.max_total_notional_fraction
-                if is_major_medium_futures_decision:
-                    total_notional_fraction = min(
-                        total_notional_fraction
-                        + self.runtime.paper_service.settings.futures_exposure.major_medium_total_notional_fraction_relaxation,
-                        1.0,
-                    )
-                if is_major_strong_futures_decision:
-                    total_notional_fraction = min(
-                        total_notional_fraction
-                        + self.runtime.paper_service.settings.futures_exposure.major_strong_total_notional_fraction_relaxation,
-                        1.0,
-                    )
-                total_notional_cap = self.equity_usd * total_notional_fraction
-                remaining_total_notional = max(total_notional_cap - current_futures_notional, 0.0)
-                if remaining_total_notional <= 0.0:
-                    max_notional = 0.0
-                else:
-                    max_notional = min(max_notional, remaining_total_notional)
-                safety_cap_fraction = 0.5
-                if is_major_medium_futures_decision:
-                    safety_cap_fraction = max(
-                        self.runtime.paper_service.settings.futures_exposure.major_medium_safety_cap_fraction,
-                        safety_cap_fraction,
-                    )
-                if is_major_strong_futures_decision:
-                    safety_cap_fraction = max(
-                        self.runtime.paper_service.settings.futures_exposure.major_strong_safety_cap_fraction,
-                        safety_cap_fraction,
-                    )
-                safety_cap = execution_headroom * safety_cap_fraction
-                max_notional = min(max_notional, safety_cap)
-            decision = self._apply_high_conviction_futures_sizing(
-                decision,
-                execution_headroom=execution_headroom,
-                leverage=leverage,
-                max_notional=max_notional,
-                is_major_strong_futures_decision=is_major_strong_futures_decision,
-                is_major_medium_futures_decision=is_major_medium_futures_decision,
-                submission_time=submission_time,
-            )
-            if decision.final_mode != "futures" or decision.order_intent_notional_usd <= 0.0:
-                return decision
-        else:
-            return decision
-        rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
-        meaningful_notional_floor = (
-            self.runtime.paper_service.settings.risk.min_meaningful_spot_notional_usd
-            if decision.final_mode == "spot"
-            else self.runtime.paper_service.settings.risk.min_meaningful_futures_notional_usd
-        )
-        preserve_execution_quality_size_throttle = self._preserve_execution_quality_size_throttle(decision)
-        major_medium_entry_floor = 0.0
-        major_strong_entry_floor = 0.0
-        if (
-            decision.final_mode == "futures"
-            and self._is_major_futures_symbol(decision.symbol)
-            and decision.predictability_score >= self.runtime.paper_service.settings.futures_exposure.pyramid_min_predictability_score
-        ):
-            meaningful_notional_floor = max(
-                meaningful_notional_floor,
-                self._major_futures_entry_floor(
-                    symbol=decision.symbol,
-                    configured_floor=self.runtime.paper_service.settings.futures_exposure.major_min_meaningful_notional_usd,
-                    decision=decision,
-                ),
-            )
-        if is_major_medium_futures_decision:
-            major_medium_entry_floor = self._major_futures_entry_floor(
-                symbol=decision.symbol,
-                configured_floor=self.runtime.paper_service.settings.futures_exposure.major_medium_min_entry_notional_usd,
-                decision=decision,
-            )
-            if preserve_execution_quality_size_throttle:
-                major_medium_entry_floor = 0.0
-            meaningful_notional_floor = max(meaningful_notional_floor, major_medium_entry_floor)
-        if is_major_strong_futures_decision:
-            major_strong_entry_floor = self._major_futures_entry_floor(
-                symbol=decision.symbol,
-                configured_floor=self.runtime.paper_service.settings.futures_exposure.major_strong_min_entry_notional_usd,
-                decision=decision,
-            )
-            if preserve_execution_quality_size_throttle:
-                major_strong_entry_floor = 0.0
-            meaningful_notional_floor = max(meaningful_notional_floor, major_strong_entry_floor)
-        if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
-            rejection_reasons = list(decision.rejection_reasons + (rejection_code,))
-            if allow_transfer_hints and decision.final_mode == "futures":
-                futures_route = self._preferred_transfer_route_for_decision(
-                    decision=decision,
-                    reference_price=reference_price,
-                    allow_non_immediate=True,
-                )
-                if futures_route is not None:
-                    capacity_effect = self._transfer_route_capacity_effect(futures_route)
-                    if capacity_effect == "direct_execution":
-                        rejection_reasons.append("TRANSFER_REQUIRED_SPOT_TO_FUTURES")
-                    elif capacity_effect == "collateral_candidate":
-                        rejection_reasons.append("FUTURES_COLLATERAL_AVAILABLE")
-                    else:
-                        rejection_reasons.append("MANUAL_FUTURES_CONVERSION_REQUIRED")
-                elif float(self.capital_report.get("futures_collateral_candidate_balance_usd", 0.0) or 0.0) > 0.0:
-                    rejection_reasons.append("FUTURES_COLLATERAL_AVAILABLE")
-                elif float(self.capital_report.get("futures_manual_handling_balance_usd", 0.0) or 0.0) > 0.0:
-                    rejection_reasons.append("MANUAL_FUTURES_CONVERSION_REQUIRED")
-            if allow_transfer_hints and decision.final_mode == "spot" and self._preferred_transfer_route_for_decision(
-                decision=decision,
-                reference_price=reference_price,
-            ) is not None:
-                rejection_reasons.append("TRANSFER_REQUIRED_FUTURES_TO_SPOT")
-            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(rejection_reasons))))
-        if decision.order_intent_notional_usd < major_medium_entry_floor:
-            if max_notional < major_medium_entry_floor:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MIN_MEANINGFUL_NOTIONAL",)))),
-                )
-            decision = replace(decision, order_intent_notional_usd=round(major_medium_entry_floor, 6))
-        if decision.order_intent_notional_usd < major_strong_entry_floor:
-            if max_notional < major_strong_entry_floor:
-                return replace(
-                    decision,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MIN_MEANINGFUL_NOTIONAL",)))),
-                )
-            decision = replace(decision, order_intent_notional_usd=round(major_strong_entry_floor, 6))
-        expected_profit_usd = self._expected_net_profit_usd(decision)
-        # Data collection mode: relax notional floor and expected profit checks to allow
-        # small-capital accounts to accumulate live trade evidence.
-        _dcm_settings = self.runtime.paper_service.settings
-        data_collection_relaxes_expected_profit = (
-            _dcm_settings.data_collection_mode
-            and len(self.closed_trades) < _dcm_settings.data_collection_min_trades
-        )
-        if data_collection_relaxes_expected_profit:
-            meaningful_notional_floor = min(meaningful_notional_floor, min_notional)
-            expected_profit_usd = max(expected_profit_usd, self._min_expected_profit_usd_threshold(decision))
-        if decision.order_intent_notional_usd < meaningful_notional_floor:
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MIN_MEANINGFUL_NOTIONAL",)))),
-            )
-        if expected_profit_usd < self._min_expected_profit_usd_threshold(decision):
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("EXPECTED_PROFIT_TOO_SMALL",)))),
-            )
-        if decision.order_intent_notional_usd <= max_notional:
-            candidate = decision
-        else:
-            floored_notional = round(max_notional, 6)
-            candidate = replace(decision, order_intent_notional_usd=floored_notional)
-        candidate_expected_profit_usd = self._expected_net_profit_usd(candidate)
-        candidate_expected_profit_threshold = self._min_expected_profit_usd_threshold(
-            candidate,
-            notional_usd=candidate.order_intent_notional_usd,
-        )
-        if data_collection_relaxes_expected_profit:
-            candidate_expected_profit_usd = max(candidate_expected_profit_usd, candidate_expected_profit_threshold)
-        if candidate_expected_profit_usd < candidate_expected_profit_threshold:
-            return replace(
-                candidate,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(candidate.rejection_reasons + ("EXPECTED_PROFIT_TOO_SMALL_AFTER_CAP",)))),
-            )
-        candidate = self._apply_policy_alignment_entry_gate(
-            candidate,
-            policy_entry_context=policy_entry_context,
-        )
-        candidate = self._apply_fee_sensitive_entry_quality_buffer(candidate)
-        if candidate.final_mode not in {"spot", "futures"} or candidate.order_intent_notional_usd <= 0.0:
-            return candidate
-        if reference_price is not None and min_quantity > 0.0:
-            quantity_reference_price = reference_price
-            if candidate.final_mode == "spot" and (candidate.spot_quote_asset or "USDT") != "USDT":
-                quote_asset_usd_price = float(candidate.spot_quote_asset_usd_price or 0.0)
-                if quote_asset_usd_price > 0.0:
-                    quantity_reference_price = reference_price * quote_asset_usd_price
-            quantity = quantity_from_notional(candidate.order_intent_notional_usd, quantity_reference_price)
-            if quantity < min_quantity:
-                return replace(
-                    candidate,
-                    final_mode="cash",
-                    side="flat",
-                    order_intent_notional_usd=0.0,
-                    stop_distance_bps=0.0,
-                    rejection_reasons=tuple(sorted(set(candidate.rejection_reasons + ("MIN_ORDER_QUANTITY",)))),
-                )
-        return candidate
-
-    def _transfer_route_for_markets(
-        self,
-        *,
-        source_market: str,
-        target_market: str,
-        asset: str | None = None,
-    ) -> dict[str, Any] | None:
-        raw_routes = self.capital_report.get("capital_transfer_routes", [])
-        if not isinstance(raw_routes, list):
-            return None
-        requested_asset = (asset or "").upper()
-        matching_routes: list[dict[str, Any]] = []
-        for item in raw_routes:
-            if not isinstance(item, dict):
-                continue
-            if (
-                str(item.get("source_market", "")) == source_market
-                and str(item.get("target_market", "")) == target_market
-            ):
-                if requested_asset and str(item.get("asset", "")).upper() != requested_asset:
-                    continue
-                matching_routes.append(item)
-        if not matching_routes:
-            if requested_asset in {"", "USDT"}:
-                if source_market == "spot" and target_market == "futures":
-                    transferable = float(self.capital_report.get("max_spot_to_futures_transfer_usd", 0.0) or 0.0)
-                elif source_market == "futures" and target_market == "spot":
-                    transferable = float(self.capital_report.get("max_futures_to_spot_transfer_usd", 0.0) or 0.0)
-                else:
-                    transferable = 0.0
-                if transferable > 0.0:
-                    return {
-                        "source_market": source_market,
-                        "target_market": target_market,
-                        "asset": "USDT",
-                        "transferable_usd": transferable,
-                        "route_type": "wallet_transfer",
-                        "capacity_effect": "direct_execution" if target_market == "futures" else "spot_execution",
-                        "auto_transfer_supported": True,
-                        "note": "Fallback transfer route synthesized from legacy capital report capacity.",
-                    }
-            return None
-        return min(
-            matching_routes,
-            key=lambda item: (
-                self._transfer_route_capacity_priority(item),
-                -float(item.get("transferable_usd", 0.0) or 0.0),
-            ),
-        )
-
-    def _transfer_route_capacity_effect(self, route: dict[str, Any]) -> str:
-        capacity_effect = str(route.get("capacity_effect", "") or "").strip().lower()
-        if capacity_effect:
-            return capacity_effect
-        if str(route.get("target_market", "")).lower() != "futures":
-            return "spot_execution"
-        if str(route.get("asset", "")).upper() == "USDT":
-            return "direct_execution"
-        if bool(route.get("requires_manual_transfer", False)):
-            return "manual_conversion"
-        return "collateral_candidate"
-
-    def _transfer_route_capacity_priority(self, route: dict[str, Any]) -> int:
-        return {
-            "direct_execution": 0,
-            "collateral_candidate": 1,
-            "manual_conversion": 2,
-            "spot_execution": 0,
-        }.get(self._transfer_route_capacity_effect(route), 3)
-
-    def _cap_live_order_decision_with_transfer_buffer(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-        target_market: str,
-        transfer_asset: str,
-        extra_balance_usd: float,
-    ) -> DecisionIntent:
-        if target_market == "futures":
-            return self._cap_live_order_decision(
-                decision,
-                reference_price=reference_price,
-                extra_futures_execution_balance_usd=extra_balance_usd,
-                allow_transfer_hints=False,
-            )
-        return self._cap_live_order_decision(
-            decision,
-            reference_price=reference_price,
-            extra_spot_available_balance_usd=extra_balance_usd,
-            extra_spot_transfer_asset=transfer_asset,
-            allow_transfer_hints=False,
-        )
-
-    def _minimal_transfer_amount_for_decision(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-        source_market: str,
-        target_market: str,
-        transfer_asset: str,
-        max_transfer_usd: float,
-    ) -> float:
-        if max_transfer_usd <= 0.0:
-            return 0.0
-        fully_funded = self._cap_live_order_decision_with_transfer_buffer(
-            decision=decision,
-            reference_price=reference_price,
-            target_market=target_market,
-            transfer_asset=transfer_asset,
-            extra_balance_usd=max_transfer_usd,
-        )
-        if fully_funded.final_mode != decision.final_mode or fully_funded.order_intent_notional_usd <= 0.0:
-            return 0.0
-        low = 0.0
-        high = max_transfer_usd
-        for _ in range(18):
-            midpoint = (low + high) / 2.0
-            candidate = self._cap_live_order_decision_with_transfer_buffer(
-                decision=decision,
-                reference_price=reference_price,
-                target_market=target_market,
-                transfer_asset=transfer_asset,
-                extra_balance_usd=midpoint,
-            )
-            if candidate.final_mode == decision.final_mode and candidate.order_intent_notional_usd > 0.0:
-                high = midpoint
-            else:
-                low = midpoint
-        return round(min(max_transfer_usd, max(high + 0.01, 5.0)), 8)
-
-    def _preferred_transfer_route_for_decision(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float | None,
-        allow_non_immediate: bool = False,
-    ) -> dict[str, Any] | None:
-        if not self.capital_report:
-            return None
-        if decision.final_mode == "futures":
-            route = self._transfer_route_for_markets(
-                source_market="spot",
-                target_market="futures",
-            )
-            if route is None:
-                return None
-            if not allow_non_immediate and self._transfer_route_capacity_effect(route) != "direct_execution":
-                return None
-            return route
-        if decision.final_mode != "spot" or decision.side != "long":
-            return None
-        selected_route = self._select_spot_execution_route(decision, reserve_fraction=self._cash_reserve_fraction())
-        if selected_route is None:
-            if decision.symbol.endswith("USDT"):
-                return self._transfer_route_for_markets(
-                    source_market="futures",
-                    target_market="spot",
-                    asset="USDT",
-                )
-            return None
-        if not bool(selected_route.get("requires_wallet_transfer", False)):
-            return None
-        funding_asset = str(selected_route.get("funding_asset", "")).upper()
-        if not funding_asset:
-            return None
-        route = self._transfer_route_for_markets(
-            source_market=str(selected_route.get("funding_source_market", "futures")),
-            target_market="spot",
-            asset=funding_asset,
-        )
-        if route is None:
-            return None
-        if reference_price is None:
-            return route
-        amount = self._minimal_transfer_amount_for_decision(
-            decision=decision,
-            reference_price=reference_price,
-            source_market=str(route.get("source_market", "")),
-            target_market=str(route.get("target_market", "")),
-            transfer_asset=funding_asset,
-            max_transfer_usd=float(route.get("transferable_usd", 0.0) or 0.0),
-        )
-        return route if amount > 0.0 else None
-
-    def _prepare_live_execution_decision(
-        self,
-        *,
-        decision: DecisionIntent,
-        reference_price: float,
-        policy_entry_context: dict[str, object] | None = None,
-        submission_time: datetime | None = None,
-    ) -> DecisionIntent:
-        executable = self._cap_live_order_decision(
-            decision,
-            reference_price=reference_price,
-            policy_entry_context=policy_entry_context,
-            submission_time=submission_time,
-        )
-        if self.rest_client is None:
-            return executable
-        transfer_method = getattr(self.rest_client, "transfer_wallet_balance", None)
-        if not callable(transfer_method):
-            transfer_method = getattr(self.rest_client, "transfer_asset", None)
-        if not callable(transfer_method):
-            return executable
-        transfer_reason = None
-        source_market = ""
-        target_market = ""
-        if "TRANSFER_REQUIRED_SPOT_TO_FUTURES" in executable.rejection_reasons:
-            transfer_reason = "auto_transfer_spot_to_futures"
-            source_market = "spot"
-            target_market = "futures"
-        elif "TRANSFER_REQUIRED_FUTURES_TO_SPOT" in executable.rejection_reasons:
-            transfer_reason = "auto_transfer_futures_to_spot"
-            source_market = "futures"
-            target_market = "spot"
-        if transfer_reason is None:
-            return executable
-        route = self._preferred_transfer_route_for_decision(
-            decision=decision,
-            reference_price=reference_price,
-        )
-        if route is None:
-            return executable
-        transfer_asset = str(route.get("asset", "USDT") or "USDT").upper()
-        source_market = str(route.get("source_market", source_market) or source_market)
-        target_market = str(route.get("target_market", target_market) or target_market)
-        if self._wallet_transfer_cooldown_active(
-            source_market=source_market,
-            target_market=target_market,
-            asset=transfer_asset,
-            timestamp=decision.timestamp,
-        ):
-            return executable
-        amount = self._minimal_transfer_amount_for_decision(
-            decision=decision,
-            reference_price=reference_price,
-            source_market=source_market,
-            target_market=target_market,
-            transfer_asset=transfer_asset,
-            max_transfer_usd=float(route.get("transferable_usd", 0.0) or 0.0),
-        )
-        if amount <= 0.0:
-            return executable
-        client_oid = f"{decision.decision_id}:{source_market}:{target_market}"
-        try:
-            transfer_response = transfer_method(
-                source_market=source_market,
-                target_market=target_market,
-                asset=transfer_asset,
-                amount=amount,
-                client_oid=client_oid,
-            )
-        except Exception as exc:
-            self._set_wallet_transfer_cooldown(
-                source_market=source_market,
-                target_market=target_market,
-                asset=transfer_asset,
-                timestamp=decision.timestamp,
-            )
-            if self.log_store is not None:
-                self.log_store.append(
-                    "wallet_transfers",
-                    {
-                        "timestamp": decision.timestamp,
-                        "symbol": decision.symbol,
-                        "status": "failed",
-                        "source_market": source_market,
-                        "target_market": target_market,
-                        "asset": transfer_asset,
-                        "route_type": route.get("route_type"),
-                        "amount_usd": amount,
-                        "error": repr(exc),
-                    },
-                )
-            return executable
-        self._set_wallet_transfer_cooldown(
-            source_market=source_market,
-            target_market=target_market,
-            asset=transfer_asset,
-            timestamp=decision.timestamp,
-        )
-        if self.log_store is not None:
-            self.log_store.append(
-                "wallet_transfers",
-                {
-                    "timestamp": decision.timestamp,
-                    "symbol": decision.symbol,
-                    "status": "submitted",
-                    "source_market": source_market,
-                    "target_market": target_market,
-                    "asset": transfer_asset,
-                    "route_type": route.get("route_type"),
-                    "route_note": route.get("note"),
-                    "amount_usd": amount,
-                    "client_oid": client_oid,
-                    "response": transfer_response,
-                },
-            )
-        self._refresh_account_state_after_live_order_activity(
-            symbol=decision.symbol,
-            timestamp=decision.timestamp,
-            stage="capital_transfer",
-            reason=transfer_reason,
-        )
-        return self._cap_live_order_decision(
-            decision,
-            reference_price=reference_price,
-            extra_spot_available_balance_usd=amount if target_market == "spot" else 0.0,
-            extra_spot_transfer_asset=transfer_asset if target_market == "spot" else "",
-            extra_futures_execution_balance_usd=amount if target_market == "futures" else 0.0,
-            policy_entry_context=policy_entry_context,
-        )
-
-    def _normalize_live_position_side(self, position: dict[str, Any]) -> str:
-        hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()
-        if hold_side in {"long", "buy"}:
-            return "long"
-        if hold_side in {"short", "sell"}:
-            return "short"
-        side = str(position.get("side") or "").lower()
-        if side in {"buy", "long"}:
-            return "long"
-        return "short"
-
-    def _find_live_futures_position(self, symbol: str) -> dict[str, Any] | None:
-        for position in self.live_positions_snapshot:
-            if str(position.get("symbol", "")) != symbol:
-                continue
-            total = self._live_position_quantity(position)
-            if total > 0.0:
-                return position
-        return None
-
-    def _live_position_quantity(self, position: dict[str, Any]) -> float:
-        return float(position.get("total") or position.get("available") or 0.0)
-
-    def _active_live_futures_positions_by_symbol(self) -> dict[str, dict[str, Any]]:
-        positions: dict[str, dict[str, Any]] = {}
-        for position in self.live_positions_snapshot:
-            symbol = str(position.get("symbol", ""))
-            if not symbol:
-                continue
-            if self._live_position_quantity(position) <= 0.0:
-                continue
-            positions[symbol] = position
-        return positions
-
-    def _open_paper_futures_positions_by_symbol(self) -> dict[str, PaperPosition]:
-        return {
-            symbol: position
-            for symbol, position in self.paper_positions.items()
-            if position.market == "futures" and position.quantity_remaining > 0.0
-        }
-
-    def _is_major_futures_symbol(self, symbol: str) -> bool:
-        return is_major_futures_symbol(
-            symbol,
-            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-        )
-
-    def _is_btc_eth_symbol(self, symbol: str) -> bool:
-        return symbol in {"BTCUSDT", "ETHUSDT"}
-
-    def _major_cross_symbol_side_conflict(self, decision: DecisionIntent) -> str | None:
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"} or not self._is_btc_eth_symbol(decision.symbol):
-            return None
-        for symbol, position in self.paper_positions.items():
-            if symbol == decision.symbol or not self._is_btc_eth_symbol(symbol):
-                continue
-            if position.market != "futures" or position.quantity_remaining <= 0.0:
-                continue
-            if position.side in {"long", "short"} and position.side != decision.side:
-                return symbol
-        for symbol, live_position in self._active_live_futures_positions_by_symbol().items():
-            if symbol == decision.symbol or not self._is_btc_eth_symbol(symbol):
-                continue
-            live_side = self._normalize_live_position_side(live_position)
-            if live_side in {"long", "short"} and live_side != decision.side:
-                return symbol
-        return None
-
-    def _major_cross_symbol_alignment_targets(self, decision: DecisionIntent) -> list[PaperPosition]:
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"} or not self._is_btc_eth_symbol(decision.symbol):
-            return []
-        targets: list[PaperPosition] = []
-        for symbol, position in self.paper_positions.items():
-            if symbol == decision.symbol or not self._is_btc_eth_symbol(symbol):
-                continue
-            if position.market != "futures" or position.quantity_remaining <= 0.0:
-                continue
-            if position.side in {"long", "short"} and position.side != decision.side and not position.exchange_synced:
-                targets.append(position)
-        return targets
-
-    def _major_cross_symbol_realign_safe(self, *, position: PaperPosition) -> bool:
-        if position.market != "futures" or position.side not in {"long", "short"}:
-            return False
-        reward_bps = self._reward_bps(position=position, price=position.current_price if position.current_price > 0 else position.entry_price)
-        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
-        return current_roe_percent > 0.0
-
-    def _should_force_major_reversal_alignment(self, *, position: PaperPosition, decision: DecisionIntent, holding_minutes: float) -> bool:
-        if position.market != "futures" or decision.final_mode != "futures":
-            return False
-        if not self._is_major_futures_symbol(position.symbol) or not self._is_major_futures_symbol(decision.symbol):
-            return False
-        if position.side == decision.side or decision.side not in {"long", "short"}:
-            return False
-        if not self._major_cross_symbol_realign_safe(position=position):
-            return False
-        if decision.net_expected_edge_bps <= max(position.entry_net_expected_edge_bps * 0.5, 8.0):
-            return False
-        if decision.predictability_score < max(position.entry_predictability_score - 6.0, 60.0):
-            return False
-        return holding_minutes >= max(self.runtime.paper_service.settings.live_position_risk.major_reversal_min_holding_minutes * 0.5, 3.0)
-
-    def _align_major_cross_symbol_positions(self, *, decision: DecisionIntent, price_map: dict[str, float], timestamp: datetime) -> tuple[list[str], bool]:
-        closed_symbols: list[str] = []
-        for position in self._major_cross_symbol_alignment_targets(decision):
-            if not self._major_cross_symbol_realign_safe(position=position):
-                continue
-            exit_price = price_map.get(position.symbol, position.current_price if position.current_price > 0 else position.entry_price)
-            self._close_position(position=position, exit_price=exit_price, timestamp=timestamp, exit_reason="MAJOR_CROSS_SYMBOL_REALIGN")
-            self.manual_symbol_cooldowns.pop(decision.symbol, None)
-            closed_symbols.append(position.symbol)
-        return closed_symbols, bool(closed_symbols)
-
-    def _is_major_strong_futures_decision(self, decision: DecisionIntent) -> bool:
-        return is_major_strong_futures_decision(
-            decision=decision,
-            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-            exposure=self.runtime.paper_service.settings.futures_exposure,
-            thresholds=self.runtime.paper_service.settings.mode_thresholds,
-        )
-
-    def _is_major_medium_futures_decision(self, decision: DecisionIntent) -> bool:
-        return is_major_medium_futures_decision(
-            decision=decision,
-            major_symbols=self.runtime.paper_service.settings.futures_exposure.major_symbols,
-            exposure=self.runtime.paper_service.settings.futures_exposure,
-            thresholds=self.runtime.paper_service.settings.mode_thresholds,
-        )
-
-    def _open_positions_for_market(self, market: str) -> list[dict[str, object]]:
-        return [
-            position.as_dict()
-            for position in self.paper_positions.values()
-            if position.market == market and position.quantity_remaining > 0
-        ]
-
-    def _market_price(self, *, state: Any, fallback: float) -> float:
-        if state is None:
-            return fallback
-        price = float(getattr(state, "last_trade_price", 0.0) or 0.0)
-        return price if price > 0 else fallback
-
-    def _position_stop_price(self, *, entry_price: float, stop_distance_bps: float, side: str) -> float:
-        if stop_distance_bps <= 0:
-            return entry_price
-        stop_fraction = stop_distance_bps / 10000.0
-        if side == "short":
-            return entry_price * (1.0 + stop_fraction)
-        return entry_price * (1.0 - stop_fraction)
-
-    def _reward_bps(self, *, position: PaperPosition, price: float) -> float:
-        if position.entry_price <= 0:
-            return 0.0
-        if position.side == "short":
-            return (position.entry_price - price) / position.entry_price * 10000.0
-        return (price - position.entry_price) / position.entry_price * 10000.0
-
-    def _paper_position_roe_percent(self, *, position: PaperPosition, reward_bps: float) -> float:
-        if position.market != "futures":
-            return 0.0
-        leverage = max(int(position.entry_planned_leverage), 1)
-        return (reward_bps / 100.0) * leverage
-
-    def _futures_proactive_take_profit_thresholds(self) -> tuple[float, ...]:
-        exit_rules = self.runtime.paper_service.settings.exit_rules
-        raw_thresholds = getattr(exit_rules, "futures_proactive_take_profit_roe_thresholds_percent", ())
-        min_threshold = max(float(getattr(exit_rules, "futures_proactive_take_profit_min_roe_percent", 10.0) or 10.0), 0.0)
-        normalized = sorted({round(float(threshold), 6) for threshold in raw_thresholds if float(threshold) >= min_threshold})
-        return tuple(normalized)
-
-    def _futures_proactive_take_profit_fraction(self) -> float:
-        exit_rules = self.runtime.paper_service.settings.exit_rules
-        fraction = float(getattr(exit_rules, "futures_proactive_take_profit_fraction", 0.0) or 0.0)
-        major_fraction = float(
-            getattr(self.runtime.paper_service.settings.live_position_risk, "major_partial_exit_fraction", 0.0) or 0.0
-        )
-        if major_fraction > 0.0:
-            fraction = min(fraction, major_fraction)
-        return max(0.0, min(fraction, 1.0))
-
-    def _pending_proactive_take_profit_threshold(
-        self,
-        *,
-        current_roe_percent: float,
-        thresholds_hit: tuple[float, ...],
-    ) -> float | None:
-        if current_roe_percent <= 0.0:
-            return None
-        hit = {round(float(threshold), 6) for threshold in thresholds_hit}
-        reached = [
-            threshold
-            for threshold in self._futures_proactive_take_profit_thresholds()
-            if threshold not in hit and current_roe_percent >= threshold
-        ]
-        if not reached:
-            return None
-        return reached[-1]
-
-    def _live_proactive_take_profit_key(self, *, identity: str, threshold: float) -> str:
-        return f"{identity}:{threshold:.6f}"
-
-    def _profit_protection_partial_triggered(
-        self,
-        *,
-        peak_roe_percent: float,
-        current_roe_percent: float,
-        retrace_taken: bool,
-        arm_threshold: float | None = None,
-        retrace_threshold: float | None = None,
-    ) -> bool:
-        exit_rules = self.runtime.paper_service.settings.exit_rules
-        if retrace_taken or current_roe_percent <= 0.0:
-            return False
-        effective_arm = (
-            exit_rules.futures_profit_protection_arm_roe_percent
-            if arm_threshold is None
-            else arm_threshold
-        )
-        effective_retrace = (
-            exit_rules.futures_profit_protection_retrace_roe_percent
-            if retrace_threshold is None
-            else retrace_threshold
-        )
-        if peak_roe_percent < effective_arm:
-            return False
-        drawdown = peak_roe_percent - current_roe_percent
-        return drawdown >= effective_retrace
-
-    def _live_profit_protection_thresholds(
-        self,
-        *,
-        hold_side: str,
-        is_major_symbol: bool,
-    ) -> tuple[float | None, float | None]:
-        if not is_major_symbol:
-            return None, None
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        if hold_side == "short":
-            short_arm = float(getattr(cfg, "short_profit_protection_arm_roe_percent", 0.0) or 0.0)
-            short_retrace = float(getattr(cfg, "short_profit_protection_retrace_roe_percent", 0.0) or 0.0)
-            if short_arm > 0.0 and short_retrace > 0.0:
-                return short_arm, short_retrace
-        return cfg.major_profit_protection_arm_roe_percent, cfg.major_profit_protection_retrace_roe_percent
-
-    def _live_turnaround_take_profit_targets(self, *, hold_side: str) -> tuple[float, float]:
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        if hold_side == "short":
-            return (
-                float(getattr(cfg, "short_profit_flip_fast_take_profit_roe_percent", 0.0) or 0.0),
-                float(getattr(cfg, "short_profit_flip_take_profit_fraction", 0.0) or 0.0),
-            )
-        return (
-            float(cfg.profit_flip_fast_take_profit_roe_percent),
-            float(cfg.profit_flip_take_profit_fraction),
-        )
-
-    def _position_stop_hit(self, *, position: PaperPosition, price: float) -> bool:
-        if position.side == "short":
-            return price >= position.active_stop_price
-        return price <= position.active_stop_price
-
-    def _record_closed_trade(
-        self,
-        *,
-        position: PaperPosition,
-        exit_price: float,
-        quantity_closed: float,
-        exit_time: datetime,
-        exit_reason: str,
-    ) -> None:
-        quantity_closed = min(quantity_closed, position.quantity_remaining)
-        if quantity_closed <= 0:
-            return
-        if position.side == "short":
-            realized = (position.entry_price - exit_price) * quantity_closed
-            return_bps = (position.entry_price - exit_price) / position.entry_price * 10000.0 if position.entry_price > 0 else 0.0
-        else:
-            realized = (exit_price - position.entry_price) * quantity_closed
-            return_bps = (exit_price - position.entry_price) / position.entry_price * 10000.0 if position.entry_price > 0 else 0.0
-        fee_bps = self._live_position_exit_fee_bps(symbol=position.symbol)
-        entry_notional = position.entry_price * quantity_closed
-        exit_notional = exit_price * quantity_closed
-        round_trip_fee_usd = (entry_notional + exit_notional) * (fee_bps / 10000.0)
-        realized_net = realized - round_trip_fee_usd
-        loss_combo_bucket_start = self._loss_combo_bucket_start(position.entry_time)
-        loss_combo_key = self._loss_combo_key(
-            symbol=position.symbol,
-            side=position.side,
-            timestamp=position.entry_time,
-        )
-        holding_minutes = (exit_time - position.entry_time).total_seconds() / 60.0 if exit_time and position.entry_time else 0.0
-        entry_hour_utc = position.entry_time.hour if position.entry_time else -1
-        # Price movement context
-        best_return_bps = 0.0
-        worst_return_bps = 0.0
-        if position.entry_price > 0:
-            if position.side == "short":
-                best_return_bps = (position.entry_price - position.worst_price) / position.entry_price * 10000.0
-                worst_return_bps = (position.entry_price - position.best_price) / position.entry_price * 10000.0
-            else:
-                best_return_bps = (position.best_price - position.entry_price) / position.entry_price * 10000.0
-                worst_return_bps = (position.worst_price - position.entry_price) / position.entry_price * 10000.0
-        trade = {
-            "symbol": position.symbol,
-            "market": position.market,
-            "side": position.side,
-            "entry_time": position.entry_time,
-            "exit_time": exit_time,
-            "entry_price": _payload_price(position.entry_price),
-            "exit_price": _payload_price(exit_price),
-            "quantity": round(quantity_closed, 8),
-            "realized_pnl_usd_estimate": round(realized, 6),
-            "realized_pnl_net_usd_estimate": round(realized_net, 6),
-            "estimated_round_trip_fee_usd": round(round_trip_fee_usd, 6),
-            "realized_return_bps_estimate": round(return_bps, 6),
-            "entry_predictability_score": round(position.entry_predictability_score, 6),
-            "latest_predictability_score": round(position.latest_predictability_score or position.entry_predictability_score, 6),
-            "exit_reason": exit_reason,
-            "partial_exit": quantity_closed < position.quantity_opened,
-            "loss_combo_key": loss_combo_key,
-            "loss_combo_time_bucket_utc": loss_combo_bucket_start.strftime("%H:%M"),
-            "position_origin": position.origin,
-            "position_adoption_source": position.adoption_source,
-            # Learning context: price action during hold
-            "holding_minutes": round(holding_minutes, 1),
-            "entry_hour_utc": entry_hour_utc,
-            "best_price": _payload_price(position.best_price),
-            "worst_price": _payload_price(position.worst_price),
-            "best_return_bps": round(best_return_bps, 2),
-            "worst_return_bps": round(worst_return_bps, 2),
-            "peak_roe_percent": round(position.peak_roe_percent, 4),
-            # Learning context: entry signal quality
-            "stop_distance_bps": round(position.stop_distance_bps, 2),
-            "entry_net_expected_edge_bps": round(position.entry_net_expected_edge_bps, 2),
-            "entry_estimated_round_trip_cost_bps": round(position.entry_estimated_round_trip_cost_bps, 2),
-            "entry_liquidity_score": round(position.entry_liquidity_score, 4),
-            "latest_liquidity_score": round(position.latest_liquidity_score, 4),
-            "latest_net_expected_edge_bps": round(position.latest_net_expected_edge_bps, 2),
-            "entry_planned_leverage": position.entry_planned_leverage,
-            # Policy context
-            "entry_policy_context_source": position.entry_policy_context_source,
-            "entry_policy_bucket": position.entry_policy_bucket,
-            "entry_policy_bucket_available": position.entry_policy_bucket_available,
-            "entry_policy_bucket_source": position.entry_policy_bucket_source,
-            "entry_policy_bucket_alignment_status": position.entry_policy_bucket_alignment_status,
-            "entry_policy_execution_phase": position.entry_policy_execution_phase,
-            "entry_policy_lineage": dict(position.entry_policy_lineage),
-            # Execution quality snapshot at close time
-            "execution_quality_snapshot": self._safe_execution_quality_snapshot(position.symbol),
-        }
-        risk_kill_switch_skipped = self._paper_verification_skip_risk_kill_switch(exit_reason=exit_reason)
-        if risk_kill_switch_skipped:
-            trade["risk_limit_evaluation"] = "skipped_paper_verification"
-        self.closed_trades.append(trade)
-        self._update_loss_combo_downgrade_state(
-            combo_key=loss_combo_key,
-            exit_time=exit_time,
-            realized_pnl_usd=float(trade["realized_pnl_usd_estimate"]),
-        )
-        self._release_portfolio_capacity(exit_notional_usd=exit_price * quantity_closed)
-        # Feed actual realized return back to online learner
-        if self.learner is not None:
-            # Use entry score for strategy trades; fall back to latest score for adopted positions
-            effective_score = position.entry_predictability_score
-            if effective_score <= 0 and hasattr(position, "latest_predictability_score"):
-                effective_score = position.latest_predictability_score
-            if effective_score > 0 and abs(return_bps) >= 0.01:
-                self.learner.ingest_closed_trade(
-                    symbol=position.symbol,
-                    mode=position.market,
-                    side=position.side,
-                    entry_predictability_score=effective_score,
-                    realized_return_bps=return_bps,
-                )
-        if self.log_store is not None:
-            self.log_store.append("closed_trades", trade)
-        self._send_trade_alert(trade)
-        if not risk_kill_switch_skipped:
-            self._enforce_risk_limits(exit_time)
-
-    def _send_telegram_alert(self, *, key: str, text: str) -> None:
-        if key in self.sent_alert_keys:
-            return
-        if telegram_report_only_enabled():
-            result = {"sent": False, "reason": "report_only_mode"}
-        else:
-            try:
-                result = send_telegram_message(text)
-            except Exception as exc:  # pragma: no cover
-                result = {"sent": False, "error": repr(exc)}
-        self.sent_alert_keys.add(key)
-        payload = {"key": key, "text": text, "result": result}
-        self.telegram_alerts.append(payload)
-        if self.log_store is not None:
-            self.log_store.append("telegram_alerts", payload)
-
-    def _send_trade_alert(self, trade: dict[str, object]) -> None:
-        reason = str(trade.get("exit_reason", ""))
-        if reason not in {
-            "PARTIAL_TAKE_PROFIT",
-            "PROACTIVE_PARTIAL_TAKE_PROFIT",
-            "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT",
-            "BREAKEVEN_STOP",
-            "STOP_LOSS",
-        }:
-            return
-        symbol = str(trade.get("symbol", ""))
-        pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
-        bps = float(trade.get("realized_return_bps_estimate", 0.0))
-        text = (
-            f"[{reason}] {symbol}\n"
-            f"realized_pnl_usd_estimate={pnl:.2f}\n"
-            f"realized_return_bps_estimate={bps:.2f}"
-        )
-        self._send_telegram_alert(
-            key=f"trade:{trade.get('exit_time')}:{symbol}:{reason}:{trade.get('quantity')}",
-            text=text,
-        )
-
-    def _send_live_entry_alert(self, live_order: dict[str, object]) -> None:
-        if not bool(live_order.get("accepted", False)):
-            return
-        symbol = str(live_order.get("symbol", ""))
-        side = str(live_order.get("side", "")).upper()
-        market = str(live_order.get("market", ""))
-        quantity = float(live_order.get("quantity", 0.0))
-        order_id = str(live_order.get("order_id", ""))
-        reference_price = float(live_order.get("reference_price", 0.0))
-        text = (
-            f"[LIVE_ENTRY] {symbol}\n"
-            f"market={market}\n"
-            f"side={side}\n"
-            f"quantity={quantity:.8f}\n"
-            f"reference_price={reference_price:.4f}\n"
-            f"order_id={order_id or 'unknown'}"
-        )
-        self._send_telegram_alert(
-            key=f"live-entry:{order_id or live_order.get('client_oid') or symbol}:{live_order.get('timestamp')}",
-            text=text,
-        )
-
-    def _parse_order_error_code(self, error_message: str) -> str:
-        return parse_error_code(error_message)
-
-    def _clear_live_entry_starvation(self, *, symbol: str) -> None:
-        self.live_entry_starvation_attempts_by_symbol.pop(symbol, None)
-        self.live_entry_starvation_last_at_by_symbol.pop(symbol, None)
-
-    def _note_live_entry_starvation(
-        self,
-        *,
-        symbol: str,
-        timestamp: datetime,
-        reason: str,
-        fingerprint: str,
-    ) -> None:
-        reset_window_seconds = max(self.runtime.decision_interval_minutes * 180, 900)
-        last_seen = self.live_entry_starvation_last_at_by_symbol.get(symbol)
-        attempts = self.live_entry_starvation_attempts_by_symbol.get(symbol, 0)
-        if last_seen is None or (timestamp - last_seen).total_seconds() > reset_window_seconds:
-            attempts = 0
-        attempts += 1
-        self.live_entry_starvation_attempts_by_symbol[symbol] = attempts
-        self.live_entry_starvation_last_at_by_symbol[symbol] = timestamp
-        self.last_executed_fingerprint_by_symbol.pop(symbol, None)
-        if attempts >= 2:
-            self._refresh_account_state_after_live_order_activity(
-                symbol=symbol,
-                timestamp=timestamp,
-                stage="live_entry_watchdog",
-                reason=reason,
-            )
-        if attempts >= 3:
-            self._apply_preflight_symbol_cooldown(
-                symbol=symbol,
-                timestamp=timestamp,
-                seconds=max(self.runtime.decision_interval_minutes * 120, 300),
-            )
-            self._send_telegram_alert(
-                key=f"live-entry-watchdog:{symbol}:{timestamp.isoformat()}",
-                text=(
-                    f"[LIVE_ENTRY_WATCHDOG] {symbol}\n"
-                    f"reason={reason}\n"
-                    f"attempt_count={attempts}\n"
-                    f"last_fingerprint={fingerprint}"
-                ),
-            )
-        self.self_healing.record_entry_starvation(
-            now=timestamp,
-            symbol=symbol,
-            attempt_count=attempts,
-            reason=reason,
-            details={
-                "fingerprint": fingerprint,
-            },
-        )
-
-    def _cooldown_seconds_for_error_code(self, code: str) -> int:
-        if code == "429":
+    def _cooldown_seconds_for_error_code(error_code: str | None) -> int:
+        if error_code in {"40762", "45111", "45110", "40774", "400172"}:
             return 300
-        if code in {"40774", "40893", "45110", "45111"}:
-            return 900
-        return 120
+        if error_code == "429":
+            return 120
+        return 0
 
-    def _apply_order_error_cooldown(
-        self,
-        *,
-        symbol: str,
-        error_message: str,
-        timestamp: datetime,
-        stage: str = "live_order",
-        exchange_id: str | None = None,
-    ) -> None:
-        code = self._parse_order_error_code(error_message)
-        cooldown_seconds = self._cooldown_seconds_for_error_code(code)
-        until = timestamp + timedelta(seconds=cooldown_seconds)
-        current = self.order_error_cooldowns.get(symbol)
-        if current is None or until > current:
-            self.order_error_cooldowns[symbol] = until
-        self.self_healing.record_runtime_error(
-            now=timestamp,
-            symbol=symbol,
-            error_message=error_message,
-            exchange_id=exchange_id or (getattr(self.live_order_executor, "_exchange_id", lambda: "binance")() if self.live_order_executor is not None else "binance"),
-            stage=stage,
-        )
-        self._send_telegram_alert(
-            key=f"order-cooldown:{symbol}:{code}:{timestamp.isoformat()}",
-            text=f"[ORDER_COOLDOWN] {symbol}\ncode={code or 'unknown'}\nuntil={until.isoformat()}",
-        )
+    def _live_order_blocked_by_cooldown(self, *, symbol: str, now: datetime) -> bool:
+        until = self.live_error_cooldown_until_by_symbol.get(symbol)
+        return until is not None and now < until
 
-    def _refresh_account_state_after_live_order_activity(
-        self,
-        *,
-        symbol: str,
-        timestamp: datetime,
-        stage: str,
-        reason: str,
-    ) -> None:
-        if self.rest_client is None:
-            return
-        try:
-            self._refresh_account_state(evaluate_live_positions=False)
-        except Exception as exc:
-            if self.log_store is not None:
-                self.log_store.append(
-                    "account_sync",
-                    {
-                        "timestamp": timestamp,
-                        "symbol": symbol,
-                        "stage": stage,
-                        "reason": reason,
-                        "status": "failed",
-                        "error": repr(exc),
-                    },
-                )
-            return
-        if self.log_store is not None:
-            self.log_store.append(
-                "account_sync",
-                {
-                    "timestamp": timestamp,
-                    "symbol": symbol,
-                    "stage": stage,
-                    "reason": reason,
-                    "status": "refreshed",
-                },
-            )
+    def _live_order_blocked_by_global_cooldown(self, *, now: datetime) -> bool:
+        until = self.live_error_global_cooldown_until
+        return until is not None and now < until
 
-    def _is_order_cooldown_active(self, symbol: str, timestamp: datetime) -> bool:
-        until = self.order_error_cooldowns.get(symbol)
-        if until is None:
-            return False
-        if timestamp >= until:
-            self.order_error_cooldowns.pop(symbol, None)
-            return False
-        return True
-
-    def _manual_reentry_cooldown_until(self, timestamp: datetime) -> datetime:
-        seconds = max(60, self.runtime.decision_interval_minutes * 60)
-        return timestamp + timedelta(seconds=seconds)
-
-    def _loss_combo_bucket_start(self, timestamp: datetime) -> datetime:
-        cfg = self.runtime.paper_service.settings.loss_combo_downgrade
-        bucket_minutes = max(int(cfg.time_bucket_minutes), int(self.runtime.decision_interval_minutes), 1)
-        utc_timestamp = timestamp.astimezone(timezone.utc)
-        day_start = utc_timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
-        minutes_since_midnight = utc_timestamp.hour * 60 + utc_timestamp.minute
-        bucket_start_minutes = (minutes_since_midnight // bucket_minutes) * bucket_minutes
-        return day_start + timedelta(minutes=bucket_start_minutes)
-
-    def _loss_combo_key(self, *, symbol: str, side: str, timestamp: datetime) -> str:
-        bucket_start = self._loss_combo_bucket_start(timestamp)
-        return f"{symbol}|{side}|{bucket_start.strftime('%H:%M')}"
-
-    def _loss_combo_realized_loss_usd(self, *, combo_key: str, now: datetime) -> float:
-        cfg = self.runtime.paper_service.settings.loss_combo_downgrade
-        if not cfg.enabled or not combo_key:
-            return 0.0
-        cutoff = now - timedelta(hours=max(int(cfg.lookback_hours), 1))
-        realized_loss = 0.0
-        for trade in self.closed_trades:
-            if str(trade.get("loss_combo_key", "")) != combo_key:
-                continue
-            if bool(trade.get("partial_exit", False)):
-                continue
-            exit_time = self._parse_runtime_datetime(trade.get("exit_time"))
-            if exit_time is None or exit_time < cutoff:
-                continue
-            pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
-            if pnl < 0.0:
-                realized_loss += abs(pnl)
-        return round(realized_loss, 6)
-
-    def _loss_combo_stage(self, *, realized_loss_usd: float) -> str | None:
-        cfg = self.runtime.paper_service.settings.loss_combo_downgrade
-        if not cfg.enabled or realized_loss_usd <= 0.0:
+    @staticmethod
+    def _live_quality_gate_reason(decision: DecisionIntent) -> str | None:
+        if decision.final_mode not in {"spot", "futures"}:
             return None
-        if cfg.cooldown_loss_usd > 0.0 and realized_loss_usd >= cfg.cooldown_loss_usd:
-            return "cooldown"
-        if cfg.observe_only_loss_usd > 0.0 and realized_loss_usd >= cfg.observe_only_loss_usd:
-            return "observe_only"
-        if cfg.prune_loss_usd > 0.0 and realized_loss_usd >= cfg.prune_loss_usd:
-            return "prune"
+        if decision.order_intent_notional_usd <= 0:
+            return "ZERO_NOTIONAL"
+        if "SPOT_POSITION_LIQUIDATION" in decision.rejection_reasons:
+            return None
+        net_edge_bps = float(decision.net_expected_edge_bps)
+        if net_edge_bps <= 0.0:
+            return "NET_EDGE_NON_POSITIVE"
+        min_live_edge_bps = 0.6 if decision.final_mode == "futures" else 0.5
+        if net_edge_bps + 1e-9 < min_live_edge_bps:
+            return "NET_EDGE_TOO_THIN_LIVE"
+        round_trip_cost_bps = max(float(decision.estimated_round_trip_cost_bps), 0.0)
+        min_edge_to_cost_ratio = 0.1 if decision.final_mode == "futures" else 0.08
+        if round_trip_cost_bps > 0 and (net_edge_bps / round_trip_cost_bps) < min_edge_to_cost_ratio:
+            return "EDGE_TO_COST_TOO_LOW_LIVE"
         return None
 
-    def _apply_loss_combo_cooldown(self, *, combo_key: str, timestamp: datetime) -> None:
-        cfg = self.runtime.paper_service.settings.loss_combo_downgrade
-        if not cfg.enabled or not combo_key or cfg.cooldown_minutes <= 0:
+    def _futures_notional_scale(self, *, symbol: str) -> float:
+        return max(0.05, min(1.0, self.futures_notional_scale_by_symbol.get(symbol, 1.0)))
+
+    def _tighten_futures_notional_scale(self, *, symbol: str) -> None:
+        current = self._futures_notional_scale(symbol=symbol)
+        self.futures_notional_scale_by_symbol[symbol] = max(0.05, round(current * 0.2, 4))
+
+    def _relax_futures_notional_scale(self, *, symbol: str) -> None:
+        current = self._futures_notional_scale(symbol=symbol)
+        if current >= 1.0:
             return
-        until = timestamp + timedelta(minutes=max(int(cfg.cooldown_minutes), 1))
-        current = self.loss_combo_cooldowns.get(combo_key)
-        if current is None or until > current:
-            self.loss_combo_cooldowns[combo_key] = until
+        self.futures_notional_scale_by_symbol[symbol] = min(1.0, round(current + 0.1, 4))
 
-    def _is_loss_combo_cooldown_active(self, *, combo_key: str, timestamp: datetime) -> bool:
-        until = self.loss_combo_cooldowns.get(combo_key)
-        if until is None:
-            return False
-        if timestamp >= until:
-            self.loss_combo_cooldowns.pop(combo_key, None)
-            return False
-        return True
+    @staticmethod
+    def _base_asset_from_symbol(symbol: str) -> str:
+        upper_symbol = symbol.upper()
+        if upper_symbol.endswith("USDT"):
+            return upper_symbol[:-4]
+        return upper_symbol
 
-    def _update_loss_combo_downgrade_state(self, *, combo_key: str, exit_time: datetime, realized_pnl_usd: float) -> None:
-        if realized_pnl_usd >= 0.0:
-            return
-        realized_loss_usd = self._loss_combo_realized_loss_usd(combo_key=combo_key, now=exit_time)
-        if self._loss_combo_stage(realized_loss_usd=realized_loss_usd) == "cooldown":
-            self._apply_loss_combo_cooldown(combo_key=combo_key, timestamp=exit_time)
-
-    def _apply_loss_combo_downgrade(self, *, decision: DecisionIntent) -> DecisionIntent:
-        cfg = self.runtime.paper_service.settings.loss_combo_downgrade
-        if (
-            not cfg.enabled
-            or decision.final_mode not in {"spot", "futures"}
-            or decision.side not in {"long", "short"}
-            or decision.order_intent_notional_usd <= 0.0
-        ):
-            return decision
-        combo_key = self._loss_combo_key(
-            symbol=decision.symbol,
-            side=decision.side,
-            timestamp=decision.timestamp,
-        )
-        if self._is_loss_combo_cooldown_active(combo_key=combo_key, timestamp=decision.timestamp):
-            reasons = tuple(sorted(set(decision.rejection_reasons + ("LOSS_COMBO_COOLDOWN",))))
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=reasons,
-            )
-        realized_loss_usd = self._loss_combo_realized_loss_usd(combo_key=combo_key, now=decision.timestamp)
-        stage = None
-        if cfg.observe_only_loss_usd > 0.0 and realized_loss_usd >= cfg.observe_only_loss_usd:
-            stage = "observe_only"
-        elif cfg.prune_loss_usd > 0.0 and realized_loss_usd >= cfg.prune_loss_usd:
-            stage = "prune"
-        if stage is None:
-            return decision
-        stage_reason = {
-            "prune": ("LOSS_COMBO_PRUNE",),
-            "observe_only": ("LOSS_COMBO_OBSERVE_ONLY", "OBSERVE_ONLY_SYMBOL"),
-        }.get(stage)
-        if stage_reason is None:
-            return decision
-        reasons = tuple(sorted(set(decision.rejection_reasons + stage_reason)))
-        return replace(
-            decision,
-            final_mode="cash",
-            side="flat",
-            order_intent_notional_usd=0.0,
-            stop_distance_bps=0.0,
-            rejection_reasons=reasons,
-        )
-
-    def _set_manual_symbol_cooldown(
-        self,
-        *,
-        symbol: str,
-        until: datetime,
-        timestamp: datetime,
-        extend_active: bool = True,
-        source: str = "manual",
-    ) -> None:
-        current = self.manual_symbol_cooldowns.get(symbol)
-        action = "noop"
-        if current is None or current <= timestamp:
-            self.manual_symbol_cooldowns[symbol] = until
-            action = "set"
-        elif extend_active and until > current:
-            self.manual_symbol_cooldowns[symbol] = until
-            action = "extend"
-        elif current is not None and current > timestamp:
-            action = "skip_active"
-        if self.log_store is not None:
-            self.log_store.append(
-                "manual_symbol_cooldown",
-                {
-                    "timestamp": timestamp,
-                    "symbol": symbol,
-                    "source": source,
-                    "action": action,
-                    "extend_active": extend_active,
-                    "current_until": current,
-                    "new_until": until,
-                    "effective_until": self.manual_symbol_cooldowns.get(symbol),
-                },
-            )
-
-    def _apply_preflight_symbol_cooldown(self, *, symbol: str, timestamp: datetime, seconds: int = 120) -> None:
-        until = timestamp + timedelta(seconds=max(seconds, 60))
-        self._set_manual_symbol_cooldown(symbol=symbol, until=until, timestamp=timestamp, extend_active=False, source="PREFLIGHT_SYMBOL_COOLDOWN")
-
-    def _wallet_transfer_cooldown_key(self, *, source_market: str, target_market: str, asset: str) -> str:
-        return f"{source_market}->{target_market}:{asset.upper()}"
-
-    def _wallet_transfer_cooldown_active(self, *, source_market: str, target_market: str, asset: str, timestamp: datetime) -> bool:
-        key = self._wallet_transfer_cooldown_key(source_market=source_market, target_market=target_market, asset=asset)
-        until = self.wallet_transfer_cooldowns.get(key)
-        return until is not None and timestamp < until
-
-    def _set_wallet_transfer_cooldown(
-        self,
-        *,
-        source_market: str,
-        target_market: str,
-        asset: str,
-        timestamp: datetime,
-        seconds: int = 300,
-    ) -> None:
-        key = self._wallet_transfer_cooldown_key(source_market=source_market, target_market=target_market, asset=asset)
-        self.wallet_transfer_cooldowns[key] = timestamp + timedelta(seconds=max(seconds, 60))
-
-    def _futures_reallocation_cooldown_window(self) -> timedelta:
-        seconds = max(60, self.runtime.decision_interval_minutes * 120)
-        return timedelta(seconds=seconds)
-
-    def _futures_reallocation_cooldown_for_timestamp(self, timestamp: datetime) -> datetime:
-        return timestamp + self._futures_reallocation_cooldown_window()
-
-    def _is_futures_reallocation_cooldown_active(self, timestamp: datetime) -> bool:
-        until = self.futures_reallocation_cooldown_until
-        if until is None:
-            return False
-        if timestamp >= until:
-            self.futures_reallocation_cooldown_until = None
-            return False
-        return True
-
-    def _is_manual_symbol_cooldown_active(self, symbol: str, timestamp: datetime) -> bool:
-        until = self.manual_symbol_cooldowns.get(symbol)
-        if until is None:
-            return False
-        if timestamp >= until:
-            self.manual_symbol_cooldowns.pop(symbol, None)
-            return False
-        return True
-
-    def _cancel_symbol_open_orders(self, *, symbol: str) -> None:
-        if self.rest_client is None or not hasattr(self.rest_client, "cancel_order"):
-            return
-        orders_payload = self.open_orders_snapshot.get("orders", [])
-        if isinstance(orders_payload, dict):
-            candidate_orders = orders_payload.get("entrustedList") or orders_payload.get("list") or []
-        else:
-            candidate_orders = orders_payload or []
-        for order in candidate_orders:
-            if str(order.get("symbol", "")) != symbol:
-                continue
-            order_id = str(order.get("orderId") or order.get("id") or order.get("clientOid") or "")
-            if not order_id:
-                continue
-            try:
-                response = self.rest_client.cancel_order(market="futures", symbol=symbol, order_id=order_id)
-            except Exception as exc:
-                if self.log_store is not None:
-                    self.log_store.append(
-                        "order_errors",
-                        {
-                            "timestamp": datetime.now(tz=timezone.utc),
-                            "symbol": symbol,
-                            "market": "futures",
-                            "stage": "manual_close_cancel_order",
-                            "order_id": order_id,
-                            "error": repr(exc),
-                        },
-                    )
-                continue
-            if self.log_store is not None:
-                self.log_store.append(
-                    "manual_close_order_cleanup",
-                    {
-                        "timestamp": datetime.now(tz=timezone.utc),
-                        "symbol": symbol,
-                        "order_id": order_id,
-                        "response": response,
-                    },
-                )
-
-    def _account_execution_balance_usd(self, snapshot: dict[str, Any]) -> float | None:
-        raw_value = snapshot.get("executionAvailableBalance", snapshot.get("availableBalance"))
+    @staticmethod
+    def _safe_float(value: Any) -> float:
         try:
-            return float(raw_value)
+            return float(value)
         except (TypeError, ValueError):
-            return None
-
-    def _estimated_position_margin_release_usd(
-        self,
-        *,
-        previous_live_position: dict[str, Any],
-        paper_position: PaperPosition,
-    ) -> float:
-        margin_size = float(previous_live_position.get("marginSize") or 0.0)
-        if margin_size > 0.0:
-            return margin_size
-        quantity = self._live_position_quantity(previous_live_position)
-        if quantity <= 0.0:
-            quantity = paper_position.quantity_remaining
-        price = 0.0
-        for key in ("markPrice", "breakEvenPrice", "openPriceAvg"):
-            try:
-                price = float(previous_live_position.get(key) or 0.0)
-            except (TypeError, ValueError):
-                price = 0.0
-            if price > 0.0:
-                break
-        if price <= 0.0:
-            price = paper_position.current_price if paper_position.current_price > 0.0 else paper_position.entry_price
-        leverage = max(
-            int(
-                float(
-                    previous_live_position.get("leverage")
-                    or previous_live_position.get("marginLeverage")
-                    or paper_position.entry_planned_leverage
-                    or 1.0
-                )
-            ),
-            1,
-        )
-        return max((price * quantity) / leverage, 0.0)
-
-    def _manual_close_is_confirmed(
-        self,
-        *,
-        symbol: str,
-        previous_live_position: dict[str, Any],
-        previous_account_snapshot: dict[str, Any],
-    ) -> bool:
-        paper_position = self.paper_positions.get(symbol)
-        if paper_position is None or paper_position.market != "futures" or paper_position.quantity_remaining <= 0.0:
-            return False
-        previous_balance = self._account_execution_balance_usd(previous_account_snapshot)
-        current_balance = self._account_execution_balance_usd(self.account_snapshot)
-        if previous_balance is None or current_balance is None:
-            return False
-        estimated_margin_release = self._estimated_position_margin_release_usd(
-            previous_live_position=previous_live_position,
-            paper_position=paper_position,
-        )
-        if estimated_margin_release <= 0.0:
-            return False
-        balance_released = current_balance - previous_balance
-        required_release = max(estimated_margin_release * 0.5, 1.0)
-        if balance_released >= required_release:
-            return True
-        unrealized_pnl = float(previous_live_position.get("unrealizedPL") or 0.0)
-        material_balance_move = abs(balance_released) >= max(abs(unrealized_pnl) * 0.5, 1.0)
-        if not material_balance_move:
-            return False
-        orders_payload = self.open_orders_snapshot.get("orders", [])
-        if isinstance(orders_payload, dict):
-            candidate_orders = orders_payload.get("entrustedList") or orders_payload.get("list") or []
-        else:
-            candidate_orders = orders_payload if isinstance(orders_payload, list) else []
-        for item in candidate_orders:
-            if str(getattr(item, "get", lambda *_: "")("symbol", "") or "") == symbol:
-                return False
-        return True
-
-    def _reconcile_manual_live_closes(
-        self,
-        *,
-        previous_live_positions: list[dict[str, Any]],
-        previous_account_snapshot: dict[str, Any],
-    ) -> None:
-        previous_positions_by_symbol: dict[str, dict[str, Any]] = {}
-        for position in previous_live_positions:
-            symbol = str(position.get("symbol", ""))
-            if not symbol or self._live_position_quantity(position) <= 0.0:
-                continue
-            previous_positions_by_symbol[symbol] = position
-        if not previous_positions_by_symbol:
-            return
-        active_symbols = set(self._active_live_futures_positions_by_symbol())
-        now = datetime.now(tz=timezone.utc)
-        for symbol, previous_live_position in previous_positions_by_symbol.items():
-            if symbol in active_symbols:
-                continue
-            if not self._manual_close_is_confirmed(
-                symbol=symbol,
-                previous_live_position=previous_live_position,
-                previous_account_snapshot=previous_account_snapshot,
-            ):
-                continue
-            self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
-            self.futures_missing_on_exchange_counts.pop(symbol, None)
-
-    def _consecutive_mismatch_threshold(self) -> int:
-        return 2
-
-    def _missing_in_paper_threshold(self) -> int:
-        return self._consecutive_mismatch_threshold()
-
-    def _missing_on_exchange_threshold(self) -> int:
-        return max(self._consecutive_mismatch_threshold(), 4)
-
-    def _missing_on_exchange_threshold_for_symbol(self, symbol: str) -> int:
-        threshold = self._missing_on_exchange_threshold()
-        if self._is_major_futures_symbol(symbol):
-            major_threshold = int(self.runtime.paper_service.settings.live_position_risk.major_missing_on_exchange_threshold or 0)
-            if major_threshold > 0:
-                return max(threshold, major_threshold)
-        return threshold
-
-    def _manual_position_adoption_grace_until(self, *, adopted_at: datetime) -> datetime | None:
-        minutes = max(
-            int(
-                getattr(
-                    self.runtime.paper_service.settings.live_position_risk,
-                    "manual_position_adoption_grace_minutes",
-                    30,
-                )
-                or 0
-            ),
-            0,
-        )
-        if minutes <= 0:
-            return adopted_at
-        return adopted_at + timedelta(minutes=minutes)
-
-    def _update_consecutive_mismatch_counts(self, *, counts: dict[str, int], active_symbols: set[str]) -> None:
-        for symbol in list(counts):
-            if symbol not in active_symbols:
-                counts.pop(symbol, None)
-        for symbol in active_symbols:
-            counts[symbol] = counts.get(symbol, 0) + 1
-
-    def _parse_live_position_timestamp(self, position: dict[str, Any]) -> datetime | None:
-        for key in ("cTime", "uTime"):
-            raw_value = position.get(key)
-            if raw_value in (None, ""):
-                continue
-            try:
-                parsed = float(raw_value)
-            except (TypeError, ValueError):
-                continue
-            if parsed <= 0.0:
-                continue
-            if parsed >= 1_000_000_000_000:
-                parsed /= 1000.0
-            try:
-                return datetime.fromtimestamp(parsed, tz=timezone.utc)
-            except (OverflowError, OSError, ValueError):
-                continue
-        return None
-
-    def _parse_runtime_datetime(self, raw_value: Any) -> datetime | None:
-        if isinstance(raw_value, datetime):
-            return raw_value if raw_value.tzinfo is not None else raw_value.replace(tzinfo=timezone.utc)
-        if raw_value in (None, "") or not isinstance(raw_value, str):
-            return None
-        try:
-            parsed = datetime.fromisoformat(raw_value)
-        except ValueError:
-            return None
-        return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
-
-    def _live_position_reference_price(self, *, symbol: str, position: dict[str, Any]) -> float:
-        state = self.runtime.dispatcher.store.get(symbol)
-        market_price = self._market_price(state=state, fallback=0.0)
-        if market_price > 0.0:
-            return market_price
-        for key in ("markPrice", "breakEvenPrice", "openPriceAvg"):
-            value = float(position.get(key) or 0.0)
-            if value > 0.0:
-                return value
-        return 0.0
-
-    def _live_position_break_even_price(self, *, position: dict[str, Any]) -> float:
-        for key in ("breakEvenPrice", "openPriceAvg"):
-            value = float(position.get(key) or 0.0)
-            if value > 0.0:
-                return value
-        return self._live_position_reference_price(symbol=str(position.get("symbol", "")), position=position)
-
-    def _live_position_exit_fee_bps(self, *, symbol: str) -> float:
-        fee_bps = float(self.runtime.paper_service.settings.fees.futures_taker_fee_bps)
-        extractor = getattr(self.runtime.paper_service, "feature_extractor", None)
-        calibration = getattr(extractor, "cost_calibration", None)
-        if calibration is not None:
-            fee_bps = max(fee_bps, float(calibration.for_symbol(symbol).empirical_fee_bps))
-        return fee_bps
-
-    def _is_fee_sensitive_partial_exit_reason(self, reason: str) -> bool:
-        return reason in {
-            "LIVE_POSITION_NON_CORE_PROFIT_EXIT",
-            "LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT",
-            "LIVE_POSITION_PROFIT_PROTECTION",
-            "LIVE_POSITION_TURNAROUND_TAKE_PROFIT",
-            "LIVE_POSITION_UNREALIZED_TAKE_PROFIT",
-            "LIVE_POSITION_PARTIAL_TAKE_PROFIT",
-            "LIVE_PORTFOLIO_PROFIT_LOCK",
-        }
-
-    def _live_partial_exit_mode(self, reason: str) -> str:
-        if reason in {
-            "LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT",
-            "LIVE_POSITION_PARTIAL_TAKE_PROFIT",
-        }:
-            return "take_profit"
-        if reason in {
-            "LIVE_POSITION_PROFIT_PROTECTION",
-            "LIVE_POSITION_UNREALIZED_TAKE_PROFIT",
-            "LIVE_PORTFOLIO_PROFIT_LOCK",
-        }:
-            return "protection"
-        if reason in {
-            "LIVE_POSITION_TURNAROUND_TAKE_PROFIT",
-            "LIVE_POSITION_NON_CORE_PROFIT_EXIT",
-        }:
-            return "turnaround"
-        return ""
-
-    def _can_trigger_live_partial_exit(self, *, identity: str, reason: str, now: datetime) -> bool:
-        mode = self._live_partial_exit_mode(reason)
-        if not mode:
-            return True
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        last_at = self.live_partial_exit_last_at_by_identity.get(identity)
-        if (
-            last_at is not None
-            and cfg.partial_exit_min_interval_minutes > 0
-            and (now - last_at).total_seconds() / 60.0 < cfg.partial_exit_min_interval_minutes
-        ):
-            return False
-        active_mode = self.live_partial_exit_mode_by_identity.get(identity)
-        if active_mode and active_mode != mode:
-            return False
-        return True
-
-    def _effective_live_partial_exit_fraction(
-        self,
-        *,
-        position: dict[str, Any],
-        reason: str,
-        fraction: float,
-    ) -> float:
-        effective = max(min(fraction, 1.0), 0.0)
-        if effective >= 0.999 or not self._is_fee_sensitive_partial_exit_reason(reason):
-            return effective
-        if (
-            self._is_major_futures_symbol(str(position.get("symbol", "")))
-            and reason in {
-                "LIVE_POSITION_PROFIT_PROTECTION",
-                "LIVE_POSITION_UNREALIZED_TAKE_PROFIT",
-                "LIVE_PORTFOLIO_PROFIT_LOCK",
-            }
-        ):
-            effective = max(effective, self.runtime.paper_service.settings.live_position_risk.major_partial_exit_fraction)
-        return min(effective, 1.0)
-
-    def _expected_live_partial_exit_after_fee_usd(
-        self,
-        *,
-        position: dict[str, Any],
-        quantity: float,
-    ) -> float:
-        symbol = str(position.get("symbol", ""))
-        reference_price = self._live_position_reference_price(symbol=symbol, position=position)
-        break_even_price = self._live_position_break_even_price(position=position)
-        if reference_price <= 0.0 or break_even_price <= 0.0 or quantity <= 0.0:
             return 0.0
-        hold_side = self._normalize_live_position_side(position)
-        if hold_side == "short":
-            gross_pnl = (break_even_price - reference_price) * quantity
-        else:
-            gross_pnl = (reference_price - break_even_price) * quantity
-        exit_fee = reference_price * quantity * (self._live_position_exit_fee_bps(symbol=symbol) / 10000.0)
-        return gross_pnl - exit_fee
 
-    def _live_position_paper_context(self, symbol: str) -> PaperPosition | None:
-        position = self.paper_positions.get(symbol)
-        if position is None or position.market != "futures":
-            return None
-        return position
+    def _spot_snapshot(self) -> dict[str, Any]:
+        spot_snapshot = self.account_snapshot.get("spot")
+        if isinstance(spot_snapshot, dict):
+            return spot_snapshot
+        # Backward compatibility for previous snapshot shape.
+        if "balances" in self.account_snapshot:
+            return self.account_snapshot
+        return {}
 
-    def _live_position_management_context(
-        self,
-        *,
-        position: dict[str, Any],
-        now: datetime,
-    ) -> tuple[PaperPosition | None, str]:
-        paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
-        if paper_position is None:
-            return None, "pending_external_adoption"
-        if paper_position.is_adopted():
-            if paper_position.adoption_grace_active(now=now):
-                return paper_position, "adopted_grace"
-            return paper_position, "adopted"
-        return paper_position, "strategy"
-
-    def _live_turnaround_grace_applies(
-        self,
-        *,
-        position: dict[str, Any],
-        identity: str,
-        roe_percent: float,
-        now: datetime,
-        abort_roe_floor: float | None = None,
-    ) -> bool:
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        if not cfg.turnaround_grace_enabled:
-            return False
-        if cfg.long_only_turnaround_mode and self._normalize_live_position_side(position) != "long":
-            return False
-        if roe_percent > cfg.soft_stop_roe_percent or roe_percent <= cfg.turnaround_abort_roe_percent:
-            return False
-        paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
-        if paper_position is None:
-            return False
-        last_decision_time = paper_position.latest_decision_time
-        if last_decision_time is None:
-            return False
-        if (now - last_decision_time).total_seconds() > cfg.turnaround_signal_max_age_minutes * 60:
-            return False
-        if paper_position.side != self._normalize_live_position_side(position):
-            return False
-        worst_roe = self.live_worst_roe_by_identity.get(identity, roe_percent)
-        recovery = roe_percent - worst_roe
-        if recovery < cfg.turnaround_recovery_roe_points:
-            return False
-        if paper_position.latest_predictability_score < cfg.turnaround_predictability_min:
-            return False
-        if paper_position.latest_net_expected_edge_bps < cfg.turnaround_net_edge_min_bps:
-            return False
-        if paper_position.latest_liquidity_score < cfg.turnaround_liquidity_min:
-            return False
-        # Apply newer turnaround quality gates only when the signal values are available.
-        if (
-            paper_position.latest_volume_confirmation is not None
-            and paper_position.latest_volume_confirmation < cfg.turnaround_volume_confirmation_min
-        ):
-            return False
-        if (
-            paper_position.latest_trend_strength is not None
-            and paper_position.latest_trend_strength < cfg.turnaround_trend_strength_min
-        ):
-            return False
-        return True
-
-    def _major_drawdown_grace_applies(
-        self,
-        *,
-        position: dict[str, Any],
-        identity: str,
-        roe_percent: float,
-        holding_minutes: float,
-        now: datetime,
-    ) -> bool:
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        if not cfg.major_drawdown_grace_enabled:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        if not self._is_major_futures_symbol(str(position.get("symbol", ""))):
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        if roe_percent > cfg.soft_stop_roe_percent:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        if roe_percent <= cfg.major_drawdown_abort_roe_percent:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        paper_position = self._live_position_paper_context(str(position.get("symbol", "")))
-        if paper_position is None:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        if paper_position.side != self._normalize_live_position_side(position):
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        last_decision_time = paper_position.latest_decision_time
-        if last_decision_time is None:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        if (now - last_decision_time).total_seconds() > cfg.major_drawdown_signal_max_age_minutes * 60:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        if (
-            paper_position.latest_predictability_score < cfg.major_drawdown_predictability_min
-            or paper_position.latest_net_expected_edge_bps < cfg.major_drawdown_net_edge_min_bps
-            or paper_position.latest_liquidity_score < cfg.major_drawdown_liquidity_min
-        ):
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        started_at = self.live_major_drawdown_grace_started_at_by_identity.get(identity)
-        if started_at is None:
-            self.live_major_drawdown_grace_started_at_by_identity[identity] = now
-            return True
-        if (now - started_at).total_seconds() / 60.0 > cfg.major_drawdown_grace_minutes:
-            self.live_major_drawdown_grace_started_at_by_identity.pop(identity, None)
-            return False
-        return True
-
-    def _build_reconciled_paper_position(
-        self, *, position: dict[str, Any], startup_recovery: bool = False
-    ) -> PaperPosition | None:
-        symbol = str(position.get("symbol", ""))
-        if not symbol:
-            return None
-        quantity = self._live_position_quantity(position)
-        if quantity <= 0.0:
-            return None
-        current_price = self._live_position_reference_price(symbol=symbol, position=position)
-        if current_price <= 0.0:
-            return None
-        entry_price = float(position.get("openPriceAvg") or position.get("breakEvenPrice") or 0.0)
-        if entry_price <= 0.0:
-            entry_price = current_price
-        side = self._normalize_live_position_side(position)
-        leverage = max(int(float(position.get("leverage") or 1.0)), 1)
-        entry_time = self._parse_live_position_timestamp(position) or datetime.now(tz=timezone.utc)
-        best_price = max(entry_price, current_price)
-        worst_price = min(entry_price, current_price)
-        # startup_recovery=True: state was lost across restart; treat as strategy-owned (not external manual).
-        # startup_recovery=False: new unknown position appeared at runtime; treat as external manual adoption
-        # unless we have recent in-session live-order evidence that this symbol/side was strategy-owned.
-        if startup_recovery or self._recent_strategy_live_order_matches_position(position=position):
-            origin = "strategy_recovered"
-            adoption_source = ""
-            adopted_at_val: datetime | None = None
-            adoption_grace_until_val: datetime | None = None
-        else:
-            origin = "adopted"
-            adoption_source = "manual_exchange_external"
-            adopted_at_val = entry_time
-            adoption_grace_until_val = self._manual_position_adoption_grace_until(adopted_at=entry_time)
-        return PaperPosition(
-            symbol=symbol,
-            market="futures",
-            side=side,
-            entry_time=entry_time,
-            entry_price=entry_price,
-            current_price=current_price,
-            quantity_opened=quantity,
-            quantity_remaining=quantity,
-            stop_distance_bps=0.0,
-            active_stop_price=entry_price,
-            best_price=best_price,
-            worst_price=worst_price,
-            entry_predictability_score=0.0,
-            entry_liquidity_score=0.0,
-            entry_net_expected_edge_bps=0.0,
-            entry_estimated_round_trip_cost_bps=0.0,
-            entry_planned_leverage=leverage,
-            latest_predictability_score=0.0,
-            latest_liquidity_score=0.0,
-            latest_net_expected_edge_bps=0.0,
-            latest_volume_confirmation=None,
-            latest_trend_strength=None,
-            latest_estimated_round_trip_cost_bps=0.0,
-            exchange_synced=True,
-            origin=origin,
-            adoption_source=adoption_source,
-            adopted_at=adopted_at_val,
-            adoption_grace_until=adoption_grace_until_val,
-        )
-
-    def _recent_strategy_live_order_matches_position(self, *, position: dict[str, Any]) -> bool:
-        symbol = str(position.get("symbol", "") or "")
-        if not symbol:
-            return False
-        hold_side = self._normalize_live_position_side(position)
-        if hold_side not in {"long", "short"}:
-            return False
-        position_time = self._parse_live_position_timestamp(position)
-        for row in reversed(self.live_orders):
-            if not bool(row.get("accepted", False)):
-                continue
-            if str(row.get("market", "") or "") != "futures":
-                continue
-            if str(row.get("symbol", "") or "") != symbol:
-                continue
-            order_side = str(row.get("side", "") or "").lower()
-            strategy_side = "long" if order_side == "buy" else "short" if order_side == "sell" else ""
-            if strategy_side != hold_side:
-                continue
-            row_time = row.get("timestamp")
-            if isinstance(row_time, datetime) and position_time is not None:
-                if abs((row_time - position_time).total_seconds()) > 6 * 3600:
-                    continue
-            return True
-        return False
-
-    def _is_strategy_managed_adopted_position(self, *, position: PaperPosition) -> bool:
-        return (
-            position.market == "futures"
-            and (
-                position.symbol in set(self.runtime.paper_service.settings.universe)
-                or position.symbol in set(self.runtime.paper_service.settings.futures_exposure.major_symbols)
-            )
-            and position.side in {"long", "short"}
-        )
-
-    def _reserve_capacity_for_reconciled_position(self, position: PaperPosition) -> None:
-        self.remaining_portfolio_capacity_usd = max(
-            0.0,
-            self.remaining_portfolio_capacity_usd - position.current_notional_usd_estimate(),
-        )
-
-    @staticmethod
-    def _runtime_payload_has_explicit_adoption_metadata(payload: dict[str, Any]) -> bool:
-        return (
-            str(payload.get("origin") or "").strip().lower() == "adopted"
-            or bool(str(payload.get("adoption_source") or "").strip())
-            or payload.get("adopted_at") is not None
-            or payload.get("adoption_grace_until") is not None
-        )
-
-    @staticmethod
-    def _runtime_payload_uses_legacy_exchange_placeholder_shape(payload: dict[str, Any]) -> bool:
-        return (
-            float(payload.get("stop_distance_bps") or 0.0) <= 0.0
-            and float(payload.get("entry_predictability_score") or 0.0) == 0.0
-            and float(payload.get("entry_liquidity_score") or 0.0) == 0.0
-            and float(payload.get("entry_net_expected_edge_bps") or 0.0) == 0.0
-            and float(payload.get("entry_estimated_round_trip_cost_bps") or 0.0) == 0.0
-        )
-
-    @classmethod
-    def _runtime_payload_uses_legacy_adopted_shape(cls, payload: dict[str, Any], *, exchange_synced: bool) -> bool:
-        if cls._runtime_payload_has_explicit_adoption_metadata(payload):
-            return False
-        if not exchange_synced or str(payload.get("origin") or "").strip():
-            return False
-        if payload.get("latest_decision_time") is not None:
-            return False
-        return cls._runtime_payload_uses_legacy_exchange_placeholder_shape(payload)
-
-    def _paper_position_from_runtime_payload(self, payload: dict[str, Any]) -> PaperPosition | None:
-        symbol = str(payload.get("symbol", ""))
-        market = str(payload.get("market", ""))
-        side = str(payload.get("side", ""))
-        quantity_remaining = float(payload.get("quantity_remaining") or 0.0)
-        if not symbol or market != "futures" or side not in {"long", "short"} or quantity_remaining <= 0.0:
-            return None
-        current_price = float(payload.get("current_price") or payload.get("entry_price") or 0.0)
-        entry_price = float(payload.get("entry_price") or current_price or 0.0)
-        if current_price <= 0.0 or entry_price <= 0.0:
-            return None
-        quantity_opened = max(float(payload.get("quantity_opened") or quantity_remaining), quantity_remaining)
-        exchange_synced = bool(payload.get("exchange_synced", False))
-        legacy_exchange_placeholder = self._runtime_payload_uses_legacy_exchange_placeholder_shape(payload)
-        if not exchange_synced and legacy_exchange_placeholder:
-            exchange_synced = True
-        raw_origin = str(payload.get("origin") or "").strip().lower()
-        legacy_adopted_shape = self._runtime_payload_uses_legacy_adopted_shape(
-            payload,
-            exchange_synced=exchange_synced,
-        )
-        origin = raw_origin or ("adopted" if legacy_adopted_shape else "strategy")
-        adoption_source = str(payload.get("adoption_source") or "").strip()
-        if origin == "adopted" and not adoption_source and raw_origin == "":
-            adoption_source = "runtime_restore_legacy"
-        adopted_at = self._parse_runtime_datetime(payload.get("adopted_at"))
-        if origin == "adopted" and adopted_at is None:
-            adopted_at = datetime.now(tz=timezone.utc)
-        adoption_grace_until = self._parse_runtime_datetime(payload.get("adoption_grace_until"))
-        if origin == "adopted" and adoption_grace_until is None and adopted_at is not None:
-            adoption_grace_until = self._manual_position_adoption_grace_until(adopted_at=adopted_at)
-        r_multiple_partial_take_profit_taken = bool(payload.get("r_multiple_partial_take_profit_taken", False))
-        profit_protection_retrace_taken = bool(payload.get("profit_protection_retrace_taken", False))
-        proactive_take_profit_thresholds_hit = tuple(
-            round(float(threshold), 6)
-            for threshold in payload.get("proactive_take_profit_thresholds_hit", ())
-            if float(threshold) > 0.0
-        )
-        partial_take_profit_taken = bool(payload.get("partial_take_profit_taken", False))
-        partial_take_profit_taken = partial_take_profit_taken or r_multiple_partial_take_profit_taken
-        partial_take_profit_taken = partial_take_profit_taken or profit_protection_retrace_taken
-        partial_take_profit_taken = partial_take_profit_taken or bool(proactive_take_profit_thresholds_hit)
-        return PaperPosition(
-            symbol=symbol,
-            market=market,
-            side=side,
-            entry_time=self._parse_runtime_datetime(payload.get("entry_time")) or datetime.now(tz=timezone.utc),
-            entry_price=entry_price,
-            current_price=current_price,
-            quantity_opened=quantity_opened,
-            quantity_remaining=quantity_remaining,
-            stop_distance_bps=float(payload.get("stop_distance_bps") or 0.0),
-            active_stop_price=float(payload.get("active_stop_price") or entry_price),
-            best_price=float(payload.get("best_price") or max(entry_price, current_price)),
-            worst_price=float(payload.get("worst_price") or min(entry_price, current_price)),
-            entry_predictability_score=float(payload.get("entry_predictability_score") or 0.0),
-            entry_liquidity_score=float(payload.get("entry_liquidity_score") or 0.0),
-            entry_net_expected_edge_bps=float(payload.get("entry_net_expected_edge_bps") or 0.0),
-            entry_estimated_round_trip_cost_bps=float(payload.get("entry_estimated_round_trip_cost_bps") or 0.0),
-            entry_planned_leverage=max(int(float(payload.get("entry_planned_leverage") or 1.0)), 1),
-            latest_predictability_score=float(
-                payload.get("latest_predictability_score")
-                if payload.get("latest_predictability_score") is not None
-                else payload.get("entry_predictability_score") or 0.0
-            ),
-            latest_liquidity_score=float(
-                payload.get("latest_liquidity_score")
-                if payload.get("latest_liquidity_score") is not None
-                else payload.get("entry_liquidity_score") or 0.0
-            ),
-            latest_net_expected_edge_bps=float(
-                payload.get("latest_net_expected_edge_bps")
-                if payload.get("latest_net_expected_edge_bps") is not None
-                else payload.get("entry_net_expected_edge_bps") or 0.0
-            ),
-            latest_volume_confirmation=(
-                float(payload.get("latest_volume_confirmation"))
-                if payload.get("latest_volume_confirmation") is not None
-                else None
-            ),
-            latest_trend_strength=(
-                float(payload.get("latest_trend_strength"))
-                if payload.get("latest_trend_strength") is not None
-                else None
-            ),
-            latest_estimated_round_trip_cost_bps=float(
-                payload.get("latest_estimated_round_trip_cost_bps")
-                if payload.get("latest_estimated_round_trip_cost_bps") is not None
-                else payload.get("entry_estimated_round_trip_cost_bps") or 0.0
-            ),
-            latest_decision_time=self._parse_runtime_datetime(payload.get("latest_decision_time")),
-            partial_take_profit_taken=partial_take_profit_taken,
-            r_multiple_partial_take_profit_taken=r_multiple_partial_take_profit_taken,
-            profit_protection_retrace_taken=profit_protection_retrace_taken,
-            proactive_take_profit_thresholds_hit=proactive_take_profit_thresholds_hit,
-            exit_confirmation_count=int(payload.get("exit_confirmation_count") or 0),
-            last_exit_signal_reason=str(payload.get("last_exit_signal_reason") or ""),
-            peak_roe_percent=float(payload.get("peak_roe_percent") or 0.0),
-            exchange_synced=exchange_synced,
-            confirmation_pending=bool(payload.get("confirmation_pending", False)),
-            confirmation_pending_since=self._parse_runtime_datetime(payload.get("confirmation_pending_since")),
-            origin=origin,
-            adoption_source=adoption_source,
-            adopted_at=adopted_at,
-            adoption_grace_until=adoption_grace_until,
-            entry_policy_context_source=str(payload.get("entry_policy_context_source", "") or ""),
-            entry_policy_bucket=str(payload.get("entry_policy_bucket", "") or ""),
-            entry_policy_bucket_available=bool(payload.get("entry_policy_bucket_available", False)),
-            entry_policy_bucket_source=str(payload.get("entry_policy_bucket_source", "") or ""),
-            entry_policy_bucket_alignment_status=str(payload.get("entry_policy_bucket_alignment_status", "") or ""),
-            entry_policy_execution_phase=str(payload.get("entry_policy_execution_phase", "baseline") or "baseline"),
-            entry_policy_lineage=dict(payload.get("entry_policy_lineage", {}) or {}),
-        )
-
-    def restore_futures_state_from_runtime(
-        self,
-        *,
-        state_payload: dict[str, Any],
-        summary_payload: dict[str, Any] | None = None,
-    ) -> int:
-        live_positions_by_symbol = self._active_live_futures_positions_by_symbol()
-        live_symbols = set(live_positions_by_symbol)
-        summary = summary_payload or {}
-        candidate_positions = (
-            state_payload.get("paper_open_futures_positions")
-            or summary.get("paper_open_futures_positions")
-            or summary.get("open_futures_positions")
-            or []
-        )
-        if not live_symbols:
-            self.futures_missing_in_paper_counts = {}
-            self.futures_missing_on_exchange_counts = {}
-            if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-                return 0
-            restored_paper_only = 0
-            for item in candidate_positions:
-                if not isinstance(item, dict):
-                    continue
-                position = self._paper_position_from_runtime_payload(item)
-                if position is None or position.exchange_synced or position.symbol in self.paper_positions:
-                    continue
-                self.paper_positions[position.symbol] = position
-                self._reserve_capacity_for_reconciled_position(position)
-                restored_paper_only += 1
-            return restored_paper_only
-        restored = 0
-        for item in candidate_positions:
+    def _spot_available_base_quantity(self, *, symbol: str) -> float:
+        base_asset = self._base_asset_from_symbol(symbol)
+        spot_snapshot = self._spot_snapshot()
+        balances = spot_snapshot.get("balances", [])
+        if not isinstance(balances, list):
+            return 0.0
+        for item in balances:
             if not isinstance(item, dict):
                 continue
-            position = self._paper_position_from_runtime_payload(item)
-            if position is None or position.symbol not in live_symbols or position.symbol in self.paper_positions:
+            asset = str(item.get("asset", "")).upper()
+            if asset != base_asset:
                 continue
-            self.paper_positions[position.symbol] = position
-            self._reserve_capacity_for_reconciled_position(position)
-            restored += 1
-        active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
-        for symbol in sorted(live_symbols - active_paper_symbols):
-            # startup_recovery=True: these positions exist on exchange but are not in our persisted
-            # state — most likely strategy positions whose state was lost (crash / state corruption).
-            # They must NOT be marked as external manual adoptions.
-            self._reconcile_missing_in_paper_position(
-                position=live_positions_by_symbol[symbol],
-                persisted_cycles=0,
-                startup_recovery=True,
-            )
-            restored += 1
-        active_paper_symbols = set(self._open_paper_futures_positions_by_symbol())
-        self.futures_missing_in_paper_counts = {
-            str(symbol): int(count)
-            for symbol, count in (state_payload.get("futures_missing_in_paper_counts") or {}).items()
-            if symbol in (live_symbols - active_paper_symbols)
-        }
-        self.futures_missing_on_exchange_counts = {
-            str(symbol): int(count)
-            for symbol, count in (state_payload.get("futures_missing_on_exchange_counts") or {}).items()
-            if symbol in (active_paper_symbols - live_symbols)
-        }
-        return restored
+            free_qty = self._safe_float(item.get("free"))
+            if free_qty > 0:
+                return free_qty
+        return 0.0
 
-    def _reconcile_missing_in_paper_position(
-        self,
-        *,
-        position: dict[str, Any],
-        persisted_cycles: int,
-        startup_recovery: bool = False,
-    ) -> None:
-        # startup_recovery bypasses disable_position_adoption: positions found on exchange at startup
-        # whose state was lost are strategy-owned, not external manual positions.
-        if not startup_recovery and self.runtime.paper_service.settings.disable_position_adoption:
-            symbol = str(position.get("symbol", ""))
-            if self.log_store is not None:
-                self.log_store.append(
-                    "futures_position_reconciliation",
-                    {
-                        "timestamp": datetime.now(tz=timezone.utc),
-                        "symbol": symbol,
-                        "action": "ADOPTION_BLOCKED_BY_CONFIG",
-                        "persisted_cycles": persisted_cycles,
-                        "reason": "disable_position_adoption=true",
-                    },
-                )
-            return
-        paper_position = self._build_reconciled_paper_position(
-            position=position, startup_recovery=startup_recovery
-        )
-        if paper_position is None:
-            return
-        existing = self.paper_positions.get(paper_position.symbol)
-        if existing is not None:
-            return
-        self.paper_positions[paper_position.symbol] = paper_position
-        self._reserve_capacity_for_reconciled_position(paper_position)
-        self.self_healing.record_mismatch_recovery(
-            now=datetime.now(tz=timezone.utc),
-            symbol=paper_position.symbol,
-            action="reconcile_missing_in_paper",
-            persisted_cycles=persisted_cycles,
-        )
-        if self.log_store is not None:
-            log_action = (
-                "STARTUP_STATE_RECOVERY" if startup_recovery else "ADOPT_EXTERNAL_MANUAL_POSITION"
-            )
-            self.log_store.append(
-                "futures_position_reconciliation",
-                {
-                    "timestamp": datetime.now(tz=timezone.utc),
-                    "symbol": paper_position.symbol,
-                    "action": log_action,
-                    "persisted_cycles": persisted_cycles,
-                    "side": paper_position.side,
-                    "entry_price": paper_position.entry_price,
-                    "current_price": paper_position.current_price,
-                    "quantity_remaining": paper_position.quantity_remaining,
-                    "entry_planned_leverage": paper_position.entry_planned_leverage,
-                    "origin": paper_position.origin,
-                    "adoption_source": paper_position.adoption_source,
-                    "adopted_at": paper_position.adopted_at,
-                    "adoption_grace_until": paper_position.adoption_grace_until,
-                },
-            )
-
-    def _cleanup_missing_on_exchange_position(self, *, symbol: str, now: datetime, reason: str) -> None:
-        paper_position = self.paper_positions.pop(symbol, None)
-        if paper_position is not None and paper_position.quantity_remaining > 0:
-            self._record_closed_trade(
-                position=paper_position,
-                exit_price=paper_position.current_price,
-                quantity_closed=paper_position.quantity_remaining,
-                exit_time=now,
-                exit_reason=reason,
-            )
-        self._cancel_symbol_open_orders(symbol=symbol)
-        cooldown_until = self._manual_reentry_cooldown_until(now)
-        self._set_manual_symbol_cooldown(symbol=symbol, until=cooldown_until, timestamp=now, extend_active=False, source=reason)
-        self.self_healing.record_mismatch_recovery(
-            now=now,
-            symbol=symbol,
-            action="cleanup_missing_on_exchange",
-            persisted_cycles=self._missing_on_exchange_threshold_for_symbol(symbol),
-        )
-        self._send_telegram_alert(
-            key=f"manual-close:{symbol}:{now.isoformat()}",
-            text=(
-                f"[{reason}] {symbol}\n"
-                f"reentry_block_until={cooldown_until.isoformat()}"
-            ),
-        )
-        if self.log_store is not None:
-            self.log_store.append(
-                "manual_close_sync",
-                {
-                    "timestamp": now,
-                    "symbol": symbol,
-                    "cooldown_until": cooldown_until,
-                    "reason": reason,
-                },
-            )
-
-    def _reconcile_persistent_futures_position_mismatch(self) -> None:
-        live_positions_by_symbol = self._active_live_futures_positions_by_symbol()
-        paper_positions_by_symbol = self._open_paper_futures_positions_by_symbol()
-        missing_in_paper = set(live_positions_by_symbol) - set(paper_positions_by_symbol)
-        missing_on_exchange = set(paper_positions_by_symbol) - set(live_positions_by_symbol)
-        if self._paper_verification_mode_enabled():
-            # In paper-only verification, strategy positions are intentionally not
-            # present on the exchange. Keep unmanaged live-position adoption checks,
-            # but do not close simulated positions as manual exchange syncs.
-            missing_on_exchange = set()
-            self.futures_missing_on_exchange_counts = {}
-        self._update_consecutive_mismatch_counts(
-            counts=self.futures_missing_in_paper_counts,
-            active_symbols=missing_in_paper,
-        )
-        self._update_consecutive_mismatch_counts(
-            counts=self.futures_missing_on_exchange_counts,
-            active_symbols=missing_on_exchange,
-        )
-        for symbol in sorted(missing_in_paper):
-            cycles = self.futures_missing_in_paper_counts.get(symbol, 0)
-            if cycles < self._missing_in_paper_threshold():
-                continue
-            self._reconcile_missing_in_paper_position(
-                position=live_positions_by_symbol[symbol],
-                persisted_cycles=cycles,
-            )
-            self.futures_missing_in_paper_counts.pop(symbol, None)
-        now = datetime.now(tz=timezone.utc)
-        for symbol in sorted(missing_on_exchange):
-            cycles = self.futures_missing_on_exchange_counts.get(symbol, 0)
-            threshold = self._missing_on_exchange_threshold_for_symbol(symbol)
-            if cycles < threshold:
-                continue
-            self._cleanup_missing_on_exchange_position(symbol=symbol, now=now, reason="MANUAL_CLOSE_SYNCED")
-            self.futures_missing_on_exchange_counts.pop(symbol, None)
-
-    def _position_roe_percent(self, position: dict[str, Any]) -> float:
-        margin = float(position.get("marginSize") or 0.0)
-        if margin <= 0.0:
+    def _spot_available_usdt_balance(self) -> float:
+        spot_snapshot = self._spot_snapshot()
+        balances = spot_snapshot.get("balances", [])
+        if not isinstance(balances, list):
             return 0.0
-        unrealized = float(position.get("unrealizedPL") or 0.0)
-        return (unrealized / margin) * 100.0
+        for item in balances:
+            if not isinstance(item, dict):
+                continue
+            asset = str(item.get("asset", "")).upper()
+            if asset != "USDT":
+                continue
+            free_qty = self._safe_float(item.get("free"))
+            if free_qty > 0:
+                return free_qty
+        return 0.0
 
-    def _position_unrealized_pnl_usd(self, position: dict[str, Any]) -> float:
-        return float(position.get("unrealizedPL") or 0.0)
+    def _spot_balance_rows(self) -> list[dict[str, Any]]:
+        spot_snapshot = self._spot_snapshot()
+        balances = spot_snapshot.get("balances", [])
+        if not isinstance(balances, list):
+            return []
+        rows: list[dict[str, Any]] = []
+        for item in balances:
+            if isinstance(item, dict):
+                rows.append(item)
+        return rows
 
-    def _live_position_identity(self, position: dict[str, Any]) -> str:
-        return "|".join(
-            [
-                str(position.get("symbol", "")),
-                str(position.get("holdSide") or position.get("posSide") or ""),
-                str(position.get("cTime") or position.get("uTime") or ""),
-            ]
-        )
-
-    def _live_position_holding_minutes(self, *, position: dict[str, Any], now: datetime) -> float:
-        opened_at = self._parse_live_position_timestamp(position)
-        if opened_at is None:
+    def _futures_openable_balance(self) -> float:
+        futures_snapshot = self.account_snapshot.get("futures")
+        if not isinstance(futures_snapshot, dict):
             return 0.0
-        return max((now - opened_at).total_seconds() / 60.0, 0.0)
+        if "effectiveAvailableBalance" in futures_snapshot:
+            return max(self._safe_float(futures_snapshot.get("effectiveAvailableBalance")), 0.0)
+        if "crossedMaxAvailable" in futures_snapshot:
+            return max(self._safe_float(futures_snapshot.get("crossedMaxAvailable")), 0.0)
+        return max(self._safe_float(futures_snapshot.get("availableBalance")), 0.0)
 
-    def _live_symbol_abs_return_volatility_bps(self, *, symbol: str, lookback_bars: int) -> float | None:
-        store = getattr(getattr(self.runtime, "dispatcher", None), "store", None)
-        if store is None or not hasattr(store, "get"):
-            return None
-        state = store.get(symbol)
-        if state is None:
-            return None
-        bars_window = max(int(lookback_bars), 2)
-        interval_volatilities: list[float] = []
-        for interval in ("1m", "5m", "15m"):
-            bars = list((state.klines or {}).get(interval) or [])
-            closed_bars = [bar for bar in bars if bool(getattr(bar, "is_closed", True))]
-            if len(closed_bars) < 3:
-                continue
-            closes = [
-                float(getattr(bar, "close_price", 0.0))
-                for bar in closed_bars[-(bars_window + 1):]
-                if float(getattr(bar, "close_price", 0.0)) > 0.0
-            ]
-            if len(closes) < 3:
-                continue
-            returns_bps: list[float] = []
-            for previous, current in zip(closes, closes[1:]):
-                if previous <= 0.0:
-                    continue
-                returns_bps.append(abs((current - previous) / previous) * 10000.0)
-            if returns_bps:
-                interval_volatilities.append(sum(returns_bps) / len(returns_bps))
-        if not interval_volatilities:
-            return None
-        # Use the highest recent interval volatility so abort widening reacts to
-        # any timeframe expansion, not only the fastest stream.
-        return max(interval_volatilities)
-
-    def _effective_long_turnaround_abort_roe_percent(
-        self,
-        *,
-        symbol: str,
-        base_abort_roe_percent: float,
-    ) -> float:
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        effective_abort = base_abort_roe_percent
-        if not cfg.turnaround_abort_volatility_adaptive:
-            return effective_abort
-        volatility_bps = self._live_symbol_abs_return_volatility_bps(
-            symbol=symbol,
-            lookback_bars=cfg.turnaround_abort_volatility_lookback_bars,
-        )
-        if volatility_bps is None:
-            return effective_abort
-        floor_bps = max(cfg.turnaround_abort_volatility_floor_bps, 0.0)
-        scale = max(cfg.turnaround_abort_volatility_scale, 0.0)
-        extra_abort = max(volatility_bps - floor_bps, 0.0) * scale
-        effective_abort -= extra_abort
-        return max(effective_abort, cfg.turnaround_abort_min_roe_percent)
-
-    def _live_client_oid(
-        self,
-        *,
-        position: dict[str, Any],
-        reason: str,
-        suffix: str,
-    ) -> str:
-        symbol = str(position.get("symbol", "")).upper()[:12]
-        hold_side = str(position.get("holdSide") or position.get("posSide") or "").lower()[:5]
-        position_token = str(position.get("uTime") or position.get("cTime") or "")[-6:]
-        self._live_client_oid_counter = (self._live_client_oid_counter + 1) % 1000
-        nonce_token = f"{time.time_ns() % 1000000:06d}{self._live_client_oid_counter:03d}"
-        normalized_reason = re.sub(r"[^a-z0-9]+", "", reason.lower())[:12]
-        oid = f"{symbol}-{hold_side}-{normalized_reason}-{suffix}-{position_token}-{nonce_token}"
-        return oid[:64]
-
-    def _reset_live_position_breakeven_protection(self, *, position: dict[str, Any]) -> None:
-        if self.rest_client is None or not hasattr(self.rest_client, "place_futures_position_tpsl"):
-            return
-        symbol = str(position.get("symbol", ""))
-        hold_side = str(position.get("holdSide", "")).lower()
-        if not symbol or hold_side not in {"long", "short"}:
-            return
-        breakeven_price = float(position.get("breakEvenPrice") or position.get("openPriceAvg") or 0.0)
-        if breakeven_price <= 0.0:
-            return
-        adapter = self.live_order_executor or DecisionLiveOrderAdapter(
-            self.rest_client,
-            self.runtime.paper_service.settings,
-        )
-        self._reconcile_live_position_plan_orders(
-            position=position,
-            hold_side=hold_side,
-        )
-        payload = {
-            "marginCoin": "USDT",
-            "productType": "USDT-FUTURES",
-            "symbol": symbol,
-            "holdSide": hold_side,
-            "stopLossTriggerPrice": adapter.format_trigger_price(
-                value=breakeven_price,
-                market="futures",
-                symbol=symbol,
-            ),
-            "stopLossTriggerType": "mark_price",
-            "stopLossClientOid": self._live_client_oid(
-                position=position,
-                reason="breakeven",
-                suffix="sl",
-            ),
-        }
-        response = self.rest_client.place_futures_position_tpsl(order_params=payload)
-        if self.log_store is not None:
-            self.log_store.append(
-                "live_position_actions",
-                {
-                    "timestamp": datetime.now(tz=timezone.utc),
-                    "symbol": symbol,
-                    "market": "futures",
-                    "action": "RESET_BREAKEVEN_PROTECTION",
-                    "payload": payload,
-                    "response": response,
-                },
-            )
-
-    def _reconcile_live_position_plan_orders(self, *, position: dict[str, Any], hold_side: str) -> None:
-        if (
-            self.rest_client is None
-            or not hasattr(self.rest_client, "get_futures_pending_plan_orders")
-            or not hasattr(self.rest_client, "cancel_futures_plan_orders")
-            or not getattr(self.rest_client, "supports_private_reads", True)
-        ):
-            return
-        symbol = str(position.get("symbol", ""))
-        if not symbol or hold_side not in {"long", "short"}:
-            return
-        try:
-            pending = self.rest_client.get_futures_pending_plan_orders(symbol=symbol, plan_type="profit_loss")
-        except Exception as _plan_exc:
-            print(f"[session] plan order query failed for {symbol} (non-fatal, skipping cleanup): {_plan_exc}")
-            return
-        rows = pending.get("orders", []) if isinstance(pending, dict) else []
-        relevant = [
-            row
-            for row in rows
-            if isinstance(row, dict)
-            and str(row.get("symbol", "")) == symbol
-            and str(row.get("posSide", row.get("holdSide", ""))).lower() == hold_side
-            and str(row.get("tradeSide", "")).lower() == "close"
-            and str(row.get("planStatus", "")).lower() == "live"
-        ]
-        if len(relevant) <= 2:
-            return
-        relevant.sort(key=lambda row: float(row.get("uTime") or row.get("cTime") or 0.0), reverse=True)
-        keep: set[str] = set()
-        for plan_type in ("profit_plan", "loss_plan"):
-            for row in relevant:
-                if str(row.get("planType", "")).lower() == plan_type:
-                    order_id = str(row.get("orderId", "")).strip()
-                    if order_id:
-                        keep.add(order_id)
-                    break
-        cancel_groups: dict[str, list[dict[str, str]]] = {}
-        for row in relevant:
-            order_id = str(row.get("orderId", "")).strip()
-            client_oid = str(row.get("clientOid", "")).strip()
-            plan_type = str(row.get("planType", "")).strip().lower()
-            if not order_id or order_id in keep:
-                continue
-            cancel_groups.setdefault(plan_type, []).append({"orderId": order_id, "clientOid": client_oid})
-        if not cancel_groups:
-            return
-        responses = []
-        cancelled_count = 0
-        for plan_type, cancel_rows in cancel_groups.items():
-            response = self.rest_client.cancel_futures_plan_orders(
-                symbol=symbol,
-                order_id_list=cancel_rows,
-                plan_type=plan_type or None,
-            )
-            responses.append({"plan_type": plan_type, "response": response})
-            cancelled_count += len(cancel_rows)
-        if self.log_store is not None:
-            self.log_store.append(
-                "live_position_actions",
-                {
-                    "timestamp": datetime.now(tz=timezone.utc),
-                    "symbol": symbol,
-                    "market": "futures",
-                    "action": "RECONCILE_POSITION_TPSL",
-                    "hold_side": hold_side,
-                    "cancelled_order_count": cancelled_count,
-                    "responses": responses,
-                },
-            )
-
-    def _live_portfolio_unrealized_ratio(self) -> float:
-        total_unrealized = sum(self._position_unrealized_pnl_usd(position) for position in self.live_positions_snapshot)
-        return total_unrealized / self.equity_usd if self.equity_usd > 0 else 0.0
-
-    def _realized_pnl_total(self) -> float:
-        return round(
-            sum(float(trade.get("realized_pnl_usd_estimate", 0.0)) for trade in self.closed_trades),
-            6,
-        )
-
-    def _live_portfolio_profit_ratio(self) -> float:
-        total_unrealized = sum(self._position_unrealized_pnl_usd(position) for position in self.live_positions_snapshot)
-        return (self._realized_pnl_total() + total_unrealized) / self.equity_usd if self.equity_usd > 0 else 0.0
-
-    def _standard_stop_loss_exits_enabled(self) -> bool:
-        return not self.runtime.paper_service.settings.live_position_risk.disable_standard_stop_loss_exits
-
-    def _select_live_portfolio_profit_lock_target(self) -> dict[str, Any] | None:
-        now = datetime.now(tz=timezone.utc)
-        profitable_positions = [
-            position
-            for position in self.live_positions_snapshot
-            if self._position_unrealized_pnl_usd(position) > 0.0
-            and self._live_position_quantity(position) > 0.0
-            and self._live_position_management_context(position=position, now=now)[1] == "strategy"
-        ]
-        if not profitable_positions:
-            return None
-        profitable_positions.sort(
-            key=lambda position: (
-                self._position_unrealized_pnl_usd(position),
-                self._position_roe_percent(position),
-            ),
-            reverse=True,
-        )
-        return profitable_positions[0]
-
-    def _bitget_live_position_mode(self, position: dict[str, Any]) -> str:
-        raw_mode = str(position.get("posMode") or position.get("positionMode") or "").strip().lower()
-        if "hedge" in raw_mode or "double" in raw_mode:
-            return "hedge"
-        if "one_way" in raw_mode or "one-way" in raw_mode or "unilateral" in raw_mode or "single" in raw_mode:
-            return "one_way"
-        return "unknown"
-
-    def _bitget_close_order_candidates(
-        self,
-        *,
-        position: dict[str, Any],
-        quantity: float,
-        reason: str,
-    ) -> tuple[dict[str, Any], ...]:
-        symbol = str(position.get("symbol", ""))
-        adapter = self.live_order_executor or DecisionLiveOrderAdapter(
-            self.rest_client,
-            self.runtime.paper_service.settings,
-        )
-        position_side = self._normalize_live_position_side(position)
-        one_way_side = "sell" if position_side == "long" else "buy"
-        hedge_side = "buy" if position_side == "long" else "sell"
-        base_payload: dict[str, Any] = {
-            "symbol": symbol,
-            "productType": "USDT-FUTURES",
-            "marginCoin": "USDT",
-            "marginMode": resolve_bitget_margin_mode(),
-            "orderType": "market",
-            "size": adapter.format_quantity(
-                market="futures",
-                symbol=symbol,
-                quantity=quantity,
-            ),
-            "clientOid": self._live_client_oid(
-                position=position,
-                reason=reason,
-                suffix="close",
-            ),
-        }
-        one_way_close = dict(base_payload)
-        one_way_close["side"] = one_way_side
-        one_way_close["reduceOnly"] = "YES"
-
-        hedge_close = dict(base_payload)
-        hedge_close["side"] = hedge_side
-        hedge_close["tradeSide"] = "close"
-
-        one_way_without_reduce_only = dict(base_payload)
-        one_way_without_reduce_only["side"] = one_way_side
-
-        mode = self._bitget_live_position_mode(position)
-        if mode == "hedge":
-            return (hedge_close, one_way_close, one_way_without_reduce_only)
-        if mode == "one_way":
-            return (one_way_close, hedge_close, one_way_without_reduce_only)
-        return (one_way_close, hedge_close, one_way_without_reduce_only)
-
-    def _close_live_position(self, *, position: dict[str, Any], reason: str, fraction: float = 1.0) -> None:
-        if self.rest_client is None or not hasattr(self.rest_client, "build_order_params") or not hasattr(self.rest_client, "place_order"):
-            return
-        symbol = str(position.get("symbol", ""))
-        hold_side = str(position.get("holdSide", "")).lower()
-        total_quantity = float(position.get("total") or position.get("available") or 0.0)
-        fraction = self._effective_live_partial_exit_fraction(
-            position=position,
-            reason=reason,
-            fraction=fraction,
-        )
-        quantity = total_quantity * max(min(fraction, 1.0), 0.0)
-        if not symbol or quantity <= 0.0:
-            return
-        adapter = self.live_order_executor or DecisionLiveOrderAdapter(
-            self.rest_client,
-            self.runtime.paper_service.settings,
-        )
-        total_quantity = adapter.normalize_quantity(market="futures", symbol=symbol, quantity=total_quantity)
-        quantity = adapter.normalize_quantity(market="futures", symbol=symbol, quantity=quantity)
-        min_quantity = self._market_min_quantity(market="futures", symbol=symbol)
-        if min_quantity > 0.0 and quantity < min_quantity and total_quantity >= min_quantity:
-            quantity = total_quantity
-            fraction = 1.0
-        if (
-            fraction < 0.999
-            and self._is_fee_sensitive_partial_exit_reason(reason)
-            and self.runtime.paper_service.settings.live_position_risk.partial_exit_min_expected_after_fee_usd > 0.0
-        ):
-            expected_after_fee = self._expected_live_partial_exit_after_fee_usd(
-                position=position,
-                quantity=quantity,
-            )
-            if expected_after_fee < self.runtime.paper_service.settings.live_position_risk.partial_exit_min_expected_after_fee_usd:
-                if self.log_store is not None:
-                    self.log_store.append(
-                        "live_position_actions",
-                        {
-                            "timestamp": datetime.now(tz=timezone.utc),
-                            "symbol": symbol,
-                            "market": "futures",
-                            "accepted": False,
-                            "reason": f"{reason}_SKIPPED_FEE",
-                            "quantity": quantity,
-                            "expected_after_fee_usd": round(expected_after_fee, 6),
-                        },
-                    )
-                return
-        side = "SELL" if hold_side == "long" else "BUY"
-        u_time = str(position.get("uTime", ""))
-        alert_key = f"live-position-close:{symbol}:{u_time}:{reason}:{fraction:.4f}"
-        if alert_key in self.sent_alert_keys:
-            return
-        exchange_id = getattr(self.rest_client, "exchange_id", "")
-        is_bitget_close = exchange_id == "bitget"
-        if is_bitget_close:
-            order_candidates = self._bitget_close_order_candidates(
-                position=position,
-                quantity=quantity,
-                reason=reason,
-            )
-            order_params = dict(order_candidates[0])
-        else:
-            order_candidates = ()
-            order_params = self.rest_client.build_order_params(
-                market="futures",
-                symbol=symbol,
-                side=side,
-                order_type="MARKET",
-                quantity=quantity,
-                reduce_only=True,
-                client_oid=self._live_client_oid(
-                    position=position,
-                    reason=reason,
-                    suffix="close",
-                ),
-            )
-        attempted_order_params = dict(order_params)
-
-        def _record_already_closed(exc: Exception) -> None:
-            if self.log_store is not None:
-                self.log_store.append(
-                    "live_position_actions",
-                    {
-                        "timestamp": datetime.now(tz=timezone.utc),
-                        "symbol": symbol,
-                        "market": "futures",
-                        "side": str(attempted_order_params.get("side", side)).lower(),
-                        "quantity": quantity,
-                        "accepted": False,
-                        "reason": f"{reason}_ALREADY_CLOSED",
-                        "response": {"error": repr(exc)},
-                    },
-                )
-
-        def _record_close_size_error(exc: Exception) -> None:
-            error_payload = {
-                "timestamp": datetime.now(tz=timezone.utc),
-                "symbol": symbol,
-                "market": "futures",
-                "stage": "live_position_close",
-                "error": repr(exc),
-                "reason": reason,
-                "fraction": fraction,
-            }
-            if self.log_store is not None:
-                self.log_store.append("order_errors", error_payload)
-            self.self_healing.record_runtime_error(
-                now=datetime.now(tz=timezone.utc),
-                symbol=symbol,
-                error_message=repr(exc),
-                exchange_id=getattr(self.rest_client, "exchange_id", "bitget"),
-                stage="live_position_close",
-            )
-
-        try:
-            attempted_order_params = dict(order_params)
-            response = self.rest_client.place_order(market="futures", order_params=order_params)
-        except Exception as exc:
-            message = str(exc)
-            can_retry_bitget_close = (
-                is_bitget_close
-                and (
-                    adapter._is_bitget_unilateral_error(message)
-                    or "22002" in message
-                    or "No position to close" in message
-                )
-            )
-            if can_retry_bitget_close:
-                retry_error = exc
-                alternates = order_candidates[1:] or adapter._bitget_alternate_futures_params(order_params)
-                for alternate_params in alternates:
-                    try:
-                        attempted_order_params = dict(alternate_params)
-                        response = self.rest_client.place_order(market="futures", order_params=alternate_params)
-                    except Exception as retry_exc:
-                        retry_error = retry_exc
-                        retry_message = str(retry_exc)
-                        if not (
-                            adapter._is_bitget_unilateral_error(retry_message)
-                            or "22002" in retry_message
-                            or "No position to close" in retry_message
-                        ):
-                            raise
-                        continue
-                    order_params = alternate_params
-                    break
-                else:
-                    if "22002" in str(retry_error) or "No position to close" in str(retry_error):
-                        _record_already_closed(retry_error)
-                        return
-                    raise retry_error
-            else:
-                if ("45111" in message or "40017" in message) and fraction < 0.999 and total_quantity > quantity:
-                    try:
-                        full_order_candidates = self._bitget_close_order_candidates(
-                            position=position,
-                            quantity=total_quantity,
-                            reason=reason,
-                        ) if is_bitget_close else ()
-                        if is_bitget_close:
-                            attempted_order_params = dict(full_order_candidates[0])
-                            response = self.rest_client.place_order(market="futures", order_params=full_order_candidates[0])
-                            order_params = full_order_candidates[0]
-                            quantity = total_quantity
-                            fraction = 1.0
-                        else:
-                            raise RuntimeError(message)
-                    except Exception as retry_exc:
-                        _record_close_size_error(retry_exc)
-                        return
-                elif "45111" in message or "40017" in message:
-                    _record_close_size_error(exc)
-                    return
-                if "22002" in message or "No position to close" in message:
-                    _record_already_closed(exc)
-                    return
-                raise
-        payload = {
-            "timestamp": datetime.now(tz=timezone.utc),
-            "symbol": symbol,
-            "market": "futures",
-            "side": str(order_params.get("side", side)).lower(),
-            "quantity": quantity,
-            "accepted": str(response.get("status", "")).upper() not in {"REJECTED", "EXPIRED", "ERROR"},
-            "reason": reason,
-            "partial_exit": fraction < 0.999,
-            "response": response,
-        }
-        self.live_orders.append(payload)
-        if self.log_store is not None:
-            self.log_store.append("live_position_actions", payload)
-        if fraction < 0.999:
-            identity = self._live_position_identity(position)
-            mode = self._live_partial_exit_mode(reason)
-            if mode:
-                self.live_partial_exit_last_at_by_identity[identity] = datetime.now(tz=timezone.utc)
-                self.live_partial_exit_mode_by_identity[identity] = mode
-        roe = self._position_roe_percent(position)
-        self._send_telegram_alert(
-            key=alert_key,
-            text=f"[{reason}] {symbol}\nroe_percent={roe:.2f}\nunrealized_pl={float(position.get('unrealizedPL') or 0.0):.2f}",
-        )
-        if fraction < 0.999:
-            self._reset_live_position_breakeven_protection(position=position)
-        elif payload["accepted"]:
-            self._sync_paper_position_after_live_full_close(
-                live_position=position,
-                reason=reason,
-                timestamp=payload["timestamp"],
-            )
-
-    def _sync_paper_position_after_live_full_close(
-        self,
-        *,
-        live_position: dict[str, Any],
-        reason: str,
-        timestamp: datetime,
-    ) -> None:
-        symbol = str(live_position.get("symbol", "") or "")
-        paper_position = self.paper_positions.get(symbol)
-        if paper_position is None or paper_position.quantity_remaining <= 0.0:
-            return
-        exit_price = self._live_position_reference_price(symbol=symbol, position=live_position)
-        if exit_price <= 0.0:
-            exit_price = paper_position.current_price if paper_position.current_price > 0.0 else paper_position.entry_price
-        self._close_position(
-            position=paper_position,
-            exit_price=exit_price,
-            timestamp=timestamp,
-            exit_reason=reason,
-        )
-
-    def _evaluate_live_positions(self) -> None:
-        cfg = self.runtime.paper_service.settings.live_position_risk
-        if not cfg.enabled or not self.live_positions_snapshot:
-            self.live_portfolio_peak_unrealized_ratio = 0.0
-            self.live_portfolio_profit_lock_taken = False
-            self.live_portfolio_full_exit_taken = False
-            return
-        proactive_fraction = self._futures_proactive_take_profit_fraction()
-        now = datetime.now(tz=timezone.utc)
-        strategy_managed_live_positions = [
-            position
-            for position in self.live_positions_snapshot
-            if self._live_position_management_context(position=position, now=now)[1] == "strategy"
-        ]
-        portfolio_unrealized_ratio = self._live_portfolio_unrealized_ratio()
-        portfolio_profit_ratio = self._live_portfolio_profit_ratio()
-        self.live_portfolio_peak_unrealized_ratio = max(
-            self.live_portfolio_peak_unrealized_ratio,
-            portfolio_unrealized_ratio,
-        )
-        if portfolio_unrealized_ratio <= 0.0:
-            self.live_portfolio_peak_unrealized_ratio = 0.0
-            self.live_portfolio_profit_lock_taken = False
-        if (
-            cfg.portfolio_full_exit_only
-            and cfg.portfolio_full_exit_profit_ratio > 0.0
-            and portfolio_profit_ratio >= cfg.portfolio_full_exit_profit_ratio
-            and strategy_managed_live_positions
-            and not self.live_portfolio_full_exit_taken
-        ):
-            self.live_portfolio_full_exit_taken = True
-            for position in list(strategy_managed_live_positions):
-                self._close_live_position(position=position, reason="LIVE_PORTFOLIO_FULL_EXIT", fraction=1.0)
-            return
-        for position in self.live_positions_snapshot:
-            symbol = str(position.get("symbol", ""))
-            _, management_mode = self._live_position_management_context(position=position, now=now)
-            is_major_symbol = self._is_major_futures_symbol(symbol)
-            in_core_universe = (
-                symbol in set(self.runtime.paper_service.settings.universe)
-                or is_major_symbol
-            )
-            hold_side = self._normalize_live_position_side(position)
-            is_long_position = hold_side == "long"
-            self._reconcile_live_position_plan_orders(position=position, hold_side=hold_side)
-            roe = self._position_roe_percent(position)
-            unrealized_pnl = self._position_unrealized_pnl_usd(position)
-            holding_minutes = self._live_position_holding_minutes(position=position, now=now)
-            margin_ratio = float(position.get("marginRatio") or 0.0)
-            identity = self._live_position_identity(position)
-            peak_roe = self.live_peak_roe_by_identity.get(identity, roe)
-            peak_roe = max(peak_roe, roe)
-            self.live_peak_roe_by_identity[identity] = peak_roe
-            worst_roe = self.live_worst_roe_by_identity.get(identity, roe)
-            worst_roe = min(worst_roe, roe)
-            self.live_worst_roe_by_identity[identity] = worst_roe
-            peak_unrealized_pnl = self.live_peak_unrealized_pnl_by_identity.get(identity, unrealized_pnl)
-            peak_unrealized_pnl = max(peak_unrealized_pnl, unrealized_pnl)
-            self.live_peak_unrealized_pnl_by_identity[identity] = peak_unrealized_pnl
-            # ── Trailing Stop: lock in profits by moving SL up ──
-            self._update_trailing_stop(
-                position=position, identity=identity, roe=roe, peak_roe=peak_roe,
-                hold_side=hold_side, symbol=symbol,
-            )
-            long_turnaround_mode = cfg.long_only_turnaround_mode and is_long_position
-            long_disable_standard_stop = long_turnaround_mode and cfg.long_disable_standard_stop_loss
-            if long_turnaround_mode and roe <= cfg.turnaround_abort_roe_percent:
-                self._close_live_position(position=position, reason="LIVE_POSITION_LONG_TURNAROUND_ABORT")
-                continue
-            if (
-                self._standard_stop_loss_exits_enabled()
-                and not long_disable_standard_stop
-                and roe <= cfg.stop_loss_roe_percent
-            ):
-                self._close_live_position(position=position, reason="LIVE_POSITION_STOP_LOSS")
-                continue
-            if margin_ratio >= cfg.margin_ratio_emergency:
-                self._close_live_position(position=position, reason="LIVE_POSITION_MARGIN_RISK")
-                continue
-            if management_mode != "strategy":
-                continue
-            if not in_core_universe:
-                if self._standard_stop_loss_exits_enabled() and roe <= cfg.non_core_soft_stop_roe_percent:
-                    self._close_live_position(position=position, reason="LIVE_POSITION_NON_CORE_SOFT_STOP_LOSS")
-                    continue
-                if (
-                    not cfg.portfolio_full_exit_only
-                    and
-                    roe >= cfg.non_core_take_profit_roe_percent
-                    and unrealized_pnl >= cfg.non_core_take_profit_min_usd
-                ):
-                    self._close_live_position(
-                        position=position,
-                        reason="LIVE_POSITION_NON_CORE_PROFIT_EXIT",
-                        fraction=cfg.non_core_take_profit_fraction,
-                    )
-                    continue
-            if (
-                in_core_universe
-                and is_major_symbol
-                and cfg.major_low_signal_max_holding_minutes > 0
-                and cfg.major_low_signal_min_unrealized_usd > 0.0
-                and holding_minutes >= cfg.major_low_signal_max_holding_minutes
-                and unrealized_pnl <= cfg.major_low_signal_min_unrealized_usd
-                and peak_roe < max(
-                    cfg.major_low_signal_min_roe_percent,
-                    cfg.major_profit_protection_arm_roe_percent,
-                )
-                and worst_roe > cfg.soft_stop_roe_percent
-            ):
-                self._close_live_position(position=position, reason="LIVE_POSITION_MAJOR_LOW_SIGNAL_EXIT")
-                continue
-            if cfg.long_only_turnaround_mode and not is_long_position:
-                turnaround_grace = False
-            else:
-                turnaround_grace = self._live_turnaround_grace_applies(
-                    position=position,
-                    identity=identity,
-                    roe_percent=roe,
-                    now=now,
-                )
-            major_drawdown_grace = self._major_drawdown_grace_applies(
-                position=position,
-                identity=identity,
-                roe_percent=roe,
-                holding_minutes=holding_minutes,
-                now=now,
-            )
-            short_turnaround_rebound_grace = (
-                is_short_position
-                and cfg.short_profit_flip_take_profit_fraction > 0.0
-                and cfg.short_profit_flip_fast_take_profit_roe_percent > 0.0
-                and worst_roe <= cfg.soft_stop_roe_percent
-                and roe > cfg.stop_loss_roe_percent
-            )
-            if (
-                self._standard_stop_loss_exits_enabled()
-                and not long_disable_standard_stop
-                and roe <= cfg.soft_stop_roe_percent
-                and not turnaround_grace
-                and not major_drawdown_grace
-                and not short_turnaround_rebound_grace
-            ):
-                self._close_live_position(position=position, reason="LIVE_POSITION_SOFT_STOP_LOSS")
-                continue
-            if cfg.portfolio_full_exit_only:
-                continue
-            # UNIFIED FINAL: TP=25% ROE full exit, SL=20% ROE
-            # No R-multiple ladder — use proactive TP at 25% ROE for full exit
-            proactive_threshold = self._pending_proactive_take_profit_threshold(
-                current_roe_percent=roe,
-                thresholds_hit=tuple(
-                    threshold
-                    for threshold in self._futures_proactive_take_profit_thresholds()
-                    if self._live_proactive_take_profit_key(identity=identity, threshold=threshold)
-                    in self.live_proactive_take_profit_keys
-                ),
-            )
-            if proactive_threshold is not None and proactive_fraction > 0.0:
-                if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT", now=now):
-                    continue
-                for threshold in self._futures_proactive_take_profit_thresholds():
-                    if threshold == proactive_threshold:
-                        self.live_proactive_take_profit_keys.add(
-                            self._live_proactive_take_profit_key(identity=identity, threshold=threshold)
-                        )
-                self._close_live_position(
-                    position=position,
-                    reason="LIVE_POSITION_PROACTIVE_PARTIAL_TAKE_PROFIT",
-                    fraction=proactive_fraction,
-                )
-                continue
-            protection_arm_threshold, protection_retrace_threshold = self._live_profit_protection_thresholds(
-                hold_side=hold_side,
-                is_major_symbol=is_major_symbol,
-            )
-            if self._profit_protection_partial_triggered(
-                peak_roe_percent=peak_roe,
-                current_roe_percent=roe,
-                retrace_taken=identity in self.live_profit_protection_keys,
-                arm_threshold=protection_arm_threshold,
-                retrace_threshold=protection_retrace_threshold,
-            ):
-                if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_PROFIT_PROTECTION", now=now):
-                    continue
-                self.live_profit_protection_keys.add(identity)
-                self._close_live_position(
-                    position=position,
-                    reason="LIVE_POSITION_PROFIT_PROTECTION",
-                    fraction=0.5,
-                )
-                continue
-            turnaround_take_profit_roe, turnaround_take_profit_fraction = self._live_turnaround_take_profit_targets(
-                hold_side=hold_side,
-            )
-            if (
-                cfg.turnaround_grace_enabled
-                and (not cfg.long_only_turnaround_mode or is_long_position)
-                and worst_roe <= cfg.soft_stop_roe_percent
-                and turnaround_take_profit_roe > 0.0
-                and roe >= turnaround_take_profit_roe
-                and identity not in self.live_turnaround_take_profit_keys
-            ):
-                if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_TURNAROUND_TAKE_PROFIT", now=now):
-                    continue
-                self.live_turnaround_take_profit_keys.add(identity)
-                self._close_live_position(
-                    position=position,
-                    reason="LIVE_POSITION_TURNAROUND_TAKE_PROFIT",
-                    fraction=turnaround_take_profit_fraction,
-                )
-                continue
-            if (
-                peak_unrealized_pnl >= cfg.position_unrealized_profit_arm_usd
-                and (peak_unrealized_pnl - unrealized_pnl) >= cfg.position_unrealized_profit_retrace_usd
-                and identity not in self.live_unrealized_take_profit_keys
-            ):
-                if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_UNREALIZED_TAKE_PROFIT", now=now):
-                    continue
-                self.live_unrealized_take_profit_keys.add(identity)
-                self._close_live_position(
-                    position=position,
-                    reason="LIVE_POSITION_UNREALIZED_TAKE_PROFIT",
-                    fraction=cfg.position_unrealized_take_profit_fraction,
-                )
-                continue
-            if not self._futures_proactive_take_profit_thresholds() and peak_roe >= cfg.take_profit_roe_percent:
-                legacy_key = self._live_proactive_take_profit_key(identity=identity, threshold=cfg.take_profit_roe_percent)
-                if legacy_key not in self.live_proactive_take_profit_keys:
-                    drawdown = peak_roe - roe
-                    if drawdown >= 2.0 or roe >= cfg.take_profit_roe_percent + 2.0:
-                        if not self._can_trigger_live_partial_exit(identity=identity, reason="LIVE_POSITION_PARTIAL_TAKE_PROFIT", now=now):
-                            continue
-                        self.live_proactive_take_profit_keys.add(legacy_key)
-                        self._close_live_position(
-                            position=position,
-                            reason="LIVE_POSITION_PARTIAL_TAKE_PROFIT",
-                            fraction=0.5,
-                        )
-        portfolio_drawdown_ratio = self.live_portfolio_peak_unrealized_ratio - portfolio_unrealized_ratio
-        if (
-            not self.live_portfolio_profit_lock_taken
-            and self.live_portfolio_peak_unrealized_ratio >= cfg.portfolio_unrealized_profit_arm_ratio
-            and portfolio_drawdown_ratio >= cfg.portfolio_unrealized_profit_retrace_ratio
-        ):
-            target = self._select_live_portfolio_profit_lock_target()
-            if target is not None:
-                target_identity = self._live_position_identity(target)
-                if not self._can_trigger_live_partial_exit(identity=target_identity, reason="LIVE_PORTFOLIO_PROFIT_LOCK", now=now):
-                    return
-                self.live_portfolio_profit_lock_taken = True
-                self._close_live_position(
-                    position=target,
-                    reason="LIVE_PORTFOLIO_PROFIT_LOCK",
-                    fraction=cfg.portfolio_profit_lock_take_profit_fraction,
-                )
-
-    # ── Trailing Stop Implementation ──────────────────────────────
-    # Activates when ROE >= threshold. Locks in 50% of peak profit.
-    # Short positions use tighter activation (scalp style).
-    _TRAILING_ACTIVATION_ROE_LONG = 8.0    # long: activate later to avoid clipping early trends
-    _TRAILING_ACTIVATION_ROE_SHORT = 5.0   # short: delay lock so one-shot runners can breathe
-    _TRAILING_LOCK_RATIO = 0.35            # lock 35% of peak profit (less aggressive)
-    _TRAILING_MIN_MOVE_BPS = 15            # minimum move to update (avoid micro-churn)
-
-    def _update_trailing_stop(
-        self,
-        *,
-        position: dict[str, Any],
-        identity: str,
-        roe: float,
-        peak_roe: float,
-        hold_side: str,
-        symbol: str,
-    ) -> None:
-        activation = self._TRAILING_ACTIVATION_ROE_SHORT if hold_side == "short" else self._TRAILING_ACTIVATION_ROE_LONG
-        if peak_roe < activation:
-            return
-        if self.rest_client is None:
-            return
-        mark_price = float(position.get("markPrice") or 0.0)
-        entry_price = float(position.get("openPriceAvg") or 0.0)
-        leverage = int(position.get("leverage") or 1)
-        if mark_price <= 0 or entry_price <= 0 or leverage <= 0:
-            return
-
-        # Calculate trailing SL price
-        # Lock _TRAILING_LOCK_RATIO of peak profit
-        locked_roe = peak_roe * self._TRAILING_LOCK_RATIO
-        if locked_roe <= 0:
-            return
-
-        # ROE to price: for long, SL = entry * (1 + locked_roe% / leverage)
-        if hold_side == "long":
-            new_sl = entry_price * (1.0 + locked_roe / 100.0 / leverage)
-            # SL must be below current price
-            if new_sl >= mark_price:
-                return
-        else:
-            new_sl = entry_price * (1.0 - locked_roe / 100.0 / leverage)
-            if new_sl <= mark_price:
-                return
-
-        # Check if SL improved enough to warrant update
-        current_sl = self.live_trailing_stop_prices.get(identity, 0.0)
-        if hold_side == "long":
-            if new_sl <= current_sl:
-                return  # SL didn't improve
-            move_bps = abs(new_sl - current_sl) / entry_price * 10000
-        else:
-            if current_sl > 0 and new_sl >= current_sl:
-                return
-            move_bps = abs(current_sl - new_sl) / entry_price * 10000 if current_sl > 0 else self._TRAILING_MIN_MOVE_BPS + 1
-
-        if move_bps < self._TRAILING_MIN_MOVE_BPS:
-            return
-
-        # Format SL price using the symbol's actual price precision.
-        # Hardcoded ".2f" truncated low-priced coins (DOGE/PEPE/XRP) to "0.09"/"0.00",
-        # which Bitget rejected with code 45122 ("stop loss price please > mark price").
-        adapter = self.live_order_executor or DecisionLiveOrderAdapter(
-            self.rest_client,
-            self.runtime.paper_service.settings,
-        )
-        new_sl_str = adapter.format_trigger_price(value=new_sl, market="futures", symbol=symbol)
-        try:
-            new_sl_rounded = float(new_sl_str)
-        except (TypeError, ValueError):
-            new_sl_rounded = new_sl
-        # Re-validate after rounding: SL must stay on the correct side of mark.
-        # For LONG: SL strictly below mark. For SHORT: SL strictly above mark.
-        if hold_side == "long" and new_sl_rounded >= mark_price:
-            return
-        if hold_side == "short" and new_sl_rounded <= mark_price:
-            return
-
-        # Update Bitget SL via place-pos-tpsl
-        try:
-            tpsl_params: dict[str, Any] = {
-                "symbol": symbol,
-                "productType": "USDT-FUTURES",
-                "marginCoin": "USDT",
-                "holdSide": hold_side,
-                "stopLossTriggerPrice": new_sl_str,
-                "stopLossTriggerType": "mark_price",
-            }
-            self.rest_client.place_futures_position_tpsl(order_params=tpsl_params)
-            self.live_trailing_stop_prices[identity] = new_sl_rounded
-            if self.verbose:
-                direction = "↑" if hold_side == "long" else "↓"
-                print(
-                    f"[TRAILING_STOP] {symbol} {hold_side} SL {direction} "
-                    f"{current_sl}→{new_sl_str} "
-                    f"(peak ROE {peak_roe:.1f}% → lock {locked_roe:.1f}%, mark={mark_price})"
-                )
-        except Exception as exc:
-            if self.verbose:
-                print(f"[TRAILING_STOP] {symbol} update failed: {exc}")
-
-    def _current_unrealized_total(self) -> float:
-        return round(sum(position.unrealized_pnl_usd_estimate() for position in self.paper_positions.values()), 6)
-
-    def _refresh_observed_paper_position(
-        self,
-        *,
-        position: PaperPosition,
-        price: float,
-    ) -> None:
-        position.current_price = price
-        position.best_price = max(position.best_price, price)
-        position.worst_price = min(position.worst_price, price)
-        reward_bps = self._reward_bps(position=position, price=price)
-        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
-        position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
-
-    def _paper_portfolio_profit_ratio(self) -> float:
-        if self.equity_usd <= 0:
+    def _required_futures_margin(self, *, decision: DecisionIntent) -> float:
+        if decision.final_mode != "futures":
             return 0.0
-        return (self._realized_pnl_total() + self._current_unrealized_total()) / self.equity_usd
-
-    def _realized_loss_ratio(self, *, now: datetime, scope: str) -> float:
-        realized_loss = 0.0
-        iso_year, iso_week, _ = now.isocalendar()
-        for trade in self.closed_trades:
-            exit_time = trade.get("exit_time")
-            if not isinstance(exit_time, datetime):
-                continue
-            same_scope = False
-            if scope == "daily":
-                same_scope = exit_time.date() == now.date()
-            elif scope == "weekly":
-                year, week, _ = exit_time.isocalendar()
-                same_scope = (year, week) == (iso_year, iso_week)
-            if not same_scope:
-                continue
-            pnl = float(trade.get("realized_pnl_usd_estimate", 0.0))
-            if pnl < 0:
-                realized_loss += abs(pnl)
-        if self.equity_usd <= 0:
-            return 0.0
-        return realized_loss / self.equity_usd
-
-    def _intraday_drawdown_ratio(self, *, now: datetime) -> float:
-        realized_today = 0.0
-        for trade in self.closed_trades:
-            exit_time = trade.get("exit_time")
-            if not isinstance(exit_time, datetime) or exit_time.date() != now.date():
-                continue
-            realized_today += float(trade.get("realized_pnl_usd_estimate", 0.0))
-        combined = realized_today + self._current_unrealized_total()
-        return abs(min(combined, 0.0)) / self.equity_usd if self.equity_usd > 0 else 0.0
-
-    def _enforce_risk_limits(self, now: datetime) -> None:
-        risk = self.runtime.paper_service.settings.risk
-        checks = (
-            ("DAILY_REALIZED_LOSS_LIMIT", self._realized_loss_ratio(now=now, scope="daily"), risk.daily_realized_loss_limit),
-            ("WEEKLY_REALIZED_LOSS_LIMIT", self._realized_loss_ratio(now=now, scope="weekly"), risk.weekly_realized_loss_limit),
-            ("INTRADAY_DRAWDOWN_LIMIT", self._intraday_drawdown_ratio(now=now), risk.intraday_drawdown_limit),
-        )
-        for code, ratio, limit in checks:
-            if ratio < limit:
-                continue
-            if not self.runtime.kill_switch.armed or code not in self.runtime.kill_switch.reasons:
-                self.runtime.kill_switch.arm(code)
-                self._send_telegram_alert(
-                    key=f"risk:{code}:{now.date().isoformat()}",
-                    text=f"[{code}] ratio={ratio:.4f} limit={limit:.4f}",
-                )
-
-    def _apply_post_take_profit_stop(self, *, position: PaperPosition, current_price: float) -> None:
-        mode = self.runtime.paper_service.settings.exit_rules.post_tp_stop_mode.strip().lower()
-        if mode == "breakeven":
-            position.active_stop_price = position.entry_price
-            return
-        if "trail" in mode:
-            stop_fraction = max(position.stop_distance_bps / 10000.0, 0.0025)
-            if position.side == "short":
-                position.active_stop_price = min(position.active_stop_price, current_price * (1.0 + stop_fraction))
-            else:
-                position.active_stop_price = max(position.active_stop_price, current_price * (1.0 - stop_fraction))
-            return
-        position.active_stop_price = position.entry_price
-
-    def _take_partial_paper_profit(
-        self,
-        *,
-        position: PaperPosition,
-        exit_price: float,
-        timestamp: datetime,
-        fraction: float,
-        exit_reason: str,
-    ) -> bool:
-        partial_fraction = max(0.0, min(fraction, 1.0))
-        if partial_fraction <= 0.0 or position.quantity_remaining <= 0.0:
-            return False
-        quantity_to_close = position.quantity_remaining * partial_fraction
-        if quantity_to_close <= 0.0:
-            return False
-        self._record_closed_trade(
-            position=position,
-            exit_price=exit_price,
-            quantity_closed=quantity_to_close,
-            exit_time=timestamp,
-            exit_reason=exit_reason,
-        )
-        position.quantity_remaining = max(position.quantity_remaining - quantity_to_close, 0.0)
-        position.partial_take_profit_taken = True
-        position.exit_confirmation_count = 0
-        position.last_exit_signal_reason = ""
-        self._apply_post_take_profit_stop(position=position, current_price=exit_price)
-        if position.quantity_remaining <= 0.0:
-            self.paper_positions.pop(position.symbol, None)
-            self.futures_pyramid_add_counts.pop(position.symbol, None)
-        return True
-
-    def _should_pyramid_futures_position(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent,
-        price: float,
-    ) -> bool:
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        if not exposure.pyramid_enabled:
-            return False
-        if position.market != "futures" or decision.final_mode != "futures":
-            return False
-        if position.symbol != decision.symbol or position.side != decision.side:
-            return False
-        if exposure.pyramid_major_only and not self._is_major_futures_symbol(position.symbol):
-            return False
-        if self.futures_pyramid_add_counts.get(position.symbol, 0) >= max(int(exposure.pyramid_max_adds_per_symbol), 0):
-            return False
-        reward_bps = self._reward_bps(position=position, price=price)
-        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
-        if current_roe_percent < exposure.pyramid_min_roe_percent:
-            return False
-        return (
-            decision.predictability_score >= exposure.pyramid_min_predictability_score
-            and decision.net_expected_edge_bps >= exposure.pyramid_min_net_edge_bps
-            and decision.trend_strength >= exposure.pyramid_min_trend_strength
-            and decision.volume_confirmation >= exposure.pyramid_min_volume_confirmation
-        )
-
-    def _apply_pyramid_fill_to_position(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent,
-        price: float,
-    ) -> None:
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        if decision.order_intent_notional_usd <= 0 or price <= 0.0:
-            return
-        added_notional = decision.order_intent_notional_usd * max(exposure.pyramid_size_multiplier, 0.0)
-        if added_notional <= 0.0:
-            return
-        added_quantity = added_notional / price
-        if added_quantity <= 0.0 or added_quantity > position.quantity_opened * 2.0:
-            # Guard: pyramid add should never exceed 2x original position
-            return
-        previous_quantity_opened = position.quantity_opened
-        new_quantity_opened = previous_quantity_opened + added_quantity
-        weighted_entry = (
-            (position.entry_price * previous_quantity_opened) + (price * added_quantity)
-        ) / max(new_quantity_opened, 1e-9)
-        position.entry_price = weighted_entry
-        position.quantity_opened = new_quantity_opened
-        position.quantity_remaining += added_quantity
-        position.current_price = price
-        position.best_price = max(position.best_price, price)
-        position.worst_price = min(position.worst_price, price)
-        position.latest_predictability_score = decision.predictability_score
-        position.latest_liquidity_score = decision.liquidity_score
-        position.latest_net_expected_edge_bps = decision.net_expected_edge_bps
-        position.latest_volume_confirmation = decision.volume_confirmation
-        position.latest_trend_strength = decision.trend_strength
-        position.latest_estimated_round_trip_cost_bps = decision.estimated_round_trip_cost_bps
-        position.latest_decision_time = decision.timestamp
-        self.remaining_portfolio_capacity_usd = max(
-            0.0,
-            self.remaining_portfolio_capacity_usd - added_notional,
-        )
-        self.futures_pyramid_add_counts[position.symbol] = self.futures_pyramid_add_counts.get(position.symbol, 0) + 1
-
-    def _open_paper_position(
-        self,
-        *,
-        decision: DecisionIntent,
-        price: float,
-        exchange_synced: bool = False,
-    ) -> bool:
-        if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
-            return False
-        if price <= 0 or decision.order_intent_notional_usd <= 0:
-            return False
-        if decision.order_intent_notional_usd > self.remaining_portfolio_capacity_usd and self.remaining_portfolio_capacity_usd > 0:
-            return False
-        quantity = decision.order_intent_notional_usd / price
-        leverage = 1
-        if decision.final_mode == "futures":
-            leverage = select_futures_leverage(
-                symbol=decision.symbol,
-                predictability_score=decision.predictability_score,
-                trend_strength=decision.trend_strength,
-                volume_confirmation=decision.volume_confirmation,
-                liquidity_score=decision.liquidity_score,
-                volatility_penalty=decision.volatility_penalty,
-                overheat_penalty=decision.overheat_penalty,
-                net_expected_edge_bps=decision.net_expected_edge_bps,
-                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
-                settings=self.runtime.paper_service.settings,
-            )
-        self.remaining_portfolio_capacity_usd = max(
-            0.0,
-            self.remaining_portfolio_capacity_usd - decision.order_intent_notional_usd,
-        )
-        policy_entry_context = self._policy_entry_context_snapshot()
-        self.paper_positions[decision.symbol] = PaperPosition(
-            symbol=decision.symbol,
-            market=decision.final_mode,
-            side=decision.side,
-            entry_time=decision.timestamp,
-            entry_price=price,
-            current_price=price,
-            quantity_opened=quantity,
-            quantity_remaining=quantity,
-            stop_distance_bps=max(decision.stop_distance_bps, 0.0),
-            active_stop_price=self._position_stop_price(
-                entry_price=price,
-                stop_distance_bps=max(decision.stop_distance_bps, 0.0),
-                side=decision.side,
-            ),
-            best_price=price,
-            worst_price=price,
-            entry_predictability_score=decision.predictability_score,
-            entry_liquidity_score=decision.liquidity_score,
-            entry_net_expected_edge_bps=decision.net_expected_edge_bps,
-            entry_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
-            entry_planned_leverage=max(int(leverage), 1),
-            latest_predictability_score=decision.predictability_score,
-            latest_liquidity_score=decision.liquidity_score,
-            latest_net_expected_edge_bps=decision.net_expected_edge_bps,
-            latest_volume_confirmation=decision.volume_confirmation,
-            latest_trend_strength=decision.trend_strength,
-            latest_estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
-            latest_decision_time=decision.timestamp,
-            exchange_synced=exchange_synced,
-            confirmation_pending=(decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED"),
-            confirmation_pending_since=decision.timestamp if decision.divergence_code == "ENTRY_CONFIRMATION_REQUIRED" else None,
-            entry_policy_context_source=str(policy_entry_context.get("entry_policy_context_source", "") or ""),
-            entry_policy_bucket=str(policy_entry_context.get("entry_policy_bucket", "") or ""),
-            entry_policy_bucket_available=bool(policy_entry_context.get("entry_policy_bucket_available", False)),
-            entry_policy_bucket_source=str(policy_entry_context.get("entry_policy_bucket_source", "") or ""),
-            entry_policy_bucket_alignment_status=str(policy_entry_context.get("entry_policy_bucket_alignment_status", "") or ""),
-            entry_policy_execution_phase=str(policy_entry_context.get("entry_policy_execution_phase", "baseline") or "baseline"),
-            entry_policy_lineage=dict(policy_entry_context.get("entry_policy_lineage", {}) or {}),
-        )
-        return True
-
-    def _release_portfolio_capacity(self, *, exit_notional_usd: float) -> None:
-        cap = self.max_portfolio_capacity_usd
-        if cap is None:
-            return
-        self.remaining_portfolio_capacity_usd = min(
-            cap,
-            self.remaining_portfolio_capacity_usd + max(0.0, exit_notional_usd),
-        )
-
-    def _liquidity_drop_reentry_cooldown_until(self, *, symbol: str, timestamp: datetime) -> datetime:
-        base_minutes = max(int(self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes), 1)
-        if symbol == "BTCUSDT":
-            minutes = base_minutes * 2
-        elif symbol == "ETHUSDT":
-            minutes = int(base_minutes * 1.25)
-        else:
-            minutes = base_minutes
-        return timestamp + timedelta(minutes=max(minutes, 1))
-
-    def _last_closed_trade_realized_pnl(self) -> float:
-        if not self.closed_trades:
-            return 0.0
-        try:
-            return float(self.closed_trades[-1].get("realized_pnl_usd_estimate", 0.0) or 0.0)
-        except (TypeError, ValueError):
-            return 0.0
-
-    def _position_has_profit_milestone(self, position: PaperPosition) -> bool:
-        return (
-            position.partial_take_profit_taken
-            or position.r_multiple_partial_take_profit_taken
-            or position.profit_protection_retrace_taken
-            or bool(position.proactive_take_profit_thresholds_hit)
-        )
-
-    def _profit_exit_reentry_cooldown_reason(self, *, position: PaperPosition, realized_pnl: float, exit_reason: str) -> str:
-        if position.market != "futures" or not self._is_major_futures_symbol(position.symbol):
-            return ""
-        if self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes <= 0:
-            return ""
-        has_profit_milestone = self._position_has_profit_milestone(position)
-        if realized_pnl <= 0.0 and not has_profit_milestone:
-            return ""
-        profit_exit_reasons = {
-            "PORTFOLIO_FULL_EXIT",
-            "MAX_HOLDING_TIME",
-            "TAKE_PROFIT",
-            "BREAKEVEN_STOP",
-            "PARTIAL_TAKE_PROFIT",
-            "PROACTIVE_PARTIAL_TAKE_PROFIT",
-            "PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT",
-        }
-        if exit_reason in profit_exit_reasons or has_profit_milestone:
-            return "PROFIT_REENTRY_COOLDOWN"
-        return ""
-
-    def _close_position(self, *, position: PaperPosition, exit_price: float, timestamp: datetime, exit_reason: str) -> None:
-        closed_trade_count = len(self.closed_trades)
-        self.recent_paper_management_close_reasons[position.symbol] = exit_reason
-        self._record_closed_trade(
-            position=position,
-            exit_price=exit_price,
-            quantity_closed=position.quantity_remaining,
-            exit_time=timestamp,
-            exit_reason=exit_reason,
-        )
-        realized_pnl = self._last_closed_trade_realized_pnl() if len(self.closed_trades) > closed_trade_count else 0.0
-        if position.market == "futures" and exit_reason == "CAPITAL_REALLOCATION":
-            cooldown_until = self._manual_reentry_cooldown_until(timestamp)
-            self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp, source=exit_reason)
-        profit_cooldown_source = self._profit_exit_reentry_cooldown_reason(
-            position=position,
-            realized_pnl=realized_pnl,
-            exit_reason=exit_reason,
-        )
-        if profit_cooldown_source:
-            cooldown_until = timestamp + timedelta(
-                minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
-            )
-            self._set_manual_symbol_cooldown(
-                symbol=position.symbol,
-                until=cooldown_until,
-                timestamp=timestamp,
-                source=profit_cooldown_source,
-            )
-        if (
-            position.market == "futures"
-            and self._is_major_futures_symbol(position.symbol)
-            and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT", "ENTRY_CONFIRMATION_FAILED", "LIQUIDITY_DROP_EXIT"}
-            and self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes > 0
-            and exit_reason != "MAJOR_CROSS_SYMBOL_REALIGN"
-        ):
-            if exit_reason == "LIQUIDITY_DROP_EXIT":
-                cooldown_until = self._liquidity_drop_reentry_cooldown_until(symbol=position.symbol, timestamp=timestamp)
-            else:
-                cooldown_until = timestamp + timedelta(
-                    minutes=self.runtime.paper_service.settings.live_position_risk.major_reentry_cooldown_minutes
-                )
-            self._set_manual_symbol_cooldown(symbol=position.symbol, until=cooldown_until, timestamp=timestamp, source=exit_reason)
-        if (
-            position.market == "futures"
-            and self._is_major_futures_symbol(position.symbol)
-            and self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_cooldown_minutes > 0
-            and self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd > 0.0
-            and self.closed_trades
-            and realized_pnl <= -self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_trigger_usd
-        ):
-            cooldown_until = timestamp + timedelta(
-                minutes=self.runtime.paper_service.settings.live_position_risk.major_loss_reentry_cooldown_minutes
-            )
-            current = self.manual_symbol_cooldowns.get(position.symbol)
-            if current is None or cooldown_until > current:
-                self.manual_symbol_cooldowns[position.symbol] = cooldown_until
-        self.paper_positions.pop(position.symbol, None)
-        # Cleanup identity-keyed dicts to prevent memory leaks
-        self._cleanup_identity_state(position)
-
-    def _estimated_paper_exit_net_usd(self, *, position: PaperPosition, exit_price: float) -> float:
-        quantity = max(float(position.quantity_remaining), 0.0)
-        if quantity <= 0.0:
-            return 0.0
-        if position.side == "short":
-            realized = (position.entry_price - exit_price) * quantity
-        else:
-            realized = (exit_price - position.entry_price) * quantity
-        entry_notional = position.entry_price * quantity
-        exit_notional = exit_price * quantity
-        fee_bps = self._fee_bps_for_market(position.market)
-        return realized - ((entry_notional + exit_notional) * fee_bps / 10000.0)
-
-    def _should_delay_fee_negative_soft_exit(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent | None = None,
-        exit_price: float,
-    ) -> bool:
-        gross_pnl = position.unrealized_pnl_usd_estimate()
-        if gross_pnl <= 0.0:
-            return False
-        if decision is not None and self._paper_verification_mode_enabled():
-            profile = self._symbol_filter_profile_for_decision(decision)
-            if profile is not None and profile.min_liquidity_score > 0.0:
-                liquidity_collapse_floor = max(profile.min_liquidity_score - 0.05, 0.45)
-                if decision.liquidity_score < liquidity_collapse_floor:
-                    return False
-        return self._estimated_paper_exit_net_usd(position=position, exit_price=exit_price) < 0.0
-
-    def _paper_verification_fee_drag_loss_guard_triggered(
-        self,
-        *,
-        position: PaperPosition,
-        holding_minutes: float,
-    ) -> bool:
-        if not self._paper_verification_mode_enabled():
-            return False
-        if position.market != "futures" or position.quantity_remaining <= 0.0:
-            return False
-        if holding_minutes < 1.0:
-            return False
-        loss_usd = -position.unrealized_pnl_usd_estimate()
-        if loss_usd <= 0.0:
-            return False
-        fee_floor = self._estimated_round_trip_fee_usd(
-            market=position.market,
-            notional_usd=position.current_notional_usd_estimate(),
-        )
-        edge_erosion_floor = max(
-            position.entry_estimated_round_trip_cost_bps,
-            position.entry_net_expected_edge_bps * 0.75,
-        )
-        return loss_usd >= max(fee_floor, 0.5) and position.latest_net_expected_edge_bps < edge_erosion_floor
-
-    def _paper_early_invalid_exit_triggered(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent,
-        holding_minutes: float,
-    ) -> bool:
-        if position.market != "futures" or not self._is_major_futures_symbol(position.symbol):
-            return False
-        if position.partial_take_profit_taken or position.proactive_take_profit_thresholds_hit:
-            return False
-        exit_rules = self.runtime.paper_service.settings.exit_rules
-        max_holding_minutes = max(float(getattr(exit_rules, "futures_early_invalid_exit_max_holding_minutes", 0.0) or 0.0), 0.0)
-        if max_holding_minutes <= 0.0 or holding_minutes > max_holding_minutes:
-            return False
-        max_peak_roe = float(getattr(exit_rules, "futures_early_invalid_exit_max_peak_roe_percent", 0.0) or 0.0)
-        if position.peak_roe_percent > max_peak_roe:
-            return False
-        min_loss_usd = max(float(getattr(exit_rules, "futures_early_invalid_exit_min_loss_usd", 0.0) or 0.0), 0.0)
-        if min_loss_usd > 0.0 and position.unrealized_pnl_usd_estimate() > -min_loss_usd:
-            return False
-        min_score_drop = max(float(getattr(exit_rules, "futures_early_invalid_exit_min_score_drop", 0.0) or 0.0), 0.0)
-        min_edge_drop = max(float(getattr(exit_rules, "futures_early_invalid_exit_min_edge_drop_bps", 0.0) or 0.0), 0.0)
-        score_drop = position.entry_predictability_score - decision.predictability_score
-        edge_drop = position.entry_net_expected_edge_bps - decision.net_expected_edge_bps
-        signal_invalid = (
-            decision.final_mode == "cash"
-            or decision.final_mode != position.market
-            or decision.side != position.side
-            or decision.net_expected_edge_bps <= 0.0
-            or decision.trend_direction <= 0
-        )
-        return signal_invalid and score_drop >= min_score_drop and edge_drop >= min_edge_drop
-
-    def _cleanup_identity_state(self, position: PaperPosition) -> None:
-        """Remove stale identity-keyed entries when a position closes."""
-        identity = f"{position.symbol}|{position.market}|{position.side}|{position.entry_price}"
-        for d in (
-            self.live_peak_roe_by_identity,
-            self.live_worst_roe_by_identity,
-            self.live_peak_unrealized_pnl_by_identity,
-            self.live_partial_exit_last_at_by_identity,
-            self.live_partial_exit_mode_by_identity,
-            self.live_major_drawdown_grace_started_at_by_identity,
-        ):
-            d.pop(identity, None)
-        for s in (
-            self.sent_alert_keys,
-            self.live_proactive_take_profit_keys,
-            self.live_profit_protection_keys,
-            self.live_turnaround_take_profit_keys,
-            self.live_unrealized_take_profit_keys,
-        ):
-            to_remove = {k for k in s if k.startswith(f"{position.symbol}|")}
-            s -= to_remove
-
-    def _update_paper_position(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent,
-        price: float,
-        timestamp: datetime,
-    ) -> None:
-        position.current_price = price
-        position.best_price = max(position.best_price, price)
-        position.worst_price = min(position.worst_price, price)
-        position.latest_predictability_score = decision.predictability_score
-        position.latest_liquidity_score = decision.liquidity_score
-        position.latest_net_expected_edge_bps = decision.net_expected_edge_bps
-        position.latest_volume_confirmation = decision.volume_confirmation
-        position.latest_trend_strength = decision.trend_strength
-        position.latest_estimated_round_trip_cost_bps = decision.estimated_round_trip_cost_bps
-        position.latest_decision_time = timestamp
-        reward_bps = self._reward_bps(position=position, price=price)
-        current_roe_percent = self._paper_position_roe_percent(position=position, reward_bps=reward_bps)
-        position.peak_roe_percent = max(position.peak_roe_percent, current_roe_percent)
-        holding_minutes = (timestamp - position.entry_time).total_seconds() / 60.0
-        if self._paper_early_invalid_exit_triggered(
-            position=position,
-            decision=decision,
-            holding_minutes=holding_minutes,
-        ):
-            self._close_position(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                exit_reason="EARLY_INVALIDATION_EXIT",
-            )
-            return
-        if self._paper_verification_fee_drag_loss_guard_triggered(
-            position=position,
-            holding_minutes=holding_minutes,
-        ):
-            self._close_position(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                exit_reason="PAPER_VERIFY_FEE_DRAG_LOSS_GUARD",
-            )
-            return
-        if position.exchange_synced and not (
-            position.is_adopted()
-            and self._should_manage_adopted_position_with_strategy(position=position, decision=decision)
-        ):
-            position.exit_confirmation_count = 0
-            position.last_exit_signal_reason = ""
-            return
-        if position.confirmation_pending:
-            confirmed = (
-                decision.final_mode == position.market
-                and decision.side == position.side
-                and decision.net_expected_edge_bps > 0.0
-                and decision.liquidity_score >= max(position.entry_liquidity_score - 0.05, 0.45)
-            )
-            if not confirmed:
-                if self._should_delay_fee_negative_soft_exit(position=position, decision=decision, exit_price=price):
-                    return
-                self._close_position(
-                    position=position,
-                    exit_price=price,
-                    timestamp=timestamp,
-                    exit_reason="ENTRY_CONFIRMATION_FAILED",
-                )
-                return
-            position.confirmation_pending = False
-            position.confirmation_pending_since = None
-        exit_rules = self.runtime.paper_service.settings.exit_rules
-        live_risk = self.runtime.paper_service.settings.live_position_risk
-        partial_action_taken = False
-        proactive_threshold = (
-            self._pending_proactive_take_profit_threshold(
-                current_roe_percent=current_roe_percent,
-                thresholds_hit=position.proactive_take_profit_thresholds_hit,
-            )
-            if position.market == "futures"
-            else None
-        )
-
-        if (
-            live_risk.portfolio_full_exit_only
-            and live_risk.portfolio_full_exit_profit_ratio > 0.0
-            and self._paper_portfolio_profit_ratio() >= live_risk.portfolio_full_exit_profit_ratio
-        ):
-            self._close_position(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                exit_reason="PORTFOLIO_FULL_EXIT",
-            )
-            return
-
-        if (
-            not live_risk.portfolio_full_exit_only
-            and
-            not partial_action_taken
-            and not position.partial_take_profit_taken
-            and not position.r_multiple_partial_take_profit_taken
-            and position.stop_distance_bps > 0
-            and proactive_threshold is None
-            and reward_bps
-            > position.stop_distance_bps
-            * (
-                max(float(exit_rules.partial_take_profit_r), 1.0)
-                if position.market == "futures" and self._futures_proactive_take_profit_thresholds()
-                else float(exit_rules.partial_take_profit_r)
-            )
-        ):
-            position.r_multiple_partial_take_profit_taken = self._take_partial_paper_profit(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                fraction=0.5,
-                exit_reason="PARTIAL_TAKE_PROFIT",
-            )
-            partial_action_taken = position.r_multiple_partial_take_profit_taken
-            if position.symbol not in self.paper_positions:
-                return
-
-        if (
-            not live_risk.portfolio_full_exit_only
-            and
-            not partial_action_taken
-            and position.market == "futures"
-            and not position.r_multiple_partial_take_profit_taken
-        ):
-            if proactive_threshold is not None and self._take_partial_paper_profit(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                fraction=self._futures_proactive_take_profit_fraction(),
-                exit_reason="PROACTIVE_PARTIAL_TAKE_PROFIT",
-            ):
-                existing_thresholds = set(position.proactive_take_profit_thresholds_hit)
-                position.proactive_take_profit_thresholds_hit = tuple(
-                    threshold
-                    for threshold in self._futures_proactive_take_profit_thresholds()
-                    if threshold in existing_thresholds or threshold == proactive_threshold
-                )
-                partial_action_taken = True
-                if position.symbol not in self.paper_positions:
-                    return
-
-        if (
-            not live_risk.portfolio_full_exit_only
-            and
-            not partial_action_taken
-            and position.market == "futures"
-            and self._profit_protection_partial_triggered(
-                peak_roe_percent=position.peak_roe_percent,
-                current_roe_percent=current_roe_percent,
-                retrace_taken=position.profit_protection_retrace_taken,
-            )
-        ):
-            position.profit_protection_retrace_taken = self._take_partial_paper_profit(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                fraction=0.5,
-                exit_reason="PROFIT_PROTECTION_PARTIAL_TAKE_PROFIT",
-            )
-            partial_action_taken = position.profit_protection_retrace_taken
-            if position.symbol not in self.paper_positions:
-                return
-
-        if position.partial_take_profit_taken and "trail" in exit_rules.post_tp_stop_mode.strip().lower():
-            self._apply_post_take_profit_stop(position=position, current_price=price)
-
-        if self._standard_stop_loss_exits_enabled() and self._position_stop_hit(position=position, price=price):
-            exit_reason = "BREAKEVEN_STOP" if position.partial_take_profit_taken else "STOP_LOSS"
-            self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason=exit_reason)
-            return
-
-        max_holding_minutes = (
-            exit_rules.futures_max_holding_minutes if position.market == "futures" else exit_rules.spot_max_holding_minutes
-        )
-        if holding_minutes >= max_holding_minutes:
-            self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason="MAX_HOLDING_TIME")
-            return
-
-        exit_reason = ""
-        if decision.final_mode == "cash" or decision.final_mode != position.market or decision.side != position.side:
-            exit_reason = "SIGNAL_REVERSAL"
-        elif decision.predictability_score <= position.entry_predictability_score - exit_rules.score_drop_exit_buffer:
-            exit_reason = "SCORE_DROP_EXIT"
-        elif decision.liquidity_score <= position.entry_liquidity_score - exit_rules.liquidity_drop_exit_buffer:
-            exit_reason = "LIQUIDITY_DROP_EXIT"
-        elif self._cross_coin_held_position_reversal_signal(position):
-            exit_reason = "CROSS_COIN_REVERSAL_EXIT"
-
-        if exit_reason:
-            required_confirmation_cycles = max(1, exit_rules.confirmation_cycles_for_exit)
-            if (
-                position.market == "futures"
-                and self._is_major_futures_symbol(position.symbol)
-                and exit_reason in {"SIGNAL_REVERSAL", "SCORE_DROP_EXIT"}
-            ):
-                realign_safe = self._major_cross_symbol_realign_safe(position=position)
-                force_alignment = realign_safe and self._should_force_major_reversal_alignment(position=position, decision=decision, holding_minutes=holding_minutes)
-                if holding_minutes < self.runtime.paper_service.settings.live_position_risk.major_reversal_min_holding_minutes and not force_alignment:
-                    return
-                required_confirmation_cycles = max(
-                    required_confirmation_cycles,
-                    1 if force_alignment else self.runtime.paper_service.settings.live_position_risk.major_reversal_confirmation_cycles,
-                    2 if not realign_safe else 1,
-                )
-            if position.last_exit_signal_reason == exit_reason:
-                position.exit_confirmation_count += 1
-            else:
-                position.last_exit_signal_reason = exit_reason
-                position.exit_confirmation_count = 1
-            if position.exit_confirmation_count >= required_confirmation_cycles:
-                self._close_position(position=position, exit_price=price, timestamp=timestamp, exit_reason=exit_reason)
-            return
-
-        position.exit_confirmation_count = 0
-        position.last_exit_signal_reason = ""
-
-    def _should_manage_adopted_position_with_strategy(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent,
-    ) -> bool:
-        return False
-
-    def _paper_verification_reversal_entry_requested(
-        self,
-        *,
-        position: PaperPosition,
-        decision: DecisionIntent,
-    ) -> bool:
-        if not self._paper_verification_mode_enabled() or self.live_order_executor is not None:
-            return False
-        if position.exchange_synced or position.quantity_remaining <= 0.0:
-            return False
-        if decision.final_mode != position.market or decision.final_mode not in {"spot", "futures"}:
-            return False
-        if decision.side not in {"long", "short"} or decision.side == position.side:
-            return False
-        return decision.order_intent_notional_usd > 0.0
-
-    def _apply_paper_trade_management(
-        self,
-        *,
-        decision: DecisionIntent,
-        state: Any,
-        timestamp: datetime,
-    ) -> tuple[bool, bool]:
-        position = self.paper_positions.get(decision.symbol)
-        fallback_price = 0.0
-        if position is not None:
-            fallback_price = position.current_price if position.current_price > 0 else position.entry_price
-        price = self._market_price(state=state, fallback=fallback_price)
-        if position is None:
-            if os.getenv("QUANT_PAPER_VERIFY_USE_CAPPED_ENTRY", "0") == "1":
-                decision = self._cap_live_order_decision(decision, reference_price=price)
-            return self._open_paper_position(decision=decision, price=price), False
-        if position.is_adopted() and not self._should_manage_adopted_position_with_strategy(position=position, decision=decision):
-            self._refresh_observed_paper_position(position=position, price=price)
-            return False, False
-        self._update_paper_position(position=position, decision=decision, price=price, timestamp=timestamp)
-        position = self.paper_positions.get(decision.symbol)
-        if position is None:
-            return False, False
-        if self._paper_verification_reversal_entry_requested(position=position, decision=decision):
-            self._close_position(
-                position=position,
-                exit_price=price,
-                timestamp=timestamp,
-                exit_reason="PAPER_VERIFY_SIGNAL_REVERSAL",
-            )
-            return True, False
-        pyramid_requested = self._should_pyramid_futures_position(
-            position=position,
-            decision=decision,
-            price=price,
-        )
-        return pyramid_requested, pyramid_requested
-
-    def _futures_slot_limit(self) -> int:
-        settings = self.runtime.paper_service.settings
-        limits = [max(int(settings.operational_limits.max_concurrent_futures_symbols), 0)]
-        if settings.portfolio_focus.enabled:
-            limits.append(max(int(settings.portfolio_focus.futures_top_n), 0))
-        positive_limits = [limit for limit in limits if limit > 0]
-        if not positive_limits:
-            return 0
-        return min(positive_limits)
-
-    def _single_slot_priority_fallback_mode_enabled(self) -> bool:
-        settings = self.runtime.paper_service.settings
-        return (
-            len(tuple(settings.universe or ())) > 1
-            and bool(settings.portfolio_focus.enabled)
-            and self._futures_slot_limit() == 1
-        )
-
-    def _cross_coin_reallocation_edge_bonus_bps(self, decision: DecisionIntent) -> float:
-        """Capped EV bonus applied to reallocation comparisons when the gate is active.
-
-        Returns 0.0 when the gate is disabled or `cross_coin_ev_bps` is non-positive,
-        so legacy code paths and disabled-gate runs stay byte-compatible. The cap
-        (10 bps) prevents an exceptionally strong leader signal from overriding the
-        real-edge gate entirely.
-        """
-        if not self._cross_coin_gate_enabled():
-            return 0.0
-        ev = float(getattr(decision, "cross_coin_ev_bps", 0.0) or 0.0)
-        if ev <= 0.0:
-            return 0.0
-        return min(ev, 10.0)
-
-    def _cross_coin_held_position_reversal_signal(self, position: "PaperPosition") -> bool:
-        """Detect if a held futures position now sits in a cross-coin reversal quadrant.
-
-        Conservative signal — only fires for the most direct reversal patterns:
-        held long with own_quadrant=="longUnwind" (longs being closed at a loss),
-        or held short with own_quadrant=="shortCover" (shorts being squeezed out).
-
-        Used by the management cycle to emit a `CROSS_COIN_REVERSAL_EXIT` exit
-        reason; respects the existing confirmation_cycles_for_exit cadence so
-        single-cycle noise does not close positions. Returns False whenever the
-        gate is off or the underlying cycle data is unavailable, keeping legacy
-        runs byte-compatible.
-        """
-        if not self._cross_coin_gate_enabled():
-            return False
-        if position.market != "futures" or position.side not in {"long", "short"}:
-            return False
-        sym = position.symbol.strip().upper()
-        if sym not in self._CROSS_COIN_UNIVERSE:
-            return False
-        states = self._cross_coin_states_cached()
-        if not states:
-            return False
-        own = states.get(sym)
-        if own is None:
-            return False
-        if position.side == "long" and own.own_quadrant == "longUnwind":
-            return True
-        if position.side == "short" and own.own_quadrant == "shortCover":
-            return True
-        return False
-
-    def _is_strong_reallocation_candidate(self, decision: DecisionIntent) -> bool:
-        settings = self.runtime.paper_service.settings
-        focus = settings.portfolio_focus
-        exposure = settings.futures_exposure
-        if not focus.enabled or decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return False
-        score_floor = settings.mode_thresholds.futures_score_min + max(focus.min_score_advantage_to_replace, 0.0)
-        edge_floor = max(
-            settings.futures_exposure.min_entry_net_edge_bps,
-            focus.min_net_edge_advantage_bps + (decision.estimated_round_trip_cost_bps * 2.0),
-        )
-        if self._is_major_futures_symbol(decision.symbol):
-            score_floor = max(score_floor - exposure.major_reallocation_score_advantage_relaxation, settings.mode_thresholds.futures_score_min)
-            edge_floor = max(edge_floor - exposure.major_reallocation_edge_advantage_relaxation_bps, exposure.min_entry_net_edge_bps)
-        cross_coin_bonus = self._cross_coin_reallocation_edge_bonus_bps(decision)
-        if cross_coin_bonus > 0.0:
-            edge_floor = max(edge_floor - cross_coin_bonus, exposure.min_entry_net_edge_bps)
-        if decision.predictability_score < score_floor:
-            return False
-        if decision.net_expected_edge_bps < edge_floor:
-            return False
-        if decision.estimated_round_trip_cost_bps > 0:
-            edge_to_cost = decision.net_expected_edge_bps / decision.estimated_round_trip_cost_bps
-            if edge_to_cost < max(settings.cost_gate.edge_to_cost_multiple_min + 0.25, 1.75):
-                return False
-        return True
-
-    def _blocked_futures_reallocation_reason(
-        self,
-        decision: DecisionIntent,
-        *,
-        reference_price: float,
-    ) -> tuple[str | None, DecisionIntent]:
-        if decision.final_mode != "futures" or decision.side not in {"long", "short"}:
-            return None, decision
-        if decision.symbol in self.paper_positions:
-            return None, decision
-        futures_positions = [
-            position
-            for position in self.paper_positions.values()
-            if position.market == "futures" and position.quantity_remaining > 0 and position.symbol != decision.symbol
-        ]
-        slot_limit = self._futures_slot_limit()
-        if slot_limit > 0 and len(futures_positions) >= slot_limit:
-            return "MAX_CONCURRENT_FUTURES", decision
-        if decision.order_intent_notional_usd <= 0:
-            return "PORTFOLIO_CAPACITY", decision
-        if not self.capital_report or not self._market_capital_allowed(decision):
-            return None, decision
-        capped = self._cap_live_order_decision(decision, reference_price=reference_price)
-        if capped.final_mode != "futures" or capped.order_intent_notional_usd <= 0:
-            if "INSUFFICIENT_EXECUTION_BALANCE" in capped.rejection_reasons:
-                return "INSUFFICIENT_EXECUTION_BALANCE", capped
-            if "MIN_ORDER_QUANTITY" in capped.rejection_reasons:
-                return "MIN_ORDER_QUANTITY", capped
-        return None, capped
-
-    def _recomputed_futures_notional(
-        self,
-        decision: DecisionIntent,
-        *,
-        additional_capacity_usd: float,
-    ) -> float:
-        if decision.stop_distance_bps <= 0:
-            return 0.0
-        settings = self.runtime.paper_service.settings
         leverage = select_futures_leverage(
-            symbol=decision.symbol,
             predictability_score=decision.predictability_score,
             trend_strength=decision.trend_strength,
             volume_confirmation=decision.volume_confirmation,
@@ -7869,778 +381,508 @@ class LivePaperSession:
             overheat_penalty=decision.overheat_penalty,
             net_expected_edge_bps=decision.net_expected_edge_bps,
             estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
-            settings=settings,
+            settings=self.runtime.paper_service.settings,
         )
-        risk_dollars = self.equity_usd * settings.risk.per_trade_equity_risk
-        raw_notional = risk_dollars / (decision.stop_distance_bps / 10000.0)
-        restored_capacity = max(self.remaining_portfolio_capacity_usd + additional_capacity_usd, 0.0)
-        capped = min(
-            raw_notional,
-            self.equity_usd * settings.risk.max_symbol_notional_fraction * max(float(leverage), 1.0),
-            restored_capacity,
-        )
-        return round(max(capped, 0.0), 6)
+        return max(float(decision.order_intent_notional_usd) / max(float(leverage), 1.0), 0.0)
 
-    def _futures_reallocation_target_state(
-        self,
-        position: PaperPosition,
-    ) -> tuple[float, float, float, datetime]:
-        current_score = min(
-            position.entry_predictability_score,
-            position.latest_predictability_score or position.entry_predictability_score,
-        )
-        current_edge = min(
-            position.entry_net_expected_edge_bps,
-            position.latest_net_expected_edge_bps or position.entry_net_expected_edge_bps,
-        )
-        pnl = position.unrealized_pnl_usd_estimate()
-        return current_score, current_edge, pnl, position.entry_time
+    def _spot_min_trade_usdt(self, *, symbol: str) -> float:
+        symbol = symbol.upper()
+        cached = self.spot_min_trade_usdt_by_symbol.get(symbol)
+        if cached is not None:
+            return max(cached, 0.0)
+        default_min_trade = 1.0
+        if self.rest_client is None:
+            self.spot_min_trade_usdt_by_symbol[symbol] = default_min_trade
+            return default_min_trade
+        direct_reader = getattr(self.rest_client, "_spot_min_trade_usdt", None)
+        if callable(direct_reader):
+            try:
+                min_trade = max(self._safe_float(direct_reader(symbol=symbol)), 0.0)
+            except Exception:
+                min_trade = default_min_trade
+            self.spot_min_trade_usdt_by_symbol[symbol] = min_trade if min_trade > 0 else default_min_trade
+            return self.spot_min_trade_usdt_by_symbol[symbol]
+        info_reader = getattr(self.rest_client, "get_exchange_info", None)
+        if callable(info_reader):
+            try:
+                info = info_reader(market="spot")
+            except Exception:
+                info = {}
+            symbols = info.get("symbols", []) if isinstance(info, dict) else []
+            if isinstance(symbols, list):
+                for row in symbols:
+                    if not isinstance(row, dict):
+                        continue
+                    if str(row.get("symbol", "")).upper() != symbol:
+                        continue
+                    raw = row.get("raw", {})
+                    if isinstance(raw, dict):
+                        min_trade = max(self._safe_float(raw.get("minTradeUSDT")), 0.0)
+                        self.spot_min_trade_usdt_by_symbol[symbol] = min_trade if min_trade > 0 else default_min_trade
+                        return self.spot_min_trade_usdt_by_symbol[symbol]
+                    break
+        self.spot_min_trade_usdt_by_symbol[symbol] = default_min_trade
+        return default_min_trade
 
-    def _exchange_synced_reallocation_loss_floor_usd(
-        self,
-        *,
-        position: PaperPosition,
-        incoming_decision: DecisionIntent,
-    ) -> float:
-        focus = self.runtime.paper_service.settings.portfolio_focus
-        max_cost_bps = max(
-            incoming_decision.estimated_round_trip_cost_bps,
-            position.entry_estimated_round_trip_cost_bps,
-            position.latest_estimated_round_trip_cost_bps or position.entry_estimated_round_trip_cost_bps,
-        )
-        cost_floor = position.current_notional_usd_estimate() * max(max_cost_bps, 0.0) * 4.0 / 10000.0
-        return round(max(focus.min_incremental_pnl_usd * 4.0, cost_floor), 6)
-
-    def _futures_reallocation_target_assessments(
-        self,
-        *,
-        incoming_decision: DecisionIntent,
-        timestamp: datetime,
-    ) -> list[dict[str, Any]]:
-        settings = self.runtime.paper_service.settings
-        focus = settings.portfolio_focus
-        incoming_major = self._is_major_futures_symbol(incoming_decision.symbol)
-        weakest: list[dict[str, Any]] = []
-        for position in self.paper_positions.values():
-            if position.market != "futures" or position.quantity_remaining <= 0 or position.symbol == incoming_decision.symbol:
-                continue
-            current_score, current_edge, pnl, _ = self._futures_reallocation_target_state(position)
-            score_erosion = position.entry_predictability_score - current_score
-            edge_erosion = position.entry_net_expected_edge_bps - current_edge
-            weakness_flags: list[str] = []
-            if score_erosion >= settings.exit_rules.score_drop_exit_buffer:
-                weakness_flags.append("score_drop")
-            if edge_erosion >= max(focus.min_net_edge_advantage_bps, 0.0):
-                weakness_flags.append("edge_drop")
-            if pnl <= -max(focus.min_incremental_pnl_usd, 0.0):
-                weakness_flags.append("negative_pnl")
-            if incoming_major and not self._is_major_futures_symbol(position.symbol):
-                if pnl <= 0.0 or current_edge < incoming_decision.net_expected_edge_bps:
-                    weakness_flags.append("major_preemptible")
-            weakness_detected = bool(weakness_flags)
-            protected_reason: str | None = None
-            exchange_synced_exception = False
-            exchange_synced_age_minutes: float | None = None
-            exchange_synced_loss_floor_usd: float | None = None
-            if position.exchange_synced:
-                exchange_synced_age_minutes = round(
-                    max((timestamp - position.entry_time).total_seconds(), 0.0) / 60.0,
-                    6,
-                )
-                exchange_synced_loss_floor_usd = self._exchange_synced_reallocation_loss_floor_usd(
-                    position=position,
-                    incoming_decision=incoming_decision,
-                )
-                if exchange_synced_age_minutes < (self._futures_reallocation_cooldown_window().total_seconds() / 60.0):
-                    protected_reason = "EXCHANGE_SYNCED_RECENCY_GUARD"
-                elif pnl > -exchange_synced_loss_floor_usd:
-                    protected_reason = "EXCHANGE_SYNCED_LOSS_GUARD"
-                else:
-                    exchange_synced_exception = True
-            elif not weakness_detected:
-                protected_reason = "TARGET_NOT_WEAK_ENOUGH"
-            eligible = weakness_detected and protected_reason is None
-            weakest.append(
-                {
-                    "position": position,
-                    "sort_key": self._futures_reallocation_target_state(position),
-                    "symbol": position.symbol,
-                    "score": round(current_score, 6),
-                    "edge_bps": round(current_edge, 6),
-                    "pnl_usd": round(pnl, 6),
-                    "score_erosion": round(score_erosion, 6),
-                    "edge_erosion_bps": round(edge_erosion, 6),
-                    "weakness_flags": weakness_flags,
-                    "eligible": eligible,
-                    "exchange_synced": position.exchange_synced,
-                    "protected_reason": protected_reason,
-                    "exchange_synced_exception": exchange_synced_exception,
-                    "exchange_synced_age_minutes": exchange_synced_age_minutes,
-                    "exchange_synced_loss_floor_usd": exchange_synced_loss_floor_usd,
-                }
-            )
-        weakest.sort(
-            key=lambda item: (
-                0 if incoming_major and not self._is_major_futures_symbol(item["symbol"]) else 1,
-                item["sort_key"],
-            )
-        )
-        return weakest
-
-    def _weak_futures_reallocation_targets(
-        self,
-        *,
-        incoming_decision: DecisionIntent,
-        timestamp: datetime,
-    ) -> list[PaperPosition]:
-        assessments = self._futures_reallocation_target_assessments(
-            incoming_decision=incoming_decision,
-            timestamp=timestamp,
-        )
-        return [item["position"] for item in assessments if item["eligible"]]
-
-    def _compact_futures_reallocation_targets(
-        self,
-        assessments: list[dict[str, Any]],
-        *,
-        limit: int = 4,
-    ) -> list[dict[str, Any]]:
-        rows: list[dict[str, Any]] = []
-        for item in assessments[:limit]:
-            row: dict[str, Any] = {
-                "symbol": item["symbol"],
-                "score": item["score"],
-                "edge_bps": item["edge_bps"],
-                "pnl_usd": item["pnl_usd"],
-                "weakness_flags": list(item["weakness_flags"]),
-                "eligible": item["eligible"],
-                "exchange_synced": item["exchange_synced"],
-                "protected_reason": item["protected_reason"],
-                "exchange_synced_exception": item["exchange_synced_exception"],
-            }
-            if item["exchange_synced"]:
-                row["exchange_synced_age_minutes"] = item["exchange_synced_age_minutes"]
-                row["exchange_synced_loss_floor_usd"] = item["exchange_synced_loss_floor_usd"]
-            rows.append(row)
-        return rows
-
-    def _log_futures_reallocation_event(
-        self,
-        *,
-        timestamp: datetime,
-        decision: DecisionIntent,
-        blocked_reason: str,
-        status: str,
-        skip_reason: str | None = None,
-        cooldown_until: datetime | None = None,
-        target_assessments: list[dict[str, Any]] | None = None,
-        selected_targets: list[PaperPosition] | None = None,
-        override_reason: str | None = None,
-        score_advantage: float | None = None,
-        edge_advantage_after_costs_bps: float | None = None,
-        aggregate_switching_cost_bps: float | None = None,
-        incremental_pnl_usd_estimate: float | None = None,
-    ) -> None:
-        if self.log_store is None:
+    def _load_symbol_market_support(self) -> None:
+        if self._symbol_market_support_loaded:
             return
-        payload: dict[str, Any] = {
-            "timestamp": timestamp,
-            "status": status,
-            "blocked_reason": blocked_reason,
-            "incoming_symbol": decision.symbol,
-            "candidate_strength": {
-                "score": round(decision.predictability_score, 6),
-                "net_edge_bps": round(decision.net_expected_edge_bps, 6),
-                "estimated_round_trip_cost_bps": round(decision.estimated_round_trip_cost_bps, 6),
-                "requested_notional_usd": round(decision.order_intent_notional_usd, 6),
-            },
-            "cooldown_until": cooldown_until,
-            "max_replacements": self._max_futures_reallocation_replacements(),
+        self._symbol_market_support_loaded = True
+        if self.rest_client is None:
+            return
+        info_reader = getattr(self.rest_client, "get_exchange_info", None)
+        if not callable(info_reader):
+            return
+        try:
+            spot_info = info_reader(market="spot")
+        except Exception:
+            spot_info = {}
+        try:
+            futures_info = info_reader(market="futures")
+        except Exception:
+            futures_info = {}
+        spot_symbols = {
+            str(item.get("symbol", "")).upper()
+            for item in (spot_info.get("symbols", []) if isinstance(spot_info, dict) else [])
+            if isinstance(item, dict)
         }
-        if skip_reason is not None:
-            payload["skip_reason"] = skip_reason
-        if override_reason is not None:
-            payload["override_reason"] = override_reason
-        if target_assessments is not None:
-            payload["targets"] = self._compact_futures_reallocation_targets(target_assessments)
-            payload["protected_symbols"] = [
-                item["symbol"]
-                for item in target_assessments
-                if item["protected_reason"] is not None
-            ]
-        if selected_targets:
-            payload["replaced_symbol"] = selected_targets[0].symbol
-            payload["replaced_symbols"] = [target.symbol for target in selected_targets]
-            payload["replaced_count"] = len(selected_targets)
-        if score_advantage is not None:
-            payload["score_advantage"] = round(score_advantage, 6)
-        if edge_advantage_after_costs_bps is not None:
-            payload["edge_advantage_after_costs_bps"] = round(edge_advantage_after_costs_bps, 6)
-        if aggregate_switching_cost_bps is not None:
-            payload["aggregate_switching_cost_bps"] = round(aggregate_switching_cost_bps, 6)
-        if incremental_pnl_usd_estimate is not None:
-            payload["incremental_pnl_usd_estimate"] = round(incremental_pnl_usd_estimate, 6)
-        self.log_store.append("futures_reallocation", payload)
-
-    def _log_position_management_gate(
-        self,
-        *,
-        timestamp: datetime,
-        decision: DecisionIntent,
-        existing_paper_position: PaperPosition | None,
-        allow_new_submission: bool,
-        pyramid_requested: bool,
-        live_orders_allowed: bool,
-        order_cooldown_active: bool,
-        manual_symbol_cooldown_active: bool,
-    ) -> None:
-        if self.log_store is None or existing_paper_position is None:
-            return
-        reasons: list[str] = []
-        current_position = self.paper_positions.get(decision.symbol)
-        closed_during_management = current_position is None
-        if existing_paper_position.is_adopted():
-            reasons.append("ADOPTED_POSITION_OBSERVE_ONLY")
-        if closed_during_management:
-            reasons.append(
-                self.recent_paper_management_close_reasons.get(
-                    decision.symbol,
-                    "PAPER_POSITION_CLOSED_DURING_MANAGEMENT",
-                )
-            )
-        elif existing_paper_position.side != decision.side and decision.side in {"long", "short"}:
-            if (
-                allow_new_submission
-                and self._paper_verification_mode_enabled()
-                and current_position is None
-            ):
-                reasons.append("PAPER_VERIFY_REVERSAL_CLOSE")
-            else:
-                reasons.append("EXISTING_SIDE_CONFLICT")
-        if order_cooldown_active:
-            reasons.append("ORDER_COOLDOWN_ACTIVE")
-        if manual_symbol_cooldown_active:
-            reasons.append("MANUAL_SYMBOL_COOLDOWN_ACTIVE")
-        if not live_orders_allowed:
-            reasons.append("LIVE_ORDER_COOLDOWN_ACTIVE")
-        if allow_new_submission and pyramid_requested:
-            reasons.append("PYRAMID_REQUESTED")
-        if not reasons:
-            reasons.append("HOLD_EXISTING_POSITION")
-        self.log_store.append(
-            "position_management_gate",
-            {
-                "timestamp": timestamp,
-                "symbol": decision.symbol,
-                "decision_side": decision.side,
-                "decision_mode": decision.final_mode,
-                "allow_new_submission": allow_new_submission,
-                "pyramid_requested": pyramid_requested,
-                "closed_during_management": closed_during_management,
-                "existing_position": {
-                    "symbol": existing_paper_position.symbol,
-                    "side": existing_paper_position.side,
-                    "market": existing_paper_position.market,
-                    "origin": existing_paper_position.origin,
-                    "exchange_synced": existing_paper_position.exchange_synced,
-                    "adoption_source": existing_paper_position.adoption_source,
-                    "quantity_remaining": round(existing_paper_position.quantity_remaining, 8),
-                    "last_exit_signal_reason": existing_paper_position.last_exit_signal_reason,
-                },
-                "reasons": reasons,
-            },
-        )
-
-    def _log_execution_preflight(
-        self,
-        *,
-        timestamp: datetime,
-        managed_decision: DecisionIntent,
-        prepared_decision: DecisionIntent,
-        allow_new_submission: bool,
-        live_orders_allowed: bool,
-        order_cooldown_active: bool,
-        manual_symbol_cooldown_active: bool,
-        pending_external_live_position: bool,
-    ) -> None:
-        self._remember_high_conviction_weak_preflight(timestamp=timestamp, decision=prepared_decision)
-        if self.log_store is None:
-            return
-        def decision_timing(decision: DecisionIntent) -> dict[str, object]:
-            decision_time = decision.timestamp
-            if decision_time.tzinfo is None:
-                decision_time = decision_time.replace(tzinfo=timezone.utc)
-            comparable_timestamp = timestamp
-            if comparable_timestamp.tzinfo is None:
-                comparable_timestamp = comparable_timestamp.replace(tzinfo=timezone.utc)
-            return {
-                "decision_timestamp": decision_time,
-                "decision_age_seconds": round((comparable_timestamp - decision_time).total_seconds(), 3),
-            }
-
-        managed_timing = decision_timing(managed_decision)
-        prepared_timing = decision_timing(prepared_decision)
-        kill_switch_status = self.runtime.kill_switch.status()
-        position_close_reason = self.recent_paper_management_close_reasons.get(managed_decision.symbol, "")
-        changed = (
-            managed_decision.final_mode != prepared_decision.final_mode
-            or managed_decision.side != prepared_decision.side
-            or round(managed_decision.order_intent_notional_usd, 6)
-            != round(prepared_decision.order_intent_notional_usd, 6)
-            or tuple(managed_decision.rejection_reasons) != tuple(prepared_decision.rejection_reasons)
-            or managed_decision.execution_symbol != prepared_decision.execution_symbol
-        )
-        would_enter_if_relaxed = (
-            bool(
-                {
-                    "POLICY_ALIGNMENT_CONFIRMATION_REQUIRED",
-                    "FEE_EDGE_BUFFER_CONFIRMATION_REQUIRED",
-                }
-                & set(prepared_decision.rejection_reasons)
-            )
-            and managed_decision.final_mode in {"spot", "futures"}
-            and managed_decision.side in {"long", "short"}
-            and managed_decision.order_intent_notional_usd > 0.0
-        )
-        if not changed and allow_new_submission and prepared_decision.final_mode in {"spot", "futures"} and prepared_decision.order_intent_notional_usd > 0:
-            payload = {
-                "timestamp": timestamp,
-                "symbol": managed_decision.symbol,
-                "allow_new_submission": allow_new_submission,
-                "live_orders_allowed": live_orders_allowed,
-                "order_cooldown_active": order_cooldown_active,
-                "manual_symbol_cooldown_active": manual_symbol_cooldown_active,
-                "pending_external_live_position": pending_external_live_position,
-                "kill_switch_armed": bool(kill_switch_status.get("armed")),
-                "kill_switch_reasons": list(kill_switch_status.get("reasons", [])),
-                "position_close_reason": position_close_reason,
-                "managed": {
-                    "final_mode": managed_decision.final_mode,
-                    "side": managed_decision.side,
-                    "order_intent_notional_usd": round(managed_decision.order_intent_notional_usd, 6),
-                    "rejection_reasons": list(managed_decision.rejection_reasons),
-                    "entry_relaxation_reasons": list(managed_decision.entry_relaxation_reasons),
-                    "size_boost_reasons": list(managed_decision.size_boost_reasons),
-                    **managed_timing,
-                },
-                "prepared": {
-                    "final_mode": prepared_decision.final_mode,
-                    "side": prepared_decision.side,
-                    "order_intent_notional_usd": round(prepared_decision.order_intent_notional_usd, 6),
-                    "rejection_reasons": list(prepared_decision.rejection_reasons),
-                    "execution_symbol": prepared_decision.execution_symbol,
-                    **prepared_timing,
-                },
-                "cap_changed": False,
-                "would_enter_if_relaxed": would_enter_if_relaxed,
-            }
-            if self.verbose:
-                managed_mode = managed_decision.final_mode
-                prepared_mode = prepared_decision.final_mode
-                managed_notional = round(managed_decision.order_intent_notional_usd, 6)
-                prepared_notional = round(prepared_decision.order_intent_notional_usd, 6)
-                prepared_reasons = ",".join(prepared_decision.rejection_reasons) or "none"
-                print(
-                    f"[EXEC_PREFLIGHT] {managed_decision.symbol} allow={allow_new_submission} live_allowed={live_orders_allowed} "
-                    f"managed={managed_mode}:{managed_notional:.2f} prepared={prepared_mode}:{prepared_notional:.2f} "
-                    f"reasons={prepared_reasons}",
-                    flush=True,
-                )
-            self.log_store.append("execution_preflight", payload)
-            return
-        payload = {
-            "timestamp": timestamp,
-            "symbol": managed_decision.symbol,
-            "allow_new_submission": allow_new_submission,
-            "live_orders_allowed": live_orders_allowed,
-            "order_cooldown_active": order_cooldown_active,
-            "manual_symbol_cooldown_active": manual_symbol_cooldown_active,
-            "pending_external_live_position": pending_external_live_position,
-            "kill_switch_armed": bool(kill_switch_status.get("armed")),
-            "kill_switch_reasons": list(kill_switch_status.get("reasons", [])),
-            "position_close_reason": position_close_reason,
-            "managed": {
-                "final_mode": managed_decision.final_mode,
-                "side": managed_decision.side,
-                "order_intent_notional_usd": round(managed_decision.order_intent_notional_usd, 6),
-                "rejection_reasons": list(managed_decision.rejection_reasons),
-                "entry_relaxation_reasons": list(managed_decision.entry_relaxation_reasons),
-                "size_boost_reasons": list(managed_decision.size_boost_reasons),
-                **managed_timing,
-            },
-            "prepared": {
-                "final_mode": prepared_decision.final_mode,
-                "side": prepared_decision.side,
-                "order_intent_notional_usd": round(prepared_decision.order_intent_notional_usd, 6),
-                "rejection_reasons": list(prepared_decision.rejection_reasons),
-                "execution_symbol": prepared_decision.execution_symbol,
-                **prepared_timing,
-            },
-            "would_enter_if_relaxed": would_enter_if_relaxed,
+        futures_symbols = {
+            str(item.get("symbol", "")).upper()
+            for item in (futures_info.get("symbols", []) if isinstance(futures_info, dict) else [])
+            if isinstance(item, dict)
         }
-        if changed:
-            payload["cap_changed"] = True
-        if self.verbose:
-            managed_mode = managed_decision.final_mode
-            prepared_mode = prepared_decision.final_mode
-            managed_notional = round(managed_decision.order_intent_notional_usd, 6)
-            prepared_notional = round(prepared_decision.order_intent_notional_usd, 6)
-            prepared_reasons = ",".join(prepared_decision.rejection_reasons) or "none"
-            print(
-                f"[EXEC_PREFLIGHT] {managed_decision.symbol} allow={allow_new_submission} live_allowed={live_orders_allowed} "
-                f"managed={managed_mode}:{managed_notional:.2f} prepared={prepared_mode}:{prepared_notional:.2f} "
-                f"reasons={prepared_reasons}",
-                flush=True,
-            )
-        self.log_store.append("execution_preflight", payload)
-
-    def _remember_high_conviction_weak_preflight(self, *, timestamp: datetime, decision: DecisionIntent) -> None:
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        if not bool(getattr(exposure, "high_conviction_recent_weak_block_enabled", False)):
+        if not spot_symbols and not futures_symbols:
             return
-        if not self._is_major_futures_symbol(decision.symbol):
-            return
-        blocking_flat_reasons = {
-            "BUYING_INTO_RESISTANCE",
-            "DIRECTION_CONFLICT",
-            "EDGE_BELOW_COST",
-            "EDGE_TOO_THIN",
-            "HIGH_CONVICTION_A_PLUS_REQUIRED",
-            "HIGH_CONVICTION_RECENT_LONG_CONFIRMATION_REQUIRED",
-            "LIQUIDITY_TOO_WEAK",
-            "LONG_ONLY_TURNAROUND_ENTRY_LONG_ONLY",
-            "SCORE_TOO_LOW",
-            "SENTIMENT_CAUTION",
-            "SENTIMENT_TOO_WEAK",
-            "SUPPORT_NOT_CONFIRMED",
-        }
-        reasons = tuple(str(reason) for reason in decision.rejection_reasons)
-        weak = (
-            decision.final_mode != "futures"
-            or decision.side != "long"
-            or decision.order_intent_notional_usd <= 0.0
-            or bool(blocking_flat_reasons.intersection(reasons))
-            or decision.trend_direction <= 0
-            or decision.net_expected_edge_bps <= 0.0
-        )
-        if weak:
-            self.recent_weak_preflight_by_symbol[decision.symbol] = (timestamp, reasons)
+        self.supported_spot_symbols = spot_symbols
+        self.supported_futures_symbols = futures_symbols
+        self._symbol_market_support_enabled = True
 
-    def _max_futures_reallocation_replacements(self) -> int:
-        return 2
+    def _symbol_market_supported(self, *, symbol: str, market: str) -> bool:
+        self._load_symbol_market_support()
+        if not self._symbol_market_support_enabled:
+            return True
+        upper = symbol.upper()
+        if market == "spot":
+            return upper in self.supported_spot_symbols
+        if market == "futures":
+            return upper in self.supported_futures_symbols
+        return True
 
-    def _fallback_blocked_futures_decision(
-        self,
-        *,
-        decision: DecisionIntent,
-        blocked_reason: str,
-        blocked_decision: DecisionIntent,
-    ) -> DecisionIntent:
-        if blocked_reason == "MAX_CONCURRENT_FUTURES":
-            return replace(
-                decision,
-                final_mode="cash",
-                side="flat",
-                order_intent_notional_usd=0.0,
-                stop_distance_bps=0.0,
-                rejection_reasons=tuple(sorted(set(decision.rejection_reasons + ("MAX_CONCURRENT_FUTURES",)))),
-            )
-        if blocked_reason in {"INSUFFICIENT_EXECUTION_BALANCE", "MIN_ORDER_QUANTITY"}:
-            return blocked_decision
-        return decision
-
-    def _maybe_reallocate_futures_entry(
-        self,
-        *,
-        decision: DecisionIntent,
-        state: Any,
-        timestamp: datetime,
-    ) -> DecisionIntent:
-        price = self._market_price(state=state, fallback=0.0)
-        if price <= 0:
+    def _normalize_decision_for_symbol_market_support(self, decision: DecisionIntent) -> DecisionIntent:
+        if decision.final_mode not in {"spot", "futures"}:
             return decision
-        blocked_reason, capped_decision = self._blocked_futures_reallocation_reason(
-            decision,
-            reference_price=price,
-        )
-        if blocked_reason is None:
-            return capped_decision
-        target_assessments = self._futures_reallocation_target_assessments(
-            incoming_decision=decision,
-            timestamp=timestamp,
-        )
-        fallback = self._fallback_blocked_futures_decision(
-            decision=decision,
-            blocked_reason=blocked_reason,
-            blocked_decision=capped_decision,
-        )
-        if not self._is_strong_reallocation_candidate(decision):
-            self._log_futures_reallocation_event(
-                timestamp=timestamp,
-                decision=decision,
-                blocked_reason=blocked_reason,
-                status="skipped",
-                skip_reason="CANDIDATE_NOT_STRONG_ENOUGH",
-                cooldown_until=self.futures_reallocation_cooldown_until,
-                target_assessments=target_assessments,
-            )
-            return fallback
-        if self._is_futures_reallocation_cooldown_active(timestamp):
-            self._log_futures_reallocation_event(
-                timestamp=timestamp,
-                decision=decision,
-                blocked_reason=blocked_reason,
-                status="skipped",
-                skip_reason="REALLOCATION_COOLDOWN_ACTIVE",
-                cooldown_until=self.futures_reallocation_cooldown_until,
-                target_assessments=target_assessments,
-            )
-            return fallback
-        futures_positions = [
-            position
-            for position in self.paper_positions.values()
-            if position.market == "futures" and position.quantity_remaining > 0 and position.symbol != decision.symbol
-        ]
-        slot_limit = self._futures_slot_limit()
-        selected_targets: list[PaperPosition] = []
-        candidate: DecisionIntent | None = None
-        released_capacity_usd = 0.0
-        released_execution_balance_usd = 0.0
-        weak_targets = [item["position"] for item in target_assessments if item["eligible"]]
-        if not weak_targets:
-            self._log_futures_reallocation_event(
-                timestamp=timestamp,
-                decision=decision,
-                blocked_reason=blocked_reason,
-                status="skipped",
-                skip_reason="NO_ELIGIBLE_TARGETS",
-                cooldown_until=self.futures_reallocation_cooldown_until,
-                target_assessments=target_assessments,
-            )
-            return fallback
-        for target in weak_targets[: self._max_futures_reallocation_replacements()]:
-            selected_targets.append(target)
-            target_notional = target.current_notional_usd_estimate()
-            released_capacity_usd += target_notional
-            released_execution_balance_usd += target_notional / max(float(target.entry_planned_leverage), 1.0)
-            candidate_notional = decision.order_intent_notional_usd
-            if candidate_notional <= 0:
-                candidate_notional = self._recomputed_futures_notional(
-                    decision,
-                    additional_capacity_usd=released_capacity_usd,
-                )
-            if candidate_notional <= 0:
-                continue
-            candidate_option = replace(decision, order_intent_notional_usd=candidate_notional)
-            if self.capital_report and self._market_capital_allowed(candidate_option):
-                candidate_option = self._cap_live_order_decision(
-                    candidate_option,
-                    reference_price=price,
-                    extra_futures_execution_balance_usd=released_execution_balance_usd,
-                )
-                if (
-                    any(target.exchange_synced for target in selected_targets)
-                    and any(item.get("exchange_synced_exception") for item in target_assessments)
-                ):
-                    candidate_option = replace(decision, order_intent_notional_usd=candidate_notional)
-            slot_unlocked = slot_limit <= 0 or (len(futures_positions) - len(selected_targets)) < slot_limit
-            if candidate_option.final_mode == "futures" and candidate_option.order_intent_notional_usd > 0 and slot_unlocked:
-                candidate = candidate_option
-                break
-        if candidate is None:
-            self._log_futures_reallocation_event(
-                timestamp=timestamp,
-                decision=decision,
-                blocked_reason=blocked_reason,
-                status="skipped",
-                skip_reason="REPLACEMENT_CANDIDATE_STILL_BLOCKED_AFTER_RELEASE",
-                cooldown_until=self.futures_reallocation_cooldown_until,
-                target_assessments=target_assessments,
-                selected_targets=selected_targets,
-            )
-            return fallback
-        replaced_scores: list[float] = []
-        replaced_edges: list[float] = []
-        switching_cost_bps = 0.0
-        for target in selected_targets:
-            current_score, current_edge, _, _ = self._futures_reallocation_target_state(target)
-            replaced_scores.append(current_score)
-            replaced_edges.append(current_edge)
-            switching_cost_bps += max(
-                target.entry_estimated_round_trip_cost_bps,
-                target.latest_estimated_round_trip_cost_bps or target.entry_estimated_round_trip_cost_bps,
-                candidate.estimated_round_trip_cost_bps,
-            ) * 2.0
-        score_advantage = candidate.predictability_score - max(replaced_scores)
-        cross_coin_edge_bonus_bps = self._cross_coin_reallocation_edge_bonus_bps(decision)
-        edge_advantage_after_costs = (
-            candidate.net_expected_edge_bps
-            - max(replaced_edges)
-            - switching_cost_bps
-            + cross_coin_edge_bonus_bps
-        )
-        incremental_pnl_usd = edge_advantage_after_costs * candidate.order_intent_notional_usd / 10000.0
-        focus = self.runtime.paper_service.settings.portfolio_focus
-        exposure = self.runtime.paper_service.settings.futures_exposure
-        major_reallocation = self._is_major_futures_symbol(decision.symbol) and any(
-            not self._is_major_futures_symbol(target.symbol) for target in selected_targets
-        )
-        required_score_advantage = max(
-            focus.min_score_advantage_to_replace - (exposure.major_reallocation_score_advantage_relaxation if major_reallocation else 0.0),
-            0.0,
-        )
-        required_edge_advantage = max(
-            focus.min_net_edge_advantage_bps - (exposure.major_reallocation_edge_advantage_relaxation_bps if major_reallocation else 0.0),
-            0.0,
-        )
-        required_incremental_pnl = max(
-            focus.min_incremental_pnl_usd - (exposure.major_reallocation_incremental_pnl_relaxation_usd if major_reallocation else 0.0),
-            0.0,
-        )
-        if self._fee_sensitive_execution_enabled():
-            target_close_fee_usd = sum(
-                self._estimated_one_way_fee_usd(
-                    market=target.market,
-                    notional_usd=target.current_notional_usd_estimate(),
-                )
-                for target in selected_targets
-            )
-            candidate_entry_fee_usd = self._estimated_one_way_fee_usd(
-                market=candidate.final_mode,
-                notional_usd=candidate.order_intent_notional_usd,
-            )
-            required_incremental_pnl = max(
-                required_incremental_pnl,
-                target_close_fee_usd + candidate_entry_fee_usd,
-            )
-        if score_advantage < required_score_advantage:
-            self._log_futures_reallocation_event(
-                timestamp=timestamp,
-                decision=decision,
-                blocked_reason=blocked_reason,
-                status="skipped",
-                skip_reason="SCORE_ADVANTAGE_BELOW_FLOOR",
-                cooldown_until=self.futures_reallocation_cooldown_until,
-                target_assessments=target_assessments,
-                selected_targets=selected_targets,
-                score_advantage=score_advantage,
-                edge_advantage_after_costs_bps=edge_advantage_after_costs,
-                aggregate_switching_cost_bps=switching_cost_bps,
-                incremental_pnl_usd_estimate=incremental_pnl_usd,
-            )
-            return fallback
-        if edge_advantage_after_costs < required_edge_advantage:
-            self._log_futures_reallocation_event(
-                timestamp=timestamp,
-                decision=decision,
-                blocked_reason=blocked_reason,
-                status="skipped",
-                skip_reason="EDGE_ADVANTAGE_BELOW_FLOOR",
-                cooldown_until=self.futures_reallocation_cooldown_until,
-                target_assessments=target_assessments,
-                selected_targets=selected_targets,
-                score_advantage=score_advantage,
-                edge_advantage_after_costs_bps=edge_advantage_after_costs,
-                aggregate_switching_cost_bps=switching_cost_bps,
-                incremental_pnl_usd_estimate=incremental_pnl_usd,
-            )
-            return fallback
-        if incremental_pnl_usd < required_incremental_pnl:
-            if any(item.get("exchange_synced_exception") for item in target_assessments):
-                override_reason = "STRICT_EXCHANGE_SYNCED_EXCEPTION"
-            else:
-                self._log_futures_reallocation_event(
-                    timestamp=timestamp,
-                    decision=decision,
-                    blocked_reason=blocked_reason,
-                    status="skipped",
-                    skip_reason="INCREMENTAL_PNL_BELOW_FLOOR",
-                    cooldown_until=self.futures_reallocation_cooldown_until,
-                    target_assessments=target_assessments,
-                    selected_targets=selected_targets,
-                    score_advantage=score_advantage,
-                    edge_advantage_after_costs_bps=edge_advantage_after_costs,
-                    aggregate_switching_cost_bps=switching_cost_bps,
-                    incremental_pnl_usd_estimate=incremental_pnl_usd,
-                )
-                return fallback
-        if self.live_order_executor is not None:
-            live_targets = [self._find_live_futures_position(target.symbol) for target in selected_targets]
-            if any(target is None for target in live_targets):
-                self._log_futures_reallocation_event(
-                    timestamp=timestamp,
-                    decision=decision,
-                    blocked_reason=blocked_reason,
-                    status="skipped",
-                    skip_reason="LIVE_EXCHANGE_TARGET_NOT_FOUND",
-                    cooldown_until=self.futures_reallocation_cooldown_until,
-                    target_assessments=target_assessments,
-                    selected_targets=selected_targets,
-                    score_advantage=score_advantage,
-                    edge_advantage_after_costs_bps=edge_advantage_after_costs,
-                    aggregate_switching_cost_bps=switching_cost_bps,
-                    incremental_pnl_usd_estimate=incremental_pnl_usd,
-                )
-                return fallback
-            for live_target in live_targets:
-                assert live_target is not None
-                self._close_live_position(position=live_target, reason="CAPITAL_REALLOCATION")
-        for target in selected_targets:
-            self._cancel_symbol_open_orders(symbol=target.symbol)
-            self._close_position(
-                position=target,
-                exit_price=target.current_price,
-                timestamp=timestamp,
-                exit_reason="CAPITAL_REALLOCATION",
-            )
-        self.futures_reallocation_cooldown_until = self._futures_reallocation_cooldown_for_timestamp(timestamp)
-        override_reason = None
-        if any(target.exchange_synced for target in selected_targets):
-            override_reason = "STRICT_EXCHANGE_SYNCED_EXCEPTION"
-        self._log_futures_reallocation_event(
-            timestamp=timestamp,
-            decision=candidate,
-            blocked_reason=blocked_reason,
-            status="executed",
-            cooldown_until=self.futures_reallocation_cooldown_until,
-            target_assessments=target_assessments,
-            selected_targets=selected_targets,
-            override_reason=override_reason,
-            score_advantage=score_advantage,
-            edge_advantage_after_costs_bps=edge_advantage_after_costs,
-            aggregate_switching_cost_bps=switching_cost_bps,
-            incremental_pnl_usd_estimate=incremental_pnl_usd,
-        )
-        return candidate
-
-    def _enforce_configured_universe_guard(self, decision: DecisionIntent) -> DecisionIntent:
-        # Final hard guard before any execution path: block symbols outside configured universe.
-        if os.getenv("QUANT_ENFORCE_CONFIGURED_UNIVERSE_GUARD", "0") != "1":
+        if self._symbol_market_supported(symbol=decision.symbol, market=decision.final_mode):
             return decision
-        if decision.final_mode not in {"spot", "futures"} or decision.side not in {"long", "short"}:
-            return decision
-        if decision.order_intent_notional_usd <= 0.0:
-            return decision
-        allowed_symbols = set(self.runtime.paper_service.settings.universe)
-        if decision.symbol in allowed_symbols:
-            return decision
-        blocked_decision = replace(
+        supports_spot = self._symbol_market_supported(symbol=decision.symbol, market="spot")
+        rejection_reasons = tuple(
+            sorted(set(decision.rejection_reasons + (f"UNSUPPORTED_{decision.final_mode.upper()}_MARKET",)))
+        )
+        if decision.final_mode == "futures" and supports_spot and decision.side == "long":
+            # Spot-only symbols can still participate in long entries.
+            return replace(decision, final_mode="spot", rejection_reasons=rejection_reasons)
+        return replace(
             decision,
             final_mode="cash",
             side="flat",
             order_intent_notional_usd=0.0,
             stop_distance_bps=0.0,
-            rejection_reasons=tuple(
-                sorted(set(decision.rejection_reasons + ("SYMBOL_NOT_IN_CONFIGURED_UNIVERSE",)))
-            ),
+            rejection_reasons=rejection_reasons,
         )
+
+    def _attempt_spot_asset_sale_for_usdt(
+        self,
+        *,
+        target_usdt: float,
+        timestamp: datetime,
+    ) -> float:
+        if self.rest_client is None:
+            return self._spot_available_usdt_balance()
+        place_order = getattr(self.rest_client, "place_order", None)
+        get_book_ticker = getattr(self.rest_client, "get_book_ticker", None)
+        if not callable(place_order) or not callable(get_book_ticker):
+            return self._spot_available_usdt_balance()
+        current_usdt = self._spot_available_usdt_balance()
+        for row in self._spot_balance_rows():
+            if current_usdt >= target_usdt:
+                break
+            asset = str(row.get("asset", "")).upper()
+            if not asset or asset == "USDT":
+                continue
+            free_qty = self._safe_float(row.get("free"))
+            if free_qty <= 0:
+                continue
+            symbol = f"{asset}USDT"
+            try:
+                ticker = get_book_ticker(market="spot", symbol=symbol)
+            except Exception:
+                continue
+            bid_price = self._safe_float(ticker.get("bidPrice")) if isinstance(ticker, dict) else 0.0
+            if bid_price <= 0:
+                continue
+            min_trade_usdt = self._spot_min_trade_usdt(symbol=symbol)
+            max_sell_notional = free_qty * bid_price
+            if max_sell_notional + 1e-9 < (min_trade_usdt * 1.1):
+                # Dust position: cannot satisfy exchange minimum trade amount.
+                continue
+            needed_usdt = max(target_usdt - current_usdt, min_trade_usdt)
+            desired_notional = max(needed_usdt * 1.1, min_trade_usdt * 1.02)
+            sell_qty = min(free_qty, round(desired_notional / bid_price, 8))
+            if sell_qty * bid_price + 1e-9 < (min_trade_usdt * 1.05):
+                sell_qty = free_qty
+            if sell_qty * bid_price + 1e-9 < (min_trade_usdt * 1.05):
+                continue
+            if sell_qty <= 0:
+                continue
+            try:
+                place_order(
+                    market="spot",
+                    order_params={
+                        "symbol": symbol,
+                        "side": "sell",
+                        "orderType": "market",
+                        "size": f"{sell_qty:.8f}",
+                        "clientOid": f"margin-refill-sell-{uuid4().hex[:12]}",
+                    },
+                )
+                self.sync_account()
+            except Exception as exc:
+                if self.verbose:
+                    print(f"[MARGIN_REFILL_SPOT_SELL_ERROR] {symbol} {exc}", flush=True)
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "order_errors",
+                        {
+                            "timestamp": timestamp,
+                            "symbol": symbol,
+                            "market": "spot",
+                            "stage": "margin_refill_spot_sell",
+                            "error": repr(exc),
+                        },
+                    )
+                continue
+            current_usdt = self._spot_available_usdt_balance()
+            if self.verbose:
+                print(
+                    f"[MARGIN_REFILL_SPOT_SELL] {symbol} qty={sell_qty:.8f} usdt_now={current_usdt:.2f}",
+                    flush=True,
+                )
+        return current_usdt
+
+    def _attempt_futures_margin_refill(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+        timestamp: datetime,
+    ) -> bool:
+        if self.rest_client is None or decision.final_mode != "futures":
+            return False
+        if self._margin_transfer_permission_denied:
+            return False
+        transfer_method = getattr(self.rest_client, "transfer_spot_to_futures_usdt", None)
+        if not callable(transfer_method):
+            return False
+        spot_usdt = self._spot_available_usdt_balance()
+        openable_balance = self._futures_openable_balance()
+        required_margin = self._required_futures_margin(decision=decision)
+        margin_gap = max(required_margin - openable_balance, 0.0)
+        target_refill_usd = max(required_margin * 0.5, margin_gap * 1.2, 10.0)
+        target_refill_usd = min(target_refill_usd, 300.0)
+        if spot_usdt < 5.0:
+            spot_usdt = self._attempt_spot_asset_sale_for_usdt(
+                target_usdt=target_refill_usd,
+                timestamp=timestamp,
+            )
+        if spot_usdt < 5.0:
+            return False
+        transfer_amount = round(min(max(spot_usdt * 0.95, 5.0), target_refill_usd), 2)
+        if transfer_amount < 5.0:
+            return False
+        try:
+            transfer_method(amount_usdt=transfer_amount, client_oid=f"margin-refill-{uuid4().hex[:12]}")
+            self.sync_account()
+        except Exception as exc:
+            error_code = self._extract_exchange_error_code(exc)
+            if error_code == "40014":
+                # API key missing transfer permission; repeated retries will not recover until key permissions are updated.
+                self._margin_transfer_permission_denied = True
+            if self.verbose:
+                print(f"[MARGIN_REFILL_ERROR] {decision.symbol} {exc}", flush=True)
+            if self.log_store is not None:
+                self.log_store.append(
+                    "order_errors",
+                    {
+                        "timestamp": timestamp,
+                        "symbol": decision.symbol,
+                        "market": decision.final_mode,
+                        "stage": "margin_refill",
+                        "error": repr(exc),
+                    },
+                )
+            return False
         if self.verbose:
             print(
-                f"[UNIVERSE_GUARD] blocked out-of-universe entry symbol={decision.symbol} "
-                f"allowed={sorted(allowed_symbols)}",
+                f"[MARGIN_REFILL] {decision.symbol} transferred_usdt={transfer_amount:.2f}",
                 flush=True,
             )
-        return blocked_decision
+        if self.log_store is not None:
+            self.log_store.append(
+                "account_sync",
+                {
+                    "timestamp": timestamp,
+                    "account_snapshot": self.account_snapshot,
+                    "open_orders_snapshot": self.open_orders_snapshot,
+                },
+            )
+        return True
+
+    def _attempt_futures_position_release(
+        self,
+        *,
+        decision: DecisionIntent,
+        timestamp: datetime,
+    ) -> bool:
+        if self.rest_client is None or decision.final_mode != "futures":
+            return False
+        if self._last_margin_release_at is not None and (timestamp - self._last_margin_release_at) < timedelta(seconds=60):
+            return False
+        get_positions = getattr(self.rest_client, "get_futures_positions", None)
+        place_order = getattr(self.rest_client, "place_order", None)
+        if not callable(get_positions) or not callable(place_order):
+            return False
+        try:
+            positions = get_positions()
+        except Exception:
+            return False
+        if not isinstance(positions, list) or not positions:
+            return False
+
+        def _priority(row: dict[str, Any]) -> tuple[int, int, float]:
+            symbol = str(row.get("symbol", "")).upper()
+            hold_side = str(row.get("holdSide", "")).lower()
+            same_symbol = int(symbol == decision.symbol.upper())
+            opposite_intent = int(
+                (decision.side == "long" and hold_side == "short")
+                or (decision.side == "short" and hold_side == "long")
+            )
+            margin_size = self._safe_float(row.get("marginSize"))
+            return (same_symbol, opposite_intent, margin_size)
+
+        ranked = sorted(
+            (row for row in positions if isinstance(row, dict) and self._safe_float(row.get("available")) > 0),
+            key=_priority,
+            reverse=True,
+        )
+        if not ranked:
+            return False
+        target_openable_usd = 3.0
+        released_any = False
+        releases_done = 0
+        min_trade_reader = getattr(self.rest_client, "_futures_min_trade_usdt", None)
+        ticker_reader = getattr(self.rest_client, "get_book_ticker", None)
+        for row in ranked:
+            if releases_done >= 3:
+                break
+            symbol = str(row.get("symbol", "")).upper()
+            hold_side = str(row.get("holdSide", "")).lower()
+            available = self._safe_float(row.get("available"))
+            if not symbol or hold_side not in {"long", "short"} or available <= 0:
+                continue
+            # Bitget hedge close-side semantics:
+            # - close long  -> side=buy, tradeSide=close
+            # - close short -> side=sell, tradeSide=close
+            close_side = "buy" if hold_side == "long" else "sell"
+            close_size = round(available, 8)
+            if callable(min_trade_reader) and callable(ticker_reader):
+                try:
+                    min_trade_usdt = max(self._safe_float(min_trade_reader(symbol=symbol)), 0.0)
+                except Exception:
+                    min_trade_usdt = 0.0
+                if min_trade_usdt > 0:
+                    try:
+                        ticker = ticker_reader(market="futures", symbol=symbol)
+                    except Exception:
+                        ticker = {}
+                    bid_price = self._safe_float(ticker.get("bidPrice")) if isinstance(ticker, dict) else 0.0
+                    if bid_price > 0 and (close_size * bid_price + 1e-9) < (min_trade_usdt * 1.02):
+                        close_size = round(available, 8)
+            if close_size <= 0:
+                continue
+            try:
+                place_order(
+                    market="futures",
+                    order_params={
+                        "symbol": symbol,
+                        "productType": "USDT-FUTURES",
+                        "marginCoin": "USDT",
+                        "marginMode": "crossed",
+                        "side": close_side,
+                        "orderType": "market",
+                        "size": f"{close_size:.8f}",
+                        "reduceOnly": "NO",
+                        "clientOid": f"margin-release-{uuid4().hex[:12]}",
+                    },
+                )
+                self._last_margin_release_at = timestamp
+                self.sync_account()
+                released_any = True
+                releases_done += 1
+                if self.verbose:
+                    print(
+                        f"[MARGIN_RELEASE] {symbol} hold={hold_side} close_side={close_side} size={close_size:.8f}",
+                        flush=True,
+                    )
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "account_sync",
+                        {
+                            "timestamp": timestamp,
+                            "account_snapshot": self.account_snapshot,
+                            "open_orders_snapshot": self.open_orders_snapshot,
+                            "margin_release": {"symbol": symbol, "hold_side": hold_side, "size": close_size},
+                        },
+                    )
+                if self._futures_openable_balance() >= target_openable_usd:
+                    return True
+            except Exception as exc:
+                if self.verbose:
+                    print(f"[MARGIN_RELEASE_ERROR] {symbol} {exc}", flush=True)
+                if self.log_store is not None:
+                    self.log_store.append(
+                        "order_errors",
+                        {
+                            "timestamp": timestamp,
+                            "symbol": symbol,
+                            "market": "futures",
+                            "stage": "margin_release",
+                            "error": repr(exc),
+                        },
+                    )
+                continue
+        return released_any
+
+    def _spot_liquidation_decision(
+        self,
+        *,
+        decision: DecisionIntent,
+        reference_price: float,
+    ) -> DecisionIntent:
+        if decision.final_mode != "cash" or decision.trend_direction >= 0:
+            return decision
+        available_qty = self._spot_available_base_quantity(symbol=decision.symbol)
+        if available_qty <= 0:
+            return decision
+        liquidation_notional = round(available_qty * max(reference_price, 0.0), 6)
+        if liquidation_notional <= 0:
+            return decision
+        return replace(
+            decision,
+            final_mode="spot",
+            side="short",
+            order_intent_notional_usd=liquidation_notional,
+            stop_distance_bps=max(decision.stop_distance_bps, 1.0),
+            rejection_reasons=tuple(
+                sorted(set(decision.rejection_reasons + ("SPOT_POSITION_LIQUIDATION",)))
+            ),
+        )
+
+    def _consume_capital_after_live_order(self, decision: DecisionIntent) -> None:
+        if not self.capital_report:
+            return
+        if decision.final_mode == "spot":
+            available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
+            self.capital_report["spot_available_balance_usd"] = max(
+                0.0,
+                available - float(decision.order_intent_notional_usd),
+            )
+            return
+        if decision.final_mode == "futures":
+            available = float(self.capital_report.get("futures_available_balance_usd", 0.0))
+            leverage = select_futures_leverage(
+                predictability_score=decision.predictability_score,
+                trend_strength=decision.trend_strength,
+                volume_confirmation=decision.volume_confirmation,
+                liquidity_score=decision.liquidity_score,
+                volatility_penalty=decision.volatility_penalty,
+                overheat_penalty=decision.overheat_penalty,
+                net_expected_edge_bps=decision.net_expected_edge_bps,
+                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+                settings=self.runtime.paper_service.settings,
+            )
+            margin_used = float(decision.order_intent_notional_usd) / max(float(leverage), 1.0)
+            self.capital_report["futures_available_balance_usd"] = max(0.0, available - margin_used)
+
+    def _market_capital_allowed(self, decision: DecisionIntent) -> bool:
+        if not self.capital_report:
+            return True
+        if decision.final_mode == "spot":
+            if decision.side == "short" and self._spot_available_base_quantity(symbol=decision.symbol) > 0:
+                return True
+            if bool(self.capital_report.get("can_trade_spot_any", False)):
+                return True
+            return float(self.capital_report.get("spot_available_balance_usd", 0.0)) > 0.0
+        if decision.final_mode == "futures":
+            if bool(self.capital_report.get("can_trade_futures_any", False)):
+                return True
+            return float(self.capital_report.get("futures_available_balance_usd", 0.0)) > 0.0
+        return True
+
+    def _cash_reserve_fraction(self) -> float:
+        if self.capital_report.get("can_trade_futures_any", False):
+            return self.runtime.paper_service.settings.cash_reserve.when_futures_enabled
+        return self.runtime.paper_service.settings.cash_reserve.when_futures_disabled
+
+    def _cap_live_order_decision(self, decision: DecisionIntent) -> DecisionIntent:
+        if not self.capital_report:
+            return decision
+        reserve_fraction = self._cash_reserve_fraction()
+        requirements_key = "spot_requirements" if decision.final_mode == "spot" else "futures_requirements"
+        min_notional = 0.0
+        for item in self.capital_report.get(requirements_key, []):
+            if item.get("symbol") == decision.symbol:
+                min_notional = float(item.get("min_notional_usd", 0.0))
+                break
+        if decision.final_mode == "spot":
+            if decision.side == "short":
+                if min_notional > 0.0 and decision.order_intent_notional_usd < min_notional:
+                    rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
+                    return replace(
+                        decision,
+                        final_mode="cash",
+                        side="flat",
+                        order_intent_notional_usd=0.0,
+                        stop_distance_bps=0.0,
+                        rejection_reasons=tuple(
+                            sorted(set(decision.rejection_reasons + (rejection_code,)))
+                        ),
+                    )
+                return decision
+            available = float(self.capital_report.get("spot_available_balance_usd", 0.0))
+            max_notional = max(0.0, available * (1.0 - reserve_fraction))
+        elif decision.final_mode == "futures":
+            available = float(self.capital_report.get("futures_available_balance_usd", 0.0))
+            leverage = select_futures_leverage(
+                predictability_score=decision.predictability_score,
+                trend_strength=decision.trend_strength,
+                volume_confirmation=decision.volume_confirmation,
+                liquidity_score=decision.liquidity_score,
+                volatility_penalty=decision.volatility_penalty,
+                overheat_penalty=decision.overheat_penalty,
+                net_expected_edge_bps=decision.net_expected_edge_bps,
+                estimated_round_trip_cost_bps=decision.estimated_round_trip_cost_bps,
+                settings=self.runtime.paper_service.settings,
+            )
+            scale = self._futures_notional_scale(symbol=decision.symbol)
+            max_notional = max(0.0, available * leverage * (1.0 - reserve_fraction) * scale)
+        else:
+            return decision
+        rejection_code = "INSUFFICIENT_EXECUTION_BALANCE"
+        if max_notional <= 0.0 or (min_notional > 0.0 and max_notional < min_notional):
+            return replace(decision, final_mode="cash", side="flat", order_intent_notional_usd=0.0, stop_distance_bps=0.0, rejection_reasons=tuple(sorted(set(decision.rejection_reasons + (rejection_code,)))))
+        if decision.order_intent_notional_usd <= max_notional:
+            return decision
+        floored_notional = round(max_notional, 6)
+        return replace(decision, order_intent_notional_usd=floored_notional)
 
     def _record_decision(
         self,
@@ -8648,454 +890,213 @@ class LivePaperSession:
         decision: DecisionIntent,
         state: Any,
         timestamp: datetime,
-        bootstrap: bool = False,
     ) -> None:
-        if (
-            self.minimum_live_decision_timestamp is not None
-            and decision.timestamp < self.minimum_live_decision_timestamp
-        ):
-            return
-        last_recorded = self.last_recorded_decision_time_by_symbol.get(decision.symbol)
-        if last_recorded is not None:
-            comparable_last_recorded = last_recorded
-            if comparable_last_recorded.tzinfo is None:
-                comparable_last_recorded = comparable_last_recorded.replace(tzinfo=timezone.utc)
-            comparable_decision_time = decision.timestamp
-            if comparable_decision_time.tzinfo is None:
-                comparable_decision_time = comparable_decision_time.replace(tzinfo=timezone.utc)
-            if comparable_decision_time <= comparable_last_recorded:
-                return
-        managed_decision = self._apply_loss_combo_downgrade(decision=decision)
-        policy_entry_context = self._policy_entry_context_snapshot()
-        managed_decision = self._execution_quality_state.apply_overlay(
-            managed_decision,
-            exchange_id=self._execution_quality_exchange_id(),
-            policy_bucket=self._policy_entry_bucket_name(policy_entry_context),
-        )
-        # Ultra-aggressive live mode: keep execution-quality telemetry and sizing
-        # annotations, but optionally bypass the hard "cash/flat" block that comes
-        # only from execution-quality edge thinning.
-        if (
-            self.runtime.paper_service.settings.strategy_profile == "live-ultra-aggressive"
-            and os.getenv("QUANT_DISABLE_EXECUTION_QUALITY_EDGE_GUARD", "1") == "1"
-            and "EXECUTION_QUALITY_EDGE_TOO_THIN" in set(managed_decision.rejection_reasons)
-            and managed_decision.final_mode == "cash"
-            and managed_decision.side == "flat"
-            and decision.final_mode in {"futures", "spot"}
-            and decision.side in {"long", "short"}
-            and decision.order_intent_notional_usd > 0.0
-        ):
-            restored_reasons = tuple(
-                sorted(
-                    reason
-                    for reason in managed_decision.rejection_reasons
-                    if reason != "EXECUTION_QUALITY_EDGE_TOO_THIN"
-                )
-            )
-            managed_decision = replace(
-                managed_decision,
-                final_mode=decision.final_mode,
-                side=decision.side,
-                order_intent_notional_usd=decision.order_intent_notional_usd,
-                stop_distance_bps=decision.stop_distance_bps,
-                net_expected_edge_bps=decision.net_expected_edge_bps,
-                rejection_reasons=restored_reasons,
-            )
-        managed_decision = self._enforce_configured_universe_guard(managed_decision)
-        emitted_at = datetime.now(tz=timezone.utc)
-        self.decisions.append(managed_decision)
-        self.last_recorded_decision_time_by_symbol[managed_decision.symbol] = managed_decision.timestamp
-        self.last_decision_timestamp = managed_decision.timestamp
-        self.last_decision_emitted_at = emitted_at
-        self.self_healing.note_decision(
-            timestamp=max(emitted_at, managed_decision.timestamp),
-            decision_count=len(self.decisions),
-            heartbeat_count=self.heartbeat_count,
-        )
+        self.decisions.append(decision)
+        self.last_decision_timestamp = timestamp
         if self.verbose:
             print(
-                f"[DECISION] {managed_decision.timestamp.isoformat()} {managed_decision.symbol} mode={managed_decision.final_mode} side={managed_decision.side} score={managed_decision.predictability_score:.2f}",
+                f"[DECISION] {decision.timestamp.isoformat()} {decision.symbol} mode={decision.final_mode} side={decision.side} score={decision.predictability_score:.2f}",
                 flush=True,
             )
         if self.learner is not None:
-            self.learner.ingest_decisions((managed_decision,))
+            self.learner.ingest_decisions((decision,))
         if self.log_store is not None:
-            reference_price = 0.0
-            if state is not None:
-                reference_price = float(getattr(state, "last_trade_price", 0.0) or 0.0)
-            self.log_store.append(
-                "decisions",
-                {
-                    **managed_decision.as_dict(),
-                    **policy_entry_context,
-                    "reference_price": reference_price,
-                    "rejected": bool(managed_decision.rejection_reasons),
-                },
+            self.log_store.append("decisions", decision.as_dict())
+        market_supported_decision = self._normalize_decision_for_symbol_market_support(decision)
+        if self.live_order_executor is not None and state is not None and self._market_capital_allowed(market_supported_decision):
+            liquidation_adjusted = self._spot_liquidation_decision(
+                decision=market_supported_decision,
+                reference_price=float(state.last_trade_price),
             )
-        if bootstrap:
-            return managed_decision
-        self._execute_recorded_decision(
-            managed_decision=managed_decision,
-            state=state,
-            timestamp=timestamp,
-        )
-        return managed_decision
-
-    def _execute_recorded_decision(
-        self,
-        *,
-        managed_decision: DecisionIntent,
-        state: Any,
-        timestamp: datetime,
-    ) -> None:
-        if state is not None:
-            managed_decision = self._maybe_reallocate_futures_entry(
-                decision=managed_decision,
-                state=state,
-                timestamp=timestamp,
-            )
-        order_cooldown_active = self._is_order_cooldown_active(managed_decision.symbol, timestamp)
-        manual_symbol_cooldown_active = self._is_manual_symbol_cooldown_active(managed_decision.symbol, timestamp)
-        live_orders_allowed = not self.self_healing.is_live_order_cooldown_active(now=timestamp)
-        kill_switch_armed = self.runtime.kill_switch.armed
-        if state is not None:
-            self._align_major_cross_symbol_positions(
-                decision=managed_decision,
-                price_map={state.symbol: state.last_trade_price},
-                timestamp=timestamp,
-            )
-        existing_paper_position = self.paper_positions.get(managed_decision.symbol)
-        pending_external_live_position = (
-            managed_decision.final_mode == "futures"
-            and existing_paper_position is None
-            and self._find_live_futures_position(managed_decision.symbol) is not None
-        )
-        allow_new_submission = False
-        pyramid_requested = False
-        can_open_new_paper_position = True
-        if (
-            existing_paper_position is None
-            and (
-                pending_external_live_position
-                or
-                order_cooldown_active
-                or manual_symbol_cooldown_active
-                or kill_switch_armed
-                or (self.live_order_executor is not None and not live_orders_allowed)
-            )
-        ):
-            can_open_new_paper_position = False
-        if state is not None and can_open_new_paper_position:
-            if existing_paper_position is None:
-                allow_new_submission = (
-                    managed_decision.final_mode in {"spot", "futures"}
-                    and managed_decision.side in {"long", "short"}
-                    and managed_decision.order_intent_notional_usd > 0.0
-                )
-            else:
-                allow_new_submission, pyramid_requested = self._apply_paper_trade_management(
-                    decision=managed_decision,
-                    state=state,
-                    timestamp=timestamp,
-                )
-        if order_cooldown_active:
-            allow_new_submission = False
-        if manual_symbol_cooldown_active:
-            allow_new_submission = False
-        if kill_switch_armed and (pyramid_requested or self.paper_positions.get(managed_decision.symbol) is None):
-            allow_new_submission = False
-            pyramid_requested = False
-        if self.verbose:
-            print(
-                f"[SUBMISSION_GATE] {managed_decision.symbol} allow={allow_new_submission} can_open={can_open_new_paper_position} "
-                f"existing={'yes' if existing_paper_position is not None else 'no'} pending_external={pending_external_live_position} "
-                f"order_cooldown={order_cooldown_active} manual_cooldown={manual_symbol_cooldown_active} "
-                f"live_allowed={live_orders_allowed} kill_switch={kill_switch_armed}",
-                flush=True,
-            )
-        prepared_execution_decision = managed_decision
-        prepared_execution_intent = build_execution_intent(decision=managed_decision)
-        if state is not None and allow_new_submission:
-            prepared_execution_decision = (
-                self._prepare_live_execution_decision(
-                    decision=managed_decision,
-                    reference_price=state.last_trade_price,
-                    policy_entry_context=self._policy_entry_context_snapshot(),
-                    submission_time=timestamp,
-                )
-                if self.live_order_executor is not None
-                else self._cap_live_order_decision(
-                    managed_decision,
-                    reference_price=state.last_trade_price,
-                    policy_entry_context=self._policy_entry_context_snapshot(),
-                    submission_time=timestamp,
-                )
-            )
-            prepared_execution_intent = build_execution_intent(decision=prepared_execution_decision)
-        if state is not None:
-            self._log_position_management_gate(
-                timestamp=timestamp,
-                decision=managed_decision,
-                existing_paper_position=existing_paper_position,
-                allow_new_submission=allow_new_submission,
-                pyramid_requested=pyramid_requested,
-                live_orders_allowed=live_orders_allowed,
-                order_cooldown_active=order_cooldown_active,
-                manual_symbol_cooldown_active=manual_symbol_cooldown_active,
-            )
-            self._log_execution_preflight(
-                timestamp=timestamp,
-                managed_decision=managed_decision,
-                prepared_decision=prepared_execution_decision,
-                allow_new_submission=allow_new_submission,
-                live_orders_allowed=live_orders_allowed,
-                order_cooldown_active=order_cooldown_active,
-                manual_symbol_cooldown_active=manual_symbol_cooldown_active,
-                pending_external_live_position=pending_external_live_position,
-            )
-        if (
-            self.live_order_executor is not None
-            and state is not None
-            and allow_new_submission
-            and live_orders_allowed
-        ):
-            executable_decision = decision_from_execution_intent(intent=prepared_execution_intent)
+            executable_decision = self._cap_live_order_decision(liquidation_adjusted)
             fingerprint = self._execution_fingerprint(executable_decision)
             last_fingerprint = self.last_executed_fingerprint_by_symbol.get(executable_decision.symbol)
-            if executable_decision.final_mode not in {"spot", "futures"} or executable_decision.order_intent_notional_usd <= 0:
-                self._clear_live_entry_starvation(symbol=executable_decision.symbol)
             if last_fingerprint != fingerprint and executable_decision.final_mode in {"spot", "futures"} and executable_decision.order_intent_notional_usd > 0:
-                policy_entry_context = self._policy_entry_context_snapshot()
-                policy_bucket = self._policy_entry_bucket_name(policy_entry_context)
-                try:
-                    live_result = self.live_order_executor.execute_decision(
-                        decision=executable_decision,
-                        reference_price=state.last_trade_price,
-                    )
-                except Exception as exc:
-                    error_text = repr(exc)
-                    payload = {
-                        "timestamp": timestamp,
-                        "symbol": executable_decision.symbol,
-                        "market": executable_decision.final_mode,
-                        "stage": "live_order",
-                        "error": error_text,
-                        **policy_entry_context,
-                    }
+                quality_gate_reason = self._live_quality_gate_reason(executable_decision)
+                if quality_gate_reason is not None:
+                    self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
                     if self.verbose:
-                        print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
-                    self._record_execution_quality_outcome(
-                        symbol=executable_decision.symbol,
-                        outcome="timeout" if self._is_timeout_error(error_text) else "reject",
-                        fill_ratio=0.0,
-                        slippage_bps=None,
-                        realized_edge_bps=0.0,
-                        expected_edge_bps=executable_decision.net_expected_edge_bps,
-                        timestamp=timestamp,
-                        market=executable_decision.final_mode,
-                        exchange_id=self.live_order_executor._exchange_id(),
-                        policy_bucket=policy_bucket,
-                    )
-                    self._apply_order_error_cooldown(
-                        symbol=executable_decision.symbol,
-                        error_message=error_text,
-                        timestamp=timestamp,
-                        stage="live_order",
-                        exchange_id=self.live_order_executor._exchange_id(),
-                    )
-                    if (
-                        self.live_order_executor._exchange_id() == "bitget"
-                        and self._parse_order_error_code(error_text) == "40762"
-                    ):
-                        self._refresh_account_state_after_live_order_activity(
-                            symbol=executable_decision.symbol,
-                            timestamp=timestamp,
-                            stage="live_order",
-                            reason="balance_error",
+                        print(
+                            f"[LIVE_ORDER_SKIP] {executable_decision.symbol} reason={quality_gate_reason}",
+                            flush=True,
                         )
                     if self.log_store is not None:
-                        self.log_store.append("order_errors", payload)
+                        self.log_store.append(
+                            "order_errors",
+                            {
+                                "timestamp": timestamp,
+                                "symbol": executable_decision.symbol,
+                                "market": executable_decision.final_mode,
+                                "stage": "live_order",
+                                "error": f"quality_gate {quality_gate_reason}",
+                            },
+                        )
+                elif self._live_order_blocked_by_global_cooldown(now=timestamp):
+                    until = self.live_error_global_cooldown_until
+                    error_code = self.live_error_global_code or "UNKNOWN"
+                    if self.verbose:
+                        print(
+                            f"[LIVE_ORDER_SKIP] {executable_decision.symbol} global_cooldown_until={until.isoformat() if until else 'unknown'} code={error_code}",
+                            flush=True,
+                        )
+                    if self.log_store is not None:
+                        self.log_store.append(
+                            "order_errors",
+                            {
+                                "timestamp": timestamp,
+                                "symbol": executable_decision.symbol,
+                                "market": executable_decision.final_mode,
+                                "stage": "live_order",
+                                "error": f"global_cooldown_active code={error_code}",
+                            },
+                        )
+                elif self._live_order_blocked_by_cooldown(symbol=executable_decision.symbol, now=timestamp):
+                    until = self.live_error_cooldown_until_by_symbol.get(executable_decision.symbol)
+                    error_code = self.live_error_code_by_symbol.get(executable_decision.symbol, "UNKNOWN")
+                    if self.verbose:
+                        print(
+                            f"[LIVE_ORDER_SKIP] {executable_decision.symbol} cooldown_until={until.isoformat() if until else 'unknown'} code={error_code}",
+                            flush=True,
+                        )
+                    if self.log_store is not None:
+                        self.log_store.append(
+                            "order_errors",
+                            {
+                                "timestamp": timestamp,
+                                "symbol": executable_decision.symbol,
+                                "market": executable_decision.final_mode,
+                                "stage": "live_order",
+                                "error": f"cooldown_active code={error_code}",
+                            },
+                        )
                 else:
-                    if live_result is not None:
-                        self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
-                        filled_quantity = float(getattr(live_result, "filled_quantity", live_result.quantity))
-                        fill_ratio = float(getattr(live_result, "fill_ratio", 1.0 if live_result.accepted else 0.0))
-                        fill_status = str(
-                            getattr(
-                                live_result,
-                                "fill_status",
-                                "filled" if live_result.accepted else "rejected",
-                            )
-                        )
-                        avg_fill_price = float(getattr(live_result, "avg_fill_price", 0.0))
-                        slippage_bps = float(getattr(live_result, "slippage_bps", 0.0))
-                        realized_edge_bps = float(getattr(live_result, "realized_edge_bps", 0.0))
-                        payload = {
-                            "timestamp": timestamp,
-                            "symbol": live_result.symbol,
-                            "market": live_result.market,
-                            "side": live_result.side,
-                            "quantity": live_result.quantity,
-                            "filled_quantity": filled_quantity,
-                            "fill_ratio": fill_ratio,
-                            "fill_status": fill_status,
-                            "accepted": live_result.accepted,
-                            "order_id": str(live_result.response.get("orderId", "")),
-                            "client_oid": str(live_result.response.get("clientOid", executable_decision.decision_id)),
-                            "reference_price": state.last_trade_price,
-                            "avg_fill_price": avg_fill_price,
-                            "slippage_bps": slippage_bps,
-                            "realized_edge_bps": realized_edge_bps,
-                            "expected_net_edge_bps": executable_decision.net_expected_edge_bps,
-                            "expected_gross_edge_bps": executable_decision.gross_expected_edge_bps,
-                            "estimated_round_trip_cost_bps": executable_decision.estimated_round_trip_cost_bps,
-                            "protection_orders": list(live_result.protection_orders),
-                            "protection_error": live_result.protection_error,
-                            "response": live_result.response,
-                            **policy_entry_context,
-                        }
-                        self._record_execution_quality_outcome(
-                            symbol=live_result.symbol,
-                            outcome="reject" if not live_result.accepted else fill_status,
-                            fill_ratio=fill_ratio,
-                            slippage_bps=slippage_bps if fill_ratio > 0.0 else None,
-                            realized_edge_bps=realized_edge_bps,
-                            expected_edge_bps=executable_decision.net_expected_edge_bps,
-                            protection_degraded=bool(live_result.protection_error),
-                            timestamp=timestamp,
-                            market=live_result.market,
-                            exchange_id=self.live_order_executor._exchange_id(),
-                            policy_bucket=policy_bucket,
-                        )
-                        self.live_orders.append(payload)
-                        if self.verbose:
-                            print(
-                                f"[LIVE_ORDER] {live_result.symbol} market={live_result.market} side={live_result.side} qty={live_result.quantity} accepted={live_result.accepted}",
-                                flush=True,
-                            )
-                        if self.log_store is not None:
-                            self.log_store.append("live_orders", payload)
-                        if live_result.protection_error and self.log_store is not None:
-                            self.log_store.append(
-                                "order_errors",
-                                {
-                                    "timestamp": timestamp,
-                                    "symbol": live_result.symbol,
-                                    "market": live_result.market,
-                                    "stage": "protection_order",
-                                    "error": live_result.protection_error,
-                                    **policy_entry_context,
-                                },
-                            )
-                            self._apply_order_error_cooldown(
-                                symbol=live_result.symbol,
-                                error_message=live_result.protection_error,
+                    if executable_decision.final_mode == "futures":
+                        openable_balance = self._futures_openable_balance()
+                        required_margin = self._required_futures_margin(decision=executable_decision)
+                        if openable_balance <= 0 or (required_margin > 0 and openable_balance < required_margin * 0.7):
+                            released = self._attempt_futures_position_release(
+                                decision=executable_decision,
                                 timestamp=timestamp,
-                                stage="protection_order",
-                                exchange_id=self.live_order_executor._exchange_id(),
                             )
-                        if live_result.accepted:
-                            self._clear_live_entry_starvation(symbol=live_result.symbol)
-                            self._send_live_entry_alert(payload)
-                            if existing_paper_position is None and not pyramid_requested:
-                                self._open_paper_position(
+                            if not released:
+                                self._attempt_futures_margin_refill(
                                     decision=executable_decision,
-                                    price=state.last_trade_price,
-                                    exchange_synced=True,
+                                    reference_price=float(state.last_trade_price),
+                                    timestamp=timestamp,
                                 )
-                            if pyramid_requested:
-                                paper_position = self.paper_positions.get(executable_decision.symbol)
-                                if paper_position is not None:
-                                    self._apply_pyramid_fill_to_position(
-                                        position=paper_position,
+                    try:
+                        live_result = self.live_order_executor.execute_decision(
+                            decision=executable_decision,
+                            reference_price=state.last_trade_price,
+                        )
+                    except Exception as exc:
+                        error_code = self._extract_exchange_error_code(exc)
+                        recovered = False
+                        if error_code == "40762" and executable_decision.final_mode == "futures":
+                            release_ok = self._attempt_futures_position_release(
+                                decision=executable_decision,
+                                timestamp=timestamp,
+                            )
+                            refill_ok = release_ok or self._attempt_futures_margin_refill(
+                                decision=executable_decision,
+                                reference_price=float(state.last_trade_price),
+                                timestamp=timestamp,
+                            )
+                            if not refill_ok and self._futures_openable_balance() > 0:
+                                # A pre-trade refill may have already increased openable balance; allow one retry.
+                                refill_ok = True
+                            if refill_ok:
+                                try:
+                                    recovered_result = self.live_order_executor.execute_decision(
                                         decision=executable_decision,
-                                        price=state.last_trade_price,
+                                        reference_price=state.last_trade_price,
                                     )
-                            self._refresh_account_state_after_live_order_activity(
-                                symbol=live_result.symbol,
-                                timestamp=timestamp,
-                                stage="live_order",
-                                reason="accepted_live_order",
-                            )
-                    else:
-                        preflight_rejection = self.live_order_executor.pop_last_preflight_rejection()
-                        if preflight_rejection is not None:
-                            symbol = str(preflight_rejection.get("symbol", executable_decision.symbol))
-                            reason = str(preflight_rejection.get("reason", "")).upper()
-                            message = str(
-                                preflight_rejection.get(
-                                    "message",
-                                    reason or "preflight_rejected",
-                                )
-                            )
-                            self._record_execution_quality_outcome(
-                                symbol=symbol,
-                                outcome="reject",
-                                fill_ratio=0.0,
-                                slippage_bps=None,
-                                realized_edge_bps=0.0,
-                                expected_edge_bps=executable_decision.net_expected_edge_bps,
-                                timestamp=timestamp,
-                                market=str(preflight_rejection.get("market", executable_decision.final_mode)),
-                                exchange_id=self.live_order_executor._exchange_id(),
-                                policy_bucket=policy_bucket,
-                            )
-                            if reason in {"BITGET_MAX_OPEN_ZERO", "BITGET_MAX_OPEN_BELOW_MIN_QTY"}:
-                                self._apply_order_error_cooldown(
-                                    symbol=symbol,
-                                    error_message=reason or message,
-                                    timestamp=timestamp,
-                                    stage="live_order_preflight",
-                                    exchange_id=self.live_order_executor._exchange_id(),
-                                )
-                                self._refresh_account_state_after_live_order_activity(
-                                    symbol=symbol,
-                                    timestamp=timestamp,
-                                    stage="live_order_preflight",
-                                    reason="preflight_capacity",
-                                )
-                            else:
-                                self._apply_preflight_symbol_cooldown(symbol=symbol, timestamp=timestamp)
-                            self.self_healing.record_runtime_error(
-                                now=timestamp,
-                                symbol=symbol,
-                                error_message=message,
-                                exchange_id=self.live_order_executor._exchange_id(),
-                                stage="live_order_preflight",
-                            )
-                            if self.log_store is not None:
-                                self.log_store.append(
-                                    "order_errors",
-                                    {
+                                except Exception as retry_exc:
+                                    exc = retry_exc
+                                    error_code = self._extract_exchange_error_code(retry_exc)
+                                else:
+                                    recovered = True
+                                    self.live_error_cooldown_until_by_symbol.pop(executable_decision.symbol, None)
+                                    self.live_error_code_by_symbol.pop(executable_decision.symbol, None)
+                                    self.live_error_global_cooldown_until = None
+                                    self.live_error_global_code = None
+                                    self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                                    if recovered_result.accepted:
+                                        self._consume_capital_after_live_order(executable_decision)
+                                        if executable_decision.final_mode == "futures":
+                                            self._relax_futures_notional_scale(symbol=executable_decision.symbol)
+                                    payload = {
                                         "timestamp": timestamp,
-                                        "symbol": symbol,
-                                        "market": str(preflight_rejection.get("market", executable_decision.final_mode)),
-                                        "stage": "live_order_preflight",
-                                        "error": message,
-                                        "reason": reason,
-                                    },
+                                        "symbol": recovered_result.symbol,
+                                        "market": recovered_result.market,
+                                        "side": recovered_result.side,
+                                        "quantity": recovered_result.quantity,
+                                        "accepted": recovered_result.accepted,
+                                    }
+                                    self.live_orders.append(payload)
+                                    if self.verbose:
+                                        print(
+                                            f"[LIVE_ORDER] {recovered_result.symbol} market={recovered_result.market} side={recovered_result.side} qty={recovered_result.quantity} accepted={recovered_result.accepted}",
+                                            flush=True,
+                                        )
+                                    if self.log_store is not None:
+                                        self.log_store.append("live_orders", payload)
+                        if not recovered:
+                            cooldown_seconds = self._cooldown_seconds_for_error_code(error_code)
+                            if error_code in {"40762", "45111", "45110", "40774", "400172"}:
+                                # Prevent immediate re-submission of the same failing live intent fingerprint.
+                                self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                            if error_code == "40762" and executable_decision.final_mode == "futures":
+                                self._tighten_futures_notional_scale(symbol=executable_decision.symbol)
+                            if cooldown_seconds > 0:
+                                self.live_error_cooldown_until_by_symbol[executable_decision.symbol] = (
+                                    timestamp + timedelta(seconds=cooldown_seconds)
                                 )
-                        elif existing_paper_position is None and self._find_live_futures_position(executable_decision.symbol) is None:
-                            self._note_live_entry_starvation(
-                                symbol=executable_decision.symbol,
-                                timestamp=timestamp,
-                                reason="LIVE_ORDER_NO_RESULT",
-                                fingerprint=fingerprint,
-                            )
-            elif (
-                existing_paper_position is None
-                and executable_decision.final_mode in {"spot", "futures"}
-                and executable_decision.order_intent_notional_usd > 0
-                and self._find_live_futures_position(executable_decision.symbol) is None
-            ):
-                self._note_live_entry_starvation(
-                                symbol=executable_decision.symbol,
-                                timestamp=timestamp,
-                                reason="STALE_FINGERPRINT_SUPPRESSION",
-                                fingerprint=fingerprint,
-                            )
-        if self.order_tester is not None and state is not None and allow_new_submission:
-            test_decision = prepared_execution_decision
+                                if error_code is not None:
+                                    self.live_error_code_by_symbol[executable_decision.symbol] = error_code
+                            if error_code in {"45110", "45111", "429"} and cooldown_seconds > 0:
+                                self.live_error_global_cooldown_until = timestamp + timedelta(seconds=cooldown_seconds)
+                                self.live_error_global_code = error_code
+                            payload = {
+                                "timestamp": timestamp,
+                                "symbol": executable_decision.symbol,
+                                "market": executable_decision.final_mode,
+                                "stage": "live_order",
+                                "error": repr(exc),
+                            }
+                            if self.verbose:
+                                print(f"[LIVE_ORDER_ERROR] {executable_decision.symbol} {exc}", flush=True)
+                            if self.log_store is not None:
+                                self.log_store.append("order_errors", payload)
+                    else:
+                        if live_result is not None:
+                            self.live_error_cooldown_until_by_symbol.pop(executable_decision.symbol, None)
+                            self.live_error_code_by_symbol.pop(executable_decision.symbol, None)
+                            self.live_error_global_cooldown_until = None
+                            self.live_error_global_code = None
+                            self.last_executed_fingerprint_by_symbol[executable_decision.symbol] = fingerprint
+                            if live_result.accepted:
+                                self._consume_capital_after_live_order(executable_decision)
+                                if executable_decision.final_mode == "futures":
+                                    self._relax_futures_notional_scale(symbol=executable_decision.symbol)
+                            payload = {
+                                "timestamp": timestamp,
+                                "symbol": live_result.symbol,
+                                "market": live_result.market,
+                                "side": live_result.side,
+                                "quantity": live_result.quantity,
+                                "accepted": live_result.accepted,
+                            }
+                            self.live_orders.append(payload)
+                            if self.verbose:
+                                print(
+                                    f"[LIVE_ORDER] {live_result.symbol} market={live_result.market} side={live_result.side} qty={live_result.quantity} accepted={live_result.accepted}",
+                                    flush=True,
+                                )
+                            if self.log_store is not None:
+                                self.log_store.append("live_orders", payload)
+        if self.order_tester is not None and state is not None and self._market_capital_allowed(market_supported_decision):
+            test_decision = self._cap_live_order_decision(market_supported_decision)
             if test_decision.final_mode in {"spot", "futures"} and test_decision.order_intent_notional_usd > 0:
                 try:
                     test_result = self.order_tester.test_decision(
@@ -9112,35 +1113,10 @@ class LivePaperSession:
                     }
                     if self.verbose:
                         print(f"[TEST_ORDER_ERROR] {test_decision.symbol} {exc}", flush=True)
-                    self._apply_order_error_cooldown(
-                        symbol=test_decision.symbol,
-                        error_message=repr(exc),
-                        timestamp=timestamp,
-                        stage="test_order",
-                        exchange_id=getattr(self.order_tester.client, "exchange_id", "binance"),
-                    )
                     if self.log_store is not None:
                         self.log_store.append("order_errors", payload)
                 else:
                     if test_result is not None:
-                        if (
-                            self.live_order_executor is None
-                            and self.paper_positions.get(test_result.symbol) is None
-                            and test_result.accepted
-                            and not pyramid_requested
-                        ):
-                            self._open_paper_position(
-                                decision=test_decision,
-                                price=state.last_trade_price,
-                            )
-                        if pyramid_requested:
-                            paper_position = self.paper_positions.get(test_result.symbol)
-                            if paper_position is not None:
-                                self._apply_pyramid_fill_to_position(
-                                    position=paper_position,
-                                    decision=test_decision,
-                                    price=state.last_trade_price,
-                                )
                         self.tested_orders.append(
                             {
                                 "symbol": test_result.symbol,
@@ -9167,185 +1143,6 @@ class LivePaperSession:
                                     "accepted": test_result.accepted,
                                 },
                             )
-
-    def _scheduled_decision_boundary_after(self, timestamp: datetime) -> datetime:
-        interval_seconds = max(
-            int(
-                getattr(
-                    self.runtime,
-                    "decision_interval_seconds",
-                    int(self.runtime.decision_interval_minutes) * 60,
-                )
-            ),
-            1,
-        )
-        floored_epoch = int(timestamp.timestamp() // interval_seconds) * interval_seconds
-        floored = datetime.fromtimestamp(floored_epoch, tz=timezone.utc)
-        if floored <= timestamp:
-            floored += timedelta(seconds=interval_seconds)
-        return floored
-
-    def _scheduled_decision_catchup_cutoff(self, now: datetime) -> datetime:
-        interval_seconds = max(
-            int(
-                getattr(
-                    self.runtime,
-                    "decision_interval_seconds",
-                    int(self.runtime.decision_interval_minutes) * 60,
-                )
-            ),
-            1,
-        )
-        return now - timedelta(seconds=interval_seconds)
-
-    def _iter_schedulable_symbols(self) -> list[str]:
-        store_symbols = {str(symbol) for symbol in getattr(self.runtime.dispatcher.store, "_states", {}).keys()}
-        configured_order = [
-            str(symbol)
-            for symbol in list(self.runtime.paper_service.settings.universe or ())
-            if str(symbol) in store_symbols
-        ]
-        trailing_symbols = sorted(store_symbols - set(configured_order))
-        ordered_symbols = configured_order + trailing_symbols
-        if self.runtime.eligible_symbols is None:
-            return ordered_symbols
-        return [symbol for symbol in ordered_symbols if symbol in self.runtime.eligible_symbols]
-
-    def _run_scheduled_decision_boundary(self, decision_time: datetime) -> None:
-        self._run_scheduled_decision_boundary_with_options(decision_time, allow_stale_snapshot=False)
-
-    def _record_reference_price_guard(
-        self,
-        *,
-        symbol: str,
-        last_trade_price: float,
-        top_mid: float,
-        deviation_bps: float,
-        timestamp: datetime | None,
-    ) -> None:
-        self.reference_price_guard_counts[symbol] = self.reference_price_guard_counts.get(symbol, 0) + 1
-        observed_at = timestamp or datetime.now(tz=timezone.utc)
-        self.reference_price_guard_last_by_symbol[symbol] = {
-            "observed_at": observed_at.isoformat(),
-            "last_trade_price": last_trade_price,
-            "top_mid": top_mid,
-            "deviation_bps": round(deviation_bps, 6),
-        }
-
-    def _state_with_reference_price_guard(self, state: Any, *, timestamp: datetime | None = None) -> Any:
-        top_of_book = getattr(state, "top_of_book", None)
-        bid_price = float(getattr(top_of_book, "bid_price", 0.0) or 0.0)
-        ask_price = float(getattr(top_of_book, "ask_price", 0.0) or 0.0)
-        last_trade_price = float(getattr(state, "last_trade_price", 0.0) or 0.0)
-        if bid_price <= 0.0 or ask_price <= 0.0 or ask_price < bid_price or last_trade_price <= 0.0:
-            return state
-        midpoint = (bid_price + ask_price) / 2.0
-        if midpoint <= 0.0:
-            return state
-        deviation_bps = abs(midpoint - last_trade_price) / max(last_trade_price, 1e-12) * 10000.0
-        max_deviation_bps = _reference_price_guard_max_bps()
-        if max_deviation_bps <= 0.0 or deviation_bps <= max_deviation_bps:
-            return state
-        symbol = str(getattr(state, "symbol", "") or "")
-        self._record_reference_price_guard(
-            symbol=symbol,
-            last_trade_price=last_trade_price,
-            top_mid=midpoint,
-            deviation_bps=deviation_bps,
-            timestamp=timestamp,
-        )
-        guarded = replace(state, last_trade_price=midpoint)
-        if self.verbose:
-            print(
-                "[REFERENCE_PRICE_GUARD] "
-                f"{symbol} last_trade_price={last_trade_price:.12g} "
-                f"top_mid={midpoint:.12g} deviation_bps={deviation_bps:.2f}",
-                flush=True,
-            )
-        return guarded
-
-    def _run_scheduled_decision_boundary_with_options(
-        self,
-        decision_time: datetime,
-        *,
-        allow_stale_snapshot: bool,
-    ) -> None:
-        for symbol in self._iter_schedulable_symbols():
-            state = self.runtime.dispatcher.store.get(symbol)
-            if state is None:
-                continue
-            stale_ms = state.freshness_ms(decision_time)
-            if stale_ms > self.runtime.paper_service.settings.operational_limits.stale_data_alarm_sla_seconds * 1000:
-                if not allow_stale_snapshot:
-                    continue
-                state = replace(
-                    state,
-                    last_update_time=decision_time,
-                    top_of_book=replace(state.top_of_book, updated_at=decision_time),
-                )
-            evaluation_state = state
-            if stale_ms < 0:
-                evaluation_state = replace(
-                    state,
-                    last_update_time=decision_time,
-                    top_of_book=replace(state.top_of_book, updated_at=decision_time),
-                )
-            evaluation_state = self._state_with_reference_price_guard(evaluation_state, timestamp=decision_time)
-            primitive_inputs = self.runtime.primitive_builder(symbol, decision_time)
-            history = self.runtime.history_provider(symbol, decision_time)
-            decision = self.runtime.paper_service.run_cycle(
-                state=evaluation_state,
-                primitive_inputs=primitive_inputs,
-                history=history,
-                decision_time=decision_time,
-                equity_usd=self.equity_usd,
-                remaining_portfolio_capacity_usd=self.remaining_portfolio_capacity_usd,
-                cash_reserve_fraction=self._cash_reserve_fraction(),
-            )
-            self.runtime.loop_stats.note_emitted_decision(symbol=symbol, decision_time=decision_time)
-            self._record_decision(decision=decision, state=evaluation_state, timestamp=decision_time)
-
-    def _priority_fallback_boundary_has_pending_symbols(self, decision_time: datetime) -> bool:
-        comparable_decision_time = decision_time
-        if comparable_decision_time.tzinfo is None:
-            comparable_decision_time = comparable_decision_time.replace(tzinfo=timezone.utc)
-        for symbol in self._iter_schedulable_symbols():
-            last_recorded = self.last_recorded_decision_time_by_symbol.get(symbol)
-            if last_recorded is None:
-                return True
-            comparable_last_recorded = last_recorded
-            if comparable_last_recorded.tzinfo is None:
-                comparable_last_recorded = comparable_last_recorded.replace(tzinfo=timezone.utc)
-            if comparable_last_recorded < comparable_decision_time:
-                return True
-        return False
-
-    def _run_priority_fallback_decision_boundary(self, decision_time: datetime) -> None:
-        self._run_scheduled_decision_boundary_with_options(
-            decision_time,
-            allow_stale_snapshot=True,
-        )
-        next_boundary = self._scheduled_decision_boundary_after(decision_time)
-        if self.next_scheduled_decision_at is None or self.next_scheduled_decision_at <= decision_time:
-            self.next_scheduled_decision_at = next_boundary
-
-    def _maybe_run_scheduled_decision_cycle(self, now: datetime) -> None:
-        if self.runtime.kill_switch.armed and not self._paper_verification_continue_decisions_after_kill_switch():
-            return
-        if self.next_scheduled_decision_at is None:
-            anchor = self.last_decision_timestamp or now
-            if anchor < self._scheduled_decision_catchup_cutoff(now):
-                anchor = now
-            self.next_scheduled_decision_at = self._scheduled_decision_boundary_after(anchor)
-        if self.next_scheduled_decision_at < self._scheduled_decision_catchup_cutoff(now):
-            self.next_scheduled_decision_at = self._scheduled_decision_boundary_after(now)
-        while self.next_scheduled_decision_at is not None and now >= self.next_scheduled_decision_at:
-            boundary = self.next_scheduled_decision_at
-            if self._single_slot_priority_fallback_mode_enabled():
-                self._run_priority_fallback_decision_boundary(boundary)
-            else:
-                self._run_scheduled_decision_boundary(boundary)
-            self.next_scheduled_decision_at = self._scheduled_decision_boundary_after(boundary)
 
 
 @dataclass(frozen=True)
@@ -9400,45 +1197,6 @@ class LivePaperShell:
         self.summary_path = summary_path
         self.state_path = state_path
 
-    async def _run_with_monitor(self, runner: AsyncLivePaperRunner) -> None:
-        task = asyncio.create_task(
-            runner.run(
-                summary_path=self.summary_path,
-                state_path=self.state_path,
-            )
-        )
-        self.session.self_healing.begin_monitoring(
-            timestamp=datetime.now(tz=timezone.utc),
-            heartbeat_count=self.session.heartbeat_count,
-            decision_count=len(self.session.decisions),
-        )
-        poll_seconds = max(1.0, min(5.0, self.session.self_healing.stall_timeout_seconds / 6.0))
-        try:
-            while not task.done():
-                await asyncio.sleep(poll_seconds)
-                if task.done():
-                    break
-                now = datetime.now(tz=timezone.utc)
-                self.session._maybe_run_scheduled_decision_cycle(now)
-                if not self.session.self_healing.detect_stall(now=now):
-                    continue
-                allowed = self.session.self_healing.register_stall_recovery(
-                    now=now,
-                    heartbeat_count=self.session.heartbeat_count,
-                )
-                task.cancel()
-                with suppress(asyncio.CancelledError):
-                    await task
-                if not allowed:
-                    raise RuntimeError("STALL_RECOVERY_LIMIT_EXCEEDED")
-                raise RuntimeError("SELF_HEAL_STALL_RESTART")
-            await task
-        finally:
-            if not task.done():
-                task.cancel()
-                with suppress(asyncio.CancelledError):
-                    await task
-
     async def run(self) -> dict[str, object] | None:
         last_error: Exception | None = None
         for attempt in range(1, self.backoff_policy.max_attempts + 1):
@@ -9449,18 +1207,14 @@ class LivePaperShell:
             try:
                 print(f"[CONNECT] websocket attempt={attempt}", flush=True)
                 runner = AsyncLivePaperRunner(self.ws_client_factory(), self.session)
-                await self._run_with_monitor(runner)
+                await runner.run(
+                    summary_path=self.summary_path,
+                    state_path=self.state_path,
+                )
                 break
             except Exception as exc:  # pragma: no cover - exercised in tests
                 last_error = exc
-                if self.summary_path is not None and self.state_path is not None:
-                    self.session.flush(
-                        summary_path=self.summary_path,
-                        state_path=self.state_path,
-                    )
                 print(f"[ERROR] websocket attempt={attempt} error={exc}", flush=True)
-                if str(exc) == "STALL_RECOVERY_LIMIT_EXCEEDED":
-                    raise
                 if attempt >= self.backoff_policy.max_attempts:
                     raise
         if self.summary_path is not None and self.state_path is not None:

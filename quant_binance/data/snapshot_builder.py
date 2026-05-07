@@ -15,14 +15,12 @@ class SnapshotBuilder:
         self.settings = settings
 
     def is_decision_boundary(self, timestamp: datetime) -> bool:
-        interval_seconds = max(
-            int(
-                self.settings.decision_engine.decision_interval_seconds
-                or self.settings.decision_engine.decision_interval_minutes * 60
-            ),
-            1,
+        interval = self.settings.decision_engine.decision_interval_minutes
+        return (
+            timestamp.minute % interval == 0
+            and timestamp.second == 0
+            and timestamp.microsecond == 0
         )
-        return timestamp.microsecond == 0 and int(timestamp.timestamp()) % interval_seconds == 0
 
     def build(
         self,

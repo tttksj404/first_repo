@@ -20,52 +20,6 @@ class OnlineEdgeLearner:
     def __init__(self, *, min_observations: int = 5) -> None:
         self.lookup = ConditionalEdgeLookup(min_observations=min_observations)
 
-    def load_from_export(self, path: str | Path) -> int:
-        """Restore learning state from a previous edge_table.json export.
-        Returns number of observations restored."""
-        export_path = Path(path)
-        if not export_path.exists():
-            return 0
-        try:
-            raw = export_path.read_text(encoding="utf-8")
-            if not raw.strip():
-                return 0
-            data = json.loads(raw)
-        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
-            return 0
-        if not isinstance(data, dict):
-            return 0
-        symbols = data.get("symbols", {})
-        if not isinstance(symbols, dict):
-            return 0
-        # Sanity check: observation_count should be positive
-        if int(data.get("observation_count", 0) or 0) <= 0:
-            return 0
-        restored = 0
-        for symbol, rows in symbols.items():
-            if not isinstance(rows, list):
-                continue
-            for row in rows:
-                if not isinstance(row, dict):
-                    continue
-                mode = row.get("mode", "")
-                bucket = row.get("bucket", 0)
-                direction = row.get("trend_direction", 1)
-                observations = row.get("observations", [])
-                if not isinstance(observations, list) or not mode:
-                    continue
-                for obs in observations:
-                    if isinstance(obs, (int, float)):
-                        self.lookup.add_observation(
-                            symbol=symbol,
-                            mode=mode,
-                            predictability_score=bucket * 10 + 5,  # bucket midpoint
-                            trend_direction=direction,
-                            forward_return_bps=float(obs),
-                        )
-                        restored += 1
-        return restored
-
     def ingest_decisions(
         self,
         decisions: list[DecisionIntent] | tuple[DecisionIntent, ...],
@@ -82,9 +36,7 @@ class OnlineEdgeLearner:
                 else None
             )
             if realized_bps is None:
-                # Skip: do NOT inject prediction as realized value.
-                # Real observations come from ingest_closed_trade() instead.
-                continue
+                realized_bps = decision.gross_expected_edge_bps
             self.lookup.add_observation(
                 symbol=decision.symbol,
                 mode=decision.final_mode,
@@ -94,27 +46,6 @@ class OnlineEdgeLearner:
             )
             count += 1
         return count
-
-    def ingest_closed_trade(
-        self,
-        *,
-        symbol: str,
-        mode: str,
-        side: str,
-        entry_predictability_score: float,
-        realized_return_bps: float,
-    ) -> None:
-        """Feed actual realized return from a closed trade into the edge lookup."""
-        if mode not in {"spot", "futures"}:
-            return
-        trend_direction = 1 if side == "long" else -1
-        self.lookup.add_observation(
-            symbol=symbol,
-            mode=mode,
-            predictability_score=entry_predictability_score,
-            trend_direction=trend_direction,
-            forward_return_bps=realized_return_bps,
-        )
 
     def export(self, path: str | Path) -> LearningUpdate:
         output_path = Path(path)
@@ -137,7 +68,6 @@ class OnlineEdgeLearner:
                 {
                     "observation_count": observation_count,
                     "symbols": symbol_rows,
-                    "diagnostics": self.lookup.diagnostics(),
                 },
                 indent=2,
                 sort_keys=True,

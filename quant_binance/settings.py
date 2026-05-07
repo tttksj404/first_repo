@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, fields as _dc_fields
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from quant_binance.env import resolve_strategy_override_path, resolve_strategy_profile, resolve_universe_symbols
+from quant_binance.env import (
+    resolve_bitget_us_stock_symbols,
+    resolve_strategy_profile,
+    resolve_universe_symbols,
+    resolve_universe_symbols_append,
+)
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -25,7 +30,6 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 @dataclass(frozen=True)
 class DecisionEngineConfig:
     decision_interval_minutes: int
-    decision_interval_seconds: int = 0
 
 
 @dataclass(frozen=True)
@@ -100,9 +104,6 @@ class RiskConfig:
     daily_realized_loss_limit: float
     weekly_realized_loss_limit: float
     intraday_drawdown_limit: float
-    min_meaningful_futures_notional_usd: float = 0.0
-    min_meaningful_spot_notional_usd: float = 0.0
-    min_expected_profit_usd_per_trade: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -120,16 +121,6 @@ class ExitRuleConfig:
     score_drop_exit_buffer: float
     liquidity_drop_exit_buffer: float
     confirmation_cycles_for_exit: int
-    futures_profit_protection_arm_roe_percent: float = 8.0
-    futures_profit_protection_retrace_roe_percent: float = 3.0
-    futures_proactive_take_profit_roe_thresholds_percent: tuple[float, ...] = ()
-    futures_proactive_take_profit_fraction: float = 0.25
-    futures_proactive_take_profit_min_roe_percent: float = 10.0
-    futures_early_invalid_exit_max_holding_minutes: float = 0.0
-    futures_early_invalid_exit_min_loss_usd: float = 0.0
-    futures_early_invalid_exit_min_score_drop: float = 0.0
-    futures_early_invalid_exit_min_edge_drop_bps: float = 0.0
-    futures_early_invalid_exit_max_peak_roe_percent: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -195,12 +186,12 @@ class FuturesExposureConfig:
     strong_overheat_penalty_max: float
     strong_edge_to_cost_multiple_min: float
     strong_size_multiplier: float
-    macro_support_min: float = 0.7
+    macro_support_min: float = 1.0
     macro_score_relaxation: float = 0.0
     macro_liquidity_relaxation: float = 0.0
     macro_overheat_relaxation: float = 0.0
     macro_volatility_relaxation: float = 0.0
-    macro_min_entry_net_edge_bps: float = 6.0
+    macro_min_entry_net_edge_bps: float = 0.0
     macro_edge_to_cost_multiple_min: float = 1.0
     macro_allow_caution: bool = False
     priority_symbols: tuple[str, ...] = ()
@@ -209,63 +200,10 @@ class FuturesExposureConfig:
     priority_edge_to_cost_multiple_min: float = 1.0
     priority_volatility_relaxation: float = 0.0
     priority_allow_caution: bool = False
-    major_symbols: tuple[str, ...] = ()
-    major_size_boost_multiplier: float = 1.0
-    major_medium_size_boost_multiplier: float = 1.0
-    alt_score_penalty_without_macro: float = 0.0
-    alt_liquidity_penalty_without_macro: float = 0.0
-    alt_min_entry_net_edge_bps_without_macro: float = 0.0
-    alt_reduced_size_multiplier: float = 0.0
-    demoted_symbols: tuple[str, ...] = ()
-    demoted_symbol_size_cap: float = 0.45
-    major_reallocation_score_advantage_relaxation: float = 0.0
-    major_reallocation_edge_advantage_relaxation_bps: float = 0.0
-    major_reallocation_incremental_pnl_relaxation_usd: float = 0.0
-    major_min_meaningful_notional_usd: float = 0.0
-    major_medium_min_entry_notional_usd: float = 0.0
-    major_medium_total_notional_fraction_relaxation: float = 0.0
-    major_medium_safety_cap_fraction: float = 0.5
-    major_strong_min_entry_notional_usd: float = 0.0
-    major_strong_total_notional_fraction_relaxation: float = 0.0
-    major_strong_safety_cap_fraction: float = 0.5
-    high_conviction_sizing_enabled: bool = False
-    high_conviction_block_non_strong: bool = False
-    high_conviction_target_margin_fraction: float = 0.0
-    high_conviction_medium_margin_fraction: float = 0.0
-    high_conviction_min_notional_usd: float = 0.0
-    high_conviction_recent_long_confirmations: int = 0
-    high_conviction_recent_max_age_minutes: int = 0
-    high_conviction_recent_min_trend_strength: float = 0.0
-    high_conviction_recent_min_volume_confirmation: float = 0.0
-    high_conviction_recent_min_liquidity: float = 0.0
-    high_conviction_recent_max_volatility_penalty: float = 0.0
-    high_conviction_recent_max_overheat_penalty: float = 0.0
-    high_conviction_recent_min_edge_to_cost_multiple: float = 0.0
-    high_conviction_recent_opposite_block_enabled: bool = False
-    high_conviction_recent_opposite_max_age_minutes: int = 0
-    high_conviction_recent_reversal_unlock_enabled: bool = False
-    high_conviction_recent_reversal_unlock_confirmations: int = 0
-    high_conviction_max_decision_age_seconds: int = 0
-    high_conviction_recent_weak_block_enabled: bool = False
-    high_conviction_recent_weak_max_age_seconds: int = 0
-    funding_bias_enabled: bool = False
-    funding_bias_min_abs_bps: float = 0.0
-    funding_bias_max_abs_bps: float = 6.0
-    pyramid_enabled: bool = False
-    pyramid_major_only: bool = True
-    pyramid_min_roe_percent: float = 0.0
-    pyramid_min_predictability_score: float = 60.0
-    pyramid_min_net_edge_bps: float = 6.0
-    pyramid_min_trend_strength: float = 0.55
-    pyramid_min_volume_confirmation: float = 0.45
-    pyramid_max_adds_per_symbol: int = 1
-    pyramid_size_multiplier: float = 0.5
-    # Short-side suppression knobs (override-aware; defaults preserve legacy behavior)
-    short_disabled: bool = False
-    short_extra_score_floor: float = 4.0
-    short_extra_edge_bps: float = 1.5
-    short_extra_liquidity_floor: float = 0.08
-    short_extra_cost_multiple_floor: float = 0.18
+    soft_reason_override_enabled: bool = True
+    soft_reason_override_edge_to_cost_multiple_min: float = 1.0
+    soft_reason_override_min_entry_net_edge_bps: float = 0.0
+    soft_reason_override_size_multiplier: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -290,146 +228,10 @@ class SymbolEligibilityConfig:
 
 
 @dataclass(frozen=True)
-class SymbolFilterProfileConfig:
-    min_predictability_score: float = 0.0
-    min_liquidity_score: float = 0.0
-    min_volume_confirmation: float = 0.0
-    min_net_edge_bps: float = 0.0
-    min_edge_to_cost: float = 0.0
-    max_stop_distance_bps: float = 0.0
-    min_expected_profit_multiplier: float = 0.0
-    min_expected_profit_extra_usd: float = 0.0
-    size_multiplier: float = 1.0
-    bypass_fee_edge_buffer: bool = False
-    reversal_prone_guard_enabled: bool = False
-    reversal_guard_confirmation_window_minutes: float = 15.0
-    reversal_guard_min_notional_to_equity: float = 4.0
-    reversal_guard_marginal_score: float = 75.0
-    reversal_guard_marginal_trend_strength: float = 0.70
-    reversal_guard_marginal_volume_confirmation: float = 0.58
-    reversal_guard_min_net_edge_bps: float = 30.0
-    reversal_guard_min_edge_to_cost: float = 3.25
-    reversal_guard_min_expected_profit_multiplier: float = 2.0
-    reversal_guard_min_expected_profit_extra_usd: float = 0.75
-    rejection_reason: str = "SYMBOL_FILTER_PROFILE"
-    paper_recovery_enabled: bool = False
-    paper_recovery_side: str = ""
-    paper_recovery_min_score: float = 0.0
-    paper_recovery_min_volume_confirmation: float = 0.0
-    paper_recovery_min_net_edge_bps: float = 0.0
-    paper_recovery_min_edge_to_cost: float = 0.0
-    paper_recovery_max_cost_bps: float = 0.0
-    paper_recovery_allowed_rejections: tuple[str, ...] = ()
-    paper_recovery_reason: str = "PAPER_SYMBOL_FILTER_RECOVERY"
-
-
-@dataclass(frozen=True)
-class LivePositionRiskConfig:
-    enabled: bool
-    take_profit_roe_percent: float
-    stop_loss_roe_percent: float
-    margin_ratio_emergency: float
-    disable_standard_stop_loss_exits: bool = False
-    long_only_turnaround_mode: bool = False
-    long_disable_standard_stop_loss: bool = False
-    portfolio_full_exit_only: bool = False
-    portfolio_full_exit_profit_ratio: float = 0.0
-    turnaround_grace_enabled: bool = True
-    soft_stop_roe_percent: float = -10.0
-    turnaround_abort_roe_percent: float = -14.0
-    turnaround_abort_volatility_adaptive: bool = False
-    turnaround_abort_volatility_floor_bps: float = 25.0
-    turnaround_abort_volatility_scale: float = 0.02
-    turnaround_abort_volatility_lookback_bars: int = 12
-    turnaround_abort_min_roe_percent: float = -35.0
-    turnaround_recovery_roe_points: float = 2.0
-    turnaround_predictability_min: float = 55.0
-    turnaround_net_edge_min_bps: float = 2.0
-    turnaround_volume_confirmation_min: float = 0.4
-    turnaround_trend_strength_min: float = 0.55
-    turnaround_liquidity_min: float = 0.45
-    turnaround_signal_max_age_minutes: int = 20
-    major_drawdown_grace_enabled: bool = False
-    major_drawdown_grace_minutes: int = 0
-    major_drawdown_abort_roe_percent: float = -12.0
-    major_drawdown_predictability_min: float = 58.0
-    major_drawdown_net_edge_min_bps: float = 4.0
-    major_drawdown_liquidity_min: float = 0.45
-    major_drawdown_signal_max_age_minutes: int = 30
-    profit_flip_fast_take_profit_roe_percent: float = 2.0
-    profit_flip_take_profit_fraction: float = 0.25
-    short_profit_flip_fast_take_profit_roe_percent: float = 0.0
-    short_profit_flip_take_profit_fraction: float = 0.0
-    position_unrealized_profit_arm_usd: float = 8.0
-    position_unrealized_profit_retrace_usd: float = 3.0
-    position_unrealized_take_profit_fraction: float = 0.25
-    portfolio_unrealized_profit_arm_ratio: float = 0.015
-    portfolio_unrealized_profit_retrace_ratio: float = 0.005
-    portfolio_profit_lock_take_profit_fraction: float = 0.25
-    partial_exit_min_expected_after_fee_usd: float = 0.0
-    partial_exit_min_interval_minutes: int = 0
-    major_partial_exit_fraction: float = 0.5
-    major_profit_protection_arm_roe_percent: float = 12.0
-    major_profit_protection_retrace_roe_percent: float = 4.5
-    short_profit_protection_arm_roe_percent: float = 0.0
-    short_profit_protection_retrace_roe_percent: float = 0.0
-    major_low_signal_max_holding_minutes: int = 0
-    major_low_signal_min_unrealized_usd: float = 0.0
-    major_low_signal_min_roe_percent: float = 0.0
-    major_reentry_cooldown_minutes: int = 0
-    major_reversal_confirmation_cycles: int = 0
-    major_reversal_min_holding_minutes: int = 0
-    major_loss_reentry_cooldown_minutes: int = 0
-    major_loss_reentry_trigger_usd: float = 0.0
-    major_missing_on_exchange_threshold: int = 0
-    non_core_soft_stop_roe_percent: float = -2.5
-    non_core_take_profit_roe_percent: float = 1.0
-    non_core_take_profit_fraction: float = 1.0
-    non_core_take_profit_min_usd: float = 1.0
-
-
-@dataclass(frozen=True)
-class LossComboDowngradeConfig:
-    enabled: bool = False
-    lookback_hours: int = 24
-    time_bucket_minutes: int = 240
-    prune_loss_usd: float = 0.0
-    observe_only_loss_usd: float = 0.0
-    cooldown_loss_usd: float = 0.0
-    cooldown_minutes: int = 0
-
-
-@dataclass(frozen=True)
-class PortfolioFocusConfig:
-    enabled: bool
-    spot_top_n: int
-    futures_top_n: int
-    min_score_advantage_to_replace: float
-    min_net_edge_advantage_bps: float = 0.0
-    min_incremental_pnl_usd: float = 0.0
-
-
-@dataclass(frozen=True)
 class HousekeepingConfig:
     enabled: bool
     max_log_bytes_per_stream: int
     keep_recent_runs: int
-
-
-@dataclass(frozen=True)
-class B3MsbConfig:
-    enabled: bool = False
-    swing_window: int = 13
-    atr_tp_multiple: float = 4.2
-    atr_sl_multiple: float = 2.8
-    breakout_buffer_pct: float = 0.0017
-    adx_min: int = 4
-    min_swing_size_atr: float = 0.4
-    rsi_upper: int = 60
-    rsi_lower: int = 22
-    vol_z_min: float = 0.8
-    score_bonus: float = 12.0  # predictability_score 보너스 (시그널 활성 시)
-    edge_bonus_bps: float = 8.0  # gross_expected_edge 보너스 (bps)
 
 
 @dataclass(frozen=True)
@@ -458,33 +260,35 @@ class Settings:
     cash_reserve: CashReserveConfig
     altcoin_overlays: AltcoinOverlayConfig
     symbol_eligibility: SymbolEligibilityConfig
-    live_position_risk: LivePositionRiskConfig
-    loss_combo_downgrade: LossComboDowngradeConfig
-    portfolio_focus: PortfolioFocusConfig
     housekeeping: HousekeepingConfig
     strategy_profile: str
-    ensemble_signal_required: bool = False
-    force_auto_mode: str = ""
-    disable_position_adoption: bool = False
-    data_collection_mode: bool = False
-    data_collection_min_trades: int = 50
-    b3_msb: B3MsbConfig = B3MsbConfig()
 
     @classmethod
-    def load(cls, path: str | Path) -> "Settings":
+    def load(
+        cls,
+        path: str | Path,
+        *,
+        strategy_profile: str | None = None,
+    ) -> "Settings":
         with Path(path).open("r", encoding="utf-8") as handle:
             raw = json.load(handle)
-        profile = resolve_strategy_profile() or "conservative"
+        profile = (strategy_profile or resolve_strategy_profile() or "conservative").strip().lower()
         raw = _deep_merge(raw, raw.get("strategy_profiles", {}).get(profile, {}))
-        override_path = resolve_strategy_override_path()
-        if override_path:
-            candidate = Path(override_path)
-            if candidate.exists():
-                raw = _deep_merge(raw, json.loads(candidate.read_text(encoding="utf-8")))
+        base_universe = list(raw.get("universe", ()))
         override_symbols = resolve_universe_symbols()
         if override_symbols:
-            # Environment-selected universe must win over any file-based override.
-            raw["universe"] = list(override_symbols)
+            base_universe = list(override_symbols)
+        append_symbols = resolve_universe_symbols_append()
+        us_stock_symbols = resolve_bitget_us_stock_symbols()
+        merged_universe: list[str] = []
+        seen_symbols: set[str] = set()
+        for symbol in (*base_universe, *append_symbols, *us_stock_symbols):
+            normalized = str(symbol).strip().upper()
+            if not normalized or normalized in seen_symbols:
+                continue
+            merged_universe.append(normalized)
+            seen_symbols.add(normalized)
+        raw["universe"] = merged_universe
         raw["strategy_profile"] = profile
         return cls.from_dict(raw)
 
@@ -494,29 +298,6 @@ class Settings:
         spot_support_raw["priority_symbols"] = tuple(spot_support_raw.get("priority_symbols", ()))
         futures_exposure_raw = dict(raw["futures_exposure"])
         futures_exposure_raw["priority_symbols"] = tuple(futures_exposure_raw.get("priority_symbols", ()))
-        futures_exposure_raw["major_symbols"] = tuple(futures_exposure_raw.get("major_symbols", ()))
-        futures_exposure_raw["demoted_symbols"] = tuple(futures_exposure_raw.get("demoted_symbols", ()))
-        exit_rules_raw = dict(raw["exit_rules"])
-        exit_rules_raw["futures_proactive_take_profit_roe_thresholds_percent"] = tuple(
-            exit_rules_raw.get("futures_proactive_take_profit_roe_thresholds_percent", ())
-        )
-        loss_combo_downgrade_raw = {
-            "enabled": False,
-            "lookback_hours": 24,
-            "time_bucket_minutes": 240,
-            "prune_loss_usd": 0.0,
-            "observe_only_loss_usd": 0.0,
-            "cooldown_loss_usd": 0.0,
-            "cooldown_minutes": 0,
-        }
-        loss_combo_downgrade_raw.update(raw.get("loss_combo_downgrade", {}))
-        _profile_field_names = {f.name for f in _dc_fields(SymbolFilterProfileConfig)}
-        symbol_filter_profiles = {
-            str(symbol).upper(): SymbolFilterProfileConfig(
-                **{k: v for k, v in dict(profile or {}).items() if k in _profile_field_names}
-            )
-            for symbol, profile in dict(raw.get("symbol_filter_profiles", {}) or {}).items()
-        }
         return cls(
             config_version=raw["config_version"],
             snapshot_schema_version=raw["snapshot_schema_version"],
@@ -532,7 +313,7 @@ class Settings:
             expected_edge=ExpectedEdgeConfig(**raw["expected_edge"]),
             risk=RiskConfig(**raw["risk"]),
             sizing=SizingConfig(**raw["sizing"]),
-            exit_rules=ExitRuleConfig(**exit_rules_raw),
+            exit_rules=ExitRuleConfig(**raw["exit_rules"]),
             operational_limits=OperationalLimitConfig(**raw["operational_limits"]),
             validation=ValidationConfig(**raw["validation"]),
             mode_behavior=ModeBehaviorConfig(**raw["mode_behavior"]),
@@ -542,15 +323,6 @@ class Settings:
             cash_reserve=CashReserveConfig(**raw["cash_reserve"]),
             altcoin_overlays=AltcoinOverlayConfig(**raw["altcoin_overlays"]),
             symbol_eligibility=SymbolEligibilityConfig(**raw["symbol_eligibility"]),
-            live_position_risk=LivePositionRiskConfig(**raw["live_position_risk"]),
-            loss_combo_downgrade=LossComboDowngradeConfig(**loss_combo_downgrade_raw),
-            portfolio_focus=PortfolioFocusConfig(**raw["portfolio_focus"]),
-            housekeeping=HousekeepingConfig(**raw["housekeeping"]),
+            housekeeping=HousekeepingConfig(**raw.get("housekeeping", {"enabled": False, "max_log_bytes_per_stream": 0, "keep_recent_runs": 0})),
             strategy_profile=raw["strategy_profile"],
-            ensemble_signal_required=bool(raw.get("ensemble_signal_required", False)),
-            force_auto_mode=str(raw.get("force_auto_mode", "") or ""),
-            disable_position_adoption=bool(raw.get("disable_position_adoption", False)),
-            data_collection_mode=bool(raw.get("data_collection_mode", False)),
-            data_collection_min_trades=int(raw.get("data_collection_min_trades", 50)),
-            b3_msb=B3MsbConfig(**{k: v for k, v in raw.get("b3_msb_strategy", {}).items() if k in B3MsbConfig.__dataclass_fields__}),
         )

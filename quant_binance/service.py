@@ -16,6 +16,7 @@ from quant_binance.overlays import (
     load_macro_inputs,
 )
 from quant_binance.settings import Settings
+from quant_binance.strategy.edge import ConditionalEdgeLookup
 from quant_binance.strategy.regime import evaluate_snapshot
 
 
@@ -24,12 +25,18 @@ class PaperTradingService:
         self,
         settings: Settings,
         router: ExecutionRouter | None = None,
-        feature_extractor: MarketFeatureExtractor | None = None,
+        edge_lookup: ConditionalEdgeLookup | None = None,
     ) -> None:
+        self.edge_lookup = edge_lookup
         self.settings = settings
         self.snapshot_builder = SnapshotBuilder(settings)
         self.router = router or ExecutionRouter()
-        self.feature_extractor = feature_extractor or MarketFeatureExtractor(settings)
+        self.feature_extractor = MarketFeatureExtractor(settings, edge_lookup=edge_lookup)
+
+    def apply_settings(self, settings: Settings) -> None:
+        self.settings = settings
+        self.snapshot_builder = SnapshotBuilder(settings)
+        self.feature_extractor = MarketFeatureExtractor(settings, edge_lookup=self.edge_lookup)
 
     def run_cycle(
         self,
@@ -66,5 +73,5 @@ class PaperTradingService:
             remaining_portfolio_capacity_usd=remaining_portfolio_capacity_usd,
             cash_reserve_fraction=cash_reserve_fraction,
         )
-        self.router.route(decision, reference_price=state.last_trade_price)
+        self.router.route(decision)
         return decision

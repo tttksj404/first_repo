@@ -38,8 +38,3 @@ class PaperBroker:
         )
         self.orders.append(order)
         return order
-
-    def ensure_position(self, decision: DecisionIntent, *, reference_price: float | None = None) -> None:
-        """Compatibility hook for callers that track paper positions outside the broker."""
-        _ = decision
-        _ = reference_price

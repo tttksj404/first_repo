@@ -4,82 +4,21 @@ import base64
 import hashlib
 import hmac
 import json
-import random
-import socket
+import math
 import ssl
 import time
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from quant_binance.execution.bitget_margin import resolve_bitget_margin_mode
 from quant_binance.exchange import ExchangeCredentials
 
 
 BITGET_REST_URL = "https://api.bitget.com"
 BITGET_DEFAULT_PRODUCT_TYPE = "USDT-FUTURES"
 BITGET_DEFAULT_MARGIN_COIN = "USDT"
-
-
-def _transport_error_message(*, request: Request, exc: URLError) -> str:
-    reason = exc.reason
-    target = request.full_url
-    host = getattr(getattr(request, "host", None), "strip", lambda: "")() or "unknown-host"
-    if isinstance(reason, socket.gaierror):
-        return f"Bitget transport error for {target} (host={host}): DNS resolution failed: {reason}"
-    return f"Bitget transport error for {target} (host={host}): {reason}"
-
-
-def _optional_float(value: Any) -> float | None:
-    if value in (None, ""):
-        return None
-    return float(value)
-
-
-def _bitget_futures_side(*, side: str, reduce_only: bool | None) -> str:
-    normalized = side.strip().upper()
-    if normalized not in {"BUY", "SELL"}:
-        raise ValueError(f"unsupported Bitget futures side '{side}'")
-    return normalized.lower()
-
-
-_SPOT_KLINE_GRANULARITY = {
-    "1m": "1min",
-    "3m": "3min",
-    "5m": "5min",
-    "15m": "15min",
-    "30m": "30min",
-    "1h": "1h",
-    "4h": "4h",
-    "6h": "6h",
-    "12h": "12h",
-    "1d": "1day",
-    "1w": "1week",
-    "1M": "1M",
-}
-
-_FUTURES_KLINE_GRANULARITY = {
-    "1m": "1m",
-    "3m": "3m",
-    "5m": "5m",
-    "15m": "15m",
-    "30m": "30m",
-    "1h": "1H",
-    "4h": "4H",
-    "6h": "6H",
-    "12h": "12H",
-    "1d": "1D",
-    "1w": "1W",
-    "1M": "1M",
-}
-
-
-def _bitget_granularity(*, market: str, interval: str) -> str:
-    if market == "futures":
-        return _FUTURES_KLINE_GRANULARITY.get(interval, interval)
-    return _SPOT_KLINE_GRANULARITY.get(interval, interval)
 
 
 def _json_body(payload: dict[str, Any] | None) -> str:
@@ -113,6 +52,10 @@ class BitgetContractConfig:
 
 class BitgetRestClient:
     exchange_id = "bitget"
+    _BALANCE_BACKOFF_FACTOR = 0.4
+    _BALANCE_BACKOFF_MAX_ATTEMPTS = 5
+    _BALANCE_BACKOFF_SLEEP_SECONDS = 0.2
+    _MIN_TRADE_USDT_BUFFER = 1.01
 
     def __init__(
         self,
@@ -128,6 +71,11 @@ class BitgetRestClient:
         self.contract_config = contract_config or BitgetContractConfig()
         self.receive_window_ms = receive_window_ms
         self.allow_insecure_ssl = allow_insecure_ssl
+        self._futures_symbol_size_constraints: dict[str, tuple[float, float, float]] | None = None
+        self._spot_symbol_constraints: dict[str, tuple[int, float]] | None = None
+        self._futures_positions_available_cache: dict[tuple[str, str], float] | None = None
+        self._futures_positions_available_cache_at: float = 0.0
+        self._futures_positions_cache_ttl_seconds: float = 5.0
 
     @property
     def supports_private_reads(self) -> bool:
@@ -211,84 +159,6 @@ class BitgetRestClient:
             params={"symbol": symbol},
         )
 
-    def build_positions_request(self) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/position/all-position",
-            method="GET",
-            params={
-                "productType": self.contract_config.product_type,
-                "marginCoin": self.contract_config.margin_coin,
-            },
-        )
-
-    def build_futures_order_history_request(
-        self,
-        *,
-        symbol: str | None = None,
-        start_time_ms: int | None = None,
-        end_time_ms: int | None = None,
-        id_less_than: str | None = None,
-        limit: int = 100,
-    ) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/order/orders-history",
-            method="GET",
-            params={
-                "productType": self.contract_config.product_type,
-                "symbol": symbol,
-                "startTime": start_time_ms,
-                "endTime": end_time_ms,
-                "idLessThan": id_less_than,
-                "limit": limit,
-            },
-        )
-
-    def build_futures_fill_history_request(
-        self,
-        *,
-        symbol: str | None = None,
-        order_id: str | None = None,
-        start_time_ms: int | None = None,
-        end_time_ms: int | None = None,
-        id_less_than: str | None = None,
-        limit: int = 100,
-    ) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/order/fill-history",
-            method="GET",
-            params={
-                "productType": self.contract_config.product_type,
-                "symbol": symbol,
-                "orderId": order_id,
-                "startTime": start_time_ms,
-                "endTime": end_time_ms,
-                "idLessThan": id_less_than,
-                "limit": limit,
-            },
-        )
-
-    def build_futures_position_history_request(
-        self,
-        *,
-        symbol: str | None = None,
-        start_time_ms: int | None = None,
-        end_time_ms: int | None = None,
-        id_less_than: str | None = None,
-        limit: int = 100,
-    ) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/position/history-position",
-            method="GET",
-            params={
-                "productType": self.contract_config.product_type,
-                "symbol": symbol,
-                "startTime": start_time_ms,
-                "endTime": end_time_ms,
-                "idLessThan": id_less_than,
-                "limit": limit,
-            },
-        )
-
     def build_live_order_request(self, *, market: str, order_params: dict[str, Any]) -> Request:
         if market == "futures":
             return self.build_signed_request(
@@ -300,108 +170,6 @@ class BitgetRestClient:
             path="/api/v2/spot/trade/place-order",
             method="POST",
             body_params=order_params,
-        )
-
-    def build_futures_position_tpsl_request(self, *, order_params: dict[str, Any]) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/order/place-pos-tpsl",
-            method="POST",
-            body_params=order_params,
-        )
-
-    def build_futures_pending_plan_orders_request(
-        self,
-        *,
-        symbol: str | None = None,
-        plan_type: str = "profit_loss",
-        order_id: str | None = None,
-        client_oid: str | None = None,
-    ) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/order/orders-plan-pending",
-            method="GET",
-            params={
-                "productType": self.contract_config.product_type,
-                "symbol": symbol,
-                "planType": plan_type,
-                "orderId": order_id,
-                "clientOid": client_oid,
-            },
-        )
-
-    def build_cancel_futures_plan_order_request(
-        self,
-        *,
-        symbol: str,
-        order_id_list: list[dict[str, str]],
-        plan_type: str | None = None,
-    ) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/mix/order/cancel-plan-order",
-            method="POST",
-            body_params={
-                "symbol": symbol,
-                "productType": self.contract_config.product_type,
-                "marginCoin": self.contract_config.margin_coin,
-                "planType": plan_type,
-                "orderIdList": order_id_list,
-            },
-        )
-
-    def build_cancel_order_request(self, *, market: str, symbol: str, order_id: str) -> Request:
-        if market == "futures":
-            return self.build_signed_request(
-                path="/api/v2/mix/order/cancel-order",
-                method="POST",
-                body_params={
-                    "symbol": symbol,
-                    "productType": self.contract_config.product_type,
-                    "marginCoin": self.contract_config.margin_coin,
-                    "orderId": order_id,
-                },
-            )
-        return self.build_signed_request(
-            path="/api/v2/spot/trade/cancel-order",
-            method="POST",
-            body_params={"symbol": symbol, "orderId": order_id},
-        )
-
-    def build_spot_plan_order_request(self, *, order_params: dict[str, Any]) -> Request:
-        return self.build_signed_request(
-            path="/api/v2/spot/trade/place-plan-order",
-            method="POST",
-            body_params=order_params,
-        )
-
-    def build_wallet_transfer_request(
-        self,
-        *,
-        source_market: str,
-        target_market: str,
-        asset: str,
-        amount: float,
-        client_oid: str | None = None,
-    ) -> Request:
-        type_map = {
-            ("spot", "futures"): ("spot", "usdt_futures"),
-            ("futures", "spot"): ("usdt_futures", "spot"),
-            ("coin_futures", "spot"): ("coin_futures", "spot"),
-        }
-        from_type, to_type = type_map.get((source_market, target_market), ("", ""))
-        if not from_type or not to_type:
-            raise ValueError(f"unsupported Bitget transfer route {source_market!r}->{target_market!r}")
-        body_params: dict[str, Any] = {
-            "fromType": from_type,
-            "toType": to_type,
-            "coin": asset.upper(),
-            "amount": f"{float(amount):.8f}",
-        }
-        if client_oid:
-            body_params["clientOid"] = client_oid
-        return self.build_signed_request(
-            path="/api/v2/spot/wallet/transfer",
-            method="POST",
-            body_params=body_params,
         )
 
     def build_order_params(
@@ -429,31 +197,206 @@ class BitgetRestClient:
             if client_oid:
                 payload["clientOid"] = client_oid
             return payload
-        raw: dict[str, Any] = {}
-        try:
-            exchange_info = self.get_exchange_info(market="futures")
-        except Exception:
-            exchange_info = {"symbols": []}
-        symbol_row = next((item for item in exchange_info.get("symbols", []) if item.get("symbol") == symbol), None)
-        raw = dict(symbol_row.get("raw") or {}) if isinstance(symbol_row, dict) else {}
-        volume_place = raw.get("volumePlace")
-        try:
-            precision = max(int(volume_place), 0)
-        except (TypeError, ValueError):
-            precision = 8
         payload = {
             "symbol": symbol,
             "productType": self.contract_config.product_type,
             "marginCoin": self.contract_config.margin_coin,
-            "marginMode": resolve_bitget_margin_mode(),
-            "side": _bitget_futures_side(side=side, reduce_only=reduce_only),
-            "tradeSide": "close" if reduce_only else "open",
+            "marginMode": "crossed",
+            "side": side.lower(),
             "orderType": order_type.lower(),
-            "size": f"{quantity:.{precision}f}",
+            "size": f"{quantity:.8f}",
         }
+        if reduce_only is not None:
+            payload["reduceOnly"] = "YES" if reduce_only else "NO"
         if client_oid:
             payload["clientOid"] = client_oid
         return payload
+
+    def get_futures_position_mode(self, *, symbol: str) -> str | None:
+        payload = self.send(
+            self.build_signed_request(
+                path="/api/v2/mix/account/account",
+                method="GET",
+                params={
+                    "symbol": symbol,
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                },
+            )
+        )
+        data = payload.get("data", {})
+        if isinstance(data, dict):
+            mode = data.get("posMode")
+            if isinstance(mode, str) and mode:
+                return mode
+        return None
+
+    def _futures_available_size_by_symbol_hold_side(self) -> dict[tuple[str, str], float]:
+        now = time.time()
+        if (
+            self._futures_positions_available_cache is not None
+            and (now - self._futures_positions_available_cache_at) <= self._futures_positions_cache_ttl_seconds
+        ):
+            return self._futures_positions_available_cache
+        try:
+            payload = self.send(
+                self.build_signed_request(
+                    path="/api/v2/mix/position/all-position",
+                    method="GET",
+                    params={
+                        "productType": self.contract_config.product_type,
+                        "marginCoin": self.contract_config.margin_coin,
+                    },
+                )
+            )
+        except Exception:
+            return {}
+        rows = payload.get("data", []) if isinstance(payload, dict) else []
+        mapped: dict[tuple[str, str], float] = {}
+        if isinstance(rows, list):
+            for item in rows:
+                if not isinstance(item, dict):
+                    continue
+                symbol = str(item.get("symbol", "")).upper()
+                hold_side = str(item.get("holdSide", "")).lower()
+                available = self._safe_float(item.get("available"))
+                if not symbol or hold_side not in {"long", "short"} or available <= 0:
+                    continue
+                mapped[(symbol, hold_side)] = available
+        self._futures_positions_available_cache = mapped
+        self._futures_positions_available_cache_at = now
+        return mapped
+
+    def _normalize_futures_order_params_for_position_mode(self, params: dict[str, Any]) -> dict[str, Any]:
+        normalized = dict(params)
+        side = str(normalized.get("side", "")).lower()
+        is_buy = side in {"buy", "buy_single", "open_long"}
+        normalized["side"] = "buy" if is_buy else "sell"
+        symbol = str(normalized.get("symbol", "")).upper()
+        if not symbol:
+            return normalized
+        try:
+            pos_mode = self.get_futures_position_mode(symbol=symbol)
+        except Exception:
+            pos_mode = None
+        if pos_mode == "hedge_mode":
+            opposite_hold_side = "short" if is_buy else "long"
+            available_by_side = self._futures_available_size_by_symbol_hold_side()
+            close_available = self._safe_float(available_by_side.get((symbol, opposite_hold_side)))
+            if close_available > 0:
+                # In hedge mode, prefer closing opposite exposure first to release margin.
+                normalized["tradeSide"] = "close"
+                # Bitget hedge close-side semantics:
+                # - close long  -> side=buy, tradeSide=close
+                # - close short -> side=sell, tradeSide=close
+                normalized["side"] = "buy" if opposite_hold_side == "long" else "sell"
+                requested_size = self._safe_float(normalized.get("size"))
+                if requested_size > 0:
+                    normalized["size"] = f"{min(requested_size, close_available):.8f}"
+            else:
+                normalized["tradeSide"] = str(normalized.get("tradeSide", "open")).lower()
+            normalized.pop("reduceOnly", None)
+            normalized.pop("holdSide", None)
+        elif pos_mode == "one_way_mode":
+            normalized.pop("tradeSide", None)
+            normalized["reduceOnly"] = str(normalized.get("reduceOnly", "NO")).upper()
+            normalized.pop("holdSide", None)
+        return normalized
+
+    @staticmethod
+    def _safe_float(value: Any) -> float:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+    @staticmethod
+    def _decimal_places(step: float) -> int:
+        if step <= 0:
+            return 8
+        text = f"{step:.12f}".rstrip("0")
+        if "." not in text:
+            return 0
+        return min(len(text.split(".")[1]), 8)
+
+    def _load_spot_symbol_constraints(self) -> dict[str, tuple[int, float]]:
+        if self._spot_symbol_constraints is not None:
+            return self._spot_symbol_constraints
+        info = self.get_exchange_info(market="spot")
+        constraints: dict[str, tuple[int, float]] = {}
+        for item in info.get("symbols", []):
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", "")).upper()
+            raw = item.get("raw", {})
+            if not symbol or not isinstance(raw, dict):
+                continue
+            try:
+                quantity_precision = max(int(raw.get("quantityPrecision", 8)), 0)
+            except (TypeError, ValueError):
+                quantity_precision = 8
+            min_trade_usdt = self._safe_float(raw.get("minTradeUSDT") or 0.0)
+            constraints[symbol] = (quantity_precision, min_trade_usdt)
+        self._spot_symbol_constraints = constraints
+        return constraints
+
+    def _normalize_spot_sell_size(self, *, symbol: str, size: float) -> float:
+        constraints = self._load_spot_symbol_constraints()
+        quantity_precision, _ = constraints.get(symbol.upper(), (8, 0.0))
+        multiplier = 10**quantity_precision
+        normalized = math.floor(max(float(size), 0.0) * multiplier + 1e-12) / multiplier
+        return round(normalized, quantity_precision)
+
+    def _spot_min_trade_usdt(self, *, symbol: str) -> float:
+        constraints = self._load_spot_symbol_constraints()
+        return constraints.get(symbol.upper(), (8, 0.0))[1]
+
+    def _load_futures_symbol_size_constraints(self) -> dict[str, tuple[float, float, float]]:
+        if self._futures_symbol_size_constraints is not None:
+            return self._futures_symbol_size_constraints
+        info = self.get_exchange_info(market="futures")
+        constraints: dict[str, tuple[float, float, float]] = {}
+        for item in info.get("symbols", []):
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", "")).upper()
+            raw = item.get("raw", {})
+            if not symbol or not isinstance(raw, dict):
+                continue
+            min_size = self._safe_float(raw.get("minTradeNum") or raw.get("minTradeAmount") or 0.0)
+            size_step = self._safe_float(raw.get("sizeMultiplier") or 0.0)
+            min_trade_usdt = self._safe_float(raw.get("minTradeUSDT") or 0.0)
+            constraints[symbol] = (min_size, size_step, min_trade_usdt)
+        self._futures_symbol_size_constraints = constraints
+        return constraints
+
+    def _normalize_futures_size(self, *, symbol: str, size: float) -> float:
+        normalized = max(float(size), 0.0)
+        constraints = self._load_futures_symbol_size_constraints()
+        min_size, size_step, _ = constraints.get(symbol.upper(), (0.0, 0.0, 0.0))
+        if size_step > 0:
+            normalized = math.floor((normalized + 1e-12) / size_step) * size_step
+            normalized = round(normalized, self._decimal_places(size_step))
+        else:
+            normalized = round(normalized, 8)
+        if min_size > 0 and normalized < min_size:
+            return 0.0
+        return normalized
+
+    def _futures_min_trade_usdt(self, *, symbol: str) -> float:
+        constraints = self._load_futures_symbol_size_constraints()
+        return constraints.get(symbol.upper(), (0.0, 0.0, 0.0))[2]
+
+    def _ceil_futures_size_for_min_notional(self, *, symbol: str, min_notional_usdt: float, bid_price: float) -> float:
+        if min_notional_usdt <= 0 or bid_price <= 0:
+            return 0.0
+        constraints = self._load_futures_symbol_size_constraints()
+        min_size, size_step, _ = constraints.get(symbol.upper(), (0.0, 0.0, 0.0))
+        raw_size = max((min_notional_usdt * self._MIN_TRADE_USDT_BUFFER) / bid_price, min_size)
+        if size_step > 0:
+            target = math.ceil((raw_size - 1e-12) / size_step) * size_step
+            return round(target, self._decimal_places(size_step))
+        return round(raw_size, 8)
 
     def test_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -465,7 +408,133 @@ class BitgetRestClient:
         }
 
     def place_order(self, *, market: str, order_params: dict[str, Any]) -> dict[str, Any]:
-        payload = self.send(self.build_live_order_request(market=market, order_params=order_params))
+        def _send(params: dict[str, Any]) -> dict[str, Any]:
+            return self.send(self.build_live_order_request(market=market, order_params=params))
+
+        def _with_balance_backoff(params: dict[str, Any]) -> dict[str, Any]:
+            if market != "futures":
+                return _send(params)
+            current = dict(params)
+            last_error: RuntimeError | None = None
+            for attempt in range(self._BALANCE_BACKOFF_MAX_ATTEMPTS):
+                try:
+                    return _send(current)
+                except RuntimeError as exc:
+                    if "code=40762" not in str(exc):
+                        raise
+                    last_error = exc
+                    symbol = str(current.get("symbol", "")).upper()
+                    try:
+                        size = float(current.get("size", 0.0))
+                    except (TypeError, ValueError):
+                        break
+                    if size <= 0:
+                        break
+                    reduced_size = size * self._BALANCE_BACKOFF_FACTOR
+                    if symbol:
+                        reduced_size = self._normalize_futures_size(symbol=symbol, size=reduced_size)
+                        min_trade_usdt = self._futures_min_trade_usdt(symbol=symbol)
+                        if min_trade_usdt > 0:
+                            try:
+                                ticker = self.get_book_ticker(market="futures", symbol=symbol)
+                            except Exception:
+                                ticker = {}
+                            bid_price = self._safe_float(ticker.get("bidPrice")) if isinstance(ticker, dict) else 0.0
+                            if bid_price > 0:
+                                min_size_floor = self._ceil_futures_size_for_min_notional(
+                                    symbol=symbol,
+                                    min_notional_usdt=min_trade_usdt,
+                                    bid_price=bid_price,
+                                )
+                                if min_size_floor > 0:
+                                    reduced_size = max(reduced_size, min_size_floor)
+                    else:
+                        reduced_size = round(reduced_size, 8)
+                    if reduced_size <= 0 or reduced_size >= size:
+                        break
+                    current["size"] = f"{reduced_size:.8f}"
+                    if attempt + 1 < self._BALANCE_BACKOFF_MAX_ATTEMPTS:
+                        time.sleep(self._BALANCE_BACKOFF_SLEEP_SECONDS * (attempt + 1))
+            if last_error is not None:
+                raise last_error
+            return _send(current)
+
+        initial_params = dict(order_params)
+        if market == "spot":
+            symbol = str(initial_params.get("symbol", "")).upper()
+            side = str(initial_params.get("side", "")).lower()
+            if symbol and side == "sell":
+                raw_size = self._safe_float(initial_params.get("size"))
+                normalized_size = self._normalize_spot_sell_size(symbol=symbol, size=raw_size)
+                if normalized_size <= 0:
+                    raise RuntimeError(
+                        f"Bitget preflight rejected spot order for {symbol}: code=45110 msg=less than the minimum amount 1 USDT"
+                    )
+                min_trade_usdt = self._spot_min_trade_usdt(symbol=symbol)
+                if min_trade_usdt > 0:
+                    ticker = self.get_book_ticker(market="spot", symbol=symbol)
+                    bid_price = self._safe_float(ticker.get("bidPrice"))
+                    required_min_notional = min_trade_usdt * self._MIN_TRADE_USDT_BUFFER
+                    if bid_price > 0 and normalized_size * bid_price + 1e-9 < required_min_notional:
+                        raise RuntimeError(
+                            f"Bitget preflight rejected spot order for {symbol}: code=45110 msg=less than the minimum amount {min_trade_usdt:g} USDT"
+                        )
+                initial_params["size"] = f"{normalized_size:.8f}"
+        if market == "futures":
+            initial_params = self._normalize_futures_order_params_for_position_mode(initial_params)
+            symbol = str(initial_params.get("symbol", "")).upper()
+            size = self._safe_float(initial_params.get("size"))
+            if symbol and size > 0:
+                normalized_size = self._normalize_futures_size(symbol=symbol, size=size)
+                if normalized_size <= 0:
+                    raise RuntimeError(
+                        f"Bitget preflight rejected futures order for {symbol}: code=45111 msg=less than the minimum order quantity"
+                    )
+                min_trade_usdt = self._futures_min_trade_usdt(symbol=symbol)
+                if min_trade_usdt > 0:
+                    ticker = self.get_book_ticker(market="futures", symbol=symbol)
+                    bid_price = self._safe_float(ticker.get("bidPrice"))
+                    required_min_notional = min_trade_usdt * self._MIN_TRADE_USDT_BUFFER
+                    if bid_price > 0 and normalized_size * bid_price + 1e-9 < required_min_notional:
+                        raise RuntimeError(
+                            f"Bitget preflight rejected futures order for {symbol}: code=45110 msg=less than the minimum amount {min_trade_usdt:g} USDT"
+                        )
+                initial_params["size"] = f"{normalized_size:.8f}"
+        try:
+            payload = _with_balance_backoff(initial_params)
+        except RuntimeError as exc:
+            if market != "futures":
+                raise
+            raw_msg = str(exc)
+            side = str(initial_params.get("side", "")).lower()
+            is_buy = side in {"buy", "buy_single", "open_long"}
+            hedge_side = "buy" if is_buy else "sell"
+            one_way_side = "buy_single" if is_buy else "sell_single"
+            legacy_open_side = "open_long" if is_buy else "open_short"
+            hold_side = "long" if is_buy else "short"
+
+            retry_candidates: list[dict[str, Any]] = []
+            if "code=40774" in raw_msg:
+                retry_candidates.append({**initial_params, "side": one_way_side})
+                retry_candidates[-1].pop("tradeSide", None)
+                retry_candidates.append({**initial_params, "side": legacy_open_side, "holdSide": hold_side})
+            elif "code=400172" in raw_msg:
+                retry_candidates.append({**initial_params, "side": hedge_side, "tradeSide": "open"})
+                retry_candidates.append({**initial_params, "side": one_way_side})
+                retry_candidates[-1].pop("tradeSide", None)
+                retry_candidates.append({**initial_params, "side": legacy_open_side, "holdSide": hold_side})
+            else:
+                raise
+
+            last_error: RuntimeError = exc
+            for candidate in retry_candidates:
+                try:
+                    payload = _with_balance_backoff(candidate)
+                    break
+                except RuntimeError as retry_exc:
+                    last_error = retry_exc
+            else:
+                raise last_error
         data = payload.get("data")
         normalized: dict[str, Any] = {
             "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
@@ -473,361 +542,104 @@ class BitgetRestClient:
             "market": market,
             "raw": payload,
         }
+        if market == "futures":
+            self._futures_positions_available_cache = None
+            self._futures_positions_available_cache_at = 0.0
         if isinstance(data, dict):
             normalized.update(data)
         return normalized
 
-    def place_futures_position_tpsl(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
-        payload = self.send(self.build_futures_position_tpsl_request(order_params=order_params))
-        data = payload.get("data")
-        normalized: dict[str, Any] = {
-            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
-            "exchange": self.exchange_id,
-            "market": "futures",
-            "raw": payload,
-        }
-        if isinstance(data, dict):
-            normalized.update(data)
-        return normalized
-
-    def get_futures_pending_plan_orders(
-        self,
-        *,
-        symbol: str | None = None,
-        plan_type: str = "profit_loss",
-        order_id: str | None = None,
-        client_oid: str | None = None,
-    ) -> dict[str, Any]:
-        payload = self.send(
-            self.build_futures_pending_plan_orders_request(
-                symbol=symbol,
-                plan_type=plan_type,
-                order_id=order_id,
-                client_oid=client_oid,
-            )
-        )
-        rows, end_id = self._extract_paged_rows(payload)
-        return {"orders": rows, "endId": end_id, "raw": payload}
-
-    def cancel_futures_plan_orders(
-        self,
-        *,
-        symbol: str,
-        order_id_list: list[dict[str, str]],
-        plan_type: str | None = None,
-    ) -> dict[str, Any]:
-        payload = self.send(
-            self.build_cancel_futures_plan_order_request(
-                symbol=symbol,
-                order_id_list=order_id_list,
-                plan_type=plan_type,
-            )
-        )
-        data = payload.get("data")
-        normalized: dict[str, Any] = {
-            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
-            "exchange": self.exchange_id,
-            "market": "futures",
-            "raw": payload,
-        }
-        if isinstance(data, dict):
-            normalized.update(data)
-        return normalized
-
-    def place_spot_plan_order(self, *, order_params: dict[str, Any]) -> dict[str, Any]:
-        payload = self.send(self.build_spot_plan_order_request(order_params=order_params))
-        data = payload.get("data")
-        normalized: dict[str, Any] = {
-            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
-            "exchange": self.exchange_id,
-            "market": "spot",
-            "raw": payload,
-        }
-        if isinstance(data, dict):
-            normalized.update(data)
-        return normalized
-
-    def transfer_asset(
-        self,
-        *,
-        source_market: str,
-        target_market: str,
-        asset: str,
-        amount: float,
-        client_oid: str | None = None,
-    ) -> dict[str, Any]:
-        payload = self.send(
-            self.build_wallet_transfer_request(
-                source_market=source_market,
-                target_market=target_market,
-                asset=asset,
-                amount=amount,
-                client_oid=client_oid,
-            )
-        )
-        data = payload.get("data")
-        normalized: dict[str, Any] = {
-            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
-            "exchange": self.exchange_id,
-            "raw": payload,
-        }
-        if isinstance(data, dict):
-            normalized.update(data)
-        return normalized
-
-    def transfer_wallet_balance(
-        self,
-        *,
-        asset: str,
-        amount: float,
-        source_market: str,
-        target_market: str,
-        client_oid: str | None = None,
-    ) -> dict[str, Any]:
-        return self.transfer_asset(
-            source_market=source_market,
-            target_market=target_market,
-            asset=asset,
-            amount=amount,
-            client_oid=client_oid,
-        )
-
-    def cancel_order(self, *, market: str, symbol: str, order_id: str) -> dict[str, Any]:
-        payload = self.send(self.build_cancel_order_request(market=market, symbol=symbol, order_id=order_id))
-        data = payload.get("data")
-        normalized: dict[str, Any] = {
-            "status": "SUCCESS" if payload.get("code") == "00000" else str(payload.get("msg", "error")).upper(),
-            "exchange": self.exchange_id,
-            "market": market,
-            "orderId": order_id,
-            "raw": payload,
-        }
-        if isinstance(data, dict):
-            normalized.update(data)
-        return normalized
-
-    def _extract_paged_rows(self, payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
-        data = payload.get("data")
-        if isinstance(data, list):
-            return [row for row in data if isinstance(row, dict)], None
-        if not isinstance(data, dict):
-            return [], None
-        for key in ("entrustedList", "fillList", "positionList", "list"):
-            rows = data.get(key)
-            if isinstance(rows, list):
-                end_id = data.get("endId")
-                return [row for row in rows if isinstance(row, dict)], str(end_id) if end_id not in (None, "") else None
-        end_id = data.get("endId")
-        return [], str(end_id) if end_id not in (None, "") else None
-
-    def get_futures_order_history(
-        self,
-        *,
-        symbol: str | None = None,
-        start_time_ms: int | None = None,
-        end_time_ms: int | None = None,
-        limit: int = 100,
-        max_pages: int = 10,
-    ) -> dict[str, Any]:
-        rows: list[dict[str, Any]] = []
-        cursor: str | None = None
-        for _ in range(max_pages):
-            payload = self.send(
-                self.build_futures_order_history_request(
-                    symbol=symbol,
-                    start_time_ms=start_time_ms,
-                    end_time_ms=end_time_ms,
-                    id_less_than=cursor,
-                    limit=limit,
-                )
-            )
-            page_rows, cursor = self._extract_paged_rows(payload)
-            rows.extend(page_rows)
-            if not cursor or not page_rows:
-                break
-        return {"orders": rows}
-
-    def get_futures_fill_history(
-        self,
-        *,
-        symbol: str | None = None,
-        order_id: str | None = None,
-        start_time_ms: int | None = None,
-        end_time_ms: int | None = None,
-        limit: int = 100,
-        max_pages: int = 10,
-    ) -> dict[str, Any]:
-        rows: list[dict[str, Any]] = []
-        cursor: str | None = None
-        for _ in range(max_pages):
-            payload = self.send(
-                self.build_futures_fill_history_request(
-                    symbol=symbol,
-                    order_id=order_id,
-                    start_time_ms=start_time_ms,
-                    end_time_ms=end_time_ms,
-                    id_less_than=cursor,
-                    limit=limit,
-                )
-            )
-            page_rows, cursor = self._extract_paged_rows(payload)
-            rows.extend(page_rows)
-            if not cursor or not page_rows:
-                break
-        return {"fills": rows}
-
-    def get_futures_position_history(
-        self,
-        *,
-        symbol: str | None = None,
-        start_time_ms: int | None = None,
-        end_time_ms: int | None = None,
-        limit: int = 100,
-        max_pages: int = 10,
-    ) -> dict[str, Any]:
-        rows: list[dict[str, Any]] = []
-        cursor: str | None = None
-        for _ in range(max_pages):
-            payload = self.send(
-                self.build_futures_position_history_request(
-                    symbol=symbol,
-                    start_time_ms=start_time_ms,
-                    end_time_ms=end_time_ms,
-                    id_less_than=cursor,
-                    limit=limit,
-                )
-            )
-            page_rows, cursor = self._extract_paged_rows(payload)
-            rows.extend(page_rows)
-            if not cursor or not page_rows:
-                break
-        return {"positions": rows}
-
-    def set_futures_leverage(self, *, symbol: str, leverage: int, hold_side: str | None = None) -> dict[str, Any]:
-        body_params: dict[str, Any] = {
-            "symbol": symbol,
-            "productType": self.contract_config.product_type,
-            "marginCoin": self.contract_config.margin_coin,
-            "leverage": str(leverage),
-        }
-        normalized_hold_side = str(hold_side or "").strip().lower()
-        if normalized_hold_side in {"long", "short"}:
-            body_params["holdSide"] = normalized_hold_side
+    def set_futures_leverage(self, *, symbol: str, leverage: int) -> dict[str, Any]:
         payload = self.send(
             self.build_signed_request(
                 path="/api/v2/mix/account/set-leverage",
                 method="POST",
-                body_params=body_params,
+                body_params={
+                    "symbol": symbol,
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                    "leverage": str(leverage),
+                },
             )
         )
         data = payload.get("data")
         normalized: dict[str, Any] = {
             "symbol": symbol,
             "leverage": leverage,
-            "holdSide": normalized_hold_side,
             "raw": payload,
         }
         if isinstance(data, dict):
             normalized.update(data)
         return normalized
 
-    def get_max_openable_quantity(
+    def transfer_spot_to_futures_usdt(
         self,
         *,
-        symbol: str,
-        pos_side: str,
-        order_type: str = "market",
-        open_amount: float | None = None,
-    ) -> float | None:
-        if open_amount is None:
-            account = self.get_account(market="futures")
-            open_amount = _optional_float(
-                account.get("executionAvailableBalance", account.get("availableBalance"))
-            )
-        if open_amount is None or open_amount <= 0.0:
-            return None
+        amount_usdt: float,
+        client_oid: str | None = None,
+    ) -> dict[str, Any]:
+        amount = round(max(float(amount_usdt), 0.0), 2)
+        if amount <= 0:
+            raise RuntimeError("transfer amount must be positive")
+        body: dict[str, Any] = {
+            "fromType": "spot",
+            "toType": "usdt_futures",
+            "amount": f"{amount:.2f}",
+            "coin": "USDT",
+        }
+        if client_oid:
+            body["clientOid"] = client_oid
         payload = self.send(
             self.build_signed_request(
-                path="/api/v2/mix/account/max-open",
-                method="GET",
-                params={
-                    "symbol": symbol,
-                    "productType": self.contract_config.product_type,
-                    "marginCoin": self.contract_config.margin_coin,
-                    "posSide": pos_side,
-                    "orderType": order_type,
-                    "openAmount": f"{open_amount:.8f}",
-                },
+                path="/api/v2/spot/wallet/transfer",
+                method="POST",
+                body_params=body,
             )
         )
-        data = payload.get("data") or {}
-        return _optional_float(data.get("maxOpen"))
-
-    def _fetch_extra_futures_account_rows(self) -> list[dict[str, Any]]:
-        """Query COIN-FUTURES and USDC-FUTURES and return all non-USDT margin rows.
-
-        These product types are separate Bitget accounts (e.g. ETH-margined or
-        USDC-margined positions) that are invisible to a USDT-FUTURES-only query.
-        We merge them into the main accounts list so capital.py can price them.
-        """
-        extra_rows: list[dict[str, Any]] = []
-        primary_coin = self.contract_config.margin_coin.upper()
-        for product_type in ("COIN-FUTURES", "USDC-FUTURES"):
-            try:
-                req = self.build_signed_request(
-                    path="/api/v2/mix/account/accounts",
-                    method="GET",
-                    params={"productType": product_type},
-                )
-                resp = self.send(req)
-                for row in resp.get("data", []) or []:
-                    if not isinstance(row, dict):
-                        continue
-                    coin = str(row.get("marginCoin", "")).upper()
-                    if coin == primary_coin:
-                        continue  # already captured from primary query
-                    equity = _optional_float(row.get("usdtEquity") or row.get("accountEquity"))
-                    if equity is None or equity <= 0.0:
-                        continue
-                    extra_rows.append(row)
-            except Exception:
-                pass  # non-critical — missing product type is silently ignored
-        return extra_rows
+        data = payload.get("data")
+        normalized: dict[str, Any] = {
+            "fromType": "spot",
+            "toType": "usdt_futures",
+            "amount": amount,
+            "coin": "USDT",
+            "raw": payload,
+        }
+        if isinstance(data, dict):
+            normalized.update(data)
+        return normalized
 
     def get_account(self, *, market: str) -> dict[str, Any]:
         payload = self.send(self.build_account_request(market=market))
         rows = payload.get("data", [])
         if market == "futures":
-            data_rows = list(rows) if isinstance(rows, list) else []
-            # Merge non-USDT coin-margined/USDC accounts (e.g. ETH in COIN-FUTURES)
-            data_rows.extend(self._fetch_extra_futures_account_rows())
-            available: float | None = None
-            crossed_max_available: float | None = None
-            union_available: float | None = None
+            data_rows = rows if isinstance(rows, list) else []
+            available = 0.0
+            raw_available = 0.0
+            crossed_max_available = 0.0
+            union_available = 0.0
+            has_crossed_max_available = False
             for item in data_rows:
                 if str(item.get("marginCoin", "")).upper() == self.contract_config.margin_coin.upper():
-                    available = _optional_float(item.get("available"))
-                    crossed_max_available = _optional_float(item.get("crossedMaxAvailable"))
-                    union_available = _optional_float(item.get("unionAvailable"))
+                    raw_available = float(item.get("available", 0.0))
+                    has_crossed_max_available = "crossedMaxAvailable" in item
+                    crossed_max_available = float(item.get("crossedMaxAvailable", 0.0))
+                    union_available = float(item.get("unionAvailable", 0.0))
+                    available = raw_available
                     break
-            # Use the larger of crossedMaxAvailable and unionAvailable so that
-            # non-USDT collateral (haircut value included in unionAvailable) is
-            # recognised as execution capital.
-            if crossed_max_available is not None and union_available is not None:
-                execution_available = max(crossed_max_available, union_available)
-            elif crossed_max_available is not None and crossed_max_available > 0:
-                execution_available = crossed_max_available
-            elif union_available is not None and union_available > 0:
-                execution_available = union_available
-            elif available is not None and available > 0:
-                execution_available = available
+            if has_crossed_max_available:
+                # Bitget exposes crossedMaxAvailable as the true cross-margin openable amount.
+                # When this is 0, opening any new futures position will be rejected (e.g. 40762).
+                effective_available = max(crossed_max_available, 0.0)
             else:
-                execution_available = union_available
+                effective_candidates = [value for value in (raw_available, union_available) if value > 0]
+                effective_available = min(effective_candidates) if effective_candidates else available
             return {
-                "availableBalance": available or 0.0,
-                "executionAvailableBalance": execution_available or 0.0,
-                "crossedMaxAvailable": crossed_max_available or 0.0,
-                "unionAvailable": union_available or 0.0,
+                "availableBalance": available,
+                "effectiveAvailableBalance": effective_available,
+                "hasCrossedMaxAvailable": has_crossed_max_available,
+                "rawAvailableBalance": raw_available,
+                "crossedMaxAvailable": crossed_max_available,
+                "unionAvailable": union_available,
                 "accounts": data_rows,
                 "raw": payload,
             }
@@ -846,10 +658,41 @@ class BitgetRestClient:
         payload = self.send(self.build_open_orders_request(market=market, symbol=symbol))
         return {"orders": payload.get("data", []), "raw": payload}
 
-    def get_positions(self) -> dict[str, Any]:
-        payload = self.send(self.build_positions_request())
+    def get_futures_positions(self) -> list[dict[str, Any]]:
+        payload = self.send(
+            self.build_signed_request(
+                path="/api/v2/mix/position/all-position",
+                method="GET",
+                params={
+                    "productType": self.contract_config.product_type,
+                    "marginCoin": self.contract_config.margin_coin,
+                },
+            )
+        )
         rows = payload.get("data", [])
-        return {"positions": rows if isinstance(rows, list) else [], "raw": payload}
+        data_rows = rows if isinstance(rows, list) else []
+        normalized: list[dict[str, Any]] = []
+        for item in data_rows:
+            if not isinstance(item, dict):
+                continue
+            symbol = str(item.get("symbol", "")).upper()
+            hold_side = str(item.get("holdSide", "")).lower()
+            total = self._safe_float(item.get("total"))
+            available = self._safe_float(item.get("available"))
+            margin_size = self._safe_float(item.get("marginSize") or item.get("margin"))
+            if not symbol or hold_side not in {"long", "short"} or available <= 0:
+                continue
+            normalized.append(
+                {
+                    "symbol": symbol,
+                    "holdSide": hold_side,
+                    "total": total,
+                    "available": available,
+                    "marginSize": margin_size,
+                    "raw": item,
+                }
+            )
+        return normalized
 
     def get_klines(
         self,
@@ -858,61 +701,24 @@ class BitgetRestClient:
         symbol: str,
         interval: str,
         limit: int,
-        start_time: int | None = None,
-        end_time: int | None = None,
     ) -> list[dict[str, Any]]:
+        granularity = interval
+        if market == "spot":
+            if interval.endswith("m"):
+                granularity = f"{interval[:-1]}min"
+        else:
+            if interval.endswith("h"):
+                granularity = f"{interval[:-1]}H"
+            elif interval.endswith("d"):
+                granularity = f"{interval[:-1]}D"
         path = "/api/v2/mix/market/candles" if market == "futures" else "/api/v2/spot/market/candles"
-        params: dict[str, Any] = {"symbol": symbol, "granularity": _bitget_granularity(market=market, interval=interval), "limit": limit}
-        if start_time is not None:
-            params["startTime"] = str(start_time)
-        if end_time is not None:
-            params["endTime"] = str(end_time)
+        params: dict[str, Any] = {"symbol": symbol, "granularity": granularity, "limit": limit}
         if market == "futures":
             params["productType"] = self.contract_config.product_type
         payload = self.send(self.build_public_request(path=path, params=params))
         rows = payload.get("data", [])
         if not isinstance(rows, list):
             raise RuntimeError("unexpected Bitget kline response shape")
-        normalized: list[dict[str, Any]] = []
-        for row in rows:
-            if not isinstance(row, list) or len(row) < 7:
-                continue
-            normalized.append(
-                {
-                    "open_time": int(row[0]),
-                    "open_price": float(row[1]),
-                    "high_price": float(row[2]),
-                    "low_price": float(row[3]),
-                    "close_price": float(row[4]),
-                    "base_volume": float(row[5]),
-                    "quote_volume": float(row[6]),
-                }
-            )
-        return normalized
-
-    def get_history_klines(
-        self,
-        *,
-        market: str,
-        symbol: str,
-        interval: str,
-        limit: int,
-        start_time: int | None = None,
-        end_time: int | None = None,
-    ) -> list[dict[str, Any]]:
-        """Fetch historical klines via history-candles endpoint (supports older data beyond ~31d)."""
-        path = "/api/v2/mix/market/history-candles" if market == "futures" else "/api/v2/spot/market/history-candles"
-        params: dict[str, Any] = {"symbol": symbol, "granularity": _bitget_granularity(market=market, interval=interval), "limit": limit}
-        if start_time is not None:
-            params["startTime"] = str(start_time)
-        if end_time is not None:
-            params["endTime"] = str(end_time)
-        if market == "futures":
-            params["productType"] = self.contract_config.product_type
-        payload = self.send(self.build_public_request(path=path, params=params))
-        rows = payload.get("data", [])
-        if not isinstance(rows, list):
-            raise RuntimeError("unexpected Bitget history kline response shape")
         normalized: list[dict[str, Any]] = []
         for row in rows:
             if not isinstance(row, list) or len(row) < 7:
@@ -979,49 +785,6 @@ class BitgetRestClient:
             raise RuntimeError("unexpected Bitget open interest response shape")
         return {"openInterest": row.get("size") or row.get("openInterest") or "0", "raw": row}
 
-    def get_historical_funding_rates(
-        self,
-        *,
-        symbol: str,
-        page_size: int = 100,
-        page_no: int = 1,
-    ) -> list[dict[str, Any]]:
-        """Fetch historical funding rates for a symbol.
-
-        Uses ``/api/v2/mix/market/history-fund-rate`` with pageNo pagination.
-
-        Returns a list of dicts with normalised keys:
-        ``funding_rate`` (float), ``funding_time`` (int ms), ``symbol`` (str).
-        """
-        params: dict[str, Any] = {
-            "symbol": symbol,
-            "productType": self.contract_config.product_type,
-            "pageSize": str(min(page_size, 100)),
-            "pageNo": str(page_no),
-        }
-
-        payload = self.send(
-            self.build_public_request(
-                path="/api/v2/mix/market/history-fund-rate",
-                params=params,
-            )
-        )
-        rows = payload.get("data", [])
-        if not isinstance(rows, list):
-            rows = []
-        result: list[dict[str, Any]] = []
-        for row in rows:
-            if not isinstance(row, dict):
-                continue
-            result.append(
-                {
-                    "funding_rate": float(row.get("fundingRate") or 0),
-                    "funding_time": int(row.get("fundingTime") or row.get("settleTime") or 0),
-                    "symbol": str(row.get("symbol") or symbol),
-                }
-            )
-        return result
-
     def get_exchange_info(self, *, market: str) -> dict[str, Any]:
         path = "/api/v2/mix/market/contracts" if market == "futures" else "/api/v2/spot/public/symbols"
         params = {"productType": self.contract_config.product_type} if market == "futures" else None
@@ -1036,11 +799,7 @@ class BitgetRestClient:
             if not symbol:
                 continue
             min_notional = item.get("minTradeUSDT") or item.get("minTradeAmount") or item.get("minTradeNum") or "0"
-            min_qty = item.get("minTradeNum") or item.get("sizeMultiplier") or "0"
-            filters = [
-                {"filterType": "MIN_NOTIONAL", "minNotional": min_notional},
-                {"filterType": "LOT_SIZE", "minQty": min_qty},
-            ]
+            filters = [{"filterType": "MIN_NOTIONAL", "minNotional": min_notional}]
             symbols.append({"symbol": symbol, "filters": filters, "raw": item})
         return {"symbols": symbols, "raw": payload}
 
@@ -1048,35 +807,19 @@ class BitgetRestClient:
         context = None
         if self.allow_insecure_ssl:
             context = ssl._create_unverified_context()
-
-        _RETRYABLE_5XX = {500, 502, 503, 504}
-        _BACKOFF_DELAYS = (2.0, 4.0, 8.0)  # up to 3 retries for 5xx/transport (jitter added below)
-
-        last_exc: Exception | None = None
-        for attempt in range(4):  # attempt 0 + up to 3 retries
+        try:
+            with urlopen(request, timeout=10, context=context) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="ignore")
+            detail = raw
             try:
-                with urlopen(request, timeout=15, context=context) as response:
-                    return json.loads(response.read().decode("utf-8"))
-            except HTTPError as exc:
-                body = exc.read().decode("utf-8", errors="replace")
-                if exc.code == 429:
-                    # Rate limited: wait 60-75s with jitter then retry (up to 2 times)
-                    if attempt < 2:
-                        time.sleep(60.0 + random.uniform(0, 15))
-                        last_exc = RuntimeError(f"Bitget HTTP 429 (rate limited): {body}")
-                        continue
-                    raise RuntimeError(f"Bitget HTTP 429 (rate limited, exhausted retries): {body}") from exc
-                if exc.code in _RETRYABLE_5XX:
-                    if attempt < len(_BACKOFF_DELAYS):
-                        time.sleep(_BACKOFF_DELAYS[attempt] + random.uniform(0, 1))
-                        last_exc = RuntimeError(f"Bitget HTTP {exc.code}: {body}")
-                        continue
-                raise RuntimeError(f"Bitget HTTP {exc.code}: {body}") from exc
-            except (URLError, socket.timeout, TimeoutError, OSError) as exc:
-                if attempt < len(_BACKOFF_DELAYS):
-                    time.sleep(_BACKOFF_DELAYS[attempt] + random.uniform(0, 1))
-                    last_exc = RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error: {exc}")
-                    continue
-                raise RuntimeError(_transport_error_message(request=request, exc=exc) if isinstance(exc, URLError) else f"Bitget transport error (exhausted retries): {exc}") from exc
-
-        raise last_exc or RuntimeError("Bitget request failed (exhausted retries)")
+                payload = json.loads(raw) if raw else {}
+                if isinstance(payload, dict):
+                    compact_raw = raw.replace("\n", " ").strip()
+                    detail = f"code={payload.get('code')} msg={payload.get('msg')} raw={compact_raw}"
+            except Exception:
+                pass
+            raise RuntimeError(
+                f"Bitget HTTP {exc.code} {exc.reason} for {request.get_method()} {request.full_url}: {detail}"
+            ) from exc
