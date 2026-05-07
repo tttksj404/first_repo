@@ -514,14 +514,17 @@ class MarketFeatureExtractor:
         vwap_price, vwap_dev_z = vwap_deviation_from_state(state)
         smc = smc_signals_from_state(state, trend_direction=features.trend_direction)
 
+        # --- Advanced signals ---
+        oi_div = oi_divergence_from_state(state, lookback=24)
+        vwap_price, vwap_dev_z = vwap_deviation_from_state(state)
+        smc = smc_signals_from_state(state, trend_direction=features.trend_direction)
+
         enriched = FeatureVector(
             **{
                 **features.as_dict(),
                 "support_alignment": round(support_alignment, 6),
                 "resistance_penalty": round(resistance_penalty, 6),
                 "pullback_signal": pullback,
-                "b3_msb_signal": b3_signal,
-                "b3_msb_strength": round(b3_strength, 6),
                 "oi_divergence_score": oi_div,
                 "vwap_price": vwap_price,
                 "vwap_deviation_z": vwap_dev_z,
