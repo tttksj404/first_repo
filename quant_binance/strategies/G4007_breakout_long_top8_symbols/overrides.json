@@ -1,0 +1,74 @@
+{
+  "_strategy_id": "G4007",
+  "_parent_id": "G4006",
+  "_playbook": "PB-BREAKOUT-001",
+  "_setup": "G4006 symbol-filtered paper probe: non-CH1 long breakout with walk-forward top-8 symbol filter, 24h high breakout +50bps, 24h momentum >= 10%, volume ratio >= 3, ATR 0-8%, hold 36h, 8x leverage, 20% margin size, TP 6%, SL 8%.",
+  "_capital_context_usd": 100,
+  "_research_only": true,
+  "engine": "breakout_long",
+  "exchange": "bitget",
+  "market": "futures",
+  "product_type": "USDT-FUTURES",
+  "timeframe": "1h",
+  "side": "long",
+  "universe_filter": "walk_forward_top8_symbols",
+  "symbol_filter": {
+    "mode": "latest_walk_forward_top8",
+    "selected_from_train_periods": [
+      "OOS22-23",
+      "OOS24-Q1"
+    ],
+    "allowed_symbols_current": [
+      "AVAXUSDT",
+      "DOTUSDT",
+      "ETHUSDT",
+      "MATICUSDT",
+      "NEARUSDT",
+      "SOLUSDT",
+      "SUIUSDT",
+      "XRPUSDT"
+    ],
+    "runtime_note": "If an exchange endpoint no longer serves a symbol such as MATICUSDT, the paper emulator skips that symbol and records the fetch error."
+  },
+  "entry_rules": {
+    "breakout_lookback_bars": 24,
+    "break_bps": 50,
+    "min_ret_24h": 0.1,
+    "min_vol_ratio": 3.0
+  },
+  "leverage": 8.0,
+  "size_pct_per_trade": 0.2,
+  "max_concurrent": 5,
+  "holding_period_bars": 36,
+  "cost_bps_round_trip": 24.0,
+  "atr_volatility_guard": {
+    "enabled": true,
+    "min_atr_pct": 0.0,
+    "max_atr_pct": 8.0
+  },
+  "exit_rules": {
+    "take_profit_pct": 0.06,
+    "stop_loss_pct": 0.08,
+    "same_bar_priority": "stop_loss",
+    "time_exit_bars": 36
+  },
+  "validation": {
+    "source": "quant_binance/strategies/_scripts/g1305_breakout_walkforward_filter_results.json",
+    "status": "watchlist paper-probe candidate",
+    "overlap": {
+      "g1165_jaccard": 0.0,
+      "g1995_jaccard": 0.0
+    },
+    "walk_forward_oos": {
+      "verdict": "PASS",
+      "trades": 133,
+      "win_rate": 0.6241,
+      "pnl_usd": 251.36,
+      "annual_pnl_usd": 110.54,
+      "monthly_pnl_usd": 9.21,
+      "max_drawdown_usd": 36.72,
+      "liquidation_rate": 0.0,
+      "all_test_folds_positive": true
+    }
+  }
+}

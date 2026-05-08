@@ -1,0 +1,61 @@
+{
+  "_strategy_id": "G7822_G4692",
+  "_strategy_type": "moderate_frequency_paper_observation_bundle",
+  "_superseded_by": "G7822_G4692_G264402",
+  "_components": [
+    "G7822",
+    "G4692"
+  ],
+  "_capital_context_usd_per_sleeve": 100,
+  "_research_only": true,
+  "_setup": "Pair G7822 quality CH1 replacement with G4692 non-CH1 watch-confirm breakout to solve paper-observation frequency without relaxing G7822.",
+  "frequency_solution": {
+    "original_target_trades_per_month": 4.0,
+    "revised_target_trades_per_month": 30.0,
+    "actual_trades_per_month": 13.33,
+    "passes_original_target": true,
+    "passes_revised_target": false
+  },
+  "direct_entry_overlap": {
+    "overlap_trades": 0,
+    "jaccard": 0.0,
+    "g7822_cover": 0.0,
+    "g4692_cover": 0.0
+  },
+  "weighted_validation": {
+    "trades": 684,
+    "win_rate": 0.5877,
+    "pnl_usd": 1557.37,
+    "annual_pnl_usd": 364.38,
+    "monthly_pnl_usd": 30.37,
+    "all_periods_positive": true,
+    "min_period_pnl_usd": 268.56,
+    "liquidations": 0,
+    "liquidation_rate": 0.0,
+    "max_individual_period_drawdown_usd": 97.54
+  },
+  "components": {
+    "G7822": {
+      "role": "quality_ch1_replacement",
+      "trades": 53,
+      "trades_per_month": 1.03,
+      "win_rate": 0.6981,
+      "pnl_usd": 1015.58,
+      "annual_pnl_usd": 237.62,
+      "liquidation_rate": 0.0
+    },
+    "G4692": {
+      "role": "high_frequency_non_ch1_observation_sleeve",
+      "trades": 631,
+      "trades_per_month": 12.3,
+      "win_rate": 0.5784,
+      "pnl_usd": 541.79,
+      "annual_pnl_usd": 126.76,
+      "liquidation_rate": 0.0
+    }
+  },
+  "validation": {
+    "source": "quant_binance/strategies/_scripts/g7822_g4692_frequency_solution_results.json",
+    "interpretation": "Slot-sum paper observation bundle, not a single shared-equity execution simulation."
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "strategy_id": "G4692",
+  "generated_at": "2026-05-06 13:56:00",
+  "source": "quant_binance/strategies/_scripts/g1309_watch_confirm_breakout_results.json",
+  "engine": "watch_confirm_breakout",
+  "exchange": "bitget",
+  "market": "USDT-FUTURES",
+  "params": {
+    "mode": "strict_plus_confirm",
+    "strict_immediate": {
+      "break_bps": 50,
+      "min_ret_24h": 0.1,
+      "min_vol_ratio": 3.0,
+      "hold": 36,
+      "leverage": 8,
+      "size": 0.2,
+      "take_profit_pct": 0.06,
+      "stop_loss_pct": 0.08
+    },
+    "watch": {
+      "break_bps": 30,
+      "min_ret_24h": 0.08,
+      "min_vol_ratio": 2.5
+    },
+    "confirm": {
+      "max_lag_bars": 1,
+      "confirm_break_bps": 50,
+      "min_follow_bps": 0,
+      "min_ret_24h": 0.1,
+      "min_vol_ratio": 3.0,
+      "failure_bps": 0
+    },
+    "confirm_trade": {
+      "hold": 24,
+      "leverage": 7,
+      "size": 0.16,
+      "take_profit_pct": 0.05,
+      "stop_loss_pct": 0.065
+    }
+  },
+  "weighted": {
+    "n": 631,
+    "wr": 0.5784,
+    "pnl_usd": 541.79,
+    "annual_pnl_usd": 126.76,
+    "monthly_pnl_usd": 10.56,
+    "max_dd_usd": 97.54,
+    "min_period_pnl_usd": 97.63,
+    "all_periods_positive": true,
+    "liquidations": 0,
+    "liq_rate": 0.0
+  },
+  "periods": {
+    "OOS22-23": {
+      "n": 250,
+      "wr": 0.564,
+      "pnl_usd": 265.09,
+      "annual_pnl_usd": 132.55,
+      "max_dd_usd": 97.54,
+      "by_engine": {
+        "strict_breakout": {
+          "n": 197,
+          "wr": 0.6041,
+          "pnl_usd": 308.32
+        },
+        "watch_confirm": {
+          "n": 53,
+          "wr": 0.4151,
+          "pnl_usd": -43.23
+        }
+      }
+    },
+    "OOS24-Q1": {
+      "n": 246,
+      "wr": 0.5894,
+      "pnl_usd": 179.07,
+      "annual_pnl_usd": 143.34,
+      "max_dd_usd": 55.17,
+      "by_engine": {
+        "strict_breakout": {
+          "n": 206,
+          "wr": 0.5728,
+          "pnl_usd": 124.67
+        },
+        "watch_confirm": {
+          "n": 40,
+          "wr": 0.675,
+          "pnl_usd": 54.4
+        }
+      }
+    },
+    "IS25-26": {
+      "n": 135,
+      "wr": 0.5852,
+      "pnl_usd": 97.63,
+      "annual_pnl_usd": 95.28,
+      "max_dd_usd": 90.65,
+      "by_engine": {
+        "strict_breakout": {
+          "n": 99,
+          "wr": 0.5758,
+          "pnl_usd": 62.43
+        },
+        "watch_confirm": {
+          "n": 36,
+          "wr": 0.6111,
+          "pnl_usd": 35.2
+        }
+      }
+    }
+  },
+  "overlap": {
+    "g1165_jaccard": 0.0,
+    "g1995_jaccard": 0.0
+  },
+  "checks": {
+    "n_>=_100": true,
+    "wr_>=_55": true,
+    "annual_>=_120": true,
+    "all_periods_positive": true,
+    "liq_==_0": true,
+    "dd_<=_140": true,
+    "g1165_j_<=_0.05": true,
+    "g1995_j_<=_0.05": true
+  }
+}

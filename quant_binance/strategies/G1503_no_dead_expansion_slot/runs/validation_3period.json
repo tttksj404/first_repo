@@ -1,0 +1,14 @@
+{
+  "strategy": "G1503",
+  "source": "quant_binance/strategies/_scripts/g1300_two_slot_results.json",
+  "weighted": {
+    "trades": 64,
+    "win_rate": 0.625,
+    "pnl_usd": 805.47,
+    "annual_pnl_usd": 188.46,
+    "monthly_pnl_usd": 15.7,
+    "liquidation_rate": 0.0,
+    "max_period_drawdown_usd": 89.79,
+    "baseline_overlap_jaccard": 0.7164
+  }
+}

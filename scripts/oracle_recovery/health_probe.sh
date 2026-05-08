@@ -9,8 +9,19 @@
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/config.env"
+strip_cr() { printf '%s' "${1//$'\r'/}"; }
+INST_ID="$(strip_cr "$INST_ID")"
+SSH_HOST="$(strip_cr "$SSH_HOST")"
+SSH_USER="$(strip_cr "$SSH_USER")"
+SSH_IP="$(strip_cr "$SSH_IP")"
+SSH_PORT="$(strip_cr "$SSH_PORT")"
+REGION="$(strip_cr "$REGION")"
 
 echo "=== g185 health probe $(date +%H:%M:%S) ==="
+SSH_KEY_ARGS=()
+if [ -f "$HOME/.ssh/id_ed25519" ]; then
+  SSH_KEY_ARGS=(-i "$HOME/.ssh/id_ed25519")
+fi
 
 # 1. TCP reachability (not blocking, 5s)
 if command -v nc >/dev/null 2>&1; then
@@ -31,7 +42,8 @@ fi
 
 # 2. SSH banner exchange (15s timeout)
 SSH_OUT=$(timeout 15 ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 \
-  "$SSH_HOST" 'echo ALIVE' 2>&1)
+  -o StrictHostKeyChecking=accept-new "${SSH_KEY_ARGS[@]}" \
+  -p "$SSH_PORT" "$SSH_USER@$SSH_IP" 'echo ALIVE' 2>&1)
 if echo "$SSH_OUT" | grep -q "^ALIVE$"; then
   echo "[2/4] SSH banner+auth  OK"
 else
@@ -40,12 +52,13 @@ else
 fi
 
 # 3. Quick remote command (sshd alive)
-RC=$(timeout 10 ssh "$SSH_HOST" 'systemctl is-active sshd' 2>&1 | tr -d '\r\n')
+RC=$(timeout 10 ssh -o StrictHostKeyChecking=accept-new "${SSH_KEY_ARGS[@]}" \
+  -p "$SSH_PORT" "$SSH_USER@$SSH_IP" 'systemctl is-active sshd' 2>&1 | tr -d '\r\n')
 echo "[3/4] sshd service: $RC"
 
 # 4. Cloud Agent reachable (OCI CLI present)
 if command -v oci >/dev/null 2>&1; then
-  STATE=$(oci compute instance get --instance-id "$INST_ID" \
+  STATE=$(oci compute instance get --region "$REGION" --instance-id "$INST_ID" \
     --query 'data."lifecycle-state"' --raw-output 2>/dev/null || echo "ERR")
   echo "[4/4] Hypervisor state: $STATE"
 else

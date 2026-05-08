@@ -1,0 +1,5311 @@
+{
+  "elapsed_sec": 74.36,
+  "generated_at": "2026-05-07 12:22:06",
+  "n_pass_wr65_tpm8": 0,
+  "n_pass_wr69_tpm8": 0,
+  "n_specs": 240,
+  "question": "Can exit tuning lift high-cadence sleeves to WR 65-69% while preserving positive full-window PnL?",
+  "top": [
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783048",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783048",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.26,
+          "liquidations": 0,
+          "max_dd_usd": 15.01,
+          "n": 157,
+          "pnl_usd": -4.37,
+          "wr": 0.7707006369426752
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.75,
+          "liquidations": 0,
+          "max_dd_usd": 18.05,
+          "n": 299,
+          "pnl_usd": -9.5,
+          "wr": 0.782608695652174
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -49.95,
+          "liquidations": 0,
+          "max_dd_usd": 66.74,
+          "n": 301,
+          "pnl_usd": -62.4,
+          "wr": 0.707641196013289
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -17.85,
+        "liquidations": 0,
+        "max_period_dd_usd": 66.74,
+        "min_period_pnl_usd": -62.4,
+        "n": 757,
+        "pnl_usd": -76.27,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.7503
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783033",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783033",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.79,
+          "liquidations": 0,
+          "max_dd_usd": 16.75,
+          "n": 169,
+          "pnl_usd": 1.83,
+          "wr": 0.7869822485207101
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.53,
+          "liquidations": 0,
+          "max_dd_usd": 18.09,
+          "n": 309,
+          "pnl_usd": -13.07,
+          "wr": 0.7702265372168284
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -50.77,
+          "liquidations": 0,
+          "max_dd_usd": 67.77,
+          "n": 324,
+          "pnl_usd": -63.42,
+          "wr": 0.7037037037037037
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -17.47,
+        "liquidations": 0,
+        "max_period_dd_usd": 67.77,
+        "min_period_pnl_usd": -63.42,
+        "n": 802,
+        "pnl_usd": -74.66,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.7469
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783048",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783048",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.58,
+          "liquidations": 0,
+          "max_dd_usd": 19.32,
+          "n": 165,
+          "pnl_usd": -6.74,
+          "wr": 0.7636363636363637
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.5,
+          "liquidations": 0,
+          "max_dd_usd": 14.96,
+          "n": 311,
+          "pnl_usd": -9.01,
+          "wr": 0.7781350482315113
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -50.14,
+          "liquidations": 0,
+          "max_dd_usd": 67.5,
+          "n": 314,
+          "pnl_usd": -62.65,
+          "wr": 0.7070063694267515
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -18.34,
+        "liquidations": 0,
+        "max_period_dd_usd": 67.5,
+        "min_period_pnl_usd": -62.65,
+        "n": 790,
+        "pnl_usd": -78.4,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.7468
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783048",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783048",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -7.12,
+          "liquidations": 0,
+          "max_dd_usd": 23.56,
+          "n": 167,
+          "pnl_usd": -7.29,
+          "wr": 0.7664670658682635
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.25,
+          "liquidations": 0,
+          "max_dd_usd": 16.22,
+          "n": 312,
+          "pnl_usd": -8.5,
+          "wr": 0.7788461538461539
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -53.13,
+          "liquidations": 0,
+          "max_dd_usd": 71.23,
+          "n": 317,
+          "pnl_usd": -66.38,
+          "wr": 0.7034700315457413
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -19.23,
+        "liquidations": 0,
+        "max_period_dd_usd": 71.23,
+        "min_period_pnl_usd": -66.38,
+        "n": 796,
+        "pnl_usd": -82.17,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.7462
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783048",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783048",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.58,
+          "liquidations": 0,
+          "max_dd_usd": 20.36,
+          "n": 167,
+          "pnl_usd": -9.82,
+          "wr": 0.7604790419161677
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.58,
+          "liquidations": 0,
+          "max_dd_usd": 20.17,
+          "n": 307,
+          "pnl_usd": -15.16,
+          "wr": 0.7719869706840391
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -53.64,
+          "liquidations": 0,
+          "max_dd_usd": 69.89,
+          "n": 313,
+          "pnl_usd": -67.01,
+          "wr": 0.7028753993610224
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.52,
+        "liquidations": 0,
+        "max_period_dd_usd": 69.89,
+        "min_period_pnl_usd": -67.01,
+        "n": 787,
+        "pnl_usd": -91.99,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.7421
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783033",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783033",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.92,
+          "liquidations": 0,
+          "max_dd_usd": 20.86,
+          "n": 181,
+          "pnl_usd": -4.02,
+          "wr": 0.7679558011049724
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -9.03,
+          "liquidations": 0,
+          "max_dd_usd": 21.4,
+          "n": 317,
+          "pnl_usd": -18.07,
+          "wr": 0.7570977917981072
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -53.51,
+          "liquidations": 0,
+          "max_dd_usd": 69.54,
+          "n": 337,
+          "pnl_usd": -66.85,
+          "wr": 0.7002967359050445
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.81,
+        "liquidations": 0,
+        "max_period_dd_usd": 69.54,
+        "min_period_pnl_usd": -66.85,
+        "n": 835,
+        "pnl_usd": -88.94,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.7365
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783033",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783033",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.4,
+          "liquidations": 0,
+          "max_dd_usd": 20.38,
+          "n": 178,
+          "pnl_usd": -9.63,
+          "wr": 0.7528089887640449
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.42,
+          "liquidations": 0,
+          "max_dd_usd": 18.0,
+          "n": 324,
+          "pnl_usd": -12.84,
+          "wr": 0.7654320987654321
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -53.54,
+          "liquidations": 0,
+          "max_dd_usd": 71.74,
+          "n": 338,
+          "pnl_usd": -66.89,
+          "wr": 0.6982248520710059
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.91,
+        "liquidations": 0,
+        "max_period_dd_usd": 71.74,
+        "min_period_pnl_usd": -66.89,
+        "n": 840,
+        "pnl_usd": -89.36,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.7357
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783033",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783033",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.88,
+          "liquidations": 0,
+          "max_dd_usd": 24.62,
+          "n": 180,
+          "pnl_usd": -10.12,
+          "wr": 0.7555555555555555
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.23,
+          "liquidations": 0,
+          "max_dd_usd": 20.12,
+          "n": 326,
+          "pnl_usd": -14.46,
+          "wr": 0.7638036809815951
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -58.23,
+          "liquidations": 0,
+          "max_dd_usd": 77.6,
+          "n": 342,
+          "pnl_usd": -72.75,
+          "wr": 0.6929824561403509
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -22.77,
+        "liquidations": 0,
+        "max_period_dd_usd": 77.6,
+        "min_period_pnl_usd": -72.75,
+        "n": 848,
+        "pnl_usd": -97.33,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.7335
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783052",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783052",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.38,
+          "liquidations": 0,
+          "max_dd_usd": 14.41,
+          "n": 157,
+          "pnl_usd": -4.49,
+          "wr": 0.732484076433121
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 0.28,
+          "liquidations": 0,
+          "max_dd_usd": 18.17,
+          "n": 299,
+          "pnl_usd": 0.56,
+          "wr": 0.7491638795986622
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -42.47,
+          "liquidations": 0,
+          "max_dd_usd": 59.52,
+          "n": 301,
+          "pnl_usd": -53.05,
+          "wr": 0.6843853820598007
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -13.33,
+        "liquidations": 0,
+        "max_period_dd_usd": 59.52,
+        "min_period_pnl_usd": -53.05,
+        "n": 757,
+        "pnl_usd": -56.98,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.7199
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783037",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783037",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.06,
+          "liquidations": 0,
+          "max_dd_usd": 17.25,
+          "n": 169,
+          "pnl_usd": 1.08,
+          "wr": 0.7396449704142012
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -0.74,
+          "liquidations": 0,
+          "max_dd_usd": 18.33,
+          "n": 309,
+          "pnl_usd": -1.48,
+          "wr": 0.7443365695792881
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -40.3,
+          "liquidations": 0,
+          "max_dd_usd": 56.82,
+          "n": 324,
+          "pnl_usd": -50.35,
+          "wr": 0.6820987654320988
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -11.87,
+        "liquidations": 0,
+        "max_period_dd_usd": 56.82,
+        "min_period_pnl_usd": -50.35,
+        "n": 802,
+        "pnl_usd": -50.75,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.7182
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783018",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783018",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.93,
+          "liquidations": 0,
+          "max_dd_usd": 18.2,
+          "n": 186,
+          "pnl_usd": 0.95,
+          "wr": 0.7526881720430108
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.1,
+          "liquidations": 0,
+          "max_dd_usd": 22.77,
+          "n": 332,
+          "pnl_usd": -12.19,
+          "wr": 0.7379518072289156
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -53.02,
+          "liquidations": 0,
+          "max_dd_usd": 70.99,
+          "n": 349,
+          "pnl_usd": -66.24,
+          "wr": 0.6790830945558739
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -18.13,
+        "liquidations": 0,
+        "max_period_dd_usd": 70.99,
+        "min_period_pnl_usd": -66.24,
+        "n": 867,
+        "pnl_usd": -77.48,
+        "trades_per_month": 16.9,
+        "unique_n": 867,
+        "wr": 0.7174
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783052",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783052",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.09,
+          "liquidations": 0,
+          "max_dd_usd": 18.57,
+          "n": 165,
+          "pnl_usd": -6.24,
+          "wr": 0.7272727272727273
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -0.07,
+          "liquidations": 0,
+          "max_dd_usd": 15.01,
+          "n": 311,
+          "pnl_usd": -0.15,
+          "wr": 0.7427652733118971
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -42.22,
+          "liquidations": 0,
+          "max_dd_usd": 59.85,
+          "n": 314,
+          "pnl_usd": -52.75,
+          "wr": 0.6847133757961783
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -13.84,
+        "liquidations": 0,
+        "max_period_dd_usd": 59.85,
+        "min_period_pnl_usd": -52.75,
+        "n": 790,
+        "pnl_usd": -59.14,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.7165
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783052",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783052",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.39,
+          "liquidations": 0,
+          "max_dd_usd": 22.81,
+          "n": 167,
+          "pnl_usd": -6.54,
+          "wr": 0.7305389221556886
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 0.24,
+          "liquidations": 0,
+          "max_dd_usd": 15.01,
+          "n": 312,
+          "pnl_usd": 0.48,
+          "wr": 0.7435897435897436
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -45.11,
+          "liquidations": 0,
+          "max_dd_usd": 63.46,
+          "n": 317,
+          "pnl_usd": -56.36,
+          "wr": 0.6813880126182965
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -14.6,
+        "liquidations": 0,
+        "max_period_dd_usd": 63.46,
+        "min_period_pnl_usd": -56.36,
+        "n": 796,
+        "pnl_usd": -62.42,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.7161
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783052",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783052",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.2,
+          "liquidations": 0,
+          "max_dd_usd": 19.51,
+          "n": 167,
+          "pnl_usd": -10.46,
+          "wr": 0.718562874251497
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -2.37,
+          "liquidations": 0,
+          "max_dd_usd": 20.29,
+          "n": 307,
+          "pnl_usd": -4.73,
+          "wr": 0.739413680781759
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -47.66,
+          "liquidations": 0,
+          "max_dd_usd": 64.54,
+          "n": 313,
+          "pnl_usd": -59.54,
+          "wr": 0.6773162939297125
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -17.48,
+        "liquidations": 0,
+        "max_period_dd_usd": 64.54,
+        "min_period_pnl_usd": -59.54,
+        "n": 787,
+        "pnl_usd": -74.73,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.7103
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783018",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783018",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.83,
+          "liquidations": 0,
+          "max_dd_usd": 22.31,
+          "n": 199,
+          "pnl_usd": -3.92,
+          "wr": 0.7386934673366834
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -9.88,
+          "liquidations": 0,
+          "max_dd_usd": 27.64,
+          "n": 341,
+          "pnl_usd": -19.77,
+          "wr": 0.7243401759530792
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -57.15,
+          "liquidations": 0,
+          "max_dd_usd": 75.19,
+          "n": 365,
+          "pnl_usd": -71.39,
+          "wr": 0.673972602739726
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -22.25,
+        "liquidations": 0,
+        "max_period_dd_usd": 75.19,
+        "min_period_pnl_usd": -71.39,
+        "n": 905,
+        "pnl_usd": -95.08,
+        "trades_per_month": 17.64,
+        "unique_n": 905,
+        "wr": 0.7072
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783037",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783037",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.01,
+          "liquidations": 0,
+          "max_dd_usd": 20.76,
+          "n": 178,
+          "pnl_usd": -10.26,
+          "wr": 0.7078651685393258
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -1.16,
+          "liquidations": 0,
+          "max_dd_usd": 14.23,
+          "n": 324,
+          "pnl_usd": -2.33,
+          "wr": 0.7376543209876543
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -42.46,
+          "liquidations": 0,
+          "max_dd_usd": 60.14,
+          "n": 338,
+          "pnl_usd": -53.04,
+          "wr": 0.6775147928994083
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -15.36,
+        "liquidations": 0,
+        "max_period_dd_usd": 60.14,
+        "min_period_pnl_usd": -53.04,
+        "n": 840,
+        "pnl_usd": -65.63,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.7071
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783018",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783018",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.88,
+          "liquidations": 0,
+          "max_dd_usd": 22.47,
+          "n": 196,
+          "pnl_usd": -3.98,
+          "wr": 0.7346938775510204
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.34,
+          "liquidations": 0,
+          "max_dd_usd": 22.57,
+          "n": 349,
+          "pnl_usd": -14.69,
+          "wr": 0.7306590257879656
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -58.57,
+          "liquidations": 0,
+          "max_dd_usd": 76.71,
+          "n": 365,
+          "pnl_usd": -73.17,
+          "wr": 0.6684931506849315
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.49,
+        "liquidations": 0,
+        "max_period_dd_usd": 76.71,
+        "min_period_pnl_usd": -73.17,
+        "n": 910,
+        "pnl_usd": -91.84,
+        "trades_per_month": 17.73,
+        "unique_n": 910,
+        "wr": 0.7066
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783037",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783037",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -5.61,
+          "liquidations": 0,
+          "max_dd_usd": 21.24,
+          "n": 181,
+          "pnl_usd": -5.74,
+          "wr": 0.7182320441988951
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -3.11,
+          "liquidations": 0,
+          "max_dd_usd": 20.45,
+          "n": 317,
+          "pnl_usd": -6.23,
+          "wr": 0.7318611987381703
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -44.45,
+          "liquidations": 0,
+          "max_dd_usd": 60.35,
+          "n": 337,
+          "pnl_usd": -55.53,
+          "wr": 0.6765578635014837
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -15.79,
+        "liquidations": 0,
+        "max_period_dd_usd": 60.35,
+        "min_period_pnl_usd": -55.53,
+        "n": 835,
+        "pnl_usd": -67.5,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.7066
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783018",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783018",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.11,
+          "liquidations": 0,
+          "max_dd_usd": 26.71,
+          "n": 198,
+          "pnl_usd": -4.21,
+          "wr": 0.7373737373737373
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.38,
+          "liquidations": 0,
+          "max_dd_usd": 24.68,
+          "n": 351,
+          "pnl_usd": -16.77,
+          "wr": 0.7293447293447294
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -61.56,
+          "liquidations": 0,
+          "max_dd_usd": 80.44,
+          "n": 368,
+          "pnl_usd": -76.91,
+          "wr": 0.6657608695652174
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -22.9,
+        "liquidations": 0,
+        "max_period_dd_usd": 80.44,
+        "min_period_pnl_usd": -76.91,
+        "n": 917,
+        "pnl_usd": -97.89,
+        "trades_per_month": 17.87,
+        "unique_n": 917,
+        "wr": 0.7056
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783037",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783037",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.25,
+          "liquidations": 0,
+          "max_dd_usd": 25.0,
+          "n": 180,
+          "pnl_usd": -10.5,
+          "wr": 0.7111111111111111
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -1.91,
+          "liquidations": 0,
+          "max_dd_usd": 14.61,
+          "n": 326,
+          "pnl_usd": -3.82,
+          "wr": 0.7361963190184049
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -47.04,
+          "liquidations": 0,
+          "max_dd_usd": 65.87,
+          "n": 342,
+          "pnl_usd": -58.77,
+          "wr": 0.672514619883041
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -17.1,
+        "liquidations": 0,
+        "max_period_dd_usd": 65.87,
+        "min_period_pnl_usd": -58.77,
+        "n": 848,
+        "pnl_usd": -73.09,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.7052
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783047",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783047",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.69,
+          "liquidations": 0,
+          "max_dd_usd": 13.15,
+          "n": 157,
+          "pnl_usd": -9.93,
+          "wr": 0.7133757961783439
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.28,
+          "liquidations": 0,
+          "max_dd_usd": 16.5,
+          "n": 299,
+          "pnl_usd": -10.57,
+          "wr": 0.7391304347826086
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -49.14,
+          "liquidations": 0,
+          "max_dd_usd": 65.72,
+          "n": 301,
+          "pnl_usd": -61.39,
+          "wr": 0.654485049833887
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -19.16,
+        "liquidations": 0,
+        "max_period_dd_usd": 65.72,
+        "min_period_pnl_usd": -61.39,
+        "n": 757,
+        "pnl_usd": -81.89,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.7001
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783047",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783047",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -11.97,
+          "liquidations": 0,
+          "max_dd_usd": 19.73,
+          "n": 165,
+          "pnl_usd": -12.26,
+          "wr": 0.7090909090909091
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.65,
+          "liquidations": 0,
+          "max_dd_usd": 16.96,
+          "n": 311,
+          "pnl_usd": -11.31,
+          "wr": 0.7363344051446945
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -52.39,
+          "liquidations": 0,
+          "max_dd_usd": 70.29,
+          "n": 314,
+          "pnl_usd": -65.45,
+          "wr": 0.6528662420382165
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.83,
+        "liquidations": 0,
+        "max_period_dd_usd": 70.29,
+        "min_period_pnl_usd": -65.45,
+        "n": 790,
+        "pnl_usd": -89.02,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.6975
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783047",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783047",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -12.02,
+          "liquidations": 0,
+          "max_dd_usd": 22.63,
+          "n": 167,
+          "pnl_usd": -12.31,
+          "wr": 0.7125748502994012
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.4,
+          "liquidations": 0,
+          "max_dd_usd": 16.46,
+          "n": 312,
+          "pnl_usd": -10.8,
+          "wr": 0.7371794871794872
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -54.58,
+          "liquidations": 0,
+          "max_dd_usd": 73.02,
+          "n": 317,
+          "pnl_usd": -68.18,
+          "wr": 0.6498422712933754
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.36,
+        "liquidations": 0,
+        "max_period_dd_usd": 73.02,
+        "min_period_pnl_usd": -68.18,
+        "n": 796,
+        "pnl_usd": -91.29,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6972
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783032",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783032",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.13,
+          "liquidations": 0,
+          "max_dd_usd": 13.99,
+          "n": 169,
+          "pnl_usd": -4.23,
+          "wr": 0.7337278106508875
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.35,
+          "liquidations": 0,
+          "max_dd_usd": 21.74,
+          "n": 309,
+          "pnl_usd": -16.71,
+          "wr": 0.7281553398058253
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -55.39,
+          "liquidations": 0,
+          "max_dd_usd": 73.53,
+          "n": 324,
+          "pnl_usd": -69.2,
+          "wr": 0.6481481481481481
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.09,
+        "liquidations": 0,
+        "max_period_dd_usd": 73.53,
+        "min_period_pnl_usd": -69.2,
+        "n": 802,
+        "pnl_usd": -90.14,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.697
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783047",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783047",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -15.13,
+          "liquidations": 0,
+          "max_dd_usd": 19.43,
+          "n": 167,
+          "pnl_usd": -15.5,
+          "wr": 0.7005988023952096
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -9.17,
+          "liquidations": 0,
+          "max_dd_usd": 19.47,
+          "n": 307,
+          "pnl_usd": -18.35,
+          "wr": 0.7263843648208469
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -54.05,
+          "liquidations": 0,
+          "max_dd_usd": 70.23,
+          "n": 313,
+          "pnl_usd": -67.52,
+          "wr": 0.6485623003194888
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -23.72,
+        "liquidations": 0,
+        "max_period_dd_usd": 70.23,
+        "min_period_pnl_usd": -67.52,
+        "n": 787,
+        "pnl_usd": -101.37,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.69
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783032",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783032",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.47,
+          "liquidations": 0,
+          "max_dd_usd": 18.45,
+          "n": 181,
+          "pnl_usd": -10.73,
+          "wr": 0.7182320441988951
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -12.23,
+          "liquidations": 0,
+          "max_dd_usd": 25.96,
+          "n": 317,
+          "pnl_usd": -24.47,
+          "wr": 0.7160883280757098
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -59.01,
+          "liquidations": 0,
+          "max_dd_usd": 76.43,
+          "n": 337,
+          "pnl_usd": -73.72,
+          "wr": 0.6439169139465876
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.48,
+        "liquidations": 0,
+        "max_period_dd_usd": 76.43,
+        "min_period_pnl_usd": -73.72,
+        "n": 835,
+        "pnl_usd": -108.92,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.6874
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783032",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783032",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -14.56,
+          "liquidations": 0,
+          "max_dd_usd": 21.79,
+          "n": 178,
+          "pnl_usd": -14.91,
+          "wr": 0.702247191011236
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.81,
+          "liquidations": 0,
+          "max_dd_usd": 22.2,
+          "n": 324,
+          "pnl_usd": -17.61,
+          "wr": 0.7253086419753086
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -61.64,
+          "liquidations": 0,
+          "max_dd_usd": 81.84,
+          "n": 338,
+          "pnl_usd": -77.0,
+          "wr": 0.6390532544378699
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.62,
+        "liquidations": 0,
+        "max_period_dd_usd": 81.84,
+        "min_period_pnl_usd": -77.0,
+        "n": 840,
+        "pnl_usd": -109.52,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.6857
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783032",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783032",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -14.55,
+          "liquidations": 0,
+          "max_dd_usd": 21.78,
+          "n": 180,
+          "pnl_usd": -14.9,
+          "wr": 0.7055555555555556
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -9.36,
+          "liquidations": 0,
+          "max_dd_usd": 23.32,
+          "n": 326,
+          "pnl_usd": -18.73,
+          "wr": 0.7239263803680982
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -65.12,
+          "liquidations": 0,
+          "max_dd_usd": 86.2,
+          "n": 342,
+          "pnl_usd": -81.36,
+          "wr": 0.6345029239766082
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -26.9,
+        "liquidations": 0,
+        "max_period_dd_usd": 86.2,
+        "min_period_pnl_usd": -81.36,
+        "n": 848,
+        "pnl_usd": -114.99,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.684
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783022",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783022",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.27,
+          "liquidations": 0,
+          "max_dd_usd": 23.23,
+          "n": 186,
+          "pnl_usd": -4.38,
+          "wr": 0.6935483870967742
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -3.78,
+          "liquidations": 0,
+          "max_dd_usd": 19.04,
+          "n": 332,
+          "pnl_usd": -7.55,
+          "wr": 0.6927710843373494
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -43.58,
+          "liquidations": 0,
+          "max_dd_usd": 61.32,
+          "n": 349,
+          "pnl_usd": -54.44,
+          "wr": 0.6504297994269341
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -15.53,
+        "liquidations": 0,
+        "max_period_dd_usd": 61.32,
+        "min_period_pnl_usd": -54.44,
+        "n": 867,
+        "pnl_usd": -66.37,
+        "trades_per_month": 16.9,
+        "unique_n": 867,
+        "wr": 0.6759
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783017",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783017",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.05,
+          "liquidations": 0,
+          "max_dd_usd": 18.84,
+          "n": 186,
+          "pnl_usd": -10.3,
+          "wr": 0.6935483870967742
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.92,
+          "liquidations": 0,
+          "max_dd_usd": 23.25,
+          "n": 332,
+          "pnl_usd": -13.85,
+          "wr": 0.7108433734939759
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -65.7,
+          "liquidations": 0,
+          "max_dd_usd": 85.69,
+          "n": 349,
+          "pnl_usd": -82.08,
+          "wr": 0.6189111747851003
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -24.86,
+        "liquidations": 0,
+        "max_period_dd_usd": 85.69,
+        "min_period_pnl_usd": -82.08,
+        "n": 867,
+        "pnl_usd": -106.23,
+        "trades_per_month": 16.9,
+        "unique_n": 867,
+        "wr": 0.6701
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783051",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783051",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -7.0,
+          "liquidations": 0,
+          "max_dd_usd": 12.4,
+          "n": 157,
+          "pnl_usd": -7.18,
+          "wr": 0.6815286624203821
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -1.5,
+          "liquidations": 0,
+          "max_dd_usd": 15.68,
+          "n": 299,
+          "pnl_usd": -3.0,
+          "wr": 0.7023411371237458
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -41.82,
+          "liquidations": 0,
+          "max_dd_usd": 58.46,
+          "n": 301,
+          "pnl_usd": -52.25,
+          "wr": 0.6312292358803987
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -14.61,
+        "liquidations": 0,
+        "max_period_dd_usd": 58.46,
+        "min_period_pnl_usd": -52.25,
+        "n": 757,
+        "pnl_usd": -62.43,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.6697
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783036",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783036",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.07,
+          "liquidations": 0,
+          "max_dd_usd": 12.88,
+          "n": 169,
+          "pnl_usd": -2.12,
+          "wr": 0.6923076923076923
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -3.75,
+          "liquidations": 0,
+          "max_dd_usd": 16.47,
+          "n": 309,
+          "pnl_usd": -7.5,
+          "wr": 0.6990291262135923
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -46.76,
+          "liquidations": 0,
+          "max_dd_usd": 64.63,
+          "n": 324,
+          "pnl_usd": -58.42,
+          "wr": 0.6265432098765432
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -15.92,
+        "liquidations": 0,
+        "max_period_dd_usd": 64.63,
+        "min_period_pnl_usd": -58.42,
+        "n": 802,
+        "pnl_usd": -68.04,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.6683
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783051",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783051",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.48,
+          "liquidations": 0,
+          "max_dd_usd": 20.25,
+          "n": 167,
+          "pnl_usd": -8.69,
+          "wr": 0.6826347305389222
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -2.18,
+          "liquidations": 0,
+          "max_dd_usd": 17.22,
+          "n": 312,
+          "pnl_usd": -4.36,
+          "wr": 0.6987179487179487
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -46.82,
+          "liquidations": 0,
+          "max_dd_usd": 65.33,
+          "n": 317,
+          "pnl_usd": -58.49,
+          "wr": 0.6277602523659306
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -16.74,
+        "liquidations": 0,
+        "max_period_dd_usd": 65.33,
+        "min_period_pnl_usd": -58.49,
+        "n": 796,
+        "pnl_usd": -71.54,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6671
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783051",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783051",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.67,
+          "liquidations": 0,
+          "max_dd_usd": 18.61,
+          "n": 165,
+          "pnl_usd": -8.89,
+          "wr": 0.6787878787878788
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -2.5,
+          "liquidations": 0,
+          "max_dd_usd": 17.22,
+          "n": 311,
+          "pnl_usd": -4.99,
+          "wr": 0.6977491961414791
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -44.73,
+          "liquidations": 0,
+          "max_dd_usd": 62.72,
+          "n": 314,
+          "pnl_usd": -55.88,
+          "wr": 0.6305732484076433
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -16.32,
+        "liquidations": 0,
+        "max_period_dd_usd": 62.72,
+        "min_period_pnl_usd": -55.88,
+        "n": 790,
+        "pnl_usd": -69.76,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.6671
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783022",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783022",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.71,
+          "liquidations": 0,
+          "max_dd_usd": 27.39,
+          "n": 196,
+          "pnl_usd": -8.93,
+          "wr": 0.6785714285714286
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.78,
+          "liquidations": 0,
+          "max_dd_usd": 18.21,
+          "n": 349,
+          "pnl_usd": -9.57,
+          "wr": 0.6876790830945558
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -48.93,
+          "liquidations": 0,
+          "max_dd_usd": 66.53,
+          "n": 365,
+          "pnl_usd": -61.13,
+          "wr": 0.6410958904109589
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -18.63,
+        "liquidations": 0,
+        "max_period_dd_usd": 66.53,
+        "min_period_pnl_usd": -61.13,
+        "n": 910,
+        "pnl_usd": -79.63,
+        "trades_per_month": 17.73,
+        "unique_n": 910,
+        "wr": 0.667
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783022",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783022",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.7,
+          "liquidations": 0,
+          "max_dd_usd": 31.63,
+          "n": 198,
+          "pnl_usd": -8.92,
+          "wr": 0.6818181818181818
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.83,
+          "liquidations": 0,
+          "max_dd_usd": 20.29,
+          "n": 351,
+          "pnl_usd": -11.65,
+          "wr": 0.6866096866096866
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -51.82,
+          "liquidations": 0,
+          "max_dd_usd": 70.14,
+          "n": 368,
+          "pnl_usd": -64.74,
+          "wr": 0.6385869565217391
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -19.96,
+        "liquidations": 0,
+        "max_period_dd_usd": 70.14,
+        "min_period_pnl_usd": -64.74,
+        "n": 917,
+        "pnl_usd": -85.31,
+        "trades_per_month": 17.87,
+        "unique_n": 917,
+        "wr": 0.6663
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783022",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783022",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.34,
+          "liquidations": 0,
+          "max_dd_usd": 27.1,
+          "n": 199,
+          "pnl_usd": -9.57,
+          "wr": 0.678391959798995
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.5,
+          "liquidations": 0,
+          "max_dd_usd": 23.78,
+          "n": 341,
+          "pnl_usd": -15.01,
+          "wr": 0.6803519061583577
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -51.2,
+          "liquidations": 0,
+          "max_dd_usd": 69.9,
+          "n": 365,
+          "pnl_usd": -63.97,
+          "wr": 0.6410958904109589
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.72,
+        "liquidations": 0,
+        "max_period_dd_usd": 69.9,
+        "min_period_pnl_usd": -63.97,
+        "n": 905,
+        "pnl_usd": -88.55,
+        "trades_per_month": 17.64,
+        "unique_n": 905,
+        "wr": 0.6641
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783003",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783003",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.81,
+          "liquidations": 0,
+          "max_dd_usd": 16.21,
+          "n": 226,
+          "pnl_usd": -2.88,
+          "wr": 0.6902654867256637
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.94,
+          "liquidations": 0,
+          "max_dd_usd": 22.99,
+          "n": 376,
+          "pnl_usd": -9.88,
+          "wr": 0.6861702127659575
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -62.25,
+          "liquidations": 0,
+          "max_dd_usd": 81.04,
+          "n": 399,
+          "pnl_usd": -77.77,
+          "wr": 0.6265664160401002
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.18,
+        "liquidations": 0,
+        "max_period_dd_usd": 81.04,
+        "min_period_pnl_usd": -77.77,
+        "n": 1001,
+        "pnl_usd": -90.53,
+        "trades_per_month": 19.51,
+        "unique_n": 1001,
+        "wr": 0.6633
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783017",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783017",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -13.48,
+          "liquidations": 0,
+          "max_dd_usd": 22.9,
+          "n": 196,
+          "pnl_usd": -13.81,
+          "wr": 0.6836734693877551
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.78,
+          "liquidations": 0,
+          "max_dd_usd": 22.76,
+          "n": 349,
+          "pnl_usd": -15.55,
+          "wr": 0.7048710601719198
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -71.98,
+          "liquidations": 0,
+          "max_dd_usd": 92.46,
+          "n": 365,
+          "pnl_usd": -89.93,
+          "wr": 0.6082191780821918
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -27.91,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.46,
+        "min_period_pnl_usd": -89.93,
+        "n": 910,
+        "pnl_usd": -119.29,
+        "trades_per_month": 17.73,
+        "unique_n": 910,
+        "wr": 0.6615
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783017",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783017",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -13.22,
+          "liquidations": 0,
+          "max_dd_usd": 26.14,
+          "n": 198,
+          "pnl_usd": -13.55,
+          "wr": 0.6868686868686869
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.57,
+          "liquidations": 0,
+          "max_dd_usd": 24.35,
+          "n": 351,
+          "pnl_usd": -17.14,
+          "wr": 0.7037037037037037
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -74.17,
+          "liquidations": 0,
+          "max_dd_usd": 95.19,
+          "n": 368,
+          "pnl_usd": -92.67,
+          "wr": 0.6059782608695652
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -28.86,
+        "liquidations": 0,
+        "max_period_dd_usd": 95.19,
+        "min_period_pnl_usd": -92.67,
+        "n": 917,
+        "pnl_usd": -123.36,
+        "trades_per_month": 17.87,
+        "unique_n": 917,
+        "wr": 0.6609
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783056",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4452_E783056",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 5.77,
+          "liquidations": 0,
+          "max_dd_usd": 14.64,
+          "n": 157,
+          "pnl_usd": 5.92,
+          "wr": 0.6687898089171974
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 3.37,
+          "liquidations": 0,
+          "max_dd_usd": 20.88,
+          "n": 299,
+          "pnl_usd": 6.73,
+          "wr": 0.6722408026755853
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -27.85,
+          "liquidations": 0,
+          "max_dd_usd": 43.76,
+          "n": 301,
+          "pnl_usd": -34.8,
+          "wr": 0.6445182724252492
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -5.18,
+        "liquidations": 0,
+        "max_period_dd_usd": 43.76,
+        "min_period_pnl_usd": -34.8,
+        "n": 757,
+        "pnl_usd": -22.15,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.6605
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783017",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783017",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -15.01,
+          "liquidations": 0,
+          "max_dd_usd": 25.83,
+          "n": 199,
+          "pnl_usd": -15.38,
+          "wr": 0.6834170854271356
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -10.78,
+          "liquidations": 0,
+          "max_dd_usd": 27.61,
+          "n": 341,
+          "pnl_usd": -21.56,
+          "wr": 0.6979472140762464
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -71.5,
+          "liquidations": 0,
+          "max_dd_usd": 91.98,
+          "n": 365,
+          "pnl_usd": -89.32,
+          "wr": 0.6109589041095891
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -29.54,
+        "liquidations": 0,
+        "max_period_dd_usd": 91.98,
+        "min_period_pnl_usd": -89.32,
+        "n": 905,
+        "pnl_usd": -126.26,
+        "trades_per_month": 17.64,
+        "unique_n": 905,
+        "wr": 0.6597
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783056",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4662_E783056",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 4.16,
+          "liquidations": 0,
+          "max_dd_usd": 18.3,
+          "n": 167,
+          "pnl_usd": 4.27,
+          "wr": 0.6706586826347305
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 2.45,
+          "liquidations": 0,
+          "max_dd_usd": 20.88,
+          "n": 312,
+          "pnl_usd": 4.9,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -26.3,
+          "liquidations": 0,
+          "max_dd_usd": 42.69,
+          "n": 317,
+          "pnl_usd": -32.85,
+          "wr": 0.6466876971608833
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -5.54,
+        "liquidations": 0,
+        "max_period_dd_usd": 42.69,
+        "min_period_pnl_usd": -32.85,
+        "n": 796,
+        "pnl_usd": -23.68,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6595
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783056",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4677_E783056",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 3.02,
+          "liquidations": 0,
+          "max_dd_usd": 14.64,
+          "n": 165,
+          "pnl_usd": 3.09,
+          "wr": 0.6606060606060606
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 2.01,
+          "liquidations": 0,
+          "max_dd_usd": 20.88,
+          "n": 311,
+          "pnl_usd": 4.02,
+          "wr": 0.6655948553054662
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -23.61,
+          "liquidations": 0,
+          "max_dd_usd": 39.33,
+          "n": 314,
+          "pnl_usd": -29.49,
+          "wr": 0.6496815286624203
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -5.24,
+        "liquidations": 0,
+        "max_period_dd_usd": 39.33,
+        "min_period_pnl_usd": -29.49,
+        "n": 790,
+        "pnl_usd": -22.38,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.6582
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783051",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783051",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -13.07,
+          "liquidations": 0,
+          "max_dd_usd": 19.24,
+          "n": 167,
+          "pnl_usd": -13.39,
+          "wr": 0.6646706586826348
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.27,
+          "liquidations": 0,
+          "max_dd_usd": 17.3,
+          "n": 307,
+          "pnl_usd": -10.53,
+          "wr": 0.6905537459283387
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -47.93,
+          "liquidations": 0,
+          "max_dd_usd": 64.47,
+          "n": 313,
+          "pnl_usd": -59.88,
+          "wr": 0.6230031948881789
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -19.61,
+        "liquidations": 0,
+        "max_period_dd_usd": 64.47,
+        "min_period_pnl_usd": -59.88,
+        "n": 787,
+        "pnl_usd": -83.8,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.6582
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783036",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783036",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.36,
+          "liquidations": 0,
+          "max_dd_usd": 18.95,
+          "n": 181,
+          "pnl_usd": -9.59,
+          "wr": 0.6740331491712708
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.51,
+          "liquidations": 0,
+          "max_dd_usd": 19.33,
+          "n": 317,
+          "pnl_usd": -15.01,
+          "wr": 0.6876971608832808
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -51.48,
+          "liquidations": 0,
+          "max_dd_usd": 69.35,
+          "n": 337,
+          "pnl_usd": -64.31,
+          "wr": 0.6201780415430267
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.8,
+        "liquidations": 0,
+        "max_period_dd_usd": 69.35,
+        "min_period_pnl_usd": -64.31,
+        "n": 835,
+        "pnl_usd": -88.91,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.6575
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783036",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783036",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -12.37,
+          "liquidations": 0,
+          "max_dd_usd": 21.81,
+          "n": 178,
+          "pnl_usd": -12.68,
+          "wr": 0.6629213483146067
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.7,
+          "liquidations": 0,
+          "max_dd_usd": 17.07,
+          "n": 324,
+          "pnl_usd": -9.41,
+          "wr": 0.6944444444444444
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -52.58,
+          "liquidations": 0,
+          "max_dd_usd": 72.53,
+          "n": 338,
+          "pnl_usd": -65.69,
+          "wr": 0.6183431952662722
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.54,
+        "liquidations": 0,
+        "max_period_dd_usd": 72.53,
+        "min_period_pnl_usd": -65.69,
+        "n": 840,
+        "pnl_usd": -87.78,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.6571
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783003",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783003",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.89,
+          "liquidations": 0,
+          "max_dd_usd": 17.84,
+          "n": 238,
+          "pnl_usd": -7.06,
+          "wr": 0.680672268907563
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.01,
+          "liquidations": 0,
+          "max_dd_usd": 23.18,
+          "n": 398,
+          "pnl_usd": -12.02,
+          "wr": 0.678391959798995
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -66.75,
+          "liquidations": 0,
+          "max_dd_usd": 84.91,
+          "n": 420,
+          "pnl_usd": -83.39,
+          "wr": 0.6214285714285714
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -23.98,
+        "liquidations": 0,
+        "max_period_dd_usd": 84.91,
+        "min_period_pnl_usd": -83.39,
+        "n": 1056,
+        "pnl_usd": -102.47,
+        "trades_per_month": 20.58,
+        "unique_n": 1056,
+        "wr": 0.6562
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783036",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783036",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -12.12,
+          "liquidations": 0,
+          "max_dd_usd": 21.55,
+          "n": 180,
+          "pnl_usd": -12.42,
+          "wr": 0.6666666666666666
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.2,
+          "liquidations": 0,
+          "max_dd_usd": 18.06,
+          "n": 326,
+          "pnl_usd": -10.4,
+          "wr": 0.6932515337423313
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -55.97,
+          "liquidations": 0,
+          "max_dd_usd": 76.76,
+          "n": 342,
+          "pnl_usd": -69.92,
+          "wr": 0.6140350877192983
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.7,
+        "liquidations": 0,
+        "max_period_dd_usd": 76.76,
+        "min_period_pnl_usd": -69.92,
+        "n": 848,
+        "pnl_usd": -92.74,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.6557
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783003",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783003",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -5.87,
+          "liquidations": 0,
+          "max_dd_usd": 20.34,
+          "n": 240,
+          "pnl_usd": -6.01,
+          "wr": 0.6833333333333333
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.67,
+          "liquidations": 0,
+          "max_dd_usd": 25.71,
+          "n": 402,
+          "pnl_usd": -15.34,
+          "wr": 0.6716417910447762
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -68.74,
+          "liquidations": 0,
+          "max_dd_usd": 87.39,
+          "n": 424,
+          "pnl_usd": -85.88,
+          "wr": 0.6226415094339622
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.09,
+        "liquidations": 0,
+        "max_period_dd_usd": 87.39,
+        "min_period_pnl_usd": -85.88,
+        "n": 1066,
+        "pnl_usd": -107.23,
+        "trades_per_month": 20.77,
+        "unique_n": 1066,
+        "wr": 0.6548
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783041",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4452_E783041",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 11.31,
+          "liquidations": 0,
+          "max_dd_usd": 14.31,
+          "n": 169,
+          "pnl_usd": 11.59,
+          "wr": 0.6863905325443787
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 1.44,
+          "liquidations": 0,
+          "max_dd_usd": 19.24,
+          "n": 309,
+          "pnl_usd": 2.88,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -30.82,
+          "liquidations": 0,
+          "max_dd_usd": 47.46,
+          "n": 324,
+          "pnl_usd": -38.5,
+          "wr": 0.6265432098765432
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -5.62,
+        "liquidations": 0,
+        "max_period_dd_usd": 47.46,
+        "min_period_pnl_usd": -38.5,
+        "n": 802,
+        "pnl_usd": -24.03,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.6546
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783003",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783003",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.06,
+          "liquidations": 0,
+          "max_dd_usd": 17.54,
+          "n": 241,
+          "pnl_usd": -2.11,
+          "wr": 0.6804979253112033
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.39,
+          "liquidations": 0,
+          "max_dd_usd": 27.16,
+          "n": 389,
+          "pnl_usd": -16.78,
+          "wr": 0.6735218508997429
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -71.18,
+          "liquidations": 0,
+          "max_dd_usd": 91.89,
+          "n": 417,
+          "pnl_usd": -88.93,
+          "wr": 0.6187050359712231
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.23,
+        "liquidations": 0,
+        "max_period_dd_usd": 91.89,
+        "min_period_pnl_usd": -88.93,
+        "n": 1047,
+        "pnl_usd": -107.82,
+        "trades_per_month": 20.4,
+        "unique_n": 1047,
+        "wr": 0.6533
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783056",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4456_E783056",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.48,
+          "liquidations": 0,
+          "max_dd_usd": 15.91,
+          "n": 167,
+          "pnl_usd": -2.54,
+          "wr": 0.6526946107784432
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 0.72,
+          "liquidations": 0,
+          "max_dd_usd": 20.88,
+          "n": 307,
+          "pnl_usd": 1.44,
+          "wr": 0.6644951140065146
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -31.85,
+          "liquidations": 0,
+          "max_dd_usd": 47.27,
+          "n": 313,
+          "pnl_usd": -39.79,
+          "wr": 0.6389776357827476
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -9.57,
+        "liquidations": 0,
+        "max_period_dd_usd": 47.27,
+        "min_period_pnl_usd": -39.79,
+        "n": 787,
+        "pnl_usd": -40.89,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.6518
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783046",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783046",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.98,
+          "liquidations": 0,
+          "max_dd_usd": 11.32,
+          "n": 157,
+          "pnl_usd": -7.15,
+          "wr": 0.6942675159235668
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -10.84,
+          "liquidations": 0,
+          "max_dd_usd": 23.73,
+          "n": 299,
+          "pnl_usd": -21.68,
+          "wr": 0.6889632107023411
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -61.37,
+          "liquidations": 0,
+          "max_dd_usd": 80.5,
+          "n": 301,
+          "pnl_usd": -76.67,
+          "wr": 0.5913621262458472
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -24.68,
+        "liquidations": 0,
+        "max_period_dd_usd": 80.5,
+        "min_period_pnl_usd": -76.67,
+        "n": 757,
+        "pnl_usd": -105.5,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.6513
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783046",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783046",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.34,
+          "liquidations": 0,
+          "max_dd_usd": 18.63,
+          "n": 167,
+          "pnl_usd": -8.54,
+          "wr": 0.6946107784431138
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -10.42,
+          "liquidations": 0,
+          "max_dd_usd": 25.86,
+          "n": 312,
+          "pnl_usd": -20.83,
+          "wr": 0.6891025641025641
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -65.41,
+          "liquidations": 0,
+          "max_dd_usd": 86.55,
+          "n": 317,
+          "pnl_usd": -81.72,
+          "wr": 0.5899053627760252
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.99,
+        "liquidations": 0,
+        "max_period_dd_usd": 86.55,
+        "min_period_pnl_usd": -81.72,
+        "n": 796,
+        "pnl_usd": -111.09,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6508
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783046",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783046",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.53,
+          "liquidations": 0,
+          "max_dd_usd": 16.46,
+          "n": 165,
+          "pnl_usd": -8.74,
+          "wr": 0.6909090909090909
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -10.67,
+          "liquidations": 0,
+          "max_dd_usd": 24.49,
+          "n": 311,
+          "pnl_usd": -21.34,
+          "wr": 0.6881028938906752
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -63.62,
+          "liquidations": 0,
+          "max_dd_usd": 84.32,
+          "n": 314,
+          "pnl_usd": -79.48,
+          "wr": 0.5923566878980892
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.63,
+        "liquidations": 0,
+        "max_period_dd_usd": 84.32,
+        "min_period_pnl_usd": -79.48,
+        "n": 790,
+        "pnl_usd": -109.56,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.6506
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783031",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783031",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.25,
+          "liquidations": 0,
+          "max_dd_usd": 11.86,
+          "n": 169,
+          "pnl_usd": -1.28,
+          "wr": 0.7159763313609467
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -15.26,
+          "liquidations": 0,
+          "max_dd_usd": 31.04,
+          "n": 309,
+          "pnl_usd": -30.51,
+          "wr": 0.6731391585760518
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -66.09,
+          "liquidations": 0,
+          "max_dd_usd": 86.39,
+          "n": 324,
+          "pnl_usd": -82.57,
+          "wr": 0.5895061728395061
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -26.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 86.39,
+        "min_period_pnl_usd": -82.57,
+        "n": 802,
+        "pnl_usd": -114.36,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.6484
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783041",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4677_E783041",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.51,
+          "liquidations": 0,
+          "max_dd_usd": 23.02,
+          "n": 178,
+          "pnl_usd": -1.54,
+          "wr": 0.6573033707865169
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 0.14,
+          "liquidations": 0,
+          "max_dd_usd": 21.36,
+          "n": 324,
+          "pnl_usd": 0.28,
+          "wr": 0.6574074074074074
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -29.51,
+          "liquidations": 0,
+          "max_dd_usd": 47.03,
+          "n": 338,
+          "pnl_usd": -36.87,
+          "wr": 0.6272189349112426
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -8.92,
+        "liquidations": 0,
+        "max_period_dd_usd": 47.03,
+        "min_period_pnl_usd": -36.87,
+        "n": 840,
+        "pnl_usd": -38.13,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.6452
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783041",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4662_E783041",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.43,
+          "liquidations": 0,
+          "max_dd_usd": 23.02,
+          "n": 180,
+          "pnl_usd": -0.44,
+          "wr": 0.6666666666666666
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -0.48,
+          "liquidations": 0,
+          "max_dd_usd": 21.36,
+          "n": 326,
+          "pnl_usd": -0.96,
+          "wr": 0.656441717791411
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -33.9,
+          "liquidations": 0,
+          "max_dd_usd": 52.51,
+          "n": 342,
+          "pnl_usd": -42.35,
+          "wr": 0.6228070175438597
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -10.24,
+        "liquidations": 0,
+        "max_period_dd_usd": 52.51,
+        "min_period_pnl_usd": -42.35,
+        "n": 848,
+        "pnl_usd": -43.75,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.645
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783041",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4456_E783041",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.77,
+          "liquidations": 0,
+          "max_dd_usd": 15.94,
+          "n": 181,
+          "pnl_usd": 1.81,
+          "wr": 0.6574585635359116
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -1.19,
+          "liquidations": 0,
+          "max_dd_usd": 19.24,
+          "n": 317,
+          "pnl_usd": -2.38,
+          "wr": 0.6529968454258676
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -33.9,
+          "liquidations": 0,
+          "max_dd_usd": 50.86,
+          "n": 337,
+          "pnl_usd": -42.36,
+          "wr": 0.6231454005934718
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -10.04,
+        "liquidations": 0,
+        "max_period_dd_usd": 50.86,
+        "min_period_pnl_usd": -42.36,
+        "n": 835,
+        "pnl_usd": -42.93,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.6419
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783031",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783031",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.21,
+          "liquidations": 0,
+          "max_dd_usd": 17.59,
+          "n": 178,
+          "pnl_usd": -10.46,
+          "wr": 0.6853932584269663
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -15.22,
+          "liquidations": 0,
+          "max_dd_usd": 30.91,
+          "n": 324,
+          "pnl_usd": -30.45,
+          "wr": 0.6728395061728395
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -69.81,
+          "liquidations": 0,
+          "max_dd_usd": 92.05,
+          "n": 338,
+          "pnl_usd": -87.22,
+          "wr": 0.5857988165680473
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -29.98,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.05,
+        "min_period_pnl_usd": -87.22,
+        "n": 840,
+        "pnl_usd": -128.13,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.6405
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783046",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783046",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -11.2,
+          "liquidations": 0,
+          "max_dd_usd": 16.45,
+          "n": 167,
+          "pnl_usd": -11.48,
+          "wr": 0.6826347305389222
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -15.04,
+          "liquidations": 0,
+          "max_dd_usd": 30.23,
+          "n": 307,
+          "pnl_usd": -30.08,
+          "wr": 0.6742671009771987
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -66.78,
+          "liquidations": 0,
+          "max_dd_usd": 85.89,
+          "n": 313,
+          "pnl_usd": -83.43,
+          "wr": 0.5846645367412141
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -29.24,
+        "liquidations": 0,
+        "max_period_dd_usd": 85.89,
+        "min_period_pnl_usd": -83.43,
+        "n": 787,
+        "pnl_usd": -124.99,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.6404
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783031",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783031",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.14,
+          "liquidations": 0,
+          "max_dd_usd": 15.7,
+          "n": 181,
+          "pnl_usd": -8.34,
+          "wr": 0.6961325966850829
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -18.51,
+          "liquidations": 0,
+          "max_dd_usd": 37.17,
+          "n": 317,
+          "pnl_usd": -37.02,
+          "wr": 0.6624605678233438
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -68.91,
+          "liquidations": 0,
+          "max_dd_usd": 88.62,
+          "n": 337,
+          "pnl_usd": -86.09,
+          "wr": 0.5875370919881305
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -30.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 88.62,
+        "min_period_pnl_usd": -86.09,
+        "n": 835,
+        "pnl_usd": -131.45,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.6395
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783031",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783031",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.96,
+          "liquidations": 0,
+          "max_dd_usd": 18.2,
+          "n": 180,
+          "pnl_usd": -10.2,
+          "wr": 0.6888888888888889
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -15.66,
+          "liquidations": 0,
+          "max_dd_usd": 33.65,
+          "n": 326,
+          "pnl_usd": -31.31,
+          "wr": 0.6717791411042945
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -72.7,
+          "liquidations": 0,
+          "max_dd_usd": 95.66,
+          "n": 342,
+          "pnl_usd": -90.82,
+          "wr": 0.5818713450292398
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -30.96,
+        "liquidations": 0,
+        "max_period_dd_usd": 95.66,
+        "min_period_pnl_usd": -90.82,
+        "n": 848,
+        "pnl_usd": -132.33,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.6392
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783016",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783016",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.22,
+          "liquidations": 0,
+          "max_dd_usd": 16.28,
+          "n": 186,
+          "pnl_usd": -6.38,
+          "wr": 0.6827956989247311
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -11.68,
+          "liquidations": 0,
+          "max_dd_usd": 29.0,
+          "n": 332,
+          "pnl_usd": -23.36,
+          "wr": 0.6716867469879518
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -73.0,
+          "liquidations": 0,
+          "max_dd_usd": 93.66,
+          "n": 349,
+          "pnl_usd": -91.21,
+          "wr": 0.5787965616045845
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -28.3,
+        "liquidations": 0,
+        "max_period_dd_usd": 93.66,
+        "min_period_pnl_usd": -91.21,
+        "n": 867,
+        "pnl_usd": -120.95,
+        "trades_per_month": 16.9,
+        "unique_n": 867,
+        "wr": 0.6367
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783021",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783021",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -13.26,
+          "liquidations": 0,
+          "max_dd_usd": 23.81,
+          "n": 186,
+          "pnl_usd": -13.59,
+          "wr": 0.6397849462365591
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.02,
+          "liquidations": 0,
+          "max_dd_usd": 18.77,
+          "n": 332,
+          "pnl_usd": -8.05,
+          "wr": 0.6686746987951807
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -58.72,
+          "liquidations": 0,
+          "max_dd_usd": 78.84,
+          "n": 349,
+          "pnl_usd": -73.35,
+          "wr": 0.5902578796561605
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -22.23,
+        "liquidations": 0,
+        "max_period_dd_usd": 78.84,
+        "min_period_pnl_usd": -73.35,
+        "n": 867,
+        "pnl_usd": -94.99,
+        "trades_per_month": 16.9,
+        "unique_n": 867,
+        "wr": 0.6309
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783016",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783016",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.14,
+          "liquidations": 0,
+          "max_dd_usd": 20.26,
+          "n": 196,
+          "pnl_usd": -9.37,
+          "wr": 0.673469387755102
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -12.28,
+          "liquidations": 0,
+          "max_dd_usd": 29.52,
+          "n": 349,
+          "pnl_usd": -24.56,
+          "wr": 0.667621776504298
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -77.58,
+          "liquidations": 0,
+          "max_dd_usd": 99.44,
+          "n": 365,
+          "pnl_usd": -96.92,
+          "wr": 0.5726027397260274
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -30.62,
+        "liquidations": 0,
+        "max_period_dd_usd": 99.44,
+        "min_period_pnl_usd": -96.92,
+        "n": 910,
+        "pnl_usd": -130.85,
+        "trades_per_month": 17.73,
+        "unique_n": 910,
+        "wr": 0.6308
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783016",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783016",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.65,
+          "liquidations": 0,
+          "max_dd_usd": 23.0,
+          "n": 198,
+          "pnl_usd": -8.86,
+          "wr": 0.6767676767676768
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -12.71,
+          "liquidations": 0,
+          "max_dd_usd": 32.26,
+          "n": 351,
+          "pnl_usd": -25.43,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -79.37,
+          "liquidations": 0,
+          "max_dd_usd": 101.68,
+          "n": 368,
+          "pnl_usd": -99.15,
+          "wr": 0.5706521739130435
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -31.22,
+        "liquidations": 0,
+        "max_period_dd_usd": 101.68,
+        "min_period_pnl_usd": -99.15,
+        "n": 917,
+        "pnl_usd": -133.44,
+        "trades_per_month": 17.87,
+        "unique_n": 917,
+        "wr": 0.6303
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783002",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4452_E783002",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -11.08,
+          "liquidations": 0,
+          "max_dd_usd": 20.75,
+          "n": 226,
+          "pnl_usd": -11.35,
+          "wr": 0.6637168141592921
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.83,
+          "liquidations": 0,
+          "max_dd_usd": 25.65,
+          "n": 376,
+          "pnl_usd": -17.67,
+          "wr": 0.6622340425531915
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -78.83,
+          "liquidations": 0,
+          "max_dd_usd": 100.85,
+          "n": 399,
+          "pnl_usd": -98.48,
+          "wr": 0.5789473684210527
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -29.83,
+        "liquidations": 0,
+        "max_period_dd_usd": 100.85,
+        "min_period_pnl_usd": -98.48,
+        "n": 1001,
+        "pnl_usd": -127.5,
+        "trades_per_month": 19.51,
+        "unique_n": 1001,
+        "wr": 0.6294
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783016",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783016",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.8,
+          "liquidations": 0,
+          "max_dd_usd": 21.82,
+          "n": 199,
+          "pnl_usd": -11.06,
+          "wr": 0.6733668341708543
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -14.91,
+          "liquidations": 0,
+          "max_dd_usd": 32.61,
+          "n": 341,
+          "pnl_usd": -29.82,
+          "wr": 0.6598240469208211
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -77.8,
+          "liquidations": 0,
+          "max_dd_usd": 98.7,
+          "n": 365,
+          "pnl_usd": -97.2,
+          "wr": 0.5726027397260274
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -32.31,
+        "liquidations": 0,
+        "max_period_dd_usd": 98.7,
+        "min_period_pnl_usd": -97.2,
+        "n": 905,
+        "pnl_usd": -138.08,
+        "trades_per_month": 17.64,
+        "unique_n": 905,
+        "wr": 0.6276
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783021",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783021",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -16.2,
+          "liquidations": 0,
+          "max_dd_usd": 27.39,
+          "n": 196,
+          "pnl_usd": -16.6,
+          "wr": 0.6326530612244898
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.64,
+          "liquidations": 0,
+          "max_dd_usd": 17.29,
+          "n": 349,
+          "pnl_usd": -9.28,
+          "wr": 0.664756446991404
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -64.9,
+          "liquidations": 0,
+          "max_dd_usd": 85.58,
+          "n": 365,
+          "pnl_usd": -81.09,
+          "wr": 0.5808219178082191
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.03,
+        "liquidations": 0,
+        "max_period_dd_usd": 85.58,
+        "min_period_pnl_usd": -81.09,
+        "n": 910,
+        "pnl_usd": -106.97,
+        "trades_per_month": 17.73,
+        "unique_n": 910,
+        "wr": 0.6242
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783002",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4677_E783002",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -12.64,
+          "liquidations": 0,
+          "max_dd_usd": 21.81,
+          "n": 238,
+          "pnl_usd": -12.96,
+          "wr": 0.6554621848739496
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -9.59,
+          "liquidations": 0,
+          "max_dd_usd": 24.66,
+          "n": 398,
+          "pnl_usd": -19.18,
+          "wr": 0.6557788944723618
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -82.51,
+          "liquidations": 0,
+          "max_dd_usd": 104.34,
+          "n": 420,
+          "pnl_usd": -103.08,
+          "wr": 0.5761904761904761
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -31.64,
+        "liquidations": 0,
+        "max_period_dd_usd": 104.34,
+        "min_period_pnl_usd": -103.08,
+        "n": 1056,
+        "pnl_usd": -135.22,
+        "trades_per_month": 20.58,
+        "unique_n": 1056,
+        "wr": 0.6241
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783021",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783021",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -15.71,
+          "liquidations": 0,
+          "max_dd_usd": 30.63,
+          "n": 198,
+          "pnl_usd": -16.09,
+          "wr": 0.6363636363636364
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.43,
+          "liquidations": 0,
+          "max_dd_usd": 18.88,
+          "n": 351,
+          "pnl_usd": -10.86,
+          "wr": 0.6638176638176638
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -66.99,
+          "liquidations": 0,
+          "max_dd_usd": 88.19,
+          "n": 368,
+          "pnl_usd": -83.7,
+          "wr": 0.5788043478260869
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.89,
+        "liquidations": 0,
+        "max_period_dd_usd": 88.19,
+        "min_period_pnl_usd": -83.7,
+        "n": 917,
+        "pnl_usd": -110.65,
+        "trades_per_month": 17.87,
+        "unique_n": 917,
+        "wr": 0.6238
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783002",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4662_E783002",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -12.83,
+          "liquidations": 0,
+          "max_dd_usd": 25.05,
+          "n": 240,
+          "pnl_usd": -13.15,
+          "wr": 0.6583333333333333
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -11.24,
+          "liquidations": 0,
+          "max_dd_usd": 27.82,
+          "n": 402,
+          "pnl_usd": -22.49,
+          "wr": 0.6492537313432836
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -83.7,
+          "liquidations": 0,
+          "max_dd_usd": 105.82,
+          "n": 424,
+          "pnl_usd": -104.56,
+          "wr": 0.5778301886792453
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -32.8,
+        "liquidations": 0,
+        "max_period_dd_usd": 105.82,
+        "min_period_pnl_usd": -104.56,
+        "n": 1066,
+        "pnl_usd": -140.2,
+        "trades_per_month": 20.77,
+        "unique_n": 1066,
+        "wr": 0.6229
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783002",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.0125
+      },
+      "id": "G4456_E783002",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.48,
+          "liquidations": 0,
+          "max_dd_usd": 23.21,
+          "n": 241,
+          "pnl_usd": -10.74,
+          "wr": 0.6556016597510373
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -12.32,
+          "liquidations": 0,
+          "max_dd_usd": 29.89,
+          "n": 389,
+          "pnl_usd": -24.63,
+          "wr": 0.6503856041131105
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -87.44,
+          "liquidations": 0,
+          "max_dd_usd": 110.89,
+          "n": 417,
+          "pnl_usd": -109.24,
+          "wr": 0.5707434052757794
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -33.84,
+        "liquidations": 0,
+        "max_period_dd_usd": 110.89,
+        "min_period_pnl_usd": -109.24,
+        "n": 1047,
+        "pnl_usd": -144.61,
+        "trades_per_month": 20.4,
+        "unique_n": 1047,
+        "wr": 0.6199
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783021",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783021",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -18.53,
+          "liquidations": 0,
+          "max_dd_usd": 31.93,
+          "n": 199,
+          "pnl_usd": -18.99,
+          "wr": 0.628140703517588
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.82,
+          "liquidations": 0,
+          "max_dd_usd": 23.0,
+          "n": 341,
+          "pnl_usd": -15.64,
+          "wr": 0.656891495601173
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -65.61,
+          "liquidations": 0,
+          "max_dd_usd": 86.5,
+          "n": 365,
+          "pnl_usd": -81.97,
+          "wr": 0.5808219178082191
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -27.28,
+        "liquidations": 0,
+        "max_period_dd_usd": 86.5,
+        "min_period_pnl_usd": -81.97,
+        "n": 905,
+        "pnl_usd": -116.6,
+        "trades_per_month": 17.64,
+        "unique_n": 905,
+        "wr": 0.6199
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783035",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783035",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.07,
+          "liquidations": 0,
+          "max_dd_usd": 11.23,
+          "n": 169,
+          "pnl_usd": 1.1,
+          "wr": 0.6745562130177515
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -11.35,
+          "liquidations": 0,
+          "max_dd_usd": 25.03,
+          "n": 309,
+          "pnl_usd": -22.71,
+          "wr": 0.6440129449838188
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -58.39,
+          "liquidations": 0,
+          "max_dd_usd": 78.58,
+          "n": 324,
+          "pnl_usd": -72.94,
+          "wr": 0.5679012345679012
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -22.12,
+        "liquidations": 0,
+        "max_period_dd_usd": 78.58,
+        "min_period_pnl_usd": -72.94,
+        "n": 802,
+        "pnl_usd": -94.55,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.6197
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783050",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783050",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.44,
+          "liquidations": 0,
+          "max_dd_usd": 9.5,
+          "n": 157,
+          "pnl_usd": -3.53,
+          "wr": 0.6624203821656051
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.39,
+          "liquidations": 0,
+          "max_dd_usd": 18.82,
+          "n": 299,
+          "pnl_usd": -16.79,
+          "wr": 0.6488294314381271
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -54.77,
+          "liquidations": 0,
+          "max_dd_usd": 73.87,
+          "n": 301,
+          "pnl_usd": -68.42,
+          "wr": 0.5681063122923588
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 73.87,
+        "min_period_pnl_usd": -68.42,
+        "n": 757,
+        "pnl_usd": -88.74,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.6196
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783050",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783050",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.94,
+          "liquidations": 0,
+          "max_dd_usd": 16.0,
+          "n": 167,
+          "pnl_usd": -4.04,
+          "wr": 0.6646706586826348
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.41,
+          "liquidations": 0,
+          "max_dd_usd": 22.33,
+          "n": 312,
+          "pnl_usd": -16.82,
+          "wr": 0.6474358974358975
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -58.36,
+          "liquidations": 0,
+          "max_dd_usd": 79.63,
+          "n": 317,
+          "pnl_usd": -72.92,
+          "wr": 0.5678233438485805
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.94,
+        "liquidations": 0,
+        "max_period_dd_usd": 79.63,
+        "min_period_pnl_usd": -72.92,
+        "n": 796,
+        "pnl_usd": -93.78,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6193
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783050",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783050",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.38,
+          "liquidations": 0,
+          "max_dd_usd": 14.46,
+          "n": 165,
+          "pnl_usd": -4.49,
+          "wr": 0.6606060606060606
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -8.72,
+          "liquidations": 0,
+          "max_dd_usd": 20.96,
+          "n": 311,
+          "pnl_usd": -17.45,
+          "wr": 0.6463022508038585
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -56.68,
+          "liquidations": 0,
+          "max_dd_usd": 77.52,
+          "n": 314,
+          "pnl_usd": -70.81,
+          "wr": 0.5700636942675159
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -21.7,
+        "liquidations": 0,
+        "max_period_dd_usd": 77.52,
+        "min_period_pnl_usd": -70.81,
+        "n": 790,
+        "pnl_usd": -92.75,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.619
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783059",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.025
+      },
+      "id": "G4452_E783059",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 25.74,
+          "liquidations": 0,
+          "max_dd_usd": 14.99,
+          "n": 157,
+          "pnl_usd": 26.37,
+          "wr": 0.6560509554140127
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 8.7,
+          "liquidations": 0,
+          "max_dd_usd": 18.64,
+          "n": 299,
+          "pnl_usd": 17.39,
+          "wr": 0.6220735785953178
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -24.61,
+          "liquidations": 0,
+          "max_dd_usd": 41.68,
+          "n": 301,
+          "pnl_usd": -30.75,
+          "wr": 0.5880398671096345
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 3.04,
+        "liquidations": 0,
+        "max_period_dd_usd": 41.68,
+        "min_period_pnl_usd": -30.75,
+        "n": 757,
+        "pnl_usd": 13.01,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.6156
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783007",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4452_E783007",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -9.88,
+          "liquidations": 0,
+          "max_dd_usd": 23.37,
+          "n": 226,
+          "pnl_usd": -10.12,
+          "wr": 0.6327433628318584
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -3.71,
+          "liquidations": 0,
+          "max_dd_usd": 24.69,
+          "n": 376,
+          "pnl_usd": -7.41,
+          "wr": 0.6382978723404256
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -57.1,
+          "liquidations": 0,
+          "max_dd_usd": 76.6,
+          "n": 399,
+          "pnl_usd": -71.33,
+          "wr": 0.5839598997493735
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -20.79,
+        "liquidations": 0,
+        "max_period_dd_usd": 76.6,
+        "min_period_pnl_usd": -71.33,
+        "n": 1001,
+        "pnl_usd": -88.86,
+        "trades_per_month": 19.51,
+        "unique_n": 1001,
+        "wr": 0.6154
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783059",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.025
+      },
+      "id": "G4662_E783059",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 22.08,
+          "liquidations": 0,
+          "max_dd_usd": 15.88,
+          "n": 167,
+          "pnl_usd": 22.63,
+          "wr": 0.6526946107784432
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 7.92,
+          "liquidations": 0,
+          "max_dd_usd": 18.64,
+          "n": 312,
+          "pnl_usd": 15.85,
+          "wr": 0.6185897435897436
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -23.01,
+          "liquidations": 0,
+          "max_dd_usd": 40.81,
+          "n": 317,
+          "pnl_usd": -28.75,
+          "wr": 0.5899053627760252
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 2.28,
+        "liquidations": 0,
+        "max_period_dd_usd": 40.81,
+        "min_period_pnl_usd": -28.75,
+        "n": 796,
+        "pnl_usd": 9.73,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6143
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783059",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.025
+      },
+      "id": "G4677_E783059",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 20.54,
+          "liquidations": 0,
+          "max_dd_usd": 14.99,
+          "n": 165,
+          "pnl_usd": 21.05,
+          "wr": 0.6424242424242425
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 7.36,
+          "liquidations": 0,
+          "max_dd_usd": 18.64,
+          "n": 311,
+          "pnl_usd": 14.72,
+          "wr": 0.617363344051447
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -17.92,
+          "liquidations": 0,
+          "max_dd_usd": 34.45,
+          "n": 314,
+          "pnl_usd": -22.39,
+          "wr": 0.5955414012738853
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 3.13,
+        "liquidations": 0,
+        "max_period_dd_usd": 34.45,
+        "min_period_pnl_usd": -22.39,
+        "n": 790,
+        "pnl_usd": 13.38,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.6139
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783026",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4452_E783026",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 3.83,
+          "liquidations": 0,
+          "max_dd_usd": 21.01,
+          "n": 186,
+          "pnl_usd": 3.93,
+          "wr": 0.6397849462365591
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.63,
+          "liquidations": 0,
+          "max_dd_usd": 19.65,
+          "n": 332,
+          "pnl_usd": -9.26,
+          "wr": 0.608433734939759
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -25.0,
+          "liquidations": 0,
+          "max_dd_usd": 40.61,
+          "n": 349,
+          "pnl_usd": -31.24,
+          "wr": 0.6017191977077364
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -8.56,
+        "liquidations": 0,
+        "max_period_dd_usd": 40.61,
+        "min_period_pnl_usd": -31.24,
+        "n": 867,
+        "pnl_usd": -36.57,
+        "trades_per_month": 16.9,
+        "unique_n": 867,
+        "wr": 0.6125
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783035",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783035",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -7.77,
+          "liquidations": 0,
+          "max_dd_usd": 17.34,
+          "n": 178,
+          "pnl_usd": -7.96,
+          "wr": 0.6460674157303371
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -11.69,
+          "liquidations": 0,
+          "max_dd_usd": 26.03,
+          "n": 324,
+          "pnl_usd": -23.39,
+          "wr": 0.6419753086419753
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -61.58,
+          "liquidations": 0,
+          "max_dd_usd": 83.64,
+          "n": 338,
+          "pnl_usd": -76.93,
+          "wr": 0.5650887573964497
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.33,
+        "liquidations": 0,
+        "max_period_dd_usd": 83.64,
+        "min_period_pnl_usd": -76.93,
+        "n": 840,
+        "pnl_usd": -108.28,
+        "trades_per_month": 16.37,
+        "unique_n": 840,
+        "wr": 0.6119
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783007",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4677_E783007",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -12.6,
+          "liquidations": 0,
+          "max_dd_usd": 26.52,
+          "n": 238,
+          "pnl_usd": -12.91,
+          "wr": 0.6302521008403361
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.28,
+          "liquidations": 0,
+          "max_dd_usd": 23.78,
+          "n": 398,
+          "pnl_usd": -8.56,
+          "wr": 0.6331658291457286
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -61.12,
+          "liquidations": 0,
+          "max_dd_usd": 80.14,
+          "n": 420,
+          "pnl_usd": -76.36,
+          "wr": 0.580952380952381
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -22.89,
+        "liquidations": 0,
+        "max_period_dd_usd": 80.14,
+        "min_period_pnl_usd": -76.36,
+        "n": 1056,
+        "pnl_usd": -97.83,
+        "trades_per_month": 20.58,
+        "unique_n": 1056,
+        "wr": 0.6117
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783035",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783035",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -7.27,
+          "liquidations": 0,
+          "max_dd_usd": 17.45,
+          "n": 180,
+          "pnl_usd": -7.45,
+          "wr": 0.65
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -12.06,
+          "liquidations": 0,
+          "max_dd_usd": 28.77,
+          "n": 326,
+          "pnl_usd": -24.13,
+          "wr": 0.6411042944785276
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -64.37,
+          "liquidations": 0,
+          "max_dd_usd": 87.12,
+          "n": 342,
+          "pnl_usd": -80.41,
+          "wr": 0.5614035087719298
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -26.2,
+        "liquidations": 0,
+        "max_period_dd_usd": 87.12,
+        "min_period_pnl_usd": -80.41,
+        "n": 848,
+        "pnl_usd": -111.99,
+        "trades_per_month": 16.53,
+        "unique_n": 848,
+        "wr": 0.6108
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783007",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4662_E783007",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -11.33,
+          "liquidations": 0,
+          "max_dd_usd": 27.16,
+          "n": 240,
+          "pnl_usd": -11.61,
+          "wr": 0.6333333333333333
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.94,
+          "liquidations": 0,
+          "max_dd_usd": 26.63,
+          "n": 402,
+          "pnl_usd": -11.88,
+          "wr": 0.6268656716417911
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -62.81,
+          "liquidations": 0,
+          "max_dd_usd": 82.24,
+          "n": 424,
+          "pnl_usd": -78.47,
+          "wr": 0.5825471698113207
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -23.86,
+        "liquidations": 0,
+        "max_period_dd_usd": 82.24,
+        "min_period_pnl_usd": -78.47,
+        "n": 1066,
+        "pnl_usd": -101.96,
+        "trades_per_month": 20.77,
+        "unique_n": 1066,
+        "wr": 0.6107
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783035",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783035",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.36,
+          "liquidations": 0,
+          "max_dd_usd": 16.38,
+          "n": 181,
+          "pnl_usd": -6.52,
+          "wr": 0.6519337016574586
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -14.48,
+          "liquidations": 0,
+          "max_dd_usd": 29.49,
+          "n": 317,
+          "pnl_usd": -28.97,
+          "wr": 0.6340694006309149
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -62.1,
+          "liquidations": 0,
+          "max_dd_usd": 83.12,
+          "n": 337,
+          "pnl_usd": -77.59,
+          "wr": 0.5637982195845698
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -26.46,
+        "liquidations": 0,
+        "max_period_dd_usd": 83.12,
+        "min_period_pnl_usd": -77.59,
+        "n": 835,
+        "pnl_usd": -113.08,
+        "trades_per_month": 16.27,
+        "unique_n": 835,
+        "wr": 0.6096
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783050",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.025,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783050",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.29,
+          "liquidations": 0,
+          "max_dd_usd": 15.09,
+          "n": 167,
+          "pnl_usd": -8.49,
+          "wr": 0.6467065868263473
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -12.53,
+          "liquidations": 0,
+          "max_dd_usd": 25.59,
+          "n": 307,
+          "pnl_usd": -25.07,
+          "wr": 0.6351791530944625
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -61.28,
+          "liquidations": 0,
+          "max_dd_usd": 80.64,
+          "n": 313,
+          "pnl_usd": -76.56,
+          "wr": 0.5591054313099042
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.77,
+        "liquidations": 0,
+        "max_period_dd_usd": 80.64,
+        "min_period_pnl_usd": -76.56,
+        "n": 787,
+        "pnl_usd": -110.12,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.6074
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783044",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.025
+      },
+      "id": "G4452_E783044",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 30.45,
+          "liquidations": 0,
+          "max_dd_usd": 14.66,
+          "n": 169,
+          "pnl_usd": 31.2,
+          "wr": 0.6745562130177515
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 5.23,
+          "liquidations": 0,
+          "max_dd_usd": 17.12,
+          "n": 309,
+          "pnl_usd": 10.47,
+          "wr": 0.6116504854368932
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -30.43,
+          "liquidations": 0,
+          "max_dd_usd": 51.32,
+          "n": 324,
+          "pnl_usd": -38.01,
+          "wr": 0.5679012345679012
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.86,
+        "liquidations": 0,
+        "max_period_dd_usd": 51.32,
+        "min_period_pnl_usd": -38.01,
+        "n": 802,
+        "pnl_usd": 3.66,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.6072
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783040",
+        "hold": 9,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.02
+      },
+      "id": "G4452_E783040",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 7.87,
+          "liquidations": 0,
+          "max_dd_usd": 11.67,
+          "n": 169,
+          "pnl_usd": 8.06,
+          "wr": 0.6390532544378699
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -5.18,
+          "liquidations": 0,
+          "max_dd_usd": 20.86,
+          "n": 309,
+          "pnl_usd": -10.36,
+          "wr": 0.6181229773462783
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -32.27,
+          "liquidations": 0,
+          "max_dd_usd": 51.72,
+          "n": 324,
+          "pnl_usd": -40.32,
+          "wr": 0.5802469135802469
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -9.97,
+        "liquidations": 0,
+        "max_period_dd_usd": 51.72,
+        "min_period_pnl_usd": -40.32,
+        "n": 802,
+        "pnl_usd": -42.62,
+        "trades_per_month": 15.63,
+        "unique_n": 802,
+        "wr": 0.6072
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783055",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.02
+      },
+      "id": "G4662_E783055",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.42,
+          "liquidations": 0,
+          "max_dd_usd": 18.32,
+          "n": 167,
+          "pnl_usd": 0.43,
+          "wr": 0.6227544910179641
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.34,
+          "liquidations": 0,
+          "max_dd_usd": 21.81,
+          "n": 312,
+          "pnl_usd": -8.69,
+          "wr": 0.6121794871794872
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -28.0,
+          "liquidations": 0,
+          "max_dd_usd": 45.82,
+          "n": 317,
+          "pnl_usd": -34.98,
+          "wr": 0.5930599369085173
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -10.12,
+        "liquidations": 0,
+        "max_period_dd_usd": 45.82,
+        "min_period_pnl_usd": -34.98,
+        "n": 796,
+        "pnl_usd": -43.24,
+        "trades_per_month": 15.51,
+        "unique_n": 796,
+        "wr": 0.6068
+      }
+    },
+    {
+      "base_id": "G4452",
+      "exit": {
+        "exit_id": "E783055",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.02
+      },
+      "id": "G4452_E783055",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.68,
+          "liquidations": 0,
+          "max_dd_usd": 11.14,
+          "n": 157,
+          "pnl_usd": 1.72,
+          "wr": 0.6178343949044586
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -3.04,
+          "liquidations": 0,
+          "max_dd_usd": 21.81,
+          "n": 299,
+          "pnl_usd": -6.07,
+          "wr": 0.6153846153846154
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -26.61,
+          "liquidations": 0,
+          "max_dd_usd": 43.2,
+          "n": 301,
+          "pnl_usd": -33.24,
+          "wr": 0.5913621262458472
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -8.8,
+        "liquidations": 0,
+        "max_period_dd_usd": 43.2,
+        "min_period_pnl_usd": -33.24,
+        "n": 757,
+        "pnl_usd": -37.59,
+        "trades_per_month": 14.75,
+        "unique_n": 757,
+        "wr": 0.6063
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783007",
+        "hold": 3,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015
+      },
+      "id": "G4456_E783007",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -8.26,
+          "liquidations": 0,
+          "max_dd_usd": 24.43,
+          "n": 241,
+          "pnl_usd": -8.47,
+          "wr": 0.6265560165975104
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.97,
+          "liquidations": 0,
+          "max_dd_usd": 28.49,
+          "n": 389,
+          "pnl_usd": -13.94,
+          "wr": 0.6272493573264781
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -68.49,
+          "liquidations": 0,
+          "max_dd_usd": 90.11,
+          "n": 417,
+          "pnl_usd": -85.57,
+          "wr": 0.5731414868105515
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -25.26,
+        "liquidations": 0,
+        "max_period_dd_usd": 90.11,
+        "min_period_pnl_usd": -85.57,
+        "n": 1047,
+        "pnl_usd": -107.98,
+        "trades_per_month": 20.4,
+        "unique_n": 1047,
+        "wr": 0.6055
+      }
+    },
+    {
+      "base_id": "G4662",
+      "exit": {
+        "exit_id": "E783026",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4662_E783026",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.81,
+          "liquidations": 0,
+          "max_dd_usd": 29.21,
+          "n": 198,
+          "pnl_usd": -0.83,
+          "wr": 0.6313131313131313
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -7.58,
+          "liquidations": 0,
+          "max_dd_usd": 21.77,
+          "n": 351,
+          "pnl_usd": -15.17,
+          "wr": 0.603988603988604
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -32.63,
+          "liquidations": 0,
+          "max_dd_usd": 48.49,
+          "n": 368,
+          "pnl_usd": -40.76,
+          "wr": 0.592391304347826
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -13.28,
+        "liquidations": 0,
+        "max_period_dd_usd": 48.49,
+        "min_period_pnl_usd": -40.76,
+        "n": 917,
+        "pnl_usd": -56.76,
+        "trades_per_month": 17.87,
+        "unique_n": 917,
+        "wr": 0.6052
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783055",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.03,
+        "tp_pct": 0.02
+      },
+      "id": "G4677_E783055",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.21,
+          "liquidations": 0,
+          "max_dd_usd": 15.08,
+          "n": 165,
+          "pnl_usd": -1.24,
+          "wr": 0.6121212121212121
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -4.78,
+          "liquidations": 0,
+          "max_dd_usd": 21.81,
+          "n": 311,
+          "pnl_usd": -9.57,
+          "wr": 0.6109324758842444
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -26.11,
+          "liquidations": 0,
+          "max_dd_usd": 43.46,
+          "n": 314,
+          "pnl_usd": -32.62,
+          "wr": 0.5955414012738853
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -10.16,
+        "liquidations": 0,
+        "max_period_dd_usd": 43.46,
+        "min_period_pnl_usd": -32.62,
+        "n": 790,
+        "pnl_usd": -43.43,
+        "trades_per_month": 15.39,
+        "unique_n": 790,
+        "wr": 0.6051
+      }
+    },
+    {
+      "base_id": "G4456",
+      "exit": {
+        "exit_id": "E783059",
+        "hold": 12,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.025
+      },
+      "id": "G4456_E783059",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 12.88,
+          "liquidations": 0,
+          "max_dd_usd": 13.96,
+          "n": 167,
+          "pnl_usd": 13.2,
+          "wr": 0.6287425149700598
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 5.35,
+          "liquidations": 0,
+          "max_dd_usd": 18.64,
+          "n": 307,
+          "pnl_usd": 10.7,
+          "wr": 0.6123778501628665
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -27.41,
+          "liquidations": 0,
+          "max_dd_usd": 43.69,
+          "n": 313,
+          "pnl_usd": -34.24,
+          "wr": 0.5846645367412141
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.42,
+        "liquidations": 0,
+        "max_period_dd_usd": 43.69,
+        "min_period_pnl_usd": -34.24,
+        "n": 787,
+        "pnl_usd": -10.34,
+        "trades_per_month": 15.34,
+        "unique_n": 787,
+        "wr": 0.6048
+      }
+    },
+    {
+      "base_id": "G4677",
+      "exit": {
+        "exit_id": "E783026",
+        "hold": 6,
+        "lev": 5.0,
+        "max_conc": 5,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.02
+      },
+      "id": "G4677_E783026",
+      "pass_wr65_tpm8": false,
+      "pass_wr69_tpm8": false,
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.69,
+          "liquidations": 0,
+          "max_dd_usd": 24.97,
+          "n": 196,
+          "pnl_usd": -1.73,
+          "wr": 0.6224489795918368
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": -6.54,
+          "liquidations": 0,
+          "max_dd_usd": 21.77,
+          "n": 349,
+          "pnl_usd": -13.08,
+          "wr": 0.6045845272206304
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -29.94,
+          "liquidations": 0,
+          "max_dd_usd": 45.13,
+          "n": 365,
+          "pnl_usd": -37.4,
+          "wr": 0.5945205479452055
+        }
+      },
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -12.22,
+        "liquidations": 0,
+        "max_period_dd_usd": 45.13,
+        "min_period_pnl_usd": -37.4,
+        "n": 910,
+        "pnl_usd": -52.21,
+        "trades_per_month": 17.73,
+        "unique_n": 910,
+        "wr": 0.6044
+      }
+    }
+  ],
+  "top_positive_tpm8": []
+}

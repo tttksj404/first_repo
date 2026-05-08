@@ -1,0 +1,240 @@
+{
+  "combos": [
+    {
+      "id": "G090_only",
+      "raw_records": 225,
+      "taken_records": 53,
+      "weighted": {
+        "all_years_positive": true,
+        "annual_pnl_units": 72.04,
+        "families": {
+          "g090_hour_filter": {
+            "n": 53,
+            "pnl_units": 167.17,
+            "wr": 0.8491
+          }
+        },
+        "liquidations": 0,
+        "max_period_dd_units": 7.26,
+        "n": 53,
+        "pnl_units": 167.17,
+        "trades_per_month": 1.9,
+        "wr": 0.8491,
+        "years": {
+          "2024": {
+            "max_dd_units": 7.26,
+            "n": 20,
+            "pnl_units": 57.15,
+            "wr": 0.8
+          },
+          "2025": {
+            "max_dd_units": 1.46,
+            "n": 21,
+            "pnl_units": 90.0,
+            "wr": 0.8571
+          },
+          "2026": {
+            "max_dd_units": 2.79,
+            "n": 12,
+            "pnl_units": 20.03,
+            "wr": 0.9167
+          }
+        }
+      }
+    },
+    {
+      "id": "G090_plus_G805740",
+      "raw_records": 814,
+      "taken_records": 572,
+      "weighted": {
+        "all_years_positive": true,
+        "annual_pnl_units": 60.94,
+        "families": {
+          "G805740_balanced_negative_squeeze": {
+            "n": 527,
+            "pnl_units": 6.05,
+            "wr": 0.6926
+          },
+          "g090_hour_filter": {
+            "n": 45,
+            "pnl_units": 135.37,
+            "wr": 0.8222
+          }
+        },
+        "liquidations": 0,
+        "max_period_dd_units": 19.44,
+        "n": 572,
+        "pnl_units": 141.42,
+        "trades_per_month": 20.53,
+        "wr": 0.7028,
+        "years": {
+          "2024": {
+            "max_dd_units": 11.33,
+            "n": 83,
+            "pnl_units": 56.16,
+            "wr": 0.7349
+          },
+          "2025": {
+            "max_dd_units": 19.44,
+            "n": 382,
+            "pnl_units": 65.87,
+            "wr": 0.6911
+          },
+          "2026": {
+            "max_dd_units": 12.38,
+            "n": 107,
+            "pnl_units": 19.39,
+            "wr": 0.7196
+          }
+        }
+      }
+    },
+    {
+      "id": "G090_plus_G827758",
+      "raw_records": 546,
+      "taken_records": 374,
+      "weighted": {
+        "all_years_positive": true,
+        "annual_pnl_units": 81.14,
+        "families": {
+          "G827758_balanced_positive_follow_midday": {
+            "n": 321,
+            "pnl_units": 21.11,
+            "wr": 0.7352
+          },
+          "g090_hour_filter": {
+            "n": 53,
+            "pnl_units": 167.17,
+            "wr": 0.8491
+          }
+        },
+        "liquidations": 0,
+        "max_period_dd_units": 19.3,
+        "n": 374,
+        "pnl_units": 188.28,
+        "trades_per_month": 13.42,
+        "wr": 0.7513,
+        "years": {
+          "2024": {
+            "max_dd_units": 19.3,
+            "n": 240,
+            "pnl_units": 63.85,
+            "wr": 0.7333
+          },
+          "2025": {
+            "max_dd_units": 8.87,
+            "n": 111,
+            "pnl_units": 99.49,
+            "wr": 0.7568
+          },
+          "2026": {
+            "max_dd_units": 2.79,
+            "n": 23,
+            "pnl_units": 24.95,
+            "wr": 0.913
+          }
+        }
+      }
+    },
+    {
+      "id": "G090_plus_G805740_plus_G827758",
+      "raw_records": 1135,
+      "taken_records": 893,
+      "weighted": {
+        "all_years_positive": true,
+        "annual_pnl_units": 70.04,
+        "families": {
+          "G805740_balanced_negative_squeeze": {
+            "n": 527,
+            "pnl_units": 6.05,
+            "wr": 0.6926
+          },
+          "G827758_balanced_positive_follow_midday": {
+            "n": 321,
+            "pnl_units": 21.11,
+            "wr": 0.7352
+          },
+          "g090_hour_filter": {
+            "n": 45,
+            "pnl_units": 135.37,
+            "wr": 0.8222
+          }
+        },
+        "liquidations": 0,
+        "max_period_dd_units": 22.1,
+        "n": 893,
+        "pnl_units": 162.53,
+        "trades_per_month": 32.05,
+        "wr": 0.7144,
+        "years": {
+          "2024": {
+            "max_dd_units": 19.3,
+            "n": 303,
+            "pnl_units": 62.86,
+            "wr": 0.7294
+          },
+          "2025": {
+            "max_dd_units": 22.1,
+            "n": 472,
+            "pnl_units": 75.36,
+            "wr": 0.6992
+          },
+          "2026": {
+            "max_dd_units": 13.75,
+            "n": 118,
+            "pnl_units": 24.32,
+            "wr": 0.7373
+          }
+        }
+      }
+    }
+  ],
+  "coverage": "2024-01-01 through 2026-04-27 where local inputs are available",
+  "elapsed_sec": 9.57,
+  "funding_candidates": [
+    {
+      "atr_max": 10,
+      "atr_min": 0,
+      "fund_abs": 0.0001,
+      "hold": 6,
+      "hour_set": null,
+      "id": "G805740_balanced_negative_squeeze",
+      "lev": 5.0,
+      "max_conc": 5,
+      "mode": "negative_squeeze_long",
+      "move_24h": 0.08,
+      "size": 0.1,
+      "sl_pct": 0.12,
+      "tp_pct": 0.015,
+      "vol_min": null
+    },
+    {
+      "atr_max": 10,
+      "atr_min": 0,
+      "fund_abs": 0.0001,
+      "hold": 6,
+      "hour_set": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "id": "G827758_balanced_positive_follow_midday",
+      "lev": 5.0,
+      "max_conc": 5,
+      "mode": "positive_follow_long",
+      "move_24h": 0.12,
+      "size": 0.1,
+      "sl_pct": 0.12,
+      "tp_pct": 0.015,
+      "vol_min": 1.8
+    }
+  ],
+  "generated_at": "2026-05-07 13:50:33",
+  "portfolio_constraint": "dedupe same ts/sym/side, skip same-symbol overlapping holds, max_conc=5",
+  "question": "Do the new funding sleeves combine with the G090 hour-filter sleeve toward the 30/month high-WR target?"
+}

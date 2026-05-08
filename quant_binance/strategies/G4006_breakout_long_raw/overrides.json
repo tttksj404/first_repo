@@ -1,0 +1,84 @@
+{
+  "_strategy_id": "G4006",
+  "_parent_id": "none",
+  "_playbook": "PB-BREAKOUT-001",
+  "_setup": "G1503 replacement paper probe: non-CH1 long breakout, no_dead universe, 24h high breakout +50bps, 24h momentum >= 10%, volume ratio >= 3, ATR 0-8%, hold 36h, 8x leverage, 20% margin size, TP 6%, SL 8%.",
+  "_capital_context_usd": 100,
+  "_research_only": true,
+  "engine": "breakout_long",
+  "exchange": "bitget",
+  "market": "futures",
+  "product_type": "USDT-FUTURES",
+  "timeframe": "1h",
+  "side": "long",
+  "universe_filter": "no_dead",
+  "universe_runtime": [
+    "DOGEUSDT",
+    "PEPEUSDT",
+    "ARBUSDT",
+    "OPUSDT",
+    "AVAXUSDT",
+    "SUIUSDT",
+    "ADAUSDT",
+    "APTUSDT",
+    "BNBUSDT",
+    "DOTUSDT",
+    "LINKUSDT",
+    "NEARUSDT",
+    "SOLUSDT",
+    "UNIUSDT",
+    "XRPUSDT"
+  ],
+  "entry_rules": {
+    "breakout_lookback_bars": 24,
+    "break_bps": 50,
+    "min_ret_24h": 0.1,
+    "min_vol_ratio": 3.0
+  },
+  "leverage": 8.0,
+  "size_pct_per_trade": 0.2,
+  "max_concurrent": 5,
+  "holding_period_bars": 36,
+  "cost_bps_round_trip": 24.0,
+  "atr_volatility_guard": {
+    "enabled": true,
+    "min_atr_pct": 0.0,
+    "max_atr_pct": 8.0
+  },
+  "exit_rules": {
+    "take_profit_pct": 0.06,
+    "stop_loss_pct": 0.08,
+    "same_bar_priority": "stop_loss",
+    "time_exit_bars": 36
+  },
+  "validation": {
+    "source": "quant_binance/strategies/_scripts/g1305_breakout_walkforward_filter_results.json",
+    "search_source": "quant_binance/strategies/_scripts/g1304_multi_family_non_overlap_results.json",
+    "status": "watchlist paper-probe candidate",
+    "overlap": {
+      "g1165_jaccard": 0.0,
+      "g1995_jaccard": 0.0
+    },
+    "baseline_all_periods": {
+      "trades": 605,
+      "win_rate": 0.5752,
+      "pnl_usd": 495.73,
+      "annual_pnl_usd": 115.99,
+      "monthly_pnl_usd": 9.67,
+      "max_drawdown_usd": 109.01,
+      "liquidation_rate": 0.0,
+      "all_periods_positive": true
+    },
+    "walk_forward_oos": {
+      "verdict": "PASS",
+      "trades": 364,
+      "win_rate": 0.5824,
+      "pnl_usd": 284.51,
+      "annual_pnl_usd": 125.12,
+      "monthly_pnl_usd": 10.43,
+      "max_drawdown_usd": 96.29,
+      "liquidation_rate": 0.0,
+      "all_test_folds_positive": true
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "source": "quant_binance/strategies/_scripts/g915_exit_veto_search.py",
+  "result_file": "quant_binance/strategies/_scripts/g915_exit_veto_results.json",
+  "selected_id": "G1165",
+  "selected_reason": "Top-ranked PASS candidate by score after 864 path-safe exit/veto variants. It improves G914 annualized PnL while preserving zero tested liquidations.",
+  "weighted": {
+    "trades": 51,
+    "win_rate": 0.6863,
+    "pnl_usd": 825.43,
+    "annual_pnl_usd": 193.13,
+    "monthly_pnl_usd": 16.09,
+    "liquidation_rate": 0.0,
+    "max_period_drawdown_usd": 96.75,
+    "all_periods_positive": true
+  },
+  "top_spec": {
+    "threshold": 80,
+    "hold_bars": 36,
+    "atr_min_pct": 3.0,
+    "atr_max_pct": 8.0,
+    "leverage": 10,
+    "size_pct_per_trade": 0.25,
+    "take_profit_pct": 0.14,
+    "stop_loss_pct": 0.075,
+    "funding_veto": null
+  }
+}

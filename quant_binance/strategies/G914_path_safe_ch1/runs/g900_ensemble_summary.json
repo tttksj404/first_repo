@@ -1,0 +1,22 @@
+{
+  "source": "quant_binance/strategies/_scripts/g900_ensemble_discovery.py",
+  "result_file": "quant_binance/strategies/_scripts/g900_ensemble_discovery_results.json",
+  "selected_id": "G914",
+  "selected_reason": "Best PASS candidate after adding path-based TP/SL. It preserves CH1 selectivity while reducing liquidation hits to zero in the tested periods.",
+  "weighted": {
+    "trades": 51,
+    "win_rate": 0.6863,
+    "pnl_usd": 655.70,
+    "annual_pnl_usd": 153.42,
+    "monthly_pnl_usd": 12.78,
+    "liquidation_rate": 0.0,
+    "max_period_drawdown_usd": 92.88,
+    "all_periods_positive": true
+  },
+  "negative_findings": [
+    "20x close-to-close CH1 variants showed excessive intrabar liquidation exposure under path testing.",
+    "Relaxed structure long/short breakout variants were high-frequency and cost-negative.",
+    "Funding-fade parallel sleeves increased trade count but reduced win rate below the promotion threshold.",
+    "Strict structure variants added no incremental trades in the available periods."
+  ]
+}

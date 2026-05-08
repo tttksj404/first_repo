@@ -27,10 +27,10 @@
         "win_rate": 1.0,
         "big_wins_30pct": 1,
         "big_losses_20pct": 0,
-        "pnl_usd": 16.09,
+        "pnl_usd": 8.04,
         "annual_pct": 15.7,
-        "annual_pnl_usd": 15.7,
-        "avg_winner_pnl_usd": 16.09,
+        "annual_pnl_usd": 7.85,
+        "avg_winner_pnl_usd": 8.04,
         "avg_loser_pnl_usd": 0,
         "days": 374
       }
@@ -38,9 +38,9 @@
     "weighted": {
       "n_taken": 1,
       "win_rate": 1.0,
-      "pnl_usd": 16.09,
-      "annual_pnl_usd": 15.7,
-      "monthly_pnl_usd": 1.31,
+      "pnl_usd": 8.04,
+      "annual_pnl_usd": 7.85,
+      "monthly_pnl_usd": 0.65,
       "all_periods_positive": false
     }
   },

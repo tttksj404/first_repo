@@ -1,0 +1,4402 @@
+{
+  "best_terminal": {
+    "candidate_ids": [
+      "G4475",
+      "G4475",
+      "G4677",
+      "G4692",
+      "G4662",
+      "G4452",
+      "G4452",
+      "G4662",
+      "G4692",
+      "G4464",
+      "G4456",
+      "G4452",
+      "G4456",
+      "G4464",
+      "G4456",
+      "G4464",
+      "G4677",
+      "G4456",
+      "G4464",
+      "G4456"
+    ],
+    "n_pockets": 20,
+    "pocket_ids": [
+      "G4475_top_symbol_hour_cells_43",
+      "G4475_top_symbol_hour_cells_44",
+      "G4677_top_symbols_56",
+      "G4692_top_symbols_84",
+      "G4662_top_hours_77",
+      "G4452_top_hours_5",
+      "G4452_top_hours_4",
+      "G4662_top_hours_79",
+      "G4692_top_hours_91",
+      "G4464_top_hours_33",
+      "G4456_top_symbol_hour_cells_12",
+      "G4452_top_symbol_hour_cells_1",
+      "G4456_top_symbol_hour_cells_13",
+      "G4464_top_symbol_hour_cells_27",
+      "G4456_top_symbol_hour_cells_14",
+      "G4464_top_symbol_hour_cells_28",
+      "G4677_top_symbol_hour_cells_55",
+      "G4456_top_symbol_hour_cells_15",
+      "G4464_top_symbol_hour_cells_29",
+      "G4456_top_symbol_hour_cells_16"
+    ],
+    "pocket_unique": {
+      "all_periods_positive": true,
+      "annual_pnl_usd": 151.82,
+      "liquidations": 0,
+      "max_period_dd_usd": 21.68,
+      "min_period_pnl_usd": 164.26,
+      "n": 228,
+      "periods": {
+        "IS25-26": {
+          "max_dd_usd": 14.96,
+          "n": 53,
+          "pnl_usd": 164.26,
+          "trades_per_month": 4.31,
+          "wr": 0.8113
+        },
+        "OOS22-23": {
+          "max_dd_usd": 16.74,
+          "n": 92,
+          "pnl_usd": 268.72,
+          "trades_per_month": 3.83,
+          "wr": 0.7609
+        },
+        "OOS24-Q1": {
+          "max_dd_usd": 21.68,
+          "n": 83,
+          "pnl_usd": 215.9,
+          "trades_per_month": 5.53,
+          "wr": 0.7349
+        }
+      },
+      "pnl_usd": 648.87,
+      "trades_per_month": 4.44,
+      "wr": 0.7632
+    },
+    "with_g7822": {
+      "annual_pnl_usd": 389.44,
+      "max_period_dd_upper_bound": 92.88,
+      "n": 281,
+      "pnl_usd": 1664.45,
+      "unique_trades_per_month": 5.48,
+      "wr": 0.7509
+    }
+  },
+  "decision": {
+    "reason": "Combines only filtered pockets with standalone WR>=69%.",
+    "verdict": "FAIL"
+  },
+  "elapsed_sec": 65.93,
+  "generated_at": "2026-05-07 12:13:40",
+  "n_pockets": 93,
+  "passes": [],
+  "pocket_summaries": [
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_43",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 18.26,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "SUIUSDT",
+            14
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 16.98,
+        "min_period_pnl_usd": 7.01,
+        "n": 20,
+        "n_cells": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 1.33,
+            "n": 4,
+            "pnl_usd": 16.66,
+            "trades_per_month": 0.33,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 0.0,
+            "n": 10,
+            "pnl_usd": 54.39,
+            "trades_per_month": 0.42,
+            "wr": 1.0
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 16.98,
+            "n": 6,
+            "pnl_usd": 7.01,
+            "trades_per_month": 0.4,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 78.06,
+        "trades_per_month": 0.39,
+        "wr": 0.85
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_44",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 21.95,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 19.48,
+        "min_period_pnl_usd": 10.51,
+        "n": 26,
+        "n_cells": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 1.33,
+            "n": 7,
+            "pnl_usd": 28.91,
+            "trades_per_month": 0.57,
+            "wr": 0.8571
+          },
+          "OOS22-23": {
+            "max_dd_usd": 0.0,
+            "n": 10,
+            "pnl_usd": 54.39,
+            "trades_per_month": 0.42,
+            "wr": 1.0
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 19.48,
+            "n": 9,
+            "pnl_usd": 10.51,
+            "trades_per_month": 0.6,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 93.81,
+        "trades_per_month": 0.51,
+        "wr": 0.8462
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_45",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 27.33,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 16.98,
+        "min_period_pnl_usd": 22.5,
+        "n": 33,
+        "n_cells": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 1.33,
+            "n": 9,
+            "pnl_usd": 34.68,
+            "trades_per_month": 0.73,
+            "wr": 0.7778
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.77,
+            "n": 13,
+            "pnl_usd": 59.62,
+            "trades_per_month": 0.54,
+            "wr": 0.9231
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 16.98,
+            "n": 11,
+            "pnl_usd": 22.5,
+            "trades_per_month": 0.73,
+            "wr": 0.7273
+          }
+        },
+        "pnl_usd": 116.8,
+        "trades_per_month": 0.64,
+        "wr": 0.8182
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_symbols",
+      "id": "G4677_top_symbols_56",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 70.59,
+        "candidate_id": "G4677",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 13.18,
+        "min_period_pnl_usd": 56.61,
+        "n": 65,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 13.18,
+            "n": 15,
+            "pnl_usd": 56.61,
+            "trades_per_month": 1.22,
+            "wr": 0.8
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.49,
+            "n": 20,
+            "pnl_usd": 117.03,
+            "trades_per_month": 0.83,
+            "wr": 0.9
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.18,
+            "n": 30,
+            "pnl_usd": 128.05,
+            "trades_per_month": 2.0,
+            "wr": 0.7667
+          }
+        },
+        "pnl_usd": 301.69,
+        "trades_per_month": 1.27,
+        "wr": 0.8154
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_symbols",
+      "id": "G4692_top_symbols_84",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 72.91,
+        "candidate_id": "G4692",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 13.18,
+        "min_period_pnl_usd": 68.26,
+        "n": 65,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 13.18,
+            "n": 15,
+            "pnl_usd": 68.26,
+            "trades_per_month": 1.22,
+            "wr": 0.8
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.49,
+            "n": 20,
+            "pnl_usd": 117.03,
+            "trades_per_month": 0.83,
+            "wr": 0.9
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.18,
+            "n": 30,
+            "pnl_usd": 126.3,
+            "trades_per_month": 2.0,
+            "wr": 0.7667
+          }
+        },
+        "pnl_usd": 311.6,
+        "trades_per_month": 1.27,
+        "wr": 0.8154
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_46",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 29.4,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 13.48,
+        "min_period_pnl_usd": 27.09,
+        "n": 40,
+        "n_cells": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.93,
+            "n": 12,
+            "pnl_usd": 38.95,
+            "trades_per_month": 0.98,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.77,
+            "n": 13,
+            "pnl_usd": 59.62,
+            "trades_per_month": 0.54,
+            "wr": 0.9231
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.48,
+            "n": 15,
+            "pnl_usd": 27.09,
+            "trades_per_month": 1.0,
+            "wr": 0.7333
+          }
+        },
+        "pnl_usd": 125.66,
+        "trades_per_month": 0.78,
+        "wr": 0.8
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_63",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 16.38,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 9.92,
+        "min_period_pnl_usd": 13.31,
+        "n": 19,
+        "n_filters": 1,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.12,
+            "n": 6,
+            "pnl_usd": 31.31,
+            "trades_per_month": 0.49,
+            "wr": 0.8333
+          },
+          "OOS22-23": {
+            "max_dd_usd": 9.0,
+            "n": 6,
+            "pnl_usd": 13.31,
+            "trades_per_month": 0.25,
+            "wr": 0.6667
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 9.92,
+            "n": 7,
+            "pnl_usd": 25.41,
+            "trades_per_month": 0.47,
+            "wr": 0.8571
+          }
+        },
+        "pnl_usd": 70.03,
+        "trades_per_month": 0.37,
+        "wr": 0.7895
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_47",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 30.0,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 15.26,
+        "min_period_pnl_usd": 30.91,
+        "n": 47,
+        "n_cells": 7,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.93,
+            "n": 12,
+            "pnl_usd": 38.95,
+            "trades_per_month": 0.98,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 15.26,
+            "n": 16,
+            "pnl_usd": 58.38,
+            "trades_per_month": 0.67,
+            "wr": 0.875
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.48,
+            "n": 19,
+            "pnl_usd": 30.91,
+            "trades_per_month": 1.27,
+            "wr": 0.7368
+          }
+        },
+        "pnl_usd": 128.23,
+        "trades_per_month": 0.92,
+        "wr": 0.7872
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_symbols",
+      "id": "G4677_top_symbols_57",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 76.98,
+        "candidate_id": "G4677",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 30.34,
+        "min_period_pnl_usd": 88.25,
+        "n": 95,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 29,
+            "pnl_usd": 88.25,
+            "trades_per_month": 2.36,
+            "wr": 0.7931
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.49,
+            "n": 20,
+            "pnl_usd": 117.03,
+            "trades_per_month": 0.83,
+            "wr": 0.9
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.34,
+            "n": 46,
+            "pnl_usd": 123.71,
+            "trades_per_month": 3.07,
+            "wr": 0.7174
+          }
+        },
+        "pnl_usd": 328.99,
+        "trades_per_month": 1.85,
+        "wr": 0.7789
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_symbols",
+      "id": "G4692_top_symbols_85",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 80.2,
+        "candidate_id": "G4692",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 30.34,
+        "min_period_pnl_usd": 103.79,
+        "n": 95,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 29,
+            "pnl_usd": 103.79,
+            "trades_per_month": 2.36,
+            "wr": 0.7931
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.49,
+            "n": 20,
+            "pnl_usd": 117.03,
+            "trades_per_month": 0.83,
+            "wr": 0.9
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.34,
+            "n": 46,
+            "pnl_usd": 121.96,
+            "trades_per_month": 3.07,
+            "wr": 0.7174
+          }
+        },
+        "pnl_usd": 342.78,
+        "trades_per_month": 1.85,
+        "wr": 0.7789
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_symbols",
+      "id": "G4662_top_symbols_71",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 74.32,
+        "candidate_id": "G4662",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 30.34,
+        "min_period_pnl_usd": 83.6,
+        "n": 94,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 23.21,
+            "n": 28,
+            "pnl_usd": 83.6,
+            "trades_per_month": 2.28,
+            "wr": 0.7857
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.34,
+            "n": 20,
+            "pnl_usd": 115.75,
+            "trades_per_month": 0.83,
+            "wr": 0.85
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.34,
+            "n": 46,
+            "pnl_usd": 118.27,
+            "trades_per_month": 3.07,
+            "wr": 0.7391
+          }
+        },
+        "pnl_usd": 317.62,
+        "trades_per_month": 1.83,
+        "wr": 0.7766
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_48",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 36.5,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 23.37,
+        "min_period_pnl_usd": 27.02,
+        "n": 57,
+        "n_cells": 8,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 4.32,
+            "n": 19,
+            "pnl_usd": 70.62,
+            "trades_per_month": 1.54,
+            "wr": 0.7895
+          },
+          "OOS22-23": {
+            "max_dd_usd": 15.26,
+            "n": 16,
+            "pnl_usd": 58.38,
+            "trades_per_month": 0.67,
+            "wr": 0.875
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 23.37,
+            "n": 22,
+            "pnl_usd": 27.02,
+            "trades_per_month": 1.47,
+            "wr": 0.6818
+          }
+        },
+        "pnl_usd": 156.01,
+        "trades_per_month": 1.11,
+        "wr": 0.7719
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_64",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 42.82,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 23.11,
+        "min_period_pnl_usd": 28.36,
+        "n": 48,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.12,
+            "n": 13,
+            "pnl_usd": 75.0,
+            "trades_per_month": 1.06,
+            "wr": 0.9231
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.26,
+            "n": 21,
+            "pnl_usd": 79.68,
+            "trades_per_month": 0.87,
+            "wr": 0.7143
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 23.11,
+            "n": 14,
+            "pnl_usd": 28.36,
+            "trades_per_month": 0.93,
+            "wr": 0.7143
+          }
+        },
+        "pnl_usd": 183.03,
+        "trades_per_month": 0.94,
+        "wr": 0.7708
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_symbols",
+      "id": "G4677_top_symbols_58",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 80.51,
+        "candidate_id": "G4677",
+        "filter_type": "top_symbols",
+        "filters": [
+          "BNBUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 30.34,
+        "min_period_pnl_usd": 92.91,
+        "n": 107,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 31,
+            "pnl_usd": 92.91,
+            "trades_per_month": 2.52,
+            "wr": 0.7742
+          },
+          "OOS22-23": {
+            "max_dd_usd": 13.18,
+            "n": 25,
+            "pnl_usd": 112.82,
+            "trades_per_month": 1.04,
+            "wr": 0.84
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.34,
+            "n": 51,
+            "pnl_usd": 138.35,
+            "trades_per_month": 3.4,
+            "wr": 0.7255
+          }
+        },
+        "pnl_usd": 344.08,
+        "trades_per_month": 2.09,
+        "wr": 0.7664
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_hours",
+      "id": "G4692_top_hours_90",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 42.99,
+        "candidate_id": "G4692",
+        "filter_type": "top_hours",
+        "filters": [
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 23.11,
+        "min_period_pnl_usd": 26.61,
+        "n": 47,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.12,
+            "n": 13,
+            "pnl_usd": 86.65,
+            "trades_per_month": 1.06,
+            "wr": 0.9231
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.26,
+            "n": 20,
+            "pnl_usd": 70.46,
+            "trades_per_month": 0.83,
+            "wr": 0.7
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 23.11,
+            "n": 14,
+            "pnl_usd": 26.61,
+            "trades_per_month": 0.93,
+            "wr": 0.7143
+          }
+        },
+        "pnl_usd": 183.72,
+        "trades_per_month": 0.92,
+        "wr": 0.766
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_symbols",
+      "id": "G4662_top_symbols_72",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 83.15,
+        "candidate_id": "G4662",
+        "filter_type": "top_symbols",
+        "filters": [
+          "ETHUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 30.34,
+        "min_period_pnl_usd": 83.6,
+        "n": 106,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 23.21,
+            "n": 28,
+            "pnl_usd": 83.6,
+            "trades_per_month": 2.28,
+            "wr": 0.7857
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.34,
+            "n": 30,
+            "pnl_usd": 138.95,
+            "trades_per_month": 1.25,
+            "wr": 0.7667
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.34,
+            "n": 48,
+            "pnl_usd": 132.82,
+            "trades_per_month": 3.2,
+            "wr": 0.75
+          }
+        },
+        "pnl_usd": 355.36,
+        "trades_per_month": 2.07,
+        "wr": 0.7642
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_49",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 39.12,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            17
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 23.37,
+        "min_period_pnl_usd": 39.01,
+        "n": 63,
+        "n_cells": 9,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 8.49,
+            "n": 21,
+            "pnl_usd": 68.12,
+            "trades_per_month": 1.71,
+            "wr": 0.7619
+          },
+          "OOS22-23": {
+            "max_dd_usd": 19.57,
+            "n": 18,
+            "pnl_usd": 60.06,
+            "trades_per_month": 0.75,
+            "wr": 0.8333
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 23.37,
+            "n": 24,
+            "pnl_usd": 39.01,
+            "trades_per_month": 1.6,
+            "wr": 0.7083
+          }
+        },
+        "pnl_usd": 167.2,
+        "trades_per_month": 1.23,
+        "wr": 0.7619
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_hours",
+      "id": "G4662_top_hours_77",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 25.53,
+        "candidate_id": "G4662",
+        "filter_type": "top_hours",
+        "filters": [
+          18
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 13.18,
+        "min_period_pnl_usd": 2.95,
+        "n": 29,
+        "n_filters": 1,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 7,
+            "pnl_usd": 43.69,
+            "trades_per_month": 0.57,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 13.18,
+            "n": 15,
+            "pnl_usd": 62.48,
+            "trades_per_month": 0.62,
+            "wr": 0.7333
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.18,
+            "n": 7,
+            "pnl_usd": 2.95,
+            "trades_per_month": 0.47,
+            "wr": 0.5714
+          }
+        },
+        "pnl_usd": 109.12,
+        "trades_per_month": 0.57,
+        "wr": 0.7586
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_symbols",
+      "id": "G4662_top_symbols_73",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 86.68,
+        "candidate_id": "G4662",
+        "filter_type": "top_symbols",
+        "filters": [
+          "BNBUSDT",
+          "ETHUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 30.34,
+        "min_period_pnl_usd": 88.26,
+        "n": 118,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 23.88,
+            "n": 30,
+            "pnl_usd": 88.26,
+            "trades_per_month": 2.44,
+            "wr": 0.7667
+          },
+          "OOS22-23": {
+            "max_dd_usd": 13.18,
+            "n": 35,
+            "pnl_usd": 134.74,
+            "trades_per_month": 1.46,
+            "wr": 0.7429
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.34,
+            "n": 53,
+            "pnl_usd": 147.46,
+            "trades_per_month": 3.53,
+            "wr": 0.7547
+          }
+        },
+        "pnl_usd": 370.46,
+        "trades_per_month": 2.3,
+        "wr": 0.7542
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_50",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 39.62,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            17
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "UNIUSDT",
+            6
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 31.86,
+        "min_period_pnl_usd": 23.15,
+        "n": 69,
+        "n_cells": 10,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 8.49,
+            "n": 21,
+            "pnl_usd": 68.12,
+            "trades_per_month": 1.71,
+            "wr": 0.7619
+          },
+          "OOS22-23": {
+            "max_dd_usd": 19.57,
+            "n": 21,
+            "pnl_usd": 78.06,
+            "trades_per_month": 0.87,
+            "wr": 0.8571
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.86,
+            "n": 27,
+            "pnl_usd": 23.15,
+            "trades_per_month": 1.8,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 169.33,
+        "trades_per_month": 1.34,
+        "wr": 0.7536
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_65",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 75.99,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 38.91,
+        "min_period_pnl_usd": 68.02,
+        "n": 84,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 20,
+            "pnl_usd": 107.02,
+            "trades_per_month": 1.63,
+            "wr": 0.85
+          },
+          "OOS22-23": {
+            "max_dd_usd": 21.04,
+            "n": 34,
+            "pnl_usd": 149.75,
+            "trades_per_month": 1.42,
+            "wr": 0.7647
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 38.91,
+            "n": 30,
+            "pnl_usd": 68.02,
+            "trades_per_month": 2.0,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 324.8,
+        "trades_per_month": 1.64,
+        "wr": 0.75
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_symbols",
+      "id": "G4452_top_symbols_2",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 24.75,
+        "candidate_id": "G4452",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 11.96,
+        "min_period_pnl_usd": 32.49,
+        "n": 67,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 2.68,
+            "n": 13,
+            "pnl_usd": 33.79,
+            "trades_per_month": 1.06,
+            "wr": 0.8462
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 23,
+            "pnl_usd": 32.49,
+            "trades_per_month": 0.96,
+            "wr": 0.7391
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.96,
+            "n": 31,
+            "pnl_usd": 39.5,
+            "trades_per_month": 2.07,
+            "wr": 0.7097
+          }
+        },
+        "pnl_usd": 105.78,
+        "trades_per_month": 1.31,
+        "wr": 0.7463
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_19",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 10.63,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          19
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 11.02,
+        "min_period_pnl_usd": 0.71,
+        "n": 31,
+        "n_filters": 1,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 1,
+            "pnl_usd": 0.71,
+            "trades_per_month": 0.08,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.64,
+            "n": 10,
+            "pnl_usd": 13.11,
+            "trades_per_month": 0.42,
+            "wr": 0.7
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.02,
+            "n": 20,
+            "pnl_usd": 31.62,
+            "trades_per_month": 1.33,
+            "wr": 0.75
+          }
+        },
+        "pnl_usd": 45.45,
+        "trades_per_month": 0.6,
+        "wr": 0.7419
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_20",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 17.9,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          19,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 7.41,
+        "min_period_pnl_usd": 17.6,
+        "n": 50,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 7,
+            "pnl_usd": 22.37,
+            "trades_per_month": 0.57,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.64,
+            "n": 17,
+            "pnl_usd": 17.6,
+            "trades_per_month": 0.71,
+            "wr": 0.6471
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 7.41,
+            "n": 26,
+            "pnl_usd": 36.52,
+            "trades_per_month": 1.73,
+            "wr": 0.7308
+          }
+        },
+        "pnl_usd": 76.49,
+        "trades_per_month": 0.97,
+        "wr": 0.74
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_66",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 81.35,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          6,
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 29.69,
+        "min_period_pnl_usd": 83.04,
+        "n": 96,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 24,
+            "pnl_usd": 127.23,
+            "trades_per_month": 1.95,
+            "wr": 0.8333
+          },
+          "OOS22-23": {
+            "max_dd_usd": 29.47,
+            "n": 39,
+            "pnl_usd": 137.43,
+            "trades_per_month": 1.62,
+            "wr": 0.7179
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 29.69,
+            "n": 33,
+            "pnl_usd": 83.04,
+            "trades_per_month": 2.2,
+            "wr": 0.697
+          }
+        },
+        "pnl_usd": 347.7,
+        "trades_per_month": 1.87,
+        "wr": 0.7396
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_5",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 19.92,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 11.02,
+        "min_period_pnl_usd": 16.11,
+        "n": 57,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 13,
+            "pnl_usd": 35.18,
+            "trades_per_month": 1.06,
+            "wr": 0.9231
+          },
+          "OOS22-23": {
+            "max_dd_usd": 11.02,
+            "n": 23,
+            "pnl_usd": 33.84,
+            "trades_per_month": 0.96,
+            "wr": 0.6957
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 10.84,
+            "n": 21,
+            "pnl_usd": 16.11,
+            "trades_per_month": 1.4,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 85.12,
+        "trades_per_month": 1.11,
+        "wr": 0.7368
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_4",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 12.65,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          17
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 7.41,
+        "min_period_pnl_usd": 11.2,
+        "n": 38,
+        "n_filters": 1,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 7,
+            "pnl_usd": 13.52,
+            "trades_per_month": 0.57,
+            "wr": 0.8571
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 16,
+            "pnl_usd": 29.35,
+            "trades_per_month": 0.67,
+            "wr": 0.75
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 7.41,
+            "n": 15,
+            "pnl_usd": 11.2,
+            "trades_per_month": 1.0,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 54.07,
+        "trades_per_month": 0.74,
+        "wr": 0.7368
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4452_top_symbol_hour_cells_0",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 5.49,
+        "candidate_id": "G4452",
+        "cells": [
+          [
+            "ADAUSDT",
+            0
+          ],
+          [
+            "NEARUSDT",
+            23
+          ],
+          [
+            "SUIUSDT",
+            16
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 6.36,
+        "min_period_pnl_usd": 5.32,
+        "n": 19,
+        "n_cells": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 4,
+            "pnl_usd": 5.32,
+            "trades_per_month": 0.33,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 8,
+            "pnl_usd": 8.69,
+            "trades_per_month": 0.33,
+            "wr": 0.75
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 6.36,
+            "n": 7,
+            "pnl_usd": 9.46,
+            "trades_per_month": 0.47,
+            "wr": 0.7143
+          }
+        },
+        "pnl_usd": 23.47,
+        "trades_per_month": 0.37,
+        "wr": 0.7368
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_6",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 29.7,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          19,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 14.41,
+        "min_period_pnl_usd": 35.89,
+        "n": 87,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 14,
+            "pnl_usd": 35.89,
+            "trades_per_month": 1.14,
+            "wr": 0.9286
+          },
+          "OOS22-23": {
+            "max_dd_usd": 12.15,
+            "n": 32,
+            "pnl_usd": 43.34,
+            "trades_per_month": 1.33,
+            "wr": 0.6875
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 14.41,
+            "n": 41,
+            "pnl_usd": 47.73,
+            "trades_per_month": 2.73,
+            "wr": 0.7073
+          }
+        },
+        "pnl_usd": 126.96,
+        "trades_per_month": 1.7,
+        "wr": 0.7356
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_21",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 29.7,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          19,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 14.41,
+        "min_period_pnl_usd": 35.89,
+        "n": 87,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 14,
+            "pnl_usd": 35.89,
+            "trades_per_month": 1.14,
+            "wr": 0.9286
+          },
+          "OOS22-23": {
+            "max_dd_usd": 12.15,
+            "n": 32,
+            "pnl_usd": 43.34,
+            "trades_per_month": 1.33,
+            "wr": 0.6875
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 14.41,
+            "n": 41,
+            "pnl_usd": 47.73,
+            "trades_per_month": 2.73,
+            "wr": 0.7073
+          }
+        },
+        "pnl_usd": 126.96,
+        "trades_per_month": 1.7,
+        "wr": 0.7356
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_hours",
+      "id": "G4662_top_hours_79",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 68.42,
+        "candidate_id": "G4662",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 31.48,
+        "min_period_pnl_usd": 75.45,
+        "n": 83,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 20,
+            "pnl_usd": 91.86,
+            "trades_per_month": 1.63,
+            "wr": 0.85
+          },
+          "OOS22-23": {
+            "max_dd_usd": 21.04,
+            "n": 33,
+            "pnl_usd": 125.13,
+            "trades_per_month": 1.37,
+            "wr": 0.7273
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.48,
+            "n": 30,
+            "pnl_usd": 75.45,
+            "trades_per_month": 2.0,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 292.44,
+        "trades_per_month": 1.62,
+        "wr": 0.7349
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_7",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 35.2,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 12.15,
+        "min_period_pnl_usd": 45.4,
+        "n": 105,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 18,
+            "pnl_usd": 45.4,
+            "trades_per_month": 1.46,
+            "wr": 0.8889
+          },
+          "OOS22-23": {
+            "max_dd_usd": 12.15,
+            "n": 38,
+            "pnl_usd": 46.68,
+            "trades_per_month": 1.58,
+            "wr": 0.6842
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.98,
+            "n": 49,
+            "pnl_usd": 58.37,
+            "trades_per_month": 3.27,
+            "wr": 0.7143
+          }
+        },
+        "pnl_usd": 150.44,
+        "trades_per_month": 2.05,
+        "wr": 0.7333
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_hours",
+      "id": "G4692_top_hours_91",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 73.68,
+        "candidate_id": "G4692",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 38.91,
+        "min_period_pnl_usd": 61.02,
+        "n": 82,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 20,
+            "pnl_usd": 118.68,
+            "trades_per_month": 1.63,
+            "wr": 0.85
+          },
+          "OOS22-23": {
+            "max_dd_usd": 21.04,
+            "n": 32,
+            "pnl_usd": 135.21,
+            "trades_per_month": 1.33,
+            "wr": 0.75
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 38.91,
+            "n": 30,
+            "pnl_usd": 61.02,
+            "trades_per_month": 2.0,
+            "wr": 0.6333
+          }
+        },
+        "pnl_usd": 314.91,
+        "trades_per_month": 1.6,
+        "wr": 0.7317
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_hours",
+      "id": "G4464_top_hours_33",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 13.66,
+        "candidate_id": "G4464",
+        "filter_type": "top_hours",
+        "filters": [
+          17
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 8.25,
+        "min_period_pnl_usd": 7.41,
+        "n": 41,
+        "n_filters": 1,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 9,
+            "pnl_usd": 20.74,
+            "trades_per_month": 0.73,
+            "wr": 0.8889
+          },
+          "OOS22-23": {
+            "max_dd_usd": 8.25,
+            "n": 18,
+            "pnl_usd": 30.23,
+            "trades_per_month": 0.75,
+            "wr": 0.7222
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 7.41,
+            "n": 14,
+            "pnl_usd": 7.41,
+            "trades_per_month": 0.93,
+            "wr": 0.6429
+          }
+        },
+        "pnl_usd": 58.37,
+        "trades_per_month": 0.8,
+        "wr": 0.7317
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_51",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 42.42,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            17
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "UNIUSDT",
+            6
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 26.99,
+        "min_period_pnl_usd": 13.82,
+        "n": 81,
+        "n_cells": 11,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 8.49,
+            "n": 23,
+            "pnl_usd": 80.12,
+            "trades_per_month": 1.87,
+            "wr": 0.7826
+          },
+          "OOS22-23": {
+            "max_dd_usd": 19.57,
+            "n": 24,
+            "pnl_usd": 87.36,
+            "trades_per_month": 1.0,
+            "wr": 0.8333
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 26.99,
+            "n": 34,
+            "pnl_usd": 13.82,
+            "trades_per_month": 2.27,
+            "wr": 0.6176
+          }
+        },
+        "pnl_usd": 181.29,
+        "trades_per_month": 1.58,
+        "wr": 0.7284
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_22",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 32.48,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          6,
+          17,
+          19,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 13.64,
+        "min_period_pnl_usd": 44.86,
+        "n": 103,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 18,
+            "pnl_usd": 47.62,
+            "trades_per_month": 1.46,
+            "wr": 0.9444
+          },
+          "OOS22-23": {
+            "max_dd_usd": 12.35,
+            "n": 40,
+            "pnl_usd": 44.86,
+            "trades_per_month": 1.67,
+            "wr": 0.675
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.64,
+            "n": 45,
+            "pnl_usd": 46.35,
+            "trades_per_month": 3.0,
+            "wr": 0.6889
+          }
+        },
+        "pnl_usd": 138.82,
+        "trades_per_month": 2.01,
+        "wr": 0.7282
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_symbols",
+      "id": "G4692_top_symbols_86",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 109.61,
+        "candidate_id": "G4692",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "OPUSDT",
+          "SOLUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 31.88,
+        "min_period_pnl_usd": 92.29,
+        "n": 147,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 32,
+            "pnl_usd": 92.29,
+            "trades_per_month": 2.6,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.27,
+            "n": 57,
+            "pnl_usd": 241.94,
+            "trades_per_month": 2.37,
+            "wr": 0.7544
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.88,
+            "n": 58,
+            "pnl_usd": 134.26,
+            "trades_per_month": 3.87,
+            "wr": 0.6897
+          }
+        },
+        "pnl_usd": 468.49,
+        "trades_per_month": 2.86,
+        "wr": 0.7279
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_hours",
+      "id": "G4464_top_hours_34",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 20.37,
+        "candidate_id": "G4464",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 8.45,
+        "min_period_pnl_usd": 16.03,
+        "n": 62,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 15,
+            "pnl_usd": 37.47,
+            "trades_per_month": 1.22,
+            "wr": 0.8667
+          },
+          "OOS22-23": {
+            "max_dd_usd": 8.45,
+            "n": 24,
+            "pnl_usd": 33.57,
+            "trades_per_month": 1.0,
+            "wr": 0.7083
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 7.41,
+            "n": 23,
+            "pnl_usd": 16.03,
+            "trades_per_month": 1.53,
+            "wr": 0.6522
+          }
+        },
+        "pnl_usd": 87.07,
+        "trades_per_month": 1.21,
+        "wr": 0.7258
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_hours",
+      "id": "G4662_top_hours_80",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 78.95,
+        "candidate_id": "G4662",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 31.48,
+        "min_period_pnl_usd": 52.39,
+        "n": 102,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 24,
+            "pnl_usd": 116.75,
+            "trades_per_month": 1.95,
+            "wr": 0.875
+          },
+          "OOS22-23": {
+            "max_dd_usd": 21.04,
+            "n": 43,
+            "pnl_usd": 168.3,
+            "trades_per_month": 1.79,
+            "wr": 0.7209
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.48,
+            "n": 35,
+            "pnl_usd": 52.39,
+            "trades_per_month": 2.33,
+            "wr": 0.6286
+          }
+        },
+        "pnl_usd": 337.44,
+        "trades_per_month": 1.99,
+        "wr": 0.7255
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_symbols",
+      "id": "G4677_top_symbols_59",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 110.4,
+        "candidate_id": "G4677",
+        "filter_type": "top_symbols",
+        "filters": [
+          "BNBUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SOLUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 31.88,
+        "min_period_pnl_usd": 81.41,
+        "n": 160,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 34,
+            "pnl_usd": 81.41,
+            "trades_per_month": 2.76,
+            "wr": 0.7353
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.43,
+            "n": 63,
+            "pnl_usd": 248.7,
+            "trades_per_month": 2.62,
+            "wr": 0.746
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.88,
+            "n": 63,
+            "pnl_usd": 141.72,
+            "trades_per_month": 4.2,
+            "wr": 0.6984
+          }
+        },
+        "pnl_usd": 471.83,
+        "trades_per_month": 3.12,
+        "wr": 0.725
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_67",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 91.56,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 37.02,
+        "min_period_pnl_usd": 63.95,
+        "n": 116,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 28,
+            "pnl_usd": 156.01,
+            "trades_per_month": 2.28,
+            "wr": 0.8571
+          },
+          "OOS22-23": {
+            "max_dd_usd": 37.02,
+            "n": 48,
+            "pnl_usd": 171.38,
+            "trades_per_month": 2.0,
+            "wr": 0.7083
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.05,
+            "n": 40,
+            "pnl_usd": 63.95,
+            "trades_per_month": 2.67,
+            "wr": 0.65
+          }
+        },
+        "pnl_usd": 391.34,
+        "trades_per_month": 2.26,
+        "wr": 0.7241
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_8",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 41.76,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 17.49,
+        "min_period_pnl_usd": 54.15,
+        "n": 134,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 26,
+            "pnl_usd": 62.51,
+            "trades_per_month": 2.11,
+            "wr": 0.8462
+          },
+          "OOS22-23": {
+            "max_dd_usd": 11.02,
+            "n": 52,
+            "pnl_usd": 61.81,
+            "trades_per_month": 2.17,
+            "wr": 0.6923
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 17.49,
+            "n": 56,
+            "pnl_usd": 54.15,
+            "trades_per_month": 3.73,
+            "wr": 0.6964
+          }
+        },
+        "pnl_usd": 178.47,
+        "trades_per_month": 2.61,
+        "wr": 0.7239
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_symbols",
+      "id": "G4464_top_symbols_30",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 31.72,
+        "candidate_id": "G4464",
+        "filter_type": "top_symbols",
+        "filters": [
+          "SUIUSDT",
+          "XRPUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 14.27,
+        "min_period_pnl_usd": 19.89,
+        "n": 94,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 10.09,
+            "n": 23,
+            "pnl_usd": 42.06,
+            "trades_per_month": 1.87,
+            "wr": 0.7826
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 14,
+            "pnl_usd": 19.89,
+            "trades_per_month": 0.58,
+            "wr": 0.7143
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 14.27,
+            "n": 57,
+            "pnl_usd": 73.64,
+            "trades_per_month": 3.8,
+            "wr": 0.7018
+          }
+        },
+        "pnl_usd": 135.59,
+        "trades_per_month": 1.83,
+        "wr": 0.7234
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_symbols",
+      "id": "G4456_top_symbols_17",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 23.74,
+        "candidate_id": "G4456",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 11.96,
+        "min_period_pnl_usd": 32.43,
+        "n": 72,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.24,
+            "n": 15,
+            "pnl_usd": 32.43,
+            "trades_per_month": 1.22,
+            "wr": 0.8
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 23,
+            "pnl_usd": 32.49,
+            "trades_per_month": 0.96,
+            "wr": 0.7391
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.96,
+            "n": 34,
+            "pnl_usd": 36.55,
+            "trades_per_month": 2.27,
+            "wr": 0.6765
+          }
+        },
+        "pnl_usd": 101.47,
+        "trades_per_month": 1.4,
+        "wr": 0.7222
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4456_top_symbol_hour_cells_12",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 6.39,
+        "candidate_id": "G4456",
+        "cells": [
+          [
+            "AVAXUSDT",
+            14
+          ],
+          [
+            "NEARUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            16
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 8.44,
+        "min_period_pnl_usd": 2.39,
+        "n": 18,
+        "n_cells": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 2,
+            "pnl_usd": 7.22,
+            "trades_per_month": 0.16,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 8.44,
+            "n": 7,
+            "pnl_usd": 2.39,
+            "trades_per_month": 0.29,
+            "wr": 0.5714
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 5.51,
+            "n": 9,
+            "pnl_usd": 17.71,
+            "trades_per_month": 0.6,
+            "wr": 0.7778
+          }
+        },
+        "pnl_usd": 27.31,
+        "trades_per_month": 0.35,
+        "wr": 0.7222
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_23",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 37.55,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          6,
+          17,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 13.64,
+        "min_period_pnl_usd": 48.2,
+        "n": 122,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 23,
+            "pnl_usd": 55.31,
+            "trades_per_month": 1.87,
+            "wr": 0.8696
+          },
+          "OOS22-23": {
+            "max_dd_usd": 11.02,
+            "n": 46,
+            "pnl_usd": 48.2,
+            "trades_per_month": 1.92,
+            "wr": 0.6739
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.64,
+            "n": 53,
+            "pnl_usd": 56.98,
+            "trades_per_month": 3.53,
+            "wr": 0.6981
+          }
+        },
+        "pnl_usd": 160.49,
+        "trades_per_month": 2.38,
+        "wr": 0.7213
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_symbols",
+      "id": "G4662_top_symbols_74",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 117.92,
+        "candidate_id": "G4662",
+        "filter_type": "top_symbols",
+        "filters": [
+          "BNBUSDT",
+          "ETHUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SOLUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 31.88,
+        "min_period_pnl_usd": 79.06,
+        "n": 172,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 24.78,
+            "n": 34,
+            "pnl_usd": 79.06,
+            "trades_per_month": 2.76,
+            "wr": 0.7353
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.27,
+            "n": 73,
+            "pnl_usd": 262.84,
+            "trades_per_month": 3.04,
+            "wr": 0.7123
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.88,
+            "n": 65,
+            "pnl_usd": 162.11,
+            "trades_per_month": 4.33,
+            "wr": 0.7231
+          }
+        },
+        "pnl_usd": 504.01,
+        "trades_per_month": 3.35,
+        "wr": 0.7209
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_9",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 44.53,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          6,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 17.49,
+        "min_period_pnl_usd": 52.77,
+        "n": 150,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 30,
+            "pnl_usd": 74.24,
+            "trades_per_month": 2.44,
+            "wr": 0.8667
+          },
+          "OOS22-23": {
+            "max_dd_usd": 11.02,
+            "n": 60,
+            "pnl_usd": 63.33,
+            "trades_per_month": 2.5,
+            "wr": 0.6833
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 17.49,
+            "n": 60,
+            "pnl_usd": 52.77,
+            "trades_per_month": 4.0,
+            "wr": 0.6833
+          }
+        },
+        "pnl_usd": 190.34,
+        "trades_per_month": 2.92,
+        "wr": 0.72
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4452_top_symbol_hour_cells_1",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 6.29,
+        "candidate_id": "G4452",
+        "cells": [
+          [
+            "ADAUSDT",
+            0
+          ],
+          [
+            "NEARUSDT",
+            23
+          ],
+          [
+            "SUIUSDT",
+            16
+          ],
+          [
+            "UNIUSDT",
+            17
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 11.02,
+        "min_period_pnl_usd": 5.32,
+        "n": 25,
+        "n_cells": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 4,
+            "pnl_usd": 5.32,
+            "trades_per_month": 0.33,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 11.02,
+            "n": 11,
+            "pnl_usd": 10.39,
+            "trades_per_month": 0.46,
+            "wr": 0.7273
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 6.36,
+            "n": 10,
+            "pnl_usd": 11.17,
+            "trades_per_month": 0.67,
+            "wr": 0.7
+          }
+        },
+        "pnl_usd": 26.89,
+        "trades_per_month": 0.49,
+        "wr": 0.72
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_symbols",
+      "id": "G4452_top_symbols_3",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 26.87,
+        "candidate_id": "G4452",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 12.92,
+        "min_period_pnl_usd": 32.49,
+        "n": 96,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 8.11,
+            "n": 26,
+            "pnl_usd": 40.19,
+            "trades_per_month": 2.11,
+            "wr": 0.7692
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 23,
+            "pnl_usd": 32.49,
+            "trades_per_month": 0.96,
+            "wr": 0.7391
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 12.92,
+            "n": 47,
+            "pnl_usd": 42.17,
+            "trades_per_month": 3.13,
+            "wr": 0.6809
+          }
+        },
+        "pnl_usd": 114.84,
+        "trades_per_month": 1.87,
+        "wr": 0.7188
+      }
+    },
+    {
+      "candidate_id": "G4472",
+      "filter_type": "top_hours",
+      "id": "G4472_top_hours_39",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 9.72,
+        "candidate_id": "G4472",
+        "filter_type": "top_hours",
+        "filters": [
+          19
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 11.02,
+        "min_period_pnl_usd": 0.71,
+        "n": 32,
+        "n_filters": 1,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 1,
+            "pnl_usd": 0.71,
+            "trades_per_month": 0.08,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 6.64,
+            "n": 11,
+            "pnl_usd": 16.72,
+            "trades_per_month": 0.46,
+            "wr": 0.7273
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.02,
+            "n": 20,
+            "pnl_usd": 24.12,
+            "trades_per_month": 1.33,
+            "wr": 0.7
+          }
+        },
+        "pnl_usd": 41.55,
+        "trades_per_month": 0.62,
+        "wr": 0.7188
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_hours",
+      "id": "G4692_top_hours_92",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 83.85,
+        "candidate_id": "G4692",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 40.27,
+        "min_period_pnl_usd": 41.94,
+        "n": 103,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 24,
+            "pnl_usd": 147.46,
+            "trades_per_month": 1.95,
+            "wr": 0.875
+          },
+          "OOS22-23": {
+            "max_dd_usd": 23.67,
+            "n": 42,
+            "pnl_usd": 168.97,
+            "trades_per_month": 1.75,
+            "wr": 0.7381
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 40.27,
+            "n": 37,
+            "pnl_usd": 41.94,
+            "trades_per_month": 2.47,
+            "wr": 0.5946
+          }
+        },
+        "pnl_usd": 358.37,
+        "trades_per_month": 2.01,
+        "wr": 0.7184
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_hours",
+      "id": "G4662_top_hours_81",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 93.61,
+        "candidate_id": "G4662",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          10,
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 31.48,
+        "min_period_pnl_usd": 101.2,
+        "n": 127,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 9.25,
+            "n": 29,
+            "pnl_usd": 136.6,
+            "trades_per_month": 2.36,
+            "wr": 0.8621
+          },
+          "OOS22-23": {
+            "max_dd_usd": 27.05,
+            "n": 52,
+            "pnl_usd": 162.31,
+            "trades_per_month": 2.17,
+            "wr": 0.6731
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.48,
+            "n": 46,
+            "pnl_usd": 101.2,
+            "trades_per_month": 3.07,
+            "wr": 0.6739
+          }
+        },
+        "pnl_usd": 400.1,
+        "trades_per_month": 2.47,
+        "wr": 0.7165
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_24",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 42.5,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 13.28,
+        "min_period_pnl_usd": 54.41,
+        "n": 141,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 25,
+            "pnl_usd": 62.53,
+            "trades_per_month": 2.03,
+            "wr": 0.88
+          },
+          "OOS22-23": {
+            "max_dd_usd": 12.92,
+            "n": 56,
+            "pnl_usd": 64.69,
+            "trades_per_month": 2.33,
+            "wr": 0.6786
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 13.28,
+            "n": 60,
+            "pnl_usd": 54.41,
+            "trades_per_month": 4.0,
+            "wr": 0.6833
+          }
+        },
+        "pnl_usd": 181.63,
+        "trades_per_month": 2.75,
+        "wr": 0.7163
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_52",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 43.86,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            17
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "UNIUSDT",
+            6
+          ],
+          [
+            "UNIUSDT",
+            17
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 30.47,
+        "min_period_pnl_usd": 11.33,
+        "n": 88,
+        "n_cells": 12,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 8.49,
+            "n": 24,
+            "pnl_usd": 79.29,
+            "trades_per_month": 1.95,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 13.57,
+            "n": 28,
+            "pnl_usd": 96.86,
+            "trades_per_month": 1.17,
+            "wr": 0.8214
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.47,
+            "n": 36,
+            "pnl_usd": 11.33,
+            "trades_per_month": 2.4,
+            "wr": 0.6111
+          }
+        },
+        "pnl_usd": 187.47,
+        "trades_per_month": 1.71,
+        "wr": 0.7159
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_hours",
+      "id": "G4692_top_hours_93",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 89.21,
+        "candidate_id": "G4692",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          18,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 39.66,
+        "min_period_pnl_usd": 56.95,
+        "n": 115,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 28,
+            "pnl_usd": 167.66,
+            "trades_per_month": 2.28,
+            "wr": 0.8571
+          },
+          "OOS22-23": {
+            "max_dd_usd": 39.66,
+            "n": 47,
+            "pnl_usd": 156.65,
+            "trades_per_month": 1.96,
+            "wr": 0.7021
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.05,
+            "n": 40,
+            "pnl_usd": 56.95,
+            "trades_per_month": 2.67,
+            "wr": 0.625
+          }
+        },
+        "pnl_usd": 381.26,
+        "trades_per_month": 2.24,
+        "wr": 0.713
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_hours",
+      "id": "G4464_top_hours_35",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 27.96,
+        "candidate_id": "G4464",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          19,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 18.0,
+        "min_period_pnl_usd": 38.18,
+        "n": 94,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 16,
+            "pnl_usd": 38.18,
+            "trades_per_month": 1.3,
+            "wr": 0.875
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.0,
+            "n": 35,
+            "pnl_usd": 41.17,
+            "trades_per_month": 1.46,
+            "wr": 0.6857
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.98,
+            "n": 43,
+            "pnl_usd": 40.15,
+            "trades_per_month": 2.87,
+            "wr": 0.6744
+          }
+        },
+        "pnl_usd": 119.5,
+        "trades_per_month": 1.83,
+        "wr": 0.7128
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_symbols",
+      "id": "G4464_top_symbols_31",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 37.75,
+        "candidate_id": "G4464",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "SUIUSDT",
+          "XRPUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 14.27,
+        "min_period_pnl_usd": 42.06,
+        "n": 121,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 10.09,
+            "n": 23,
+            "pnl_usd": 42.06,
+            "trades_per_month": 1.87,
+            "wr": 0.7826
+          },
+          "OOS22-23": {
+            "max_dd_usd": 11.02,
+            "n": 41,
+            "pnl_usd": 45.65,
+            "trades_per_month": 1.71,
+            "wr": 0.6829
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 14.27,
+            "n": 57,
+            "pnl_usd": 73.64,
+            "trades_per_month": 3.8,
+            "wr": 0.7018
+          }
+        },
+        "pnl_usd": 161.34,
+        "trades_per_month": 2.36,
+        "wr": 0.7107
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_symbols",
+      "id": "G4662_top_symbols_75",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 136.64,
+        "candidate_id": "G4662",
+        "filter_type": "top_symbols",
+        "filters": [
+          "BNBUSDT",
+          "DOTUSDT",
+          "ETHUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SOLUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 26.37,
+        "min_period_pnl_usd": 114.35,
+        "n": 200,
+        "n_filters": 7,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 24.78,
+            "n": 42,
+            "pnl_usd": 114.35,
+            "trades_per_month": 3.41,
+            "wr": 0.7619
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.58,
+            "n": 83,
+            "pnl_usd": 244.81,
+            "trades_per_month": 3.46,
+            "wr": 0.6506
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 26.37,
+            "n": 75,
+            "pnl_usd": 224.82,
+            "trades_per_month": 5.0,
+            "wr": 0.7467
+          }
+        },
+        "pnl_usd": 583.98,
+        "trades_per_month": 3.9,
+        "wr": 0.71
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4692_top_symbol_hour_cells_83",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 23.84,
+        "candidate_id": "G4692",
+        "cells": [
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            14
+          ],
+          [
+            "PEPEUSDT",
+            0
+          ],
+          [
+            "SUIUSDT",
+            16
+          ],
+          [
+            "XRPUSDT",
+            15
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 26.37,
+        "min_period_pnl_usd": 14.55,
+        "n": 31,
+        "n_cells": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 4,
+            "pnl_usd": 20.1,
+            "trades_per_month": 0.33,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 20.73,
+            "n": 7,
+            "pnl_usd": 14.55,
+            "trades_per_month": 0.29,
+            "wr": 0.5714
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 26.37,
+            "n": 20,
+            "pnl_usd": 67.23,
+            "trades_per_month": 1.33,
+            "wr": 0.75
+          }
+        },
+        "pnl_usd": 101.87,
+        "trades_per_month": 0.6,
+        "wr": 0.7097
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_68",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 100.14,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          18,
+          19,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 63.39,
+        "min_period_pnl_usd": 89.41,
+        "n": 144,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 30,
+            "pnl_usd": 153.89,
+            "trades_per_month": 2.44,
+            "wr": 0.8333
+          },
+          "OOS22-23": {
+            "max_dd_usd": 63.39,
+            "n": 57,
+            "pnl_usd": 184.72,
+            "trades_per_month": 2.37,
+            "wr": 0.7018
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 45.91,
+            "n": 57,
+            "pnl_usd": 89.41,
+            "trades_per_month": 3.8,
+            "wr": 0.6491
+          }
+        },
+        "pnl_usd": 428.01,
+        "trades_per_month": 2.81,
+        "wr": 0.7083
+      }
+    },
+    {
+      "candidate_id": "G4472",
+      "filter_type": "top_hours",
+      "id": "G4472_top_hours_40",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 21.06,
+        "candidate_id": "G4472",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          19
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 14.86,
+        "min_period_pnl_usd": 17.84,
+        "n": 72,
+        "n_filters": 2,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 9,
+            "pnl_usd": 17.84,
+            "trades_per_month": 0.73,
+            "wr": 0.8889
+          },
+          "OOS22-23": {
+            "max_dd_usd": 14.86,
+            "n": 29,
+            "pnl_usd": 40.63,
+            "trades_per_month": 1.21,
+            "wr": 0.6897
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.98,
+            "n": 34,
+            "pnl_usd": 31.53,
+            "trades_per_month": 2.27,
+            "wr": 0.6765
+          }
+        },
+        "pnl_usd": 90.0,
+        "trades_per_month": 1.4,
+        "wr": 0.7083
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4456_top_symbol_hour_cells_13",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 7.67,
+        "candidate_id": "G4456",
+        "cells": [
+          [
+            "AVAXUSDT",
+            14
+          ],
+          [
+            "NEARUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            16
+          ],
+          [
+            "UNIUSDT",
+            1
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 8.62,
+        "min_period_pnl_usd": 3.95,
+        "n": 24,
+        "n_cells": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 3.31,
+            "n": 5,
+            "pnl_usd": 11.13,
+            "trades_per_month": 0.41,
+            "wr": 0.8
+          },
+          "OOS22-23": {
+            "max_dd_usd": 8.62,
+            "n": 10,
+            "pnl_usd": 3.95,
+            "trades_per_month": 0.42,
+            "wr": 0.6
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 5.51,
+            "n": 9,
+            "pnl_usd": 17.71,
+            "trades_per_month": 0.6,
+            "wr": 0.7778
+          }
+        },
+        "pnl_usd": 32.78,
+        "trades_per_month": 0.47,
+        "wr": 0.7083
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4464_top_symbol_hour_cells_27",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 6.77,
+        "candidate_id": "G4464",
+        "cells": [
+          [
+            "ADAUSDT",
+            0
+          ],
+          [
+            "DOGEUSDT",
+            0
+          ],
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 11.87,
+        "min_period_pnl_usd": 5.72,
+        "n": 24,
+        "n_cells": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 3,
+            "pnl_usd": 10.83,
+            "trades_per_month": 0.24,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 9.19,
+            "n": 7,
+            "pnl_usd": 5.72,
+            "trades_per_month": 0.29,
+            "wr": 0.7143
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.87,
+            "n": 14,
+            "pnl_usd": 12.37,
+            "trades_per_month": 0.93,
+            "wr": 0.6429
+          }
+        },
+        "pnl_usd": 28.92,
+        "trades_per_month": 0.47,
+        "wr": 0.7083
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_25",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 48.3,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 20.73,
+        "min_period_pnl_usd": 46.96,
+        "n": 171,
+        "n_filters": 7,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 33,
+            "pnl_usd": 79.64,
+            "trades_per_month": 2.68,
+            "wr": 0.8485
+          },
+          "OOS22-23": {
+            "max_dd_usd": 12.92,
+            "n": 70,
+            "pnl_usd": 79.82,
+            "trades_per_month": 2.92,
+            "wr": 0.6857
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 20.73,
+            "n": 68,
+            "pnl_usd": 46.96,
+            "trades_per_month": 4.53,
+            "wr": 0.6618
+          }
+        },
+        "pnl_usd": 206.42,
+        "trades_per_month": 3.33,
+        "wr": 0.7076
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_hours",
+      "id": "G4464_top_hours_36",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 35.4,
+        "candidate_id": "G4464",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          18,
+          19,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 17.49,
+        "min_period_pnl_usd": 39.55,
+        "n": 126,
+        "n_filters": 4,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 24,
+            "pnl_usd": 51.37,
+            "trades_per_month": 1.95,
+            "wr": 0.7917
+          },
+          "OOS22-23": {
+            "max_dd_usd": 16.53,
+            "n": 51,
+            "pnl_usd": 60.38,
+            "trades_per_month": 2.12,
+            "wr": 0.7059
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 17.49,
+            "n": 51,
+            "pnl_usd": 39.55,
+            "trades_per_month": 3.4,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 151.3,
+        "trades_per_month": 2.46,
+        "wr": 0.7063
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_hours",
+      "id": "G4692_top_hours_94",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 97.95,
+        "candidate_id": "G4692",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          18,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 39.66,
+        "min_period_pnl_usd": 67.97,
+        "n": 129,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 32,
+            "pnl_usd": 190.15,
+            "trades_per_month": 2.6,
+            "wr": 0.8438
+          },
+          "OOS22-23": {
+            "max_dd_usd": 39.66,
+            "n": 50,
+            "pnl_usd": 160.5,
+            "trades_per_month": 2.08,
+            "wr": 0.68
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 31.05,
+            "n": 47,
+            "pnl_usd": 67.97,
+            "trades_per_month": 3.13,
+            "wr": 0.6383
+          }
+        },
+        "pnl_usd": 418.62,
+        "trades_per_month": 2.51,
+        "wr": 0.7054
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_53",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 44.95,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            17
+          ],
+          [
+            "NEARUSDT",
+            22
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "UNIUSDT",
+            6
+          ],
+          [
+            "UNIUSDT",
+            17
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 30.47,
+        "min_period_pnl_usd": 17.33,
+        "n": 95,
+        "n_cells": 13,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 9.32,
+            "n": 26,
+            "pnl_usd": 62.3,
+            "trades_per_month": 2.11,
+            "wr": 0.6923
+          },
+          "OOS22-23": {
+            "max_dd_usd": 13.57,
+            "n": 32,
+            "pnl_usd": 112.48,
+            "trades_per_month": 1.33,
+            "wr": 0.8125
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 30.47,
+            "n": 37,
+            "pnl_usd": 17.33,
+            "trades_per_month": 2.47,
+            "wr": 0.6216
+          }
+        },
+        "pnl_usd": 192.1,
+        "trades_per_month": 1.85,
+        "wr": 0.7053
+      }
+    },
+    {
+      "candidate_id": "G4662",
+      "filter_type": "top_hours",
+      "id": "G4662_top_hours_82",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 104.76,
+        "candidate_id": "G4662",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          10,
+          17,
+          18,
+          19,
+          20
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 45.91,
+        "min_period_pnl_usd": 126.66,
+        "n": 156,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 9.25,
+            "n": 31,
+            "pnl_usd": 134.48,
+            "trades_per_month": 2.52,
+            "wr": 0.8387
+          },
+          "OOS22-23": {
+            "max_dd_usd": 38.56,
+            "n": 62,
+            "pnl_usd": 186.61,
+            "trades_per_month": 2.58,
+            "wr": 0.6774
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 45.91,
+            "n": 63,
+            "pnl_usd": 126.66,
+            "trades_per_month": 4.2,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 447.74,
+        "trades_per_month": 3.04,
+        "wr": 0.7051
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_symbols",
+      "id": "G4677_top_symbols_60",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 135.87,
+        "candidate_id": "G4677",
+        "filter_type": "top_symbols",
+        "filters": [
+          "AVAXUSDT",
+          "BNBUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SOLUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 43.97,
+        "min_period_pnl_usd": 74.15,
+        "n": 210,
+        "n_filters": 6,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 38,
+            "pnl_usd": 74.15,
+            "trades_per_month": 3.09,
+            "wr": 0.6842
+          },
+          "OOS22-23": {
+            "max_dd_usd": 37.57,
+            "n": 97,
+            "pnl_usd": 375.75,
+            "trades_per_month": 4.04,
+            "wr": 0.7423
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 43.97,
+            "n": 75,
+            "pnl_usd": 130.81,
+            "trades_per_month": 5.0,
+            "wr": 0.6667
+          }
+        },
+        "pnl_usd": 580.71,
+        "trades_per_month": 4.09,
+        "wr": 0.7048
+      }
+    },
+    {
+      "candidate_id": "G4452",
+      "filter_type": "top_hours",
+      "id": "G4452_top_hours_10",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 52.2,
+        "candidate_id": "G4452",
+        "filter_type": "top_hours",
+        "filters": [
+          6,
+          15,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 22.04,
+        "min_period_pnl_usd": 55.76,
+        "n": 193,
+        "n_filters": 7,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 46,
+            "pnl_usd": 95.48,
+            "trades_per_month": 3.74,
+            "wr": 0.8261
+          },
+          "OOS22-23": {
+            "max_dd_usd": 14.82,
+            "n": 71,
+            "pnl_usd": 71.86,
+            "trades_per_month": 2.96,
+            "wr": 0.6761
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 22.04,
+            "n": 76,
+            "pnl_usd": 55.76,
+            "trades_per_month": 5.07,
+            "wr": 0.6579
+          }
+        },
+        "pnl_usd": 223.1,
+        "trades_per_month": 3.76,
+        "wr": 0.7047
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_symbols",
+      "id": "G4456_top_symbols_18",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 25.86,
+        "candidate_id": "G4456",
+        "filter_type": "top_symbols",
+        "filters": [
+          "MATICUSDT",
+          "OPUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 12.92,
+        "min_period_pnl_usd": 32.49,
+        "n": 101,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 9.86,
+            "n": 28,
+            "pnl_usd": 38.83,
+            "trades_per_month": 2.28,
+            "wr": 0.75
+          },
+          "OOS22-23": {
+            "max_dd_usd": 5.51,
+            "n": 23,
+            "pnl_usd": 32.49,
+            "trades_per_month": 0.96,
+            "wr": 0.7391
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 12.92,
+            "n": 50,
+            "pnl_usd": 39.22,
+            "trades_per_month": 3.33,
+            "wr": 0.66
+          }
+        },
+        "pnl_usd": 110.54,
+        "trades_per_month": 1.97,
+        "wr": 0.703
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_hours",
+      "id": "G4677_top_hours_69",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 107.98,
+        "candidate_id": "G4677",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 63.39,
+        "min_period_pnl_usd": 96.55,
+        "n": 158,
+        "n_filters": 7,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 34,
+            "pnl_usd": 176.37,
+            "trades_per_month": 2.76,
+            "wr": 0.8235
+          },
+          "OOS22-23": {
+            "max_dd_usd": 63.39,
+            "n": 60,
+            "pnl_usd": 188.57,
+            "trades_per_month": 2.5,
+            "wr": 0.6833
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 45.91,
+            "n": 64,
+            "pnl_usd": 96.55,
+            "trades_per_month": 4.27,
+            "wr": 0.6562
+          }
+        },
+        "pnl_usd": 461.49,
+        "trades_per_month": 3.08,
+        "wr": 0.7025
+      }
+    },
+    {
+      "candidate_id": "G4472",
+      "filter_type": "top_hours",
+      "id": "G4472_top_hours_41",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 27.35,
+        "candidate_id": "G4472",
+        "filter_type": "top_hours",
+        "filters": [
+          17,
+          19,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 15.19,
+        "min_period_pnl_usd": 32.75,
+        "n": 94,
+        "n_filters": 3,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 16,
+            "pnl_usd": 32.75,
+            "trades_per_month": 1.3,
+            "wr": 0.8125
+          },
+          "OOS22-23": {
+            "max_dd_usd": 15.19,
+            "n": 35,
+            "pnl_usd": 43.98,
+            "trades_per_month": 1.46,
+            "wr": 0.6857
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 11.98,
+            "n": 43,
+            "pnl_usd": 40.15,
+            "trades_per_month": 2.87,
+            "wr": 0.6744
+          }
+        },
+        "pnl_usd": 116.88,
+        "trades_per_month": 1.83,
+        "wr": 0.7021
+      }
+    },
+    {
+      "candidate_id": "G4692",
+      "filter_type": "top_symbols",
+      "id": "G4692_top_symbols_87",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 132.17,
+        "candidate_id": "G4692",
+        "filter_type": "top_symbols",
+        "filters": [
+          "AVAXUSDT",
+          "MATICUSDT",
+          "OPUSDT",
+          "SOLUSDT",
+          "SUIUSDT"
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 51.47,
+        "min_period_pnl_usd": 85.02,
+        "n": 198,
+        "n_filters": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 26.37,
+            "n": 36,
+            "pnl_usd": 85.02,
+            "trades_per_month": 2.93,
+            "wr": 0.6944
+          },
+          "OOS22-23": {
+            "max_dd_usd": 37.57,
+            "n": 92,
+            "pnl_usd": 356.51,
+            "trades_per_month": 3.83,
+            "wr": 0.7391
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 51.47,
+            "n": 70,
+            "pnl_usd": 123.34,
+            "trades_per_month": 4.67,
+            "wr": 0.6571
+          }
+        },
+        "pnl_usd": 564.88,
+        "trades_per_month": 3.86,
+        "wr": 0.702
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_hours",
+      "id": "G4456_top_hours_26",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 53.12,
+        "candidate_id": "G4456",
+        "filter_type": "top_hours",
+        "filters": [
+          4,
+          6,
+          10,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "liquidations": 0,
+        "max_period_dd_usd": 18.59,
+        "min_period_pnl_usd": 62.54,
+        "n": 201,
+        "n_filters": 8,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 39,
+            "pnl_usd": 94.36,
+            "trades_per_month": 3.17,
+            "wr": 0.8462
+          },
+          "OOS22-23": {
+            "max_dd_usd": 18.43,
+            "n": 80,
+            "pnl_usd": 62.54,
+            "trades_per_month": 3.33,
+            "wr": 0.65
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 18.59,
+            "n": 82,
+            "pnl_usd": 70.13,
+            "trades_per_month": 5.47,
+            "wr": 0.6829
+          }
+        },
+        "pnl_usd": 227.03,
+        "trades_per_month": 3.92,
+        "wr": 0.7015
+      }
+    },
+    {
+      "candidate_id": "G4456",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4456_top_symbol_hour_cells_14",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 8.75,
+        "candidate_id": "G4456",
+        "cells": [
+          [
+            "AVAXUSDT",
+            14
+          ],
+          [
+            "NEARUSDT",
+            14
+          ],
+          [
+            "NEARUSDT",
+            23
+          ],
+          [
+            "SUIUSDT",
+            16
+          ],
+          [
+            "UNIUSDT",
+            1
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 9.37,
+        "min_period_pnl_usd": 5.62,
+        "n": 30,
+        "n_cells": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 5.51,
+            "n": 6,
+            "pnl_usd": 5.62,
+            "trades_per_month": 0.49,
+            "wr": 0.6667
+          },
+          "OOS22-23": {
+            "max_dd_usd": 9.37,
+            "n": 15,
+            "pnl_usd": 14.06,
+            "trades_per_month": 0.62,
+            "wr": 0.6667
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 5.51,
+            "n": 9,
+            "pnl_usd": 17.71,
+            "trades_per_month": 0.6,
+            "wr": 0.7778
+          }
+        },
+        "pnl_usd": 37.38,
+        "trades_per_month": 0.58,
+        "wr": 0.7
+      }
+    },
+    {
+      "candidate_id": "G4464",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4464_top_symbol_hour_cells_28",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 7.57,
+        "candidate_id": "G4464",
+        "cells": [
+          [
+            "ADAUSDT",
+            0
+          ],
+          [
+            "DOGEUSDT",
+            0
+          ],
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "UNIUSDT",
+            17
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 17.38,
+        "min_period_pnl_usd": 7.43,
+        "n": 30,
+        "n_cells": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 0.0,
+            "n": 3,
+            "pnl_usd": 10.83,
+            "trades_per_month": 0.24,
+            "wr": 1.0
+          },
+          "OOS22-23": {
+            "max_dd_usd": 9.19,
+            "n": 10,
+            "pnl_usd": 7.43,
+            "trades_per_month": 0.42,
+            "wr": 0.7
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 17.38,
+            "n": 17,
+            "pnl_usd": 14.08,
+            "trades_per_month": 1.13,
+            "wr": 0.6471
+          }
+        },
+        "pnl_usd": 32.34,
+        "trades_per_month": 0.58,
+        "wr": 0.7
+      }
+    },
+    {
+      "candidate_id": "G4677",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4677_top_symbol_hour_cells_55",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 21.68,
+        "candidate_id": "G4677",
+        "cells": [
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            14
+          ],
+          [
+            "PEPEUSDT",
+            0
+          ],
+          [
+            "SUIUSDT",
+            16
+          ],
+          [
+            "XRPUSDT",
+            15
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 26.37,
+        "min_period_pnl_usd": 10.88,
+        "n": 30,
+        "n_cells": 5,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 7.55,
+            "n": 3,
+            "pnl_usd": 10.88,
+            "trades_per_month": 0.24,
+            "wr": 0.6667
+          },
+          "OOS22-23": {
+            "max_dd_usd": 20.73,
+            "n": 7,
+            "pnl_usd": 14.55,
+            "trades_per_month": 0.29,
+            "wr": 0.5714
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 26.37,
+            "n": 20,
+            "pnl_usd": 67.23,
+            "trades_per_month": 1.33,
+            "wr": 0.75
+          }
+        },
+        "pnl_usd": 92.66,
+        "trades_per_month": 0.58,
+        "wr": 0.7
+      }
+    },
+    {
+      "candidate_id": "G4475",
+      "filter_type": "top_symbol_hour_cells",
+      "id": "G4475_top_symbol_hour_cells_54",
+      "summary": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 45.88,
+        "candidate_id": "G4475",
+        "cells": [
+          [
+            "ADAUSDT",
+            12
+          ],
+          [
+            "ARBUSDT",
+            16
+          ],
+          [
+            "AVAXUSDT",
+            18
+          ],
+          [
+            "DOGEUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            16
+          ],
+          [
+            "NEARUSDT",
+            17
+          ],
+          [
+            "NEARUSDT",
+            22
+          ],
+          [
+            "PEPEUSDT",
+            17
+          ],
+          [
+            "SUIUSDT",
+            14
+          ],
+          [
+            "SUIUSDT",
+            15
+          ],
+          [
+            "UNIUSDT",
+            6
+          ],
+          [
+            "UNIUSDT",
+            14
+          ],
+          [
+            "UNIUSDT",
+            17
+          ],
+          [
+            "XRPUSDT",
+            18
+          ]
+        ],
+        "filter_type": "top_symbol_hour_cells",
+        "liquidations": 0,
+        "max_period_dd_usd": 27.97,
+        "min_period_pnl_usd": 32.28,
+        "n": 102,
+        "n_cells": 14,
+        "periods": {
+          "IS25-26": {
+            "max_dd_usd": 12.43,
+            "n": 28,
+            "pnl_usd": 59.81,
+            "trades_per_month": 2.28,
+            "wr": 0.6786
+          },
+          "OOS22-23": {
+            "max_dd_usd": 13.57,
+            "n": 33,
+            "pnl_usd": 103.99,
+            "trades_per_month": 1.37,
+            "wr": 0.7879
+          },
+          "OOS24-Q1": {
+            "max_dd_usd": 27.97,
+            "n": 41,
+            "pnl_usd": 32.28,
+            "trades_per_month": 2.73,
+            "wr": 0.6341
+          }
+        },
+        "pnl_usd": 196.08,
+        "trades_per_month": 1.99,
+        "wr": 0.6961
+      }
+    }
+  ]
+}

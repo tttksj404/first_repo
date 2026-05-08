@@ -31,11 +31,11 @@
                 "win_rate": 0.85,
                 "big_wins_30pct": 14,
                 "big_losses_20pct": 2,
-                "pnl_usd": 536.3,
+                "pnl_usd": 268.15,
                 "annual_pct": 268.1,
-                "annual_pnl_usd": 268.15,
-                "avg_winner_pnl_usd": 33.18,
-                "avg_loser_pnl_usd": -9.25,
+                "annual_pnl_usd": 134.07,
+                "avg_winner_pnl_usd": 16.59,
+                "avg_loser_pnl_usd": -4.62,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 13.5,
                 "days": 730
@@ -45,11 +45,11 @@
                 "win_rate": 0.8824,
                 "big_wins_30pct": 28,
                 "big_losses_20pct": 0,
-                "pnl_usd": 1266.78,
+                "pnl_usd": 633.39,
                 "annual_pct": 1014.0,
-                "annual_pnl_usd": 1013.98,
-                "avg_winner_pnl_usd": 42.63,
-                "avg_loser_pnl_usd": -3.05,
+                "annual_pnl_usd": 506.99,
+                "avg_winner_pnl_usd": 21.32,
+                "avg_loser_pnl_usd": -1.52,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 13.5,
                 "days": 456
@@ -59,11 +59,11 @@
                 "win_rate": 0.75,
                 "big_wins_30pct": 5,
                 "big_losses_20pct": 1,
-                "pnl_usd": 174.01,
+                "pnl_usd": 87.0,
                 "annual_pct": 169.8,
-                "annual_pnl_usd": 169.82,
-                "avg_winner_pnl_usd": 22.08,
-                "avg_loser_pnl_usd": -8.23,
+                "annual_pnl_usd": 84.91,
+                "avg_winner_pnl_usd": 11.04,
+                "avg_loser_pnl_usd": -4.12,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 13.5,
                 "days": 374
@@ -72,9 +72,9 @@
             "weighted": {
               "n_taken": 66,
               "win_rate": 0.8485,
-              "pnl_usd": 1977.09,
-              "annual_pnl_usd": 462.59,
-              "monthly_pnl_usd": 38.55,
+              "pnl_usd": 988.54,
+              "annual_pnl_usd": 231.29,
+              "monthly_pnl_usd": 19.27,
               "all_periods_positive": true,
               "peak_notional_x_equity": 13.5
             }
@@ -84,10 +84,10 @@
             "checks": {
               "wr_>=_70%": true,
               "all_periods_pos": true,
-              "annual_pnl_>=_$300": true,
+              "annual_pnl_>=_$300": false,
               "trades_>=_30": true
             },
-            "verdict": "PASS"
+            "verdict": "FAIL"
           }
         },
         "stress24": {
@@ -98,11 +98,11 @@
                 "win_rate": 0.85,
                 "big_wins_30pct": 14,
                 "big_losses_20pct": 2,
-                "pnl_usd": 531.98,
+                "pnl_usd": 265.99,
                 "annual_pct": 266.0,
-                "annual_pnl_usd": 265.99,
-                "avg_winner_pnl_usd": 32.96,
-                "avg_loser_pnl_usd": -9.46,
+                "annual_pnl_usd": 132.99,
+                "avg_winner_pnl_usd": 16.48,
+                "avg_loser_pnl_usd": -4.73,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 13.5,
                 "days": 730
@@ -112,11 +112,11 @@
                 "win_rate": 0.8824,
                 "big_wins_30pct": 28,
                 "big_losses_20pct": 0,
-                "pnl_usd": 1259.44,
+                "pnl_usd": 629.72,
                 "annual_pct": 1008.1,
-                "annual_pnl_usd": 1008.1,
-                "avg_winner_pnl_usd": 42.42,
-                "avg_loser_pnl_usd": -3.26,
+                "annual_pnl_usd": 504.05,
+                "avg_winner_pnl_usd": 21.21,
+                "avg_loser_pnl_usd": -1.63,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 13.5,
                 "days": 456
@@ -126,11 +126,11 @@
                 "win_rate": 0.75,
                 "big_wins_30pct": 5,
                 "big_losses_20pct": 1,
-                "pnl_usd": 171.41,
+                "pnl_usd": 85.71,
                 "annual_pct": 167.3,
-                "annual_pnl_usd": 167.29,
-                "avg_winner_pnl_usd": 21.86,
-                "avg_loser_pnl_usd": -8.45,
+                "annual_pnl_usd": 83.64,
+                "avg_winner_pnl_usd": 10.93,
+                "avg_loser_pnl_usd": -4.23,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 13.5,
                 "days": 374
@@ -139,9 +139,9 @@
             "weighted": {
               "n_taken": 66,
               "win_rate": 0.8485,
-              "pnl_usd": 1962.83,
-              "annual_pnl_usd": 459.25,
-              "monthly_pnl_usd": 38.27,
+              "pnl_usd": 981.42,
+              "annual_pnl_usd": 229.63,
+              "monthly_pnl_usd": 19.14,
               "all_periods_positive": true,
               "peak_notional_x_equity": 13.5
             }
@@ -151,13 +151,13 @@
             "checks": {
               "wr_>=_70%": true,
               "all_periods_pos": true,
-              "annual_pnl_>=_$300": true,
+              "annual_pnl_>=_$300": false,
               "trades_>=_30": true
             },
-            "verdict": "PASS"
+            "verdict": "FAIL"
           }
         },
-        "robust_PASS": true
+        "robust_PASS": false
       }
     },
     "G191": {
@@ -181,11 +181,11 @@
                 "win_rate": 0.875,
                 "big_wins_30pct": 17,
                 "big_losses_20pct": 2,
-                "pnl_usd": 572.54,
+                "pnl_usd": 286.27,
                 "annual_pct": 286.3,
-                "annual_pnl_usd": 286.27,
-                "avg_winner_pnl_usd": 28.44,
-                "avg_loser_pnl_usd": -8.22,
+                "annual_pnl_usd": 143.14,
+                "avg_winner_pnl_usd": 14.22,
+                "avg_loser_pnl_usd": -4.11,
                 "peak_concurrent": 8,
                 "peak_notional_x_equity": 19.2,
                 "days": 730
@@ -195,11 +195,11 @@
                 "win_rate": 0.9091,
                 "big_wins_30pct": 37,
                 "big_losses_20pct": 0,
-                "pnl_usd": 1474.91,
+                "pnl_usd": 737.46,
                 "annual_pct": 1180.6,
-                "annual_pnl_usd": 1180.58,
-                "avg_winner_pnl_usd": 37.14,
-                "avg_loser_pnl_usd": -2.71,
+                "annual_pnl_usd": 590.29,
+                "avg_winner_pnl_usd": 18.57,
+                "avg_loser_pnl_usd": -1.35,
                 "peak_concurrent": 8,
                 "peak_notional_x_equity": 19.2,
                 "days": 456
@@ -209,11 +209,11 @@
                 "win_rate": 0.8,
                 "big_wins_30pct": 8,
                 "big_losses_20pct": 1,
-                "pnl_usd": 224.23,
+                "pnl_usd": 112.11,
                 "annual_pct": 218.8,
-                "annual_pnl_usd": 218.83,
-                "avg_winner_pnl_usd": 20.52,
-                "avg_loser_pnl_usd": -7.32,
+                "annual_pnl_usd": 109.42,
+                "avg_winner_pnl_usd": 10.26,
+                "avg_loser_pnl_usd": -3.66,
                 "peak_concurrent": 8,
                 "peak_notional_x_equity": 19.2,
                 "days": 374
@@ -222,9 +222,9 @@
             "weighted": {
               "n_taken": 83,
               "win_rate": 0.8795,
-              "pnl_usd": 2271.68,
-              "annual_pnl_usd": 531.51,
-              "monthly_pnl_usd": 44.29,
+              "pnl_usd": 1135.84,
+              "annual_pnl_usd": 265.76,
+              "monthly_pnl_usd": 22.15,
               "all_periods_positive": true,
               "peak_notional_x_equity": 19.2
             }
@@ -234,10 +234,10 @@
             "checks": {
               "wr_>=_70%": true,
               "all_periods_pos": true,
-              "annual_pnl_>=_$300": true,
+              "annual_pnl_>=_$300": false,
               "trades_>=_30": true
             },
-            "verdict": "PASS"
+            "verdict": "FAIL"
           }
         },
         "stress24": {
@@ -248,11 +248,11 @@
                 "win_rate": 0.875,
                 "big_wins_30pct": 17,
                 "big_losses_20pct": 2,
-                "pnl_usd": 567.93,
+                "pnl_usd": 283.97,
                 "annual_pct": 284.0,
-                "annual_pnl_usd": 283.97,
-                "avg_winner_pnl_usd": 28.25,
-                "avg_loser_pnl_usd": -8.41,
+                "annual_pnl_usd": 141.98,
+                "avg_winner_pnl_usd": 14.12,
+                "avg_loser_pnl_usd": -4.21,
                 "peak_concurrent": 8,
                 "peak_notional_x_equity": 19.2,
                 "days": 730
@@ -262,11 +262,11 @@
                 "win_rate": 0.9091,
                 "big_wins_30pct": 37,
                 "big_losses_20pct": 0,
-                "pnl_usd": 1466.46,
+                "pnl_usd": 733.23,
                 "annual_pct": 1173.8,
-                "annual_pnl_usd": 1173.81,
-                "avg_winner_pnl_usd": 36.95,
-                "avg_loser_pnl_usd": -2.9,
+                "annual_pnl_usd": 586.91,
+                "avg_winner_pnl_usd": 18.48,
+                "avg_loser_pnl_usd": -1.45,
                 "peak_concurrent": 8,
                 "peak_notional_x_equity": 19.2,
                 "days": 456
@@ -276,11 +276,11 @@
                 "win_rate": 0.8,
                 "big_wins_30pct": 8,
                 "big_losses_20pct": 1,
-                "pnl_usd": 221.35,
+                "pnl_usd": 110.67,
                 "annual_pct": 216.0,
-                "annual_pnl_usd": 216.02,
-                "avg_winner_pnl_usd": 20.32,
-                "avg_loser_pnl_usd": -7.51,
+                "annual_pnl_usd": 108.01,
+                "avg_winner_pnl_usd": 10.16,
+                "avg_loser_pnl_usd": -3.76,
                 "peak_concurrent": 8,
                 "peak_notional_x_equity": 19.2,
                 "days": 374
@@ -289,9 +289,9 @@
             "weighted": {
               "n_taken": 83,
               "win_rate": 0.8795,
-              "pnl_usd": 2255.74,
-              "annual_pnl_usd": 527.79,
-              "monthly_pnl_usd": 43.98,
+              "pnl_usd": 1127.87,
+              "annual_pnl_usd": 263.89,
+              "monthly_pnl_usd": 21.99,
               "all_periods_positive": true,
               "peak_notional_x_equity": 19.2
             }
@@ -301,13 +301,13 @@
             "checks": {
               "wr_>=_70%": true,
               "all_periods_pos": true,
-              "annual_pnl_>=_$300": true,
+              "annual_pnl_>=_$300": false,
               "trades_>=_30": true
             },
-            "verdict": "PASS"
+            "verdict": "FAIL"
           }
         },
-        "robust_PASS": true
+        "robust_PASS": false
       }
     },
     "G192": {
@@ -331,11 +331,11 @@
                 "win_rate": 0.85,
                 "big_wins_30pct": 14,
                 "big_losses_20pct": 2,
-                "pnl_usd": 476.71,
+                "pnl_usd": 238.35,
                 "annual_pct": 238.4,
-                "annual_pnl_usd": 238.35,
-                "avg_winner_pnl_usd": 29.49,
-                "avg_loser_pnl_usd": -8.22,
+                "annual_pnl_usd": 119.18,
+                "avg_winner_pnl_usd": 14.75,
+                "avg_loser_pnl_usd": -4.11,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 730
@@ -345,11 +345,11 @@
                 "win_rate": 0.8824,
                 "big_wins_30pct": 28,
                 "big_losses_20pct": 0,
-                "pnl_usd": 1054.99,
+                "pnl_usd": 527.5,
                 "annual_pct": 844.5,
-                "annual_pnl_usd": 844.45,
-                "avg_winner_pnl_usd": 35.53,
-                "avg_loser_pnl_usd": -2.71,
+                "annual_pnl_usd": 422.23,
+                "avg_winner_pnl_usd": 17.76,
+                "avg_loser_pnl_usd": -1.35,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 456
@@ -359,11 +359,11 @@
                 "win_rate": 0.75,
                 "big_wins_30pct": 5,
                 "big_losses_20pct": 1,
-                "pnl_usd": 154.67,
+                "pnl_usd": 77.34,
                 "annual_pct": 151.0,
-                "annual_pnl_usd": 150.95,
-                "avg_winner_pnl_usd": 19.63,
-                "avg_loser_pnl_usd": -7.32,
+                "annual_pnl_usd": 75.48,
+                "avg_winner_pnl_usd": 9.81,
+                "avg_loser_pnl_usd": -3.66,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 374
@@ -372,9 +372,9 @@
             "weighted": {
               "n_taken": 66,
               "win_rate": 0.8485,
-              "pnl_usd": 1686.37,
-              "annual_pnl_usd": 394.57,
-              "monthly_pnl_usd": 32.88,
+              "pnl_usd": 843.19,
+              "annual_pnl_usd": 197.28,
+              "monthly_pnl_usd": 16.44,
               "all_periods_positive": true,
               "peak_notional_x_equity": 12.0
             }
@@ -384,10 +384,10 @@
             "checks": {
               "wr_>=_70%": true,
               "all_periods_pos": true,
-              "annual_pnl_>=_$300": true,
+              "annual_pnl_>=_$300": false,
               "trades_>=_30": true
             },
-            "verdict": "PASS"
+            "verdict": "FAIL"
           }
         },
         "stress24": {
@@ -398,11 +398,11 @@
                 "win_rate": 0.85,
                 "big_wins_30pct": 14,
                 "big_losses_20pct": 2,
-                "pnl_usd": 472.87,
+                "pnl_usd": 236.43,
                 "annual_pct": 236.4,
-                "annual_pnl_usd": 236.43,
-                "avg_winner_pnl_usd": 29.3,
-                "avg_loser_pnl_usd": -8.41,
+                "annual_pnl_usd": 118.22,
+                "avg_winner_pnl_usd": 14.65,
+                "avg_loser_pnl_usd": -4.21,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 730
@@ -412,11 +412,11 @@
                 "win_rate": 0.8824,
                 "big_wins_30pct": 28,
                 "big_losses_20pct": 0,
-                "pnl_usd": 1048.46,
+                "pnl_usd": 524.23,
                 "annual_pct": 839.2,
-                "annual_pnl_usd": 839.23,
-                "avg_winner_pnl_usd": 35.34,
-                "avg_loser_pnl_usd": -2.9,
+                "annual_pnl_usd": 419.61,
+                "avg_winner_pnl_usd": 17.67,
+                "avg_loser_pnl_usd": -1.45,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 456
@@ -426,11 +426,11 @@
                 "win_rate": 0.75,
                 "big_wins_30pct": 5,
                 "big_losses_20pct": 1,
-                "pnl_usd": 152.37,
+                "pnl_usd": 76.18,
                 "annual_pct": 148.7,
-                "annual_pnl_usd": 148.7,
-                "avg_winner_pnl_usd": 19.43,
-                "avg_loser_pnl_usd": -7.51,
+                "annual_pnl_usd": 74.35,
+                "avg_winner_pnl_usd": 9.72,
+                "avg_loser_pnl_usd": -3.76,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 374
@@ -439,9 +439,9 @@
             "weighted": {
               "n_taken": 66,
               "win_rate": 0.8485,
-              "pnl_usd": 1673.7,
-              "annual_pnl_usd": 391.6,
-              "monthly_pnl_usd": 32.63,
+              "pnl_usd": 836.84,
+              "annual_pnl_usd": 195.8,
+              "monthly_pnl_usd": 16.32,
               "all_periods_positive": true,
               "peak_notional_x_equity": 12.0
             }
@@ -451,13 +451,13 @@
             "checks": {
               "wr_>=_70%": true,
               "all_periods_pos": true,
-              "annual_pnl_>=_$300": true,
+              "annual_pnl_>=_$300": false,
               "trades_>=_30": true
             },
-            "verdict": "PASS"
+            "verdict": "FAIL"
           }
         },
-        "robust_PASS": true
+        "robust_PASS": false
       }
     },
     "G193": {
@@ -481,11 +481,11 @@
                 "win_rate": 0.6438,
                 "big_wins_30pct": 22,
                 "big_losses_20pct": 10,
-                "pnl_usd": 530.66,
+                "pnl_usd": 265.33,
                 "annual_pct": 265.3,
-                "annual_pnl_usd": 265.33,
-                "avg_winner_pnl_usd": 16.85,
-                "avg_loser_pnl_usd": -10.06,
+                "annual_pnl_usd": 132.67,
+                "avg_winner_pnl_usd": 8.43,
+                "avg_loser_pnl_usd": -5.03,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 730
@@ -495,11 +495,11 @@
                 "win_rate": 0.5938,
                 "big_wins_30pct": 16,
                 "big_losses_20pct": 11,
-                "pnl_usd": 359.55,
+                "pnl_usd": 179.77,
                 "annual_pct": 287.8,
-                "annual_pnl_usd": 287.8,
-                "avg_winner_pnl_usd": 14.56,
-                "avg_loser_pnl_usd": -7.45,
+                "annual_pnl_usd": 143.9,
+                "avg_winner_pnl_usd": 7.28,
+                "avg_loser_pnl_usd": -3.72,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 456
@@ -509,11 +509,11 @@
                 "win_rate": 0.7297,
                 "big_wins_30pct": 9,
                 "big_losses_20pct": 5,
-                "pnl_usd": 224.45,
+                "pnl_usd": 112.22,
                 "annual_pct": 219.0,
-                "annual_pnl_usd": 219.05,
-                "avg_winner_pnl_usd": 11.65,
-                "avg_loser_pnl_usd": -9.02,
+                "annual_pnl_usd": 109.52,
+                "avg_winner_pnl_usd": 5.83,
+                "avg_loser_pnl_usd": -4.51,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 374
@@ -522,9 +522,9 @@
             "weighted": {
               "n_taken": 174,
               "win_rate": 0.6437,
-              "pnl_usd": 1114.66,
-              "annual_pnl_usd": 260.8,
-              "monthly_pnl_usd": 21.73,
+              "pnl_usd": 557.32,
+              "annual_pnl_usd": 130.4,
+              "monthly_pnl_usd": 10.87,
               "all_periods_positive": true,
               "peak_notional_x_equity": 12.0
             }
@@ -548,11 +548,11 @@
                 "win_rate": 0.6438,
                 "big_wins_30pct": 22,
                 "big_losses_20pct": 10,
-                "pnl_usd": 517.03,
+                "pnl_usd": 258.51,
                 "annual_pct": 258.5,
-                "annual_pnl_usd": 258.51,
-                "avg_winner_pnl_usd": 16.66,
-                "avg_loser_pnl_usd": -10.23,
+                "annual_pnl_usd": 129.26,
+                "avg_winner_pnl_usd": 8.33,
+                "avg_loser_pnl_usd": -5.12,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 730
@@ -562,11 +562,11 @@
                 "win_rate": 0.5781,
                 "big_wins_30pct": 16,
                 "big_losses_20pct": 11,
-                "pnl_usd": 347.26,
+                "pnl_usd": 173.63,
                 "annual_pct": 278.0,
-                "annual_pnl_usd": 277.96,
-                "avg_winner_pnl_usd": 14.76,
-                "avg_loser_pnl_usd": -7.36,
+                "annual_pnl_usd": 138.98,
+                "avg_winner_pnl_usd": 7.38,
+                "avg_loser_pnl_usd": -3.68,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 456
@@ -576,11 +576,11 @@
                 "win_rate": 0.7297,
                 "big_wins_30pct": 9,
                 "big_losses_20pct": 5,
-                "pnl_usd": 217.34,
+                "pnl_usd": 108.67,
                 "annual_pct": 212.1,
-                "annual_pnl_usd": 212.11,
-                "avg_winner_pnl_usd": 11.46,
-                "avg_loser_pnl_usd": -9.21,
+                "annual_pnl_usd": 106.06,
+                "avg_winner_pnl_usd": 5.73,
+                "avg_loser_pnl_usd": -4.6,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 374
@@ -589,9 +589,9 @@
             "weighted": {
               "n_taken": 174,
               "win_rate": 0.6379,
-              "pnl_usd": 1081.63,
-              "annual_pnl_usd": 253.07,
-              "monthly_pnl_usd": 21.09,
+              "pnl_usd": 540.81,
+              "annual_pnl_usd": 126.54,
+              "monthly_pnl_usd": 10.54,
               "all_periods_positive": true,
               "peak_notional_x_equity": 12.0
             }
@@ -631,11 +631,11 @@
                 "win_rate": 0.75,
                 "big_wins_30pct": 10,
                 "big_losses_20pct": 3,
-                "pnl_usd": 250.09,
+                "pnl_usd": 125.04,
                 "annual_pct": 125.0,
-                "annual_pnl_usd": 125.04,
-                "avg_winner_pnl_usd": 19.96,
-                "avg_loser_pnl_usd": -9.87,
+                "annual_pnl_usd": 62.52,
+                "avg_winner_pnl_usd": 9.98,
+                "avg_loser_pnl_usd": -4.93,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 730
@@ -645,11 +645,11 @@
                 "win_rate": 0.9706,
                 "big_wins_30pct": 27,
                 "big_losses_20pct": 0,
-                "pnl_usd": 944.3,
+                "pnl_usd": 472.15,
                 "annual_pct": 755.9,
-                "annual_pnl_usd": 755.85,
-                "avg_winner_pnl_usd": 28.63,
-                "avg_loser_pnl_usd": -0.53,
+                "annual_pnl_usd": 377.93,
+                "avg_winner_pnl_usd": 14.32,
+                "avg_loser_pnl_usd": -0.26,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 456
@@ -659,11 +659,11 @@
                 "win_rate": 0.4167,
                 "big_wins_30pct": 0,
                 "big_losses_20pct": 2,
-                "pnl_usd": -18.85,
+                "pnl_usd": -9.43,
                 "annual_pct": -18.4,
-                "annual_pnl_usd": -18.4,
-                "avg_winner_pnl_usd": 5.06,
-                "avg_loser_pnl_usd": -6.31,
+                "annual_pnl_usd": -9.2,
+                "avg_winner_pnl_usd": 2.53,
+                "avg_loser_pnl_usd": -3.15,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 374
@@ -672,9 +672,9 @@
             "weighted": {
               "n_taken": 66,
               "win_rate": 0.803,
-              "pnl_usd": 1175.54,
-              "annual_pnl_usd": 275.05,
-              "monthly_pnl_usd": 22.92,
+              "pnl_usd": 587.76,
+              "annual_pnl_usd": 137.52,
+              "monthly_pnl_usd": 11.46,
               "all_periods_positive": false,
               "peak_notional_x_equity": 12.0
             }
@@ -698,11 +698,11 @@
                 "win_rate": 0.75,
                 "big_wins_30pct": 10,
                 "big_losses_20pct": 3,
-                "pnl_usd": 246.25,
+                "pnl_usd": 123.12,
                 "annual_pct": 123.1,
-                "annual_pnl_usd": 123.12,
-                "avg_winner_pnl_usd": 19.77,
-                "avg_loser_pnl_usd": -10.06,
+                "annual_pnl_usd": 61.56,
+                "avg_winner_pnl_usd": 9.88,
+                "avg_loser_pnl_usd": -5.03,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 730
@@ -712,11 +712,11 @@
                 "win_rate": 0.9706,
                 "big_wins_30pct": 27,
                 "big_losses_20pct": 0,
-                "pnl_usd": 937.77,
+                "pnl_usd": 468.88,
                 "annual_pct": 750.6,
-                "annual_pnl_usd": 750.63,
-                "avg_winner_pnl_usd": 28.44,
-                "avg_loser_pnl_usd": -0.72,
+                "annual_pnl_usd": 375.31,
+                "avg_winner_pnl_usd": 14.22,
+                "avg_loser_pnl_usd": -0.36,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 456
@@ -726,11 +726,11 @@
                 "win_rate": 0.4167,
                 "big_wins_30pct": 0,
                 "big_losses_20pct": 2,
-                "pnl_usd": -21.16,
+                "pnl_usd": -10.58,
                 "annual_pct": -20.6,
-                "annual_pnl_usd": -20.65,
-                "avg_winner_pnl_usd": 4.87,
-                "avg_loser_pnl_usd": -6.5,
+                "annual_pnl_usd": -10.32,
+                "avg_winner_pnl_usd": 2.43,
+                "avg_loser_pnl_usd": -3.25,
                 "peak_concurrent": 5,
                 "peak_notional_x_equity": 12.0,
                 "days": 374
@@ -739,9 +739,9 @@
             "weighted": {
               "n_taken": 66,
               "win_rate": 0.803,
-              "pnl_usd": 1162.86,
-              "annual_pnl_usd": 272.08,
-              "monthly_pnl_usd": 22.67,
+              "pnl_usd": 581.42,
+              "annual_pnl_usd": 136.04,
+              "monthly_pnl_usd": 11.34,
               "all_periods_positive": false,
               "peak_notional_x_equity": 12.0
             }
@@ -761,9 +761,5 @@
       }
     }
   },
-  "robust_passers": [
-    "G191",
-    "G190",
-    "G192"
-  ]
+  "robust_passers": []
 }

@@ -1,0 +1,4814 @@
+{
+  "chunk_count": 512,
+  "chunk_index": 5,
+  "complete": true,
+  "coverage": "2024-01-01 through 2026-04-27 funding/1h price",
+  "elapsed_sec": 41.21,
+  "generated_at": "2026-05-07 13:39:56",
+  "n_dream_pass": 0,
+  "n_specs": 160,
+  "n_strict_pass": 0,
+  "question": "Can funding extremes produce high-frequency high-WR alpha?",
+  "top": [
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G810341",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.95,
+          "liquidations": 0,
+          "max_dd_usd": 6.36,
+          "n": 25,
+          "pnl_usd": 2.0,
+          "wr": 0.8
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 2.02,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 4,
+          "pnl_usd": 2.52,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G810341",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 1.99,
+        "liquidations": 0,
+        "max_period_dd_usd": 6.36,
+        "min_period_pnl_usd": 2.0,
+        "n": 29,
+        "pnl_usd": 4.52,
+        "trades_per_month": 1.06,
+        "wr": 0.8276
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G814437",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.06,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 13,
+          "pnl_usd": -0.06,
+          "wr": 0.7692307692307693
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.01,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 2,
+          "pnl_usd": 1.26,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G814437",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.53,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.24,
+        "min_period_pnl_usd": -0.06,
+        "n": 15,
+        "pnl_usd": 1.2,
+        "trades_per_month": 0.55,
+        "wr": 0.8
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G807269",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.12,
+          "liquidations": 0,
+          "max_dd_usd": 5.56,
+          "n": 26,
+          "pnl_usd": -0.12,
+          "wr": 0.7692307692307693
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 6.51,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 26,
+          "pnl_usd": 8.13,
+          "wr": 0.8076923076923077
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G807269",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 3.52,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.56,
+        "min_period_pnl_usd": -0.12,
+        "n": 52,
+        "pnl_usd": 8.01,
+        "trades_per_month": 1.9,
+        "wr": 0.7885
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G793957",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.37,
+          "liquidations": 0,
+          "max_dd_usd": 7.05,
+          "n": 77,
+          "pnl_usd": 0.47,
+          "wr": 0.7792207792207793
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G793957",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.21,
+        "liquidations": 0,
+        "max_period_dd_usd": 7.05,
+        "min_period_pnl_usd": 0.0,
+        "n": 77,
+        "pnl_usd": 0.47,
+        "trades_per_month": 2.82,
+        "wr": 0.7792
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G811365",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.67,
+          "liquidations": 0,
+          "max_dd_usd": 2.98,
+          "n": 12,
+          "pnl_usd": -0.69,
+          "wr": 0.75
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.5,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G811365",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.03,
+        "liquidations": 0,
+        "max_period_dd_usd": 2.98,
+        "min_period_pnl_usd": -0.69,
+        "n": 13,
+        "pnl_usd": -0.06,
+        "trades_per_month": 0.48,
+        "wr": 0.7692
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G790885",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.61,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -0.45,
+          "liquidations": 0,
+          "max_dd_usd": 8.34,
+          "n": 75,
+          "pnl_usd": -0.56,
+          "wr": 0.76
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G790885",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.03,
+        "liquidations": 0,
+        "max_period_dd_usd": 8.34,
+        "min_period_pnl_usd": -0.56,
+        "n": 76,
+        "pnl_usd": 0.07,
+        "trades_per_month": 2.78,
+        "wr": 0.7632
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G789861",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.31,
+          "liquidations": 0,
+          "max_dd_usd": 0.94,
+          "n": 2,
+          "pnl_usd": -0.31,
+          "wr": 0.5
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 5.95,
+          "liquidations": 0,
+          "max_dd_usd": 9.75,
+          "n": 136,
+          "pnl_usd": 7.43,
+          "wr": 0.7647058823529411
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G789861",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 3.13,
+        "liquidations": 0,
+        "max_period_dd_usd": 9.75,
+        "min_period_pnl_usd": -0.31,
+        "n": 138,
+        "pnl_usd": 7.12,
+        "trades_per_month": 5.05,
+        "wr": 0.7609
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G794981",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.02,
+          "liquidations": 0,
+          "max_dd_usd": 7.22,
+          "n": 46,
+          "pnl_usd": -1.27,
+          "wr": 0.7608695652173914
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G794981",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.56,
+        "liquidations": 0,
+        "max_period_dd_usd": 7.22,
+        "min_period_pnl_usd": -1.27,
+        "n": 46,
+        "pnl_usd": -1.27,
+        "trades_per_month": 1.68,
+        "wr": 0.7609
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G790373",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.61,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.11,
+          "liquidations": 0,
+          "max_dd_usd": 11.12,
+          "n": 106,
+          "pnl_usd": 0.13,
+          "wr": 0.7547169811320755
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G790373",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 0.33,
+        "liquidations": 0,
+        "max_period_dd_usd": 11.12,
+        "min_period_pnl_usd": 0.13,
+        "n": 107,
+        "pnl_usd": 0.76,
+        "trades_per_month": 3.92,
+        "wr": 0.757
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G795493",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.91,
+          "liquidations": 0,
+          "max_dd_usd": 9.87,
+          "n": 77,
+          "pnl_usd": 2.39,
+          "wr": 0.7532467532467533
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G795493",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 1.05,
+        "liquidations": 0,
+        "max_period_dd_usd": 9.87,
+        "min_period_pnl_usd": 0.0,
+        "n": 77,
+        "pnl_usd": 2.39,
+        "trades_per_month": 2.82,
+        "wr": 0.7532
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G815461",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.06,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 7,
+          "pnl_usd": -1.09,
+          "wr": 0.7142857142857143
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.5,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G815461",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.2,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.61,
+        "min_period_pnl_usd": -1.09,
+        "n": 8,
+        "pnl_usd": -0.46,
+        "trades_per_month": 0.29,
+        "wr": 0.75
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G818533",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.06,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 7,
+          "pnl_usd": -1.09,
+          "wr": 0.7142857142857143
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.5,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G818533",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.2,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.61,
+        "min_period_pnl_usd": -1.09,
+        "n": 8,
+        "pnl_usd": -0.46,
+        "trades_per_month": 0.29,
+        "wr": 0.75
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G809317",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -5.03,
+          "liquidations": 0,
+          "max_dd_usd": 8.51,
+          "n": 36,
+          "pnl_usd": -5.15,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 4.76,
+          "liquidations": 0,
+          "max_dd_usd": 2.12,
+          "n": 18,
+          "pnl_usd": 5.95,
+          "wr": 0.8888888888888888
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G809317",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.35,
+        "liquidations": 0,
+        "max_period_dd_usd": 8.51,
+        "min_period_pnl_usd": -5.15,
+        "n": 54,
+        "pnl_usd": 0.8,
+        "trades_per_month": 1.98,
+        "wr": 0.7407
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G789349",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.31,
+          "liquidations": 0,
+          "max_dd_usd": 0.94,
+          "n": 2,
+          "pnl_usd": -0.31,
+          "wr": 0.5
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.5,
+          "liquidations": 0,
+          "max_dd_usd": 14.4,
+          "n": 204,
+          "pnl_usd": 0.62,
+          "wr": 0.7352941176470589
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G789349",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.14,
+        "liquidations": 0,
+        "max_period_dd_usd": 14.4,
+        "min_period_pnl_usd": -0.31,
+        "n": 206,
+        "pnl_usd": 0.31,
+        "trades_per_month": 7.55,
+        "wr": 0.733
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G794469",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.38,
+          "liquidations": 0,
+          "max_dd_usd": 12.15,
+          "n": 67,
+          "pnl_usd": -5.47,
+          "wr": 0.7313432835820896
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G794469",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.41,
+        "liquidations": 0,
+        "max_period_dd_usd": 12.15,
+        "min_period_pnl_usd": -5.47,
+        "n": 67,
+        "pnl_usd": -5.47,
+        "trades_per_month": 2.45,
+        "wr": 0.7313
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G793445",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -5.63,
+          "liquidations": 0,
+          "max_dd_usd": 12.68,
+          "n": 119,
+          "pnl_usd": -7.04,
+          "wr": 0.7226890756302521
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G793445",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -3.1,
+        "liquidations": 0,
+        "max_period_dd_usd": 12.68,
+        "min_period_pnl_usd": -7.04,
+        "n": 119,
+        "pnl_usd": -7.04,
+        "trades_per_month": 4.36,
+        "wr": 0.7227
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G797541",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.73,
+          "liquidations": 0,
+          "max_dd_usd": 10.66,
+          "n": 43,
+          "pnl_usd": -5.91,
+          "wr": 0.7209302325581395
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G797541",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.6,
+        "liquidations": 0,
+        "max_period_dd_usd": 10.66,
+        "min_period_pnl_usd": -5.91,
+        "n": 43,
+        "pnl_usd": -5.91,
+        "trades_per_month": 1.57,
+        "wr": 0.7209
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G791909",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.48,
+          "liquidations": 0,
+          "max_dd_usd": 11.83,
+          "n": 139,
+          "pnl_usd": -5.59,
+          "wr": 0.7194244604316546
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G791909",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.46,
+        "liquidations": 0,
+        "max_period_dd_usd": 11.83,
+        "min_period_pnl_usd": -5.59,
+        "n": 139,
+        "pnl_usd": -5.59,
+        "trades_per_month": 5.09,
+        "wr": 0.7194
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G788837",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.31,
+          "liquidations": 0,
+          "max_dd_usd": 0.94,
+          "n": 2,
+          "pnl_usd": -0.31,
+          "wr": 0.5
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -0.59,
+          "liquidations": 0,
+          "max_dd_usd": 16.17,
+          "n": 215,
+          "pnl_usd": -0.74,
+          "wr": 0.7162790697674418
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G788837",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.46,
+        "liquidations": 0,
+        "max_period_dd_usd": 16.17,
+        "min_period_pnl_usd": -0.74,
+        "n": 217,
+        "pnl_usd": -1.05,
+        "trades_per_month": 7.95,
+        "wr": 0.7143
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G796517",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.26,
+          "liquidations": 0,
+          "max_dd_usd": 13.23,
+          "n": 63,
+          "pnl_usd": -5.32,
+          "wr": 0.7142857142857143
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G796517",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.34,
+        "liquidations": 0,
+        "max_period_dd_usd": 13.23,
+        "min_period_pnl_usd": -5.32,
+        "n": 63,
+        "pnl_usd": -5.32,
+        "trades_per_month": 2.31,
+        "wr": 0.7143
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G819557",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.68,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.5,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G819557",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.48,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.61,
+        "min_period_pnl_usd": -1.72,
+        "n": 7,
+        "pnl_usd": -1.09,
+        "trades_per_month": 0.26,
+        "wr": 0.7143
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G791397",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.64,
+          "liquidations": 0,
+          "max_dd_usd": 14.02,
+          "n": 244,
+          "pnl_usd": 2.04,
+          "wr": 0.7090163934426229
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G791397",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.9,
+        "liquidations": 0,
+        "max_period_dd_usd": 14.02,
+        "min_period_pnl_usd": 0.0,
+        "n": 244,
+        "pnl_usd": 2.04,
+        "trades_per_month": 8.94,
+        "wr": 0.709
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G806245",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.2,
+          "liquidations": 0,
+          "max_dd_usd": 15.82,
+          "n": 81,
+          "pnl_usd": -4.31,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 9.12,
+          "liquidations": 0,
+          "max_dd_usd": 3.67,
+          "n": 49,
+          "pnl_usd": 11.4,
+          "wr": 0.7755102040816326
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G806245",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 3.12,
+        "liquidations": 0,
+        "max_period_dd_usd": 15.82,
+        "min_period_pnl_usd": -4.31,
+        "n": 130,
+        "pnl_usd": 7.09,
+        "trades_per_month": 4.76,
+        "wr": 0.7077
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G792421",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -9.51,
+          "liquidations": 0,
+          "max_dd_usd": 16.67,
+          "n": 188,
+          "pnl_usd": -11.88,
+          "wr": 0.7021276595744681
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G792421",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -5.22,
+        "liquidations": 0,
+        "max_period_dd_usd": 16.67,
+        "min_period_pnl_usd": -11.88,
+        "n": 188,
+        "pnl_usd": -11.88,
+        "trades_per_month": 6.89,
+        "wr": 0.7021
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G810853",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.0,
+          "liquidations": 0,
+          "max_dd_usd": 6.23,
+          "n": 18,
+          "pnl_usd": -2.05,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.01,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 2,
+          "pnl_usd": 1.26,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G810853",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.35,
+        "liquidations": 0,
+        "max_period_dd_usd": 6.23,
+        "min_period_pnl_usd": -2.05,
+        "n": 20,
+        "pnl_usd": -0.79,
+        "trades_per_month": 0.73,
+        "wr": 0.7
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G787813",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.31,
+          "liquidations": 0,
+          "max_dd_usd": 0.94,
+          "n": 2,
+          "pnl_usd": -0.31,
+          "wr": 0.5
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -3.51,
+          "liquidations": 0,
+          "max_dd_usd": 20.8,
+          "n": 281,
+          "pnl_usd": -4.38,
+          "wr": 0.701067615658363
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G787813",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.06,
+        "liquidations": 0,
+        "max_period_dd_usd": 20.8,
+        "min_period_pnl_usd": -4.38,
+        "n": 283,
+        "pnl_usd": -4.69,
+        "trades_per_month": 10.37,
+        "wr": 0.6996
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G798565",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -5.37,
+          "liquidations": 0,
+          "max_dd_usd": 11.06,
+          "n": 33,
+          "pnl_usd": -6.71,
+          "wr": 0.696969696969697
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G798565",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.95,
+        "liquidations": 0,
+        "max_period_dd_usd": 11.06,
+        "min_period_pnl_usd": -6.71,
+        "n": 33,
+        "pnl_usd": -6.71,
+        "trades_per_month": 1.21,
+        "wr": 0.697
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G792933",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -8.96,
+          "liquidations": 0,
+          "max_dd_usd": 15.34,
+          "n": 112,
+          "pnl_usd": -11.19,
+          "wr": 0.6964285714285714
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G792933",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -4.92,
+        "liquidations": 0,
+        "max_period_dd_usd": 15.34,
+        "min_period_pnl_usd": -11.19,
+        "n": 112,
+        "pnl_usd": -11.19,
+        "trades_per_month": 4.1,
+        "wr": 0.6964
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G796005",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -5.19,
+          "liquidations": 0,
+          "max_dd_usd": 7.45,
+          "n": 39,
+          "pnl_usd": -6.48,
+          "wr": 0.6923076923076923
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G796005",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.85,
+        "liquidations": 0,
+        "max_period_dd_usd": 7.45,
+        "min_period_pnl_usd": -6.48,
+        "n": 39,
+        "pnl_usd": -6.48,
+        "trades_per_month": 1.43,
+        "wr": 0.6923
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G813413",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.5,
+          "liquidations": 0,
+          "max_dd_usd": 5.43,
+          "n": 18,
+          "pnl_usd": -2.56,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.23,
+          "liquidations": 0,
+          "max_dd_usd": 2.12,
+          "n": 8,
+          "pnl_usd": 0.29,
+          "wr": 0.75
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G813413",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.43,
+        "min_period_pnl_usd": -2.56,
+        "n": 26,
+        "pnl_usd": -2.27,
+        "trades_per_month": 0.95,
+        "wr": 0.6923
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G827237",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 7.14,
+          "liquidations": 0,
+          "max_dd_usd": 8.63,
+          "n": 132,
+          "pnl_usd": 7.32,
+          "wr": 0.696969696969697
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -24.15,
+          "liquidations": 0,
+          "max_dd_usd": 35.42,
+          "n": 326,
+          "pnl_usd": -30.17,
+          "wr": 0.6779141104294478
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G827237",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -10.05,
+        "liquidations": 0,
+        "max_period_dd_usd": 35.42,
+        "min_period_pnl_usd": -30.17,
+        "n": 458,
+        "pnl_usd": -22.85,
+        "trades_per_month": 16.77,
+        "wr": 0.6834
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G827749",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 8.6,
+          "liquidations": 0,
+          "max_dd_usd": 11.15,
+          "n": 106,
+          "pnl_usd": 8.81,
+          "wr": 0.7169811320754716
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -23.31,
+          "liquidations": 0,
+          "max_dd_usd": 29.75,
+          "n": 240,
+          "pnl_usd": -29.12,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G827749",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -8.93,
+        "liquidations": 0,
+        "max_period_dd_usd": 29.75,
+        "min_period_pnl_usd": -29.12,
+        "n": 346,
+        "pnl_usd": -20.31,
+        "trades_per_month": 12.67,
+        "wr": 0.6821
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G799077",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.31,
+          "liquidations": 0,
+          "max_dd_usd": 5.96,
+          "n": 22,
+          "pnl_usd": -5.39,
+          "wr": 0.6818181818181818
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G799077",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.37,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.96,
+        "min_period_pnl_usd": -5.39,
+        "n": 22,
+        "pnl_usd": -5.39,
+        "trades_per_month": 0.81,
+        "wr": 0.6818
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G788325",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.76,
+          "liquidations": 0,
+          "max_dd_usd": 1.41,
+          "n": 4,
+          "pnl_usd": -0.78,
+          "wr": 0.25
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -17.19,
+          "liquidations": 0,
+          "max_dd_usd": 32.37,
+          "n": 363,
+          "pnl_usd": -21.47,
+          "wr": 0.6859504132231405
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G788325",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -9.78,
+        "liquidations": 0,
+        "max_period_dd_usd": 32.37,
+        "min_period_pnl_usd": -21.47,
+        "n": 367,
+        "pnl_usd": -22.25,
+        "trades_per_month": 13.44,
+        "wr": 0.6812
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G806757",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.37,
+          "liquidations": 0,
+          "max_dd_usd": 9.36,
+          "n": 45,
+          "pnl_usd": -0.37,
+          "wr": 0.7333333333333333
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.08,
+          "liquidations": 0,
+          "max_dd_usd": 13.83,
+          "n": 39,
+          "pnl_usd": -5.09,
+          "wr": 0.6153846153846154
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G806757",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.4,
+        "liquidations": 0,
+        "max_period_dd_usd": 13.83,
+        "min_period_pnl_usd": -5.09,
+        "n": 84,
+        "pnl_usd": -5.46,
+        "trades_per_month": 3.08,
+        "wr": 0.6786
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G787301",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.15,
+          "liquidations": 0,
+          "max_dd_usd": 0.94,
+          "n": 5,
+          "pnl_usd": -0.15,
+          "wr": 0.4
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.77,
+          "liquidations": 0,
+          "max_dd_usd": 17.17,
+          "n": 507,
+          "pnl_usd": 2.22,
+          "wr": 0.6765285996055227
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G787301",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.91,
+        "liquidations": 0,
+        "max_period_dd_usd": 17.17,
+        "min_period_pnl_usd": -0.15,
+        "n": 512,
+        "pnl_usd": 2.07,
+        "trades_per_month": 18.75,
+        "wr": 0.6738
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G831333",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.61,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -13.59,
+          "liquidations": 0,
+          "max_dd_usd": 23.88,
+          "n": 106,
+          "pnl_usd": -16.98,
+          "wr": 0.6698113207547169
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G831333",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -7.19,
+        "liquidations": 0,
+        "max_period_dd_usd": 23.88,
+        "min_period_pnl_usd": -16.98,
+        "n": 107,
+        "pnl_usd": -16.35,
+        "trades_per_month": 3.92,
+        "wr": 0.6729
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G816997",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -7.16,
+          "liquidations": 0,
+          "max_dd_usd": 12.62,
+          "n": 36,
+          "pnl_usd": -7.34,
+          "wr": 0.5833333333333334
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 3.95,
+          "liquidations": 0,
+          "max_dd_usd": 1.13,
+          "n": 12,
+          "pnl_usd": 4.94,
+          "wr": 0.9166666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G816997",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.06,
+        "liquidations": 0,
+        "max_period_dd_usd": 12.62,
+        "min_period_pnl_usd": -7.34,
+        "n": 48,
+        "pnl_usd": -2.4,
+        "trades_per_month": 1.76,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G798053",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -6.2,
+          "liquidations": 0,
+          "max_dd_usd": 8.14,
+          "n": 27,
+          "pnl_usd": -7.74,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G798053",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -3.4,
+        "liquidations": 0,
+        "max_period_dd_usd": 8.14,
+        "min_period_pnl_usd": -7.74,
+        "n": 27,
+        "pnl_usd": -7.74,
+        "trades_per_month": 0.99,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G817509",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.0,
+          "liquidations": 0,
+          "max_dd_usd": 4.96,
+          "n": 9,
+          "pnl_usd": -3.07,
+          "wr": 0.5555555555555556
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.42,
+          "liquidations": 0,
+          "max_dd_usd": 1.13,
+          "n": 6,
+          "pnl_usd": 1.78,
+          "wr": 0.8333333333333334
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G817509",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.57,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.96,
+        "min_period_pnl_usd": -3.07,
+        "n": 15,
+        "pnl_usd": -1.29,
+        "trades_per_month": 0.55,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G819045",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.24,
+          "liquidations": 0,
+          "max_dd_usd": 6.47,
+          "n": 10,
+          "pnl_usd": -3.32,
+          "wr": 0.6
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.01,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 2,
+          "pnl_usd": 1.26,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G819045",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.91,
+        "liquidations": 0,
+        "max_period_dd_usd": 6.47,
+        "min_period_pnl_usd": -3.32,
+        "n": 12,
+        "pnl_usd": -2.06,
+        "trades_per_month": 0.44,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G823141",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -2.52,
+          "liquidations": 0,
+          "max_dd_usd": 5.73,
+          "n": 9,
+          "pnl_usd": -2.58,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G823141",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.13,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.73,
+        "min_period_pnl_usd": -2.58,
+        "n": 9,
+        "pnl_usd": -2.58,
+        "trades_per_month": 0.33,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G840549",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -2.07,
+          "liquidations": 0,
+          "max_dd_usd": 5.1,
+          "n": 9,
+          "pnl_usd": -2.58,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G840549",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.13,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.1,
+        "min_period_pnl_usd": -2.58,
+        "n": 9,
+        "pnl_usd": -2.58,
+        "trades_per_month": 0.33,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G841573",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -2.07,
+          "liquidations": 0,
+          "max_dd_usd": 5.1,
+          "n": 9,
+          "pnl_usd": -2.58,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G841573",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.13,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.1,
+        "min_period_pnl_usd": -2.58,
+        "n": 9,
+        "pnl_usd": -2.58,
+        "trades_per_month": 0.33,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G822629",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.68,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G822629",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.61,
+        "min_period_pnl_usd": -1.72,
+        "n": 6,
+        "pnl_usd": -1.72,
+        "trades_per_month": 0.22,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G823653",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.68,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G823653",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.61,
+        "min_period_pnl_usd": -1.72,
+        "n": 6,
+        "pnl_usd": -1.72,
+        "trades_per_month": 0.22,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G841061",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.38,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G841061",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.24,
+        "min_period_pnl_usd": -1.72,
+        "n": 6,
+        "pnl_usd": -1.72,
+        "trades_per_month": 0.22,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G842085",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.38,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G842085",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.24,
+        "min_period_pnl_usd": -1.72,
+        "n": 6,
+        "pnl_usd": -1.72,
+        "trades_per_month": 0.22,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G843109",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.38,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G843109",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.24,
+        "min_period_pnl_usd": -1.72,
+        "n": 6,
+        "pnl_usd": -1.72,
+        "trades_per_month": 0.22,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G844133",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.38,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 6,
+          "pnl_usd": -1.72,
+          "wr": 0.6666666666666666
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G844133",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.24,
+        "min_period_pnl_usd": -1.72,
+        "n": 6,
+        "pnl_usd": -1.72,
+        "trades_per_month": 0.22,
+        "wr": 0.6667
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G831845",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.61,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 1,
+          "pnl_usd": 0.63,
+          "wr": 1.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -12.48,
+          "liquidations": 0,
+          "max_dd_usd": 17.49,
+          "n": 75,
+          "pnl_usd": -15.6,
+          "wr": 0.6533333333333333
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G831845",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -6.58,
+        "liquidations": 0,
+        "max_period_dd_usd": 17.49,
+        "min_period_pnl_usd": -15.6,
+        "n": 76,
+        "pnl_usd": -14.97,
+        "trades_per_month": 2.78,
+        "wr": 0.6579
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G847717",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -5.98,
+          "liquidations": 0,
+          "max_dd_usd": 11.12,
+          "n": 45,
+          "pnl_usd": -6.12,
+          "wr": 0.6222222222222222
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -4.43,
+          "liquidations": 0,
+          "max_dd_usd": 10.06,
+          "n": 39,
+          "pnl_usd": -5.53,
+          "wr": 0.6923076923076923
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G847717",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_follow_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -5.12,
+        "liquidations": 0,
+        "max_period_dd_usd": 11.12,
+        "min_period_pnl_usd": -6.12,
+        "n": 84,
+        "pnl_usd": -11.65,
+        "trades_per_month": 3.08,
+        "wr": 0.6548
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G805221",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -22.6,
+          "liquidations": 0,
+          "max_dd_usd": 30.45,
+          "n": 141,
+          "pnl_usd": -23.16,
+          "wr": 0.5673758865248227
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 15.79,
+          "liquidations": 0,
+          "max_dd_usd": 6.29,
+          "n": 102,
+          "pnl_usd": 19.73,
+          "wr": 0.7745098039215687
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G805221",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.51,
+        "liquidations": 0,
+        "max_period_dd_usd": 30.45,
+        "min_period_pnl_usd": -23.16,
+        "n": 243,
+        "pnl_usd": -3.43,
+        "trades_per_month": 8.9,
+        "wr": 0.6543
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G818021",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -5.96,
+          "liquidations": 0,
+          "max_dd_usd": 10.52,
+          "n": 16,
+          "pnl_usd": -6.11,
+          "wr": 0.5625
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 2.02,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 4,
+          "pnl_usd": 2.52,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G818021",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.58,
+        "liquidations": 0,
+        "max_period_dd_usd": 10.52,
+        "min_period_pnl_usd": -6.11,
+        "n": 20,
+        "pnl_usd": -3.59,
+        "trades_per_month": 0.73,
+        "wr": 0.65
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G851813",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -0.83,
+          "liquidations": 0,
+          "max_dd_usd": 8.56,
+          "n": 18,
+          "pnl_usd": -0.85,
+          "wr": 0.7222222222222222
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -3.39,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 2,
+          "pnl_usd": -4.24,
+          "wr": 0.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G851813",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_follow_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.24,
+        "liquidations": 0,
+        "max_period_dd_usd": 8.56,
+        "min_period_pnl_usd": -4.24,
+        "n": 20,
+        "pnl_usd": -5.09,
+        "trades_per_month": 0.73,
+        "wr": 0.65
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G805733",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -4.86,
+          "liquidations": 0,
+          "max_dd_usd": 25.48,
+          "n": 162,
+          "pnl_usd": -4.98,
+          "wr": 0.6296296296296297
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.03,
+          "liquidations": 0,
+          "max_dd_usd": 16.15,
+          "n": 92,
+          "pnl_usd": -1.28,
+          "wr": 0.6847826086956522
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G805733",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.75,
+        "liquidations": 0,
+        "max_period_dd_usd": 25.48,
+        "min_period_pnl_usd": -4.98,
+        "n": 254,
+        "pnl_usd": -6.26,
+        "trades_per_month": 9.3,
+        "wr": 0.6496
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G808293",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -7.75,
+          "liquidations": 0,
+          "max_dd_usd": 12.7,
+          "n": 65,
+          "pnl_usd": -7.94,
+          "wr": 0.6461538461538462
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 2.53,
+          "liquidations": 0,
+          "max_dd_usd": 2.64,
+          "n": 32,
+          "pnl_usd": 3.17,
+          "wr": 0.65625
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G808293",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.1,
+        "liquidations": 0,
+        "max_period_dd_usd": 12.7,
+        "min_period_pnl_usd": -7.94,
+        "n": 97,
+        "pnl_usd": -4.77,
+        "trades_per_month": 3.55,
+        "wr": 0.6495
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G814949",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.0,
+          "liquidations": 0,
+          "max_dd_usd": 6.86,
+          "n": 12,
+          "pnl_usd": -3.08,
+          "wr": 0.5833333333333334
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 1.01,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 2,
+          "pnl_usd": 1.26,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G814949",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.8,
+        "liquidations": 0,
+        "max_period_dd_usd": 6.86,
+        "min_period_pnl_usd": -3.08,
+        "n": 14,
+        "pnl_usd": -1.82,
+        "trades_per_month": 0.51,
+        "wr": 0.6429
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G855909",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.84,
+          "liquidations": 0,
+          "max_dd_usd": 4.32,
+          "n": 12,
+          "pnl_usd": 0.87,
+          "wr": 0.75
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -3.39,
+          "liquidations": 0,
+          "max_dd_usd": 4.24,
+          "n": 2,
+          "pnl_usd": -4.24,
+          "wr": 0.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G855909",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_follow_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.48,
+        "liquidations": 0,
+        "max_period_dd_usd": 4.32,
+        "min_period_pnl_usd": -4.24,
+        "n": 14,
+        "pnl_usd": -3.37,
+        "trades_per_month": 0.51,
+        "wr": 0.6429
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G785765",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -44.03,
+          "liquidations": 0,
+          "max_dd_usd": 50.07,
+          "n": 228,
+          "pnl_usd": -45.12,
+          "wr": 0.5614035087719298
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -17.19,
+          "liquidations": 0,
+          "max_dd_usd": 33.36,
+          "n": 412,
+          "pnl_usd": -21.48,
+          "wr": 0.6868932038834952
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G785765",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -29.29,
+        "liquidations": 0,
+        "max_period_dd_usd": 50.07,
+        "min_period_pnl_usd": -45.12,
+        "n": 640,
+        "pnl_usd": -66.6,
+        "trades_per_month": 23.44,
+        "wr": 0.6422
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G785253",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -47.95,
+          "liquidations": 0,
+          "max_dd_usd": 63.66,
+          "n": 319,
+          "pnl_usd": -49.13,
+          "wr": 0.5768025078369906
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -32.86,
+          "liquidations": 0,
+          "max_dd_usd": 68.07,
+          "n": 682,
+          "pnl_usd": -41.05,
+          "wr": 0.6715542521994134
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G785253",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -39.66,
+        "liquidations": 0,
+        "max_period_dd_usd": 68.07,
+        "min_period_pnl_usd": -49.13,
+        "n": 1001,
+        "pnl_usd": -90.18,
+        "trades_per_month": 36.66,
+        "wr": 0.6414
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G813925",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -6.54,
+          "liquidations": 0,
+          "max_dd_usd": 11.36,
+          "n": 27,
+          "pnl_usd": -6.71,
+          "wr": 0.5555555555555556
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 3.03,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 6,
+          "pnl_usd": 3.78,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G813925",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.29,
+        "liquidations": 0,
+        "max_period_dd_usd": 11.36,
+        "min_period_pnl_usd": -6.71,
+        "n": 33,
+        "pnl_usd": -2.93,
+        "trades_per_month": 1.21,
+        "wr": 0.6364
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G816485",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.49,
+          "liquidations": 0,
+          "max_dd_usd": 3.61,
+          "n": 15,
+          "pnl_usd": -1.53,
+          "wr": 0.6666666666666666
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.52,
+          "liquidations": 0,
+          "max_dd_usd": 1.35,
+          "n": 7,
+          "pnl_usd": 0.65,
+          "wr": 0.5714285714285714
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G816485",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -0.39,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.61,
+        "min_period_pnl_usd": -1.53,
+        "n": 22,
+        "pnl_usd": -0.88,
+        "trades_per_month": 0.81,
+        "wr": 0.6364
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G786789",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -38.17,
+          "liquidations": 0,
+          "max_dd_usd": 41.0,
+          "n": 106,
+          "pnl_usd": -39.11,
+          "wr": 0.5471698113207547
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -29.16,
+          "liquidations": 0,
+          "max_dd_usd": 48.62,
+          "n": 240,
+          "pnl_usd": -36.43,
+          "wr": 0.675
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G786789",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -33.22,
+        "liquidations": 0,
+        "max_period_dd_usd": 48.62,
+        "min_period_pnl_usd": -39.11,
+        "n": 346,
+        "pnl_usd": -75.54,
+        "trades_per_month": 12.67,
+        "wr": 0.6358
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G786277",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -41.39,
+          "liquidations": 0,
+          "max_dd_usd": 45.46,
+          "n": 132,
+          "pnl_usd": -42.41,
+          "wr": 0.5378787878787878
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -35.1,
+          "liquidations": 0,
+          "max_dd_usd": 53.94,
+          "n": 326,
+          "pnl_usd": -43.85,
+          "wr": 0.6748466257668712
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G786277",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -37.93,
+        "liquidations": 0,
+        "max_period_dd_usd": 53.94,
+        "min_period_pnl_usd": -43.85,
+        "n": 458,
+        "pnl_usd": -86.26,
+        "trades_per_month": 16.77,
+        "wr": 0.6354
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G797029",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -9.08,
+          "liquidations": 0,
+          "max_dd_usd": 11.75,
+          "n": 30,
+          "pnl_usd": -11.35,
+          "wr": 0.6333333333333333
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G797029",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -4.99,
+        "liquidations": 0,
+        "max_period_dd_usd": 11.75,
+        "min_period_pnl_usd": -11.35,
+        "n": 30,
+        "pnl_usd": -11.35,
+        "trades_per_month": 1.1,
+        "wr": 0.6333
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G835941",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -8.68,
+          "liquidations": 0,
+          "max_dd_usd": 15.26,
+          "n": 46,
+          "pnl_usd": -10.85,
+          "wr": 0.6304347826086957
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G835941",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -4.77,
+        "liquidations": 0,
+        "max_period_dd_usd": 15.26,
+        "min_period_pnl_usd": -10.85,
+        "n": 46,
+        "pnl_usd": -10.85,
+        "trades_per_month": 1.68,
+        "wr": 0.6304
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G839013",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -3.8,
+          "liquidations": 0,
+          "max_dd_usd": 9.16,
+          "n": 27,
+          "pnl_usd": -4.75,
+          "wr": 0.6296296296296297
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G839013",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.09,
+        "liquidations": 0,
+        "max_period_dd_usd": 9.16,
+        "min_period_pnl_usd": -4.75,
+        "n": 27,
+        "pnl_usd": -4.75,
+        "trades_per_month": 0.99,
+        "wr": 0.6296
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G835429",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -14.84,
+          "liquidations": 0,
+          "max_dd_usd": 24.21,
+          "n": 67,
+          "pnl_usd": -18.54,
+          "wr": 0.6268656716417911
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G835429",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.12,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -8.15,
+        "liquidations": 0,
+        "max_period_dd_usd": 24.21,
+        "min_period_pnl_usd": -18.54,
+        "n": 67,
+        "pnl_usd": -18.54,
+        "trades_per_month": 2.45,
+        "wr": 0.6269
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G804197",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -23.26,
+          "liquidations": 0,
+          "max_dd_usd": 39.59,
+          "n": 281,
+          "pnl_usd": -23.83,
+          "wr": 0.5729537366548043
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 19.8,
+          "liquidations": 0,
+          "max_dd_usd": 5.57,
+          "n": 164,
+          "pnl_usd": 24.74,
+          "wr": 0.7134146341463414
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G804197",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 0.4,
+        "liquidations": 0,
+        "max_period_dd_usd": 39.59,
+        "min_period_pnl_usd": -23.83,
+        "n": 445,
+        "pnl_usd": 0.91,
+        "trades_per_month": 16.3,
+        "wr": 0.6247
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G826725",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 18.27,
+          "liquidations": 0,
+          "max_dd_usd": 11.22,
+          "n": 228,
+          "pnl_usd": 18.72,
+          "wr": 0.6929824561403509
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -66.52,
+          "liquidations": 0,
+          "max_dd_usd": 85.28,
+          "n": 412,
+          "pnl_usd": -83.1,
+          "wr": 0.5849514563106796
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G826725",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -28.31,
+        "liquidations": 0,
+        "max_period_dd_usd": 85.28,
+        "min_period_pnl_usd": -83.1,
+        "n": 640,
+        "pnl_usd": -64.38,
+        "trades_per_month": 23.44,
+        "wr": 0.6234
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G809829",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -10.68,
+          "liquidations": 0,
+          "max_dd_usd": 17.89,
+          "n": 46,
+          "pnl_usd": -10.95,
+          "wr": 0.5434782608695652
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 4.54,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 9,
+          "pnl_usd": 5.67,
+          "wr": 1.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G809829",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.32,
+        "liquidations": 0,
+        "max_period_dd_usd": 17.89,
+        "min_period_pnl_usd": -10.95,
+        "n": 55,
+        "pnl_usd": -5.28,
+        "trades_per_month": 2.01,
+        "wr": 0.6182
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G784741",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -55.3,
+          "liquidations": 0,
+          "max_dd_usd": 65.26,
+          "n": 425,
+          "pnl_usd": -56.66,
+          "wr": 0.5764705882352941
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -46.16,
+          "liquidations": 0,
+          "max_dd_usd": 74.97,
+          "n": 824,
+          "pnl_usd": -57.67,
+          "wr": 0.633495145631068
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G784741",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_fade_short",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -50.28,
+        "liquidations": 0,
+        "max_period_dd_usd": 74.97,
+        "min_period_pnl_usd": -57.67,
+        "n": 1249,
+        "pnl_usd": -114.33,
+        "trades_per_month": 45.75,
+        "wr": 0.6141
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G830309",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.23,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 2,
+          "pnl_usd": 1.26,
+          "wr": 1.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -37.06,
+          "liquidations": 0,
+          "max_dd_usd": 52.03,
+          "n": 204,
+          "pnl_usd": -46.3,
+          "wr": 0.6078431372549019
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G830309",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -19.81,
+        "liquidations": 0,
+        "max_period_dd_usd": 52.03,
+        "min_period_pnl_usd": -46.3,
+        "n": 206,
+        "pnl_usd": -45.04,
+        "trades_per_month": 7.55,
+        "wr": 0.6117
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G812389",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -1.3,
+          "liquidations": 0,
+          "max_dd_usd": 5.34,
+          "n": 28,
+          "pnl_usd": -1.33,
+          "wr": 0.6785714285714286
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -1.32,
+          "liquidations": 0,
+          "max_dd_usd": 2.61,
+          "n": 13,
+          "pnl_usd": -1.65,
+          "wr": 0.46153846153846156
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G812389",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.31,
+        "liquidations": 0,
+        "max_period_dd_usd": 5.34,
+        "min_period_pnl_usd": -1.65,
+        "n": 41,
+        "pnl_usd": -2.98,
+        "trades_per_month": 1.5,
+        "wr": 0.6098
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G812901",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -13.04,
+          "liquidations": 0,
+          "max_dd_usd": 18.13,
+          "n": 71,
+          "pnl_usd": -13.36,
+          "wr": 0.5492957746478874
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 3.77,
+          "liquidations": 0,
+          "max_dd_usd": 2.12,
+          "n": 16,
+          "pnl_usd": 4.71,
+          "wr": 0.875
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0005,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G812901",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_squeeze_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -3.8,
+        "liquidations": 0,
+        "max_period_dd_usd": 18.13,
+        "min_period_pnl_usd": -13.36,
+        "n": 87,
+        "pnl_usd": -8.65,
+        "trades_per_month": 3.19,
+        "wr": 0.6092
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G829797",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 1.23,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 2,
+          "pnl_usd": 1.26,
+          "wr": 1.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -33.79,
+          "liquidations": 0,
+          "max_dd_usd": 52.4,
+          "n": 215,
+          "pnl_usd": -42.22,
+          "wr": 0.6046511627906976
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0003,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G829797",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -18.01,
+        "liquidations": 0,
+        "max_period_dd_usd": 52.4,
+        "min_period_pnl_usd": -42.22,
+        "n": 217,
+        "pnl_usd": -40.96,
+        "trades_per_month": 7.95,
+        "wr": 0.6083
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G826213",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 6.63,
+          "liquidations": 0,
+          "max_dd_usd": 14.94,
+          "n": 319,
+          "pnl_usd": 6.8,
+          "wr": 0.6363636363636364
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -93.47,
+          "liquidations": 0,
+          "max_dd_usd": 118.26,
+          "n": 682,
+          "pnl_usd": -116.78,
+          "wr": 0.5894428152492669
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0001,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G826213",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.08,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -48.36,
+        "liquidations": 0,
+        "max_period_dd_usd": 118.26,
+        "min_period_pnl_usd": -116.78,
+        "n": 1001,
+        "pnl_usd": -109.98,
+        "trades_per_month": 36.66,
+        "wr": 0.6044
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G861029",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -3.04,
+          "liquidations": 0,
+          "max_dd_usd": 10.32,
+          "n": 30,
+          "pnl_usd": -3.12,
+          "wr": 0.6
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0012,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G861029",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "negative_follow_short",
+        "move_24h": 0.0,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -1.37,
+        "liquidations": 0,
+        "max_period_dd_usd": 10.32,
+        "min_period_pnl_usd": -3.12,
+        "n": 30,
+        "pnl_usd": -3.12,
+        "trades_per_month": 1.1,
+        "wr": 0.6
+      }
+    },
+    {
+      "dream_pass": false,
+      "family": "funding_extreme",
+      "id": "G837989",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "n": 0,
+          "pnl_usd": 0.0,
+          "wr": 0.0
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -5.3,
+          "liquidations": 0,
+          "max_dd_usd": 12.96,
+          "n": 30,
+          "pnl_usd": -6.62,
+          "wr": 0.6
+        }
+      },
+      "spec": {
+        "atr_max": 10,
+        "atr_min": 0,
+        "fund_abs": 0.0008,
+        "hold": 6,
+        "hour_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "id": "G837989",
+        "lev": 5.0,
+        "max_conc": 5,
+        "mode": "positive_follow_long",
+        "move_24h": 0.04,
+        "size": 0.1,
+        "sl_pct": 0.04,
+        "tp_pct": 0.015,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -2.91,
+        "liquidations": 0,
+        "max_period_dd_usd": 12.96,
+        "min_period_pnl_usd": -6.62,
+        "n": 30,
+        "pnl_usd": -6.62,
+        "trades_per_month": 1.1,
+        "wr": 0.6
+      }
+    }
+  ]
+}

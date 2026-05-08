@@ -1,0 +1,44 @@
+{
+  "source": "quant_binance/strategies/_scripts/g1167_fast_g1165_dominance_search.py",
+  "result_file": "quant_binance/strategies/_scripts/g1167_fast_g1165_dominance_results.json",
+  "selected_id": "G7822",
+  "selected_reason": "Top-ranked G1165 dominator by score. It beats G1165 on trades, win rate, total PnL, annual/monthly PnL, max period drawdown, liquidation rate, and all-period positivity.",
+  "search": {
+    "checked_specs": 18000,
+    "dominators": 28
+  },
+  "baseline_g1165": {
+    "trades": 51,
+    "win_rate": 0.6863,
+    "pnl_usd": 825.43,
+    "annual_pnl_usd": 193.13,
+    "monthly_pnl_usd": 16.09,
+    "liquidation_rate": 0.0,
+    "max_period_drawdown_usd": 96.75,
+    "all_periods_positive": true
+  },
+  "selected_weighted": {
+    "trades": 53,
+    "win_rate": 0.6981,
+    "pnl_usd": 1015.58,
+    "annual_pnl_usd": 237.62,
+    "monthly_pnl_usd": 19.8,
+    "liquidations": 0,
+    "liquidation_rate": 0.0,
+    "max_period_drawdown_usd": 92.88,
+    "all_periods_positive": true,
+    "min_period_pnl_usd": 170.93
+  },
+  "selected_spec": {
+    "symbol_mode": "no_dead_no_weak",
+    "entry_threshold": 80,
+    "atr_min_pct": 2.0,
+    "atr_max_pct": 8.0,
+    "leverage": 8.0,
+    "size_pct_per_trade": 0.3,
+    "hold_bars": 48,
+    "take_profit_pct": 0.16,
+    "stop_loss_pct": 0.075,
+    "max_concurrent": 5
+  }
+}

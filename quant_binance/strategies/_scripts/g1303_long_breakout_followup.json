@@ -1,0 +1,3546 @@
+{
+  "purpose": "G1303 side-specific long breakout follow-up",
+  "n_specs": 216,
+  "n_soft_pass": 4,
+  "criteria": "soft watchlist: n>=30 wr>=55 ann>=80 all periods positive liq0 DD<=150 overlap<=0.05",
+  "top": [
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.4808,
+        "pnl_usd": 531.24,
+        "annual_pnl_usd": 124.3,
+        "monthly_pnl_usd": 10.36,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 108.45,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.451505016722408,
+          "pnl_usd": 90.34,
+          "annual_pnl_usd": 45.17,
+          "monthly_pnl_usd": 3.76,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 108.45,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 90.34
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.4883720930232558,
+          "pnl_usd": 245.32,
+          "annual_pnl_usd": 196.36,
+          "monthly_pnl_usd": 16.35,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 65.28,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 245.32
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.5222929936305732,
+          "pnl_usd": 195.58,
+          "annual_pnl_usd": 190.87,
+          "monthly_pnl_usd": 15.9,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 104.6,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 195.58
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 126.0355,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.5016,
+        "pnl_usd": 533.31,
+        "annual_pnl_usd": 124.78,
+        "monthly_pnl_usd": 10.4,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 124.37,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.47843137254901963,
+          "pnl_usd": 209.93,
+          "annual_pnl_usd": 104.97,
+          "monthly_pnl_usd": 8.74,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 124.37,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 209.93
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.5258964143426295,
+          "pnl_usd": 269.95,
+          "annual_pnl_usd": 216.08,
+          "monthly_pnl_usd": 18.0,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 81.98,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 269.95
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.5,
+          "pnl_usd": 53.43,
+          "annual_pnl_usd": 52.15,
+          "monthly_pnl_usd": 4.34,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 106.21,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 53.43
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 123.7835,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 495.73,
+        "annual_pnl_usd": 115.99,
+        "monthly_pnl_usd": 9.67,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 109.01,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 211.22,
+          "annual_pnl_usd": 105.61,
+          "monthly_pnl_usd": 8.8,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 109.01,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 211.22
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 207.3,
+          "annual_pnl_usd": 165.93,
+          "monthly_pnl_usd": 13.82,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 61.09,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 207.3
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 77.21,
+          "annual_pnl_usd": 75.35,
+          "monthly_pnl_usd": 6.28,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 96.29,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 77.21
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 123.2495,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.06,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.481,
+        "pnl_usd": 477.28,
+        "annual_pnl_usd": 111.67,
+        "monthly_pnl_usd": 9.31,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 72.5,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.45228215767634855,
+          "pnl_usd": 98.35,
+          "annual_pnl_usd": 49.18,
+          "monthly_pnl_usd": 4.1,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 63.26,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 98.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.4808510638297872,
+          "pnl_usd": 169.22,
+          "annual_pnl_usd": 135.45,
+          "monthly_pnl_usd": 11.28,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 72.5,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 169.22
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5348837209302325,
+          "pnl_usd": 209.71,
+          "annual_pnl_usd": 204.66,
+          "monthly_pnl_usd": 17.05,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 45.06,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 209.71
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 122.405,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.4808,
+        "pnl_usd": 498.04,
+        "annual_pnl_usd": 116.53,
+        "monthly_pnl_usd": 9.71,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 101.67,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.451505016722408,
+          "pnl_usd": 84.69,
+          "annual_pnl_usd": 42.35,
+          "monthly_pnl_usd": 3.53,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 101.67,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 84.69
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.4883720930232558,
+          "pnl_usd": 229.99,
+          "annual_pnl_usd": 184.09,
+          "monthly_pnl_usd": 15.33,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 61.2,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 229.99
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.5222929936305732,
+          "pnl_usd": 183.36,
+          "annual_pnl_usd": 178.94,
+          "monthly_pnl_usd": 14.9,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 98.06,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 183.36
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 119.9605,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.4808,
+        "pnl_usd": 498.04,
+        "annual_pnl_usd": 116.53,
+        "monthly_pnl_usd": 9.71,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 101.67,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.451505016722408,
+          "pnl_usd": 84.69,
+          "annual_pnl_usd": 42.35,
+          "monthly_pnl_usd": 3.53,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 101.67,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 84.69
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.4883720930232558,
+          "pnl_usd": 229.99,
+          "annual_pnl_usd": 184.09,
+          "monthly_pnl_usd": 15.33,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 61.2,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 229.99
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.5222929936305732,
+          "pnl_usd": 183.36,
+          "annual_pnl_usd": 178.94,
+          "monthly_pnl_usd": 14.9,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 98.06,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 183.36
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 119.9605,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.4808,
+        "pnl_usd": 498.04,
+        "annual_pnl_usd": 116.53,
+        "monthly_pnl_usd": 9.71,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 101.67,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.451505016722408,
+          "pnl_usd": 84.69,
+          "annual_pnl_usd": 42.35,
+          "monthly_pnl_usd": 3.53,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 101.67,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 84.69
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.4883720930232558,
+          "pnl_usd": 229.99,
+          "annual_pnl_usd": 184.09,
+          "monthly_pnl_usd": 15.33,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 61.2,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 229.99
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.5222929936305732,
+          "pnl_usd": 183.36,
+          "annual_pnl_usd": 178.94,
+          "monthly_pnl_usd": 14.9,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 98.06,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 183.36
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 119.9605,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.5016,
+        "pnl_usd": 499.97,
+        "annual_pnl_usd": 116.98,
+        "monthly_pnl_usd": 9.75,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 116.6,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.47843137254901963,
+          "pnl_usd": 196.81,
+          "annual_pnl_usd": 98.41,
+          "monthly_pnl_usd": 8.2,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 116.6,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 196.81
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.5258964143426295,
+          "pnl_usd": 253.07,
+          "annual_pnl_usd": 202.57,
+          "monthly_pnl_usd": 16.87,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 76.86,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 253.07
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.5,
+          "pnl_usd": 50.09,
+          "annual_pnl_usd": 48.89,
+          "monthly_pnl_usd": 4.07,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 99.57,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 50.09
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.926,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.5016,
+        "pnl_usd": 499.97,
+        "annual_pnl_usd": 116.98,
+        "monthly_pnl_usd": 9.75,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 116.6,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.47843137254901963,
+          "pnl_usd": 196.81,
+          "annual_pnl_usd": 98.41,
+          "monthly_pnl_usd": 8.2,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 116.6,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 196.81
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.5258964143426295,
+          "pnl_usd": 253.07,
+          "annual_pnl_usd": 202.57,
+          "monthly_pnl_usd": 16.87,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 76.86,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 253.07
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.5,
+          "pnl_usd": 50.09,
+          "annual_pnl_usd": 48.89,
+          "monthly_pnl_usd": 4.07,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 99.57,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 50.09
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.926,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.1,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.5016,
+        "pnl_usd": 499.97,
+        "annual_pnl_usd": 116.98,
+        "monthly_pnl_usd": 9.75,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 116.6,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.47843137254901963,
+          "pnl_usd": 196.81,
+          "annual_pnl_usd": 98.41,
+          "monthly_pnl_usd": 8.2,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 116.6,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 196.81
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.5258964143426295,
+          "pnl_usd": 253.07,
+          "annual_pnl_usd": 202.57,
+          "monthly_pnl_usd": 16.87,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 76.86,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 253.07
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.5,
+          "pnl_usd": 50.09,
+          "annual_pnl_usd": 48.89,
+          "monthly_pnl_usd": 4.07,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 99.57,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 50.09
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.926,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.1,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.4299,
+        "pnl_usd": 544.84,
+        "annual_pnl_usd": 127.48,
+        "monthly_pnl_usd": 10.62,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 141.7,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.4,
+          "pnl_usd": 143.33,
+          "annual_pnl_usd": 71.66,
+          "monthly_pnl_usd": 5.97,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 101.78,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 143.33
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.4342629482071713,
+          "pnl_usd": 238.31,
+          "annual_pnl_usd": 190.75,
+          "monthly_pnl_usd": 15.89,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 141.7,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 238.31
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.47794117647058826,
+          "pnl_usd": 163.2,
+          "annual_pnl_usd": 159.27,
+          "monthly_pnl_usd": 13.27,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 56.75,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 163.2
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.849,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 464.75,
+        "annual_pnl_usd": 108.74,
+        "monthly_pnl_usd": 9.06,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 102.19,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 198.02,
+          "annual_pnl_usd": 99.01,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 102.19,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 198.02
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 194.35,
+          "annual_pnl_usd": 155.56,
+          "monthly_pnl_usd": 12.96,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 57.27,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 194.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 72.38,
+          "annual_pnl_usd": 70.64,
+          "monthly_pnl_usd": 5.88,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 72.38
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.7045,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 464.75,
+        "annual_pnl_usd": 108.74,
+        "monthly_pnl_usd": 9.06,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 102.19,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 198.02,
+          "annual_pnl_usd": 99.01,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 102.19,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 198.02
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 194.35,
+          "annual_pnl_usd": 155.56,
+          "monthly_pnl_usd": 12.96,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 57.27,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 194.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 72.38,
+          "annual_pnl_usd": 70.64,
+          "monthly_pnl_usd": 5.88,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 72.38
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.7045,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 464.75,
+        "annual_pnl_usd": 108.74,
+        "monthly_pnl_usd": 9.06,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 102.19,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 198.02,
+          "annual_pnl_usd": 99.01,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 102.19,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 198.02
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 194.35,
+          "annual_pnl_usd": 155.56,
+          "monthly_pnl_usd": 12.96,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 57.27,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 194.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 72.38,
+          "annual_pnl_usd": 70.64,
+          "monthly_pnl_usd": 5.88,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 72.38
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.7045,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.06,
+        "sl_pct": 0.06,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5455,
+        "pnl_usd": 447.61,
+        "annual_pnl_usd": 104.73,
+        "monthly_pnl_usd": 8.73,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 83.18,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5435684647302904,
+          "pnl_usd": 183.55,
+          "annual_pnl_usd": 91.77,
+          "monthly_pnl_usd": 7.64,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 83.18,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 183.55
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5404255319148936,
+          "pnl_usd": 123.74,
+          "annual_pnl_usd": 99.05,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 76.29,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 123.74
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5581395348837209,
+          "pnl_usd": 140.32,
+          "annual_pnl_usd": 136.95,
+          "monthly_pnl_usd": 11.41,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 70.69,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 140.32
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 116.665,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.06,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.481,
+        "pnl_usd": 447.45,
+        "annual_pnl_usd": 104.69,
+        "monthly_pnl_usd": 8.72,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 67.97,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.45228215767634855,
+          "pnl_usd": 92.21,
+          "annual_pnl_usd": 46.1,
+          "monthly_pnl_usd": 3.84,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 59.3,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 92.21
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.4808510638297872,
+          "pnl_usd": 158.64,
+          "annual_pnl_usd": 126.98,
+          "monthly_pnl_usd": 10.58,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 67.97,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 158.64
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5348837209302325,
+          "pnl_usd": 196.6,
+          "annual_pnl_usd": 191.87,
+          "monthly_pnl_usd": 15.98,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 42.24,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 196.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 116.5575,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.06,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.481,
+        "pnl_usd": 447.45,
+        "annual_pnl_usd": 104.69,
+        "monthly_pnl_usd": 8.72,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 67.97,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.45228215767634855,
+          "pnl_usd": 92.21,
+          "annual_pnl_usd": 46.1,
+          "monthly_pnl_usd": 3.84,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 59.3,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 92.21
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.4808510638297872,
+          "pnl_usd": 158.64,
+          "annual_pnl_usd": 126.98,
+          "monthly_pnl_usd": 10.58,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 67.97,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 158.64
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5348837209302325,
+          "pnl_usd": 196.6,
+          "annual_pnl_usd": 191.87,
+          "monthly_pnl_usd": 15.98,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 42.24,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 196.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 116.5575,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.06,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.481,
+        "pnl_usd": 447.45,
+        "annual_pnl_usd": 104.69,
+        "monthly_pnl_usd": 8.72,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 67.97,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.45228215767634855,
+          "pnl_usd": 92.21,
+          "annual_pnl_usd": 46.1,
+          "monthly_pnl_usd": 3.84,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 59.3,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 92.21
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.4808510638297872,
+          "pnl_usd": 158.64,
+          "annual_pnl_usd": 126.98,
+          "monthly_pnl_usd": 10.58,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 67.97,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 158.64
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5348837209302325,
+          "pnl_usd": 196.6,
+          "annual_pnl_usd": 191.87,
+          "monthly_pnl_usd": 15.98,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 42.24,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 196.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 116.5575,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.1,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.4299,
+        "pnl_usd": 510.79,
+        "annual_pnl_usd": 119.51,
+        "monthly_pnl_usd": 9.96,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 132.85,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.4,
+          "pnl_usd": 134.37,
+          "annual_pnl_usd": 67.18,
+          "monthly_pnl_usd": 5.6,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 95.42,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 134.37
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.4342629482071713,
+          "pnl_usd": 223.42,
+          "annual_pnl_usd": 178.83,
+          "monthly_pnl_usd": 14.89,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 132.85,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 223.42
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.47794117647058826,
+          "pnl_usd": 153.0,
+          "annual_pnl_usd": 149.32,
+          "monthly_pnl_usd": 12.44,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 53.2,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 153.0
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 112.0915,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.1,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.4299,
+        "pnl_usd": 510.79,
+        "annual_pnl_usd": 119.51,
+        "monthly_pnl_usd": 9.96,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 132.85,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.4,
+          "pnl_usd": 134.37,
+          "annual_pnl_usd": 67.18,
+          "monthly_pnl_usd": 5.6,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 95.42,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 134.37
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.4342629482071713,
+          "pnl_usd": 223.42,
+          "annual_pnl_usd": 178.83,
+          "monthly_pnl_usd": 14.89,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 132.85,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 223.42
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.47794117647058826,
+          "pnl_usd": 153.0,
+          "annual_pnl_usd": 149.32,
+          "monthly_pnl_usd": 12.44,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 53.2,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 153.0
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 112.0915,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.1,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.4299,
+        "pnl_usd": 510.79,
+        "annual_pnl_usd": 119.51,
+        "monthly_pnl_usd": 9.96,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 132.85,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.4,
+          "pnl_usd": 134.37,
+          "annual_pnl_usd": 67.18,
+          "monthly_pnl_usd": 5.6,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 95.42,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 134.37
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.4342629482071713,
+          "pnl_usd": 223.42,
+          "annual_pnl_usd": 178.83,
+          "monthly_pnl_usd": 14.89,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 132.85,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 223.42
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.47794117647058826,
+          "pnl_usd": 153.0,
+          "annual_pnl_usd": 149.32,
+          "monthly_pnl_usd": 12.44,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 53.2,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 153.0
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 112.0915,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.06,
+        "sl_pct": 0.06,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5455,
+        "pnl_usd": 419.64,
+        "annual_pnl_usd": 98.19,
+        "monthly_pnl_usd": 8.18,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 77.98,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5435684647302904,
+          "pnl_usd": 172.08,
+          "annual_pnl_usd": 86.04,
+          "monthly_pnl_usd": 7.17,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 77.98,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 172.08
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5404255319148936,
+          "pnl_usd": 116.01,
+          "annual_pnl_usd": 92.86,
+          "monthly_pnl_usd": 7.73,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 71.52,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 116.01
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5581395348837209,
+          "pnl_usd": 131.55,
+          "annual_pnl_usd": 128.39,
+          "monthly_pnl_usd": 10.69,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 66.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 131.55
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 111.425,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.06,
+        "sl_pct": 0.06,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5455,
+        "pnl_usd": 419.64,
+        "annual_pnl_usd": 98.19,
+        "monthly_pnl_usd": 8.18,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 77.98,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5435684647302904,
+          "pnl_usd": 172.08,
+          "annual_pnl_usd": 86.04,
+          "monthly_pnl_usd": 7.17,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 77.98,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 172.08
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5404255319148936,
+          "pnl_usd": 116.01,
+          "annual_pnl_usd": 92.86,
+          "monthly_pnl_usd": 7.73,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 71.52,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 116.01
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5581395348837209,
+          "pnl_usd": 131.55,
+          "annual_pnl_usd": 128.39,
+          "monthly_pnl_usd": 10.69,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 66.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 131.55
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 111.425,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.06,
+        "sl_pct": 0.06,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5455,
+        "pnl_usd": 419.64,
+        "annual_pnl_usd": 98.19,
+        "monthly_pnl_usd": 8.18,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 77.98,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5435684647302904,
+          "pnl_usd": 172.08,
+          "annual_pnl_usd": 86.04,
+          "monthly_pnl_usd": 7.17,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 77.98,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 172.08
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5404255319148936,
+          "pnl_usd": 116.01,
+          "annual_pnl_usd": 92.86,
+          "monthly_pnl_usd": 7.73,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 71.52,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 116.01
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5581395348837209,
+          "pnl_usd": 131.55,
+          "annual_pnl_usd": 128.39,
+          "monthly_pnl_usd": 10.69,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 66.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 131.55
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 111.425,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.5073,
+        "pnl_usd": 430.4,
+        "annual_pnl_usd": 100.7,
+        "monthly_pnl_usd": 8.39,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 88.54,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.4682274247491639,
+          "pnl_usd": 80.76,
+          "annual_pnl_usd": 40.38,
+          "monthly_pnl_usd": 3.36,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 88.54,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 80.76
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.521594684385382,
+          "pnl_usd": 168.73,
+          "annual_pnl_usd": 135.06,
+          "monthly_pnl_usd": 11.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 77.27,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 168.73
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.554140127388535,
+          "pnl_usd": 180.91,
+          "annual_pnl_usd": 176.55,
+          "monthly_pnl_usd": 14.7,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 88.03,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 180.91
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 109.003,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.1,
+        "sl_pct": 0.04,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.4066,
+        "pnl_usd": 482.97,
+        "annual_pnl_usd": 113.0,
+        "monthly_pnl_usd": 9.42,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 121.88,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.37344398340248963,
+          "pnl_usd": 101.83,
+          "annual_pnl_usd": 50.92,
+          "monthly_pnl_usd": 4.24,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 111.74,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 101.83
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.42127659574468085,
+          "pnl_usd": 247.05,
+          "annual_pnl_usd": 197.75,
+          "monthly_pnl_usd": 16.47,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 121.88,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 247.05
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.4418604651162791,
+          "pnl_usd": 134.09,
+          "annual_pnl_usd": 130.86,
+          "monthly_pnl_usd": 10.9,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 71.53,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 134.09
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 106.926,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 24,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.1,
+        "sl_pct": 0.06,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 642,
+        "wr": 0.4782,
+        "pnl_usd": 493.53,
+        "annual_pnl_usd": 115.47,
+        "monthly_pnl_usd": 9.62,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 151.55,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 255,
+          "wr": 0.4666666666666667,
+          "pnl_usd": 232.71,
+          "annual_pnl_usd": 116.35,
+          "monthly_pnl_usd": 9.69,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 111.48,
+          "by_side": {
+            "long": {
+              "n": 255,
+              "pnl": 232.71
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 251,
+          "wr": 0.4820717131474104,
+          "pnl_usd": 177.83,
+          "annual_pnl_usd": 142.34,
+          "monthly_pnl_usd": 11.86,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 151.55,
+          "by_side": {
+            "long": {
+              "n": 251,
+              "pnl": 177.83
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 136,
+          "wr": 0.49264705882352944,
+          "pnl_usd": 82.99,
+          "annual_pnl_usd": 81.0,
+          "monthly_pnl_usd": 6.75,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 85.55,
+          "by_side": {
+            "long": {
+              "n": 136,
+              "pnl": 82.99
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 106.2745,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.5073,
+        "pnl_usd": 403.5,
+        "annual_pnl_usd": 94.41,
+        "monthly_pnl_usd": 7.87,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 83.01,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.4682274247491639,
+          "pnl_usd": 75.71,
+          "annual_pnl_usd": 37.85,
+          "monthly_pnl_usd": 3.15,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 83.01,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 75.71
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.521594684385382,
+          "pnl_usd": 158.19,
+          "annual_pnl_usd": 126.62,
+          "monthly_pnl_usd": 10.55,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 72.44,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 158.19
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.554140127388535,
+          "pnl_usd": 169.6,
+          "annual_pnl_usd": 165.52,
+          "monthly_pnl_usd": 13.79,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 82.52,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 169.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 104.0955,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.5073,
+        "pnl_usd": 403.5,
+        "annual_pnl_usd": 94.41,
+        "monthly_pnl_usd": 7.87,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 83.01,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.4682274247491639,
+          "pnl_usd": 75.71,
+          "annual_pnl_usd": 37.85,
+          "monthly_pnl_usd": 3.15,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 83.01,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 75.71
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.521594684385382,
+          "pnl_usd": 158.19,
+          "annual_pnl_usd": 126.62,
+          "monthly_pnl_usd": 10.55,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 72.44,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 158.19
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.554140127388535,
+          "pnl_usd": 169.6,
+          "annual_pnl_usd": 165.52,
+          "monthly_pnl_usd": 13.79,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 82.52,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 169.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 104.0955,
+      "soft_pass": false
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 12,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 757,
+        "wr": 0.5073,
+        "pnl_usd": 403.5,
+        "annual_pnl_usd": 94.41,
+        "monthly_pnl_usd": 7.87,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 83.01,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 299,
+          "wr": 0.4682274247491639,
+          "pnl_usd": 75.71,
+          "annual_pnl_usd": 37.85,
+          "monthly_pnl_usd": 3.15,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 83.01,
+          "by_side": {
+            "long": {
+              "n": 299,
+              "pnl": 75.71
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 301,
+          "wr": 0.521594684385382,
+          "pnl_usd": 158.19,
+          "annual_pnl_usd": 126.62,
+          "monthly_pnl_usd": 10.55,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 72.44,
+          "by_side": {
+            "long": {
+              "n": 301,
+              "pnl": 158.19
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 157,
+          "wr": 0.554140127388535,
+          "pnl_usd": 169.6,
+          "annual_pnl_usd": 165.52,
+          "monthly_pnl_usd": 13.79,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 82.52,
+          "by_side": {
+            "long": {
+              "n": 157,
+              "pnl": 169.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 104.0955,
+      "soft_pass": false
+    }
+  ],
+  "soft_passers": [
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 8,
+        "size": 0.2,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 495.73,
+        "annual_pnl_usd": 115.99,
+        "monthly_pnl_usd": 9.67,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 109.01,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 211.22,
+          "annual_pnl_usd": 105.61,
+          "monthly_pnl_usd": 8.8,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 109.01,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 211.22
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 207.3,
+          "annual_pnl_usd": 165.93,
+          "monthly_pnl_usd": 13.82,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 61.09,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 207.3
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 77.21,
+          "annual_pnl_usd": 75.35,
+          "monthly_pnl_usd": 6.28,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 96.29,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 77.21
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 123.2495,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 5,
+        "size": 0.3,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 464.75,
+        "annual_pnl_usd": 108.74,
+        "monthly_pnl_usd": 9.06,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 102.19,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 198.02,
+          "annual_pnl_usd": 99.01,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 102.19,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 198.02
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 194.35,
+          "annual_pnl_usd": 155.56,
+          "monthly_pnl_usd": 12.96,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 57.27,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 194.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 72.38,
+          "annual_pnl_usd": 70.64,
+          "monthly_pnl_usd": 5.88,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 72.38
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.7045,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 6,
+        "size": 0.25,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 464.75,
+        "annual_pnl_usd": 108.74,
+        "monthly_pnl_usd": 9.06,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 102.19,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 198.02,
+          "annual_pnl_usd": 99.01,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 102.19,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 198.02
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 194.35,
+          "annual_pnl_usd": 155.56,
+          "monthly_pnl_usd": 12.96,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 57.27,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 194.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 72.38,
+          "annual_pnl_usd": 70.64,
+          "monthly_pnl_usd": 5.88,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 72.38
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.7045,
+      "soft_pass": true
+    },
+    {
+      "spec": {
+        "univ": "no_dead",
+        "hold": 36,
+        "break_bps": 50,
+        "mom_24h": 0.1,
+        "vol_ratio": 3.0,
+        "atr_min": 0,
+        "atr_max": 8,
+        "lev": 10,
+        "size": 0.15,
+        "tp_pct": 0.06,
+        "sl_pct": 0.08,
+        "btc_gate": null,
+        "side": "long"
+      },
+      "weighted": {
+        "n": 605,
+        "wr": 0.5752,
+        "pnl_usd": 464.75,
+        "annual_pnl_usd": 108.74,
+        "monthly_pnl_usd": 9.06,
+        "all_periods_positive": true,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 102.19,
+        "g1165_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        },
+        "g1995_overlap": {
+          "n": 0,
+          "candidate_cover": 0.0,
+          "other_cover": 0.0,
+          "jaccard": 0.0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 241,
+          "wr": 0.5643153526970954,
+          "pnl_usd": 198.02,
+          "annual_pnl_usd": 99.01,
+          "monthly_pnl_usd": 8.25,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 102.19,
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 198.02
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 235,
+          "wr": 0.5872340425531914,
+          "pnl_usd": 194.35,
+          "annual_pnl_usd": 155.56,
+          "monthly_pnl_usd": 12.96,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 57.27,
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 194.35
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 129,
+          "wr": 0.5736434108527132,
+          "pnl_usd": 72.38,
+          "annual_pnl_usd": 70.64,
+          "monthly_pnl_usd": 5.88,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.27,
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 72.38
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "score": 117.7045,
+      "soft_pass": true
+    }
+  ]
+}

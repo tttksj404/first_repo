@@ -1,0 +1,100 @@
+{
+  "strategy_id": "G4007",
+  "generated_at": "2026-05-06 12:50:57",
+  "source": "quant_binance/strategies/_scripts/g1305_breakout_walkforward_filter_results.json",
+  "engine": "breakout_long",
+  "filter": "top8_symbols",
+  "params": {
+    "universe": "walk_forward_top8_symbols",
+    "timeframe": "1h",
+    "side": "long",
+    "hold": 36,
+    "break_bps": 50,
+    "min_ret_24h": 0.1,
+    "min_vol_ratio": 3.0,
+    "atr_min_pct": 0,
+    "atr_max_pct": 8,
+    "leverage": 8,
+    "size_pct_per_trade": 0.2,
+    "take_profit_pct": 0.06,
+    "stop_loss_pct": 0.08,
+    "cost_bps_round_trip": 24.0
+  },
+  "latest_allowed_symbols": [
+    "AVAXUSDT",
+    "DOTUSDT",
+    "ETHUSDT",
+    "MATICUSDT",
+    "NEARUSDT",
+    "SOLUSDT",
+    "SUIUSDT",
+    "XRPUSDT"
+  ],
+  "walk_forward_oos": {
+    "verdict": "PASS",
+    "checks": {
+      "n_>=_30": true,
+      "wr_>=_55": true,
+      "annual_>=_80": true,
+      "all_test_folds_positive": true,
+      "liq_==_0": true,
+      "dd_<=_150": true
+    },
+    "test_stats": {
+      "n": 133,
+      "wr": 0.6241,
+      "pnl_usd": 251.36,
+      "annual_pnl_usd": 110.54,
+      "monthly_pnl_usd": 9.21,
+      "max_dd_usd": 36.72,
+      "liquidations": 0,
+      "liq_rate": 0.0
+    },
+    "by_fold": {
+      "train_OOS22_test_OOS24": {
+        "selected_symbols": [
+          "ADAUSDT",
+          "AVAXUSDT",
+          "DOGEUSDT",
+          "DOTUSDT",
+          "MATICUSDT",
+          "NEARUSDT",
+          "SOLUSDT",
+          "XRPUSDT"
+        ],
+        "n": 94,
+        "wr": 0.6383,
+        "pnl_usd": 187.95,
+        "annual_pnl_usd": 150.44,
+        "monthly_pnl_usd": 12.54,
+        "max_dd_usd": 33.61,
+        "liquidations": 0,
+        "liq_rate": 0.0
+      },
+      "train_OOS22_OOS24_test_IS25": {
+        "selected_symbols": [
+          "AVAXUSDT",
+          "DOTUSDT",
+          "ETHUSDT",
+          "MATICUSDT",
+          "NEARUSDT",
+          "SOLUSDT",
+          "SUIUSDT",
+          "XRPUSDT"
+        ],
+        "n": 39,
+        "wr": 0.5897,
+        "pnl_usd": 63.41,
+        "annual_pnl_usd": 61.89,
+        "monthly_pnl_usd": 5.16,
+        "max_dd_usd": 36.72,
+        "liquidations": 0,
+        "liq_rate": 0.0
+      }
+    }
+  },
+  "overlap": {
+    "g1165_jaccard": 0.0,
+    "g1995_jaccard": 0.0
+  }
+}

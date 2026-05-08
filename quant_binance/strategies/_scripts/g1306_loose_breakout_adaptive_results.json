@@ -1,0 +1,1520 @@
+{
+  "anchors": {
+    "G1165_keys": 51,
+    "G1995_keys": 57
+  },
+  "criteria": {
+    "all_periods_positive": true,
+    "annual_min_usd": 100,
+    "liquidations": 0,
+    "max_dd_usd": 160,
+    "n_min": 100,
+    "overlap_j_max_each_anchor": 0.05,
+    "wr_min": 0.54
+  },
+  "elapsed_sec": 22.85,
+  "generated_at": "2026-05-06 13:22:00",
+  "n_pass": 1,
+  "n_specs": 7,
+  "question": "Can looser non-CH1 breakout entries stay profitable when response is adapted by signal strength?",
+  "top": [
+    {
+      "checks": {
+        "all_periods_positive": true,
+        "annual_>=_100": true,
+        "dd_<=_160": true,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": true
+      },
+      "desc": "strict G4006 baseline",
+      "id": "G4006_BASELINE",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 75.35,
+          "by_bucket": {
+            "strict": {
+              "n": 129,
+              "pnl_usd": 77.21,
+              "wr": 0.5736
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 129,
+              "pnl": 77.21
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 92.32,
+          "monthly_pnl_usd": 6.28,
+          "n": 129,
+          "pnl_usd": 77.21,
+          "wr": 0.5736434108527132
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 116.81,
+          "by_bucket": {
+            "strict": {
+              "n": 241,
+              "pnl_usd": 233.62,
+              "wr": 0.5685
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 241,
+              "pnl": 233.62
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 109.01,
+          "monthly_pnl_usd": 9.73,
+          "n": 241,
+          "pnl_usd": 233.62,
+          "wr": 0.5684647302904564
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 161.15,
+          "by_bucket": {
+            "strict": {
+              "n": 235,
+              "pnl_usd": 201.33,
+              "wr": 0.5872
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 235,
+              "pnl": 201.33
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 69.22,
+          "monthly_pnl_usd": 13.42,
+          "n": 235,
+          "pnl_usd": 201.33,
+          "wr": 0.5872340425531914
+        }
+      },
+      "score": 157.315,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "strict G4006 baseline",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4006_BASELINE",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "PASS",
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 119.83,
+        "by_bucket": {
+          "strict": {
+            "n": 605,
+            "pnl_usd": 512.16,
+            "wr": 0.5769
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 109.01,
+        "min_period_pnl_usd": 77.21,
+        "monthly_pnl_usd": 9.99,
+        "n": 605,
+        "pnl_usd": 512.16,
+        "wr": 0.5769
+      }
+    },
+    {
+      "checks": {
+        "all_periods_positive": false,
+        "annual_>=_100": false,
+        "dd_<=_160": true,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": false
+      },
+      "desc": "ret8 vol2 adaptive, mid selectivity",
+      "id": "G4404_ADAPTIVE_8_2",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -19.91,
+          "by_bucket": {
+            "standard": {
+              "n": 16,
+              "pnl_usd": -18.77,
+              "wr": 0.375
+            },
+            "starter": {
+              "n": 194,
+              "pnl_usd": -21.09,
+              "wr": 0.4897
+            },
+            "strong": {
+              "n": 82,
+              "pnl_usd": 19.46,
+              "wr": 0.5488
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 292,
+              "pnl": -20.4
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 153.01,
+          "monthly_pnl_usd": -1.66,
+          "n": 292,
+          "pnl_usd": -20.4,
+          "wr": 0.5
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 121.11,
+          "by_bucket": {
+            "standard": {
+              "n": 43,
+              "pnl_usd": -23.41,
+              "wr": 0.5349
+            },
+            "starter": {
+              "n": 362,
+              "pnl_usd": -73.82,
+              "wr": 0.4613
+            },
+            "strong": {
+              "n": 149,
+              "pnl_usd": 339.44,
+              "wr": 0.6443
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 554,
+              "pnl": 242.22
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 86.48,
+          "monthly_pnl_usd": 10.09,
+          "n": 554,
+          "pnl_usd": 242.22,
+          "wr": 0.516245487364621
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 53.46,
+          "by_bucket": {
+            "standard": {
+              "n": 53,
+              "pnl_usd": -3.25,
+              "wr": 0.5283
+            },
+            "starter": {
+              "n": 331,
+              "pnl_usd": -112.21,
+              "wr": 0.4622
+            },
+            "strong": {
+              "n": 158,
+              "pnl_usd": 182.25,
+              "wr": 0.5886
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 542,
+              "pnl": 66.79
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 94.17,
+          "monthly_pnl_usd": 4.45,
+          "n": 542,
+          "pnl_usd": 66.79,
+          "wr": 0.5055350553505535
+        }
+      },
+      "score": 73.278,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 20,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.045
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 12,
+              "lev": 5.0,
+              "size": 0.11,
+              "sl_pct": 0.038,
+              "tp_pct": 0.028
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "ret8 vol2 adaptive, mid selectivity",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        },
+        "id": "G4404_ADAPTIVE_8_2",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "FAIL",
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 67.53,
+        "by_bucket": {
+          "standard": {
+            "n": 112,
+            "pnl_usd": -45.43,
+            "wr": 0.5089
+          },
+          "starter": {
+            "n": 887,
+            "pnl_usd": -207.12,
+            "wr": 0.4679
+          },
+          "strong": {
+            "n": 389,
+            "pnl_usd": 541.15,
+            "wr": 0.6015
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 153.01,
+        "min_period_pnl_usd": -20.4,
+        "monthly_pnl_usd": 5.63,
+        "n": 1388,
+        "pnl_usd": 288.61,
+        "wr": 0.5086
+      }
+    },
+    {
+      "checks": {
+        "all_periods_positive": false,
+        "annual_>=_100": false,
+        "dd_<=_160": true,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": false
+      },
+      "desc": "ret5 vol2 adaptive starter/standard/strong",
+      "id": "G4402_ADAPTIVE_5_2",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -56.3,
+          "by_bucket": {
+            "standard": {
+              "n": 61,
+              "pnl_usd": 6.33,
+              "wr": 0.5574
+            },
+            "starter": {
+              "n": 447,
+              "pnl_usd": -69.23,
+              "wr": 0.4832
+            },
+            "strong": {
+              "n": 42,
+              "pnl_usd": 5.21,
+              "wr": 0.5714
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 550,
+              "pnl": -57.69
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 121.69,
+          "monthly_pnl_usd": -4.69,
+          "n": 550,
+          "pnl_usd": -57.69,
+          "wr": 0.49818181818181817
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 73.63,
+          "by_bucket": {
+            "standard": {
+              "n": 162,
+              "pnl_usd": -28.04,
+              "wr": 0.4938
+            },
+            "starter": {
+              "n": 726,
+              "pnl_usd": -54.11,
+              "wr": 0.5179
+            },
+            "strong": {
+              "n": 107,
+              "pnl_usd": 229.4,
+              "wr": 0.6355
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 995,
+              "pnl": 147.25
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 99.33,
+          "monthly_pnl_usd": 6.13,
+          "n": 995,
+          "pnl_usd": 147.25,
+          "wr": 0.5266331658291458
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 2.85,
+          "by_bucket": {
+            "standard": {
+              "n": 153,
+              "pnl_usd": -46.28,
+              "wr": 0.4706
+            },
+            "starter": {
+              "n": 678,
+              "pnl_usd": -107.7,
+              "wr": 0.5118
+            },
+            "strong": {
+              "n": 122,
+              "pnl_usd": 157.54,
+              "wr": 0.6066
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 953,
+              "pnl": 3.56
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 127.26,
+          "monthly_pnl_usd": 0.24,
+          "n": 953,
+          "pnl_usd": 3.56,
+          "wr": 0.5173137460650578
+        }
+      },
+      "score": 25.64,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 20,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 6.0,
+              "size": 0.15,
+              "sl_pct": 0.055,
+              "tp_pct": 0.045
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 12,
+              "lev": 5.0,
+              "size": 0.1,
+              "sl_pct": 0.035,
+              "tp_pct": 0.025
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "ret5 vol2 adaptive starter/standard/strong",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        },
+        "id": "G4402_ADAPTIVE_5_2",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "FAIL",
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 21.79,
+        "by_bucket": {
+          "standard": {
+            "n": 376,
+            "pnl_usd": -67.99,
+            "wr": 0.4947
+          },
+          "starter": {
+            "n": 1851,
+            "pnl_usd": -231.04,
+            "wr": 0.5073
+          },
+          "strong": {
+            "n": 271,
+            "pnl_usd": 392.15,
+            "wr": 0.6125
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 127.26,
+        "min_period_pnl_usd": -57.69,
+        "monthly_pnl_usd": 1.82,
+        "n": 2498,
+        "pnl_usd": 93.12,
+        "wr": 0.5168
+      }
+    },
+    {
+      "checks": {
+        "all_periods_positive": false,
+        "annual_>=_100": false,
+        "dd_<=_160": true,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": false
+      },
+      "desc": "ret5 vol2 adaptive with green close",
+      "id": "G4405_GREEN_CONFIRM",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -56.3,
+          "by_bucket": {
+            "standard": {
+              "n": 61,
+              "pnl_usd": 6.33,
+              "wr": 0.5574
+            },
+            "starter": {
+              "n": 447,
+              "pnl_usd": -69.23,
+              "wr": 0.4832
+            },
+            "strong": {
+              "n": 42,
+              "pnl_usd": 5.21,
+              "wr": 0.5714
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 550,
+              "pnl": -57.69
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 121.69,
+          "monthly_pnl_usd": -4.69,
+          "n": 550,
+          "pnl_usd": -57.69,
+          "wr": 0.49818181818181817
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 73.63,
+          "by_bucket": {
+            "standard": {
+              "n": 162,
+              "pnl_usd": -28.04,
+              "wr": 0.4938
+            },
+            "starter": {
+              "n": 726,
+              "pnl_usd": -54.11,
+              "wr": 0.5179
+            },
+            "strong": {
+              "n": 107,
+              "pnl_usd": 229.4,
+              "wr": 0.6355
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 995,
+              "pnl": 147.25
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 99.33,
+          "monthly_pnl_usd": 6.13,
+          "n": 995,
+          "pnl_usd": 147.25,
+          "wr": 0.5266331658291458
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 2.85,
+          "by_bucket": {
+            "standard": {
+              "n": 153,
+              "pnl_usd": -46.28,
+              "wr": 0.4706
+            },
+            "starter": {
+              "n": 678,
+              "pnl_usd": -107.7,
+              "wr": 0.5118
+            },
+            "strong": {
+              "n": 122,
+              "pnl_usd": 157.54,
+              "wr": 0.6066
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 953,
+              "pnl": 3.56
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 127.26,
+          "monthly_pnl_usd": 0.24,
+          "n": 953,
+          "pnl_usd": 3.56,
+          "wr": 0.5173137460650578
+        }
+      },
+      "score": 25.64,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 20,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 6.0,
+              "size": 0.15,
+              "sl_pct": 0.055,
+              "tp_pct": 0.045
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 12,
+              "lev": 5.0,
+              "size": 0.1,
+              "sl_pct": 0.035,
+              "tp_pct": 0.025
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "ret5 vol2 adaptive with green close",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 0,
+          "close_green": true,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        },
+        "id": "G4405_GREEN_CONFIRM",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "FAIL",
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 21.79,
+        "by_bucket": {
+          "standard": {
+            "n": 376,
+            "pnl_usd": -67.99,
+            "wr": 0.4947
+          },
+          "starter": {
+            "n": 1851,
+            "pnl_usd": -231.04,
+            "wr": 0.5073
+          },
+          "strong": {
+            "n": 271,
+            "pnl_usd": 392.15,
+            "wr": 0.6125
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 127.26,
+        "min_period_pnl_usd": -57.69,
+        "monthly_pnl_usd": 1.82,
+        "n": 2498,
+        "pnl_usd": 93.12,
+        "wr": 0.5168
+      }
+    },
+    {
+      "checks": {
+        "all_periods_positive": false,
+        "annual_>=_100": false,
+        "dd_<=_160": true,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": false
+      },
+      "desc": "ret5 vol2 adaptive with BTC 72h >= 0",
+      "id": "G4406_BTC_GATE",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -56.3,
+          "by_bucket": {
+            "standard": {
+              "n": 61,
+              "pnl_usd": 6.33,
+              "wr": 0.5574
+            },
+            "starter": {
+              "n": 447,
+              "pnl_usd": -69.23,
+              "wr": 0.4832
+            },
+            "strong": {
+              "n": 42,
+              "pnl_usd": 5.21,
+              "wr": 0.5714
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 550,
+              "pnl": -57.69
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 121.69,
+          "monthly_pnl_usd": -4.69,
+          "n": 550,
+          "pnl_usd": -57.69,
+          "wr": 0.49818181818181817
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 73.63,
+          "by_bucket": {
+            "standard": {
+              "n": 162,
+              "pnl_usd": -28.04,
+              "wr": 0.4938
+            },
+            "starter": {
+              "n": 726,
+              "pnl_usd": -54.11,
+              "wr": 0.5179
+            },
+            "strong": {
+              "n": 107,
+              "pnl_usd": 229.4,
+              "wr": 0.6355
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 995,
+              "pnl": 147.25
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 99.33,
+          "monthly_pnl_usd": 6.13,
+          "n": 995,
+          "pnl_usd": 147.25,
+          "wr": 0.5266331658291458
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 2.85,
+          "by_bucket": {
+            "standard": {
+              "n": 153,
+              "pnl_usd": -46.28,
+              "wr": 0.4706
+            },
+            "starter": {
+              "n": 678,
+              "pnl_usd": -107.7,
+              "wr": 0.5118
+            },
+            "strong": {
+              "n": 122,
+              "pnl_usd": 157.54,
+              "wr": 0.6066
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 953,
+              "pnl": 3.56
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 127.26,
+          "monthly_pnl_usd": 0.24,
+          "n": 953,
+          "pnl_usd": 3.56,
+          "wr": 0.5173137460650578
+        }
+      },
+      "score": 25.64,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 20,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 6.0,
+              "size": 0.15,
+              "sl_pct": 0.055,
+              "tp_pct": 0.045
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 12,
+              "lev": 5.0,
+              "size": 0.1,
+              "sl_pct": 0.035,
+              "tp_pct": 0.025
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "ret5 vol2 adaptive with BTC 72h >= 0",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 0,
+          "btc_gate": 0.0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        },
+        "id": "G4406_BTC_GATE",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "FAIL",
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 21.79,
+        "by_bucket": {
+          "standard": {
+            "n": 376,
+            "pnl_usd": -67.99,
+            "wr": 0.4947
+          },
+          "starter": {
+            "n": 1851,
+            "pnl_usd": -231.04,
+            "wr": 0.5073
+          },
+          "strong": {
+            "n": 271,
+            "pnl_usd": 392.15,
+            "wr": 0.6125
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 127.26,
+        "min_period_pnl_usd": -57.69,
+        "monthly_pnl_usd": 1.82,
+        "n": 2498,
+        "pnl_usd": 93.12,
+        "wr": 0.5168
+      }
+    },
+    {
+      "checks": {
+        "all_periods_positive": false,
+        "annual_>=_100": false,
+        "dd_<=_160": true,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": false
+      },
+      "desc": "ret5 vol1.8 adaptive, more entries",
+      "id": "G4403_ADAPTIVE_5_18",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 10.07,
+          "by_bucket": {
+            "standard": {
+              "n": 132,
+              "pnl_usd": 22.66,
+              "wr": 0.5985
+            },
+            "starter": {
+              "n": 478,
+              "pnl_usd": -29.32,
+              "wr": 0.5314
+            },
+            "strong": {
+              "n": 54,
+              "pnl_usd": 16.99,
+              "wr": 0.5741
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 664,
+              "pnl": 10.32
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 68.91,
+          "monthly_pnl_usd": 0.84,
+          "n": 664,
+          "pnl_usd": 10.32,
+          "wr": 0.5481927710843374
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 18.9,
+          "by_bucket": {
+            "standard": {
+              "n": 264,
+              "pnl_usd": -40.67,
+              "wr": 0.5
+            },
+            "starter": {
+              "n": 810,
+              "pnl_usd": -27.65,
+              "wr": 0.5568
+            },
+            "strong": {
+              "n": 113,
+              "pnl_usd": 106.12,
+              "wr": 0.5841
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 1187,
+              "pnl": 37.81
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 115.46,
+          "monthly_pnl_usd": 1.57,
+          "n": 1187,
+          "pnl_usd": 37.81,
+          "wr": 0.5467565290648694
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -16.0,
+          "by_bucket": {
+            "standard": {
+              "n": 232,
+              "pnl_usd": -82.94,
+              "wr": 0.4741
+            },
+            "starter": {
+              "n": 775,
+              "pnl_usd": -88.71,
+              "wr": 0.5148
+            },
+            "strong": {
+              "n": 142,
+              "pnl_usd": 151.66,
+              "wr": 0.5986
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 1149,
+              "pnl": -19.99
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 85.32,
+          "monthly_pnl_usd": -1.33,
+          "n": 1149,
+          "pnl_usd": -19.99,
+          "wr": 0.5169712793733682
+        }
+      },
+      "score": 21.275,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.075,
+            "min_strength_bps": 0,
+            "min_vol_ratio": 2.3,
+            "trade": {
+              "hold": 18,
+              "lev": 5.0,
+              "size": 0.13,
+              "sl_pct": 0.045,
+              "tp_pct": 0.035
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 8,
+              "lev": 4.0,
+              "size": 0.08,
+              "sl_pct": 0.028,
+              "tp_pct": 0.018
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "ret5 vol1.8 adaptive, more entries",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": -20,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 1.8
+        },
+        "id": "G4403_ADAPTIVE_5_18",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "FAIL",
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": 6.58,
+        "by_bucket": {
+          "standard": {
+            "n": 628,
+            "pnl_usd": -100.95,
+            "wr": 0.5111
+          },
+          "starter": {
+            "n": 2063,
+            "pnl_usd": -145.68,
+            "wr": 0.5351
+          },
+          "strong": {
+            "n": 309,
+            "pnl_usd": 274.77,
+            "wr": 0.589
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 115.46,
+        "min_period_pnl_usd": -19.99,
+        "monthly_pnl_usd": 0.55,
+        "n": 3000,
+        "pnl_usd": 28.14,
+        "wr": 0.5357
+      }
+    },
+    {
+      "checks": {
+        "all_periods_positive": false,
+        "annual_>=_100": false,
+        "dd_<=_160": false,
+        "g1165_j_<=_0.05": true,
+        "g1995_j_<=_0.05": true,
+        "liq_==_0": true,
+        "n_>=_100": true,
+        "wr_>=_54": false
+      },
+      "desc": "loose entry, one conservative exit",
+      "id": "G4401_LOOSE_STATIC",
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": -66.4,
+          "by_bucket": {
+            "standard": {
+              "n": 47,
+              "pnl_usd": -2.42,
+              "wr": 0.5532
+            },
+            "starter": {
+              "n": 404,
+              "pnl_usd": -16.74,
+              "wr": 0.5371
+            },
+            "strong": {
+              "n": 37,
+              "pnl_usd": -48.87,
+              "wr": 0.4324
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 488,
+              "pnl": -68.04
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 155.94,
+          "monthly_pnl_usd": -5.53,
+          "n": 488,
+          "pnl_usd": -68.04,
+          "wr": 0.5307377049180327
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 46.85,
+          "by_bucket": {
+            "standard": {
+              "n": 140,
+              "pnl_usd": -53.04,
+              "wr": 0.4714
+            },
+            "starter": {
+              "n": 681,
+              "pnl_usd": -14.17,
+              "wr": 0.5213
+            },
+            "strong": {
+              "n": 97,
+              "pnl_usd": 160.92,
+              "wr": 0.5773
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 918,
+              "pnl": 93.71
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 97.39,
+          "monthly_pnl_usd": 3.9,
+          "n": 918,
+          "pnl_usd": 93.71,
+          "wr": 0.5196078431372549
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": -142.63,
+          "by_bucket": {
+            "standard": {
+              "n": 142,
+              "pnl_usd": -44.68,
+              "wr": 0.4789
+            },
+            "starter": {
+              "n": 645,
+              "pnl_usd": -218.38,
+              "wr": 0.4713
+            },
+            "strong": {
+              "n": 107,
+              "pnl_usd": 84.87,
+              "wr": 0.5888
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 894,
+              "pnl": -178.19
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 180.11,
+          "monthly_pnl_usd": -11.88,
+          "n": 894,
+          "pnl_usd": -178.19,
+          "wr": 0.4865771812080537
+        }
+      },
+      "score": -66.895,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 20,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 18,
+              "lev": 5.0,
+              "size": 0.14,
+              "sl_pct": 0.045,
+              "tp_pct": 0.035
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 5.0,
+              "size": 0.14,
+              "sl_pct": 0.045,
+              "tp_pct": 0.035
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50.0,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "loose entry, one conservative exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        },
+        "id": "G4401_LOOSE_STATIC",
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "verdict": "FAIL",
+      "weighted": {
+        "all_periods_positive": false,
+        "annual_pnl_usd": -35.69,
+        "by_bucket": {
+          "standard": {
+            "n": 329,
+            "pnl_usd": -100.14,
+            "wr": 0.4863
+          },
+          "starter": {
+            "n": 1730,
+            "pnl_usd": -249.29,
+            "wr": 0.5064
+          },
+          "strong": {
+            "n": 241,
+            "pnl_usd": 196.92,
+            "wr": 0.5602
+          }
+        },
+        "g1165_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "g1995_overlap": {
+          "candidate_cover": 0.0,
+          "jaccard": 0.0,
+          "n": 0,
+          "other_cover": 0.0
+        },
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 180.11,
+        "min_period_pnl_usd": -178.19,
+        "monthly_pnl_usd": -2.97,
+        "n": 2300,
+        "pnl_usd": -152.52,
+        "wr": 0.5091
+      }
+    }
+  ]
+}
