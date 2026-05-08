@@ -1,0 +1,1901 @@
+{
+  "chunk_count": 4096,
+  "chunk_index": 1,
+  "complete": false,
+  "coverage": "2024-01-01 through 2026-04-27, ETH/SOL/DOGE/PEPE 5m only",
+  "criteria": "tpm>=8, wr>=65%, pnl>0, all years positive, liq=0",
+  "elapsed_sec": 121.63,
+  "generated_at": "2026-05-07 13:45:10",
+  "n_specs_evaluated": 37,
+  "n_strict_pass": 0,
+  "question": "Can 5m cross-asset lead/lag produce high-frequency high-WR alpha?",
+  "top": [
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_69633",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -30.9,
+        "liquidations": 0,
+        "max_period_dd_usd": 34.74,
+        "min_year_pnl_usd": -33.14,
+        "n": 1494,
+        "pnl_usd": -71.71,
+        "trades_per_month": 53.62,
+        "wr": 0.6332,
+        "years": {
+          "2024": {
+            "max_dd_usd": 33.74,
+            "n": 495,
+            "pnl_usd": -33.14,
+            "wr": 0.6404
+          },
+          "2025": {
+            "max_dd_usd": 34.74,
+            "n": 792,
+            "pnl_usd": -30.24,
+            "wr": 0.6376
+          },
+          "2026": {
+            "max_dd_usd": 8.94,
+            "n": 207,
+            "pnl_usd": -8.33,
+            "wr": 0.599
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_36865",
+      "spec": {
+        "follower": "SOLUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -39.57,
+        "liquidations": 0,
+        "max_period_dd_usd": 42.86,
+        "min_year_pnl_usd": -41.87,
+        "n": 1601,
+        "pnl_usd": -91.83,
+        "trades_per_month": 57.46,
+        "wr": 0.5597,
+        "years": {
+          "2024": {
+            "max_dd_usd": 33.66,
+            "n": 562,
+            "pnl_usd": -33.06,
+            "wr": 0.5836
+          },
+          "2025": {
+            "max_dd_usd": 42.86,
+            "n": 791,
+            "pnl_usd": -41.87,
+            "wr": 0.555
+          },
+          "2026": {
+            "max_dd_usd": 17.2,
+            "n": 248,
+            "pnl_usd": -16.9,
+            "wr": 0.5202
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_176129",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -107.37,
+        "liquidations": 0,
+        "max_period_dd_usd": 131.66,
+        "min_year_pnl_usd": -129.08,
+        "n": 4402,
+        "pnl_usd": -249.15,
+        "trades_per_month": 157.99,
+        "wr": 0.5925,
+        "years": {
+          "2024": {
+            "max_dd_usd": 131.66,
+            "n": 2222,
+            "pnl_usd": -129.08,
+            "wr": 0.6215
+          },
+          "2025": {
+            "max_dd_usd": 101.38,
+            "n": 1855,
+            "pnl_usd": -100.29,
+            "wr": 0.5655
+          },
+          "2026": {
+            "max_dd_usd": 19.79,
+            "n": 325,
+            "pnl_usd": -19.79,
+            "wr": 0.5477
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_159745",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -47.38,
+        "liquidations": 0,
+        "max_period_dd_usd": 58.31,
+        "min_year_pnl_usd": -58.31,
+        "n": 1992,
+        "pnl_usd": -109.94,
+        "trades_per_month": 71.5,
+        "wr": 0.5196,
+        "years": {
+          "2024": {
+            "max_dd_usd": 58.31,
+            "n": 1001,
+            "pnl_usd": -58.31,
+            "wr": 0.4965
+          },
+          "2025": {
+            "max_dd_usd": 40.11,
+            "n": 781,
+            "pnl_usd": -38.77,
+            "wr": 0.5557
+          },
+          "2026": {
+            "max_dd_usd": 13.04,
+            "n": 210,
+            "pnl_usd": -12.86,
+            "wr": 0.4952
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_53249",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -56.81,
+        "liquidations": 0,
+        "max_period_dd_usd": 56.49,
+        "min_year_pnl_usd": -56.21,
+        "n": 2616,
+        "pnl_usd": -131.84,
+        "trades_per_month": 93.89,
+        "wr": 0.5115,
+        "years": {
+          "2024": {
+            "max_dd_usd": 56.49,
+            "n": 938,
+            "pnl_usd": -56.21,
+            "wr": 0.5128
+          },
+          "2025": {
+            "max_dd_usd": 55.94,
+            "n": 1266,
+            "pnl_usd": -55.94,
+            "wr": 0.5237
+          },
+          "2026": {
+            "max_dd_usd": 21.04,
+            "n": 412,
+            "pnl_usd": -19.69,
+            "wr": 0.4709
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_90113",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -149.05,
+        "liquidations": 0,
+        "max_period_dd_usd": 156.66,
+        "min_year_pnl_usd": -154.12,
+        "n": 6878,
+        "pnl_usd": -345.87,
+        "trades_per_month": 246.86,
+        "wr": 0.5741,
+        "years": {
+          "2024": {
+            "max_dd_usd": 156.66,
+            "n": 2386,
+            "pnl_usd": -154.12,
+            "wr": 0.6018
+          },
+          "2025": {
+            "max_dd_usd": 153.13,
+            "n": 3405,
+            "pnl_usd": -147.97,
+            "wr": 0.5612
+          },
+          "2026": {
+            "max_dd_usd": 44.08,
+            "n": 1087,
+            "pnl_usd": -43.78,
+            "wr": 0.5538
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_172033",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -164.8,
+        "liquidations": 0,
+        "max_period_dd_usd": 230.23,
+        "min_year_pnl_usd": -227.17,
+        "n": 7998,
+        "pnl_usd": -382.42,
+        "trades_per_month": 287.06,
+        "wr": 0.6139,
+        "years": {
+          "2024": {
+            "max_dd_usd": 230.23,
+            "n": 3902,
+            "pnl_usd": -227.17,
+            "wr": 0.6279
+          },
+          "2025": {
+            "max_dd_usd": 129.48,
+            "n": 3454,
+            "pnl_usd": -127.49,
+            "wr": 0.6039
+          },
+          "2026": {
+            "max_dd_usd": 28.6,
+            "n": 642,
+            "pnl_usd": -27.75,
+            "wr": 0.5826
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_147457",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -46.88,
+        "liquidations": 0,
+        "max_period_dd_usd": 72.17,
+        "min_year_pnl_usd": -70.54,
+        "n": 2213,
+        "pnl_usd": -108.8,
+        "trades_per_month": 79.43,
+        "wr": 0.4898,
+        "years": {
+          "2024": {
+            "max_dd_usd": 72.17,
+            "n": 1484,
+            "pnl_usd": -70.54,
+            "wr": 0.4791
+          },
+          "2025": {
+            "max_dd_usd": 32.66,
+            "n": 599,
+            "pnl_usd": -32.4,
+            "wr": 0.5225
+          },
+          "2026": {
+            "max_dd_usd": 5.86,
+            "n": 130,
+            "pnl_usd": -5.85,
+            "wr": 0.4615
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_65537",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -78.4,
+        "liquidations": 0,
+        "max_period_dd_usd": 81.97,
+        "min_year_pnl_usd": -81.82,
+        "n": 3598,
+        "pnl_usd": -181.94,
+        "trades_per_month": 129.14,
+        "wr": 0.4722,
+        "years": {
+          "2024": {
+            "max_dd_usd": 74.05,
+            "n": 1309,
+            "pnl_usd": -72.18,
+            "wr": 0.4836
+          },
+          "2025": {
+            "max_dd_usd": 81.97,
+            "n": 1735,
+            "pnl_usd": -81.82,
+            "wr": 0.4749
+          },
+          "2026": {
+            "max_dd_usd": 28.6,
+            "n": 554,
+            "pnl_usd": -27.94,
+            "wr": 0.4368
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_49153",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -132.02,
+        "liquidations": 0,
+        "max_period_dd_usd": 143.38,
+        "min_year_pnl_usd": -142.82,
+        "n": 5149,
+        "pnl_usd": -306.35,
+        "trades_per_month": 184.8,
+        "wr": 0.4935,
+        "years": {
+          "2024": {
+            "max_dd_usd": 116.14,
+            "n": 1796,
+            "pnl_usd": -115.12,
+            "wr": 0.5178
+          },
+          "2025": {
+            "max_dd_usd": 143.38,
+            "n": 2557,
+            "pnl_usd": -142.82,
+            "wr": 0.4924
+          },
+          "2026": {
+            "max_dd_usd": 49.15,
+            "n": 796,
+            "pnl_usd": -48.41,
+            "wr": 0.4422
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_98305",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -77.94,
+        "liquidations": 0,
+        "max_period_dd_usd": 106.88,
+        "min_year_pnl_usd": -106.88,
+        "n": 3707,
+        "pnl_usd": -180.86,
+        "trades_per_month": 133.05,
+        "wr": 0.4632,
+        "years": {
+          "2024": {
+            "max_dd_usd": 106.88,
+            "n": 2016,
+            "pnl_usd": -106.88,
+            "wr": 0.4266
+          },
+          "2025": {
+            "max_dd_usd": 64.61,
+            "n": 1400,
+            "pnl_usd": -64.01,
+            "wr": 0.495
+          },
+          "2026": {
+            "max_dd_usd": 11.97,
+            "n": 291,
+            "pnl_usd": -9.98,
+            "wr": 0.5636
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_61441",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -187.49,
+        "liquidations": 0,
+        "max_period_dd_usd": 189.47,
+        "min_year_pnl_usd": -189.26,
+        "n": 8411,
+        "pnl_usd": -435.09,
+        "trades_per_month": 301.88,
+        "wr": 0.4595,
+        "years": {
+          "2024": {
+            "max_dd_usd": 167.47,
+            "n": 3020,
+            "pnl_usd": -167.02,
+            "wr": 0.4781
+          },
+          "2025": {
+            "max_dd_usd": 189.47,
+            "n": 4055,
+            "pnl_usd": -189.26,
+            "wr": 0.4686
+          },
+          "2026": {
+            "max_dd_usd": 78.91,
+            "n": 1336,
+            "pnl_usd": -78.82,
+            "wr": 0.39
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_167937",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -286.23,
+        "liquidations": 0,
+        "max_period_dd_usd": 350.01,
+        "min_year_pnl_usd": -339.38,
+        "n": 15130,
+        "pnl_usd": -664.22,
+        "trades_per_month": 543.04,
+        "wr": 0.5549,
+        "years": {
+          "2024": {
+            "max_dd_usd": 350.01,
+            "n": 7099,
+            "pnl_usd": -339.38,
+            "wr": 0.5875
+          },
+          "2025": {
+            "max_dd_usd": 274.97,
+            "n": 6737,
+            "pnl_usd": -273.8,
+            "wr": 0.5272
+          },
+          "2026": {
+            "max_dd_usd": 52.21,
+            "n": 1294,
+            "pnl_usd": -51.04,
+            "wr": 0.5193
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_24577",
+      "spec": {
+        "follower": "SOLUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -23.3,
+        "liquidations": 0,
+        "max_period_dd_usd": 26.29,
+        "min_year_pnl_usd": -26.11,
+        "n": 751,
+        "pnl_usd": -54.07,
+        "trades_per_month": 26.95,
+        "wr": 0.4834,
+        "years": {
+          "2024": {
+            "max_dd_usd": 23.71,
+            "n": 303,
+            "pnl_usd": -23.02,
+            "wr": 0.4983
+          },
+          "2025": {
+            "max_dd_usd": 26.29,
+            "n": 393,
+            "pnl_usd": -26.11,
+            "wr": 0.4758
+          },
+          "2026": {
+            "max_dd_usd": 5.31,
+            "n": 55,
+            "pnl_usd": -4.93,
+            "wr": 0.4545
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_45057",
+      "spec": {
+        "follower": "SOLUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -180.6,
+        "liquidations": 0,
+        "max_period_dd_usd": 195.99,
+        "min_year_pnl_usd": -195.79,
+        "n": 7948,
+        "pnl_usd": -419.09,
+        "trades_per_month": 285.26,
+        "wr": 0.4381,
+        "years": {
+          "2024": {
+            "max_dd_usd": 159.06,
+            "n": 2885,
+            "pnl_usd": -158.53,
+            "wr": 0.453
+          },
+          "2025": {
+            "max_dd_usd": 195.99,
+            "n": 3886,
+            "pnl_usd": -195.79,
+            "wr": 0.4398
+          },
+          "2026": {
+            "max_dd_usd": 64.82,
+            "n": 1177,
+            "pnl_usd": -64.76,
+            "wr": 0.3959
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_114689",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -100.81,
+        "liquidations": 0,
+        "max_period_dd_usd": 142.87,
+        "min_year_pnl_usd": -142.87,
+        "n": 4566,
+        "pnl_usd": -233.94,
+        "trades_per_month": 163.88,
+        "wr": 0.3903,
+        "years": {
+          "2024": {
+            "max_dd_usd": 142.87,
+            "n": 2496,
+            "pnl_usd": -142.87,
+            "wr": 0.3542
+          },
+          "2025": {
+            "max_dd_usd": 81.08,
+            "n": 1762,
+            "pnl_usd": -80.84,
+            "wr": 0.4274
+          },
+          "2026": {
+            "max_dd_usd": 10.63,
+            "n": 308,
+            "pnl_usd": -10.23,
+            "wr": 0.4708
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_180225",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -14.81,
+        "liquidations": 0,
+        "max_period_dd_usd": 22.9,
+        "min_year_pnl_usd": -21.58,
+        "n": 645,
+        "pnl_usd": -34.36,
+        "trades_per_month": 23.15,
+        "wr": 0.6512,
+        "years": {
+          "2024": {
+            "max_dd_usd": 22.9,
+            "n": 327,
+            "pnl_usd": -21.58,
+            "wr": 0.6483
+          },
+          "2025": {
+            "max_dd_usd": 14.64,
+            "n": 261,
+            "pnl_usd": -12.39,
+            "wr": 0.6398
+          },
+          "2026": {
+            "max_dd_usd": 3.3,
+            "n": 57,
+            "pnl_usd": -0.4,
+            "wr": 0.7193
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_28673",
+      "spec": {
+        "follower": "SOLUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -248.56,
+        "liquidations": 0,
+        "max_period_dd_usd": 261.33,
+        "min_year_pnl_usd": -261.03,
+        "n": 10980,
+        "pnl_usd": -576.81,
+        "trades_per_month": 394.09,
+        "wr": 0.4719,
+        "years": {
+          "2024": {
+            "max_dd_usd": 247.06,
+            "n": 3993,
+            "pnl_usd": -245.85,
+            "wr": 0.4758
+          },
+          "2025": {
+            "max_dd_usd": 261.33,
+            "n": 5375,
+            "pnl_usd": -261.03,
+            "wr": 0.4748
+          },
+          "2026": {
+            "max_dd_usd": 70.03,
+            "n": 1612,
+            "pnl_usd": -69.92,
+            "wr": 0.4522
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_192513",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "DOGEUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -175.56,
+        "liquidations": 0,
+        "max_period_dd_usd": 234.45,
+        "min_year_pnl_usd": -234.11,
+        "n": 7371,
+        "pnl_usd": -407.4,
+        "trades_per_month": 264.56,
+        "wr": 0.436,
+        "years": {
+          "2024": {
+            "max_dd_usd": 234.45,
+            "n": 4274,
+            "pnl_usd": -234.11,
+            "wr": 0.416
+          },
+          "2025": {
+            "max_dd_usd": 148.68,
+            "n": 2640,
+            "pnl_usd": -148.59,
+            "wr": 0.4576
+          },
+          "2026": {
+            "max_dd_usd": 24.7,
+            "n": 457,
+            "pnl_usd": -24.7,
+            "wr": 0.4989
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_110593",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -191.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 238.75,
+        "min_year_pnl_usd": -238.7,
+        "n": 8809,
+        "pnl_usd": -444.98,
+        "trades_per_month": 316.17,
+        "wr": 0.3975,
+        "years": {
+          "2024": {
+            "max_dd_usd": 238.75,
+            "n": 4701,
+            "pnl_usd": -238.7,
+            "wr": 0.3776
+          },
+          "2025": {
+            "max_dd_usd": 170.97,
+            "n": 3411,
+            "pnl_usd": -170.79,
+            "wr": 0.4195
+          },
+          "2026": {
+            "max_dd_usd": 35.93,
+            "n": 697,
+            "pnl_usd": -35.49,
+            "wr": 0.4247
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_73729",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -11.41,
+        "liquidations": 0,
+        "max_period_dd_usd": 14.61,
+        "min_year_pnl_usd": -12.63,
+        "n": 613,
+        "pnl_usd": -26.48,
+        "trades_per_month": 22.0,
+        "wr": 0.646,
+        "years": {
+          "2024": {
+            "max_dd_usd": 9.48,
+            "n": 211,
+            "pnl_usd": -8.91,
+            "wr": 0.6682
+          },
+          "2025": {
+            "max_dd_usd": 14.61,
+            "n": 312,
+            "pnl_usd": -12.63,
+            "wr": 0.6474
+          },
+          "2026": {
+            "max_dd_usd": 6.26,
+            "n": 90,
+            "pnl_usd": -4.94,
+            "wr": 0.5889
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_81921",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -473.59,
+        "liquidations": 0,
+        "max_period_dd_usd": 504.32,
+        "min_year_pnl_usd": -503.5,
+        "n": 23483,
+        "pnl_usd": -1099.0,
+        "trades_per_month": 842.84,
+        "wr": 0.5636,
+        "years": {
+          "2024": {
+            "max_dd_usd": 504.32,
+            "n": 9066,
+            "pnl_usd": -503.5,
+            "wr": 0.5945
+          },
+          "2025": {
+            "max_dd_usd": 490.65,
+            "n": 11521,
+            "pnl_usd": -489.28,
+            "wr": 0.5482
+          },
+          "2026": {
+            "max_dd_usd": 106.59,
+            "n": 2896,
+            "pnl_usd": -106.21,
+            "wr": 0.528
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_151553",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.008,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -398.87,
+        "liquidations": 0,
+        "max_period_dd_usd": 424.38,
+        "min_year_pnl_usd": -423.64,
+        "n": 18117,
+        "pnl_usd": -925.6,
+        "trades_per_month": 650.24,
+        "wr": 0.4815,
+        "years": {
+          "2024": {
+            "max_dd_usd": 424.38,
+            "n": 8599,
+            "pnl_usd": -423.64,
+            "wr": 0.486
+          },
+          "2025": {
+            "max_dd_usd": 397.28,
+            "n": 7617,
+            "pnl_usd": -397.02,
+            "wr": 0.4854
+          },
+          "2026": {
+            "max_dd_usd": 104.97,
+            "n": 1901,
+            "pnl_usd": -104.94,
+            "wr": 0.4461
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_40961",
+      "spec": {
+        "follower": "SOLUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -349.95,
+        "liquidations": 0,
+        "max_period_dd_usd": 381.14,
+        "min_year_pnl_usd": -381.01,
+        "n": 14748,
+        "pnl_usd": -812.07,
+        "trades_per_month": 529.33,
+        "wr": 0.429,
+        "years": {
+          "2024": {
+            "max_dd_usd": 307.57,
+            "n": 5467,
+            "pnl_usd": -307.57,
+            "wr": 0.4524
+          },
+          "2025": {
+            "max_dd_usd": 381.14,
+            "n": 7136,
+            "pnl_usd": -381.01,
+            "wr": 0.4271
+          },
+          "2026": {
+            "max_dd_usd": 123.65,
+            "n": 2145,
+            "pnl_usd": -123.5,
+            "wr": 0.3758
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_163841",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -516.52,
+        "liquidations": 0,
+        "max_period_dd_usd": 593.83,
+        "min_year_pnl_usd": -593.34,
+        "n": 24450,
+        "pnl_usd": -1198.61,
+        "trades_per_month": 877.54,
+        "wr": 0.5452,
+        "years": {
+          "2024": {
+            "max_dd_usd": 593.83,
+            "n": 11184,
+            "pnl_usd": -593.34,
+            "wr": 0.5763
+          },
+          "2025": {
+            "max_dd_usd": 516.37,
+            "n": 11011,
+            "pnl_usd": -515.92,
+            "wr": 0.516
+          },
+          "2026": {
+            "max_dd_usd": 90.46,
+            "n": 2255,
+            "pnl_usd": -89.35,
+            "wr": 0.533
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_188417",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "DOGEUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -311.29,
+        "liquidations": 0,
+        "max_period_dd_usd": 386.72,
+        "min_year_pnl_usd": -386.43,
+        "n": 14597,
+        "pnl_usd": -722.36,
+        "trades_per_month": 523.91,
+        "wr": 0.374,
+        "years": {
+          "2024": {
+            "max_dd_usd": 386.72,
+            "n": 7574,
+            "pnl_usd": -386.43,
+            "wr": 0.3574
+          },
+          "2025": {
+            "max_dd_usd": 279.28,
+            "n": 5912,
+            "pnl_usd": -279.23,
+            "wr": 0.3985
+          },
+          "2026": {
+            "max_dd_usd": 56.86,
+            "n": 1111,
+            "pnl_usd": -56.71,
+            "wr": 0.3573
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_86017",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -10.02,
+        "liquidations": 0,
+        "max_period_dd_usd": 16.83,
+        "min_year_pnl_usd": -12.62,
+        "n": 538,
+        "pnl_usd": -23.25,
+        "trades_per_month": 19.31,
+        "wr": 0.6394,
+        "years": {
+          "2024": {
+            "max_dd_usd": 16.83,
+            "n": 229,
+            "pnl_usd": -12.62,
+            "wr": 0.6463
+          },
+          "2025": {
+            "max_dd_usd": 8.68,
+            "n": 205,
+            "pnl_usd": -6.72,
+            "wr": 0.6439
+          },
+          "2026": {
+            "max_dd_usd": 5.27,
+            "n": 104,
+            "pnl_usd": -3.91,
+            "wr": 0.6154
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_106497",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.006,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -512.09,
+        "liquidations": 0,
+        "max_period_dd_usd": 565.4,
+        "min_year_pnl_usd": -565.23,
+        "n": 22878,
+        "pnl_usd": -1188.32,
+        "trades_per_month": 821.12,
+        "wr": 0.3813,
+        "years": {
+          "2024": {
+            "max_dd_usd": 565.4,
+            "n": 11415,
+            "pnl_usd": -565.23,
+            "wr": 0.3683
+          },
+          "2025": {
+            "max_dd_usd": 510.05,
+            "n": 9314,
+            "pnl_usd": -510.05,
+            "wr": 0.3902
+          },
+          "2026": {
+            "max_dd_usd": 113.04,
+            "n": 2149,
+            "pnl_usd": -113.04,
+            "wr": 0.4123
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_184321",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "DOGEUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -573.97,
+        "liquidations": 0,
+        "max_period_dd_usd": 661.1,
+        "min_year_pnl_usd": -661.1,
+        "n": 26469,
+        "pnl_usd": -1331.92,
+        "trades_per_month": 950.01,
+        "wr": 0.3744,
+        "years": {
+          "2024": {
+            "max_dd_usd": 661.1,
+            "n": 12798,
+            "pnl_usd": -661.1,
+            "wr": 0.3575
+          },
+          "2025": {
+            "max_dd_usd": 548.49,
+            "n": 11289,
+            "pnl_usd": -548.49,
+            "wr": 0.3928
+          },
+          "2026": {
+            "max_dd_usd": 122.38,
+            "n": 2382,
+            "pnl_usd": -122.32,
+            "wr": 0.3778
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_57345",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -18.71,
+        "liquidations": 0,
+        "max_period_dd_usd": 23.38,
+        "min_year_pnl_usd": -23.1,
+        "n": 445,
+        "pnl_usd": -43.43,
+        "trades_per_month": 15.97,
+        "wr": 0.5348,
+        "years": {
+          "2024": {
+            "max_dd_usd": 10.95,
+            "n": 128,
+            "pnl_usd": -10.42,
+            "wr": 0.5781
+          },
+          "2025": {
+            "max_dd_usd": 23.38,
+            "n": 222,
+            "pnl_usd": -23.1,
+            "wr": 0.5225
+          },
+          "2026": {
+            "max_dd_usd": 10.02,
+            "n": 95,
+            "pnl_usd": -9.91,
+            "wr": 0.5053
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_102401",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 6,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -789.38,
+        "liquidations": 0,
+        "max_period_dd_usd": 866.17,
+        "min_year_pnl_usd": -865.93,
+        "n": 35081,
+        "pnl_usd": -1831.79,
+        "trades_per_month": 1259.11,
+        "wr": 0.3863,
+        "years": {
+          "2024": {
+            "max_dd_usd": 866.17,
+            "n": 16975,
+            "pnl_usd": -865.93,
+            "wr": 0.3705
+          },
+          "2025": {
+            "max_dd_usd": 785.19,
+            "n": 14605,
+            "pnl_usd": -785.12,
+            "wr": 0.3992
+          },
+          "2026": {
+            "max_dd_usd": 180.73,
+            "n": 3501,
+            "pnl_usd": -180.73,
+            "wr": 0.409
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_143361",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 12,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.004,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -897.76,
+        "liquidations": 0,
+        "max_period_dd_usd": 947.08,
+        "min_year_pnl_usd": -947.03,
+        "n": 39404,
+        "pnl_usd": -2083.29,
+        "trades_per_month": 1414.26,
+        "wr": 0.421,
+        "years": {
+          "2024": {
+            "max_dd_usd": 947.08,
+            "n": 17685,
+            "pnl_usd": -947.03,
+            "wr": 0.4274
+          },
+          "2025": {
+            "max_dd_usd": 888.61,
+            "n": 16967,
+            "pnl_usd": -888.39,
+            "wr": 0.4265
+          },
+          "2026": {
+            "max_dd_usd": 248.01,
+            "n": 4752,
+            "pnl_usd": -247.86,
+            "wr": 0.3777
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_139265",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -8.97,
+        "liquidations": 0,
+        "max_period_dd_usd": 10.22,
+        "min_year_pnl_usd": -9.75,
+        "n": 260,
+        "pnl_usd": -20.82,
+        "trades_per_month": 9.33,
+        "wr": 0.5692,
+        "years": {
+          "2024": {
+            "max_dd_usd": 10.22,
+            "n": 131,
+            "pnl_usd": -9.75,
+            "wr": 0.5878
+          },
+          "2025": {
+            "max_dd_usd": 8.82,
+            "n": 103,
+            "pnl_usd": -8.66,
+            "wr": 0.5437
+          },
+          "2026": {
+            "max_dd_usd": 3.17,
+            "n": 26,
+            "pnl_usd": -2.42,
+            "wr": 0.5769
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_94209",
+      "spec": {
+        "follower": "ETHUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "follow",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -9.64,
+        "liquidations": 0,
+        "max_period_dd_usd": 13.64,
+        "min_year_pnl_usd": -13.64,
+        "n": 320,
+        "pnl_usd": -22.36,
+        "trades_per_month": 11.49,
+        "wr": 0.425,
+        "years": {
+          "2024": {
+            "max_dd_usd": 13.64,
+            "n": 210,
+            "pnl_usd": -13.64,
+            "wr": 0.4
+          },
+          "2025": {
+            "max_dd_usd": 8.82,
+            "n": 106,
+            "pnl_usd": -8.82,
+            "wr": 0.4623
+          },
+          "2026": {
+            "max_dd_usd": 0.22,
+            "n": 4,
+            "pnl_usd": 0.09,
+            "wr": 0.75
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_77825",
+      "spec": {
+        "follower": "PEPEUSDT",
+        "follower_lookback": 1,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.018,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -5.63,
+        "liquidations": 0,
+        "max_period_dd_usd": 8.08,
+        "min_year_pnl_usd": -7.93,
+        "n": 74,
+        "pnl_usd": -13.08,
+        "trades_per_month": 2.66,
+        "wr": 0.527,
+        "years": {
+          "2024": {
+            "max_dd_usd": 2.6,
+            "n": 21,
+            "pnl_usd": -2.45,
+            "wr": 0.619
+          },
+          "2025": {
+            "max_dd_usd": 8.08,
+            "n": 43,
+            "pnl_usd": -7.93,
+            "wr": 0.5116
+          },
+          "2026": {
+            "max_dd_usd": 3.0,
+            "n": 10,
+            "pnl_usd": -2.7,
+            "wr": 0.4
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_155649",
+      "spec": {
+        "follower": "DOGEUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "SOLUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "same_confirm",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -4.65,
+        "liquidations": 0,
+        "max_period_dd_usd": 6.96,
+        "min_year_pnl_usd": -6.94,
+        "n": 118,
+        "pnl_usd": -10.78,
+        "trades_per_month": 4.24,
+        "wr": 0.4322,
+        "years": {
+          "2024": {
+            "max_dd_usd": 6.96,
+            "n": 80,
+            "pnl_usd": -6.94,
+            "wr": 0.3875
+          },
+          "2025": {
+            "max_dd_usd": 4.38,
+            "n": 33,
+            "pnl_usd": -3.74,
+            "wr": 0.5152
+          },
+          "2026": {
+            "max_dd_usd": 0.46,
+            "n": 5,
+            "pnl_usd": -0.09,
+            "wr": 0.6
+          }
+        }
+      }
+    },
+    {
+      "family": "5m_leadlag",
+      "id": "G7831_32769",
+      "spec": {
+        "follower": "SOLUSDT",
+        "follower_lookback": 3,
+        "hold": 3,
+        "leader": "ETHUSDT",
+        "lev": 5.0,
+        "lookback": 3,
+        "max_conc": 3,
+        "max_follower_move": 0.002,
+        "mode": "revert",
+        "move": 0.012,
+        "size": 0.1,
+        "sl": 0.01,
+        "tp": 0.004
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "annual_pnl_usd": -2.21,
+        "liquidations": 0,
+        "max_period_dd_usd": 3.84,
+        "min_year_pnl_usd": -3.84,
+        "n": 43,
+        "pnl_usd": -5.12,
+        "trades_per_month": 1.54,
+        "wr": 0.4884,
+        "years": {
+          "2024": {
+            "max_dd_usd": 3.84,
+            "n": 20,
+            "pnl_usd": -3.84,
+            "wr": 0.35
+          },
+          "2025": {
+            "max_dd_usd": 1.91,
+            "n": 22,
+            "pnl_usd": -0.89,
+            "wr": 0.6364
+          },
+          "2026": {
+            "max_dd_usd": 0.39,
+            "n": 1,
+            "pnl_usd": -0.39,
+            "wr": 0.0
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "n_total": 1458,
   "n_valid": 1386,
-  "n_robust_pass": 138,
+  "n_robust_pass": 14,
   "top_overall_by_score": [
     {
       "params": {
@@ -10,37 +10,6 @@
         "atr_max": 10,
         "atr_min": 3,
         "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 4,
-      "std": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 556.5007586925133,
-        "monthly_pnl": 46.375063224376106,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "stress": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 553.2812715130261,
-        "monthly_pnl": 46.10677262608551,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "score": 829.6920402324743
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 1,
         "univ": "no_dead",
         "lev": 20,
         "size": 0.2,
@@ -50,51 +19,20 @@
       "std": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 630.5467681944035,
-        "monthly_pnl": 52.545564016200295,
+        "annual_pnl": 315.27338409720176,
+        "monthly_pnl": 26.272782008100148,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
       "stress": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 626.8031784508139,
-        "monthly_pnl": 52.23359820423449,
+        "annual_pnl": 313.40158922540695,
+        "monthly_pnl": 26.116799102117245,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 824.656263501308
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 10,
-        "atr_min": 0,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 3,
-      "std": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 593.505642800385,
-        "monthly_pnl": 49.45880356669875,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "stress": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 589.3876940824364,
-        "monthly_pnl": 49.11564117353637,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "score": 785.0934292482284
+      "score": 412.328131750654
     },
     {
       "params": {
@@ -112,144 +50,20 @@
       "std": {
         "n": 51,
         "wr": 0.9411764705882353,
-        "annual_pnl": 637.2268035835491,
-        "monthly_pnl": 53.10223363196243,
+        "annual_pnl": 318.61340179177455,
+        "monthly_pnl": 26.551116815981214,
         "all_pos": true,
         "liq_rate": 0.0
       },
       "stress": {
         "n": 51,
         "wr": 0.9411764705882353,
-        "annual_pnl": 633.4817115317111,
-        "monthly_pnl": 52.79014262764259,
+        "annual_pnl": 316.74085576585554,
+        "monthly_pnl": 26.395071313821294,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 779.6657361492836
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 24,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 3,
-      "std": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 562.6110696608564,
-        "monthly_pnl": 46.88425580507137,
-        "all_pos": true,
-        "liq_rate": 0.0
-      },
-      "stress": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 559.3900801731209,
-        "monthly_pnl": 46.61584001442674,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "score": 760.1642748031343
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 8,
-        "atr_min": 3,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 3,
-      "std": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 556.5007586925133,
-        "monthly_pnl": 46.375063224376106,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "stress": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 553.2812715130261,
-        "monthly_pnl": 46.10677262608551,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "score": 751.9084114606798
-    },
-    {
-      "params": {
-        "thr": 78,
-        "hold": 36,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 2,
-        "univ": "no_dead",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 5,
-      "std": {
-        "n": 51,
-        "wr": 0.8627450980392157,
-        "annual_pnl": 493.18139214645214,
-        "monthly_pnl": 41.09844934553768,
-        "all_pos": true,
-        "liq_rate": 0.0392156862745098
-      },
-      "stress": {
-        "n": 51,
-        "wr": 0.8627450980392157,
-        "annual_pnl": 489.51267419773416,
-        "monthly_pnl": 40.79272284981118,
-        "all_pos": true,
-        "liq_rate": 0.0392156862745098
-      },
-      "score": 744.6071999073886
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 6,
-        "atr_min": 3,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 3,
-      "std": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 548.4295901181127,
-        "monthly_pnl": 45.702465843176064,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "stress": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 545.2101029386258,
-        "monthly_pnl": 45.43417524488549,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "score": 741.0031621027681
+      "score": 389.8328680746418
     },
     {
       "params": {
@@ -267,20 +81,20 @@
       "std": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 630.5467681944035,
-        "monthly_pnl": 52.545564016200295,
+        "annual_pnl": 315.27338409720176,
+        "monthly_pnl": 26.272782008100148,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
       "stress": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 626.8031784508139,
-        "monthly_pnl": 52.23359820423449,
+        "annual_pnl": 313.40158922540695,
+        "monthly_pnl": 26.116799102117245,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 739.3469948632418
+      "score": 369.6734974316209
     },
     {
       "params": {
@@ -298,20 +112,20 @@
       "std": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 622.6689746546335,
-        "monthly_pnl": 51.88908122121946,
+        "annual_pnl": 311.33448732731677,
+        "monthly_pnl": 25.94454061060973,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
       "stress": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 618.925384911044,
-        "monthly_pnl": 51.57711540925367,
+        "annual_pnl": 309.462692455522,
+        "monthly_pnl": 25.788557704626836,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 730.1098957715114
+      "score": 365.0549478857557
     },
     {
       "params": {
@@ -329,51 +143,20 @@
       "std": {
         "n": 64,
         "wr": 0.875,
-        "annual_pnl": 638.4704795686876,
-        "monthly_pnl": 53.20587329739063,
+        "annual_pnl": 319.2352397843438,
+        "monthly_pnl": 26.602936648695316,
         "all_pos": true,
         "liq_rate": 0.03125
       },
       "stress": {
         "n": 64,
         "wr": 0.875,
-        "annual_pnl": 633.8284282866364,
-        "monthly_pnl": 52.81903569055303,
+        "annual_pnl": 316.9142141433182,
+        "monthly_pnl": 26.409517845276515,
         "all_pos": true,
         "liq_rate": 0.03125
       },
-      "score": 726.2601705093821
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 8,
-        "atr_min": 0,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 2,
-      "std": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 593.505642800385,
-        "monthly_pnl": 49.45880356669875,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "stress": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 589.3876940824364,
-        "monthly_pnl": 49.11564117353637,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "score": 703.87686760186
+      "score": 363.13008525469104
     },
     {
       "params": {
@@ -391,144 +174,20 @@
       "std": {
         "n": 57,
         "wr": 0.8947368421052632,
-        "annual_pnl": 604.2908479830534,
-        "monthly_pnl": 50.35757066525445,
+        "annual_pnl": 302.1454239915267,
+        "monthly_pnl": 25.178785332627225,
         "all_pos": true,
         "liq_rate": 0.017543859649122806
       },
       "stress": {
         "n": 57,
         "wr": 0.8947368421052632,
-        "annual_pnl": 600.1713969568561,
-        "monthly_pnl": 50.014283079738014,
+        "annual_pnl": 300.08569847842807,
+        "monthly_pnl": 25.007141539869007,
         "all_pos": true,
         "liq_rate": 0.03508771929824561
       },
-      "score": 702.8856705487094
-    },
-    {
-      "params": {
-        "thr": 78,
-        "hold": 36,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 5,
-      "std": {
-        "n": 62,
-        "wr": 0.8064516129032258,
-        "annual_pnl": 495.7543901776178,
-        "monthly_pnl": 41.31286584813481,
-        "all_pos": true,
-        "liq_rate": 0.0967741935483871
-      },
-      "stress": {
-        "n": 62,
-        "wr": 0.7903225806451613,
-        "annual_pnl": 491.56156966479733,
-        "monthly_pnl": 40.96346413873311,
-        "all_pos": true,
-        "liq_rate": 0.0967741935483871
-      },
-      "score": 699.6533732345413
-    },
-    {
-      "params": {
-        "thr": 78,
-        "hold": 36,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 2,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 6,
-      "std": {
-        "n": 41,
-        "wr": 0.8780487804878049,
-        "annual_pnl": 419.0300382849819,
-        "monthly_pnl": 34.919169857081826,
-        "all_pos": true,
-        "liq_rate": 0.04878048780487805
-      },
-      "stress": {
-        "n": 41,
-        "wr": 0.8780487804878049,
-        "annual_pnl": 416.11003828498195,
-        "monthly_pnl": 34.675836523748494,
-        "all_pos": true,
-        "liq_rate": 0.04878048780487805
-      },
-      "score": 699.0647467973845
-    },
-    {
-      "params": {
-        "thr": 78,
-        "hold": 24,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 4,
-      "std": {
-        "n": 66,
-        "wr": 0.803030303030303,
-        "annual_pnl": 541.5509537921372,
-        "monthly_pnl": 45.129246149344766,
-        "all_pos": true,
-        "liq_rate": 0.07575757575757576
-      },
-      "stress": {
-        "n": 66,
-        "wr": 0.803030303030303,
-        "annual_pnl": 537.023453595141,
-        "monthly_pnl": 44.75195446626174,
-        "all_pos": true,
-        "liq_rate": 0.09090909090909091
-      },
-      "score": 695.8109224480793
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 6,
-        "atr_min": 0,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 2,
-      "std": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 585.4344742259847,
-        "monthly_pnl": 48.78620618549872,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "stress": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 581.3165255080361,
-        "monthly_pnl": 48.44304379233634,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "score": 694.3047448715187
+      "score": 351.4428352743547
     },
     {
       "params": {
@@ -546,82 +205,237 @@
       "std": {
         "n": 51,
         "wr": 0.9411764705882353,
-        "annual_pnl": 637.2268035835491,
-        "monthly_pnl": 53.10223363196243,
+        "annual_pnl": 318.61340179177455,
+        "monthly_pnl": 26.551116815981214,
         "all_pos": true,
         "liq_rate": 0.0
       },
       "stress": {
         "n": 51,
         "wr": 0.9411764705882353,
-        "annual_pnl": 633.4817115317111,
-        "monthly_pnl": 52.79014262764259,
+        "annual_pnl": 316.74085576585554,
+        "monthly_pnl": 26.395071313821294,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 689.7043050551354
+      "score": 344.8521525275677
     },
     {
       "params": {
-        "thr": 78,
+        "thr": 80,
         "hold": 24,
-        "atr_max": 10,
+        "atr_max": 6,
         "atr_min": 3,
-        "consec": 2,
+        "consec": 1,
         "univ": "no_dead",
         "lev": 20,
         "size": 0.2,
         "max_conc": 5
       },
-      "novelty": 4,
+      "novelty": 1,
       "std": {
-        "n": 52,
-        "wr": 0.8653846153846154,
-        "annual_pnl": 493.38837463633735,
-        "monthly_pnl": 41.115697886361446,
+        "n": 51,
+        "wr": 0.9411764705882353,
+        "annual_pnl": 312.8981854561553,
+        "monthly_pnl": 26.074848788012943,
         "all_pos": true,
-        "liq_rate": 0.057692307692307696
+        "liq_rate": 0.0
       },
       "stress": {
-        "n": 52,
-        "wr": 0.8653846153846154,
-        "annual_pnl": 489.79302617424275,
-        "monthly_pnl": 40.81608551452023,
+        "n": 51,
+        "wr": 0.9411764705882353,
+        "annual_pnl": 311.0256394302362,
+        "monthly_pnl": 25.918803285853016,
         "all_pos": true,
-        "liq_rate": 0.07692307692307693
+        "liq_rate": 0.0196078431372549
       },
-      "score": 683.1531341118517
+      "score": 338.66627131725045
+    },
+    {
+      "params": {
+        "thr": 80,
+        "hold": 24,
+        "atr_max": 10,
+        "atr_min": 0,
+        "consec": 1,
+        "univ": "no_dead",
+        "lev": 20,
+        "size": 0.2,
+        "max_conc": 5
+      },
+      "novelty": 1,
+      "std": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 330.82251499715636,
+        "monthly_pnl": 27.568542916429696,
+        "all_pos": true,
+        "liq_rate": 0.015625
+      },
+      "stress": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 328.5007382020065,
+        "monthly_pnl": 27.375061516833878,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "score": 332.89015571588857
+    },
+    {
+      "params": {
+        "thr": 80,
+        "hold": 36,
+        "atr_max": 8,
+        "atr_min": 0,
+        "consec": 1,
+        "univ": "no_dead",
+        "lev": 20,
+        "size": 0.2,
+        "max_conc": 5
+      },
+      "novelty": 1,
+      "std": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 319.2352397843438,
+        "monthly_pnl": 26.602936648695316,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "stress": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 316.9142141433182,
+        "monthly_pnl": 26.409517845276515,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "score": 321.2304600329959
+    },
+    {
+      "params": {
+        "thr": 80,
+        "hold": 36,
+        "atr_max": 6,
+        "atr_min": 0,
+        "consec": 1,
+        "univ": "no_dead",
+        "lev": 20,
+        "size": 0.2,
+        "max_conc": 5
+      },
+      "novelty": 1,
+      "std": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 315.29634301445884,
+        "monthly_pnl": 26.274695251204903,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "stress": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 312.9753173734332,
+        "monthly_pnl": 26.0812764477861,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "score": 317.2669451582992
     },
     {
       "params": {
         "thr": 80,
         "hold": 24,
         "atr_max": 8,
-        "atr_min": 3,
+        "atr_min": 0,
         "consec": 1,
         "univ": "top10",
         "lev": 20,
         "size": 0.2,
         "max_conc": 5
       },
-      "novelty": 2,
+      "novelty": 1,
       "std": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 562.6110696608564,
-        "monthly_pnl": 46.88425580507137,
+        "n": 57,
+        "wr": 0.8947368421052632,
+        "annual_pnl": 302.1454239915267,
+        "monthly_pnl": 25.178785332627225,
         "all_pos": true,
-        "liq_rate": 0.0
+        "liq_rate": 0.017543859649122806
       },
       "stress": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 559.3900801731209,
-        "monthly_pnl": 46.61584001442674,
+        "n": 57,
+        "wr": 0.8947368421052632,
+        "annual_pnl": 300.08569847842807,
+        "monthly_pnl": 25.007141539869007,
         "all_pos": true,
-        "liq_rate": 0.022727272727272728
+        "liq_rate": 0.03508771929824561
       },
-      "score": 681.5265912028101
+      "score": 310.89173889654455
+    },
+    {
+      "params": {
+        "thr": 80,
+        "hold": 24,
+        "atr_max": 8,
+        "atr_min": 0,
+        "consec": 1,
+        "univ": "no_dead",
+        "lev": 20,
+        "size": 0.2,
+        "max_conc": 5
+      },
+      "novelty": 0,
+      "std": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 330.82251499715636,
+        "monthly_pnl": 27.568542916429696,
+        "all_pos": true,
+        "liq_rate": 0.015625
+      },
+      "stress": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 328.5007382020065,
+        "monthly_pnl": 27.375061516833878,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "score": 289.4697006225118
+    },
+    {
+      "params": {
+        "thr": 80,
+        "hold": 24,
+        "atr_max": 6,
+        "atr_min": 0,
+        "consec": 1,
+        "univ": "no_dead",
+        "lev": 20,
+        "size": 0.2,
+        "max_conc": 5
+      },
+      "novelty": 0,
+      "std": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 325.10729866153713,
+        "monthly_pnl": 27.09227488846143,
+        "all_pos": true,
+        "liq_rate": 0.015625
+      },
+      "stress": {
+        "n": 64,
+        "wr": 0.875,
+        "annual_pnl": 322.7855218663872,
+        "monthly_pnl": 26.898793488865604,
+        "all_pos": true,
+        "liq_rate": 0.03125
+      },
+      "score": 284.468886328845
     }
   ],
   "top_novel_by_pnl": [
@@ -641,20 +455,20 @@
       "std": {
         "n": 64,
         "wr": 0.875,
-        "annual_pnl": 638.4704795686876,
-        "monthly_pnl": 53.20587329739063,
+        "annual_pnl": 319.2352397843438,
+        "monthly_pnl": 26.602936648695316,
         "all_pos": true,
         "liq_rate": 0.03125
       },
       "stress": {
         "n": 64,
         "wr": 0.875,
-        "annual_pnl": 633.8284282866364,
-        "monthly_pnl": 52.81903569055303,
+        "annual_pnl": 316.9142141433182,
+        "monthly_pnl": 26.409517845276515,
         "all_pos": true,
         "liq_rate": 0.03125
       },
-      "score": 726.2601705093821
+      "score": 363.13008525469104
     },
     {
       "params": {
@@ -672,20 +486,20 @@
       "std": {
         "n": 51,
         "wr": 0.9411764705882353,
-        "annual_pnl": 637.2268035835491,
-        "monthly_pnl": 53.10223363196243,
+        "annual_pnl": 318.61340179177455,
+        "monthly_pnl": 26.551116815981214,
         "all_pos": true,
         "liq_rate": 0.0
       },
       "stress": {
         "n": 51,
         "wr": 0.9411764705882353,
-        "annual_pnl": 633.4817115317111,
-        "monthly_pnl": 52.79014262764259,
+        "annual_pnl": 316.74085576585554,
+        "monthly_pnl": 26.395071313821294,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 779.6657361492836
+      "score": 389.8328680746418
     },
     {
       "params": {
@@ -703,20 +517,20 @@
       "std": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 630.5467681944035,
-        "monthly_pnl": 52.545564016200295,
+        "annual_pnl": 315.27338409720176,
+        "monthly_pnl": 26.272782008100148,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
       "stress": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 626.8031784508139,
-        "monthly_pnl": 52.23359820423449,
+        "annual_pnl": 313.40158922540695,
+        "monthly_pnl": 26.116799102117245,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 824.656263501308
+      "score": 412.328131750654
     },
     {
       "params": {
@@ -734,20 +548,20 @@
       "std": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 630.5467681944035,
-        "monthly_pnl": 52.545564016200295,
+        "annual_pnl": 315.27338409720176,
+        "monthly_pnl": 26.272782008100148,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
       "stress": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 626.8031784508139,
-        "monthly_pnl": 52.23359820423449,
+        "annual_pnl": 313.40158922540695,
+        "monthly_pnl": 26.116799102117245,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 739.3469948632418
+      "score": 369.6734974316209
     },
     {
       "params": {
@@ -765,20 +579,20 @@
       "std": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 622.6689746546335,
-        "monthly_pnl": 51.88908122121946,
+        "annual_pnl": 311.33448732731677,
+        "monthly_pnl": 25.94454061060973,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
       "stress": {
         "n": 51,
         "wr": 0.9019607843137255,
-        "annual_pnl": 618.925384911044,
-        "monthly_pnl": 51.57711540925367,
+        "annual_pnl": 309.462692455522,
+        "monthly_pnl": 25.788557704626836,
         "all_pos": true,
         "liq_rate": 0.0196078431372549
       },
-      "score": 730.1098957715114
+      "score": 365.0549478857557
     },
     {
       "params": {
@@ -796,144 +610,20 @@
       "std": {
         "n": 57,
         "wr": 0.8947368421052632,
-        "annual_pnl": 604.2908479830534,
-        "monthly_pnl": 50.35757066525445,
+        "annual_pnl": 302.1454239915267,
+        "monthly_pnl": 25.178785332627225,
         "all_pos": true,
         "liq_rate": 0.017543859649122806
       },
       "stress": {
         "n": 57,
         "wr": 0.8947368421052632,
-        "annual_pnl": 600.1713969568561,
-        "monthly_pnl": 50.014283079738014,
+        "annual_pnl": 300.08569847842807,
+        "monthly_pnl": 25.007141539869007,
         "all_pos": true,
         "liq_rate": 0.03508771929824561
       },
-      "score": 702.8856705487094
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 10,
-        "atr_min": 0,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 3,
-      "std": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 593.505642800385,
-        "monthly_pnl": 49.45880356669875,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "stress": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 589.3876940824364,
-        "monthly_pnl": 49.11564117353637,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "score": 785.0934292482284
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 8,
-        "atr_min": 0,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 2,
-      "std": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 593.505642800385,
-        "monthly_pnl": 49.45880356669875,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "stress": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 589.3876940824364,
-        "monthly_pnl": 49.11564117353637,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "score": 703.87686760186
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 36,
-        "atr_max": 6,
-        "atr_min": 0,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 2,
-      "std": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 585.4344742259847,
-        "monthly_pnl": 48.78620618549872,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "stress": {
-        "n": 57,
-        "wr": 0.9122807017543859,
-        "annual_pnl": 581.3165255080361,
-        "monthly_pnl": 48.44304379233634,
-        "all_pos": true,
-        "liq_rate": 0.03508771929824561
-      },
-      "score": 694.3047448715187
-    },
-    {
-      "params": {
-        "thr": 80,
-        "hold": 24,
-        "atr_max": 10,
-        "atr_min": 3,
-        "consec": 1,
-        "univ": "top10",
-        "lev": 20,
-        "size": 0.2,
-        "max_conc": 5
-      },
-      "novelty": 3,
-      "std": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 562.6110696608564,
-        "monthly_pnl": 46.88425580507137,
-        "all_pos": true,
-        "liq_rate": 0.0
-      },
-      "stress": {
-        "n": 44,
-        "wr": 0.9318181818181818,
-        "annual_pnl": 559.3900801731209,
-        "monthly_pnl": 46.61584001442674,
-        "all_pos": true,
-        "liq_rate": 0.022727272727272728
-      },
-      "score": 760.1642748031343
+      "score": 351.4428352743547
     }
   ]
 }

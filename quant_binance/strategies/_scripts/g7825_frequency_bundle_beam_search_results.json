@@ -1,0 +1,4243 @@
+{
+  "base": {
+    "component_families": [
+      "ch1_quality",
+      "watch_confirm"
+    ],
+    "component_ids": [
+      "G7822",
+      "G4692"
+    ],
+    "n_components": 2,
+    "per_period_slot_sum": {
+      "IS25-26": {
+        "slot_sum_n": 140,
+        "slot_sum_pnl_usd": 268.56,
+        "slot_sum_trades_per_month": 11.38,
+        "slot_sum_wr": 0.6
+      },
+      "OOS22-23": {
+        "slot_sum_n": 267,
+        "slot_sum_pnl_usd": 485.1,
+        "slot_sum_trades_per_month": 11.12,
+        "slot_sum_wr": 0.5655
+      },
+      "OOS24-Q1": {
+        "slot_sum_n": 277,
+        "slot_sum_pnl_usd": 803.71,
+        "slot_sum_trades_per_month": 18.47,
+        "slot_sum_wr": 0.6029
+      }
+    },
+    "slot_sum": {
+      "all_periods_positive": true,
+      "annual_pnl_usd": 364.38,
+      "liquidations": 0,
+      "max_component_period_dd_usd": 97.54,
+      "n": 684,
+      "pnl_usd": 1557.37,
+      "trades_per_month": 13.33,
+      "wr": 0.5877
+    },
+    "unique_direct_entries": {
+      "n": 684,
+      "trades_per_month": 13.33
+    }
+  },
+  "best_passes": [
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4673",
+        "G4472"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 698,
+          "slot_sum_pnl_usd": 550.35,
+          "slot_sum_trades_per_month": 56.74,
+          "slot_sum_wr": 0.5774
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1307,
+          "slot_sum_pnl_usd": 755.7,
+          "slot_sum_trades_per_month": 54.43,
+          "slot_sum_wr": 0.5409
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1272,
+          "slot_sum_pnl_usd": 1056.89,
+          "slot_sum_trades_per_month": 84.8,
+          "slot_sum_wr": 0.5676
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 552.87,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 165.29,
+        "n": 3277,
+        "pnl_usd": 2362.94,
+        "trades_per_month": 63.86,
+        "wr": 0.5591
+      },
+      "unique_direct_entries": {
+        "n": 1632,
+        "trades_per_month": 31.8
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4674",
+        "G4472"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 704,
+          "slot_sum_pnl_usd": 520.17,
+          "slot_sum_trades_per_month": 57.22,
+          "slot_sum_wr": 0.571
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1311,
+          "slot_sum_pnl_usd": 772.31,
+          "slot_sum_trades_per_month": 54.6,
+          "slot_sum_wr": 0.537
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1281,
+          "slot_sum_pnl_usd": 1006.54,
+          "slot_sum_trades_per_month": 85.4,
+          "slot_sum_wr": 0.5597
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 537.91,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3296,
+        "pnl_usd": 2299.02,
+        "trades_per_month": 64.23,
+        "wr": 0.5531
+      },
+      "unique_direct_entries": {
+        "n": 1630,
+        "trades_per_month": 31.76
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4673"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 763,
+          "slot_sum_pnl_usd": 487.57,
+          "slot_sum_trades_per_month": 62.02,
+          "slot_sum_wr": 0.5609
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1419,
+          "slot_sum_pnl_usd": 756.43,
+          "slot_sum_trades_per_month": 59.09,
+          "slot_sum_wr": 0.5328
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1342,
+          "slot_sum_pnl_usd": 1022.09,
+          "slot_sum_trades_per_month": 89.47,
+          "slot_sum_wr": 0.5611
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 530.21,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 165.29,
+        "n": 3524,
+        "pnl_usd": 2266.09,
+        "trades_per_month": 68.67,
+        "wr": 0.5496
+      },
+      "unique_direct_entries": {
+        "n": 1618,
+        "trades_per_month": 31.53
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4674"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 769,
+          "slot_sum_pnl_usd": 457.39,
+          "slot_sum_trades_per_month": 62.51,
+          "slot_sum_wr": 0.5553
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1423,
+          "slot_sum_pnl_usd": 773.04,
+          "slot_sum_trades_per_month": 59.26,
+          "slot_sum_wr": 0.5292
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1351,
+          "slot_sum_pnl_usd": 971.74,
+          "slot_sum_trades_per_month": 90.07,
+          "slot_sum_wr": 0.5537
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 515.25,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3543,
+        "pnl_usd": 2202.17,
+        "trades_per_month": 69.04,
+        "wr": 0.5442
+      },
+      "unique_direct_entries": {
+        "n": 1615,
+        "trades_per_month": 31.47
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4672"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 751,
+          "slot_sum_pnl_usd": 420.68,
+          "slot_sum_trades_per_month": 61.04,
+          "slot_sum_wr": 0.5699
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1399,
+          "slot_sum_pnl_usd": 827.07,
+          "slot_sum_trades_per_month": 58.26,
+          "slot_sum_wr": 0.534
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1329,
+          "slot_sum_pnl_usd": 977.43,
+          "slot_sum_trades_per_month": 88.6,
+          "slot_sum_wr": 0.5606
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 520.64,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3479,
+        "pnl_usd": 2225.18,
+        "trades_per_month": 67.8,
+        "wr": 0.5519
+      },
+      "unique_direct_entries": {
+        "n": 1609,
+        "trades_per_month": 31.35
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4669"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 744,
+          "slot_sum_pnl_usd": 442.35,
+          "slot_sum_trades_per_month": 60.47,
+          "slot_sum_wr": 0.5753
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1398,
+          "slot_sum_pnl_usd": 774.12,
+          "slot_sum_trades_per_month": 58.22,
+          "slot_sum_wr": 0.5322
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1327,
+          "slot_sum_pnl_usd": 950.17,
+          "slot_sum_trades_per_month": 88.47,
+          "slot_sum_wr": 0.5607
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 506.94,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3469,
+        "pnl_usd": 2166.64,
+        "trades_per_month": 67.6,
+        "wr": 0.5523
+      },
+      "unique_direct_entries": {
+        "n": 1599,
+        "trades_per_month": 31.16
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4673",
+        "G4672"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 691,
+          "slot_sum_pnl_usd": 486.41,
+          "slot_sum_trades_per_month": 56.17,
+          "slot_sum_wr": 0.5716
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1280,
+          "slot_sum_pnl_usd": 993.82,
+          "slot_sum_trades_per_month": 53.3,
+          "slot_sum_wr": 0.543
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1230,
+          "slot_sum_pnl_usd": 1165.3,
+          "slot_sum_trades_per_month": 82.0,
+          "slot_sum_wr": 0.5683
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 618.99,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 165.29,
+        "n": 3201,
+        "pnl_usd": 2645.53,
+        "trades_per_month": 62.38,
+        "wr": 0.5589
+      },
+      "unique_direct_entries": {
+        "n": 1598,
+        "trades_per_month": 31.14
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4673",
+        "G4464"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 687,
+          "slot_sum_pnl_usd": 565.73,
+          "slot_sum_trades_per_month": 55.84,
+          "slot_sum_wr": 0.5822
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1298,
+          "slot_sum_pnl_usd": 776.31,
+          "slot_sum_trades_per_month": 54.05,
+          "slot_sum_wr": 0.5416
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1258,
+          "slot_sum_pnl_usd": 1066.6,
+          "slot_sum_trades_per_month": 83.87,
+          "slot_sum_wr": 0.57
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 563.56,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 165.29,
+        "n": 3243,
+        "pnl_usd": 2408.64,
+        "trades_per_month": 63.2,
+        "wr": 0.5612
+      },
+      "unique_direct_entries": {
+        "n": 1596,
+        "trades_per_month": 31.1
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4671"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 740,
+          "slot_sum_pnl_usd": 481.99,
+          "slot_sum_trades_per_month": 60.15,
+          "slot_sum_wr": 0.5703
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1389,
+          "slot_sum_pnl_usd": 810.78,
+          "slot_sum_trades_per_month": 57.84,
+          "slot_sum_wr": 0.5342
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1323,
+          "slot_sum_pnl_usd": 953.74,
+          "slot_sum_trades_per_month": 88.2,
+          "slot_sum_wr": 0.5563
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 525.63,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3452,
+        "pnl_usd": 2246.51,
+        "trades_per_month": 67.27,
+        "wr": 0.5504
+      },
+      "unique_direct_entries": {
+        "n": 1596,
+        "trades_per_month": 31.1
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4468",
+        "G4474",
+        "G4674"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 750,
+          "slot_sum_pnl_usd": 433.71,
+          "slot_sum_trades_per_month": 60.96,
+          "slot_sum_wr": 0.5507
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1392,
+          "slot_sum_pnl_usd": 853.4,
+          "slot_sum_trades_per_month": 57.97,
+          "slot_sum_wr": 0.5323
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1321,
+          "slot_sum_pnl_usd": 1103.8,
+          "slot_sum_trades_per_month": 88.07,
+          "slot_sum_wr": 0.5617
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 559.41,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 166.19,
+        "n": 3463,
+        "pnl_usd": 2390.91,
+        "trades_per_month": 67.48,
+        "wr": 0.5475
+      },
+      "unique_direct_entries": {
+        "n": 1596,
+        "trades_per_month": 31.1
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4674",
+        "G4464"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 693,
+          "slot_sum_pnl_usd": 535.55,
+          "slot_sum_trades_per_month": 56.33,
+          "slot_sum_wr": 0.5758
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1302,
+          "slot_sum_pnl_usd": 792.92,
+          "slot_sum_trades_per_month": 54.22,
+          "slot_sum_wr": 0.5376
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1267,
+          "slot_sum_pnl_usd": 1016.25,
+          "slot_sum_trades_per_month": 84.47,
+          "slot_sum_wr": 0.562
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 548.6,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3262,
+        "pnl_usd": 2344.72,
+        "trades_per_month": 63.57,
+        "wr": 0.5552
+      },
+      "unique_direct_entries": {
+        "n": 1595,
+        "trades_per_month": 31.08
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4674",
+        "G4672"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 697,
+          "slot_sum_pnl_usd": 456.23,
+          "slot_sum_trades_per_month": 56.65,
+          "slot_sum_wr": 0.5653
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1284,
+          "slot_sum_pnl_usd": 1010.43,
+          "slot_sum_trades_per_month": 53.47,
+          "slot_sum_wr": 0.5389
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1239,
+          "slot_sum_pnl_usd": 1114.95,
+          "slot_sum_trades_per_month": 82.6,
+          "slot_sum_wr": 0.5601
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 604.03,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3220,
+        "pnl_usd": 2581.61,
+        "trades_per_month": 62.75,
+        "wr": 0.5528
+      },
+      "unique_direct_entries": {
+        "n": 1595,
+        "trades_per_month": 31.08
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4690"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 745,
+          "slot_sum_pnl_usd": 439.11,
+          "slot_sum_trades_per_month": 60.56,
+          "slot_sum_wr": 0.5651
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1392,
+          "slot_sum_pnl_usd": 814.56,
+          "slot_sum_trades_per_month": 57.97,
+          "slot_sum_wr": 0.5287
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1325,
+          "slot_sum_pnl_usd": 987.21,
+          "slot_sum_trades_per_month": 88.33,
+          "slot_sum_wr": 0.5608
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 524.31,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 117.33,
+        "n": 3462,
+        "pnl_usd": 2240.88,
+        "trades_per_month": 67.46,
+        "wr": 0.5488
+      },
+      "unique_direct_entries": {
+        "n": 1595,
+        "trades_per_month": 31.08
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4670"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 734,
+          "slot_sum_pnl_usd": 489.11,
+          "slot_sum_trades_per_month": 59.66,
+          "slot_sum_wr": 0.5668
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1382,
+          "slot_sum_pnl_usd": 842.74,
+          "slot_sum_trades_per_month": 57.55,
+          "slot_sum_wr": 0.5376
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1317,
+          "slot_sum_pnl_usd": 989.95,
+          "slot_sum_trades_per_month": 87.8,
+          "slot_sum_wr": 0.5596
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 543.24,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3433,
+        "pnl_usd": 2321.8,
+        "trades_per_month": 66.9,
+        "wr": 0.5523
+      },
+      "unique_direct_entries": {
+        "n": 1594,
+        "trades_per_month": 31.06
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4474",
+        "G4674",
+        "G4472"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 685,
+          "slot_sum_pnl_usd": 496.49,
+          "slot_sum_trades_per_month": 55.68,
+          "slot_sum_wr": 0.5664
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1280,
+          "slot_sum_pnl_usd": 852.67,
+          "slot_sum_trades_per_month": 53.3,
+          "slot_sum_wr": 0.5406
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1251,
+          "slot_sum_pnl_usd": 1138.6,
+          "slot_sum_trades_per_month": 83.4,
+          "slot_sum_wr": 0.5683
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 582.07,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 166.19,
+        "n": 3216,
+        "pnl_usd": 2487.76,
+        "trades_per_month": 62.67,
+        "wr": 0.5569
+      },
+      "unique_direct_entries": {
+        "n": 1593,
+        "trades_per_month": 31.04
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4472",
+        "G4690"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 680,
+          "slot_sum_pnl_usd": 501.89,
+          "slot_sum_trades_per_month": 55.27,
+          "slot_sum_wr": 0.5824
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1280,
+          "slot_sum_pnl_usd": 813.83,
+          "slot_sum_trades_per_month": 53.3,
+          "slot_sum_wr": 0.5367
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1255,
+          "slot_sum_pnl_usd": 1022.01,
+          "slot_sum_trades_per_month": 83.67,
+          "slot_sum_wr": 0.5673
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 546.97,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 117.33,
+        "n": 3215,
+        "pnl_usd": 2337.73,
+        "trades_per_month": 62.65,
+        "wr": 0.5583
+      },
+      "unique_direct_entries": {
+        "n": 1592,
+        "trades_per_month": 31.02
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4472"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 758,
+          "slot_sum_pnl_usd": 484.62,
+          "slot_sum_trades_per_month": 61.61,
+          "slot_sum_wr": 0.5752
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1426,
+          "slot_sum_pnl_usd": 588.95,
+          "slot_sum_trades_per_month": 59.38,
+          "slot_sum_wr": 0.5323
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1371,
+          "slot_sum_pnl_usd": 869.02,
+          "slot_sum_trades_per_month": 91.4,
+          "slot_sum_wr": 0.5602
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 454.52,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3555,
+        "pnl_usd": 1942.59,
+        "trades_per_month": 69.28,
+        "wr": 0.5522
+      },
+      "unique_direct_entries": {
+        "n": 1591,
+        "trades_per_month": 31.0
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4673",
+        "G4456"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 686,
+          "slot_sum_pnl_usd": 515.34,
+          "slot_sum_trades_per_month": 55.76,
+          "slot_sum_wr": 0.5714
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1275,
+          "slot_sum_pnl_usd": 812.12,
+          "slot_sum_trades_per_month": 53.1,
+          "slot_sum_wr": 0.5467
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1231,
+          "slot_sum_pnl_usd": 1080.79,
+          "slot_sum_trades_per_month": 82.07,
+          "slot_sum_wr": 0.5719
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 563.47,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 165.29,
+        "n": 3192,
+        "pnl_usd": 2408.25,
+        "trades_per_month": 62.2,
+        "wr": 0.5617
+      },
+      "unique_direct_entries": {
+        "n": 1590,
+        "trades_per_month": 30.98
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "controlled_loose_breakout",
+        "watch_confirm"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4468",
+        "G4705"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 742,
+          "slot_sum_pnl_usd": 467.17,
+          "slot_sum_trades_per_month": 60.31,
+          "slot_sum_wr": 0.566
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1387,
+          "slot_sum_pnl_usd": 797.77,
+          "slot_sum_trades_per_month": 57.76,
+          "slot_sum_wr": 0.5314
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1322,
+          "slot_sum_pnl_usd": 989.02,
+          "slot_sum_trades_per_month": 88.13,
+          "slot_sum_wr": 0.5613
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 527.37,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3451,
+        "pnl_usd": 2253.96,
+        "trades_per_month": 67.25,
+        "wr": 0.5503
+      },
+      "unique_direct_entries": {
+        "n": 1590,
+        "trades_per_month": 30.98
+      }
+    },
+    {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4674",
+        "G4456"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 692,
+          "slot_sum_pnl_usd": 485.16,
+          "slot_sum_trades_per_month": 56.25,
+          "slot_sum_wr": 0.565
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1279,
+          "slot_sum_pnl_usd": 828.73,
+          "slot_sum_trades_per_month": 53.26,
+          "slot_sum_wr": 0.5426
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1240,
+          "slot_sum_pnl_usd": 1030.44,
+          "slot_sum_trades_per_month": 82.67,
+          "slot_sum_wr": 0.5637
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 548.51,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 3211,
+        "pnl_usd": 2344.33,
+        "trades_per_month": 62.57,
+        "wr": 0.5556
+      },
+      "unique_direct_entries": {
+        "n": 1589,
+        "trades_per_month": 30.97
+      }
+    }
+  ],
+  "candidate_gate": {
+    "bundle_wr_gte": 0.54,
+    "component_all_periods_positive": true,
+    "component_liquidations": 0,
+    "component_max_dd_lte": 190,
+    "component_pnl_positive": true,
+    "component_wr_gte": 0.5,
+    "target_unique_trades_per_month": 30.0
+  },
+  "decision": {
+    "best": {
+      "component_families": [
+        "ch1_quality",
+        "watch_confirm",
+        "controlled_loose_breakout",
+        "watch_confirm",
+        "controlled_loose_breakout"
+      ],
+      "component_ids": [
+        "G7822",
+        "G4692",
+        "G4475",
+        "G4673",
+        "G4472"
+      ],
+      "n_components": 5,
+      "per_period_slot_sum": {
+        "IS25-26": {
+          "slot_sum_n": 698,
+          "slot_sum_pnl_usd": 550.35,
+          "slot_sum_trades_per_month": 56.74,
+          "slot_sum_wr": 0.5774
+        },
+        "OOS22-23": {
+          "slot_sum_n": 1307,
+          "slot_sum_pnl_usd": 755.7,
+          "slot_sum_trades_per_month": 54.43,
+          "slot_sum_wr": 0.5409
+        },
+        "OOS24-Q1": {
+          "slot_sum_n": 1272,
+          "slot_sum_pnl_usd": 1056.89,
+          "slot_sum_trades_per_month": 84.8,
+          "slot_sum_wr": 0.5676
+        }
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 552.87,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 165.29,
+        "n": 3277,
+        "pnl_usd": 2362.94,
+        "trades_per_month": 63.86,
+        "wr": 0.5591
+      },
+      "unique_direct_entries": {
+        "n": 1632,
+        "trades_per_month": 31.8
+      }
+    },
+    "interpretation": "Full-window multi-sleeve paper-observation bundle; not a single shared-equity live portfolio.",
+    "verdict": "PASS"
+  },
+  "elapsed_sec": 112.09,
+  "generated_at": "2026-05-07 11:40:26",
+  "n_raw_components": 82,
+  "n_retained_components": 62,
+  "question": "Can multi-sleeve full-window search solve the >=30 unique entries/month target?",
+  "top_components": [
+    {
+      "desc": "controlled loose breakout ret8_vol25_mid_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4475",
+      "new_keys_vs_base": 683,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          }
+        },
+        "desc": "controlled loose breakout ret8_vol25_mid_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4475",
+        "labels": {
+          "exit": "mid_exit",
+          "gate": "ret8_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 1042,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 52.01,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 113.88,
+        "min_period_pnl_usd": 12.27,
+        "monthly_pnl_usd": 4.33,
+        "n": 1042,
+        "pnl_usd": 222.31,
+        "trades_per_month": 20.31,
+        "wr": 0.5317
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_ret8_fast_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4468",
+      "new_keys_vs_base": 620,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_ret8_fast_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4468",
+        "labels": {
+          "exit": "fast_exit",
+          "gate": "break30_ret8"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 1038,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 7.73,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 101.62,
+        "min_period_pnl_usd": 2.07,
+        "monthly_pnl_usd": 0.64,
+        "n": 1038,
+        "pnl_usd": 33.03,
+        "trades_per_month": 20.23,
+        "wr": 0.5356
+      }
+    },
+    {
+      "desc": "controlled loose breakout ret8_vol25_g4006_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4474",
+      "new_keys_vs_base": 616,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "controlled loose breakout ret8_vol25_g4006_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4474",
+        "labels": {
+          "exit": "g4006_exit",
+          "gate": "ret8_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 962,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 96.18,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 166.19,
+        "min_period_pnl_usd": 85.92,
+        "monthly_pnl_usd": 8.01,
+        "n": 962,
+        "pnl_usd": 411.05,
+        "trades_per_month": 18.75,
+        "wr": 0.5426
+      }
+    },
+    {
+      "desc": "controlled loose breakout ret8_fast_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4460",
+      "new_keys_vs_base": 573,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          }
+        },
+        "desc": "controlled loose breakout ret8_fast_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4460",
+        "labels": {
+          "exit": "fast_exit",
+          "gate": "ret8"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 997,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 19.35,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 83.91,
+        "min_period_pnl_usd": 10.86,
+        "monthly_pnl_usd": 1.61,
+        "n": 997,
+        "pnl_usd": 82.68,
+        "trades_per_month": 19.43,
+        "wr": 0.5426
+      }
+    },
+    {
+      "desc": "controlled loose breakout ret8_g4006_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4458",
+      "new_keys_vs_base": 477,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "controlled loose breakout ret8_g4006_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4458",
+        "labels": {
+          "exit": "g4006_exit",
+          "gate": "ret8"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 881,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 72.8,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 187.51,
+        "min_period_pnl_usd": 45.18,
+        "monthly_pnl_usd": 6.07,
+        "n": 881,
+        "pnl_usd": 311.14,
+        "trades_per_month": 17.17,
+        "wr": 0.546
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_hold_break30 mid",
+      "family": "watch_confirm",
+      "id": "G4674",
+      "new_keys_vs_base": 270,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_hold_break30 mid",
+        "id": "G4674",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 779,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 91.12,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 113.06,
+        "min_period_pnl_usd": 57.39,
+        "monthly_pnl_usd": 7.59,
+        "n": 779,
+        "pnl_usd": 389.46,
+        "trades_per_month": 15.18,
+        "wr": 0.534
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_hold_break30 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4673",
+      "new_keys_vs_base": 261,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_hold_break30 g4006_like",
+        "id": "G4673",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 760,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 106.08,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 165.29,
+        "min_period_pnl_usd": 87.57,
+        "monthly_pnl_usd": 8.84,
+        "n": 760,
+        "pnl_usd": 453.38,
+        "trades_per_month": 14.81,
+        "wr": 0.5592
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_vol25_fast_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4472",
+      "new_keys_vs_base": 253,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_vol25_fast_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4472",
+        "labels": {
+          "exit": "fast_exit",
+          "gate": "break30_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 791,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 30.39,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 75.88,
+        "min_period_pnl_usd": 1.34,
+        "monthly_pnl_usd": 2.53,
+        "n": 791,
+        "pnl_usd": 129.88,
+        "trades_per_month": 15.41,
+        "wr": 0.5702
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_vol25_mid_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4471",
+      "new_keys_vs_base": 218,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_vol25_mid_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4471",
+        "labels": {
+          "exit": "mid_exit",
+          "gate": "break30_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 748,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 30.0,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 107.73,
+        "min_period_pnl_usd": 1.46,
+        "monthly_pnl_usd": 2.5,
+        "n": 748,
+        "pnl_usd": 128.2,
+        "trades_per_month": 14.58,
+        "wr": 0.5495
+      }
+    },
+    {
+      "desc": "controlled loose breakout vol25_fast_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4464",
+      "new_keys_vs_base": 215,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          }
+        },
+        "desc": "controlled loose breakout vol25_fast_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4464",
+        "labels": {
+          "exit": "fast_exit",
+          "gate": "vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 757,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 41.08,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 80.83,
+        "min_period_pnl_usd": 21.95,
+        "monthly_pnl_usd": 3.42,
+        "n": 757,
+        "pnl_usd": 175.58,
+        "trades_per_month": 14.75,
+        "wr": 0.5799
+      }
+    },
+    {
+      "desc": "controlled loose breakout vol25_mid_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4463",
+      "new_keys_vs_base": 181,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          }
+        },
+        "desc": "controlled loose breakout vol25_mid_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4463",
+        "labels": {
+          "exit": "mid_exit",
+          "gate": "vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 715,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 51.29,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 103.57,
+        "min_period_pnl_usd": 21.94,
+        "monthly_pnl_usd": 4.27,
+        "n": 715,
+        "pnl_usd": 219.21,
+        "trades_per_month": 13.93,
+        "wr": 0.5594
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_vol25_g4006_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4470",
+      "new_keys_vs_base": 162,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_vol25_g4006_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4470",
+        "labels": {
+          "exit": "g4006_exit",
+          "gate": "break30_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 690,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 75.49,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 187.21,
+        "min_period_pnl_usd": 63.72,
+        "monthly_pnl_usd": 6.29,
+        "n": 690,
+        "pnl_usd": 322.65,
+        "trades_per_month": 13.45,
+        "wr": 0.5565
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c3_green_follow30 fast",
+      "family": "watch_confirm",
+      "id": "G4672",
+      "new_keys_vs_base": 140,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c3_green_follow30 fast",
+        "id": "G4672",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 715,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 96.51,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.05,
+        "min_period_pnl_usd": 20.68,
+        "monthly_pnl_usd": 8.04,
+        "n": 715,
+        "pnl_usd": 412.47,
+        "trades_per_month": 13.93,
+        "wr": 0.5706
+      }
+    },
+    {
+      "desc": "controlled loose breakout vol25_g4006_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4462",
+      "new_keys_vs_base": 128,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "controlled loose breakout vol25_g4006_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4462",
+        "labels": {
+          "exit": "g4006_exit",
+          "gate": "vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 663,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 111.0,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 171.82,
+        "min_period_pnl_usd": 109.01,
+        "monthly_pnl_usd": 9.25,
+        "n": 663,
+        "pnl_usd": 474.41,
+        "trades_per_month": 12.92,
+        "wr": 0.5671
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_fast_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4456",
+      "new_keys_vs_base": 128,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_fast_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4456",
+        "labels": {
+          "exit": "fast_exit",
+          "gate": "break30"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 706,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 40.99,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 45.76,
+        "min_period_pnl_usd": 49.61,
+        "monthly_pnl_usd": 3.42,
+        "n": 706,
+        "pnl_usd": 175.19,
+        "trades_per_month": 13.76,
+        "wr": 0.5836
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_follow20_vol25 fast",
+      "family": "watch_confirm",
+      "id": "G4669",
+      "new_keys_vs_base": 125,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_follow20_vol25 fast",
+        "id": "G4669",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 705,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 82.81,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 74.04,
+        "min_period_pnl_usd": 42.35,
+        "monthly_pnl_usd": 6.9,
+        "n": 705,
+        "pnl_usd": 353.93,
+        "trades_per_month": 13.74,
+        "wr": 0.573
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c3_green_follow30 mid",
+      "family": "watch_confirm",
+      "id": "G4671",
+      "new_keys_vs_base": 111,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c3_green_follow30 mid",
+        "id": "G4671",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 688,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 101.5,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 88.29,
+        "min_period_pnl_usd": 81.99,
+        "monthly_pnl_usd": 8.46,
+        "n": 688,
+        "pnl_usd": 433.8,
+        "trades_per_month": 13.41,
+        "wr": 0.564
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_hold_break30 fast",
+      "family": "watch_confirm",
+      "id": "G4690",
+      "new_keys_vs_base": 107,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_hold_break30 fast",
+        "id": "G4690",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 698,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 100.18,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 117.33,
+        "min_period_pnl_usd": 39.11,
+        "monthly_pnl_usd": 8.35,
+        "n": 698,
+        "pnl_usd": 428.17,
+        "trades_per_month": 13.6,
+        "wr": 0.5559
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c3_green_follow30 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4670",
+      "new_keys_vs_base": 102,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c3_green_follow30 g4006_like",
+        "id": "G4670",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 669,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 119.11,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 109.27,
+        "min_period_pnl_usd": 89.11,
+        "monthly_pnl_usd": 9.93,
+        "n": 669,
+        "pnl_usd": 509.09,
+        "trades_per_month": 13.04,
+        "wr": 0.574
+      }
+    },
+    {
+      "desc": "controlled loose breakout strict_fast_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4452",
+      "new_keys_vs_base": 101,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 18,
+              "lev": 6.0,
+              "size": 0.16,
+              "sl_pct": 0.055,
+              "tp_pct": 0.04
+            }
+          }
+        },
+        "desc": "controlled loose breakout strict_fast_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4452",
+        "labels": {
+          "exit": "fast_exit",
+          "gate": "strict"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 680,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 47.52,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 47.21,
+        "min_period_pnl_usd": 64.65,
+        "monthly_pnl_usd": 3.96,
+        "n": 680,
+        "pnl_usd": 203.1,
+        "trades_per_month": 13.25,
+        "wr": 0.5912
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_follow20_vol25 mid",
+      "family": "watch_confirm",
+      "id": "G4668",
+      "new_keys_vs_base": 98,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_follow20_vol25 mid",
+        "id": "G4668",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 680,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 113.48,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.02,
+        "min_period_pnl_usd": 97.36,
+        "monthly_pnl_usd": 9.46,
+        "n": 680,
+        "pnl_usd": 485.03,
+        "trades_per_month": 13.25,
+        "wr": 0.5735
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_hold_break30 fast",
+      "family": "watch_confirm",
+      "id": "G4705",
+      "new_keys_vs_base": 96,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_hold_break30 fast",
+        "id": "G4705",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 687,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 103.24,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 103.28,
+        "min_period_pnl_usd": 67.17,
+        "monthly_pnl_usd": 8.6,
+        "n": 687,
+        "pnl_usd": 441.25,
+        "trades_per_month": 13.39,
+        "wr": 0.5633
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c3_green_follow30 fast",
+      "family": "watch_confirm",
+      "id": "G4687",
+      "new_keys_vs_base": 94,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c3_green_follow30 fast",
+        "id": "G4687",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 691,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 101.76,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 120.35,
+        "min_period_pnl_usd": 16.61,
+        "monthly_pnl_usd": 8.48,
+        "n": 691,
+        "pnl_usd": 434.93,
+        "trades_per_month": 13.47,
+        "wr": 0.5644
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_mid_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4455",
+      "new_keys_vs_base": 91,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_mid_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4455",
+        "labels": {
+          "exit": "mid_exit",
+          "gate": "break30"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 665,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 34.31,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 73.5,
+        "min_period_pnl_usd": 46.05,
+        "monthly_pnl_usd": 2.86,
+        "n": 665,
+        "pnl_usd": 146.66,
+        "trades_per_month": 12.96,
+        "wr": 0.5564
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_follow20_vol25 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4667",
+      "new_keys_vs_base": 90,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_follow20_vol25 g4006_like",
+        "id": "G4667",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 662,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 117.25,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 109.27,
+        "min_period_pnl_usd": 88.56,
+        "monthly_pnl_usd": 9.77,
+        "n": 662,
+        "pnl_usd": 501.12,
+        "trades_per_month": 12.9,
+        "wr": 0.571
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_hold_break30 mid",
+      "family": "watch_confirm",
+      "id": "G4689",
+      "new_keys_vs_base": 89,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_hold_break30 mid",
+        "id": "G4689",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 683,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 102.58,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 94.54,
+        "min_period_pnl_usd": 71.05,
+        "monthly_pnl_usd": 8.55,
+        "n": 683,
+        "pnl_usd": 438.43,
+        "trades_per_month": 13.31,
+        "wr": 0.5447
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_hold_break30 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4688",
+      "new_keys_vs_base": 85,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_hold_break30 g4006_like",
+        "id": "G4688",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 671,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 98.85,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 102.26,
+        "min_period_pnl_usd": 69.4,
+        "monthly_pnl_usd": 8.24,
+        "n": 671,
+        "pnl_usd": 422.47,
+        "trades_per_month": 13.08,
+        "wr": 0.5589
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_follow20_vol25 fast",
+      "family": "watch_confirm",
+      "id": "G4684",
+      "new_keys_vs_base": 84,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_follow20_vol25 fast",
+        "id": "G4684",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 685,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 84.73,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 111.86,
+        "min_period_pnl_usd": 28.68,
+        "monthly_pnl_usd": 7.06,
+        "n": 685,
+        "pnl_usd": 362.13,
+        "trades_per_month": 13.35,
+        "wr": 0.5635
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_strict fast",
+      "family": "watch_confirm",
+      "id": "G4666",
+      "new_keys_vs_base": 82,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_strict fast",
+        "id": "G4666",
+        "labels": {
+          "confirm": "c2_strict",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 678,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 77.76,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 86.89,
+        "min_period_pnl_usd": 22.64,
+        "monthly_pnl_usd": 6.48,
+        "n": 678,
+        "pnl_usd": 332.35,
+        "trades_per_month": 13.21,
+        "wr": 0.5737
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_hold_break30 mid",
+      "family": "watch_confirm",
+      "id": "G4704",
+      "new_keys_vs_base": 81,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_hold_break30 mid",
+        "id": "G4704",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 675,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 110.36,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 97.54,
+        "min_period_pnl_usd": 95.82,
+        "monthly_pnl_usd": 9.2,
+        "n": 675,
+        "pnl_usd": 471.66,
+        "trades_per_month": 13.15,
+        "wr": 0.5541
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_hold_break30 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4703",
+      "new_keys_vs_base": 79,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 30,
+          "failure_bps": 0,
+          "intra_low_invalidates": true,
+          "max_lag_bars": 2,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_hold_break30 g4006_like",
+        "id": "G4703",
+        "labels": {
+          "confirm": "c2_hold_break30",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 664,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 110.61,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 104.9,
+        "min_period_pnl_usd": 89.8,
+        "monthly_pnl_usd": 9.22,
+        "n": 664,
+        "pnl_usd": 472.74,
+        "trades_per_month": 12.94,
+        "wr": 0.5633
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c3_green_follow30 mid",
+      "family": "watch_confirm",
+      "id": "G4686",
+      "new_keys_vs_base": 73,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c3_green_follow30 mid",
+        "id": "G4686",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 671,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 109.56,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.79,
+        "min_period_pnl_usd": 93.53,
+        "monthly_pnl_usd": 9.13,
+        "n": 671,
+        "pnl_usd": 468.27,
+        "trades_per_month": 13.08,
+        "wr": 0.5618
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c3_green_follow30 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4685",
+      "new_keys_vs_base": 69,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c3_green_follow30 g4006_like",
+        "id": "G4685",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 657,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 121.1,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 111.99,
+        "min_period_pnl_usd": 65.65,
+        "monthly_pnl_usd": 10.09,
+        "n": 657,
+        "pnl_usd": 517.58,
+        "trades_per_month": 12.8,
+        "wr": 0.5738
+      }
+    },
+    {
+      "desc": "breakout_long",
+      "family": "breakout_long",
+      "id": "G4010",
+      "new_keys_vs_base": 67,
+      "spec": {
+        "family": "breakout_long",
+        "id": "G4010",
+        "max_conc": 5,
+        "params": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "btc_gate": null,
+          "engine": "breakout_long",
+          "hold": 24,
+          "lev": 8,
+          "mom_24h": 0.1,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06,
+          "vol_ratio": 3.0
+        },
+        "univ": "top10"
+      },
+      "unique_keys": 487,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 35.77,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 123.82,
+        "min_period_pnl_usd": 27.61,
+        "monthly_pnl_usd": 2.98,
+        "n": 487,
+        "pnl_usd": 152.87,
+        "trades_per_month": 9.49,
+        "wr": 0.5318
+      }
+    },
+    {
+      "desc": "controlled loose breakout strict_mid_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4451",
+      "new_keys_vs_base": 66,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          }
+        },
+        "desc": "controlled loose breakout strict_mid_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4451",
+        "labels": {
+          "exit": "mid_exit",
+          "gate": "strict"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 642,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 44.97,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 70.06,
+        "min_period_pnl_usd": 52.93,
+        "monthly_pnl_usd": 3.75,
+        "n": 642,
+        "pnl_usd": 192.19,
+        "trades_per_month": 12.51,
+        "wr": 0.5607
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c3_green_follow30 fast",
+      "family": "watch_confirm",
+      "id": "G4702",
+      "new_keys_vs_base": 65,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c3_green_follow30 fast",
+        "id": "G4702",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 674,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 98.13,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 114.41,
+        "min_period_pnl_usd": 32.35,
+        "monthly_pnl_usd": 8.18,
+        "n": 674,
+        "pnl_usd": 419.39,
+        "trades_per_month": 13.13,
+        "wr": 0.5653
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_follow20_vol25 mid",
+      "family": "watch_confirm",
+      "id": "G4683",
+      "new_keys_vs_base": 63,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_follow20_vol25 mid",
+        "id": "G4683",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 666,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 115.02,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.79,
+        "min_period_pnl_usd": 101.39,
+        "monthly_pnl_usd": 9.59,
+        "n": 666,
+        "pnl_usd": 491.6,
+        "trades_per_month": 12.98,
+        "wr": 0.5691
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c1_strict fast",
+      "family": "watch_confirm",
+      "id": "G4663",
+      "new_keys_vs_base": 62,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 1,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c1_strict fast",
+        "id": "G4663",
+        "labels": {
+          "confirm": "c1_strict",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 666,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 84.64,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 85.81,
+        "min_period_pnl_usd": 28.17,
+        "monthly_pnl_usd": 7.05,
+        "n": 666,
+        "pnl_usd": 361.74,
+        "trades_per_month": 12.98,
+        "wr": 0.5736
+      }
+    },
+    {
+      "desc": "breakout_long",
+      "family": "breakout_long",
+      "id": "G4003",
+      "new_keys_vs_base": 61,
+      "spec": {
+        "family": "breakout_long",
+        "id": "G4003",
+        "max_conc": 5,
+        "params": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "btc_gate": null,
+          "engine": "breakout_long",
+          "hold": 24,
+          "lev": 8,
+          "mom_24h": 0.1,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.1,
+          "vol_ratio": 3.0
+        },
+        "univ": "no_dead"
+      },
+      "unique_keys": 642,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 124.78,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 124.37,
+        "min_period_pnl_usd": 53.43,
+        "monthly_pnl_usd": 10.4,
+        "n": 642,
+        "pnl_usd": 533.31,
+        "trades_per_month": 12.51,
+        "wr": 0.5016
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_follow20_vol25 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4682",
+      "new_keys_vs_base": 58,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_follow20_vol25 g4006_like",
+        "id": "G4682",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 652,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 115.82,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 111.99,
+        "min_period_pnl_usd": 66.85,
+        "monthly_pnl_usd": 9.65,
+        "n": 652,
+        "pnl_usd": 495.02,
+        "trades_per_month": 12.71,
+        "wr": 0.5721
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_strict mid",
+      "family": "watch_confirm",
+      "id": "G4665",
+      "new_keys_vs_base": 55,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_strict mid",
+        "id": "G4665",
+        "labels": {
+          "confirm": "c2_strict",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 655,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 110.15,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 85.03,
+        "min_period_pnl_usd": 66.97,
+        "monthly_pnl_usd": 9.18,
+        "n": 655,
+        "pnl_usd": 470.76,
+        "trades_per_month": 12.76,
+        "wr": 0.5756
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_follow20_vol25 fast",
+      "family": "watch_confirm",
+      "id": "G4699",
+      "new_keys_vs_base": 54,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_follow20_vol25 fast",
+        "id": "G4699",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 668,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 86.89,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 101.15,
+        "min_period_pnl_usd": 53.02,
+        "monthly_pnl_usd": 7.24,
+        "n": 668,
+        "pnl_usd": 371.36,
+        "trades_per_month": 13.02,
+        "wr": 0.5644
+      }
+    },
+    {
+      "desc": "controlled loose breakout break30_g4006_exit",
+      "family": "controlled_loose_breakout",
+      "id": "G4454",
+      "new_keys_vs_base": 51,
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.1,
+            "min_strength_bps": 30,
+            "min_vol_ratio": 3.0,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "controlled loose breakout break30_g4006_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "id": "G4454",
+        "labels": {
+          "exit": "g4006_exit",
+          "gate": "break30"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 626,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 92.42,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 109.01,
+        "min_period_pnl_usd": 50.28,
+        "monthly_pnl_usd": 7.7,
+        "n": 626,
+        "pnl_usd": 395.0,
+        "trades_per_month": 12.2,
+        "wr": 0.5687
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_strict fast",
+      "family": "watch_confirm",
+      "id": "G4681",
+      "new_keys_vs_base": 51,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 18,
+          "lev": 6.0,
+          "size": 0.14,
+          "sl_pct": 0.055,
+          "tp_pct": 0.04
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret8_vol2 c2_strict fast",
+        "id": "G4681",
+        "labels": {
+          "confirm": "c2_strict",
+          "exit": "fast",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret8_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 665,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 82.23,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 112.17,
+        "min_period_pnl_usd": 25.21,
+        "monthly_pnl_usd": 6.85,
+        "n": 665,
+        "pnl_usd": 351.44,
+        "trades_per_month": 12.96,
+        "wr": 0.5654
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c3_green_follow30 mid",
+      "family": "watch_confirm",
+      "id": "G4701",
+      "new_keys_vs_base": 50,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c3_green_follow30 mid",
+        "id": "G4701",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 659,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 106.55,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 101.81,
+        "min_period_pnl_usd": 81.76,
+        "monthly_pnl_usd": 8.88,
+        "n": 659,
+        "pnl_usd": 455.38,
+        "trades_per_month": 12.84,
+        "wr": 0.5599
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c3_green_follow30 g4006_like",
+      "family": "watch_confirm",
+      "id": "G4700",
+      "new_keys_vs_base": 49,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "confirm_green": true,
+          "failure_bps": 0,
+          "max_lag_bars": 3,
+          "min_follow_bps": 30,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c3_green_follow30 g4006_like",
+        "id": "G4700",
+        "labels": {
+          "confirm": "c3_green_follow30",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 648,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 112.42,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 115.03,
+        "min_period_pnl_usd": 44.56,
+        "monthly_pnl_usd": 9.37,
+        "n": 648,
+        "pnl_usd": 480.46,
+        "trades_per_month": 12.63,
+        "wr": 0.5725
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_strict g4006_like",
+      "family": "watch_confirm",
+      "id": "G4664",
+      "new_keys_vs_base": 48,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.18,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c2_strict g4006_like",
+        "id": "G4664",
+        "labels": {
+          "confirm": "c2_strict",
+          "exit": "g4006_like",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 641,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 120.89,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 99.13,
+        "min_period_pnl_usd": 77.28,
+        "monthly_pnl_usd": 10.07,
+        "n": 641,
+        "pnl_usd": 516.66,
+        "trades_per_month": 12.49,
+        "wr": 0.5772
+      }
+    },
+    {
+      "desc": "breakout_long",
+      "family": "breakout_long",
+      "id": "G4014",
+      "new_keys_vs_base": 41,
+      "spec": {
+        "family": "breakout_long",
+        "id": "G4014",
+        "max_conc": 5,
+        "params": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "btc_gate": null,
+          "engine": "breakout_long",
+          "hold": 36,
+          "lev": 8,
+          "mom_24h": 0.1,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06,
+          "vol_ratio": 3.0
+        },
+        "univ": "top10"
+      },
+      "unique_keys": 463,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 54.15,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 121.9,
+        "min_period_pnl_usd": 40.91,
+        "monthly_pnl_usd": 4.51,
+        "n": 463,
+        "pnl_usd": 231.45,
+        "trades_per_month": 9.02,
+        "wr": 0.5594
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_follow20_vol25 mid",
+      "family": "watch_confirm",
+      "id": "G4698",
+      "new_keys_vs_base": 38,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 2,
+          "min_follow_bps": 20,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 2.5
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c2_follow20_vol25 mid",
+        "id": "G4698",
+        "labels": {
+          "confirm": "c2_follow20_vol25",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break30_ret8_vol25"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        }
+      },
+      "unique_keys": 653,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 114.93,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 102.3,
+        "min_period_pnl_usd": 104.95,
+        "monthly_pnl_usd": 9.58,
+        "n": 653,
+        "pnl_usd": 491.19,
+        "trades_per_month": 12.73,
+        "wr": 0.5666
+      }
+    },
+    {
+      "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c1_strict mid",
+      "family": "watch_confirm",
+      "id": "G4662",
+      "new_keys_vs_base": 37,
+      "spec": {
+        "confirm": {
+          "confirm_break_bps": 50,
+          "failure_bps": 0,
+          "max_lag_bars": 1,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "sl_pct": 0.065,
+          "tp_pct": 0.05
+        },
+        "desc": "watch-confirm breakout strict_plus_confirm w_break_ret5_vol2 c1_strict mid",
+        "id": "G4662",
+        "labels": {
+          "confirm": "c1_strict",
+          "exit": "mid",
+          "mode": "strict_plus_confirm",
+          "watch": "w_break_ret5_vol2"
+        },
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "sl_pct": 0.08,
+          "tp_pct": 0.06
+        },
+        "watch": {
+          "break_bps": 0,
+          "min_ret_24h": 0.05,
+          "min_vol_ratio": 2.0
+        }
+      },
+      "unique_keys": 645,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 116.68,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 90.67,
+        "min_period_pnl_usd": 63.49,
+        "monthly_pnl_usd": 9.72,
+        "n": 645,
+        "pnl_usd": 498.68,
+        "trades_per_month": 12.57,
+        "wr": 0.5814
+      }
+    }
+  ]
+}

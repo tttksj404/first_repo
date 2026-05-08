@@ -1,0 +1,42 @@
+{
+  "_strategy_id": "G264402",
+  "_parent_id": "G129183/G4703_OI_grid",
+  "_strategy_type": "oi_pressure_continuation",
+  "_capital_context_usd": 100,
+  "_research_only": true,
+  "_setup": "High-cadence OI-pressure continuation candidate selected to push combined paper observation cadence above 30 trades/month.",
+  "engine": "oi_pressure_continuation",
+  "exchange": "bitget",
+  "market": "futures",
+  "product_type": "USDT-FUTURES",
+  "timeframe": "1h",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "window_hours": 12,
+  "min_abs_price_move": 0.04,
+  "min_oi_increase": 0.02,
+  "vol_ratio_min": 0.8,
+  "hold_bars": 18,
+  "take_profit_pct": 0.04,
+  "stop_loss_pct": 0.05,
+  "leverage": 10.0,
+  "size_pct_per_trade": 0.35,
+  "cooldown_bars": 18,
+  "validation": {
+    "source": "quant_binance/strategies/_scripts/g4703_fast_oi_pressure_grid.json",
+    "weighted": {
+      "trades": 252,
+      "trades_per_month": 20.43,
+      "win_rate": 0.5714,
+      "pnl_usd": 344.01,
+      "annual_pnl_usd": 334.83,
+      "max_drawdown_usd": 115.67,
+      "liquidations": 0,
+      "all_periods_positive": true
+    }
+  }
+}

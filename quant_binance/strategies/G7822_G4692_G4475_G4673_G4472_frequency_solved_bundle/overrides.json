@@ -1,0 +1,20 @@
+{
+  "bundle_id": "G7822_G4692_G4475_G4673_G4472_frequency_solved_bundle",
+  "status": "paper_observation_frequency_pass",
+  "target_unique_trades_per_month": 30.0,
+  "validated_unique_trades_per_month": 31.8,
+  "result_source": "quant_binance/strategies/_scripts/g7825_frequency_bundle_beam_search_results.json",
+  "interpretation": "multi-sleeve paper observation bundle, not one shared-equity live portfolio",
+  "components": [
+    "G7822",
+    "G4692",
+    "G4475",
+    "G4673",
+    "G4472"
+  ],
+  "runtime_requirements": [
+    "deduplicate timestamp/symbol/side entries across sleeves",
+    "cap total breakout-family exposure before live use",
+    "paper-only until runtime fills are compared against backtest event timestamps"
+  ]
+}

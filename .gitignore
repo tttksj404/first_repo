@@ -1,6 +1,7 @@
 # Environments & Secrets
 .env
 .env.*
+env
 *.key
 *.token
 notion_key.txt
@@ -29,7 +30,18 @@ ENV/
 .idea/
 .claude/
 .gemini/
+.obsidian/
 
 # Project Specific
 notion_automation/**/notion_key.txt
 notion_automation/**/notion_auth.py
+.omx/tmp/
+quant_runtime/bootstrap_run.log
+quant_runtime/funding_binance/
+quant_runtime/historical/
+quant_runtime/historical_*/
+quant_runtime/liquidations/
+quant_runtime/output/
+quant_runtime_g185_paper/
+scripts/_safety_guardian_stop
+scripts/_supervisor_stop

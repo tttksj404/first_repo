@@ -1,0 +1,3652 @@
+{
+  "elapsed_sec": 5.94,
+  "generated_at": "2026-05-07 12:55:45",
+  "n_filters": 72,
+  "n_strict_pass": 15,
+  "question": "Can G090-long be filtered into a high-frequency high-WR sleeve?",
+  "raw": {
+    "all_years_positive": true,
+    "all_years_wr_gte_65": false,
+    "avg_net_bps": 954.96,
+    "max_dd_units": 73.01,
+    "min_year_pnl_units": 76.21,
+    "n": 393,
+    "pnl_units": 1876.49,
+    "trades_per_month": 14.11,
+    "wr": 0.8066,
+    "years": {
+      "2024": {
+        "avg_net_bps": 1065.01,
+        "n": 131,
+        "pnl_units": 697.58,
+        "wr": 0.8702
+      },
+      "2025": {
+        "avg_net_bps": 1387.04,
+        "n": 159,
+        "pnl_units": 1102.7,
+        "wr": 0.9119
+      },
+      "2026": {
+        "avg_net_bps": 147.98,
+        "n": 103,
+        "pnl_units": 76.21,
+        "wr": 0.5631
+      }
+    }
+  },
+  "top": [
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1341.92,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19
+      ],
+      "max_dd_units": 7.26,
+      "min_year_pnl_units": 99.72,
+      "n": 225,
+      "pnl_units": 1509.66,
+      "strict_pass": true,
+      "trades_per_month": 8.08,
+      "wr": 0.9556,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1005.3,
+          "n": 69,
+          "pnl_units": 346.83,
+          "wr": 0.942
+        },
+        "2025": {
+          "avg_net_bps": 1687.48,
+          "n": 126,
+          "pnl_units": 1063.11,
+          "wr": 0.9762
+        },
+        "2026": {
+          "avg_net_bps": 664.79,
+          "n": 30,
+          "pnl_units": 99.72,
+          "wr": 0.9
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1319.77,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22
+      ],
+      "max_dd_units": 11.56,
+      "min_year_pnl_units": 109.63,
+      "n": 232,
+      "pnl_units": 1530.94,
+      "strict_pass": true,
+      "trades_per_month": 8.33,
+      "wr": 0.9526,
+      "years": {
+        "2024": {
+          "avg_net_bps": 972.58,
+          "n": 70,
+          "pnl_units": 340.4,
+          "wr": 0.9286
+        },
+        "2025": {
+          "avg_net_bps": 1662.92,
+          "n": 130,
+          "pnl_units": 1080.9,
+          "wr": 0.9769
+        },
+        "2026": {
+          "avg_net_bps": 685.21,
+          "n": 32,
+          "pnl_units": 109.63,
+          "wr": 0.9062
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1256.16,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17
+      ],
+      "max_dd_units": 11.56,
+      "min_year_pnl_units": 116.14,
+      "n": 264,
+      "pnl_units": 1658.13,
+      "strict_pass": true,
+      "trades_per_month": 9.48,
+      "wr": 0.9318,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1066.53,
+          "n": 87,
+          "pnl_units": 463.94,
+          "wr": 0.9195
+        },
+        "2025": {
+          "avg_net_bps": 1621.13,
+          "n": 133,
+          "pnl_units": 1078.05,
+          "wr": 0.9624
+        },
+        "2026": {
+          "avg_net_bps": 527.89,
+          "n": 44,
+          "pnl_units": 116.14,
+          "wr": 0.8636
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1276.12,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11
+      ],
+      "max_dd_units": 11.56,
+      "min_year_pnl_units": 108.93,
+      "n": 280,
+      "pnl_units": 1786.57,
+      "strict_pass": true,
+      "trades_per_month": 10.05,
+      "wr": 0.9214,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1211.28,
+          "n": 99,
+          "pnl_units": 599.59,
+          "wr": 0.9293
+        },
+        "2025": {
+          "avg_net_bps": 1621.13,
+          "n": 133,
+          "pnl_units": 1078.05,
+          "wr": 0.9624
+        },
+        "2026": {
+          "avg_net_bps": 453.89,
+          "n": 48,
+          "pnl_units": 108.93,
+          "wr": 0.7917
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1231.04,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8
+      ],
+      "max_dd_units": 15.92,
+      "min_year_pnl_units": 106.8,
+      "n": 294,
+      "pnl_units": 1809.62,
+      "strict_pass": true,
+      "trades_per_month": 10.55,
+      "wr": 0.9116,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1199.7,
+          "n": 103,
+          "pnl_units": 617.85,
+          "wr": 0.932
+        },
+        "2025": {
+          "avg_net_bps": 1595.55,
+          "n": 136,
+          "pnl_units": 1084.97,
+          "wr": 0.9632
+        },
+        "2026": {
+          "avg_net_bps": 388.37,
+          "n": 55,
+          "pnl_units": 106.8,
+          "wr": 0.7455
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1216.65,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8,
+        5
+      ],
+      "max_dd_units": 19.32,
+      "min_year_pnl_units": 103.4,
+      "n": 301,
+      "pnl_units": 1831.06,
+      "strict_pass": true,
+      "trades_per_month": 10.8,
+      "wr": 0.907,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1195.64,
+          "n": 108,
+          "pnl_units": 645.64,
+          "wr": 0.9352
+        },
+        "2025": {
+          "avg_net_bps": 1579.58,
+          "n": 137,
+          "pnl_units": 1082.01,
+          "wr": 0.9562
+        },
+        "2026": {
+          "avg_net_bps": 369.28,
+          "n": 56,
+          "pnl_units": 103.4,
+          "wr": 0.7321
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1121.37,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT"
+      ],
+      "max_dd_units": 20.67,
+      "min_year_pnl_units": 59.43,
+      "n": 230,
+      "pnl_units": 1289.57,
+      "strict_pass": true,
+      "trades_per_month": 8.26,
+      "wr": 0.8957,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1154.67,
+          "n": 82,
+          "pnl_units": 473.41,
+          "wr": 0.939
+        },
+        "2025": {
+          "avg_net_bps": 1455.23,
+          "n": 104,
+          "pnl_units": 756.72,
+          "wr": 0.9423
+        },
+        "2026": {
+          "avg_net_bps": 270.16,
+          "n": 44,
+          "pnl_units": 59.43,
+          "wr": 0.7045
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1144.77,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8,
+        5,
+        18
+      ],
+      "max_dd_units": 18.87,
+      "min_year_pnl_units": 116.69,
+      "n": 323,
+      "pnl_units": 1848.81,
+      "strict_pass": true,
+      "trades_per_month": 11.59,
+      "wr": 0.8916,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1147.92,
+          "n": 111,
+          "pnl_units": 637.1,
+          "wr": 0.9099
+        },
+        "2025": {
+          "avg_net_bps": 1479.75,
+          "n": 148,
+          "pnl_units": 1095.02,
+          "wr": 0.9324
+        },
+        "2026": {
+          "avg_net_bps": 364.66,
+          "n": 64,
+          "pnl_units": 116.69,
+          "wr": 0.7656
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1129.85,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT"
+      ],
+      "max_dd_units": 26.87,
+      "min_year_pnl_units": 53.24,
+      "n": 239,
+      "pnl_units": 1350.16,
+      "strict_pass": true,
+      "trades_per_month": 8.58,
+      "wr": 0.8912,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1178.19,
+          "n": 84,
+          "pnl_units": 494.84,
+          "wr": 0.9405
+        },
+        "2025": {
+          "avg_net_bps": 1471.72,
+          "n": 109,
+          "pnl_units": 802.09,
+          "wr": 0.945
+        },
+        "2026": {
+          "avg_net_bps": 231.47,
+          "n": 46,
+          "pnl_units": 53.24,
+          "wr": 0.6739
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1143.5,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8,
+        5,
+        18,
+        10
+      ],
+      "max_dd_units": 19.8,
+      "min_year_pnl_units": 120.47,
+      "n": 329,
+      "pnl_units": 1881.05,
+      "strict_pass": true,
+      "trades_per_month": 11.81,
+      "wr": 0.8875,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1167.66,
+          "n": 114,
+          "pnl_units": 665.56,
+          "wr": 0.9123
+        },
+        "2025": {
+          "avg_net_bps": 1479.75,
+          "n": 148,
+          "pnl_units": 1095.02,
+          "wr": 0.9324
+        },
+        "2026": {
+          "avg_net_bps": 359.61,
+          "n": 67,
+          "pnl_units": 120.47,
+          "wr": 0.7463
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1117.38,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT"
+      ],
+      "max_dd_units": 26.87,
+      "min_year_pnl_units": 55.44,
+      "n": 247,
+      "pnl_units": 1379.96,
+      "strict_pass": true,
+      "trades_per_month": 8.87,
+      "wr": 0.8866,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1120.87,
+          "n": 88,
+          "pnl_units": 493.18,
+          "wr": 0.9205
+        },
+        "2025": {
+          "avg_net_bps": 1484.54,
+          "n": 112,
+          "pnl_units": 831.34,
+          "wr": 0.9464
+        },
+        "2026": {
+          "avg_net_bps": 235.9,
+          "n": 47,
+          "pnl_units": 55.44,
+          "wr": 0.6809
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1132.95,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8,
+        5,
+        18,
+        10,
+        9
+      ],
+      "max_dd_units": 23.62,
+      "min_year_pnl_units": 124.8,
+      "n": 334,
+      "pnl_units": 1892.02,
+      "strict_pass": true,
+      "trades_per_month": 11.99,
+      "wr": 0.8832,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1169.05,
+          "n": 115,
+          "pnl_units": 672.21,
+          "wr": 0.913
+        },
+        "2025": {
+          "avg_net_bps": 1479.75,
+          "n": 148,
+          "pnl_units": 1095.02,
+          "wr": 0.9324
+        },
+        "2026": {
+          "avg_net_bps": 351.55,
+          "n": 71,
+          "pnl_units": 124.8,
+          "wr": 0.7324
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1091.87,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8,
+        5,
+        18,
+        10,
+        9,
+        15
+      ],
+      "max_dd_units": 36.8,
+      "min_year_pnl_units": 117.51,
+      "n": 350,
+      "pnl_units": 1910.77,
+      "strict_pass": true,
+      "trades_per_month": 12.56,
+      "wr": 0.8686,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1168.39,
+          "n": 118,
+          "pnl_units": 689.35,
+          "wr": 0.9068
+        },
+        "2025": {
+          "avg_net_bps": 1452.5,
+          "n": 152,
+          "pnl_units": 1103.9,
+          "wr": 0.9342
+        },
+        "2026": {
+          "avg_net_bps": 293.78,
+          "n": 80,
+          "pnl_units": 117.51,
+          "wr": 0.6875
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1045.62,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT"
+      ],
+      "max_dd_units": 26.87,
+      "min_year_pnl_units": 55.41,
+      "n": 281,
+      "pnl_units": 1469.09,
+      "strict_pass": true,
+      "trades_per_month": 10.09,
+      "wr": 0.8683,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1042.25,
+          "n": 103,
+          "pnl_units": 536.76,
+          "wr": 0.9029
+        },
+        "2025": {
+          "avg_net_bps": 1380.99,
+          "n": 127,
+          "pnl_units": 876.93,
+          "wr": 0.9213
+        },
+        "2026": {
+          "avg_net_bps": 217.29,
+          "n": 51,
+          "pnl_units": 55.41,
+          "wr": 0.6667
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1069.86,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6,
+        19,
+        22,
+        17,
+        11,
+        8,
+        5,
+        18,
+        10,
+        9,
+        15,
+        12
+      ],
+      "max_dd_units": 45.39,
+      "min_year_pnl_units": 109.53,
+      "n": 358,
+      "pnl_units": 1915.05,
+      "strict_pass": true,
+      "trades_per_month": 12.85,
+      "wr": 0.8603,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1159.69,
+          "n": 121,
+          "pnl_units": 701.61,
+          "wr": 0.9008
+        },
+        "2025": {
+          "avg_net_bps": 1452.5,
+          "n": 152,
+          "pnl_units": 1103.9,
+          "wr": 0.9342
+        },
+        "2026": {
+          "avg_net_bps": 257.72,
+          "n": 85,
+          "pnl_units": 109.53,
+          "wr": 0.6706
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1461.8,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 14.58,
+      "n": 78,
+      "pnl_units": 570.1,
+      "strict_pass": false,
+      "trades_per_month": 2.8,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 825.4,
+          "n": 13,
+          "pnl_units": 53.65,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1701.24,
+          "n": 59,
+          "pnl_units": 501.87,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 486.15,
+          "n": 6,
+          "pnl_units": 14.58,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1612.69,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 2.7,
+      "n": 61,
+      "pnl_units": 491.87,
+      "strict_pass": false,
+      "trades_per_month": 2.19,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 825.4,
+          "n": 13,
+          "pnl_units": 53.65,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1979.65,
+          "n": 44,
+          "pnl_units": 435.52,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 134.75,
+          "n": 4,
+          "pnl_units": 2.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1468.71,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 51,
+      "pnl_units": 374.52,
+      "strict_pass": false,
+      "trades_per_month": 1.83,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1239.87,
+          "n": 25,
+          "pnl_units": 154.98,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1798.65,
+          "n": 24,
+          "pnl_units": 215.84,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1482.7,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 48,
+      "pnl_units": 355.85,
+      "strict_pass": false,
+      "trades_per_month": 1.72,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1239.2,
+          "n": 22,
+          "pnl_units": 136.31,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1798.65,
+          "n": 24,
+          "pnl_units": 215.84,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1468.63,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 45,
+      "pnl_units": 330.44,
+      "strict_pass": false,
+      "trades_per_month": 1.62,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1264.79,
+          "n": 20,
+          "pnl_units": 126.48,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1741.43,
+          "n": 23,
+          "pnl_units": 200.26,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1748.97,
+      "filter_type": "hour",
+      "filters": [
+        1
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 2.41,
+      "n": 44,
+      "pnl_units": 384.77,
+      "strict_pass": false,
+      "trades_per_month": 1.58,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 651.61,
+          "n": 2,
+          "pnl_units": 6.52,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1927.41,
+          "n": 39,
+          "pnl_units": 375.84,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 160.85,
+          "n": 3,
+          "pnl_units": 2.41,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1439.8,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 41,
+      "pnl_units": 295.16,
+      "strict_pass": false,
+      "trades_per_month": 1.47,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1250.34,
+          "n": 18,
+          "pnl_units": 112.53,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1704.08,
+          "n": 21,
+          "pnl_units": 178.93,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1479.75,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 35,
+      "pnl_units": 258.96,
+      "strict_pass": false,
+      "trades_per_month": 1.26,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1228.96,
+          "n": 17,
+          "pnl_units": 104.46,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1884.95,
+          "n": 16,
+          "pnl_units": 150.8,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1103.28,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          0
+        ]
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 15.16,
+      "n": 35,
+      "pnl_units": 193.07,
+      "strict_pass": false,
+      "trades_per_month": 1.26,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 831.89,
+          "n": 7,
+          "pnl_units": 29.12,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1239.99,
+          "n": 24,
+          "pnl_units": 148.8,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 757.89,
+          "n": 4,
+          "pnl_units": 15.16,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1154.76,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ]
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 15.16,
+      "n": 32,
+      "pnl_units": 184.76,
+      "strict_pass": false,
+      "trades_per_month": 1.15,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 831.89,
+          "n": 7,
+          "pnl_units": 29.12,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1337.97,
+          "n": 21,
+          "pnl_units": 140.49,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 757.89,
+          "n": 4,
+          "pnl_units": 15.16,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1483.79,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 30,
+      "pnl_units": 222.57,
+      "strict_pass": false,
+      "trades_per_month": 1.08,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1219.93,
+          "n": 15,
+          "pnl_units": 91.49,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1959.59,
+          "n": 13,
+          "pnl_units": 127.37,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1211.84,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ]
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 15.16,
+      "n": 28,
+      "pnl_units": 169.66,
+      "strict_pass": false,
+      "trades_per_month": 1.0,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 831.89,
+          "n": 7,
+          "pnl_units": 29.12,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1475.1,
+          "n": 17,
+          "pnl_units": 125.38,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 757.89,
+          "n": 4,
+          "pnl_units": 15.16,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1415.18,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT"
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 3.7,
+      "n": 26,
+      "pnl_units": 183.97,
+      "strict_pass": false,
+      "trades_per_month": 0.93,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1172.79,
+          "n": 13,
+          "pnl_units": 76.23,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1891.7,
+          "n": 11,
+          "pnl_units": 104.04,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 369.91,
+          "n": 2,
+          "pnl_units": 3.7,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1227.42,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ]
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 8.59,
+      "n": 25,
+      "pnl_units": 153.43,
+      "strict_pass": false,
+      "trades_per_month": 0.9,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 831.89,
+          "n": 7,
+          "pnl_units": 29.12,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1542.89,
+          "n": 15,
+          "pnl_units": 115.72,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 572.98,
+          "n": 3,
+          "pnl_units": 8.59,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1290.97,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ]
+      ],
+      "max_dd_units": 0.0,
+      "min_year_pnl_units": 8.31,
+      "n": 21,
+      "pnl_units": 135.55,
+      "strict_pass": false,
+      "trades_per_month": 0.75,
+      "wr": 1.0,
+      "years": {
+        "2024": {
+          "avg_net_bps": 904.94,
+          "n": 5,
+          "pnl_units": 22.62,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1494.51,
+          "n": 14,
+          "pnl_units": 104.62,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 831.23,
+          "n": 2,
+          "pnl_units": 8.31,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1546.95,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "max_dd_units": 0.19,
+      "min_year_pnl_units": 14.94,
+      "n": 122,
+      "pnl_units": 943.64,
+      "strict_pass": false,
+      "trades_per_month": 4.38,
+      "wr": 0.9918,
+      "years": {
+        "2024": {
+          "avg_net_bps": 803.96,
+          "n": 23,
+          "pnl_units": 92.46,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1858.32,
+          "n": 90,
+          "pnl_units": 836.25,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 331.91,
+          "n": 9,
+          "pnl_units": 14.94,
+          "wr": 0.8889
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1477.85,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21
+      ],
+      "max_dd_units": 0.55,
+      "min_year_pnl_units": 40.61,
+      "n": 142,
+      "pnl_units": 1049.27,
+      "strict_pass": false,
+      "trades_per_month": 5.1,
+      "wr": 0.9859,
+      "years": {
+        "2024": {
+          "avg_net_bps": 803.6,
+          "n": 28,
+          "pnl_units": 112.5,
+          "wr": 0.9643
+        },
+        "2025": {
+          "avg_net_bps": 1792.33,
+          "n": 100,
+          "pnl_units": 896.16,
+          "wr": 1.0
+        },
+        "2026": {
+          "avg_net_bps": 580.08,
+          "n": 14,
+          "pnl_units": 40.61,
+          "wr": 0.9286
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1405.03,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT"
+      ],
+      "max_dd_units": 0.13,
+      "min_year_pnl_units": 22.22,
+      "n": 66,
+      "pnl_units": 463.66,
+      "strict_pass": false,
+      "trades_per_month": 2.37,
+      "wr": 0.9848,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1249.85,
+          "n": 31,
+          "pnl_units": 193.73,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1769.34,
+          "n": 28,
+          "pnl_units": 247.71,
+          "wr": 0.9643
+        },
+        "2026": {
+          "avg_net_bps": 635.0,
+          "n": 7,
+          "pnl_units": 22.22,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1422.48,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20
+      ],
+      "max_dd_units": 0.9,
+      "min_year_pnl_units": 73.77,
+      "n": 179,
+      "pnl_units": 1273.12,
+      "strict_pass": false,
+      "trades_per_month": 6.42,
+      "wr": 0.9777,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1063.57,
+          "n": 48,
+          "pnl_units": 255.26,
+          "wr": 0.9792
+        },
+        "2025": {
+          "avg_net_bps": 1732.27,
+          "n": 109,
+          "pnl_units": 944.09,
+          "wr": 0.9817
+        },
+        "2026": {
+          "avg_net_bps": 670.67,
+          "n": 22,
+          "pnl_units": 73.77,
+          "wr": 0.9545
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1361.66,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT"
+      ],
+      "max_dd_units": 4.5,
+      "min_year_pnl_units": 22.22,
+      "n": 78,
+      "pnl_units": 531.05,
+      "strict_pass": false,
+      "trades_per_month": 2.8,
+      "wr": 0.9744,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1151.19,
+          "n": 39,
+          "pnl_units": 224.48,
+          "wr": 0.9744
+        },
+        "2025": {
+          "avg_net_bps": 1777.12,
+          "n": 32,
+          "pnl_units": 284.34,
+          "wr": 0.9688
+        },
+        "2026": {
+          "avg_net_bps": 635.0,
+          "n": 7,
+          "pnl_units": 22.22,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1040.41,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          16
+        ]
+      ],
+      "max_dd_units": 0.03,
+      "min_year_pnl_units": 15.16,
+      "n": 38,
+      "pnl_units": 197.68,
+      "strict_pass": false,
+      "trades_per_month": 1.36,
+      "wr": 0.9737,
+      "years": {
+        "2024": {
+          "avg_net_bps": 829.28,
+          "n": 8,
+          "pnl_units": 33.17,
+          "wr": 1.0
+        },
+        "2025": {
+          "avg_net_bps": 1148.83,
+          "n": 26,
+          "pnl_units": 149.35,
+          "wr": 0.9615
+        },
+        "2026": {
+          "avg_net_bps": 757.89,
+          "n": 4,
+          "pnl_units": 15.16,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1421.24,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4
+      ],
+      "max_dd_units": 0.9,
+      "min_year_pnl_units": 73.46,
+      "n": 187,
+      "pnl_units": 1328.86,
+      "strict_pass": false,
+      "trades_per_month": 6.71,
+      "wr": 0.9733,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1027.71,
+          "n": 51,
+          "pnl_units": 262.07,
+          "wr": 0.9804
+        },
+        "2025": {
+          "avg_net_bps": 1758.11,
+          "n": 113,
+          "pnl_units": 993.33,
+          "wr": 0.9823
+        },
+        "2026": {
+          "avg_net_bps": 638.82,
+          "n": 23,
+          "pnl_units": 73.46,
+          "wr": 0.913
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1397.28,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23
+      ],
+      "max_dd_units": 5.14,
+      "min_year_pnl_units": 95.78,
+      "n": 195,
+      "pnl_units": 1362.35,
+      "strict_pass": false,
+      "trades_per_month": 7.0,
+      "wr": 0.9692,
+      "years": {
+        "2024": {
+          "avg_net_bps": 988.17,
+          "n": 52,
+          "pnl_units": 256.93,
+          "wr": 0.9615
+        },
+        "2025": {
+          "avg_net_bps": 1740.77,
+          "n": 116,
+          "pnl_units": 1009.65,
+          "wr": 0.9828
+        },
+        "2026": {
+          "avg_net_bps": 709.47,
+          "n": 27,
+          "pnl_units": 95.78,
+          "wr": 0.9259
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1387.52,
+      "filter_type": "hour",
+      "filters": [
+        1,
+        3,
+        0,
+        2,
+        21,
+        20,
+        4,
+        23,
+        6
+      ],
+      "max_dd_units": 5.14,
+      "min_year_pnl_units": 92.99,
+      "n": 210,
+      "pnl_units": 1456.89,
+      "strict_pass": false,
+      "trades_per_month": 7.54,
+      "wr": 0.9619,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1090.68,
+          "n": 63,
+          "pnl_units": 343.56,
+          "wr": 0.9683
+        },
+        "2025": {
+          "avg_net_bps": 1714.86,
+          "n": 119,
+          "pnl_units": 1020.34,
+          "wr": 0.9748
+        },
+        "2026": {
+          "avg_net_bps": 664.18,
+          "n": 28,
+          "pnl_units": 92.99,
+          "wr": 0.8929
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1364.99,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT"
+      ],
+      "max_dd_units": 4.5,
+      "min_year_pnl_units": 20.0,
+      "n": 99,
+      "pnl_units": 675.67,
+      "strict_pass": false,
+      "trades_per_month": 3.55,
+      "wr": 0.9596,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1205.65,
+          "n": 48,
+          "pnl_units": 289.36,
+          "wr": 0.9583
+        },
+        "2025": {
+          "avg_net_bps": 1703.78,
+          "n": 43,
+          "pnl_units": 366.31,
+          "wr": 0.9767
+        },
+        "2026": {
+          "avg_net_bps": 500.01,
+          "n": 8,
+          "pnl_units": 20.0,
+          "wr": 0.875
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1381.95,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT"
+      ],
+      "max_dd_units": 4.5,
+      "min_year_pnl_units": 19.45,
+      "n": 109,
+      "pnl_units": 753.16,
+      "strict_pass": false,
+      "trades_per_month": 3.91,
+      "wr": 0.9541,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1239.08,
+          "n": 50,
+          "pnl_units": 309.77,
+          "wr": 0.96
+        },
+        "2025": {
+          "avg_net_bps": 1766.42,
+          "n": 48,
+          "pnl_units": 423.94,
+          "wr": 0.9792
+        },
+        "2026": {
+          "avg_net_bps": 353.7,
+          "n": 11,
+          "pnl_units": 19.45,
+          "wr": 0.8182
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 970.12,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          16
+        ],
+        [
+          "PNUTUSDT",
+          18
+        ]
+      ],
+      "max_dd_units": 4.2,
+      "min_year_pnl_units": 17.64,
+      "n": 41,
+      "pnl_units": 198.88,
+      "strict_pass": false,
+      "trades_per_month": 1.47,
+      "wr": 0.9512,
+      "years": {
+        "2024": {
+          "avg_net_bps": 643.71,
+          "n": 9,
+          "pnl_units": 28.97,
+          "wr": 0.8889
+        },
+        "2025": {
+          "avg_net_bps": 1127.9,
+          "n": 27,
+          "pnl_units": 152.27,
+          "wr": 0.963
+        },
+        "2026": {
+          "avg_net_bps": 705.68,
+          "n": 5,
+          "pnl_units": 17.64,
+          "wr": 1.0
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1325.23,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT"
+      ],
+      "max_dd_units": 4.5,
+      "min_year_pnl_units": 33.65,
+      "n": 128,
+      "pnl_units": 848.15,
+      "strict_pass": false,
+      "trades_per_month": 4.59,
+      "wr": 0.9453,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1260.02,
+          "n": 52,
+          "pnl_units": 327.6,
+          "wr": 0.9615
+        },
+        "2025": {
+          "avg_net_bps": 1622.97,
+          "n": 60,
+          "pnl_units": 486.89,
+          "wr": 0.95
+        },
+        "2026": {
+          "avg_net_bps": 420.66,
+          "n": 16,
+          "pnl_units": 33.65,
+          "wr": 0.875
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1201.47,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT"
+      ],
+      "max_dd_units": 13.3,
+      "min_year_pnl_units": 63.7,
+      "n": 171,
+      "pnl_units": 1027.26,
+      "strict_pass": false,
+      "trades_per_month": 6.14,
+      "wr": 0.924,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1181.84,
+          "n": 64,
+          "pnl_units": 378.19,
+          "wr": 0.9375
+        },
+        "2025": {
+          "avg_net_bps": 1463.44,
+          "n": 80,
+          "pnl_units": 585.38,
+          "wr": 0.9375
+        },
+        "2026": {
+          "avg_net_bps": 471.83,
+          "n": 27,
+          "pnl_units": 63.7,
+          "wr": 0.8519
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1215.45,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT"
+      ],
+      "max_dd_units": 13.3,
+      "min_year_pnl_units": 63.7,
+      "n": 178,
+      "pnl_units": 1081.75,
+      "strict_pass": false,
+      "trades_per_month": 6.39,
+      "wr": 0.9213,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1177.95,
+          "n": 68,
+          "pnl_units": 400.5,
+          "wr": 0.9265
+        },
+        "2025": {
+          "avg_net_bps": 1488.08,
+          "n": 83,
+          "pnl_units": 617.55,
+          "wr": 0.9398
+        },
+        "2026": {
+          "avg_net_bps": 471.83,
+          "n": 27,
+          "pnl_units": 63.7,
+          "wr": 0.8519
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1229.01,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT"
+      ],
+      "max_dd_units": 13.3,
+      "min_year_pnl_units": 61.84,
+      "n": 184,
+      "pnl_units": 1130.69,
+      "strict_pass": false,
+      "trades_per_month": 6.6,
+      "wr": 0.9185,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1199.07,
+          "n": 71,
+          "pnl_units": 425.67,
+          "wr": 0.9296
+        },
+        "2025": {
+          "avg_net_bps": 1513.34,
+          "n": 85,
+          "pnl_units": 643.17,
+          "wr": 0.9412
+        },
+        "2026": {
+          "avg_net_bps": 441.74,
+          "n": 28,
+          "pnl_units": 61.84,
+          "wr": 0.8214
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 1205.36,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT"
+      ],
+      "max_dd_units": 14.44,
+      "min_year_pnl_units": 55.76,
+      "n": 200,
+      "pnl_units": 1205.36,
+      "strict_pass": false,
+      "trades_per_month": 7.18,
+      "wr": 0.91,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1210.95,
+          "n": 74,
+          "pnl_units": 448.05,
+          "wr": 0.9324
+        },
+        "2025": {
+          "avg_net_bps": 1492.66,
+          "n": 94,
+          "pnl_units": 701.55,
+          "wr": 0.9468
+        },
+        "2026": {
+          "avg_net_bps": 348.49,
+          "n": 32,
+          "pnl_units": 55.76,
+          "wr": 0.75
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 891.52,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          16
+        ],
+        [
+          "PNUTUSDT",
+          18
+        ],
+        [
+          "RUNEUSDT",
+          17
+        ]
+      ],
+      "max_dd_units": 4.2,
+      "min_year_pnl_units": 20.66,
+      "n": 46,
+      "pnl_units": 205.05,
+      "strict_pass": false,
+      "trades_per_month": 1.65,
+      "wr": 0.8913,
+      "years": {
+        "2024": {
+          "avg_net_bps": 634.47,
+          "n": 11,
+          "pnl_units": 34.9,
+          "wr": 0.8182
+        },
+        "2025": {
+          "avg_net_bps": 1067.82,
+          "n": 28,
+          "pnl_units": 149.49,
+          "wr": 0.9286
+        },
+        "2026": {
+          "avg_net_bps": 590.24,
+          "n": 7,
+          "pnl_units": 20.66,
+          "wr": 0.8571
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1035.84,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT"
+      ],
+      "max_dd_units": 34.21,
+      "min_year_pnl_units": 48.57,
+      "n": 292,
+      "pnl_units": 1512.33,
+      "strict_pass": false,
+      "trades_per_month": 10.48,
+      "wr": 0.863,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1048.06,
+          "n": 104,
+          "pnl_units": 544.99,
+          "wr": 0.9038
+        },
+        "2025": {
+          "avg_net_bps": 1381.62,
+          "n": 133,
+          "pnl_units": 918.78,
+          "wr": 0.9248
+        },
+        "2026": {
+          "avg_net_bps": 176.6,
+          "n": 55,
+          "pnl_units": 48.57,
+          "wr": 0.6364
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1029.06,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT",
+        "WIFUSDT"
+      ],
+      "max_dd_units": 41.88,
+      "min_year_pnl_units": 60.36,
+      "n": 309,
+      "pnl_units": 1589.9,
+      "strict_pass": false,
+      "trades_per_month": 11.09,
+      "wr": 0.8544,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1083.47,
+          "n": 108,
+          "pnl_units": 585.07,
+          "wr": 0.9074
+        },
+        "2025": {
+          "avg_net_bps": 1388.93,
+          "n": 136,
+          "pnl_units": 944.47,
+          "wr": 0.9265
+        },
+        "2026": {
+          "avg_net_bps": 185.72,
+          "n": 65,
+          "pnl_units": 60.36,
+          "wr": 0.6154
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1026.22,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT",
+        "WIFUSDT",
+        "STXUSDT"
+      ],
+      "max_dd_units": 41.88,
+      "min_year_pnl_units": 60.36,
+      "n": 319,
+      "pnl_units": 1636.83,
+      "strict_pass": false,
+      "trades_per_month": 11.45,
+      "wr": 0.8495,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1062.82,
+          "n": 114,
+          "pnl_units": 605.81,
+          "wr": 0.8947
+        },
+        "2025": {
+          "avg_net_bps": 1386.66,
+          "n": 140,
+          "pnl_units": 970.66,
+          "wr": 0.9214
+        },
+        "2026": {
+          "avg_net_bps": 185.72,
+          "n": 65,
+          "pnl_units": 60.36,
+          "wr": 0.6154
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1023.5,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT",
+        "WIFUSDT",
+        "STXUSDT",
+        "SUIUSDT"
+      ],
+      "max_dd_units": 45.1,
+      "min_year_pnl_units": 57.15,
+      "n": 329,
+      "pnl_units": 1683.66,
+      "strict_pass": false,
+      "trades_per_month": 11.81,
+      "wr": 0.845,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1078.32,
+          "n": 118,
+          "pnl_units": 636.21,
+          "wr": 0.8983
+        },
+        "2025": {
+          "avg_net_bps": 1385.05,
+          "n": 143,
+          "pnl_units": 990.31,
+          "wr": 0.9231
+        },
+        "2026": {
+          "avg_net_bps": 168.08,
+          "n": 68,
+          "pnl_units": 57.15,
+          "wr": 0.5882
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 806.66,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          16
+        ],
+        [
+          "PNUTUSDT",
+          18
+        ],
+        [
+          "RUNEUSDT",
+          17
+        ],
+        [
+          "BOMEUSDT",
+          18
+        ]
+      ],
+      "max_dd_units": 4.2,
+      "min_year_pnl_units": 23.34,
+      "n": 51,
+      "pnl_units": 205.7,
+      "strict_pass": false,
+      "trades_per_month": 1.83,
+      "wr": 0.8431,
+      "years": {
+        "2024": {
+          "avg_net_bps": 555.98,
+          "n": 12,
+          "pnl_units": 33.36,
+          "wr": 0.75
+        },
+        "2025": {
+          "avg_net_bps": 961.31,
+          "n": 31,
+          "pnl_units": 149.0,
+          "wr": 0.871
+        },
+        "2026": {
+          "avg_net_bps": 583.45,
+          "n": 8,
+          "pnl_units": 23.34,
+          "wr": 0.875
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1016.38,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT",
+        "WIFUSDT",
+        "STXUSDT",
+        "SUIUSDT",
+        "PNUTUSDT"
+      ],
+      "max_dd_units": 55.75,
+      "min_year_pnl_units": 73.74,
+      "n": 357,
+      "pnl_units": 1814.24,
+      "strict_pass": false,
+      "trades_per_month": 12.81,
+      "wr": 0.8319,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1104.88,
+          "n": 125,
+          "pnl_units": 690.55,
+          "wr": 0.896
+        },
+        "2025": {
+          "avg_net_bps": 1409.32,
+          "n": 149,
+          "pnl_units": 1049.94,
+          "wr": 0.9195
+        },
+        "2026": {
+          "avg_net_bps": 177.69,
+          "n": 83,
+          "pnl_units": 73.74,
+          "wr": 0.5783
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1008.16,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT",
+        "WIFUSDT",
+        "STXUSDT",
+        "SUIUSDT",
+        "PNUTUSDT",
+        "APTUSDT"
+      ],
+      "max_dd_units": 63.87,
+      "min_year_pnl_units": 67.89,
+      "n": 368,
+      "pnl_units": 1855.02,
+      "strict_pass": false,
+      "trades_per_month": 13.21,
+      "wr": 0.8261,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1109.99,
+          "n": 126,
+          "pnl_units": 699.3,
+          "wr": 0.8968
+        },
+        "2025": {
+          "avg_net_bps": 1422.01,
+          "n": 153,
+          "pnl_units": 1087.84,
+          "wr": 0.9216
+        },
+        "2026": {
+          "avg_net_bps": 152.56,
+          "n": 89,
+          "pnl_units": 67.89,
+          "wr": 0.5618
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 1000.17,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0002
+      },
+      "max_dd_units": 48.37,
+      "min_year_pnl_units": 103.44,
+      "n": 338,
+      "pnl_units": 1690.28,
+      "strict_pass": false,
+      "trades_per_month": 12.13,
+      "wr": 0.8254,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1077.92,
+          "n": 127,
+          "pnl_units": 684.48,
+          "wr": 0.8661
+        },
+        "2025": {
+          "avg_net_bps": 1388.24,
+          "n": 130,
+          "pnl_units": 902.36,
+          "wr": 0.9
+        },
+        "2026": {
+          "avg_net_bps": 255.41,
+          "n": 81,
+          "pnl_units": 103.44,
+          "wr": 0.642
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": true,
+      "avg_net_bps": 780.91,
+      "filter_type": "symbol_hour",
+      "filters": [
+        [
+          "MEMEUSDT",
+          2
+        ],
+        [
+          "PEPEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          2
+        ],
+        [
+          "BOMEUSDT",
+          21
+        ],
+        [
+          "MEMEUSDT",
+          1
+        ],
+        [
+          "BOMEUSDT",
+          3
+        ],
+        [
+          "TIAUSDT",
+          0
+        ],
+        [
+          "BOMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          0
+        ],
+        [
+          "MEMEUSDT",
+          16
+        ],
+        [
+          "PNUTUSDT",
+          18
+        ],
+        [
+          "RUNEUSDT",
+          17
+        ],
+        [
+          "BOMEUSDT",
+          18
+        ],
+        [
+          "MEMEUSDT",
+          17
+        ]
+      ],
+      "max_dd_units": 4.2,
+      "min_year_pnl_units": 22.71,
+      "n": 54,
+      "pnl_units": 210.85,
+      "strict_pass": false,
+      "trades_per_month": 1.94,
+      "wr": 0.8148,
+      "years": {
+        "2024": {
+          "avg_net_bps": 614.33,
+          "n": 13,
+          "pnl_units": 39.93,
+          "wr": 0.7692
+        },
+        "2025": {
+          "avg_net_bps": 926.28,
+          "n": 32,
+          "pnl_units": 148.21,
+          "wr": 0.8438
+        },
+        "2026": {
+          "avg_net_bps": 504.63,
+          "n": 9,
+          "pnl_units": 22.71,
+          "wr": 0.7778
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 965.1,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0008
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 80.83,
+      "n": 390,
+      "pnl_units": 1881.95,
+      "strict_pass": false,
+      "trades_per_month": 14.0,
+      "wr": 0.8103,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1065.01,
+          "n": 131,
+          "pnl_units": 697.58,
+          "wr": 0.8702
+        },
+        "2025": {
+          "avg_net_bps": 1405.79,
+          "n": 157,
+          "pnl_units": 1103.55,
+          "wr": 0.9172
+        },
+        "2026": {
+          "avg_net_bps": 158.49,
+          "n": 102,
+          "pnl_units": 80.83,
+          "wr": 0.5686
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 954.96,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 8,
+        "funding_abs_lte": null
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 76.21,
+      "n": 393,
+      "pnl_units": 1876.49,
+      "strict_pass": false,
+      "trades_per_month": 14.11,
+      "wr": 0.8066,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1065.01,
+          "n": 131,
+          "pnl_units": 697.58,
+          "wr": 0.8702
+        },
+        "2025": {
+          "avg_net_bps": 1387.04,
+          "n": 159,
+          "pnl_units": 1102.7,
+          "wr": 0.9119
+        },
+        "2026": {
+          "avg_net_bps": 147.98,
+          "n": 103,
+          "pnl_units": 76.21,
+          "wr": 0.5631
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 956.91,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0006
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 80.83,
+      "n": 381,
+      "pnl_units": 1822.92,
+      "strict_pass": false,
+      "trades_per_month": 13.67,
+      "wr": 0.8058,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1065.01,
+          "n": 131,
+          "pnl_units": 697.58,
+          "wr": 0.8702
+        },
+        "2025": {
+          "avg_net_bps": 1411.5,
+          "n": 148,
+          "pnl_units": 1044.51,
+          "wr": 0.9122
+        },
+        "2026": {
+          "avg_net_bps": 158.49,
+          "n": 102,
+          "pnl_units": 80.83,
+          "wr": 0.5686
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 953.0,
+      "filter_type": "symbol",
+      "filters": [
+        "BONKUSDT",
+        "UNIUSDT",
+        "LINKUSDT",
+        "ALGOUSDT",
+        "NEARUSDT",
+        "AVAXUSDT",
+        "DOTUSDT",
+        "XRPUSDT",
+        "SOLUSDT",
+        "ARBUSDT",
+        "ATOMUSDT",
+        "PEPEUSDT",
+        "FLOKIUSDT",
+        "TIAUSDT",
+        "BOMEUSDT",
+        "DOGEUSDT",
+        "SHIBUSDT",
+        "SEIUSDT",
+        "OPUSDT",
+        "ADAUSDT",
+        "AAVEUSDT",
+        "MEMEUSDT",
+        "INJUSDT",
+        "WIFUSDT",
+        "STXUSDT",
+        "SUIUSDT",
+        "PNUTUSDT",
+        "APTUSDT",
+        "RUNEUSDT"
+      ],
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 76.21,
+      "n": 391,
+      "pnl_units": 1863.12,
+      "strict_pass": false,
+      "trades_per_month": 14.03,
+      "wr": 0.8056,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1065.01,
+          "n": 131,
+          "pnl_units": 697.58,
+          "wr": 0.8702
+        },
+        "2025": {
+          "avg_net_bps": 1387.68,
+          "n": 157,
+          "pnl_units": 1089.33,
+          "wr": 0.9108
+        },
+        "2026": {
+          "avg_net_bps": 147.98,
+          "n": 103,
+          "pnl_units": 76.21,
+          "wr": 0.5631
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 961.65,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0004
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 80.23,
+      "n": 379,
+      "pnl_units": 1822.32,
+      "strict_pass": false,
+      "trades_per_month": 13.6,
+      "wr": 0.8047,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1065.01,
+          "n": 131,
+          "pnl_units": 697.58,
+          "wr": 0.8702
+        },
+        "2025": {
+          "avg_net_bps": 1411.5,
+          "n": 148,
+          "pnl_units": 1044.51,
+          "wr": 0.9122
+        },
+        "2026": {
+          "avg_net_bps": 160.46,
+          "n": 100,
+          "pnl_units": 80.23,
+          "wr": 0.56
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 805.75,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0002
+      },
+      "max_dd_units": 48.37,
+      "min_year_pnl_units": 103.44,
+      "n": 294,
+      "pnl_units": 1184.45,
+      "strict_pass": false,
+      "trades_per_month": 10.55,
+      "wr": 0.8027,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1035.18,
+          "n": 118,
+          "pnl_units": 610.76,
+          "wr": 0.8559
+        },
+        "2025": {
+          "avg_net_bps": 990.0,
+          "n": 95,
+          "pnl_units": 470.25,
+          "wr": 0.8737
+        },
+        "2026": {
+          "avg_net_bps": 255.41,
+          "n": 81,
+          "pnl_units": 103.44,
+          "wr": 0.642
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 784.1,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0008
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 80.83,
+      "n": 343,
+      "pnl_units": 1344.74,
+      "strict_pass": false,
+      "trades_per_month": 12.31,
+      "wr": 0.7872,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1022.71,
+          "n": 122,
+          "pnl_units": 623.86,
+          "wr": 0.8607
+        },
+        "2025": {
+          "avg_net_bps": 1075.72,
+          "n": 119,
+          "pnl_units": 640.05,
+          "wr": 0.8992
+        },
+        "2026": {
+          "avg_net_bps": 158.49,
+          "n": 102,
+          "pnl_units": 80.83,
+          "wr": 0.5686
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 774.15,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 6,
+        "funding_abs_lte": null
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 76.21,
+      "n": 346,
+      "pnl_units": 1339.27,
+      "strict_pass": false,
+      "trades_per_month": 12.42,
+      "wr": 0.7832,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1022.71,
+          "n": 122,
+          "pnl_units": 623.86,
+          "wr": 0.8607
+        },
+        "2025": {
+          "avg_net_bps": 1056.54,
+          "n": 121,
+          "pnl_units": 639.21,
+          "wr": 0.8926
+        },
+        "2026": {
+          "avg_net_bps": 147.98,
+          "n": 103,
+          "pnl_units": 76.21,
+          "wr": 0.5631
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 769.88,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0006
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 80.83,
+      "n": 334,
+      "pnl_units": 1285.7,
+      "strict_pass": false,
+      "trades_per_month": 11.99,
+      "wr": 0.7814,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1022.71,
+          "n": 122,
+          "pnl_units": 623.86,
+          "wr": 0.8607
+        },
+        "2025": {
+          "avg_net_bps": 1056.4,
+          "n": 110,
+          "pnl_units": 581.02,
+          "wr": 0.8909
+        },
+        "2026": {
+          "avg_net_bps": 158.49,
+          "n": 102,
+          "pnl_units": 80.83,
+          "wr": 0.5686
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 774.16,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0004
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 80.23,
+      "n": 332,
+      "pnl_units": 1285.11,
+      "strict_pass": false,
+      "trades_per_month": 11.92,
+      "wr": 0.7801,
+      "years": {
+        "2024": {
+          "avg_net_bps": 1022.71,
+          "n": 122,
+          "pnl_units": 623.86,
+          "wr": 0.8607
+        },
+        "2025": {
+          "avg_net_bps": 1056.4,
+          "n": 110,
+          "pnl_units": 581.02,
+          "wr": 0.8909
+        },
+        "2026": {
+          "avg_net_bps": 160.46,
+          "n": 100,
+          "pnl_units": 80.23,
+          "wr": 0.56
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 433.46,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0002
+      },
+      "max_dd_units": 48.37,
+      "min_year_pnl_units": 91.27,
+      "n": 189,
+      "pnl_units": 409.62,
+      "strict_pass": false,
+      "trades_per_month": 6.78,
+      "wr": 0.7143,
+      "years": {
+        "2024": {
+          "avg_net_bps": 557.53,
+          "n": 53,
+          "pnl_units": 147.74,
+          "wr": 0.7547
+        },
+        "2025": {
+          "avg_net_bps": 588.31,
+          "n": 58,
+          "pnl_units": 170.61,
+          "wr": 0.7931
+        },
+        "2026": {
+          "avg_net_bps": 234.03,
+          "n": 78,
+          "pnl_units": 91.27,
+          "wr": 0.6282
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 378.87,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0008
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 68.66,
+      "n": 216,
+      "pnl_units": 409.18,
+      "strict_pass": false,
+      "trades_per_month": 7.75,
+      "wr": 0.6806,
+      "years": {
+        "2024": {
+          "avg_net_bps": 564.36,
+          "n": 57,
+          "pnl_units": 160.84,
+          "wr": 0.7719
+        },
+        "2025": {
+          "avg_net_bps": 598.93,
+          "n": 60,
+          "pnl_units": 179.68,
+          "wr": 0.8
+        },
+        "2026": {
+          "avg_net_bps": 138.7,
+          "n": 99,
+          "pnl_units": 68.66,
+          "wr": 0.5556
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 374.59,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0006
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 68.66,
+      "n": 215,
+      "pnl_units": 402.68,
+      "strict_pass": false,
+      "trades_per_month": 7.72,
+      "wr": 0.6791,
+      "years": {
+        "2024": {
+          "avg_net_bps": 564.36,
+          "n": 57,
+          "pnl_units": 160.84,
+          "wr": 0.7719
+        },
+        "2025": {
+          "avg_net_bps": 587.06,
+          "n": 59,
+          "pnl_units": 173.18,
+          "wr": 0.7966
+        },
+        "2026": {
+          "avg_net_bps": 138.7,
+          "n": 99,
+          "pnl_units": 68.66,
+          "wr": 0.5556
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 372.86,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 4,
+        "funding_abs_lte": null
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 64.04,
+      "n": 217,
+      "pnl_units": 404.56,
+      "strict_pass": false,
+      "trades_per_month": 7.79,
+      "wr": 0.6774,
+      "years": {
+        "2024": {
+          "avg_net_bps": 564.36,
+          "n": 57,
+          "pnl_units": 160.84,
+          "wr": 0.7719
+        },
+        "2025": {
+          "avg_net_bps": 598.93,
+          "n": 60,
+          "pnl_units": 179.68,
+          "wr": 0.8
+        },
+        "2026": {
+          "avg_net_bps": 128.07,
+          "n": 100,
+          "pnl_units": 64.04,
+          "wr": 0.55
+        }
+      }
+    },
+    {
+      "all_years_positive": true,
+      "all_years_wr_gte_65": false,
+      "avg_net_bps": 377.55,
+      "filter_type": "threshold",
+      "filters": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0004
+      },
+      "max_dd_units": 73.01,
+      "min_year_pnl_units": 68.06,
+      "n": 213,
+      "pnl_units": 402.09,
+      "strict_pass": false,
+      "trades_per_month": 7.64,
+      "wr": 0.6761,
+      "years": {
+        "2024": {
+          "avg_net_bps": 564.36,
+          "n": 57,
+          "pnl_units": 160.84,
+          "wr": 0.7719
+        },
+        "2025": {
+          "avg_net_bps": 587.06,
+          "n": 59,
+          "pnl_units": 173.18,
+          "wr": 0.7966
+        },
+        "2026": {
+          "avg_net_bps": 140.33,
+          "n": 97,
+          "pnl_units": 68.06,
+          "wr": 0.5464
+        }
+      }
+    }
+  ]
+}

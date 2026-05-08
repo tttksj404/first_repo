@@ -1,0 +1,3522 @@
+{
+  "chunk_count": 2048,
+  "chunk_index": 3,
+  "complete": false,
+  "coverage": "2024-01-01 through 2026-04-27",
+  "elapsed_sec": 120.39,
+  "generated_at": "2026-05-07 13:42:40",
+  "n_freq_pass": 0,
+  "n_specs": 56,
+  "n_strict_pass": 0,
+  "question": "Can G090 variants raise cadence while preserving high WR?",
+  "top": [
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G902187",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": 0.0004,
+        "hold": 12,
+        "hours": null,
+        "id": "G902187",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.12,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -180.28,
+        "liquidations": 0,
+        "max_period_dd_usd": 193.59,
+        "min_year_pnl_usd": -164.98,
+        "n": 2559,
+        "pnl_usd": -418.35,
+        "trades_per_month": 91.85,
+        "wr": 0.4228,
+        "years": {
+          "2024": {
+            "max_dd_usd": 193.59,
+            "n": 1001,
+            "pnl_usd": -164.29,
+            "wr": 0.4196
+          },
+          "2025": {
+            "max_dd_usd": 173.81,
+            "n": 1134,
+            "pnl_usd": -164.98,
+            "wr": 0.4356
+          },
+          "2026": {
+            "max_dd_usd": 111.92,
+            "n": 424,
+            "pnl_usd": -89.09,
+            "wr": 0.3962
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G904235",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": 0.0008,
+        "hold": 12,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G904235",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.16,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -149.29,
+        "liquidations": 0,
+        "max_period_dd_usd": 226.79,
+        "min_year_pnl_usd": -167.3,
+        "n": 2408,
+        "pnl_usd": -346.44,
+        "trades_per_month": 86.43,
+        "wr": 0.468,
+        "years": {
+          "2024": {
+            "max_dd_usd": 155.15,
+            "n": 954,
+            "pnl_usd": -74.01,
+            "wr": 0.4686
+          },
+          "2025": {
+            "max_dd_usd": 226.79,
+            "n": 1060,
+            "pnl_usd": -167.3,
+            "wr": 0.4896
+          },
+          "2026": {
+            "max_dd_usd": 124.87,
+            "n": 394,
+            "pnl_usd": -105.13,
+            "wr": 0.4086
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G871467",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0012,
+        "hold": 12,
+        "hours": null,
+        "id": "G871467",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.08,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -126.04,
+        "liquidations": 0,
+        "max_period_dd_usd": 211.69,
+        "min_year_pnl_usd": -136.22,
+        "n": 2193,
+        "pnl_usd": -292.47,
+        "trades_per_month": 78.71,
+        "wr": 0.4697,
+        "years": {
+          "2024": {
+            "max_dd_usd": 211.69,
+            "n": 850,
+            "pnl_usd": -136.22,
+            "wr": 0.4624
+          },
+          "2025": {
+            "max_dd_usd": 137.21,
+            "n": 971,
+            "pnl_usd": -118.85,
+            "wr": 0.4809
+          },
+          "2026": {
+            "max_dd_usd": 75.41,
+            "n": 372,
+            "pnl_usd": -37.41,
+            "wr": 0.457
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G816171",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0012,
+        "hold": 12,
+        "hours": null,
+        "id": "G816171",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.12,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -122.78,
+        "liquidations": 0,
+        "max_period_dd_usd": 195.12,
+        "min_year_pnl_usd": -141.13,
+        "n": 2182,
+        "pnl_usd": -284.91,
+        "trades_per_month": 78.31,
+        "wr": 0.4661,
+        "years": {
+          "2024": {
+            "max_dd_usd": 195.12,
+            "n": 848,
+            "pnl_usd": -107.85,
+            "wr": 0.4611
+          },
+          "2025": {
+            "max_dd_usd": 155.08,
+            "n": 964,
+            "pnl_usd": -141.13,
+            "wr": 0.4751
+          },
+          "2026": {
+            "max_dd_usd": 71.82,
+            "n": 370,
+            "pnl_usd": -35.93,
+            "wr": 0.4541
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G846891",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0004,
+        "hold": 18,
+        "hours": null,
+        "id": "G846891",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.06,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -85.25,
+        "liquidations": 0,
+        "max_period_dd_usd": 152.94,
+        "min_year_pnl_usd": -100.18,
+        "n": 2136,
+        "pnl_usd": -197.83,
+        "trades_per_month": 76.66,
+        "wr": 0.4448,
+        "years": {
+          "2024": {
+            "max_dd_usd": 152.94,
+            "n": 841,
+            "pnl_usd": -100.18,
+            "wr": 0.4376
+          },
+          "2025": {
+            "max_dd_usd": 78.08,
+            "n": 951,
+            "pnl_usd": -15.47,
+            "wr": 0.4669
+          },
+          "2026": {
+            "max_dd_usd": 118.73,
+            "n": 344,
+            "pnl_usd": -82.18,
+            "wr": 0.4012
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G791595",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0004,
+        "hold": 18,
+        "hours": null,
+        "id": "G791595",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.1,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -88.78,
+        "liquidations": 0,
+        "max_period_dd_usd": 156.42,
+        "min_year_pnl_usd": -82.16,
+        "n": 2092,
+        "pnl_usd": -206.02,
+        "trades_per_month": 75.08,
+        "wr": 0.4345,
+        "years": {
+          "2024": {
+            "max_dd_usd": 156.42,
+            "n": 815,
+            "pnl_usd": -79.14,
+            "wr": 0.4233
+          },
+          "2025": {
+            "max_dd_usd": 86.72,
+            "n": 935,
+            "pnl_usd": -44.72,
+            "wr": 0.4567
+          },
+          "2026": {
+            "max_dd_usd": 117.48,
+            "n": 342,
+            "pnl_usd": -82.16,
+            "wr": 0.4006
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G793643",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0008,
+        "hold": 18,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G793643",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.12,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -69.45,
+        "liquidations": 0,
+        "max_period_dd_usd": 143.55,
+        "min_year_pnl_usd": -135.44,
+        "n": 1973,
+        "pnl_usd": -161.17,
+        "trades_per_month": 70.81,
+        "wr": 0.5013,
+        "years": {
+          "2024": {
+            "max_dd_usd": 127.2,
+            "n": 787,
+            "pnl_usd": 43.43,
+            "wr": 0.5235
+          },
+          "2025": {
+            "max_dd_usd": 143.55,
+            "n": 868,
+            "pnl_usd": -135.44,
+            "wr": 0.4988
+          },
+          "2026": {
+            "max_dd_usd": 106.41,
+            "n": 318,
+            "pnl_usd": -69.16,
+            "wr": 0.4528
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G873515",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0012,
+        "hold": 12,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G873515",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.12,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -94.2,
+        "liquidations": 0,
+        "max_period_dd_usd": 157.04,
+        "min_year_pnl_usd": -114.85,
+        "n": 1969,
+        "pnl_usd": -218.59,
+        "trades_per_month": 70.67,
+        "wr": 0.4347,
+        "years": {
+          "2024": {
+            "max_dd_usd": 157.04,
+            "n": 750,
+            "pnl_usd": -114.85,
+            "wr": 0.4133
+          },
+          "2025": {
+            "max_dd_usd": 98.71,
+            "n": 880,
+            "pnl_usd": -59.76,
+            "wr": 0.458
+          },
+          "2026": {
+            "max_dd_usd": 71.33,
+            "n": 339,
+            "pnl_usd": -43.98,
+            "wr": 0.4218
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G908331",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": 0.0012,
+        "hold": 18,
+        "hours": null,
+        "id": "G908331",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.12,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -29.55,
+        "liquidations": 0,
+        "max_period_dd_usd": 123.49,
+        "min_year_pnl_usd": -44.96,
+        "n": 1873,
+        "pnl_usd": -68.58,
+        "trades_per_month": 67.22,
+        "wr": 0.4955,
+        "years": {
+          "2024": {
+            "max_dd_usd": 123.49,
+            "n": 745,
+            "pnl_usd": 7.43,
+            "wr": 0.502
+          },
+          "2025": {
+            "max_dd_usd": 90.5,
+            "n": 824,
+            "pnl_usd": -31.05,
+            "wr": 0.5024
+          },
+          "2026": {
+            "max_dd_usd": 93.37,
+            "n": 304,
+            "pnl_usd": -44.96,
+            "wr": 0.4605
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G883755",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0004,
+        "hold": 24,
+        "hours": null,
+        "id": "G883755",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.1,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -96.11,
+        "liquidations": 0,
+        "max_period_dd_usd": 164.32,
+        "min_year_pnl_usd": -148.02,
+        "n": 1838,
+        "pnl_usd": -223.03,
+        "trades_per_month": 65.97,
+        "wr": 0.4086,
+        "years": {
+          "2024": {
+            "max_dd_usd": 123.01,
+            "n": 726,
+            "pnl_usd": -18.39,
+            "wr": 0.4229
+          },
+          "2025": {
+            "max_dd_usd": 164.32,
+            "n": 816,
+            "pnl_usd": -148.02,
+            "wr": 0.4007
+          },
+          "2026": {
+            "max_dd_usd": 100.84,
+            "n": 296,
+            "pnl_usd": -56.62,
+            "wr": 0.3953
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G828459",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0004,
+        "hold": 24,
+        "hours": null,
+        "id": "G828459",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.16,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -120.41,
+        "liquidations": 0,
+        "max_period_dd_usd": 195.64,
+        "min_year_pnl_usd": -179.33,
+        "n": 1832,
+        "pnl_usd": -279.41,
+        "trades_per_month": 65.75,
+        "wr": 0.4067,
+        "years": {
+          "2024": {
+            "max_dd_usd": 147.77,
+            "n": 723,
+            "pnl_usd": -33.96,
+            "wr": 0.4205
+          },
+          "2025": {
+            "max_dd_usd": 195.64,
+            "n": 814,
+            "pnl_usd": -179.33,
+            "wr": 0.398
+          },
+          "2026": {
+            "max_dd_usd": 109.9,
+            "n": 295,
+            "pnl_usd": -66.12,
+            "wr": 0.3966
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G885803",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0008,
+        "hold": 24,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G885803",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.12,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -128.18,
+        "liquidations": 0,
+        "max_period_dd_usd": 218.16,
+        "min_year_pnl_usd": -205.84,
+        "n": 1756,
+        "pnl_usd": -297.46,
+        "trades_per_month": 63.03,
+        "wr": 0.4806,
+        "years": {
+          "2024": {
+            "max_dd_usd": 164.43,
+            "n": 711,
+            "pnl_usd": 17.76,
+            "wr": 0.5091
+          },
+          "2025": {
+            "max_dd_usd": 218.16,
+            "n": 771,
+            "pnl_usd": -205.84,
+            "wr": 0.476
+          },
+          "2026": {
+            "max_dd_usd": 152.38,
+            "n": 274,
+            "pnl_usd": -109.38,
+            "wr": 0.4197
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G818219",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0012,
+        "hold": 18,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G818219",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.06,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -83.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 157.11,
+        "min_year_pnl_usd": -134.74,
+        "n": 1691,
+        "pnl_usd": -192.59,
+        "trades_per_month": 60.69,
+        "wr": 0.45,
+        "years": {
+          "2024": {
+            "max_dd_usd": 157.11,
+            "n": 666,
+            "pnl_usd": -134.74,
+            "wr": 0.4279
+          },
+          "2025": {
+            "max_dd_usd": 77.44,
+            "n": 749,
+            "pnl_usd": -27.51,
+            "wr": 0.4686
+          },
+          "2026": {
+            "max_dd_usd": 64.48,
+            "n": 276,
+            "pnl_usd": -30.35,
+            "wr": 0.4529
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G853035",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0012,
+        "hold": 24,
+        "hours": null,
+        "id": "G853035",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.06,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -69.06,
+        "liquidations": 0,
+        "max_period_dd_usd": 119.73,
+        "min_year_pnl_usd": -66.87,
+        "n": 1636,
+        "pnl_usd": -160.25,
+        "trades_per_month": 58.72,
+        "wr": 0.4884,
+        "years": {
+          "2024": {
+            "max_dd_usd": 117.86,
+            "n": 649,
+            "pnl_usd": -27.65,
+            "wr": 0.4977
+          },
+          "2025": {
+            "max_dd_usd": 99.46,
+            "n": 724,
+            "pnl_usd": -65.73,
+            "wr": 0.4945
+          },
+          "2026": {
+            "max_dd_usd": 119.73,
+            "n": 263,
+            "pnl_usd": -66.87,
+            "wr": 0.4487
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G842795",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": null,
+        "hold": 12,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G842795",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.08,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -97.53,
+        "liquidations": 0,
+        "max_period_dd_usd": 156.57,
+        "min_year_pnl_usd": -91.69,
+        "n": 1609,
+        "pnl_usd": -226.32,
+        "trades_per_month": 57.75,
+        "wr": 0.486,
+        "years": {
+          "2024": {
+            "max_dd_usd": 139.2,
+            "n": 611,
+            "pnl_usd": -71.89,
+            "wr": 0.4828
+          },
+          "2025": {
+            "max_dd_usd": 156.57,
+            "n": 719,
+            "pnl_usd": -91.69,
+            "wr": 0.5104
+          },
+          "2026": {
+            "max_dd_usd": 75.86,
+            "n": 279,
+            "pnl_usd": -62.74,
+            "wr": 0.4301
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G797739",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0012,
+        "hold": 24,
+        "hours": null,
+        "id": "G797739",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.1,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -78.74,
+        "liquidations": 0,
+        "max_period_dd_usd": 132.31,
+        "min_year_pnl_usd": -91.89,
+        "n": 1608,
+        "pnl_usd": -182.71,
+        "trades_per_month": 57.71,
+        "wr": 0.467,
+        "years": {
+          "2024": {
+            "max_dd_usd": 132.31,
+            "n": 630,
+            "pnl_usd": -25.66,
+            "wr": 0.481
+          },
+          "2025": {
+            "max_dd_usd": 115.83,
+            "n": 717,
+            "pnl_usd": -91.89,
+            "wr": 0.4644
+          },
+          "2026": {
+            "max_dd_usd": 117.72,
+            "n": 261,
+            "pnl_usd": -65.16,
+            "wr": 0.4406
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G787499",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": null,
+        "hold": 12,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G787499",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.12,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -106.27,
+        "liquidations": 0,
+        "max_period_dd_usd": 160.68,
+        "min_year_pnl_usd": -87.56,
+        "n": 1594,
+        "pnl_usd": -246.62,
+        "trades_per_month": 57.21,
+        "wr": 0.4843,
+        "years": {
+          "2024": {
+            "max_dd_usd": 158.76,
+            "n": 604,
+            "pnl_usd": -87.13,
+            "wr": 0.4768
+          },
+          "2025": {
+            "max_dd_usd": 160.68,
+            "n": 712,
+            "pnl_usd": -87.56,
+            "wr": 0.514
+          },
+          "2026": {
+            "max_dd_usd": 85.04,
+            "n": 278,
+            "pnl_usd": -71.92,
+            "wr": 0.4245
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G822315",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": null,
+        "hold": 18,
+        "hours": null,
+        "id": "G822315",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.12,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -90.02,
+        "liquidations": 0,
+        "max_period_dd_usd": 139.34,
+        "min_year_pnl_usd": -111.39,
+        "n": 1560,
+        "pnl_usd": -208.89,
+        "trades_per_month": 55.99,
+        "wr": 0.4974,
+        "years": {
+          "2024": {
+            "max_dd_usd": 136.06,
+            "n": 626,
+            "pnl_usd": -21.38,
+            "wr": 0.508
+          },
+          "2025": {
+            "max_dd_usd": 139.34,
+            "n": 685,
+            "pnl_usd": -111.39,
+            "wr": 0.5066
+          },
+          "2026": {
+            "max_dd_usd": 101.37,
+            "n": 249,
+            "pnl_usd": -76.12,
+            "wr": 0.4458
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G910379",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": 0.0012,
+        "hold": 24,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G910379",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.06,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -93.78,
+        "liquidations": 0,
+        "max_period_dd_usd": 153.87,
+        "min_year_pnl_usd": -114.96,
+        "n": 1494,
+        "pnl_usd": -217.61,
+        "trades_per_month": 53.62,
+        "wr": 0.4143,
+        "years": {
+          "2024": {
+            "max_dd_usd": 153.87,
+            "n": 586,
+            "pnl_usd": -114.96,
+            "wr": 0.4027
+          },
+          "2025": {
+            "max_dd_usd": 85.88,
+            "n": 673,
+            "pnl_usd": -60.25,
+            "wr": 0.425
+          },
+          "2026": {
+            "max_dd_usd": 85.44,
+            "n": 235,
+            "pnl_usd": -42.4,
+            "wr": 0.4128
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G855083",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0012,
+        "hold": 24,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G855083",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.1,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -69.96,
+        "liquidations": 0,
+        "max_period_dd_usd": 155.99,
+        "min_year_pnl_usd": -86.4,
+        "n": 1493,
+        "pnl_usd": -162.34,
+        "trades_per_month": 53.59,
+        "wr": 0.3979,
+        "years": {
+          "2024": {
+            "max_dd_usd": 155.99,
+            "n": 586,
+            "pnl_usd": -42.93,
+            "wr": 0.3976
+          },
+          "2025": {
+            "max_dd_usd": 111.39,
+            "n": 672,
+            "pnl_usd": -86.4,
+            "wr": 0.3958
+          },
+          "2026": {
+            "max_dd_usd": 78.46,
+            "n": 235,
+            "pnl_usd": -33.02,
+            "wr": 0.4043
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G799787",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0012,
+        "hold": 24,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G799787",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.16,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -81.89,
+        "liquidations": 0,
+        "max_period_dd_usd": 155.69,
+        "min_year_pnl_usd": -101.66,
+        "n": 1471,
+        "pnl_usd": -190.04,
+        "trades_per_month": 52.8,
+        "wr": 0.3984,
+        "years": {
+          "2024": {
+            "max_dd_usd": 155.69,
+            "n": 573,
+            "pnl_usd": -46.83,
+            "wr": 0.3979
+          },
+          "2025": {
+            "max_dd_usd": 126.34,
+            "n": 665,
+            "pnl_usd": -101.66,
+            "wr": 0.3985
+          },
+          "2026": {
+            "max_dd_usd": 86.11,
+            "n": 233,
+            "pnl_usd": -41.55,
+            "wr": 0.3991
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G879659",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": null,
+        "hold": 18,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G879659",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.12,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -104.06,
+        "liquidations": 0,
+        "max_period_dd_usd": 169.96,
+        "min_year_pnl_usd": -162.06,
+        "n": 1390,
+        "pnl_usd": -241.48,
+        "trades_per_month": 49.89,
+        "wr": 0.4892,
+        "years": {
+          "2024": {
+            "max_dd_usd": 118.16,
+            "n": 550,
+            "pnl_usd": -30.16,
+            "wr": 0.5036
+          },
+          "2025": {
+            "max_dd_usd": 169.96,
+            "n": 610,
+            "pnl_usd": -162.06,
+            "wr": 0.4836
+          },
+          "2026": {
+            "max_dd_usd": 76.22,
+            "n": 230,
+            "pnl_usd": -49.25,
+            "wr": 0.4696
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G875563",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": null,
+        "hold": 18,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G875563",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.06,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -89.18,
+        "liquidations": 0,
+        "max_period_dd_usd": 137.39,
+        "min_year_pnl_usd": -117.97,
+        "n": 1360,
+        "pnl_usd": -206.96,
+        "trades_per_month": 48.81,
+        "wr": 0.4419,
+        "years": {
+          "2024": {
+            "max_dd_usd": 137.39,
+            "n": 536,
+            "pnl_usd": -117.97,
+            "wr": 0.4347
+          },
+          "2025": {
+            "max_dd_usd": 62.65,
+            "n": 593,
+            "pnl_usd": -52.25,
+            "wr": 0.4587
+          },
+          "2026": {
+            "max_dd_usd": 84.35,
+            "n": 231,
+            "pnl_usd": -36.74,
+            "wr": 0.4156
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G889899",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0012,
+        "hold": 36,
+        "hours": null,
+        "id": "G889899",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.1,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -59.74,
+        "liquidations": 0,
+        "max_period_dd_usd": 171.67,
+        "min_year_pnl_usd": -126.62,
+        "n": 1359,
+        "pnl_usd": -138.63,
+        "trades_per_month": 48.78,
+        "wr": 0.4599,
+        "years": {
+          "2024": {
+            "max_dd_usd": 138.14,
+            "n": 543,
+            "pnl_usd": 0.45,
+            "wr": 0.4788
+          },
+          "2025": {
+            "max_dd_usd": 171.67,
+            "n": 604,
+            "pnl_usd": -126.62,
+            "wr": 0.4288
+          },
+          "2026": {
+            "max_dd_usd": 85.35,
+            "n": 212,
+            "pnl_usd": -12.45,
+            "wr": 0.5
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G834603",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0012,
+        "hold": 36,
+        "hours": null,
+        "id": "G834603",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.16,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -73.96,
+        "liquidations": 0,
+        "max_period_dd_usd": 210.05,
+        "min_year_pnl_usd": -179.83,
+        "n": 1353,
+        "pnl_usd": -171.62,
+        "trades_per_month": 48.56,
+        "wr": 0.4501,
+        "years": {
+          "2024": {
+            "max_dd_usd": 128.02,
+            "n": 541,
+            "pnl_usd": 25.21,
+            "wr": 0.4732
+          },
+          "2025": {
+            "max_dd_usd": 210.05,
+            "n": 601,
+            "pnl_usd": -179.83,
+            "wr": 0.4126
+          },
+          "2026": {
+            "max_dd_usd": 93.22,
+            "n": 211,
+            "pnl_usd": -17.0,
+            "wr": 0.4976
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G820267",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": null,
+        "hold": 18,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G820267",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.1,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -67.55,
+        "liquidations": 0,
+        "max_period_dd_usd": 130.76,
+        "min_year_pnl_usd": -92.71,
+        "n": 1349,
+        "pnl_usd": -156.75,
+        "trades_per_month": 48.42,
+        "wr": 0.4344,
+        "years": {
+          "2024": {
+            "max_dd_usd": 130.76,
+            "n": 533,
+            "pnl_usd": -92.71,
+            "wr": 0.4259
+          },
+          "2025": {
+            "max_dd_usd": 54.02,
+            "n": 587,
+            "pnl_usd": -39.61,
+            "wr": 0.4514
+          },
+          "2026": {
+            "max_dd_usd": 78.56,
+            "n": 229,
+            "pnl_usd": -24.43,
+            "wr": 0.4105
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G783403",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": null,
+        "hold": 12,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G783403",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.06,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -130.46,
+        "liquidations": 0,
+        "max_period_dd_usd": 144.74,
+        "min_year_pnl_usd": -140.34,
+        "n": 1336,
+        "pnl_usd": -302.75,
+        "trades_per_month": 47.95,
+        "wr": 0.4147,
+        "years": {
+          "2024": {
+            "max_dd_usd": 144.74,
+            "n": 527,
+            "pnl_usd": -140.34,
+            "wr": 0.408
+          },
+          "2025": {
+            "max_dd_usd": 112.51,
+            "n": 581,
+            "pnl_usd": -112.51,
+            "wr": 0.4234
+          },
+          "2026": {
+            "max_dd_usd": 74.22,
+            "n": 228,
+            "pnl_usd": -49.9,
+            "wr": 0.4079
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G912427",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": null,
+        "hold": 24,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G912427",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.1,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -60.64,
+        "liquidations": 0,
+        "max_period_dd_usd": 122.47,
+        "min_year_pnl_usd": -51.61,
+        "n": 1281,
+        "pnl_usd": -140.71,
+        "trades_per_month": 45.98,
+        "wr": 0.42,
+        "years": {
+          "2024": {
+            "max_dd_usd": 122.47,
+            "n": 499,
+            "pnl_usd": -51.61,
+            "wr": 0.4188
+          },
+          "2025": {
+            "max_dd_usd": 63.67,
+            "n": 564,
+            "pnl_usd": -41.59,
+            "wr": 0.4362
+          },
+          "2026": {
+            "max_dd_usd": 98.63,
+            "n": 218,
+            "pnl_usd": -47.51,
+            "wr": 0.3807
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G857131",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": null,
+        "hold": 24,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G857131",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.16,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -69.26,
+        "liquidations": 0,
+        "max_period_dd_usd": 126.09,
+        "min_year_pnl_usd": -58.52,
+        "n": 1280,
+        "pnl_usd": -160.72,
+        "trades_per_month": 45.94,
+        "wr": 0.4172,
+        "years": {
+          "2024": {
+            "max_dd_usd": 126.09,
+            "n": 498,
+            "pnl_usd": -58.52,
+            "wr": 0.4157
+          },
+          "2025": {
+            "max_dd_usd": 69.93,
+            "n": 564,
+            "pnl_usd": -50.98,
+            "wr": 0.4326
+          },
+          "2026": {
+            "max_dd_usd": 108.22,
+            "n": 218,
+            "pnl_usd": -51.22,
+            "wr": 0.3807
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G865323",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0004,
+        "hold": 48,
+        "hours": null,
+        "id": "G865323",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.08,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -52.47,
+        "liquidations": 0,
+        "max_period_dd_usd": 133.27,
+        "min_year_pnl_usd": -98.07,
+        "n": 1271,
+        "pnl_usd": -121.76,
+        "trades_per_month": 45.62,
+        "wr": 0.3651,
+        "years": {
+          "2024": {
+            "max_dd_usd": 92.5,
+            "n": 517,
+            "pnl_usd": 27.28,
+            "wr": 0.383
+          },
+          "2025": {
+            "max_dd_usd": 133.27,
+            "n": 556,
+            "pnl_usd": -98.07,
+            "wr": 0.3543
+          },
+          "2026": {
+            "max_dd_usd": 81.05,
+            "n": 198,
+            "pnl_usd": -50.98,
+            "wr": 0.3485
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G810027",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0004,
+        "hold": 48,
+        "hours": null,
+        "id": "G810027",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.12,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -43.68,
+        "liquidations": 0,
+        "max_period_dd_usd": 132.42,
+        "min_year_pnl_usd": -106.28,
+        "n": 1253,
+        "pnl_usd": -101.36,
+        "trades_per_month": 44.97,
+        "wr": 0.3488,
+        "years": {
+          "2024": {
+            "max_dd_usd": 132.42,
+            "n": 501,
+            "pnl_usd": 46.81,
+            "wr": 0.3613
+          },
+          "2025": {
+            "max_dd_usd": 123.64,
+            "n": 554,
+            "pnl_usd": -106.28,
+            "wr": 0.3357
+          },
+          "2026": {
+            "max_dd_usd": 85.88,
+            "n": 198,
+            "pnl_usd": -41.88,
+            "wr": 0.3535
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G891947",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0012,
+        "hold": 36,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G891947",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.16,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -45.66,
+        "liquidations": 0,
+        "max_period_dd_usd": 129.72,
+        "min_year_pnl_usd": -62.67,
+        "n": 1244,
+        "pnl_usd": -105.95,
+        "trades_per_month": 44.65,
+        "wr": 0.3802,
+        "years": {
+          "2024": {
+            "max_dd_usd": 129.72,
+            "n": 490,
+            "pnl_usd": -23.57,
+            "wr": 0.3673
+          },
+          "2025": {
+            "max_dd_usd": 123.94,
+            "n": 563,
+            "pnl_usd": -62.67,
+            "wr": 0.3694
+          },
+          "2026": {
+            "max_dd_usd": 76.39,
+            "n": 191,
+            "pnl_usd": -19.7,
+            "wr": 0.445
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G867371",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0008,
+        "hold": 48,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G867371",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.1,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -142.49,
+        "liquidations": 0,
+        "max_period_dd_usd": 214.74,
+        "min_year_pnl_usd": -193.44,
+        "n": 1223,
+        "pnl_usd": -330.64,
+        "trades_per_month": 43.9,
+        "wr": 0.4603,
+        "years": {
+          "2024": {
+            "max_dd_usd": 147.56,
+            "n": 508,
+            "pnl_usd": -51.66,
+            "wr": 0.4508
+          },
+          "2025": {
+            "max_dd_usd": 214.74,
+            "n": 530,
+            "pnl_usd": -193.44,
+            "wr": 0.4698
+          },
+          "2026": {
+            "max_dd_usd": 124.7,
+            "n": 185,
+            "pnl_usd": -85.55,
+            "wr": 0.4595
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G812075",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0008,
+        "hold": 48,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G812075",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.16,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -135.49,
+        "liquidations": 0,
+        "max_period_dd_usd": 239.04,
+        "min_year_pnl_usd": -209.57,
+        "n": 1203,
+        "pnl_usd": -314.41,
+        "trades_per_month": 43.18,
+        "wr": 0.448,
+        "years": {
+          "2024": {
+            "max_dd_usd": 162.46,
+            "n": 491,
+            "pnl_usd": -37.8,
+            "wr": 0.4338
+          },
+          "2025": {
+            "max_dd_usd": 239.04,
+            "n": 527,
+            "pnl_usd": -209.57,
+            "wr": 0.4535
+          },
+          "2026": {
+            "max_dd_usd": 123.06,
+            "n": 185,
+            "pnl_usd": -67.04,
+            "wr": 0.4703
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G803883",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": null,
+        "hold": 36,
+        "hours": null,
+        "id": "G803883",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.1,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -71.85,
+        "liquidations": 0,
+        "max_period_dd_usd": 170.59,
+        "min_year_pnl_usd": -151.4,
+        "n": 1152,
+        "pnl_usd": -166.73,
+        "trades_per_month": 41.35,
+        "wr": 0.4852,
+        "years": {
+          "2024": {
+            "max_dd_usd": 126.62,
+            "n": 448,
+            "pnl_usd": 6.23,
+            "wr": 0.5156
+          },
+          "2025": {
+            "max_dd_usd": 170.59,
+            "n": 521,
+            "pnl_usd": -151.4,
+            "wr": 0.4511
+          },
+          "2026": {
+            "max_dd_usd": 87.65,
+            "n": 183,
+            "pnl_usd": -21.55,
+            "wr": 0.5082
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G900139",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": 0.0004,
+        "hold": 12,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G900139",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.08,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -111.41,
+        "liquidations": 0,
+        "max_period_dd_usd": 129.74,
+        "min_year_pnl_usd": -129.74,
+        "n": 1148,
+        "pnl_usd": -258.54,
+        "trades_per_month": 41.2,
+        "wr": 0.4355,
+        "years": {
+          "2024": {
+            "max_dd_usd": 128.12,
+            "n": 451,
+            "pnl_usd": -98.96,
+            "wr": 0.4302
+          },
+          "2025": {
+            "max_dd_usd": 129.74,
+            "n": 501,
+            "pnl_usd": -129.74,
+            "wr": 0.4451
+          },
+          "2026": {
+            "max_dd_usd": 62.99,
+            "n": 196,
+            "pnl_usd": -29.84,
+            "wr": 0.4235
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G844843",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0004,
+        "hold": 12,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G844843",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.12,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -104.11,
+        "liquidations": 0,
+        "max_period_dd_usd": 125.77,
+        "min_year_pnl_usd": -125.77,
+        "n": 1147,
+        "pnl_usd": -241.58,
+        "trades_per_month": 41.17,
+        "wr": 0.4333,
+        "years": {
+          "2024": {
+            "max_dd_usd": 118.45,
+            "n": 451,
+            "pnl_usd": -81.28,
+            "wr": 0.4302
+          },
+          "2025": {
+            "max_dd_usd": 125.77,
+            "n": 500,
+            "pnl_usd": -125.77,
+            "wr": 0.442
+          },
+          "2026": {
+            "max_dd_usd": 67.82,
+            "n": 196,
+            "pnl_usd": -34.53,
+            "wr": 0.4184
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G789547",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0004,
+        "hold": 18,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G789547",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.06,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -49.94,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.59,
+        "min_year_pnl_usd": -58.93,
+        "n": 1131,
+        "pnl_usd": -115.88,
+        "trades_per_month": 40.59,
+        "wr": 0.5102,
+        "years": {
+          "2024": {
+            "max_dd_usd": 92.59,
+            "n": 448,
+            "pnl_usd": -58.93,
+            "wr": 0.5179
+          },
+          "2025": {
+            "max_dd_usd": 54.08,
+            "n": 492,
+            "pnl_usd": -23.27,
+            "wr": 0.5264
+          },
+          "2026": {
+            "max_dd_usd": 87.66,
+            "n": 191,
+            "pnl_usd": -33.68,
+            "wr": 0.4503
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G881707",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": 0.0004,
+        "hold": 24,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G881707",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.06,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -59.06,
+        "liquidations": 0,
+        "max_period_dd_usd": 104.37,
+        "min_year_pnl_usd": -52.93,
+        "n": 1083,
+        "pnl_usd": -137.05,
+        "trades_per_month": 38.87,
+        "wr": 0.4912,
+        "years": {
+          "2024": {
+            "max_dd_usd": 91.7,
+            "n": 424,
+            "pnl_usd": -34.54,
+            "wr": 0.5118
+          },
+          "2025": {
+            "max_dd_usd": 66.99,
+            "n": 475,
+            "pnl_usd": -49.57,
+            "wr": 0.4947
+          },
+          "2026": {
+            "max_dd_usd": 104.37,
+            "n": 184,
+            "pnl_usd": -52.93,
+            "wr": 0.4348
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G826411",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0004,
+        "hold": 24,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G826411",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.1,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -53.3,
+        "liquidations": 0,
+        "max_period_dd_usd": 106.13,
+        "min_year_pnl_usd": -73.42,
+        "n": 1076,
+        "pnl_usd": -123.69,
+        "trades_per_month": 38.62,
+        "wr": 0.4796,
+        "years": {
+          "2024": {
+            "max_dd_usd": 106.13,
+            "n": 423,
+            "pnl_usd": -18.89,
+            "wr": 0.5083
+          },
+          "2025": {
+            "max_dd_usd": 79.99,
+            "n": 470,
+            "pnl_usd": -73.42,
+            "wr": 0.4723
+          },
+          "2026": {
+            "max_dd_usd": 91.87,
+            "n": 183,
+            "pnl_usd": -31.38,
+            "wr": 0.4317
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G836651",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0012,
+        "hold": 48,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G836651",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.08,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -43.31,
+        "liquidations": 0,
+        "max_period_dd_usd": 109.23,
+        "min_year_pnl_usd": -81.61,
+        "n": 1063,
+        "pnl_usd": -100.51,
+        "trades_per_month": 38.15,
+        "wr": 0.3735,
+        "years": {
+          "2024": {
+            "max_dd_usd": 92.42,
+            "n": 429,
+            "pnl_usd": -11.05,
+            "wr": 0.373
+          },
+          "2025": {
+            "max_dd_usd": 109.23,
+            "n": 471,
+            "pnl_usd": -81.61,
+            "wr": 0.3631
+          },
+          "2026": {
+            "max_dd_usd": 50.87,
+            "n": 163,
+            "pnl_usd": -7.85,
+            "wr": 0.4049
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G861227",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": null,
+        "hold": 36,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G861227",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.1,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -57.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 121.34,
+        "min_year_pnl_usd": -101.51,
+        "n": 1061,
+        "pnl_usd": -132.28,
+        "trades_per_month": 38.08,
+        "wr": 0.4741,
+        "years": {
+          "2024": {
+            "max_dd_usd": 117.95,
+            "n": 410,
+            "pnl_usd": -6.78,
+            "wr": 0.5024
+          },
+          "2025": {
+            "max_dd_usd": 121.34,
+            "n": 481,
+            "pnl_usd": -101.51,
+            "wr": 0.447
+          },
+          "2026": {
+            "max_dd_usd": 80.06,
+            "n": 170,
+            "pnl_usd": -23.98,
+            "wr": 0.4824
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G805931",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": null,
+        "hold": 36,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G805931",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.16,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -78.31,
+        "liquidations": 0,
+        "max_period_dd_usd": 144.82,
+        "min_year_pnl_usd": -121.52,
+        "n": 1050,
+        "pnl_usd": -181.72,
+        "trades_per_month": 37.69,
+        "wr": 0.461,
+        "years": {
+          "2024": {
+            "max_dd_usd": 120.35,
+            "n": 405,
+            "pnl_usd": -33.69,
+            "wr": 0.4889
+          },
+          "2025": {
+            "max_dd_usd": 144.82,
+            "n": 475,
+            "pnl_usd": -121.52,
+            "wr": 0.4337
+          },
+          "2026": {
+            "max_dd_usd": 90.75,
+            "n": 170,
+            "pnl_usd": -26.5,
+            "wr": 0.4706
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G896043",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": null,
+        "hold": 48,
+        "hours": null,
+        "id": "G896043",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.1,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -118.47,
+        "liquidations": 0,
+        "max_period_dd_usd": 233.56,
+        "min_year_pnl_usd": -215.38,
+        "n": 1018,
+        "pnl_usd": -274.91,
+        "trades_per_month": 36.54,
+        "wr": 0.4627,
+        "years": {
+          "2024": {
+            "max_dd_usd": 129.52,
+            "n": 409,
+            "pnl_usd": -8.98,
+            "wr": 0.4866
+          },
+          "2025": {
+            "max_dd_usd": 233.56,
+            "n": 451,
+            "pnl_usd": -215.38,
+            "wr": 0.439
+          },
+          "2026": {
+            "max_dd_usd": 110.17,
+            "n": 158,
+            "pnl_usd": -50.55,
+            "wr": 0.4684
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G840747",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": null,
+        "hold": 48,
+        "hours": null,
+        "id": "G840747",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.085,
+        "tp_pct": 0.16,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -135.67,
+        "liquidations": 0,
+        "max_period_dd_usd": 300.48,
+        "min_year_pnl_usd": -275.0,
+        "n": 1017,
+        "pnl_usd": -314.84,
+        "trades_per_month": 36.5,
+        "wr": 0.4474,
+        "years": {
+          "2024": {
+            "max_dd_usd": 119.25,
+            "n": 409,
+            "pnl_usd": 28.36,
+            "wr": 0.4768
+          },
+          "2025": {
+            "max_dd_usd": 300.48,
+            "n": 450,
+            "pnl_usd": -275.0,
+            "wr": 0.4178
+          },
+          "2026": {
+            "max_dd_usd": 127.66,
+            "n": 158,
+            "pnl_usd": -68.2,
+            "wr": 0.4557
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G906283",
+      "spec": {
+        "atr_max": 12,
+        "funding_abs_lte": 0.0008,
+        "hold": 18,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G906283",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.08,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -29.16,
+        "liquidations": 0,
+        "max_period_dd_usd": 108.27,
+        "min_year_pnl_usd": -54.82,
+        "n": 984,
+        "pnl_usd": -67.67,
+        "trades_per_month": 35.32,
+        "wr": 0.5041,
+        "years": {
+          "2024": {
+            "max_dd_usd": 108.27,
+            "n": 379,
+            "pnl_usd": -54.82,
+            "wr": 0.4987
+          },
+          "2025": {
+            "max_dd_usd": 55.51,
+            "n": 436,
+            "pnl_usd": 11.23,
+            "wr": 0.5344
+          },
+          "2026": {
+            "max_dd_usd": 74.66,
+            "n": 169,
+            "pnl_usd": -24.08,
+            "wr": 0.4379
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G850987",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0008,
+        "hold": 18,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G850987",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.12,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -28.47,
+        "liquidations": 0,
+        "max_period_dd_usd": 98.93,
+        "min_year_pnl_usd": -41.22,
+        "n": 983,
+        "pnl_usd": -66.06,
+        "trades_per_month": 35.28,
+        "wr": 0.4995,
+        "years": {
+          "2024": {
+            "max_dd_usd": 98.93,
+            "n": 379,
+            "pnl_usd": -41.22,
+            "wr": 0.4987
+          },
+          "2025": {
+            "max_dd_usd": 55.51,
+            "n": 435,
+            "pnl_usd": -0.57,
+            "wr": 0.5264
+          },
+          "2026": {
+            "max_dd_usd": 76.37,
+            "n": 169,
+            "pnl_usd": -24.27,
+            "wr": 0.432
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G814123",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0008,
+        "hold": 12,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G814123",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.08,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -79.38,
+        "liquidations": 0,
+        "max_period_dd_usd": 111.75,
+        "min_year_pnl_usd": -90.2,
+        "n": 982,
+        "pnl_usd": -184.21,
+        "trades_per_month": 35.25,
+        "wr": 0.4613,
+        "years": {
+          "2024": {
+            "max_dd_usd": 111.75,
+            "n": 380,
+            "pnl_usd": -90.2,
+            "wr": 0.4368
+          },
+          "2025": {
+            "max_dd_usd": 66.96,
+            "n": 432,
+            "pnl_usd": -57.15,
+            "wr": 0.5
+          },
+          "2026": {
+            "max_dd_usd": 66.75,
+            "n": 170,
+            "pnl_usd": -36.85,
+            "wr": 0.4176
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G801835",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": null,
+        "hold": 36,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G801835",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.08,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -54.38,
+        "liquidations": 0,
+        "max_period_dd_usd": 114.03,
+        "min_year_pnl_usd": -92.52,
+        "n": 976,
+        "pnl_usd": -126.19,
+        "trades_per_month": 35.03,
+        "wr": 0.3955,
+        "years": {
+          "2024": {
+            "max_dd_usd": 64.21,
+            "n": 387,
+            "pnl_usd": 4.02,
+            "wr": 0.4341
+          },
+          "2025": {
+            "max_dd_usd": 114.03,
+            "n": 430,
+            "pnl_usd": -92.52,
+            "wr": 0.3674
+          },
+          "2026": {
+            "max_dd_usd": 79.54,
+            "n": 159,
+            "pnl_usd": -37.68,
+            "wr": 0.3774
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G893995",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": null,
+        "hold": 48,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G893995",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.08,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -56.95,
+        "liquidations": 0,
+        "max_period_dd_usd": 118.26,
+        "min_year_pnl_usd": -86.0,
+        "n": 948,
+        "pnl_usd": -132.16,
+        "trades_per_month": 34.03,
+        "wr": 0.3745,
+        "years": {
+          "2024": {
+            "max_dd_usd": 61.46,
+            "n": 373,
+            "pnl_usd": 13.49,
+            "wr": 0.4021
+          },
+          "2025": {
+            "max_dd_usd": 118.26,
+            "n": 419,
+            "pnl_usd": -86.0,
+            "wr": 0.3604
+          },
+          "2026": {
+            "max_dd_usd": 95.21,
+            "n": 156,
+            "pnl_usd": -59.65,
+            "wr": 0.3462
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G838699",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": null,
+        "hold": 48,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G838699",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": null,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.035,
+        "tp_pct": 0.12,
+        "vol_min": null
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -37.02,
+        "liquidations": 0,
+        "max_period_dd_usd": 101.76,
+        "min_year_pnl_usd": -57.49,
+        "n": 944,
+        "pnl_usd": -85.91,
+        "trades_per_month": 33.88,
+        "wr": 0.3633,
+        "years": {
+          "2024": {
+            "max_dd_usd": 70.68,
+            "n": 370,
+            "pnl_usd": 17.93,
+            "wr": 0.3811
+          },
+          "2025": {
+            "max_dd_usd": 101.76,
+            "n": 419,
+            "pnl_usd": -57.49,
+            "wr": 0.3532
+          },
+          "2026": {
+            "max_dd_usd": 90.07,
+            "n": 155,
+            "pnl_usd": -46.35,
+            "wr": 0.3484
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G898091",
+      "spec": {
+        "atr_max": 10,
+        "funding_abs_lte": null,
+        "hold": 48,
+        "hours": [
+          1,
+          3,
+          0,
+          2,
+          21,
+          20,
+          4,
+          23,
+          6,
+          19,
+          22,
+          17,
+          11,
+          8,
+          5,
+          18,
+          10,
+          9,
+          15
+        ],
+        "id": "G898091",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.8,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.16,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -116.11,
+        "liquidations": 0,
+        "max_period_dd_usd": 246.13,
+        "min_year_pnl_usd": -216.31,
+        "n": 916,
+        "pnl_usd": -269.43,
+        "trades_per_month": 32.88,
+        "wr": 0.4323,
+        "years": {
+          "2024": {
+            "max_dd_usd": 91.63,
+            "n": 361,
+            "pnl_usd": 4.2,
+            "wr": 0.4598
+          },
+          "2025": {
+            "max_dd_usd": 246.13,
+            "n": 411,
+            "pnl_usd": -216.31,
+            "wr": 0.4039
+          },
+          "2026": {
+            "max_dd_usd": 111.45,
+            "n": 144,
+            "pnl_usd": -57.33,
+            "wr": 0.4444
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G863275",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0004,
+        "hold": 36,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G863275",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.16,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -76.71,
+        "liquidations": 0,
+        "max_period_dd_usd": 207.29,
+        "min_year_pnl_usd": -200.74,
+        "n": 860,
+        "pnl_usd": -178.01,
+        "trades_per_month": 30.87,
+        "wr": 0.4547,
+        "years": {
+          "2024": {
+            "max_dd_usd": 70.62,
+            "n": 337,
+            "pnl_usd": 21.4,
+            "wr": 0.5104
+          },
+          "2025": {
+            "max_dd_usd": 207.29,
+            "n": 382,
+            "pnl_usd": -200.74,
+            "wr": 0.3901
+          },
+          "2026": {
+            "max_dd_usd": 72.06,
+            "n": 141,
+            "pnl_usd": 1.33,
+            "wr": 0.4965
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G807979",
+      "spec": {
+        "atr_max": 4,
+        "funding_abs_lte": 0.0004,
+        "hold": 48,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G807979",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.2,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.055,
+        "tp_pct": 0.08,
+        "vol_min": 1.2
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -43.28,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.18,
+        "min_year_pnl_usd": -84.15,
+        "n": 816,
+        "pnl_usd": -100.44,
+        "trades_per_month": 29.29,
+        "wr": 0.4571,
+        "years": {
+          "2024": {
+            "max_dd_usd": 59.95,
+            "n": 317,
+            "pnl_usd": 1.51,
+            "wr": 0.4763
+          },
+          "2025": {
+            "max_dd_usd": 92.18,
+            "n": 364,
+            "pnl_usd": -84.15,
+            "wr": 0.4368
+          },
+          "2026": {
+            "max_dd_usd": 77.54,
+            "n": 135,
+            "pnl_usd": -17.8,
+            "wr": 0.4667
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G832555",
+      "spec": {
+        "atr_max": 6,
+        "funding_abs_lte": 0.0008,
+        "hold": 36,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G832555",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.1,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -80.34,
+        "liquidations": 0,
+        "max_period_dd_usd": 186.27,
+        "min_year_pnl_usd": -169.92,
+        "n": 750,
+        "pnl_usd": -186.44,
+        "trades_per_month": 26.92,
+        "wr": 0.4667,
+        "years": {
+          "2024": {
+            "max_dd_usd": 93.65,
+            "n": 288,
+            "pnl_usd": -2.95,
+            "wr": 0.5208
+          },
+          "2025": {
+            "max_dd_usd": 186.27,
+            "n": 340,
+            "pnl_usd": -169.92,
+            "wr": 0.4088
+          },
+          "2026": {
+            "max_dd_usd": 73.11,
+            "n": 122,
+            "pnl_usd": -13.56,
+            "wr": 0.5
+          }
+        }
+      }
+    },
+    {
+      "family": "g090_ch1_funding_long_variant",
+      "freq_pass": false,
+      "id": "G869419",
+      "spec": {
+        "atr_max": 8,
+        "funding_abs_lte": 0.0008,
+        "hold": 48,
+        "hours": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "id": "G869419",
+        "lev": 5.0,
+        "max_conc": 5,
+        "ret24_max": 0.4,
+        "score": 70,
+        "size": 0.1,
+        "sl_pct": 0.07,
+        "tp_pct": 0.16,
+        "vol_min": 1.8
+      },
+      "strict_pass": false,
+      "weighted": {
+        "all_years_positive": false,
+        "all_years_wr_gte_65": false,
+        "annual_pnl_usd": -85.18,
+        "liquidations": 0,
+        "max_period_dd_usd": 172.64,
+        "min_year_pnl_usd": -155.0,
+        "n": 727,
+        "pnl_usd": -197.67,
+        "trades_per_month": 26.09,
+        "wr": 0.4539,
+        "years": {
+          "2024": {
+            "max_dd_usd": 78.6,
+            "n": 276,
+            "pnl_usd": -11.44,
+            "wr": 0.471
+          },
+          "2025": {
+            "max_dd_usd": 172.64,
+            "n": 331,
+            "pnl_usd": -155.0,
+            "wr": 0.429
+          },
+          "2026": {
+            "max_dd_usd": 81.41,
+            "n": 120,
+            "pnl_usd": -31.22,
+            "wr": 0.4833
+          }
+        }
+      }
+    }
+  ]
+}

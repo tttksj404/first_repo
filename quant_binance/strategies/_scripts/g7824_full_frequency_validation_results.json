@@ -1,0 +1,589 @@
+{
+  "bundle_checks": {
+    "G7822_G4692_G4474": {
+      "frequency_gate": {
+        "passes": false,
+        "target_unique_trades_per_month": 30.0
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 460.56,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 166.19,
+        "n": 1646,
+        "pnl_usd": 1968.42,
+        "trades_per_month": 32.08,
+        "wr": 0.5613
+      },
+      "unique_direct_entries": {
+        "added_unique_entries": 616,
+        "n": 1300,
+        "overlap_with_g7822_g4692": 346,
+        "trades_per_month": 25.33
+      }
+    },
+    "G7822_G4692_G4475": {
+      "frequency_gate": {
+        "passes": false,
+        "target_unique_trades_per_month": 30.0
+      },
+      "slot_sum": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 416.4,
+        "liquidations": 0,
+        "max_component_period_dd_usd": 113.88,
+        "n": 1726,
+        "pnl_usd": 1779.68,
+        "trades_per_month": 33.63,
+        "wr": 0.5539
+      },
+      "unique_direct_entries": {
+        "added_unique_entries": 683,
+        "n": 1367,
+        "overlap_with_g7822_g4692": 359,
+        "trades_per_month": 26.64
+      }
+    }
+  },
+  "components": {
+    "G4474": {
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 83.85,
+          "by_bucket": {
+            "starter": {
+              "n": 40,
+              "pnl_usd": 25.02,
+              "wr": 0.55
+            },
+            "strong": {
+              "n": 162,
+              "pnl_usd": 60.9,
+              "wr": 0.5247
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 202,
+              "pnl": 85.92
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 109.07,
+          "monthly_pnl_usd": 6.98,
+          "n": 202,
+          "pnl_usd": 85.92,
+          "wr": 0.5297029702970297
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 90.4,
+          "by_bucket": {
+            "starter": {
+              "n": 78,
+              "pnl_usd": 24.21,
+              "wr": 0.5128
+            },
+            "strong": {
+              "n": 316,
+              "pnl_usd": 156.59,
+              "wr": 0.5411
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 394,
+              "pnl": 180.8
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 166.19,
+          "monthly_pnl_usd": 7.53,
+          "n": 394,
+          "pnl_usd": 180.8,
+          "wr": 0.5355329949238579
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 115.53,
+          "by_bucket": {
+            "starter": {
+              "n": 70,
+              "pnl_usd": 16.43,
+              "wr": 0.5571
+            },
+            "strong": {
+              "n": 296,
+              "pnl_usd": 127.91,
+              "wr": 0.5574
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 366,
+              "pnl": 144.33
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 140.67,
+          "monthly_pnl_usd": 9.62,
+          "n": 366,
+          "pnl_usd": 144.33,
+          "wr": 0.5573770491803278
+        }
+      },
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 36,
+              "lev": 8.0,
+              "size": 0.2,
+              "sl_pct": 0.08,
+              "tp_pct": 0.06
+            }
+          }
+        },
+        "desc": "controlled loose breakout ret8_vol25_g4006_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4474",
+        "labels": {
+          "exit": "g4006_exit",
+          "gate": "ret8_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 962,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 96.18,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 166.19,
+        "min_period_pnl_usd": 85.92,
+        "monthly_pnl_usd": 8.01,
+        "n": 962,
+        "pnl_usd": 411.05,
+        "trades_per_month": 18.75,
+        "wr": 0.5426
+      }
+    },
+    "G4475": {
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 106.96,
+          "by_bucket": {
+            "starter": {
+              "n": 42,
+              "pnl_usd": 2.21,
+              "wr": 0.4762
+            },
+            "strong": {
+              "n": 179,
+              "pnl_usd": 107.39,
+              "wr": 0.5642
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 221,
+              "pnl": 109.6
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 72.03,
+          "monthly_pnl_usd": 8.91,
+          "n": 221,
+          "pnl_usd": 109.6,
+          "wr": 0.5475113122171946
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 50.22,
+          "by_bucket": {
+            "starter": {
+              "n": 82,
+              "pnl_usd": 75.37,
+              "wr": 0.561
+            },
+            "strong": {
+              "n": 343,
+              "pnl_usd": 25.07,
+              "wr": 0.516
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 425,
+              "pnl": 100.44
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 101.48,
+          "monthly_pnl_usd": 4.18,
+          "n": 425,
+          "pnl_usd": 100.44,
+          "wr": 0.5247058823529411
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 9.82,
+          "by_bucket": {
+            "starter": {
+              "n": 71,
+              "pnl_usd": -2.44,
+              "wr": 0.5211
+            },
+            "strong": {
+              "n": 325,
+              "pnl_usd": 14.72,
+              "wr": 0.5323
+            }
+          },
+          "by_side": {
+            "long": {
+              "n": 396,
+              "pnl": 12.27
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 113.88,
+          "monthly_pnl_usd": 0.82,
+          "n": 396,
+          "pnl_usd": 12.27,
+          "wr": 0.5303030303030303
+        }
+      },
+      "spec": {
+        "bucket_rules": {
+          "standard": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "starter": {
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          },
+          "strong": {
+            "min_ret_24h": 0.08,
+            "min_strength_bps": 50,
+            "min_vol_ratio": 2.5,
+            "trade": {
+              "hold": 24,
+              "lev": 7.0,
+              "size": 0.18,
+              "sl_pct": 0.065,
+              "tp_pct": 0.05
+            }
+          }
+        },
+        "desc": "controlled loose breakout ret8_vol25_mid_exit",
+        "entry": {
+          "atr_max": 8,
+          "atr_min": 0,
+          "break_bps": 50,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        },
+        "id": "G4475",
+        "labels": {
+          "exit": "mid_exit",
+          "gate": "ret8_vol25"
+        },
+        "max_conc": 5,
+        "max_hold": 36,
+        "univ": "no_dead"
+      },
+      "unique_keys": 1042,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 52.01,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 113.88,
+        "min_period_pnl_usd": 12.27,
+        "monthly_pnl_usd": 4.33,
+        "n": 1042,
+        "pnl_usd": 222.31,
+        "trades_per_month": 20.31,
+        "wr": 0.5317
+      }
+    },
+    "G4692": {
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 95.28,
+          "by_engine": {
+            "strict_breakout": {
+              "n": 99,
+              "pnl_usd": 62.43,
+              "wr": 0.5758
+            },
+            "watch_confirm": {
+              "n": 36,
+              "pnl_usd": 35.2,
+              "wr": 0.6111
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 90.65,
+          "monthly_pnl_usd": 7.94,
+          "n": 135,
+          "pnl_usd": 97.63,
+          "wr": 0.5851851851851851
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 132.55,
+          "by_engine": {
+            "strict_breakout": {
+              "n": 197,
+              "pnl_usd": 308.32,
+              "wr": 0.6041
+            },
+            "watch_confirm": {
+              "n": 53,
+              "pnl_usd": -43.23,
+              "wr": 0.4151
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 97.54,
+          "monthly_pnl_usd": 11.04,
+          "n": 250,
+          "pnl_usd": 265.09,
+          "wr": 0.564
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 143.34,
+          "by_engine": {
+            "strict_breakout": {
+              "n": 206,
+              "pnl_usd": 124.67,
+              "wr": 0.5728
+            },
+            "watch_confirm": {
+              "n": 40,
+              "pnl_usd": 54.4,
+              "wr": 0.675
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 55.17,
+          "monthly_pnl_usd": 11.94,
+          "n": 246,
+          "pnl_usd": 179.07,
+          "wr": 0.5894308943089431
+        }
+      },
+      "unique_keys": 631,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 126.76,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 97.54,
+        "min_period_pnl_usd": 97.63,
+        "monthly_pnl_usd": 10.56,
+        "n": 631,
+        "pnl_usd": 541.79,
+        "trades_per_month": 12.3,
+        "wr": 0.5784
+      }
+    },
+    "G7822": {
+      "periods": {
+        "IS25-26": {
+          "annual_pnl_usd": 166.82,
+          "by_side": {
+            "long": {
+              "n": 5,
+              "pnl": 170.93
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 0.0,
+          "monthly_pnl_usd": 13.89,
+          "n": 5,
+          "pnl_usd": 170.93,
+          "wr": 1.0
+        },
+        "OOS22-23": {
+          "annual_pnl_usd": 110.0,
+          "by_side": {
+            "long": {
+              "n": 17,
+              "pnl": 220.01
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 39.81,
+          "monthly_pnl_usd": 9.16,
+          "n": 17,
+          "pnl_usd": 220.01,
+          "wr": 0.5882352941176471
+        },
+        "OOS24-Q1": {
+          "annual_pnl_usd": 499.99,
+          "by_side": {
+            "long": {
+              "n": 31,
+              "pnl": 624.64
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          },
+          "liq_rate": 0.0,
+          "liquidations": 0,
+          "max_dd_usd": 92.88,
+          "monthly_pnl_usd": 41.64,
+          "n": 31,
+          "pnl_usd": 624.64,
+          "wr": 0.7096774193548387
+        }
+      },
+      "unique_keys": 53,
+      "weighted": {
+        "all_periods_positive": true,
+        "annual_pnl_usd": 237.62,
+        "liq_rate": 0.0,
+        "liquidations": 0,
+        "max_period_dd_usd": 92.88,
+        "min_period_pnl_usd": 170.93,
+        "monthly_pnl_usd": 19.8,
+        "n": 53,
+        "pnl_usd": 1015.58,
+        "trades_per_month": 1.03,
+        "wr": 0.6981
+      }
+    }
+  },
+  "decision": {
+    "next_research_target": "Find a non-breakout, full-window validated sleeve adding at least 3.36 unique entries/month after overlap.",
+    "reason": "G264402 is blocked by insufficient full-window OI coverage. The best full-price add-ons improve slot-sum cadence, but after direct-entry de-duplication they still reach only 25.33-26.64 unique entries/month, below the 30/month target.",
+    "verdict": "FAIL"
+  },
+  "elapsed_sec": 9.18,
+  "generated_at": "2026-05-07 11:27:33",
+  "oi_coverage": {
+    "available": {
+      "BTCUSDT": {
+        "exists": true,
+        "max_utc": "2026-04-04T13:00:00Z",
+        "min_utc": "2025-03-25T14:00:00Z",
+        "rows": 9000,
+        "timestamp_rows": 9000
+      },
+      "ETHUSDT": {
+        "exists": true,
+        "max_utc": "2026-04-04T13:00:00Z",
+        "min_utc": "2025-03-25T14:00:00Z",
+        "rows": 9000,
+        "timestamp_rows": 9000
+      },
+      "SOLUSDT": {
+        "exists": true,
+        "max_utc": "2026-04-04T13:00:00Z",
+        "min_utc": "2025-03-25T14:00:00Z",
+        "rows": 9000,
+        "timestamp_rows": 9000
+      },
+      "XRPUSDT": {
+        "exists": true,
+        "max_utc": "2026-04-04T13:00:00Z",
+        "min_utc": "2025-03-25T14:00:00Z",
+        "rows": 9000,
+        "timestamp_rows": 9000
+      }
+    },
+    "decision": "G264402 cannot be accepted as a full-window frequency fix with the current local OI data.",
+    "full_window_available": false,
+    "required_window": "full price-validation windows: OOS22-23, OOS24-Q1, IS25-26"
+  },
+  "question": "Can the frequency problem be solved under full-window validation?"
+}

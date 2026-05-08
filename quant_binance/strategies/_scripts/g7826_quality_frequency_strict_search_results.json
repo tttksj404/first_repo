@@ -1,0 +1,630 @@
+{
+  "baselines": {
+    "G1165": {
+      "annual_pnl_usd": 193.13,
+      "max_period_dd_usd": 96.75,
+      "pnl_usd": 825.43,
+      "trades_per_month": 0.99,
+      "wr": 0.6863
+    },
+    "G7822": {
+      "annual_pnl_usd": 237.62,
+      "max_period_dd_usd": 92.88,
+      "pnl_usd": 1015.58,
+      "trades_per_month": 1.03,
+      "wr": 0.6981
+    }
+  },
+  "best_high_cadence_components_by_wr": [
+    {
+      "family": "controlled_loose_breakout",
+      "id": "G4452",
+      "max_period_dd_usd": 47.21,
+      "n": 680,
+      "pnl_usd": 203.1,
+      "trades_per_month": 13.25,
+      "wr": 0.5912
+    },
+    {
+      "family": "controlled_loose_breakout",
+      "id": "G4456",
+      "max_period_dd_usd": 45.76,
+      "n": 706,
+      "pnl_usd": 175.19,
+      "trades_per_month": 13.76,
+      "wr": 0.5836
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4677",
+      "max_period_dd_usd": 92.79,
+      "n": 639,
+      "pnl_usd": 540.63,
+      "trades_per_month": 12.45,
+      "wr": 0.5822
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4662",
+      "max_period_dd_usd": 90.67,
+      "n": 645,
+      "pnl_usd": 498.68,
+      "trades_per_month": 12.57,
+      "wr": 0.5814
+    },
+    {
+      "family": "controlled_loose_breakout",
+      "id": "G4464",
+      "max_period_dd_usd": 80.83,
+      "n": 757,
+      "pnl_usd": 175.58,
+      "trades_per_month": 14.75,
+      "wr": 0.5799
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4676",
+      "max_period_dd_usd": 101.85,
+      "n": 630,
+      "pnl_usd": 554.05,
+      "trades_per_month": 12.28,
+      "wr": 0.5794
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4692",
+      "max_period_dd_usd": 97.54,
+      "n": 631,
+      "pnl_usd": 541.79,
+      "trades_per_month": 12.3,
+      "wr": 0.5784
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4661",
+      "max_period_dd_usd": 99.13,
+      "n": 634,
+      "pnl_usd": 525.15,
+      "trades_per_month": 12.35,
+      "wr": 0.5773
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4664",
+      "max_period_dd_usd": 99.13,
+      "n": 641,
+      "pnl_usd": 516.66,
+      "trades_per_month": 12.49,
+      "wr": 0.5772
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4679",
+      "max_period_dd_usd": 101.85,
+      "n": 636,
+      "pnl_usd": 516.17,
+      "trades_per_month": 12.39,
+      "wr": 0.577
+    },
+    {
+      "family": "controlled_loose_breakout",
+      "id": "G4450",
+      "max_period_dd_usd": 109.01,
+      "n": 605,
+      "pnl_usd": 512.16,
+      "trades_per_month": 11.79,
+      "wr": 0.5769
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4691",
+      "max_period_dd_usd": 104.9,
+      "n": 625,
+      "pnl_usd": 527.15,
+      "trades_per_month": 12.18,
+      "wr": 0.576
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4665",
+      "max_period_dd_usd": 85.03,
+      "n": 655,
+      "pnl_usd": 470.76,
+      "trades_per_month": 12.76,
+      "wr": 0.5756
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4600_STRICT_BASELINE",
+      "max_period_dd_usd": 109.01,
+      "n": 605,
+      "pnl_usd": 495.73,
+      "trades_per_month": 11.79,
+      "wr": 0.5752
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4694",
+      "max_period_dd_usd": 104.9,
+      "n": 632,
+      "pnl_usd": 478.65,
+      "trades_per_month": 12.32,
+      "wr": 0.5744
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4670",
+      "max_period_dd_usd": 109.27,
+      "n": 669,
+      "pnl_usd": 509.09,
+      "trades_per_month": 13.04,
+      "wr": 0.574
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4685",
+      "max_period_dd_usd": 111.99,
+      "n": 657,
+      "pnl_usd": 517.58,
+      "trades_per_month": 12.8,
+      "wr": 0.5738
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4666",
+      "max_period_dd_usd": 86.89,
+      "n": 678,
+      "pnl_usd": 332.35,
+      "trades_per_month": 13.21,
+      "wr": 0.5737
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4663",
+      "max_period_dd_usd": 85.81,
+      "n": 666,
+      "pnl_usd": 361.74,
+      "trades_per_month": 12.98,
+      "wr": 0.5736
+    },
+    {
+      "family": "watch_confirm",
+      "id": "G4668",
+      "max_period_dd_usd": 92.02,
+      "n": 680,
+      "pnl_usd": 485.03,
+      "trades_per_month": 13.25,
+      "wr": 0.5735
+    }
+  ],
+  "decision": {
+    "reason": "No full-window bundle found that keeps >=30 unique entries/month while also matching G1165/G7822 win rate and drawdown. High-cadence validated components top out far below the ~69% WR required, so aggregate WR falls when cadence is repaired.",
+    "verdict": "FAIL"
+  },
+  "elapsed_sec": 138.05,
+  "generated_at": "2026-05-07 11:58:00",
+  "n_candidates": 60,
+  "question": "Can frequency and all G1165/G7822 quality metrics be improved simultaneously?",
+  "search_results": {
+    "G7822_G4692_base": {
+      "best_beam_terminal": {
+        "component_families": [
+          "ch1_quality",
+          "watch_confirm",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm"
+        ],
+        "component_ids": [
+          "G7822",
+          "G4692",
+          "G4452",
+          "G4456",
+          "G4604",
+          "G4634",
+          "G4619",
+          "G4616"
+        ],
+        "n_components": 8,
+        "per_period_slot_sum": {
+          "IS25-26": {
+            "slot_sum_n": 763,
+            "slot_sum_pnl_usd": 675.41,
+            "slot_sum_trades_per_month": 62.02,
+            "slot_sum_wr": 0.6016
+          },
+          "OOS22-23": {
+            "slot_sum_n": 1249,
+            "slot_sum_pnl_usd": 774.27,
+            "slot_sum_trades_per_month": 52.01,
+            "slot_sum_wr": 0.5548
+          },
+          "OOS24-Q1": {
+            "slot_sum_n": 1219,
+            "slot_sum_pnl_usd": 1483.73,
+            "slot_sum_trades_per_month": 81.27,
+            "slot_sum_wr": 0.6062
+          }
+        },
+        "slot_sum": {
+          "all_periods_positive": true,
+          "annual_pnl_usd": 686.34,
+          "liquidations": 0,
+          "max_component_period_dd_usd": 97.54,
+          "n": 3231,
+          "pnl_usd": 2933.41,
+          "trades_per_month": 62.96,
+          "wr": 0.5853
+        },
+        "strict_checks": {
+          "all_periods_positive": true,
+          "annual_gt_g1165": true,
+          "annual_gt_g7822": true,
+          "dd_lte_g1165": false,
+          "dd_lte_g7822": false,
+          "liquidations_zero": true,
+          "pnl_gt_g1165": true,
+          "pnl_gt_g7822": true,
+          "unique_tpm_gte_30": false,
+          "wr_gte_g1165": false,
+          "wr_gte_g7822": false
+        },
+        "unique_direct_entries": {
+          "n": 946,
+          "trades_per_month": 18.43
+        }
+      },
+      "best_frequency_bundle_by_quality": {
+        "component_families": [
+          "ch1_quality",
+          "watch_confirm",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm"
+        ],
+        "component_ids": [
+          "G7822",
+          "G4692",
+          "G4472",
+          "G4468",
+          "G4475",
+          "G4619",
+          "G4670",
+          "G4669"
+        ],
+        "n_components": 8,
+        "per_period_slot_sum": {
+          "IS25-26": {
+            "slot_sum_n": 1136,
+            "slot_sum_pnl_usd": 688.34,
+            "slot_sum_trades_per_month": 92.34,
+            "slot_sum_wr": 0.5845
+          },
+          "OOS22-23": {
+            "slot_sum_n": 2088,
+            "slot_sum_pnl_usd": 1070.37,
+            "slot_sum_trades_per_month": 86.95,
+            "slot_sum_wr": 0.5383
+          },
+          "OOS24-Q1": {
+            "slot_sum_n": 2007,
+            "slot_sum_pnl_usd": 1279.89,
+            "slot_sum_trades_per_month": 133.8,
+            "slot_sum_wr": 0.567
+          }
+        },
+        "slot_sum": {
+          "all_periods_positive": true,
+          "annual_pnl_usd": 710.95,
+          "liquidations": 0,
+          "max_component_period_dd_usd": 113.88,
+          "n": 5231,
+          "pnl_usd": 3038.6,
+          "trades_per_month": 101.94,
+          "wr": 0.5594
+        },
+        "strict_checks": {
+          "all_periods_positive": true,
+          "annual_gt_g1165": true,
+          "annual_gt_g7822": true,
+          "dd_lte_g1165": false,
+          "dd_lte_g7822": false,
+          "liquidations_zero": true,
+          "pnl_gt_g1165": true,
+          "pnl_gt_g7822": true,
+          "unique_tpm_gte_30": true,
+          "wr_gte_g1165": false,
+          "wr_gte_g7822": false
+        },
+        "unique_direct_entries": {
+          "n": 1751,
+          "trades_per_month": 34.12
+        }
+      },
+      "best_wr_among_frequency_bundles": {
+        "component_families": [
+          "ch1_quality",
+          "watch_confirm",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "watch_confirm",
+          "watch_confirm"
+        ],
+        "component_ids": [
+          "G7822",
+          "G4692",
+          "G4472",
+          "G4474",
+          "G4604",
+          "G4677"
+        ],
+        "n_components": 6,
+        "per_period_slot_sum": {
+          "IS25-26": {
+            "slot_sum_n": 750,
+            "slot_sum_pnl_usd": 637.16,
+            "slot_sum_trades_per_month": 60.96,
+            "slot_sum_wr": 0.5853
+          },
+          "OOS22-23": {
+            "slot_sum_n": 1365,
+            "slot_sum_pnl_usd": 1042.64,
+            "slot_sum_trades_per_month": 56.84,
+            "slot_sum_wr": 0.5502
+          },
+          "OOS24-Q1": {
+            "slot_sum_n": 1340,
+            "slot_sum_pnl_usd": 1315.49,
+            "slot_sum_trades_per_month": 89.33,
+            "slot_sum_wr": 0.5813
+          }
+        },
+        "slot_sum": {
+          "all_periods_positive": true,
+          "annual_pnl_usd": 700.82,
+          "liquidations": 0,
+          "max_component_period_dd_usd": 166.19,
+          "n": 3455,
+          "pnl_usd": 2995.29,
+          "trades_per_month": 67.33,
+          "wr": 0.5699
+        },
+        "strict_checks": {
+          "all_periods_positive": true,
+          "annual_gt_g1165": true,
+          "annual_gt_g7822": true,
+          "dd_lte_g1165": false,
+          "dd_lte_g7822": false,
+          "liquidations_zero": true,
+          "pnl_gt_g1165": true,
+          "pnl_gt_g7822": true,
+          "unique_tpm_gte_30": true,
+          "wr_gte_g1165": false,
+          "wr_gte_g7822": false
+        },
+        "unique_direct_entries": {
+          "n": 1554,
+          "trades_per_month": 30.28
+        }
+      }
+    },
+    "G7822_only": {
+      "best_beam_terminal": {
+        "component_families": [
+          "ch1_quality",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm"
+        ],
+        "component_ids": [
+          "G7822",
+          "G4452",
+          "G4456",
+          "G4604",
+          "G4634",
+          "G4619",
+          "G4616"
+        ],
+        "n_components": 7,
+        "per_period_slot_sum": {
+          "IS25-26": {
+            "slot_sum_n": 628,
+            "slot_sum_pnl_usd": 577.78,
+            "slot_sum_trades_per_month": 51.05,
+            "slot_sum_wr": 0.6051
+          },
+          "OOS22-23": {
+            "slot_sum_n": 999,
+            "slot_sum_pnl_usd": 509.18,
+            "slot_sum_trades_per_month": 41.6,
+            "slot_sum_wr": 0.5526
+          },
+          "OOS24-Q1": {
+            "slot_sum_n": 973,
+            "slot_sum_pnl_usd": 1304.66,
+            "slot_sum_trades_per_month": 64.87,
+            "slot_sum_wr": 0.6105
+          }
+        },
+        "slot_sum": {
+          "all_periods_positive": true,
+          "annual_pnl_usd": 559.58,
+          "liquidations": 0,
+          "max_component_period_dd_usd": 92.88,
+          "n": 2600,
+          "pnl_usd": 2391.62,
+          "trades_per_month": 50.67,
+          "wr": 0.5869
+        },
+        "strict_checks": {
+          "all_periods_positive": true,
+          "annual_gt_g1165": true,
+          "annual_gt_g7822": true,
+          "dd_lte_g1165": true,
+          "dd_lte_g7822": true,
+          "liquidations_zero": true,
+          "pnl_gt_g1165": true,
+          "pnl_gt_g7822": true,
+          "unique_tpm_gte_30": false,
+          "wr_gte_g1165": false,
+          "wr_gte_g7822": false
+        },
+        "unique_direct_entries": {
+          "n": 934,
+          "trades_per_month": 18.2
+        }
+      },
+      "best_frequency_bundle_by_quality": {
+        "component_families": [
+          "ch1_quality",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm",
+          "watch_confirm"
+        ],
+        "component_ids": [
+          "G7822",
+          "G4468",
+          "G4475",
+          "G4619",
+          "G4600_STRICT_BASELINE",
+          "G4670",
+          "G4668"
+        ],
+        "n_components": 7,
+        "per_period_slot_sum": {
+          "IS25-26": {
+            "slot_sum_n": 956,
+            "slot_sum_pnl_usd": 638.31,
+            "slot_sum_trades_per_month": 77.71,
+            "slot_sum_wr": 0.5743
+          },
+          "OOS22-23": {
+            "slot_sum_n": 1758,
+            "slot_sum_pnl_usd": 1066.39,
+            "slot_sum_trades_per_month": 73.21,
+            "slot_sum_wr": 0.541
+          },
+          "OOS24-Q1": {
+            "slot_sum_n": 1675,
+            "slot_sum_pnl_usd": 1289.06,
+            "slot_sum_trades_per_month": 111.67,
+            "slot_sum_wr": 0.5636
+          }
+        },
+        "slot_sum": {
+          "all_periods_positive": true,
+          "annual_pnl_usd": 700.46,
+          "liquidations": 0,
+          "max_component_period_dd_usd": 113.88,
+          "n": 4389,
+          "pnl_usd": 2993.76,
+          "trades_per_month": 85.53,
+          "wr": 0.5568
+        },
+        "strict_checks": {
+          "all_periods_positive": true,
+          "annual_gt_g1165": true,
+          "annual_gt_g7822": true,
+          "dd_lte_g1165": false,
+          "dd_lte_g7822": false,
+          "liquidations_zero": true,
+          "pnl_gt_g1165": true,
+          "pnl_gt_g7822": true,
+          "unique_tpm_gte_30": true,
+          "wr_gte_g1165": false,
+          "wr_gte_g7822": false
+        },
+        "unique_direct_entries": {
+          "n": 1701,
+          "trades_per_month": 33.15
+        }
+      },
+      "best_wr_among_frequency_bundles": {
+        "component_families": [
+          "ch1_quality",
+          "controlled_loose_breakout",
+          "controlled_loose_breakout",
+          "watch_confirm",
+          "watch_confirm"
+        ],
+        "component_ids": [
+          "G7822",
+          "G4472",
+          "G4474",
+          "G4604",
+          "G4677"
+        ],
+        "n_components": 5,
+        "per_period_slot_sum": {
+          "IS25-26": {
+            "slot_sum_n": 615,
+            "slot_sum_pnl_usd": 539.53,
+            "slot_sum_trades_per_month": 49.99,
+            "slot_sum_wr": 0.5854
+          },
+          "OOS22-23": {
+            "slot_sum_n": 1115,
+            "slot_sum_pnl_usd": 777.55,
+            "slot_sum_trades_per_month": 46.43,
+            "slot_sum_wr": 0.5471
+          },
+          "OOS24-Q1": {
+            "slot_sum_n": 1094,
+            "slot_sum_pnl_usd": 1136.42,
+            "slot_sum_trades_per_month": 72.93,
+            "slot_sum_wr": 0.5795
+          }
+        },
+        "slot_sum": {
+          "all_periods_positive": true,
+          "annual_pnl_usd": 574.06,
+          "liquidations": 0,
+          "max_component_period_dd_usd": 166.19,
+          "n": 2824,
+          "pnl_usd": 2453.5,
+          "trades_per_month": 55.03,
+          "wr": 0.568
+        },
+        "strict_checks": {
+          "all_periods_positive": true,
+          "annual_gt_g1165": true,
+          "annual_gt_g7822": true,
+          "dd_lte_g1165": false,
+          "dd_lte_g7822": false,
+          "liquidations_zero": true,
+          "pnl_gt_g1165": true,
+          "pnl_gt_g7822": true,
+          "unique_tpm_gte_30": true,
+          "wr_gte_g1165": false,
+          "wr_gte_g7822": false
+        },
+        "unique_direct_entries": {
+          "n": 1552,
+          "trades_per_month": 30.24
+        }
+      }
+    }
+  },
+  "strict_passes": [],
+  "strict_target": {
+    "annual_gt_g7822": 237.62,
+    "dd_lte_g1165": 96.75,
+    "dd_lte_g7822": 92.88,
+    "pnl_gt_g7822": 1015.58,
+    "unique_trades_per_month_gte": 30.0,
+    "wr_gte_g1165": 0.6863,
+    "wr_gte_g7822": 0.6981
+  }
+}

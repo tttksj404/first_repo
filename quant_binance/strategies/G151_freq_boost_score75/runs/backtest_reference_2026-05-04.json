@@ -1,0 +1,15 @@
+{
+  "strategy_id": "G151",
+  "date": "2026-05-04",
+  "type": "reference_only",
+  "parent_strategy": "G150",
+  "single_change": "mode_thresholds.futures_score_min: 76 -> 75",
+  "reference_metrics": {
+    "source": "quant_binance/strategies/G150_user_intent/card.md",
+    "window": "60d",
+    "trades": 140,
+    "win_rate_pct": 50.0,
+    "total_net_bps": 2050
+  },
+  "note": "Session backtest rerun timed out repeatedly for analyze_backtest; candidate prepared for next replay/paper validation cycle."
+}

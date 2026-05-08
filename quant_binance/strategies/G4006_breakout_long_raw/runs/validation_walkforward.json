@@ -1,0 +1,80 @@
+{
+  "strategy_id": "G4006",
+  "generated_at": "2026-05-06 12:50:57",
+  "source": "quant_binance/strategies/_scripts/g1305_breakout_walkforward_filter_results.json",
+  "engine": "breakout_long",
+  "filter": "baseline",
+  "params": {
+    "universe": "no_dead",
+    "timeframe": "1h",
+    "side": "long",
+    "hold": 36,
+    "break_bps": 50,
+    "min_ret_24h": 0.1,
+    "min_vol_ratio": 3.0,
+    "atr_min_pct": 0,
+    "atr_max_pct": 8,
+    "leverage": 8,
+    "size_pct_per_trade": 0.2,
+    "take_profit_pct": 0.06,
+    "stop_loss_pct": 0.08,
+    "cost_bps_round_trip": 24.0
+  },
+  "all_periods": {
+    "n": 605,
+    "wr": 0.5752,
+    "pnl_usd": 495.73,
+    "annual_pnl_usd": 115.99,
+    "monthly_pnl_usd": 9.67,
+    "max_dd_usd": 109.01,
+    "liquidations": 0,
+    "liq_rate": 0.0
+  },
+  "walk_forward_oos": {
+    "verdict": "PASS",
+    "checks": {
+      "n_>=_30": true,
+      "wr_>=_55": true,
+      "annual_>=_80": true,
+      "all_test_folds_positive": true,
+      "liq_==_0": true,
+      "dd_<=_150": true
+    },
+    "test_stats": {
+      "n": 364,
+      "wr": 0.5824,
+      "pnl_usd": 284.51,
+      "annual_pnl_usd": 125.12,
+      "monthly_pnl_usd": 10.43,
+      "max_dd_usd": 96.29,
+      "liquidations": 0,
+      "liq_rate": 0.0
+    },
+    "by_fold": {
+      "train_OOS22_test_OOS24": {
+        "n": 235,
+        "wr": 0.5872,
+        "pnl_usd": 207.3,
+        "annual_pnl_usd": 165.93,
+        "monthly_pnl_usd": 13.83,
+        "max_dd_usd": 61.09,
+        "liquidations": 0,
+        "liq_rate": 0.0
+      },
+      "train_OOS22_OOS24_test_IS25": {
+        "n": 129,
+        "wr": 0.5736,
+        "pnl_usd": 77.21,
+        "annual_pnl_usd": 75.35,
+        "monthly_pnl_usd": 6.28,
+        "max_dd_usd": 96.29,
+        "liquidations": 0,
+        "liq_rate": 0.0
+      }
+    }
+  },
+  "overlap": {
+    "g1165_jaccard": 0.0,
+    "g1995_jaccard": 0.0
+  }
+}

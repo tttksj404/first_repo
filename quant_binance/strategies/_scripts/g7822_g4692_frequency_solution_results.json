@@ -1,0 +1,333 @@
+{
+  "generated_at": "2026-05-07 11:06:46",
+  "question": "Does pairing G7822 with G4692 solve paper-entry frequency while preserving G7822 quality?",
+  "interpretation": "Slot-sum paper observation bundle, not a single shared-equity execution simulation.",
+  "components": {
+    "G7822": {
+      "role": "quality CH1 replacement/shadow for G1165",
+      "spec": {
+        "id": "G7822",
+        "desc": "quality CH1 replacement for G1165",
+        "univ": "no_dead_no_weak",
+        "max_conc": 5,
+        "engine": {
+          "thr": 80,
+          "hold": 48,
+          "atr_min": 2,
+          "atr_max": 8,
+          "lev": 8,
+          "size": 0.3,
+          "tp_pct": 0.16,
+          "sl_pct": 0.075
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 17,
+          "wr": 0.5882352941176471,
+          "pnl_usd": 220.01,
+          "annual_pnl_usd": 110.0,
+          "monthly_pnl_usd": 9.16,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 39.81,
+          "by_side": {
+            "long": {
+              "n": 17,
+              "pnl": 220.01
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 31,
+          "wr": 0.7096774193548387,
+          "pnl_usd": 624.64,
+          "annual_pnl_usd": 499.99,
+          "monthly_pnl_usd": 41.64,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 92.88,
+          "by_side": {
+            "long": {
+              "n": 31,
+              "pnl": 624.64
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 5,
+          "wr": 1.0,
+          "pnl_usd": 170.93,
+          "annual_pnl_usd": 166.82,
+          "monthly_pnl_usd": 13.89,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 0.0,
+          "by_side": {
+            "long": {
+              "n": 5,
+              "pnl": 170.93
+            },
+            "short": {
+              "n": 0,
+              "pnl": 0.0
+            }
+          }
+        }
+      },
+      "weighted": {
+        "n": 53,
+        "trades_per_month": 1.03,
+        "wr": 0.6981,
+        "pnl_usd": 1015.58,
+        "annual_pnl_usd": 237.62,
+        "monthly_pnl_usd": 19.8,
+        "all_periods_positive": true,
+        "min_period_pnl_usd": 170.93,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 92.88
+      }
+    },
+    "G4692": {
+      "role": "high-frequency non-CH1 paper-observation sleeve",
+      "spec": {
+        "id": "G4692",
+        "desc": "watch-confirm breakout strict_plus_confirm w_break30_ret8_vol25 c1_strict mid",
+        "mode": "strict_plus_confirm",
+        "strict_trade": {
+          "hold": 36,
+          "lev": 8.0,
+          "size": 0.2,
+          "tp_pct": 0.06,
+          "sl_pct": 0.08
+        },
+        "confirm_trade": {
+          "hold": 24,
+          "lev": 7.0,
+          "size": 0.16,
+          "tp_pct": 0.05,
+          "sl_pct": 0.065
+        },
+        "watch": {
+          "break_bps": 30,
+          "min_ret_24h": 0.08,
+          "min_vol_ratio": 2.5
+        },
+        "confirm": {
+          "max_lag_bars": 1,
+          "confirm_break_bps": 50,
+          "min_follow_bps": 0,
+          "min_ret_24h": 0.1,
+          "min_vol_ratio": 3.0,
+          "failure_bps": 0
+        }
+      },
+      "periods": {
+        "OOS22-23": {
+          "n": 250,
+          "wr": 0.564,
+          "pnl_usd": 265.09,
+          "annual_pnl_usd": 132.55,
+          "monthly_pnl_usd": 11.04,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 97.54,
+          "by_engine": {
+            "strict_breakout": {
+              "n": 197,
+              "wr": 0.6041,
+              "pnl_usd": 308.32
+            },
+            "watch_confirm": {
+              "n": 53,
+              "wr": 0.4151,
+              "pnl_usd": -43.23
+            }
+          }
+        },
+        "OOS24-Q1": {
+          "n": 246,
+          "wr": 0.5894308943089431,
+          "pnl_usd": 179.07,
+          "annual_pnl_usd": 143.34,
+          "monthly_pnl_usd": 11.94,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 55.17,
+          "by_engine": {
+            "strict_breakout": {
+              "n": 206,
+              "wr": 0.5728,
+              "pnl_usd": 124.67
+            },
+            "watch_confirm": {
+              "n": 40,
+              "wr": 0.675,
+              "pnl_usd": 54.4
+            }
+          }
+        },
+        "IS25-26": {
+          "n": 135,
+          "wr": 0.5851851851851851,
+          "pnl_usd": 97.63,
+          "annual_pnl_usd": 95.28,
+          "monthly_pnl_usd": 7.94,
+          "liquidations": 0,
+          "liq_rate": 0.0,
+          "max_dd_usd": 90.65,
+          "by_engine": {
+            "strict_breakout": {
+              "n": 99,
+              "wr": 0.5758,
+              "pnl_usd": 62.43
+            },
+            "watch_confirm": {
+              "n": 36,
+              "wr": 0.6111,
+              "pnl_usd": 35.2
+            }
+          }
+        }
+      },
+      "weighted": {
+        "n": 631,
+        "trades_per_month": 12.3,
+        "wr": 0.5784,
+        "pnl_usd": 541.79,
+        "annual_pnl_usd": 126.76,
+        "monthly_pnl_usd": 10.56,
+        "all_periods_positive": true,
+        "min_period_pnl_usd": 97.63,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_period_dd_usd": 97.54
+      }
+    }
+  },
+  "combined": {
+    "periods": {
+      "OOS22-23": {
+        "n": 267,
+        "trades_per_month": 11.12,
+        "wr": 0.5655,
+        "pnl_usd": 485.1,
+        "annual_pnl_usd": 242.55,
+        "monthly_pnl_usd": 20.2,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_dd_usd_individual_max": 97.54,
+        "max_dd_usd_slot_sum_upper_bound": 137.35,
+        "components": {
+          "G7822": {
+            "n": 17,
+            "wr": 0.5882,
+            "pnl_usd": 220.01,
+            "max_dd_usd": 39.81
+          },
+          "G4692": {
+            "n": 250,
+            "wr": 0.564,
+            "pnl_usd": 265.09,
+            "max_dd_usd": 97.54
+          }
+        }
+      },
+      "OOS24-Q1": {
+        "n": 277,
+        "trades_per_month": 18.47,
+        "wr": 0.6029,
+        "pnl_usd": 803.71,
+        "annual_pnl_usd": 643.32,
+        "monthly_pnl_usd": 53.58,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_dd_usd_individual_max": 92.88,
+        "max_dd_usd_slot_sum_upper_bound": 148.05,
+        "components": {
+          "G7822": {
+            "n": 31,
+            "wr": 0.7097,
+            "pnl_usd": 624.64,
+            "max_dd_usd": 92.88
+          },
+          "G4692": {
+            "n": 246,
+            "wr": 0.5894,
+            "pnl_usd": 179.07,
+            "max_dd_usd": 55.17
+          }
+        }
+      },
+      "IS25-26": {
+        "n": 140,
+        "trades_per_month": 11.38,
+        "wr": 0.6,
+        "pnl_usd": 268.56,
+        "annual_pnl_usd": 262.1,
+        "monthly_pnl_usd": 21.83,
+        "liquidations": 0,
+        "liq_rate": 0.0,
+        "max_dd_usd_individual_max": 90.65,
+        "max_dd_usd_slot_sum_upper_bound": 90.65,
+        "components": {
+          "G7822": {
+            "n": 5,
+            "wr": 1.0,
+            "pnl_usd": 170.93,
+            "max_dd_usd": 0.0
+          },
+          "G4692": {
+            "n": 135,
+            "wr": 0.5852,
+            "pnl_usd": 97.63,
+            "max_dd_usd": 90.65
+          }
+        }
+      }
+    },
+    "weighted": {
+      "n": 684,
+      "trades_per_month": 13.33,
+      "wr": 0.5877,
+      "pnl_usd": 1557.37,
+      "annual_pnl_usd": 364.38,
+      "monthly_pnl_usd": 30.37,
+      "all_periods_positive": true,
+      "min_period_pnl_usd": 268.56,
+      "liquidations": 0,
+      "liq_rate": 0.0,
+      "max_period_dd_usd": 97.54
+    },
+    "direct_entry_overlap": {
+      "n": 0,
+      "jaccard": 0.0,
+      "g7822_cover": 0.0,
+      "g4692_cover": 0.0
+    },
+    "frequency_gate": {
+      "target_trades_per_month": 4.0,
+      "actual_trades_per_month": 13.33,
+      "passes": true
+    },
+    "quality_gate": {
+      "all_periods_positive": true,
+      "liquidations": 0,
+      "passes": true
+    }
+  },
+  "decision": {
+    "verdict": "PASS",
+    "recommendation": "Paper-observe G7822 and G4692 together. Keep G7822 unchanged; use G4692 for cadence."
+  },
+  "elapsed_sec": 5.74
+}

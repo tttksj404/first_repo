@@ -1,0 +1,45 @@
+{
+  "_strategy_id": "G7822_G4692_G264402",
+  "_strategy_type": "high_cadence_paper_observation_bundle",
+  "_components": [
+    "G7822",
+    "G4692",
+    "G264402"
+  ],
+  "_research_only": true,
+  "_setup": "Revised paper-observation bundle that targets at least 30 entries/month by adding the G264402 OI-pressure sleeve.",
+  "frequency_solution": {
+    "target_trades_per_month": 30.0,
+    "estimated_actual_trades_per_month": 32.22,
+    "passes": true
+  },
+  "component_cadence": {
+    "G7822_recent_trades_per_month": 0.41,
+    "G4692_recent_trades_per_month": 11.38,
+    "G264402_oi_validation_trades_per_month": 20.43
+  },
+  "components": {
+    "G7822": {
+      "role": "quality_ch1_replacement",
+      "status": "keep_unchanged"
+    },
+    "G4692": {
+      "role": "non_ch1_breakout_cadence_sleeve",
+      "weighted_trades": 631,
+      "weighted_trades_per_month": 12.3,
+      "liquidations": 0
+    },
+    "G264402": {
+      "role": "oi_pressure_high_cadence_sleeve",
+      "weighted_trades": 252,
+      "weighted_trades_per_month": 20.43,
+      "win_rate": 0.5714,
+      "pnl_usd": 344.01,
+      "annual_pnl_usd": 334.83,
+      "max_drawdown_usd": 115.67,
+      "liquidations": 0,
+      "all_periods_positive": true
+    }
+  },
+  "caveat": "G264402 uses available 2025/2026 OI validation data, not the full 2022-2026 CH1/backout windows."
+}
