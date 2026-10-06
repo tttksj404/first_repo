@@ -45,3 +45,6 @@ quant_runtime/output/
 quant_runtime_g185_paper/
 scripts/_safety_guardian_stop
 scripts/_supervisor_stop
+.claude/settings.local.json
+.gemini/settings.json
+!.env.example
