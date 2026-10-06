@@ -48,3 +48,4 @@ scripts/_supervisor_stop
 .claude/settings.local.json
 .gemini/settings.json
 !.env.example
+scripts/oracle_recovery/config.env

@@ -10,7 +10,7 @@ to find the current instance, then regenerate `Host g185`.
 
 | File | Purpose |
 |---|---|
-| `config.env` | Last known instance OCID, public IP, SSH alias, region |
+| `config.env` | Last known instance OCID, public IP, SSH alias, region. Local only (git-ignored); copy `config.env.example` to start |
 | `ensure_access.py` | Cross-platform bootstrap: discover VM, update SSH config, enroll key when possible, verify SSH |
 | `emergency_recover.sh` | Cloud Shell recovery: health probe, sshd restart, START/SOFTRESET/RESET |
 | `health_probe.sh` | TCP/SSH/OCI health check |
